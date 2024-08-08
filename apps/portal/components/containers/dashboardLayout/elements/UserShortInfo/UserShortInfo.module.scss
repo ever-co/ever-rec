@@ -1,0 +1,79 @@
+.userName {
+  color: #5b4dbe;
+  white-space: nowrap;
+  cursor: pointer;
+
+  &:before {
+    position: absolute;
+    left: 0;
+    color: #000000;
+    content: attr(title);
+    width: 0;
+    overflow: hidden;
+    transition: all 0.3s linear;
+  }
+
+  &:hover:before {
+    width: 100%;
+  }
+}
+
+.emailStyle {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.userPhotoContainer {
+  border: 3px solid #8576ff;
+  position: relative;
+  border-radius: 99999px;
+  box-shadow: none;
+  min-width: 40px;
+  height: 40px;
+
+  &:before,
+  &:after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    border-radius: 99999px;
+  }
+
+  &:before {
+    border: 3px solid transparent;
+  }
+
+  &:after {
+    border: 0 solid transparent;
+  }
+
+  &:hover {
+    border: none;
+    padding: 3px;
+
+    &:before {
+      border-top-color: #8576ff;
+      border-right-color: #8576ff;
+      border-bottom-color: #8576ff;
+      transition: border-top-color 0.15s linear 0.1s,
+        border-right-color 0.15s linear 0.1s,
+        border-bottom-color 0.15s linear 0.2s;
+    }
+
+    &:after {
+      border-top: 3px solid #8576ff;
+      border-left-width: 3px;
+      border-right-width: 3px;
+      transform: rotate(270deg);
+      transition: transform 0.4s linear 0s, border-left-width 0s linear 0.35s,
+        -webkit-transform 0.4s linear 0s;
+    }
+  }
+
+  & .userPhoto {
+    border-radius: 99999px;
+  }
+}

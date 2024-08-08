@@ -1,0 +1,48 @@
+@import '/src/content/utilities/partials/_dotSeparator.scss';
+
+.commentWrapper {
+  display: flex;
+  gap: 0.5rem;
+  width: 100%;
+
+  img {
+    width: 35px;
+    height: 35px;
+    border-radius: 100%;
+  }
+}
+
+.commentAuthor {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  div {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    opacity: 0.8;
+  }
+
+  span:first-of-type {
+    font-weight: bold;
+  }
+}
+
+.commentDetails {
+  width: 100%;
+}
+
+.commentContent {
+  display: flex;
+  justify-content: space-between;
+
+  p {
+    word-break: break-word;
+  }
+}
+
+.menuItemOption {
+  display: flex;
+  gap: 0.5rem;
+}

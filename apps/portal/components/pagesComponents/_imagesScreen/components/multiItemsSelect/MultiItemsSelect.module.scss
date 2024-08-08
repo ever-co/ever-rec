@@ -1,0 +1,59 @@
+.MultiItemsSelect {
+  order: 0;
+  margin: 0 1rem;
+}
+
+@media (max-width: 1388px) {
+  .MultiItemsSelect {
+    order: 3;
+    margin: 1rem 1.5rem 0;
+  }
+
+  .trash {
+    order: 0;
+    margin: 0;
+  }
+}
+
+@media (max-width: 1200px) {
+  .trash {
+    order: 3;
+  }
+}
+
+@media (max-width: 936px) {
+  .MultiItemsSelect {
+    width: 100%;
+    flex-direction: column;
+    gap: 1rem;
+    margin: 0.5rem 1rem;
+  }
+
+  .trash {
+    flex-direction: row;
+    justify-content: center;
+    gap: 0rem;
+  }
+
+  .workspace {
+    width: 100%;
+    flex-direction: column;
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 1000px) {
+  .trash {
+    width: 100%;
+    flex-direction: row;
+    justify-content: center;
+    gap: 0rem;
+  }
+}
+
+@media (max-width: 1467px) {
+  .workspace {
+    order: 3;
+    margin-top: 1rem;
+  }
+}

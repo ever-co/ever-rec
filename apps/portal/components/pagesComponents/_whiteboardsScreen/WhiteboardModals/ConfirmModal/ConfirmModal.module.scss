@@ -1,0 +1,56 @@
+.modal {
+  width: 600px !important;
+}
+
+.mainHeading {
+  //styleName: H3 - Headline;
+  font-family: Roboto;
+  font-size: 20px;
+  font-weight: bold;
+  line-height: 33px;
+  letter-spacing: 0.25px;
+  text-align: left;
+}
+
+.subHeading {
+  font-family: Roboto;
+  font-size: 16px;
+  font-weight: bolder;
+  line-height: 24px;
+  letter-spacing: 0.01em;
+  text-align: left;
+  margin-bottom: 30px;
+}
+
+.appButton {
+  margin-top: 20px;
+  width: 100%;
+  padding-top: 15px;
+  padding-bottom: 15px;
+}
+
+.button_container {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-direction: row;
+  .buttons {
+    padding: 4px 30px;
+    color: white;
+    border-radius: 5px;
+    font-size: large;
+    cursor: pointer;
+    user-select: none;
+    font-size: medium;
+  }
+  #delete {
+    background-color: rgb(86, 84, 221);
+    border: 1px solid transparent;
+  }
+  #cancel {
+    background-color: rgba(255, 255, 255, 0);
+    border: 1px solid black;
+    color: black;
+  }
+}

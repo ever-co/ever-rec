@@ -1,0 +1,40 @@
+.selectedTab {
+  background: transparent !important;
+  border: none !important;
+  color: black !important;
+  font-family: Roboto;
+  font-size: 18px;
+  font-weight: bolder !important;
+  line-height: 23px;
+  letter-spacing: 0.25px;
+  text-align: center;
+
+  &:before {
+    content : "";
+    position: absolute;
+    left    : 50%;
+    bottom  : -5px;
+    transform: translate(-50%);
+    height  : 1px;
+    width   : 90%;
+    border-bottom: 2px solid #5B4DBE;
+  }
+
+  &:after {
+    background: transparent !important;
+  }
+}
+
+.tab {
+  font-family: Roboto;
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 23px;
+  letter-spacing: 0.25px;
+  text-align: center;
+}
+
+.tabList {
+  border-bottom: none;
+  margin-bottom: 20px;
+}

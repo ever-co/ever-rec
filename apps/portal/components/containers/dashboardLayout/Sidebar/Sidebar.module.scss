@@ -1,0 +1,54 @@
+@import 'pagesScss/partials/_mixins.scss';
+@import 'pagesScss/partials/_colors.scss';
+
+.dashboardCard {
+  border: 1px solid white;
+  position: relative;
+  border-radius: 0px;
+  padding-top: 0px;
+  padding-bottom: 0rem;
+  height: 100%;
+  display: flex;
+}
+
+.sidebarContainer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  border-right: 1px solid $grey-light05;
+}
+
+.sidebarWrapper {
+  flex: 1;
+  width: 100%;
+}
+
+.logoWrapper {
+  display: flex;
+  margin: 1.5rem;
+  // padding: 1.5rem;
+}
+
+.lineSeparator {
+  border-top: 1px solid $grey-light05;
+  margin: 1.25rem 0;
+}
+
+.sidebarHeading {
+  font-weight: bold;
+  padding: 0rem 1rem 1rem;
+}
+
+.profilePageWrapper {
+  position: relative;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  margin: 0.75rem 0.5rem;
+  transition: background-color 0.3s ease;
+
+  &:hover {
+    background-color: $blue-grey;
+  }
+}

@@ -1,0 +1,92 @@
+@import 'pagesScss/partials/_colors.scss';
+
+.mainSection {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+}
+
+.foldersDashboardCard {
+  padding-top: 0 !important;
+}
+
+.foldersSectionMainHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid $grey-light05;
+}
+
+.pageHeadingWrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  border-bottom: 1px solid $grey-light05;
+  padding: 1rem 2rem;
+}
+
+.pageMainSectionWrapper {
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 1rem 2rem;
+}
+
+.mainHeader {
+  font-family: Roboto;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 33px;
+  letter-spacing: 0.25px;
+  text-align: left;
+  color: #2a292f;
+}
+
+.foldersHeadingContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  font-weight: bold;
+}
+
+.foldersScrollableDiv {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+
+  padding: 0rem 1rem 1rem 2rem;
+  max-height: 135px;
+}
+
+.contentDashboardCard {
+  padding-bottom: 0;
+  overflow: hidden;
+}
+
+.trashedItemsHeaderContainer {
+  padding: 1rem 2rem;
+}
+
+.recentlyDeleted {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.levelOneHeight {
+  height: 85%;
+}
+
+.levelTwoHeight {
+  height: 83%;
+}
+
+.levelThreeHeight {
+  height: 80%;
+}
+
+.marginLeft {
+  margin-left: 2rem;
+}

@@ -1,0 +1,95 @@
+@import 'pagesScss/partials/_colors.scss';
+
+.VideoChaptersWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  overflow-x: hidden;
+  margin-top: 0.5rem;
+  margin-right: 0.5rem;
+  padding-left: 1rem;
+  height: 430px;
+}
+
+.VideoChaptersWrapperHorizontal {
+  flex-direction: row;
+  height: auto;
+  overflow-x: auto;
+  margin-top: 1rem;
+  margin-right: 0;
+  padding-bottom: 1rem;
+  padding-left: 0;
+}
+
+.ChapterHeading {
+  display: flex;
+  flex-direction: column;
+  padding-top: 0.25rem;
+
+  h3 {
+    width: 350px;
+    text-align: center;
+    margin: auto;
+  }
+}
+
+.ChapterHeadingHorizontal {
+  h3 {
+    width: unset;
+    text-align: left;
+    margin: 0;
+  }
+}
+
+.AddChapterButtonWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  bottom: 0;
+  width: 91.8%;
+  margin: 1rem auto 0;
+
+  button:first-of-type {
+    flex: 200%;
+  }
+}
+
+.AddChapterButtonWrapperHorizontal {
+  justify-content: start;
+  max-width: 500px;
+  margin: 1rem 0 0 0;
+}
+
+.ChapterButton {
+  width: 100%;
+  max-width: 250px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: $primary-violet;
+  border-radius: 1.4rem;
+  color: white;
+
+  &:hover {
+    background-color: $primary-violet80;
+  }
+}
+
+.spinner {
+  background-color: $primary-violet !important;
+}
+
+.ChapterButtonDisabled {
+  background-color: $grey-light01;
+
+  &:hover {
+    background-color: $grey-dark-20;
+  }
+}
+
+.localAppSpinnerWrapper {
+  width: 25px;
+  height: 25px;
+}

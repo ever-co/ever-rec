@@ -1,0 +1,28 @@
+.rec {
+  .countdown-container {
+    z-index: 9999999999;
+    height: 100%;
+    width: 100%;
+    left: 0%;
+    top: 0%;
+    font-size: 220px;
+    position: fixed;
+    background: grey;
+    opacity: 0.4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .circle-container {
+    background: #ffffff;
+    color: black;
+    width: 315px;
+    height: 315px;
+    display: flex;
+    position: fixed;
+    justify-content: center;
+    border-radius: 300px;
+    padding: 140px;
+  }
+}

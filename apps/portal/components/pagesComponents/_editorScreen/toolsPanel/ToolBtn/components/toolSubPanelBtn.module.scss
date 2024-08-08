@@ -1,0 +1,54 @@
+.parentContainer {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin-left: 0.25rem;
+  margin-right: 0.25rem;
+  border: 2px solid white;
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+.lowOpacity {
+  opacity: 0.3;
+}
+.highOpacity {
+  opacity: 1;
+}
+
+.active {
+  color: #fbfaff;
+  background: #998fff;
+
+}
+
+.notActive {
+  background: transparent;
+  border-color: transparent;
+  &:hover {
+    background: #cdbbff;
+    border-color: white;
+  }
+}
+
+.container {
+    color: black;
+    padding: 5px;
+}
+.activeContainer {
+    color: white;
+    background: #998FFF;
+    padding: 5px;
+    border-radius: 9999px;
+}
+
+.flexContainer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

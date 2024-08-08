@@ -1,0 +1,26 @@
+.thumbnail {
+  display: flex;
+  align-items: center;
+  height: 176px;
+  position: relative;
+  overflow: hidden;
+
+  & > * {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.paddingTop {
+  padding-top: 49%;
+}
+
+.video {
+  width: 100%;
+  min-height: 100%;
+  max-height: 100%;
+  object-fit: cover;
+}

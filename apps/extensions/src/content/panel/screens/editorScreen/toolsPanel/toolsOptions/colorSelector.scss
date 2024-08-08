@@ -1,0 +1,30 @@
+.sketchPickerContainer {
+  position: absolute !important;
+  margin-left: 50px;
+  bottom: 0;
+}
+
+.sketch-picker {
+  padding: 18px !important;
+  border-radius: 10px !important;
+  background-color: #e9e7f0 !important;
+  background-image: radial-gradient(
+      at 47% 83%,
+      rgb(211, 205, 248) 0,
+      transparent 59%
+    ),
+    radial-gradient(at 82% 65%, hsl(253.33, 23%, 92%) 0, transparent 55%) !important;
+  -webkit-box-shadow: inset 0px 22px 10px -15px #ffffff !important;
+  box-shadow: inset 0px 22px 10px -15px #ffffff !important;
+  .flexbox-fix {
+    input {
+      width: 100% !important;
+      text-align: center;
+      border-radius: 5px !important;
+    }
+  }
+}
+
+.sketch-picker > div {
+  border-radius: 5px !important;
+}

@@ -1,0 +1,40 @@
+@import 'pagesScss/partials/_mixins.scss';
+
+.modal {
+  width: 600px !important;
+}
+
+.mainHeading {
+  //styleName: H3 - Headline;
+  font-family: Roboto;
+  font-size: 28px;
+  font-weight: bold;
+  line-height: 33px;
+  letter-spacing: 0.25px;
+  text-align: left;
+  margin-bottom: 30px;
+  @include truncate;
+}
+
+.subHeading {
+  font-family: Roboto;
+  font-size: 16px;
+  font-weight: bolder;
+  line-height: 24px;
+  letter-spacing: 0.01em;
+  text-align: left;
+}
+
+.input {
+  width: 100%;
+  background: transparent;
+  margin: 2rem 0;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #ab9e9e;
+}
+
+.appButton {
+  width: 100%;
+  padding-top: 15px;
+  padding-bottom: 15px;
+}

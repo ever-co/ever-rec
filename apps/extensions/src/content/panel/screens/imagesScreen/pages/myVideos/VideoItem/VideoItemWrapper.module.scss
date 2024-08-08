@@ -1,0 +1,21 @@
+@import '/src/content/utilities/partials/_colors.scss';
+
+.wrapper {
+  box-sizing: border-box;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  overflow: hidden;
+  position: relative;
+  transition: all 0.1s ease-in-out;
+}
+
+.defaultBorder {
+  border: 2px solid;
+  border-color: $grey-light04;
+}
+
+.selected,
+.wrapper:hover {
+  border: 2px solid $primary-violet;
+  box-shadow: 0 0 15px 2px rgba(124, 58, 237, 0.225);
+}

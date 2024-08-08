@@ -1,0 +1,17 @@
+.workspaceItem {
+  background: #b8b1f8;
+  padding: 10px;
+  padding-left: 20px;
+  color: black;
+  border-radius: 5px;
+  cursor: pointer;
+  border: 1px solid #5b4dbe;
+  transition: all 0.5s ease;
+  margin-bottom: 10px;
+
+  &.active, &:hover{
+    transition: all 0.5s ease;
+    color: white;
+    background: #5b4dbe;
+  }
+}

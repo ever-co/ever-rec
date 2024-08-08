@@ -1,0 +1,64 @@
+@import '/src/content/utilities/partials/_mixins.scss';
+@import '/src/content/utilities/partials/_colors.scss';
+
+.InviteMembers {
+  width: 100%;
+
+  .illustrationWrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    svg {
+      margin: 1rem 0;
+    }
+
+    p {
+      margin-bottom: 1.5rem;
+    }
+  }
+
+  .workspaceInviteWrapper {
+    max-width: 100%;
+    display: flex;
+
+    &:first-of-type {
+      margin-bottom: 1.5rem;
+    }
+
+    .whiteParagraph {
+      width: 65%;
+      height: 45px;
+      margin: 0 !important;
+      padding: 0.6rem 0.5rem;
+      border-top-left-radius: 0.2rem;
+      border-bottom-left-radius: 0.2rem;
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+      background: white;
+      overflow: hidden;
+      border: 1px solid $grey-light02;
+      @include truncate;
+
+      input {
+        border: 0 !important;
+      }
+    }
+
+    .whiteParagraphButton {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 35%;
+      font-size: 0.9rem;
+    }
+
+    .createWorkspaceButton {
+      width: 100%;
+    }
+  }
+}
+
+.reactMultiEmail > span[data-placeholder] {
+  top: 0.65em;
+}

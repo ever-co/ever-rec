@@ -1,0 +1,187 @@
+@import 'pagesScss/partials/_mixins.scss';
+
+@mixin backgroundTransition {
+  transition: background-color 0.2s ease-in;
+
+  &:hover {
+    transition: background-color 0.2s ease-in;
+    background-color: #c4c4c4;
+  }
+}
+
+.dashboardCard {
+  height: 100%;
+
+  .mainHeader {
+    display:flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 25px 30px 35px;
+    font-size: 30px;
+    font-weight: bolder;
+    font-family: 'Roboto', sans-serif;
+    font-style: normal;
+    -webkit-box-shadow: 0px 5px 15px -15px #000000;
+    box-shadow: 0px 5px 15px -15px #000000;
+  }
+
+  .teamHeader {
+    padding: 20px 40px 34px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    .teamHeading {
+      margin-right: 1rem;
+      display: flex;
+      align-items: center;
+
+      a {
+        margin-right: 1rem;
+      }
+    }
+  }
+
+  .workspacesContainer {
+    overflow-y: auto;
+    height: 82vh;
+    padding: 1rem 1rem 2rem 2rem;
+    margin: 1rem 1rem 0 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, 400px);
+    grid-template-rows: repeat(auto-fit, 300px);
+    gap: 3rem 3rem;
+    justify-content: center;
+  }
+}
+
+.workspaceItemWrapper {
+  height: 300px;
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  border: 1px solid lightgray;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  // align-items: center;
+  font-family: 'Roboto', sans-serif;
+  font-style: normal;
+  -webkit-box-shadow: 0px 0px 15px -10px #000000;
+  box-shadow: 0px 0px 15px -10px #000000;
+
+  .thumbnailWrapper {
+    height: 230px;
+    width: 100%;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    .thumbnail {
+      object-fit: cover;
+    }
+
+    .workspaceName {
+      width: 100%;
+      background: rgb(255, 255, 255);
+      background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 1) 0%,
+        rgba(236, 234, 244, 0) 100%
+      );
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      padding-left: 10px;
+      padding-bottom: 5px;
+      padding-top: 5px;
+      font-family: Roboto;
+      font-size: 18px;
+      font-weight: 500;
+      line-height: 24px;
+      letter-spacing: 0.01em;
+      text-align: left;
+      color: #6e6e6e;
+      @include truncate;
+    }
+  }
+
+  .subItemsWrapper {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+
+    .subItems {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .subItem {
+      color: lightgray;
+      padding: 10px 10px;
+      font-family: 'Roboto', sans-serif;
+      font-style: normal;
+      border-radius: 5px;
+      cursor: pointer;
+      @include backgroundTransition();
+
+      &:last-of-type {
+        margin-right: 0;
+      }
+    }
+
+    .membersCountWrapper {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      padding: 10px;
+      border-radius: 5px;
+
+      @include backgroundTransition();
+
+      .membersSvg {
+        margin-right: 5px;
+      }
+
+      .membersContainer {
+        display: flex;
+        height: 100%;
+        align-items: flex-end;
+        font-family: Roboto;
+        font-size: 18px;
+        font-weight: 500;
+        letter-spacing: 0.01em;
+        color: #6e6e6e;
+      }
+    }
+
+    .teamOptionsWrapper {
+      display: flex;
+      gap: 0.25rem;
+    }
+  }
+}
+
+@media screen and (max-width: 1200px) {
+  .teamHeading {
+    font-size: 1.5rem;
+  }
+}
+
+@media screen and (max-width: 1000px) {
+  .teamHeading {
+    font-size: 1rem;
+  }
+}
+
+.settingsSvg {
+  cursor: pointer;
+  padding: 10px;
+  border-radius: 5px;
+  @include backgroundTransition();
+}

@@ -1,0 +1,7 @@
+.stroke-selector .ant-select-selection-item .title {
+  color: rgb(0, 0, 0) !important;
+}
+
+.stroke-selector .ant-select-selection-item .bottom-line {
+  background-color: rgb(0, 0, 0) !important;
+}

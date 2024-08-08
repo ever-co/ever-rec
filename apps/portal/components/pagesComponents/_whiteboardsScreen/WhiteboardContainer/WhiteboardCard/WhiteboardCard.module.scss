@@ -1,0 +1,68 @@
+$iron-grey: #d4d2d4;
+
+@mixin shadow-md {
+  --tw-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000),
+    var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+}
+
+@mixin truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.whiteboardCard {
+  width: 100%;
+  margin-bottom: 2rem;
+  border: 1px solid $iron-grey;
+  border-radius: 0.5rem;
+  background-color: #fff;
+  overflow: hidden;
+
+  &:hover {
+    @include shadow-md;
+  }
+
+  .whiteboardCardThumbnail {
+    padding: 1.25rem;
+    height: 170px;
+    border-bottom: 1px solid $iron-grey;
+
+    .whiteboardCardThumbnailOverlayTop {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      height: 60px;
+
+      div:last-of-type {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+    }
+
+    .whiteboardCardThumbnailOverlayBottom {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      height: 80px;
+    }
+  }
+
+  .whiteboardCardDescription {
+    display: flex;
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 1.25rem;
+
+    h1 {
+      max-width: 100%;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      cursor: pointer;
+      @include truncate;
+    }
+  }
+}

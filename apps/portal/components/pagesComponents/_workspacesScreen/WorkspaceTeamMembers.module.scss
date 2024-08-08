@@ -1,0 +1,87 @@
+@mixin skeleton-background {
+  background: rgba(130, 130, 130, 0.2);
+  background: -webkit-gradient(
+    linear,
+    left top,
+    right top,
+    color-stop(8%, rgba(130, 130, 130, 0.2)),
+    color-stop(18%, rgba(130, 130, 130, 0.3)),
+    color-stop(33%, rgba(130, 130, 130, 0.2))
+  );
+  background: linear-gradient(
+    to right,
+    rgba(130, 130, 130, 0.2) 8%,
+    rgba(130, 130, 130, 0.3) 18%,
+    rgba(130, 130, 130, 0.2) 33%
+  );
+  background-size: 800px 100px;
+  animation: wave-lines 1.5s infinite ease-out;
+
+  @keyframes wave-lines {
+    0% {
+      background-position: -468px 0;
+    }
+    100% {
+      background-position: 468px 0;
+    }
+  }
+  @keyframes wave-squares {
+    0% {
+      background-position: -468px 0;
+    }
+    100% {
+      background-position: 468px 0;
+    }
+  }
+}
+
+.WorkspaceTeamMembers {
+  transition: background-color 0.2s;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 0.2rem 0 0.2rem 10px;
+  width: 55%;
+  height: 32px;
+  border-radius: 0.5rem;
+  cursor: pointer;
+
+  &.isWorkspace {
+    width: unset;
+    padding: 1.2rem;
+  }
+
+  &.loading {
+    @include skeleton-background;
+    height: 36px;
+  }
+
+  .MemberPhotoStack {
+    display: flex;
+
+    img {
+      border-radius: 1rem;
+      width: 1.5rem;
+      height: 1.5rem;
+
+      &:nth-child(n + 2) {
+        margin-left: -0.4rem;
+      }
+    }
+
+    &.isWorkspace {
+      img {
+        width: 1.65rem;
+        height: 1.65rem;
+      }
+    }
+  }
+
+  span {
+    margin-left: 0.5rem;
+  }
+
+  &:hover {
+    background-color: #dedede;
+  }
+}

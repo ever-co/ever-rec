@@ -1,0 +1,54 @@
+.itemActions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.75rem;
+  height: 30px;
+  margin: auto 0;
+}
+
+.dropdownWrapper {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  cursor: pointer;
+}
+
+.pointer {
+  cursor: pointer;
+}
+
+.menuItemHidden {
+  display: none !important;
+}
+
+.itemActionButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: 2px solid rgba(0, 0, 255, 0.292);
+  padding: 0.25rem 1rem !important;
+  border-radius: 0.25rem;
+  font-size: 0.85rem !important;
+  font-weight: 600;
+  outline: none;
+
+  span {
+    white-space: nowrap;
+  }
+}
+
+.hideMoreMenu {
+  display: none;
+}
+
+@media screen and (max-width: 900px) {
+  .menuItemHidden {
+    display: flex !important;
+  }
+
+  .hideMoreMenu {
+    display: flex;
+  }
+}

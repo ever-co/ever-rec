@@ -1,0 +1,76 @@
+.cropWrapper {
+  z-index: 2000;
+  position: absolute;
+}
+
+.cropInnerContainer {
+  width: 7rem;
+  font-weight: 600;
+  font-family: sans-serif;
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  background-color: #e5e4ed;
+  border-radius: 5px;
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
+.cropBtn {
+  padding: 1px 0.25rem;
+  margin-bottom: 0.5rem;
+  border-radius: 1rem;
+}
+
+.cropBg {
+  background-color: #6e6e6e;
+}
+
+.cropBtnContent {
+  font-size: 0.75rem;
+  line-height: 1rem;
+  margin: 2px;
+}
+
+.cancelBtn {
+  padding: 1px 0.25rem;
+  border-radius: 1rem;
+  border-color: #a1a1a1;
+}
+
+.pageContainer {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+}
+
+.stageContainer {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  position: relative;
+  overflow: auto;
+  height: 97vh;
+}
+.popupContainer {
+  position: relative;
+  height: 97vh;
+
+  z-index: 999;
+}
+
+.stageContainer::-webkit-scrollbar {
+  width: 0.5rem;
+  height: 0.5rem;
+}
+
+.stageContainer::-webkit-scrollbar-thumb {
+  background-color: grey;
+  border-radius: 9999px;
+}
+
+.stageContainer::-webkit-scrollbar-track {
+  background-color: lightgray;
+  border-radius: 9999px;
+}

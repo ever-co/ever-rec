@@ -1,0 +1,132 @@
+@use 'pagesScss/partials/_reactTabs.scss';
+
+.modalWrapper {
+  width: 700px !important;
+  border-image-source: linear-gradient(180deg, #ffffff 0%, #cccad5 100%);
+
+  ::-webkit-scrollbar {
+    width: 40px;
+    height: 100%;
+  }
+
+  ::-webkit-scrollbar-track {
+    margin-top: 100px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    border: 17px solid rgba(0, 0, 0, 0);
+    background-clip: padding-box;
+    border-radius: 9999px;
+    background-color: #5b4dbe;
+  }
+}
+
+.modalWrapper :global {
+  .ant-modal-content {
+    height: 600px;
+  }
+
+  .ant-modal-body {
+    max-height: 100%;
+    overflow-y: auto;
+  }
+}
+
+.mainSection {
+  margin-top: 10px;
+  margin-bottom: 30px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.recordWrapper {
+  margin-bottom: 20px;
+  width: 100%;
+  max-height: 95%;
+}
+
+.mainSection,
+.recordWrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.recordRow,
+.checkboxesWrapper {
+  display: flex;
+  justify-content: space-between;
+}
+
+.recordRow {
+  margin-bottom: 15px;
+
+  .userInfo {
+    display: flex;
+    align-items: center;
+    font-family: Roboto;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 24px;
+    letter-spacing: 0.01em;
+    text-align: left;
+    color: #636366;
+  }
+
+  .photoURL {
+    border-radius: 99px;
+    width: 30px;
+    height: 30px;
+    margin-right: 10px;
+  }
+}
+
+.checkboxesWrapper {
+  width: 15%;
+
+  .checkboxWrapper {
+    width: 35%;
+    display: flex;
+    justify-content: center;
+    font-family: Roboto;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 24px;
+    letter-spacing: 0.01em;
+    text-align: center;
+    color: #636366;
+  }
+
+  .checkbox {
+    width: 80%;
+    cursor: pointer;
+  }
+}
+
+.headingRecordRow {
+  margin-bottom: 15px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.recordHeader {
+  width: 85%;
+}
+
+.noMembersSection {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  :global .ant-modal-content {
+    width: 100%;
+  }
+}
+
+.addTeamWrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: 30px;
+}

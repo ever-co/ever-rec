@@ -1,0 +1,22 @@
+@import 'pagesScss/partials/_colors.scss';
+
+.appButtonSecond {
+  background-color: $primary-violet;
+  padding: 0.7rem 1.5rem;
+  border-radius: 1.5rem;
+  color: white;
+  cursor: pointer;
+}
+
+.appButtonDisabled {
+  background-color: $grey-light03;
+}
+
+.appButtonDanger {
+  background-color: $accessible-red;
+}
+
+.appButtonDanger.appButtonDisabled {
+  background-color: $accessible-red;
+  opacity: 0.5;
+}

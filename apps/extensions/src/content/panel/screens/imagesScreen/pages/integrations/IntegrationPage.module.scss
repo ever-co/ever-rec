@@ -1,0 +1,58 @@
+@import '/src/content/utilities/partials/_colors.scss';
+
+.mainWrapperItem {
+  height: 250px;
+  display: flex;
+  justify-content: space-between;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  align-items: center;
+  flex-direction: column;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #ffffff 0%, #ebe9f3 50%, #e2ddff 100%);
+  border: 2px solid;
+  border-color: $grey-light04;
+}
+
+.mainWrapper {
+  height: 100%;
+
+  .mainHeader {
+    width: 100%;
+    font-family: 'Roboto', sans-serif;
+    font-style: normal;
+
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 1rem 2rem;
+    border-bottom: 1px solid $grey-light05;
+  }
+
+  .innerWrapper {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, 300px);
+    gap: 2rem;
+    justify-content: center;
+    max-height: 82vh;
+    padding: 2rem;
+    overflow-y: auto;
+  }
+}
+
+.cardContentWrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.description {
+  width: 90%;
+  text-align: center;
+}
+
+.disconnectBtn {
+  background-color: #d32f2f !important;
+  border: 1px solid transparent;
+  color: white;
+}

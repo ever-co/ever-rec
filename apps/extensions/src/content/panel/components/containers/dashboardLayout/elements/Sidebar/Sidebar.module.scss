@@ -1,0 +1,56 @@
+@import '/src/content/utilities/partials/_mixins.scss';
+@import '/src/content/utilities/partials/_colors.scss';
+
+.dashboardCard {
+  border: 1px solid white;
+  position: relative;
+  border-radius: 0px;
+  padding-top: 0px !important;
+  padding-bottom: 0rem !important;
+  height: 100%;
+  display: flex;
+}
+
+.sidebarContainer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  border-right: 1px solid $grey-light05;
+}
+
+.sidebarWrapper {
+  flex: 1;
+  width: 100%;
+}
+
+.logoWrapper {
+  display: flex;
+  margin: 1.5rem;
+}
+
+.lineSeparator {
+  border-top: 1px solid $grey-light05;
+  margin: 1.25rem 0 !important;
+}
+
+.sidebarHeading {
+  padding: 0rem 1rem 1rem;
+
+  h1 {
+    font-weight: bold !important;
+  }
+}
+
+.profilePageWrapper {
+  position: relative;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  margin: 0.75rem 0.5rem;
+  transition: background-color 0.3s ease;
+
+  &:hover {
+    background-color: $blue-grey;
+  }
+}

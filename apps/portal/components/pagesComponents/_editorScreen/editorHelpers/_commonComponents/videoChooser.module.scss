@@ -1,0 +1,82 @@
+.footer {
+  margin-top: 1rem;
+  padding-bottom: 1rem;
+  height: 500px;
+  border-radius: 0.375rem;
+  overflow: auto;
+  .ant-col {
+    cursor: pointer;
+
+    &:hover {
+      img {
+        box-shadow: 0px 0px 0px 5px rgba(155, 145, 243, 0.808);
+        -webkit-box-shadow: 0px 0px 0px 5px rgba(155, 145, 243, 0.808);
+        -moz-box-shadow: 0px 0px 0px 5px rgba(155, 145, 243, 0.808);
+      }
+    }
+  }
+}
+
+.btnWrapper {
+  border: 4px solid #5b4dbe;
+  border-radius: 0.5rem;
+  background: black;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.button {
+  position: absolute;
+  z-index: 10;
+  right: 20px;
+  top: 10px;
+  padding: 0.25rem;
+  height: 45px;
+  width: 90px;
+  background: rgba(0, 0, 0, 0.553);
+  color: white;
+  border-radius: 0.5rem;
+  &:hover {
+    color: white !important;
+    background: rgba(0, 0, 0, 0.253) !important;
+    box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  }
+}
+
+.title {
+  text-align: left;
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-top: 0.5rem;
+}
+
+.videosContainer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding-right: 1.25rem;
+}
+
+.videosInnerContainer {
+    margin-bottom: 1.5rem;
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+    font-weight: 700;
+}
+
+.appButton {
+    color: white;
+    padding-bottom: 0.5rem;
+    padding-top: 0.5rem;
+}
+
+.appBtnPadding {
+    padding-left: 3.5rem;
+    padding-right: 3.5rem;
+}

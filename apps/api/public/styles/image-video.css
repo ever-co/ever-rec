@@ -1,0 +1,232 @@
+/* new styles for the image and the video templates, there are some left in main.css from prev dev, but i will */
+/*write new styles only here, for future easier separation */
+
+.content {
+  background: #f5f4f7;
+  border-radius: 12px;
+  padding: 30px;
+  min-width: 830px;
+}
+
+#mainPic,
+#video {
+  width: 100%;
+}
+
+.comments-container {
+  min-width: 350px;
+  width: 350px;
+  background: #f5f4f7;
+  border-radius: 12px;
+  padding: 30px;
+  margin-left: 30px;
+  height: fit-content;
+}
+
+.comments-wrapper {
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  max-width: calc(100% - 40px);
+}
+
+.comment-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding-bottom: 15px;
+  margin-bottom: 10px;
+}
+
+.comment-wrapper-last {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 5px 5px 15px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  background-color: #e1e1e1;
+}
+
+.latest-comment {
+  font-size: 13px;
+  color: gray;
+  margin-bottom: 10px;
+}
+
+.load-buttons-wrapper {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+
+.comment-image-wrapper {
+  display: flex;
+  max-width: 80%;
+  width: 80%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.comment-delete-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-left: 52px;
+}
+
+.user-comment-img {
+  width: 40px;
+  height: 40px;
+  border-radius: 30px;
+  margin-right: 12px;
+}
+
+.date-span {
+  font-size: 14px;
+  color: darkgrey;
+  margin-top: 10px;
+  font-weight: normal;
+}
+
+.comments-button {
+  width: 80%;
+  background: #5b4dbe;
+  border-radius: 6px;
+  color: #fff;
+  text-align: center;
+  padding: 15px;
+  margin: 60px auto auto 22px;
+  cursor: pointer;
+  border: none;
+}
+
+.comments-button:disabled {
+  background: grey;
+  cursor: not-allowed;
+}
+
+.comments-block {
+  width: 100%;
+  height: 100%;
+  background: #fff;
+  border-radius: 12px;
+  position: relative;
+  padding-bottom: 20px;
+  overflow-y: auto;
+}
+
+#leave-main-signed {
+  display: none;
+}
+
+.comments-text-box {
+  bottom: 18px;
+  border: 1px solid #5b4dbe;
+  box-sizing: border-box;
+  border-radius: 6px;
+  margin-left: 18px;
+  width: 92%;
+  padding: 5px;
+}
+
+.edit-comment-link,
+.delete-link {
+  text-decoration: none;
+  font-size: 14px;
+  color: rgb(110, 110, 110);
+}
+
+.delete-link {
+  color: red;
+  margin-left: 10px;
+}
+
+.acc-icon {
+  display: flex;
+  align-items: center;
+}
+
+.auth-link {
+  text-decoration: none;
+  color: darkgrey;
+}
+
+.likes-views-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.like-icon {
+  width: 30px;
+  cursor: pointer;
+  margin-left: 5px;
+}
+
+.like-wrapper,
+.views-wrapper {
+  padding-right: 5px;
+}
+
+.views-wrapper {
+  margin-top: 10px;
+}
+
+@media screen and (max-width: 1400px) {
+  main {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+
+  .container-main {
+    flex-direction: column;
+    width: 90%;
+  }
+
+  .comments-container {
+    width: auto;
+    max-width: unset;
+    margin-top: 30px;
+    margin-left: 0;
+  }
+
+  .submit-btn-wrapper {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-top: 50px;
+  }
+
+  .comments-button {
+    width: 50%;
+    margin: 0;
+  }
+}
+
+.person-data {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.photo-user-image {
+  width: 60px;
+}
+
+.main-date {
+  color: rgb(110, 110, 110);
+}
+
+.item-main-information {
+  width: 99%;
+}
+
+.pricing-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-right: 20px;
+}

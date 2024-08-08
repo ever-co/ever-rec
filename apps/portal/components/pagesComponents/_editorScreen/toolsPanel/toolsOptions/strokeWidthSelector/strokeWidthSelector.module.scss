@@ -1,0 +1,27 @@
+.mainSelector {
+  width: 6rem;
+  border-radius: 0.25rem;
+}
+
+.black {
+  color: black;
+}
+
+.flexContainer {
+  display: flex;
+  color: black;
+  flex-direction: column;
+  align-items: center;
+  color: rgb(0, 0, 0) !important;
+}
+
+.wrapper {
+  font-size: 0.75rem; 
+  line-height: 1rem;
+}
+
+.select {
+  background-color: rgb(0, 0, 0) !important;
+  width: 100%;
+  border-radius: 9999px;
+}

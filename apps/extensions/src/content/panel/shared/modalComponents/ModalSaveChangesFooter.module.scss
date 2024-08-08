@@ -1,0 +1,13 @@
+@import '/src/content/utilities/partials/_colors.scss';
+
+.footerContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1.7rem;
+
+  .cancelLink {
+    color: $primary-violet;
+    cursor: pointer;
+  }
+}

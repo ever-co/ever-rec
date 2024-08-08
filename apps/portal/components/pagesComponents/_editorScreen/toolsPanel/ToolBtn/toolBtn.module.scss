@@ -1,0 +1,123 @@
+.toolbtnlarge {
+  width: 45px;
+  height: 45px;
+}
+
+.toolbtn {
+  width: 35px;
+  height: 35px;
+}
+
+.icons {
+  padding: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.parentContainer {
+  background: transparent;
+  margin: 2px;
+  position: relative;
+}
+
+.flexContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.tooltipWrapper {
+  width: 100%;
+  height: 100%;
+  background-color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: 2px solid white;
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+  border-radius: 9999px;
+}
+
+.lowOpacity {
+  opacity: 0.3;
+}
+
+.fullOpacity {
+  opacity: 1;
+}
+
+.activeBg {
+  background-color: #998fff;
+  color: white;
+}
+
+.notActiveBg {
+  background-color: white;
+  border-color: transparent;
+  &:hover {
+    background-color: #cdbbff;
+    border-color: white;
+  }
+}
+
+.absolute {
+  position: absolute;
+  z-index: 10;
+  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  border-radius: 10px;
+  display: flex;
+}
+.close {
+  margin-bottom: 30px;
+  position: absolute;
+  right: -15px;
+  top: -15px;
+  cursor: pointer;
+  transition: 0.2s;
+  &:hover {
+    scale: 1.2;
+  }
+}
+.negative {
+  top: -250px;
+}
+
+.zero {
+  top: 0;
+}
+
+@media screen and (max-height: 860px) {
+  .toolswrapper {
+    width: 5rem;
+    top: 10px;
+  }
+
+  .toolbtn {
+    width: 30px;
+    height: 30px;
+  }
+  .toolbtnlarge {
+    width: 35px;
+    height: 35px;
+  }
+  .icons {
+    padding: 3px;
+  }
+}
+
+@media screen and (max-height: 690px) {
+  .toolbtn {
+    width: 25px;
+    height: 25px;
+  }
+  .toolbtnlarge {
+    width: 30px;
+    height: 30px;
+  }
+}

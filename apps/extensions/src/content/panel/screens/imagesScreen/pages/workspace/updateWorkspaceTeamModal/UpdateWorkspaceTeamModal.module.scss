@@ -1,0 +1,150 @@
+@mixin centered() {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal {
+  width: 600px !important;
+}
+
+.row {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 30px;
+
+  .iconInnerWrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .iconButtonsWrapper {
+    display: flex;
+  }
+
+  .avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 9999px;
+    object-fit: cover;
+    cursor: pointer;
+  }
+}
+
+.actionWrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.actionWrapper.lastActionWrapper {
+  margin-bottom: 0;
+}
+
+.heading {
+  margin-bottom: 10px !important;
+  //styleName: Body Bold;
+  font-family: Roboto;
+  font-size: 16px;
+  font-weight: bold !important;
+  line-height: 24px !important;
+  letter-spacing: 0.01em;
+  text-align: left;
+  color: #636366 !important;
+}
+
+.saveButton {
+  width: 116px !important;
+  height: 45px !important;
+  margin-right: 15px;
+  @include centered();
+}
+
+.cancelButton {
+  width: 130px !important;
+  height: 46px !important;
+  @include centered();
+}
+
+.supportsP {
+  margin-top: 10px !important;
+  //styleName: Small Body Medium;
+  font-family: Roboto;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 22px;
+  letter-spacing: 0em;
+  text-align: left;
+  color: #636366;
+}
+
+.descriptionP {
+  font-family: Roboto;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 24px;
+  letter-spacing: 0em;
+  text-align: left;
+  color: #636366;
+}
+
+.thumbnail {
+  width: 204px;
+  min-height: 115px;
+  height: 115px;
+  max-height: 115px;
+  object-fit: contain;
+  cursor: pointer;
+}
+
+.imageBorder {
+  border: 1px solid grey !important;
+  padding-left: 10px;
+  padding-right: 10px;
+  border-radius: 10px;
+}
+
+.dangerButton {
+  min-width: 168px;
+  height: 46px;
+  @include centered();
+}
+
+.confirmDelete {
+  width: 100px !important;
+  height: 41px;
+  @include centered();
+}
+
+.leaveTeamBtn {
+  border: 1px solid #d70015;
+  color: #d70015;
+}
+
+.deleteTeamBtn {
+  background-color: #d70015 !important;
+}
+
+.spinnerWrapper {
+  width: 20px;
+  height: 20px;
+}
+
+.toDeleteTeam {
+  @include centered();
+  gap: 1rem;
+}
+
+.input {
+  width: 50%;
+  background: transparent;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #ab9e9e;
+  margin-right: 50px !important;
+}
+
+.changeTeamName {
+  @include centered();
+}

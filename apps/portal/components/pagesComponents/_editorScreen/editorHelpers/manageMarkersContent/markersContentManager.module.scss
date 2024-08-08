@@ -1,0 +1,67 @@
+.mainContainer {
+  overflow-y: auto;
+  align-items: flex-start;
+  justify-content: flex-start;
+  flex-direction: column;
+  border-radius: 5px;
+  background-color: #e9e7f0;
+  background-image: radial-gradient(
+      at 47% 83%,
+      rgb(211, 205, 248) 0,
+      transparent 59%
+    ),
+    radial-gradient(at 82% 65%, hsl(253.33, 23%, 92%) 0, transparent 55%);
+  -webkit-box-shadow: inset 0px 22px 10px -15px #ffffff;
+  box-shadow: inset 0px 22px 10px -15px #ffffff;
+  -webkit-box-shadow: 0px 0px 7px -3px #000000;
+  box-shadow: 0px 0px 7px -3px #000000;
+  border: 1px solid rgba(91, 77, 240, 0.13);
+  position: absolute;
+}
+
+.innerContainer {
+  padding: 0.25rem;
+  cursor: pointer;
+}
+
+.container {
+  background: transparent;
+  padding: 0.5rem;
+}
+
+.flexContiner {
+  display: flex;
+  justify-content: space-between;
+}
+
+.commentsContainer {
+  position: absolute;
+  overflow-y: auto;
+  align-items: flex-start;
+  justify-content: flex-start;
+  flex-direction: column;
+  border-radius: 5px;
+  background-color: #e9e7f0;
+  background-image: radial-gradient(
+      at 47% 83%,
+      rgb(211, 205, 248) 0,
+      transparent 59%
+    ),
+    radial-gradient(at 82% 65%, hsl(253.33, 23%, 92%) 0, transparent 55%);
+  -webkit-box-shadow: inset 0px 22px 10px -15px #ffffff;
+  box-shadow: inset 0px 22px 10px -15px #ffffff;
+  -webkit-box-shadow: 0px 0px 7px -3px #000000;
+  box-shadow: 0px 0px 7px -3px #000000;
+  border: 1px solid rgba(91, 77, 240, 0.13);
+  padding: 13px;
+  background-color: white;
+  width: 360px;
+}
+
+.displayFlex {
+    display: flex;
+}
+
+.displayHidden {
+    display: none;
+}

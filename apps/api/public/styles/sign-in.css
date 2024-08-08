@@ -1,0 +1,172 @@
+* {
+  margin: 0;
+  padding: 0;
+  font-family: 'Helvetica';
+}
+
+.container {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  width: 100vw;
+  height: 100vh;
+}
+
+.login {
+  grid-column-start: 2;
+  grid-column-end: span 3;
+  max-width: 410px;
+  margin-right: 2rem;
+}
+.illustrations {
+  margin: 1rem;
+  border-radius: 1rem;
+  background: #f5f4f7;
+  grid-column-end: span 4;
+}
+
+.logo {
+  width: 200px;
+  height: 80px;
+  margin: 4rem 0 2rem 0;
+}
+
+.login h1 {
+  margin-bottom: 2rem;
+  font-size: 36px;
+}
+
+.login-description p {
+  margin-bottom: 2rem;
+}
+
+.login-description p:last-of-type {
+  margin-bottom: 3rem;
+}
+
+.hide {
+  display: none !important;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+}
+
+.form input {
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid grey;
+  outline: none;
+  font-size: 1rem;
+  padding: 0.3rem;
+}
+
+.inputs-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.button {
+  border: none;
+  border-radius: 0.5rem;
+  padding: 1rem 0;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.form button {
+  color: #fff;
+  background-color: #5b4dbe;
+  margin-top: 2.5rem;
+}
+
+.continue-with {
+  margin: 1.5rem 0;
+  text-align: center;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.third-party-login {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+/* circle */
+/* .google-button {
+  padding: 1rem;
+  border-radius: 100%;
+} */
+
+.google-button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  background-color: #f5f4f7;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.google-button span {
+  margin-top: 0.2rem;
+  margin-left: 0.5rem;
+}
+
+.login-options {
+  display: flex;
+  justify-content: center;
+  margin-top: 1.5rem;
+}
+
+.login-options a {
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #5b4dbe;
+}
+
+.separator {
+  border-right: 1px solid grey;
+  margin: 0 1rem;
+  height: 0.8rem;
+  margin-top: 0.2rem;
+}
+
+#reset-password-info {
+  margin-top: 0.5rem;
+  padding: 0.3rem;
+}
+
+.success {
+  color: #00b600;
+}
+
+.error {
+  color: #ff0000;
+}
+
+.login-wrapper-only-google {
+  background: darkgrey;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100vw;
+  height: 100vh;
+}
+
+.inner-wrapper-google {
+  border: 1px solid black;
+  background: white;
+  width: 450px;
+  height: 350px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+}

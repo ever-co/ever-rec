@@ -1,0 +1,119 @@
+$static-url: 'https://api.rec.so';
+
+@font-face {
+  font-family: 'Roboto';
+  src: url('./fonts/Roboto-Regular.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Roboto Bold';
+  src: url('./fonts/Roboto-Bold.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Roboto Medium';
+  src: url('./fonts/Roboto-Medium.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Poppins-Medium';
+  src: url('#{$static-url}/fonts/Poppins/Poppins-Medium.ttf');
+}
+
+@font-face {
+  font-family: 'Limelight';
+  src: url('#{$static-url}/fonts/Limelight/Limelight-Regular.ttf');
+}
+
+@font-face {
+  font-family: 'Crafty Girls';
+  src: url('#{$static-url}/fonts/Crafty_Girls/CraftyGirls-Regular.ttf');
+}
+
+@font-face {
+  font-family: 'Octavia';
+  src: url('#{$static-url}/fonts/Octavia/Octavia.otf');
+}
+
+@font-face {
+  font-family: 'Avenir Next Cyr';
+  src: url('#{$static-url}/fonts/Avenir/Avenir.otf');
+}
+
+@font-face {
+  font-family: 'Puppies Play';
+  src: url('#{$static-url}/fonts/Puppies_Play/PuppiesPlay-Regular.ttf');
+}
+
+@font-face {
+  font-family: 'Abhaya Libre';
+  src: url('#{$static-url}/fonts/Abhaya_Libre/AbhayaLibre-ExtraBold.ttf');
+}
+
+@font-face {
+  font-family: 'Yellowtail';
+  src: url('#{$static-url}/fonts/Yellowtail/Yellowtail-Regular.ttf');
+}
+@font-face {
+  font-family: 'Oswald';
+  src: url('#{$static-url}/fonts/Oswald/Oswald-VariableFont_wght.ttf');
+}
+@font-face {
+  font-family: 'Bebas Neue';
+  src: url('#{$static-url}/fonts/Bebas_Neue/BebasNeue-Regular.ttf');
+}
+
+@font-face {
+  font-family: 'Leckerli One';
+  src: url('#{$static-url}/fonts/Leckerli_One/LeckerliOne-Regular.ttf');
+}
+
+@font-face {
+  font-family: 'Lobster';
+  src: url('#{$static-url}/fonts/Lobster/Lobster-Regular.ttf');
+}
+
+@font-face {
+  font-family: 'Berkshire Swash';
+  src: url('#{$static-url}/fonts/Berkshire_Swash/BerkshireSwash-Regular.ttf');
+}
+
+@font-face {
+  font-family: 'Stalemate';
+  src: url('#{$static-url}/fonts/Stalemate/Stalemate-Regular.ttf');
+}
+
+@font-face {
+  font-family: 'Style Script';
+  src: url('#{$static-url}/fonts/Style_Script/StyleScript-Regular.ttf');
+}
+
+@font-face {
+  font-family: 'Marker Felt';
+  src: url('#{$static-url}/fonts/Marker_Felt/Marker Felt.ttf');
+}
+
+@font-face {
+  font-family: 'Righteous';
+  src: url('#{$static-url}/fonts/Righteous/Righteous-Regular.ttf');
+}
+
+@font-face {
+  font-family: 'Rochester';
+  src: url('#{$static-url}/fonts/Rochester/Rochester-Regular.ttf');
+}
+
+@font-face {
+  font-family: 'Lato';
+  src: url('#{$static-url}/fonts/Lato/Lato-Light.ttf');
+}
+
+@font-face {
+  font-family: 'Rasa';
+  src: url('#{$static-url}/fonts/Rasa/Rasa-VariableFont_wght.ttf');
+}
+
+@font-face {
+  font-family: 'Laila';
+  src: url('#{$static-url}/fonts/Laila/Laila-Light.ttf');
+}

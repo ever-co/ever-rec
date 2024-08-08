@@ -1,0 +1,45 @@
+.parentContainer {
+  display: flex;
+  flex-direction: column;
+  width: 350px;
+}
+
+.flexContainer {
+  display: flex;
+  width: 100%;
+  align-items: flex-start;
+  justify-content: flex-start;
+  flex-direction: column;
+}
+
+.title {
+  font-size: 1.5rem;
+  line-height: 2rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.inputContainer {
+  width: 100%;
+}
+
+.innerContainer {
+  padding-top: 13px;
+  display: flex;
+  width: 100%;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-direction: row;
+}
+
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.buttonContainer {
+  padding: 0.25rem 1.25rem;
+  border-radius: 9999px;
+  border: 2px solid #3c3099;
+}

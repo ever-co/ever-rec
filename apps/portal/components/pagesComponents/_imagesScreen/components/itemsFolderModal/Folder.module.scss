@@ -1,0 +1,41 @@
+.hidden {
+  max-height: 0;
+  overflow: hidden;
+  transition: all 0.2s ease;
+
+  .slideInDiv {
+    transition: all 0.3s ease;
+    transform: translateY(-50%);
+  }
+}
+
+.show {
+  max-height: 1000px;
+  transition: all 2s ease;
+
+  .slideInDiv {
+    overflow: hidden;
+    transition: all 0.3s ease;
+    transform: translateY(0);
+  }
+}
+
+.highlighted {
+  background: #5b4dbe !important;
+  color: #ffffff !important;
+}
+
+.folder {
+  background: #f5f4f7;
+  transition: all 0.2s ease-in;
+  position: relative;
+  z-index: 2;
+  cursor: pointer;
+
+  &:hover {
+    background: #b6aeea;
+    transition: all 0.2s ease-in;
+  }
+}
+
+

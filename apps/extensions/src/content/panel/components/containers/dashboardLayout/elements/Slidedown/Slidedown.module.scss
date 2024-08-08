@@ -1,0 +1,17 @@
+.react-slidedown {
+  height: 0;
+  transition-property: none;
+  transition-duration: 0.4s;
+  transition-timing-function: ease-in-out;
+}
+
+.transitioning {
+  overflow-y: hidden;
+  transition-property: none;
+  transition-duration: 0.4s;
+  transition-timing-function: ease-in-out;
+}
+
+.closed {
+  display: none;
+}

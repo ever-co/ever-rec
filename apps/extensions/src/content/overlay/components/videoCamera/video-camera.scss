@@ -1,0 +1,19 @@
+.rec {
+  .video-container-main {
+    width: 175px;
+
+    .video-container {
+      position: absolute;
+      top: 20px;
+      left: 105px;
+      right: 0;
+      bottom: 0;
+      height: 175px;
+      width: 175px;
+      border-radius: 999px;
+      transform: translateX(-50%);
+      background-color: #3f4049;
+      z-index: 2147483647;
+    }
+  }
+}

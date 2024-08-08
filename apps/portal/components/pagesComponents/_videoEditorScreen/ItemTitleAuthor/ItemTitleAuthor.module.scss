@@ -1,0 +1,23 @@
+@use 'pagesScss/partials/_dotSeparator.scss';
+
+.itemAuthor {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+
+  h3 {
+    font-size: 1.3rem;
+    font-weight: 600;
+  }
+}
+
+.itemAuthorDetails {
+  display: flex;
+  gap: 0.5rem;
+
+  img {
+    width: 25px;
+    height: 25px;
+    border-radius: 100%;
+  }
+}

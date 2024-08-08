@@ -1,0 +1,131 @@
+@import '/src/content/utilities/partials/_colors.scss';
+
+.appHeader {
+  background-color: $primary-violet10;
+  padding: 1.2rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.search {
+  display: flex;
+  align-items: center;
+  background-color: white;
+  border-radius: 2rem;
+  padding: 0.5rem 1rem;
+  width: 520px;
+}
+
+.appInput {
+  width: 100%;
+  margin-left: 0.75rem !important;
+
+  &:disabled {
+    background-color: white;
+    cursor: not-allowed;
+  }
+}
+
+.actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.CTAButton {
+  font-family: 'Roboto Medium' !important;
+  background-color: $primary-violet !important;
+  color: white !important;
+  border-radius: 2rem;
+  padding: 0rem 2rem !important;
+  transition: all 0.2s ease-in;
+
+  &:hover {
+    opacity: 0.9;
+  }
+}
+
+.actionButton {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.75rem;
+  transition: all 0.2s ease-in;
+  border-radius: 0.5rem;
+  cursor: pointer;
+
+  &:hover {
+    background-color: $primary-violet30;
+  }
+}
+
+.profileButton {
+  padding: 0.55rem;
+}
+
+.profilePicture {
+  border-radius: 100%;
+  width: 25px;
+  height: 25px !important;
+}
+
+.profileMenu {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  width: 300px;
+}
+
+.menuItem {
+  border-bottom-left-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+
+  padding: 1rem 1.25rem !important;
+
+  &:hover {
+    background-color: $primary-violet20;
+  }
+
+  &:first-of-type {
+    border-bottom: 1px solid $grey-light05;
+  }
+
+  &:last-of-type {
+    border-top: 1px solid $grey-light05;
+    border-bottom-left-radius: 0.5rem !important;
+    border-bottom-right-radius: 0.5rem !important;
+  }
+}
+
+.menuItemSpan {
+  font-size: 1rem;
+  margin-left: 0.5rem;
+}
+
+.menuItemHidden {
+  display: none !important;
+}
+
+@media (max-width: 1400px) {
+  .search {
+    width: 250px;
+  }
+}
+
+@media (max-width: 1165px) {
+  .actionButton {
+    display: none;
+  }
+  .profileButton {
+    display: flex;
+  }
+
+  .menuItemHidden {
+    display: flex !important;
+  }
+
+  .CTAButton {
+    display: none;
+  }
+}

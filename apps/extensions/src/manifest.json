@@ -1,0 +1,65 @@
+{
+  "name": "Ever Rec - Screen Capture, Screen Recording, Images & Video Sharing Platform",
+  "short_name": "Rec",
+  "version": "{{version}}",
+  "description": "",
+  "author": "Ever Co. LTD",
+  "manifest_version": 3,
+  "icons": {
+    "16": "icons/16.png",
+    "48": "icons/48.png",
+    "128": "icons/128.png"
+  },
+  "permissions": [
+    "activeTab",
+    "tabs",
+    "cookies",
+    "storage",
+    "desktopCapture",
+    "downloads",
+    "downloads.shelf",
+    "tabCapture",
+    "scripting"
+  ],
+  "host_permissions": ["<all_urls>"],
+  "action": {
+    "default_title": "{{name}}",
+    "default_popup": "popup/popup.html"
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "js": ["content/content.js"],
+      "matches": ["<all_urls>"],
+      "run_at": "document_end",
+      "all_frames": false,
+      "match_about_blank": true,
+      "match_origin_as_fallback": true
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "*.html",
+        "images/*",
+        "fonts/*",
+        "styles/*",
+        "*/install.html",
+        "firebase/*.js"
+      ],
+      "matches": ["<all_urls>"]
+    }
+  ],
+  "externally_connectable": {
+    "matches": [
+      "https://api.rec.so/*",
+      "https://app.rec.so/*",
+      "http://localhost:3000/*",
+      "http://localhost:4200/*"
+    ]
+  },
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxc8r9oD4SCn9r+lDdDAXbI7rFWZUOgn7ND0IiJJzUsrgh9eTVdzIqX6qBMj5hxAentvYECtubZLPRQmlo0sUTEzlaXyrc5SLbTXYoThPIx9UgpT8vY5+vnmVRMxgg2A0bD/K0cWUabW5O15PHOVmSz2s9PNFDb/9+qebot3Ejr1WB7wNw3rADRLabuCmP+7rtTfvrsyt2ps5Fx3JBrNp2KQILyEg9AAyl5ZFR72wlbE2jS++Xi3OPgMeEySL2Da58kVV0dhUVuDQlQfB7fXwT24yFupM+cqgV+58L8yCZZd4vZUKZCWxitY+hoyFDgrlpcPAPJDoRN+VqnjWuWNxpwIDAQAB"
+}

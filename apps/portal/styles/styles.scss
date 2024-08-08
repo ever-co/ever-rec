@@ -1,0 +1,300 @@
+@import '~antd/dist/antd.css';
+@import '~react-toastify/dist/ReactToastify.css';
+@import '~react-multi-email/style.css';
+@import './fonts.scss';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+//Editor
+em-emoji-picker {
+  --background-rgb: 'transparent';
+  --border-radius: 5px;
+  --category-icon-size: 18px;
+  --color-border-hover: rgba(0, 0, 0, 0.1);
+  --color-border: rgba(0, 0, 0, 0.05);
+  --rgb-accent: 91, 77, 190;
+  --rgb-background: 'transparent';
+  --rgb-color: 0, 0, 0;
+  --shadow: 'none';
+  height: 50vh;
+  min-height: 300px;
+  max-height: 500px;
+}
+.editor-player {
+  .plyr__progress {
+    display: none !important;
+  }
+}
+
+.editor-comments {
+  display: none;
+  border-radius: 20px !important;
+  background-color: #e9e7f0;
+  background-image: radial-gradient(
+      at 47% 83%,
+      rgb(211, 205, 248) 0,
+      transparent 59%
+    ),
+    radial-gradient(at 82% 65%, hsl(253.33, 23%, 92%) 0, transparent 55%);
+  -webkit-box-shadow: inset 0px 22px 10px -15px #ffffff;
+  box-shadow: inset 0px 22px 10px -15px #ffffff;
+  -webkit-box-shadow: 0px 0px 7px -3px #000000;
+  box-shadow: 0px 0px 7px -3px #000000;
+  border: 1px solid rgba(91, 77, 240, 0.13);
+  /* width */
+  ::-webkit-scrollbar {
+    width: 7px;
+    border-radius: 25px;
+  }
+
+  /* Track */
+  ::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 25px;
+  }
+
+  /* Handle */
+  ::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 25px;
+  }
+
+  /* Handle on hover */
+  ::-webkit-scrollbar-thumb:hover {
+    background: #555;
+  }
+  em-emoji-picker {
+    height: 200px !important;
+    -webkit-box-shadow: 0px -11px 38px 2px rgba(0, 0, 0, 0.29);
+    box-shadow: 0px -11px 38px 2px rgba(0, 0, 0, 0.29);
+  }
+}
+
+.side-comments {
+  overflow-y: auto;
+  align-items: flex-start;
+  justify-content: flex-start;
+  flex-direction: column;
+  border-radius: 5px;
+  background-color: #e9e7f0;
+  background-image: radial-gradient(
+      at 47% 83%,
+      rgb(211, 205, 248) 0,
+      transparent 59%
+    ),
+    radial-gradient(at 82% 65%, hsl(253.33, 23%, 92%) 0, transparent 55%);
+  -webkit-box-shadow: inset 0px 22px 10px -15px #ffffff;
+  box-shadow: inset 0px 22px 10px -15px #ffffff;
+  -webkit-box-shadow: 0px 0px 7px -3px #000000;
+  box-shadow: 0px 0px 7px -3px #000000;
+  border: 1px solid rgba(91, 77, 240, 0.13);
+}
+.choose-modal {
+  .ant-col {
+    cursor: pointer;
+
+    &:hover {
+      img {
+        box-shadow: 0px 0px 0px 5px rgba(155, 145, 243, 0.808);
+        -webkit-box-shadow: 0px 0px 0px 5px rgba(155, 145, 243, 0.808);
+        -moz-box-shadow: 0px 0px 0px 5px rgba(155, 145, 243, 0.808);
+      }
+    }
+  }
+}
+.pulse {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgb(207, 0, 0);
+  box-shadow: 0 0 0 rgba(204, 44, 44, 0.4);
+  animation: pulse 1s infinite;
+}
+
+@-webkit-keyframes pulse {
+  0% {
+    -webkit-box-shadow: 0 0 0 0 rgba(204, 44, 44, 0.4);
+  }
+  70% {
+    -webkit-box-shadow: 0 0 0 10px rgba(204, 44, 44, 0);
+  }
+  100% {
+    -webkit-box-shadow: 0 0 0 0 rgba(204, 44, 44, 0);
+  }
+}
+@keyframes pulse {
+  0% {
+    -moz-box-shadow: 0 0 0 0 rgba(204, 44, 44, 0.4);
+    box-shadow: 0 0 0 0 rgba(204, 44, 44, 0.4);
+  }
+  70% {
+    -moz-box-shadow: 0 0 0 10px rgba(204, 44, 44, 0);
+    box-shadow: 0 0 0 10px rgba(204, 44, 44, 0);
+  }
+  100% {
+    -moz-box-shadow: 0 0 0 0 rgba(204, 44, 44, 0);
+    box-shadow: 0 0 0 0 rgba(204, 44, 44, 0);
+  }
+}
+
+:root {
+  --toastify-color-info: #5b4dbe !important;
+  --toastify-color-success: #5b4dbe !important;
+
+  --toastify-icon-color-info: var(--toastify-color-info) !important;
+  --toastify-icon-color-success: var(--toastify-color-success) !important;
+
+  --plyr-color-main: #8576ff !important;
+}
+
+[data-plyr='play']:not(.plyr__controls__item) {
+  border: 0.3rem solid #8576ff !important;
+  background: #000000cc !important;
+}
+
+div.plyr.plyr--full-ui {
+  height: 100%;
+}
+
+.rec-next {
+  color: #383c44;
+
+  font-family: Roboto, Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  font-style: normal;
+  font-weight: normal;
+  letter-spacing: 0.01em;
+
+  input:focus {
+    outline: none;
+  }
+
+  div:focus {
+    outline: none;
+  }
+
+  p {
+    font-size: 16px;
+    letter-spacing: 0.01em;
+  }
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif,
+    Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
+  line-height: 1.5;
+  tab-size: 4;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: inherit;
+  line-height: inherit;
+  margin: 0;
+}
+
+h1,
+h2,
+p,
+pre {
+  margin: 0;
+}
+*,
+::before,
+::after {
+  box-sizing: border-box;
+  border-width: 0;
+  border-style: solid;
+  border-color: currentColor;
+}
+
+h1,
+h2 {
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+a {
+  color: inherit;
+  text-decoration: inherit;
+}
+
+pre {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    Liberation Mono, Courier New, monospace;
+}
+
+svg {
+  display: block;
+  vertical-align: middle;
+  shape-rendering: auto;
+  text-rendering: optimizeLegibility;
+}
+
+pre {
+  background-color: rgba(55, 65, 81, 1);
+  border-radius: 0.25rem;
+  color: rgba(229, 231, 235, 1);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    Liberation Mono, Courier New, monospace;
+  overflow: scroll;
+  padding: 0.5rem 0.75rem;
+}
+
+.shadow {
+  box-shadow: 0 0 #0000, 0 0 #0000, 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.rounded {
+  border-radius: 1.5rem;
+}
+
+.wrapper {
+  width: 100%;
+}
+
+details {
+  align-items: center;
+  display: flex;
+  margin-top: 1rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  width: 100%;
+}
+
+details pre > span {
+  color: rgba(181, 181, 181, 1);
+  display: block;
+}
+
+summary {
+  border-radius: 0.5rem;
+  display: flex;
+  font-weight: 400;
+  padding: 0.5rem;
+  cursor: pointer;
+  transition-property: background-color, border-color, color, fill, stroke,
+    opacity, box-shadow, transform, filter, backdrop-filter,
+    -webkit-backdrop-filter;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+summary:hover {
+  background-color: rgba(243, 244, 246, 1);
+}
+
+summary svg {
+  height: 1.5rem;
+  margin-right: 1rem;
+  width: 1.5rem;
+}
+
+.app {
+  overflow: hidden;
+}

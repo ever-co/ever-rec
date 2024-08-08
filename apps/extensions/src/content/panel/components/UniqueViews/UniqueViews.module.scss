@@ -1,0 +1,30 @@
+.bgColor {
+  background: linear-gradient(
+    278deg,
+    rgba(236, 234, 244, 1) 0%,
+    rgba(101, 99, 255, 0.3) 49%,
+    rgba(236, 234, 244, 1) 100%
+  );
+}
+
+.noViews {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.25rem 1rem !important;
+  border-radius: 0.25rem;
+  font-size: 0.85rem !important;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+  max-height: 35px;
+}
+
+.border {
+  border: 2px solid rgba(0, 0, 255, 0.292);
+}
+
+.noPointer {
+  cursor: default !important;
+}

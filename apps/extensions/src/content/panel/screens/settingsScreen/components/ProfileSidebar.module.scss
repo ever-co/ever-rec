@@ -1,0 +1,48 @@
+@import '/src/content/utilities/partials/_colors.scss';
+
+.profileSidebar {
+  width: 30%;
+  height: 98.5%;
+  border-left: 1px solid $primary-violet20;
+
+  h1 {
+    font-weight: bold;
+    margin: 2rem 1rem 1rem 1rem;
+  }
+
+  .profileSidebarNotFoundSpan {
+    margin-left: 1rem;
+  }
+
+  .profileSidebarSection {
+    min-height: 200px;
+    max-height: 50%;
+    margin-bottom: 0.5rem;
+    overflow: auto;
+  }
+}
+
+@media screen and (max-width: 1000px) {
+  .profileSidebar {
+    width: 100%;
+    border: 0;
+
+    .profileSidebarSection {
+      max-height: 25%;
+    }
+  }
+}
+
+.profileSidebarItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  height: 40px;
+  padding-left: 1rem;
+  margin-bottom: 0.5rem;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: $primary-violet20;
+  }
+}

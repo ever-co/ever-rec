@@ -1,0 +1,67 @@
+.parentContainer {
+    display: flex;
+    flex-direction: column;
+    width: 330px;
+}
+
+.innerContainer {
+    display: flex;
+    width: 100%;
+    align-items: flex-start;
+    justify-content: flex-start;
+    flex-direction: column;
+}
+
+.title {
+    font-size: 1.5rem;
+    line-height: 2rem; 
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.emailContainer {
+    border: 1px solid #998fff;
+    border-radius: 5px;
+    width: 100%;
+}
+
+.emailInput {
+    background-color: white;
+    padding: 0;
+}
+
+.wrapper {
+    padding-top: 13px;
+    display: flex;
+    width: 100%;
+    align-items: flex-start;
+    justify-content: space-between;
+}
+
+.column {
+    flex-direction: column;
+}
+
+.row {
+    flex-direction: row;
+}
+
+.textarea {
+    border-radius: 5px;
+    width: 100%;
+    margin: '10px 0px';
+    border: '1px solid #998fff';
+}
+
+.fullWidth {
+    width: 100%;
+}
+
+.flexContainer {
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.button {
+    padding: 0.5rem 2rem;
+}

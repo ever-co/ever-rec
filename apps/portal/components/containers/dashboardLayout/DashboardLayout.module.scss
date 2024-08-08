@@ -1,0 +1,16 @@
+.dashboardLayoutWrapper {
+  // minHeight: '100vh',
+  max-height: 100vh;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f5f4f7;
+}
+
+@media screen and (max-width: 767px) {
+  .dashboardLayoutWrapper {
+    max-height: unset;
+    height: auto;
+  }
+}

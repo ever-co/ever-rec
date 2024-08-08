@@ -1,0 +1,19 @@
+.mainContainer {
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+.title {
+  font-size: 1rem;
+  line-height: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+    width: 300px;
+}

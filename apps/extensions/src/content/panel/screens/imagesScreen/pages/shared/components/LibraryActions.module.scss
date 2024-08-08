@@ -1,0 +1,28 @@
+@import '/src/content/utilities/partials/_colors.scss';
+
+.libraryActions {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem 2rem;
+
+  .buttonInner {
+    display: flex;
+    align-items: center;
+
+    svg {
+      margin-right: 1rem;
+    }
+  }
+}
+
+.actionButton:hover,
+.actionButton.active {
+  border-color: $primary-violet;
+  background-color: $primary-violet10;
+  color: #000000;
+
+  & .svgWrapper {
+    color: #000000;
+    fill: #000000;
+  }
+}

@@ -1,0 +1,27 @@
+.wrapper :global {
+    .ant-modal {
+      border-radius: 1rem;
+      background: #ffffff;
+      padding: 0;
+    }
+    .ant-modal-content {
+      background: #ffffff;
+      background: linear-gradient(
+        278deg,
+        rgba(236, 234, 244, 1) 0%,
+        rgba(101, 99, 255, 0.3) 49%,
+        rgba(236, 234, 244, 1) 100%
+      );
+    }
+  }
+  
+  .closeIcon {
+    position: absolute;
+    right: -20px;
+    top: -20px;
+  }
+  
+  .deleteButton {
+    background: #D1322B;
+  }
+  

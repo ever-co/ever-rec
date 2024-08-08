@@ -1,0 +1,28 @@
+.heading {
+  font-family: Roboto !important;
+  font-size: 20px !important;
+  font-weight: bold;
+  line-height: 26px;
+  letter-spacing: 0.01em;
+  text-align: center;
+}
+
+.buttonWrapper, .descWrapper {
+  width: 90%;
+}
+
+.descWrapper {
+  margin-top: 20px;
+
+  .desc {
+    margin-top: 5px;
+    text-align: center;
+    //styleName: Subtitle 1;
+    font-family: Roboto !important;
+    font-size: 16px;
+    font-weight: bolder;
+    line-height: 24px;
+    letter-spacing: 0.01em;
+    text-align: center;
+  }
+}

@@ -1,0 +1,100 @@
+@use '/src/content/utilities/partials/reactTabs.scss';
+
+.mainSection {
+  display: flex;
+  flex-direction: column;
+
+  & * {
+    text-align: left;
+  }
+
+  .mainHeader {
+    width: fit-content;
+    font-family: Roboto;
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 23px;
+    letter-spacing: 0.25px;
+    text-align: left;
+    padding-bottom: 15px;
+    margin-bottom: 40px;
+    border-bottom: 2px solid #5b4dbe;
+  }
+}
+
+.teamWrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 10px 0;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  transition: background-color 0.2s;
+
+  &:last-of-type {
+    border: none;
+    margin-bottom: 0;
+  }
+
+  &:hover {
+    background-color: white;
+  }
+}
+
+.separator {
+  margin: 10px 0;
+  color: rgb(179, 179, 179);
+
+  &:last-of-type {
+    display: none;
+  }
+}
+
+.mainRow {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.avatarWrapper,
+.actionsWrapper {
+  display: flex;
+  div:first-of-type {
+    margin-right: 0.5rem;
+  }
+}
+
+.avatar {
+  margin-right: 10px;
+}
+
+.teamName,
+.leaveAction {
+  font-family: Roboto;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 24px;
+  letter-spacing: 0.01em;
+  text-align: left;
+  color: #636366;
+}
+
+.leaveAction,
+.goAction {
+  padding: 0.2rem 0.5rem;
+  cursor: pointer;
+}
+
+.goAction {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 0.2rem;
+  background-color: green;
+  color: white;
+  margin-right: 20px;
+}
+
+.members {
+  color: black;
+}

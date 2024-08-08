@@ -1,0 +1,26 @@
+@import 'pagesScss/partials/_colors.scss';
+
+.mainWrapper {
+  height: 100%;
+
+  .mainHeader {
+    width: 100%;
+    font-family: 'Roboto', sans-serif;
+    font-style: normal;
+
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 1rem 2rem;
+    border-bottom: 1px solid $grey-light05;
+  }
+
+  .innerWrapper {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, 300px);
+    gap: 2rem;
+    justify-content: center;
+    max-height: 82vh;
+    padding: 2rem;
+    overflow-y: auto;
+  }
+}

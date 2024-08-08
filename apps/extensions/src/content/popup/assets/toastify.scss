@@ -1,0 +1,8 @@
+@import '~react-toastify/dist/ReactToastify.css';
+:root {
+  --toastify-color-info: #5b4dbe;
+  --toastify-color-success: #5b4dbe;
+
+  --toastify-icon-color-info: var(--toastify-color-info);
+  --toastify-icon-color-success: var(--toastify-color-success);
+}

@@ -1,0 +1,38 @@
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1rem;
+  margin-top: 1rem;
+}
+
+.iconGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.iconPair {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.icon {
+  margin-bottom: 1px;
+}
+
+.label {
+  font-size: 1rem;
+  color: #636366;
+}
+
+.dateContainer {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.date {
+  color: #4b5563;
+}

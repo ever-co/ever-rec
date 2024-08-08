@@ -1,0 +1,23 @@
+@use '/src/content/utilities/partials/_reactTabs.scss';
+
+.mainSection {
+  display: flex;
+  flex-direction: column;
+
+  & * {
+    text-align: left;
+  }
+
+  .mainHeader {
+    width: fit-content;
+    font-family: Roboto;
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 23px;
+    letter-spacing: 0.25px;
+    text-align: left;
+    padding-bottom: 15px;
+    margin-bottom: 40px;
+    border-bottom: 2px solid #5b4dbe;
+  }
+}

@@ -1,0 +1,28 @@
+@import '@/content/popup/assets/hidden-scrollbar.scss';
+
+.rec {
+  color: #383c44;
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  font-style: normal;
+  font-weight: normal;
+  letter-spacing: 0.01em;
+
+  input:focus {
+    outline: none;
+  }
+
+  div:focus {
+    outline: none;
+  }
+
+  p {
+    font-size: 16px;
+    letter-spacing: 0.01em;
+  }
+
+  .ant-modal-footer {
+    border-top: 0 none !important;
+  }
+}

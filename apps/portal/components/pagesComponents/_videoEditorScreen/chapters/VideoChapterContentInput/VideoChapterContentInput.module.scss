@@ -1,0 +1,12 @@
+.ContentInput {
+  border: 1px solid rgb(150, 150, 150) !important;
+  margin-right: 0.5rem;
+  height: 51px !important;
+  width: 165px;
+}
+
+.disabled {
+  color: black !important;
+  background-color: transparent !important;
+  cursor: default !important;
+}

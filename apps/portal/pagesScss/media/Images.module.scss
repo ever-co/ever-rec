@@ -1,0 +1,91 @@
+@use 'pagesScss/Shared.module.scss';
+@import 'pagesScss/partials/_colors.scss';
+
+.mainSection {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
+  .foldersDashboardCard {
+    padding-left: 0;
+    padding-right: 0;
+
+    .foldersSectionMainHeader {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      margin-left: 0;
+      margin-right: 0;
+      border-bottom: 1px solid $grey-light05;
+      padding-bottom: 1rem;
+
+      .mainHeader {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-right: 1rem;
+      }
+
+    }
+
+    .foldersSectionMainHeaderCreateFolder {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+  }
+
+  .itemsSeparator {
+    display: flex;
+    align-items: center;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .foldersScrollableDiv {
+    overflow-y: auto;
+    margin-right: 1rem;
+  }
+
+  .contentDashboardCard {
+    flex: 1;
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 0;
+  }
+
+  .createFolderButton {
+    width: 160px;
+    margin-bottom: 0;
+  }
+}
+
+.heading {
+  font-weight: 600;
+}
+
+@media (max-width: 1024px) {
+  .mainSection {
+    .foldersSectionMainHeader {
+      > div:first-of-type {
+        width: 100%;
+        margin-bottom: 1rem;
+      }
+    }
+
+    .foldersSectionMainHeaderCreateFolderOuter {
+      width: 100%;
+
+      .createFolderButton {
+        width: 100%;
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .mainSection {
+    margin-top: 1rem;
+  }
+}

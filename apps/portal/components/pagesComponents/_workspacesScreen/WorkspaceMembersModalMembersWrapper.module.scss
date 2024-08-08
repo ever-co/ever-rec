@@ -1,0 +1,48 @@
+.MembersWrapper {
+  max-height: 525px;
+  overflow-y: auto;
+
+  .MemberRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem;
+    transition: background-color 0.1s;
+
+    &:hover {
+      background-color: #fff;
+    }
+
+    & > div:first-of-type {
+      display: flex;
+
+      img {
+        border-radius: 1rem;
+        margin-right: 0.5rem;
+        width: 2rem;
+        height: 2rem;
+      }
+    }
+
+    .MemberInfo {
+      display: flex;
+      flex-direction: column;
+
+      span:first-of-type {
+        margin-bottom: 0.2rem;
+      }
+    }
+  }
+}
+
+.spinnerWrapper {
+  width: 20px;
+  height: 20px;
+}
+
+.MemberButton {
+  font-size: .85rem;
+  width: 80px;
+  height: 40px;
+}

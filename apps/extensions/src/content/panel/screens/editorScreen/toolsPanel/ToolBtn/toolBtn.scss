@@ -1,0 +1,46 @@
+.toolbtn {
+  width: 35px;
+  height: 35px;
+  .icons {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+.close {
+  margin-bottom: 30px;
+  position: absolute;
+  right: -15px;
+  top: -15px;
+  cursor: pointer;
+  transition: 0.2s;
+  &:hover {
+    scale: 1.2;
+  }
+}
+
+.toolbtn-large {
+  width: 45px;
+  height: 45px;
+}
+@media screen and (max-height: 860px) {
+  .toolbtn {
+    width: 30px;
+    height: 30px;
+  }
+  .toolbtn-large {
+    width: 35px;
+    height: 35px;
+  }
+}
+
+@media screen and (max-height: 690px) {
+  .toolbtn {
+    width: 25px;
+    height: 25px;
+  }
+  .toolbtnlarge {
+    width: 30px;
+    height: 30px;
+  }
+}

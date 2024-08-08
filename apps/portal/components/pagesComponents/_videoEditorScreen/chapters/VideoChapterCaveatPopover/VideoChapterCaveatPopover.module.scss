@@ -1,0 +1,23 @@
+.Caveats {
+  padding: 1rem;
+  border-radius: 1rem;
+
+  h3 {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  ul {
+    list-style-type: disc;
+    margin-left: 1rem;
+  }
+
+  p {
+    max-width: 350px;
+  }
+}
+
+.Paragraph {
+  margin-top: 0.5rem;
+  font-size: 0.9rem !important;
+}

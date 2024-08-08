@@ -1,0 +1,40 @@
+@import '/src/content/utilities/partials/_colors.scss';
+
+.modalHeader {
+  font-size: 1rem !important;
+  font-weight: bold !important;
+  margin-bottom: 1.7rem !important;
+}
+
+.inputField {
+  margin-bottom: 1rem;
+
+  &:last-of-type {
+    margin-bottom: 0;
+  }
+
+  .inputFieldCombined {
+    display: flex;
+
+    div {
+      width: 100%;
+    }
+
+    svg {
+      margin-left: -2rem;
+    }
+  }
+}
+
+.appInputSecond {
+  color: $grey-dark-20 !important;
+  background-color: $primary-violet10 !important;
+  padding: 0.5rem 1rem !important;
+  border-color: $primary-violet !important;
+  border-bottom-width: 2px !important;
+  border-radius: 0.2rem;
+
+  &::placeholder {
+    color: $grey-dark-20 !important;
+  }
+}

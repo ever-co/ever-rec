@@ -1,0 +1,36 @@
+.buttonContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 70px;
+  height: 70px;
+  background: white;
+  padding: 1rem;
+  margin-right: 1rem;
+  border-radius: 0.5rem;
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 300ms;
+  border: 2px solid white;
+}
+
+.disabled {
+  filter: grayscale(100%);
+  opacity: 75;
+  &:hover {
+    cursor: pointer !important;
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1),
+      0 4px 6px -4px rgb(0 0 0 / 0.1);
+    background: #cdbbff;
+  }
+}
+
+.enabled {
+  filter: grayscale(0);
+  &:hover {
+    cursor: pointer;
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1),
+      0 4px 6px -4px rgb(0 0 0 / 0.1);
+    background: #cdbbff;
+  }
+}

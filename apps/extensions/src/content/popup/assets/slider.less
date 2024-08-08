@@ -1,0 +1,48 @@
+@import '~nouislider/distribute/nouislider.css';
+
+.rec {
+  // Slider horizontal line
+  .noUi-connect {
+    background: rgb(91, 77, 190);
+  }
+  .noUi-connects {
+    background: #eeeff3;
+  }
+
+  .noUi-target {
+    border: 0px;
+  }
+  .noUi-horizontal .noUi-handle {
+    width: 25px;
+    height: 25px;
+    right: -15px;
+    top: -8px;
+  }
+  .noUi-horizontal {
+    height: 9px;
+    cursor: pointer;
+  }
+  .noUi-handle {
+    width: 25px;
+    height: 19px;
+    right: -17px;
+    top: -7px;
+  }
+  .noUi-handle {
+    border: 13px solid rgb(91, 77, 190);
+    border-radius: 300px;
+    background: rgb(91, 77, 190);
+    cursor: pointer;
+  }
+  .noUi-handle:before,
+  .noUi-handle:after {
+    content: '';
+    display: block;
+    position: absolute;
+    height: 14px;
+    width: 0px;
+    background: #ff7f00;
+    left: 14px;
+    top: 6px;
+  }
+}

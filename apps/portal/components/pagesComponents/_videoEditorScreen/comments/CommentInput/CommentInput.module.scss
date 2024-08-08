@@ -1,0 +1,31 @@
+.commentEdit {
+  input {
+    width: 100%;
+    border-bottom: 1px solid grey;
+    background-color: transparent;
+  }
+}
+
+.commentEditButtons {
+  margin-top: 0.5rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.saveButton {
+  padding: 0.5rem;
+  background-color: #5b4db9;
+  border-radius: 1rem;
+  width: 62px;
+  font-weight: 500;
+  color: white;
+}
+
+.saveButton:hover {
+  background-color: #6f62c4;
+}
+
+.saveButton:disabled {
+  background-color: #aea9d0;
+}

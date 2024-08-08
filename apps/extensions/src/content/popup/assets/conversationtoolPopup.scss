@@ -1,0 +1,40 @@
+.ant-tabs-tab {
+  padding: 0px !important;
+  margin: 0px !important;
+  border: none !important;
+  height: 40px;
+  border-radius: 10px;
+}
+
+.ant-tabs-content-holder {
+  border-radius: 6px !important;
+  margin: 5px 5px 0px 5px;
+}
+
+.styled-tabs {
+  padding: 20px 18.4px !important;
+  height: 100%;
+  margin-top: 10px;
+  border-radius: 6px !important;
+}
+
+#corporate {
+  background-color: #e2dffa;
+}
+.ant-tabs-tab-active {
+  span {
+    background-color: #e5e4ed !important;
+  }
+}
+
+#fun {
+  background-color: #b9b1eb;
+}
+
+#colorful {
+  background-color: #ffc1c1;
+}
+
+#outline {
+  background-color: #fff393;
+}

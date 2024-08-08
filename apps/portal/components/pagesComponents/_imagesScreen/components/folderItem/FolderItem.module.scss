@@ -1,0 +1,131 @@
+@import 'pagesScss/partials/_colors.scss';
+
+.mainWrapper {
+  border: 2px solid $grey-light04;
+  font-family: Roboto;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+  letter-spacing: 0.01em;
+  text-align: left;
+  background-color: #fdfdfd;
+  transition: all 0.1s ease-in-out;
+  padding: 0.5rem 0.75rem;
+  padding-right: 0;
+  border-radius: 0.375rem;
+  width: 250px;
+  cursor: pointer;
+}
+
+.mainWrapper:hover,
+.mainWrapper.active {
+  border-color: $primary-violet;
+  background-color: $primary-violet10;
+  color: #000000;
+
+  & .svgWrapper {
+    color: #000000;
+    fill: #000000;
+  }
+}
+
+.folderContent {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  max-width: 85%;
+  cursor: pointer;
+}
+
+.folderIconWrapper {
+  margin-right: 10px;
+  margin-bottom: 1px;
+}
+
+.folderName {
+  font-size: 1rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.favoriteWrapper {
+  display: flex;
+}
+
+.favoriteWrapper .starSvg {
+  margin-right: 5px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.svgWrapper {
+  color: #888888;
+  fill: #888888;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 2.5rem;
+  border-radius: 9999px;
+  cursor: pointer;
+  padding: 0 0.75rem;
+}
+
+.svg {
+  fill: currentColor;
+}
+
+.lowerText {
+  font-family: Roboto;
+  font-size: 0.875rem;
+  font-weight: 400;
+  line-height: 24px;
+  letter-spacing: 0.01em;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.spinnerWrapper {
+  width: 23px;
+  height: 23px;
+}
+
+.gradientBackground {
+  background: radial-gradient(circle at 50% 50%, #b198f8 0%, #e0dfe7 59%);
+}
+
+.menuNormalCursor {
+  cursor: default;
+}
+
+.headerContainer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.folderInfo {
+  height: 24px;
+}
+
+.infoWrapper {
+  display: flex;
+  justify-content: space-between;
+}
+
+@media (max-width: 1500px) {
+  .mainWrapper {
+    width: calc((100% - 36px) / 3);
+  }
+}
+
+@media (max-width: 992px) {
+  .mainWrapper {
+    width: calc((100% - 18px) / 2);
+  }
+}

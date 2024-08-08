@@ -1,0 +1,29 @@
+.itemAuthorContainer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1rem;
+  margin-top: 1rem;
+
+  img {
+    border-radius: 100%;
+    margin-right: 0.5rem;
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+}
+
+.author {
+  display: flex;
+  width: 60%;
+}
+
+.authorName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.date {
+  color: #4b5563;
+  font-size: 0.9rem;
+}

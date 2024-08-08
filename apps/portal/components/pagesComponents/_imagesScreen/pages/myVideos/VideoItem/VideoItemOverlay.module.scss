@@ -1,0 +1,33 @@
+.overlayContainer {
+  position: absolute;
+  background-color: rgba(0, 0, 0, 0.6);
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  padding: 0.75rem;
+}
+
+.hidden {
+  visibility: hidden;
+}
+
+.centered {
+  justify-content: center;
+  align-items: center;
+}
+
+.spaceBetweenItemsStart {
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.endItemsStart {
+  justify-content: flex-end;
+  align-items: flex-start;
+}
+
+.selectButton {
+  margin-top: 4px;
+}

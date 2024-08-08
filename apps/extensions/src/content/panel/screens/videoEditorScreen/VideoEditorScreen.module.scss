@@ -1,0 +1,78 @@
+.itemPageWrapper {
+  padding: 3rem 3rem;
+  max-width: 1436px;
+  margin: auto;
+}
+
+.itemDisplaySection {
+  display: flex;
+  margin-bottom: 1rem;
+}
+
+.chapters {
+  border: 1px solid #80808066;
+  padding-bottom: 0.5rem;
+}
+
+.chaptersHeading {
+  display: flex;
+  gap: 0.25rem;
+  background-color: #c3c3c3;
+  padding: 0.25rem 1rem;
+  font-weight: bold;
+  font-size: 0.9rem;
+  width: 100%;
+  border-radius: 0;
+  bottom: 0;
+}
+
+.itemActionSection {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+}
+
+.videoCommentsWrapper {
+  width: 60%;
+}
+
+.chaptersHorizontal {
+  display: none;
+}
+
+.tabList {
+  display: flex;
+}
+
+.videoSlider{
+  width: 374px;
+  padding: 0 2rem;
+}
+
+@media screen and (max-width: 1400px) {
+  .chapters {
+    display: none;
+  }
+
+  .chaptersHorizontal {
+    display: block;
+  }
+}
+
+@media screen and (max-width: 900px) {
+  .videoCommentsWrapper {
+    width: 100%;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .itemPageWrapper {
+    padding: 1.5rem 1.5rem;
+  }
+
+  .itemActionSection {
+    flex-direction: column;
+    gap: 2rem;
+    align-items: start;
+  }
+}

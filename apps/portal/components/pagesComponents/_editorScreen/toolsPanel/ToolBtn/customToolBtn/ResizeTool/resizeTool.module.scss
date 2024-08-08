@@ -1,0 +1,84 @@
+.parentContainer {
+    display: flex;
+    flex-direction: column;
+    width: 280px;
+}
+
+.title {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.flexContainer {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.inputContainer {
+    background: transparent;
+    border: 1px solid #a1a1a1;
+    border-radius: 3px;
+    width: 65px;
+}
+
+.innerInputContainer {
+    margin-right: 0.5rem;
+    margin-left: 0.75rem;
+}
+
+.secondInputContainer {
+    font-size: 1rem;
+    line-height: 1.5rem;
+    background: transparent;
+    border: 1px solid #a1a1a1;
+    border-radius: 3px;
+    width: 65px;
+}
+
+.secondInnerInputContainer {
+    margin-left: 0.25rem;
+    margin-right: 0.25rem;
+}
+
+.widthError {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    color: #f45046;
+}
+
+.heightError {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    color: #f45046;
+    margin-bottom: 0.5rem;
+}
+
+.buttonContainer {
+    margin-top: 0.75rem;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.firstBtn {
+    margin-right: 0.5rem;
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+}
+
+.whiteBg {
+    background-color: white;
+}
+
+.secondBtn {
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+}

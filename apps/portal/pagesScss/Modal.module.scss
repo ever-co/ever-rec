@@ -1,0 +1,55 @@
+@import 'pagesScss/partials/_colors.scss';
+
+.modalHeader {
+  font-size: 1rem;
+  font-weight: bold;
+  margin-bottom: 1.7rem;
+}
+
+.inputField {
+  margin-bottom: 1rem;
+
+  &:last-of-type {
+    margin-bottom: 0;
+  }
+
+  .inputFieldCombined {
+    display: flex;
+
+    div {
+      width: 100%;
+    }
+
+    svg {
+      margin-left: -0.5rem;
+    }
+  }
+}
+
+.appInputSecond {
+  color: $grey-dark-20;
+  background-color: $primary-violet10;
+  border-radius: 0.2rem;
+  padding: 0.5rem 1rem;
+  border-color: $primary-violet;
+  border-bottom-width: 2px;
+
+  &::placeholder {
+    color: $grey-dark-20;
+  }
+
+  &.appInputSecondDanger {
+    background-color: $pink-light;
+    border-color: $pink;
+  }
+}
+
+.permanentlyDeleteAccount {
+  p {
+    margin-bottom: 1.5rem;
+
+    &:last-of-type {
+      margin: 0;
+    }
+  }
+}

@@ -1,0 +1,39 @@
+@import 'pagesScss/partials/_colors.scss';
+
+.profileDetail {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  height: 60px;
+  min-width: 300px;
+  padding: 0 1rem;
+  border-radius: 0.5rem;
+  transition: background-color 0.2s ease;
+  gap: 1rem;
+  cursor: pointer;
+
+  &:hover {
+    background-color: $primary-violet20;
+
+    .profileDetailRightArrow {
+      background-color: $primary-violet40;
+    }
+  }
+
+  div:first-of-type {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+
+    .profileDetailRightArrow {
+      padding: 0.5rem;
+      border-radius: 0.5rem;
+    }
+  }
+}
+
+.profileDetailDisabled {
+  opacity: 0.5;
+}

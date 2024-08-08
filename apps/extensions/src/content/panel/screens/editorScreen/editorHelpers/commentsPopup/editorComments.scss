@@ -1,0 +1,163 @@
+.editor-comments {
+  border-radius: 20px !important;
+  background-color: #e9e7f0;
+  background-image: radial-gradient(
+      at 47% 83%,
+      rgb(211, 205, 248) 0,
+      transparent 59%
+    ),
+    radial-gradient(at 82% 65%, hsl(253.33, 23%, 92%) 0, transparent 55%);
+  -webkit-box-shadow: inset 0px 22px 10px -15px #ffffff;
+  box-shadow: inset 0px 22px 10px -15px #ffffff;
+  -webkit-box-shadow: 0px 0px 7px -3px #000000;
+  box-shadow: 0px 0px 7px -3px #000000;
+  border: 1px solid rgba(91, 77, 240, 0.13);
+  /* width */
+  ::-webkit-scrollbar {
+    width: 7px;
+    border-radius: 25px;
+  }
+
+  /* Track */
+  ::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 25px;
+  }
+
+  /* Handle */
+  ::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 25px;
+  }
+
+  /* Handle on hover */
+  ::-webkit-scrollbar-thumb:hover {
+    background: #555;
+  }
+  em-emoji-picker {
+    height: 200px !important;
+    -webkit-box-shadow: 0px -11px 38px 2px rgba(0, 0, 0, 0.29);
+    box-shadow: 0px -11px 38px 2px rgba(0, 0, 0, 0.29);
+  }
+  textarea {
+    outline-color: #cdbbff00;
+  }
+}
+
+.editor-comments {
+  display: none;
+  border-radius: 20px !important;
+  background-color: #e9e7f0;
+  background-image: radial-gradient(
+      at 47% 83%,
+      rgb(211, 205, 248) 0,
+      transparent 59%
+    ),
+    radial-gradient(at 82% 65%, hsl(253.33, 23%, 92%) 0, transparent 55%);
+  -webkit-box-shadow: inset 0px 22px 10px -15px #ffffff;
+  box-shadow: inset 0px 22px 10px -15px #ffffff;
+  -webkit-box-shadow: 0px 0px 7px -3px #000000;
+  box-shadow: 0px 0px 7px -3px #000000;
+  border: 1px solid rgba(91, 77, 240, 0.13);
+  /* width */
+  ::-webkit-scrollbar {
+    width: 7px;
+    border-radius: 25px;
+  }
+
+  /* Track */
+  ::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 25px;
+  }
+
+  /* Handle */
+  ::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 25px;
+  }
+
+  /* Handle on hover */
+  ::-webkit-scrollbar-thumb:hover {
+    background: #555;
+  }
+  em-emoji-picker {
+    height: 200px !important;
+    -webkit-box-shadow: 0px -11px 38px 2px rgba(0, 0, 0, 0.29);
+    box-shadow: 0px -11px 38px 2px rgba(0, 0, 0, 0.29);
+  }
+}
+
+.side-comments {
+  overflow-y: auto;
+  align-items: flex-start;
+  justify-content: flex-start;
+  flex-direction: column;
+  border-radius: 5px;
+  background-color: #e9e7f0;
+  background-image: radial-gradient(
+      at 47% 83%,
+      rgb(211, 205, 248) 0,
+      transparent 59%
+    ),
+    radial-gradient(at 82% 65%, hsl(253.33, 23%, 92%) 0, transparent 55%);
+  -webkit-box-shadow: inset 0px 22px 10px -15px #ffffff;
+  box-shadow: inset 0px 22px 10px -15px #ffffff;
+  -webkit-box-shadow: 0px 0px 7px -3px #000000;
+  box-shadow: 0px 0px 7px -3px #000000;
+  border: 1px solid rgba(91, 77, 240, 0.13);
+}
+.choose-modal {
+  .ant-col {
+    cursor: pointer;
+
+    &:hover {
+      img {
+        box-shadow: 0px 0px 0px 5px rgba(155, 145, 243, 0.808);
+        -webkit-box-shadow: 0px 0px 0px 5px rgba(155, 145, 243, 0.808);
+        -moz-box-shadow: 0px 0px 0px 5px rgba(155, 145, 243, 0.808);
+      }
+    }
+  }
+}
+
+.ant-image-preview-img-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pulse {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgb(207, 0, 0);
+  box-shadow: 0 0 0 rgba(204, 44, 44, 0.4);
+  animation: pulse 1s infinite;
+}
+
+@-webkit-keyframes pulse {
+  0% {
+    -webkit-box-shadow: 0 0 0 0 rgba(204, 44, 44, 0.4);
+  }
+  70% {
+    -webkit-box-shadow: 0 0 0 10px rgba(204, 44, 44, 0);
+  }
+  100% {
+    -webkit-box-shadow: 0 0 0 0 rgba(204, 44, 44, 0);
+  }
+}
+@keyframes pulse {
+  0% {
+    -moz-box-shadow: 0 0 0 0 rgba(204, 44, 44, 0.4);
+    box-shadow: 0 0 0 0 rgba(204, 44, 44, 0.4);
+  }
+  70% {
+    -moz-box-shadow: 0 0 0 10px rgba(204, 44, 44, 0);
+    box-shadow: 0 0 0 10px rgba(204, 44, 44, 0);
+  }
+  100% {
+    -moz-box-shadow: 0 0 0 0 rgba(204, 44, 44, 0);
+    box-shadow: 0 0 0 0 rgba(204, 44, 44, 0);
+  }
+}

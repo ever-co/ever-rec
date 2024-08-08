@@ -1,0 +1,153 @@
+main {
+  font-family: 'Roboto';
+  display: flex;
+  margin: auto;
+  width: 90%;
+  align-items: center;
+}
+
+.container-main {
+  display: flex;
+  margin: auto;
+  padding-top: 60px;
+  padding-bottom: 60px;
+}
+
+.content-info {
+  margin-top: 40px;
+}
+
+.content-title-wrapper {
+  display: flex;
+  justify-content: space-between;
+}
+
+.content-title {
+  max-width: 85%;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 28px;
+  line-height: 33px;
+  letter-spacing: 0.25px;
+  color: #2a292f;
+  overflow: hidden;
+  margin-left: 2px;
+}
+
+.item-main-information {
+  padding-top: 15px;
+  margin-bottom: 15px;
+  display: flex;
+  height: 10vh;
+  align-items: center;
+}
+
+.person-info,
+.content-date {
+  flex: 1;
+  display: flex;
+}
+
+.person-info {
+  display: flex;
+}
+
+.person-info img {
+  border-radius: 300px;
+}
+
+.content-date {
+  justify-content: flex-end;
+}
+
+.person-data {
+  margin-left: 30px;
+}
+
+.person-name {
+  font-style: normal;
+  font-weight: 700;
+  font-size: 24px;
+  color: #2a292f;
+}
+
+.person-email {
+  font-style: normal;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 24px;
+
+  letter-spacing: 0.01em;
+  color: #6e6e6e;
+}
+
+.comments-text {
+  padding: 15px;
+  font-style: normal;
+  font-weight: 700;
+  font-size: 16px;
+  color: #5b4dbe;
+}
+
+.comments-icon {
+  width: 200px;
+  padding-top: 130px;
+  margin: auto;
+}
+
+.hidden {
+  display: none;
+}
+
+.comment-area-bot {
+  display: flex;
+  align-items: end;
+}
+
+.comment-area-top {
+  width: 98%;
+  height: 65px;
+  resize: none;
+}
+
+.icon-buttons-comments {
+  flex: 1;
+}
+
+.comment-button-container {
+  display: flex;
+}
+
+.comment-button-main {
+  background: #5b4dbe;
+  border-radius: 6px;
+  color: #fff;
+  padding: 11px;
+  margin: 3px;
+  cursor: pointer;
+}
+
+.comment-button-main:hover {
+  font-weight: 700;
+  background: #4c40a8;
+}
+
+textarea::-webkit-scrollbar {
+  width: 6px;
+  background: transparent;
+}
+
+textarea::-webkit-scrollbar-thumb {
+  border-radius: 5px;
+  background-color: #a9a9a9;
+}
+
+.cancel {
+  background: #ffffff;
+  color: #5b4dbe;
+  border: 1px solid #5b4dbe;
+}
+
+.cancel:hover {
+  background: #e6e3e3;
+}

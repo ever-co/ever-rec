@@ -1,0 +1,32 @@
+.flexContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.innerContainer {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.25rem;
+  user-select: none;
+  padding: 0.5rem;
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+  margin: 0.25rem;
+  &:hover {
+    background: #362e72;
+  }
+}
+
+.bgColor {
+    background-color: #cdbbff;
+}
+
+.selector {
+    cursor: pointer;
+    width: 40px;
+    height: 25px;
+}

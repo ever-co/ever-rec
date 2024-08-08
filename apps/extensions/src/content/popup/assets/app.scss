@@ -1,0 +1,45 @@
+@import './fonts.scss';
+@import '~nouislider/distribute/nouislider.css';
+@import '~react-circular-progressbar/dist/styles.css';
+@import './plyr.scss';
+
+.rec {
+  color: #383c44;
+
+  font-family: Roboto, Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  font-style: normal;
+  font-weight: normal;
+  letter-spacing: 0.01em;
+
+  input:focus {
+    outline: none;
+  }
+
+  div:focus {
+    outline: none;
+  }
+
+  p {
+    font-size: 16px;
+    letter-spacing: 0.01em;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    margin: 0;
+  }
+
+  .leak-bg {
+    background-size: cover;
+  }
+
+  .konvajs-content {
+    box-shadow: 0px 0px 1px 1px #898989;
+  }
+}

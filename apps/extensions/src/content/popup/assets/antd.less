@@ -1,0 +1,318 @@
+.rec {
+  @import '~antd/dist/antd.less';
+  @primary-color: #5b4dbe;
+  .ant-modal {
+    border-radius: 1rem;
+    background: #ffffff;
+    padding: 0;
+  }
+
+  .ant-modal-content {
+    border-radius: 0.5rem;
+    background: #ffffff;
+  }
+
+  .modalCloseButton {
+    position: absolute;
+    right: -20px;
+    top: -20px;
+  }
+
+  .ant-radio-wrapper {
+    margin-bottom: 5px !important;
+  }
+
+  .ant-modal-body {
+    padding: 2rem 2rem 0 2rem;
+  }
+
+  .ant-modal-footer {
+    border-top: 0 none !important;
+    padding: 0 2rem 2rem 2rem;
+  }
+
+  .panel-select {
+    display: flex;
+    align-items: center;
+    max-width: 81%;
+    border: 1px solid #e2e2e2;
+    height: 40px;
+    border-radius: 0.5rem;
+
+    .ant-select-selection-item {
+      display: flex;
+      align-items: center;
+      margin-top: 1px;
+    }
+  }
+
+  .ant-select-dropdown,
+  .ant-dropdown-menu {
+    padding: 0;
+    border-radius: 0.5rem;
+  }
+
+  .ant-dropdown-menu-item:hover:first-of-type {
+    border-top-left-radius: 0.5rem;
+    border-top-right-radius: 0.5rem;
+  }
+
+  .ant-dropdown-menu-item:hover:last-of-type {
+    border-bottom-left-radius: 0.5rem;
+    border-bottom-right-radius: 0.5rem;
+  }
+
+  .ant-select-item,
+  .ant-dropdown-menu-item {
+    padding: 10px 12px;
+  }
+
+  // There was a problem with the arrows of the tooltip. Next ~100 lines are the fix.
+  /* Top */
+  .ant-tooltip-placement-top .ant-tooltip-arrow {
+    bottom: 0;
+    left: 50%;
+    transform: translateY(100%) translateX(-50%);
+  }
+
+  .ant-tooltip-placement-top .ant-tooltip-arrow-content,
+  .ant-tooltip-placement-topLeft .ant-tooltip-arrow-content,
+  .ant-tooltip-placement-topRight .ant-tooltip-arrow-content {
+    box-shadow: 3px -3px 7px rgba(0, 0, 0, 0.07);
+    transform: translateY(-11px) rotate(45deg);
+  }
+
+  /* Bottom */
+  .ant-tooltip-placement-bottom .ant-tooltip-arrow {
+    top: 0;
+    left: 50%;
+    transform: translateY(-100%) translateX(-50%);
+  }
+
+  .ant-tooltip-placement-bottom .ant-tooltip-arrow-content,
+  .ant-tooltip-placement-bottomLeft .ant-tooltip-arrow-content,
+  .ant-tooltip-placement-bottomRight .ant-tooltip-arrow-content {
+    box-shadow: -3px -3px 7px rgba(0, 0, 0, 0.07);
+    transform: translateY(11px) rotate(-135deg);
+  }
+
+  /* Left */
+  .ant-tooltip-placement-left .ant-tooltip-arrow {
+    top: 50%;
+    right: 0;
+    transform: translateX(100%) translateY(-50%);
+  }
+
+  .ant-tooltip-placement-left .ant-tooltip-arrow-content,
+  .ant-tooltip-placement-leftTop .ant-tooltip-arrow-content,
+  .ant-tooltip-placement-leftBottom .ant-tooltip-arrow-content {
+    box-shadow: 3px 3px 7px rgba(0, 0, 0, 0.07);
+    transform: translateX(-11px) rotate(-45deg);
+  }
+
+  /* Right */
+  .ant-tooltip-placement-right .ant-tooltip-arrow {
+    top: 50%;
+    left: 0;
+    transform: translateX(-100%) translateY(-50%);
+  }
+
+  .ant-tooltip-placement-right .ant-tooltip-arrow-content,
+  .ant-tooltip-placement-rightTop .ant-tooltip-arrow-content,
+  .ant-tooltip-placement-rightBottom .ant-tooltip-arrow-content {
+    box-shadow: -3px 3px 7px rgba(0, 0, 0, 0.07);
+    transform: translateX(11px) rotate(135deg);
+  }
+
+  /* topLeft */
+  .ant-tooltip-placement-topLeft .ant-tooltip-arrow {
+    bottom: 0;
+    left: 8%;
+    transform: translateY(100%) translateX(-50%);
+  }
+
+  /* topRight */
+  .ant-tooltip-placement-topRight .ant-tooltip-arrow {
+    bottom: 0;
+    left: 92%;
+    transform: translateY(100%) translateX(-50%);
+  }
+
+  /* bottomLeft */
+  .ant-tooltip-placement-bottomLeft .ant-tooltip-arrow {
+    top: 0;
+    left: 8%;
+    transform: translateY(-100%) translateX(-50%);
+  }
+
+  /* bottomRight */
+  .ant-tooltip-placement-bottomRight .ant-tooltip-arrow {
+    top: 0;
+    left: 92%;
+    transform: translateY(-100%) translateX(-50%);
+  }
+
+  /* leftTop */
+  .ant-tooltip-placement-leftTop .ant-tooltip-arrow {
+    top: 8%;
+    right: 0;
+    transform: translateX(100%) translateY(-50%);
+  }
+
+  /* leftBottom */
+  .ant-tooltip-placement-leftBottom .ant-tooltip-arrow {
+    top: 92%;
+    right: 0;
+    transform: translateX(100%) translateY(-50%);
+  }
+
+  /* rightTop */
+  .ant-tooltip-placement-rightTop .ant-tooltip-arrow {
+    top: 8%;
+    left: 0;
+    transform: translateX(-100%) translateY(-50%);
+  }
+
+  /* rightBottom */
+  .ant-tooltip-placement-rightBottom .ant-tooltip-arrow {
+    top: 92%;
+    left: 0;
+    transform: translateX(-100%) translateY(-50%);
+  }
+  // End of fix. There was a problem with the arrows of the tooltip.
+
+  textarea.ant-input {
+    border: 1px solid transparent;
+    border-radius: 5px;
+  }
+
+  .ant-input-font-size-xl {
+    font-size: 1.25rem;
+  }
+  .ant-input-font-size-4xl {
+    font-size: 2.25rem;
+  }
+  .ant-input-transparent {
+    background-color: transparent;
+  }
+  .ant-input:focus {
+    border-color: #5b4dbe;
+    overflow-y: auto;
+  }
+  .ant-input:focus::-webkit-scrollbar {
+    width: 5px;
+  }
+  .ant-input:focus::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    background: #bdb5ff;
+    -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5);
+  }
+  .ant-input:hover {
+    border-color: #8576ff;
+  }
+
+  .ant-slider-rail {
+    height: 1px !important;
+    background-color: #979797;
+  }
+  .ant-slider-track {
+    background-color: #201641 !important;
+    height: 1px !important;
+  }
+  .ant-slider-handle {
+    margin-top: -6px !important;
+    height: 15px !important;
+    width: 15px !important;
+    background-color: #5b4dbe;
+    border: 2px solid black;
+  }
+  .ant-tabs-tab-disabled {
+    opacity: 0.5;
+  }
+
+  .ant-popover-inner-content {
+    padding: 0;
+  }
+  .ant-popover-arrow {
+    display: none;
+  }
+
+  .ant-input {
+    border: 1px solid transparent;
+    border-radius: 5px;
+  }
+
+  .ant-input-font-size-xl {
+    font-size: 1.25rem;
+  }
+
+  .ant-input-font-size-4xl {
+    font-size: 2.25rem;
+  }
+
+  .ant-input:focus {
+    border-color: #5b4dbe;
+    overflow-y: auto;
+  }
+  .ant-input:focus::-webkit-scrollbar {
+    width: 5px;
+  }
+  .ant-input:focus::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    background: #bdb5ff;
+    -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5);
+  }
+  .ant-input:hover {
+    border-color: #8576ff;
+  }
+
+  .watermark {
+    .styled-tabs-watermark {
+      padding: 12px 8.4px !important;
+      height: 100%;
+    }
+    .ant-tabs {
+      align-items: center;
+    }
+    .ant-tabs-nav {
+      width: 95% !important;
+      margin: 0px !important;
+    }
+    .ant-tabs-nav-wrap {
+      border-bottom: 1px solid rgb(196, 196, 196);
+    }
+    .ant-tabs-tab {
+      margin-right: 3px !important;
+      height: auto;
+      padding: 10px 0px !important;
+    }
+    .ant-tabs-content-holder {
+      width: 100%;
+    }
+  }
+}
+
+.ant-tooltip-inner {
+  border-radius: 5px !important;
+}
+.ant-tooltip {
+  pointer-events: none;
+}
+
+.tw-dark {
+  .ant-select-item-option-selected:not(.ant-select-item-option-disabled) {
+    background-color: #373737 !important;
+    color: #ffffff !important;
+  }
+
+  .ant-select-item-option-active:not(.ant-select-item-option-disabled) {
+    background-color: #363636 !important;
+    color: #ffffff;
+  }
+
+  .ant-select-item-option {
+    display: flex;
+    background-color: #464646;
+    color: #ffffff;
+  }
+}

@@ -1,0 +1,16 @@
+.rec {
+  em-emoji-picker {
+    --background-rgb: 'transparent';
+    --border-radius: 5px;
+    --category-icon-size: 18px;
+    --color-border-hover: rgba(0, 0, 0, 0.1);
+    --color-border: rgba(0, 0, 0, 0.05);
+    --rgb-accent: 91, 77, 190;
+    --rgb-background: 'transparent';
+    --rgb-color: 0, 0, 0;
+    --shadow: 'none';
+    height: 50vh;
+    min-height: 300px;
+    max-height: 500px;
+  }
+}

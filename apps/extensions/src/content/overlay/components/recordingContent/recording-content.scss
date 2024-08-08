@@ -1,0 +1,327 @@
+.rec {
+  .rec-main {
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+
+    .canvasfree {
+      top: 0px;
+      left: 0px;
+      position: absolute;
+      z-index: 99990000;
+      cursor: default;
+      pointer-events: none;
+    }
+
+    .background-container {
+      z-index: 100000;
+      height: 100%;
+      width: 100%;
+      left: 0%;
+      top: 0%;
+      position: absolute;
+      background: gray;
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
+    .content {
+      position: relative;
+      width: 100%;
+    }
+
+    @keyframes show-up {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    .rec-container {
+      z-index: 99990002;
+      position: fixed;
+      bottom: 15px;
+      left: 15px;
+      width: 220px;
+      height: 80px;
+      background-color: #f5f4f7;
+      display: flex;
+      border-radius: 10px;
+      pointer-events: all;
+      transition: width 0.2s ease-in-out !important;
+      animation: 0.4s ease-in-out show-up;
+      -webkit-user-select: none; /* Safari */
+      -ms-user-select: none; /* IE 10 and IE 11 */
+      user-select: none; /* Standard syntax */
+    }
+
+    .rec-container-editor {
+      z-index: 99990002;
+      position: fixed;
+      bottom: 15px;
+      left: 15px;
+      width: 220px;
+      height: 80px;
+      background-color: #f5f4f7;
+      display: flex;
+      border-radius: 10px;
+      pointer-events: all;
+      -webkit-user-select: none; /* Safari */
+      -ms-user-select: none; /* IE 10 and IE 11 */
+      user-select: none; /* Standard syntax */
+    }
+
+    .stopButton img {
+      height: 33px;
+    }
+
+    .stopButton {
+      cursor: pointer;
+      margin-left: 7px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .timer {
+      padding-top: 3px;
+      font-size: 23px;
+      text-align: center;
+      color: rgb(0, 0, 0);
+      font-weight: bold;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+        Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    }
+
+    .line {
+      background-color: #e5e5e5;
+      width: 100%;
+      height: 1px;
+      border-radius: 300px;
+    }
+
+    .binButton,
+    .micButton,
+    .playButton,
+    .penButton,
+    .pauseButton {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      img {
+        width: 34px !important;
+      }
+    }
+
+    .eraserButton {
+      background-color: #fff;
+      border-radius: 100%;
+      padding: 0.3rem;
+
+      img {
+        width: 24px !important;
+      }
+    }
+
+    .micButton,
+    .playButton,
+    .binButton,
+    .pauseButton {
+      height: 35px;
+      background-color: #fff;
+      border-radius: 300px;
+      cursor: pointer;
+      margin-left: 7px;
+    }
+
+    .main-buttons {
+      display: flex;
+      align-items: center;
+      margin: 5px;
+      margin-top: 7px;
+    }
+
+    .penButton,
+    .eraserButton {
+      margin-left: -60px;
+      visibility: hidden;
+      opacity: 0;
+      transition: visibility 0s, opacity 0.4s linear,
+        margin-left 0.2s ease-in-out;
+      cursor: pointer;
+    }
+
+    .rec-container:hover {
+      width: 350px;
+      .penButton,
+      .eraserButton,
+      .colorPicker {
+        visibility: visible;
+        opacity: 1;
+        margin-left: 7px;
+      }
+    }
+
+    .cursor-not-allowed {
+      cursor: not-allowed;
+    }
+
+    .penSlider {
+      position: absolute;
+      z-index: 9999999999;
+      pointer-events: all !important;
+      visibility: hidden;
+      opacity: 0;
+      transition: visibility 0s, opacity 0.3s linear;
+      left: 228px;
+      bottom: 142px;
+      width: 15px;
+
+      input {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 100px;
+        height: 100px;
+        outline: none;
+        transform: rotate(-90deg);
+        position: absolute;
+        z-index: 99999999999999999;
+        margin-left: -43px;
+        background-color: rgba(0, 0, 0, 0);
+      }
+
+      input::-webkit-slider-thumb {
+        width: 12px;
+        -webkit-appearance: none;
+        height: 12px;
+        background: rgb(91, 77, 190);
+        border-radius: 200px;
+      }
+
+      img {
+        position: absolute;
+        z-index: 99999999;
+        width: 15px;
+      }
+    }
+
+    .penSlider:hover {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    .show-slider {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    .colorPicker {
+      width: 34px;
+      background: #ffffff;
+      height: 34px;
+      border-radius: 300px;
+      margin-left: -5px;
+      visibility: hidden;
+      opacity: 0;
+      transition: visibility 0s, opacity 0.4s linear,
+        margin-left 0.2s ease-in-out;
+      cursor: pointer;
+    }
+
+    .colorPicker-icon {
+      width: 20px;
+      height: 20px;
+      border-radius: 200px;
+      background-color: #eb205d;
+      margin-top: 7px;
+      margin-left: 7px;
+      display: inline-block;
+    }
+
+    .color-picker-github {
+      bottom: 122px;
+    }
+  }
+
+  .remove-pointer-events {
+    pointer-events: none;
+  }
+
+  .set-pointer-events {
+    pointer-events: all;
+  }
+
+  #recording-window-overwrite {
+    position: relative;
+    display: flex;
+    justify-content: flex-end;
+
+    .binButton,
+    .micButton,
+    .playButton,
+    .penButton,
+    .eraserButton,
+    .pauseButton {
+      margin-left: 10px;
+
+      img {
+        width: 40px !important;
+      }
+    }
+
+    .stopButton {
+      display: flex;
+      align-items: center;
+
+      img {
+        height: 38px;
+      }
+    }
+  }
+
+  .video-preview-wrapper {
+    position: relative;
+    width: 95%;
+    margin: auto;
+    aspect-ratio: 16/9;
+    background-color: #ededed;
+
+    .video-preview-overlay::before {
+      content: '';
+      position: absolute;
+      background: rgba(0, 0, 0, 0.7);
+      border-radius: 5px;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+    }
+
+    .cam-only-class {
+      width: 100vh;
+      margin: auto;
+    }
+
+    .recording-paused-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      width: 100%;
+      height: 100px;
+      max-width: 500px;
+      margin: auto;
+      font-size: 3rem;
+      font-weight: 500;
+      color: white;
+      z-index: 1;
+    }
+  }
+}

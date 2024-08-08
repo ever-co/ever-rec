@@ -1,0 +1,32 @@
+/* width */
+.toolssubpanel {
+  padding: 20px;
+  color: black;
+  border-radius: 10px;
+  background-color: #e9e7f0;
+  background-image: radial-gradient(
+      at 47% 83%,
+      rgb(211, 205, 248) 0,
+      transparent 59%
+    ),
+    radial-gradient(at 82% 65%, hsl(253.33, 23%, 92%) 0, transparent 55%);
+    -webkit-box-shadow: inset 0px 22px 10px -15px #FFFFFF; 
+    box-shadow: inset 0px 22px 10px -15px #FFFFFF;
+  
+}
+
+.toolssubpanel::-webkit-scrollbar {
+  width: 8px;
+}
+
+/* Track */
+.toolssubpanel::-webkit-scrollbar-track {
+  background: #ebebeb;
+  border-radius: 5px;
+}
+
+/* Handle */
+.toolssubpanel::-webkit-scrollbar-thumb {
+  background: #5b4dbe;
+  border-radius: 3px 0px 0px 3px;
+}

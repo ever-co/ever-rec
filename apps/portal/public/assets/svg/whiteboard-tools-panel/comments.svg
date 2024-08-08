@@ -1,0 +1,6 @@
+﻿
+<svg  width="16px" height="16px" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+  <g transform="matrix(1 0 0 1 -16 -16 )">
+    <path d="M 16 1.6  C 16 0.7199999809265136  15.280000019073487 0  14.4 0  C 14.4 0  1.6 0  1.6 0  C 0.7199999809265136 0  0 0.7199999809265136  0 1.6  C 0 1.6  0 16  0 16  L 3.2 12.8  C 3.2 12.8  14.4 12.8  14.4 12.8  C 15.280000019073487 12.8  16 12.080000019073486  16 11.2  C 16 11.2  16 1.6  16 1.6  Z M 14.4 1.6  L 14.4 11  L 3.2 11  L 1.6 12.8  L 1.6 1.6  L 14.4 1.6  Z " fill-rule="nonzero" fill="currentColor"  stroke="none" transform="matrix(1 0 0 1 16 16 )" />
+  </g>
+</svg>

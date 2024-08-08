@@ -1,0 +1,177 @@
+.appContainer {
+  min-height: calc(100vh - 5rem);
+  background: radial-gradient(
+    ellipse at 25% 92%,
+    rgba(101, 99, 255, 0.35) 0%,
+    rgba(236, 234, 244, 0.4) 42%,
+    rgba(236, 234, 244, 0.7) 100%
+  );
+}
+
+.comingSoon {
+  text-align: center;
+  padding: 20px;
+  & > h1 {
+    font-size: 20px;
+  }
+}
+
+.containerImageAction {
+  background: #f5f4f7 !important;
+  transition: background-color 0.3s ease;
+
+  & .innerCircle {
+    background: #d8d8d8 !important;
+    transition: background-color 0.3s ease;
+    border: 1px solid white;
+  }
+
+  &:hover {
+    background: #d8d8d8 !important;
+
+    & .innerCircle {
+      background: #f5f4f7 !important;
+    }
+  }
+}
+
+.imageWrapper {
+  background: radial-gradient(
+    ellipse at 50% 100%,
+    rgba(163, 132, 252, 0.5) 0%,
+    rgba(236, 234, 244, 0.4) 44%,
+    rgba(236, 234, 244, 0.4) 100%
+  );
+}
+
+.cloudProvidersWrapper {
+  border-radius: 5px;
+  overflow: hidden;
+  display: flex;
+  position: relative;
+  width: 100%;
+  height: 51px;
+
+  .providerText,
+  .deleteDriveItemBtn {
+    width: 0;
+    opacity: 0;
+  }
+
+  .hoveredHidden {
+    min-width: 0 !important;
+    width: 0 !important;
+    opacity: 0;
+    z-index: 1;
+    visibility: hidden;
+    transition: all 0.2s ease-in-out;
+  }
+
+  .hoveredActive {
+    width: 100% !important;
+    min-width: 100% !important;
+    display: flex;
+    z-index: 10;
+    visibility: visible;
+    opacity: 1;
+    transition: all 0.2s ease-in-out;
+
+    & .providerText {
+      width: 85%;
+      opacity: 1;
+      transition: opacity 0.2s ease-in;
+      margin-left: 10px;
+      color: white;
+    }
+
+    & .deleteDriveItemBtn {
+      width: 15%;
+      opacity: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: 2px;
+      background: #d32f2f;
+      transition: opacity 0.2s ease-in;
+      border-top-left-radius: 0px;
+      border-bottom-left-radius: 0px;
+    }
+  }
+
+  .cloudProviderButton {
+    width: 50%;
+    min-width: 50%;
+    transition: all 0.2s ease-in-out;
+
+    & .openImageText {
+      white-space: nowrap;
+    }
+  }
+}
+
+.appButton {
+  width: 100% !important;
+  height: 100% !important;
+  display: flex !important;
+  justify-content: center !important;
+  position: relative;
+  align-items: center;
+  background: #5b4dbe;
+}
+
+.svgWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &.loadingSpinner {
+    width: 25px;
+    height: 25px;
+  }
+}
+
+.moveToFolder {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f5f4f7;
+  border-radius: 5px;
+  color: #9b9b9b;
+  padding-left: 25px;
+  padding-right: 25px;
+  cursor: pointer;
+  margin-top: 10px;
+  font-family: 'Roboto', sans-serif;
+  font-style: normal;
+  height: 60px;
+
+  & .moveToFolderInner {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+  }
+}
+
+.driveButtonWrapper {
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+  display: flex;
+}
+
+.generateLink {
+  text-align: center;
+  height: 51px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.localAppSpinnerWrapper {
+  width: 25px;
+  height: 25px;
+  .localAppSpinner {
+    width: 80%;
+    height: 80%;
+  }
+}

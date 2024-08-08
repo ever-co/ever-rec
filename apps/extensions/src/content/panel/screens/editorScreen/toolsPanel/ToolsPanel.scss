@@ -1,0 +1,64 @@
+.rec {
+  .toolbtn-3d {
+    border-radius: 24px;
+    background: linear-gradient(145deg, #d4d2db, #fbf9ff);
+    box-shadow: 0px 3px 7px #929097, -3px -3px 7px #ffffff;
+    margin-bottom: 5px !important;
+    border: 3px solid rgb(247, 247, 247) !important;
+    padding: 0px !important;
+  }
+
+  .toolbtn-flat {
+    user-select: none;
+    border-radius: 50px;
+    margin-bottom: 5px !important;
+    border: 2px solid rgb(255, 255, 255) !important;
+    padding: 3px !important;
+    transition: 0.3s;
+    &:hover {
+      transition: 0.3s ease-in-out;
+      background: linear-gradient(145deg, #cdbbff, #cdbbff);
+    }
+  }
+
+  .toolbtn-flat-small {
+    user-select: none;
+    border-radius: 50px;
+    background-color: #eceaf4;
+    border: 1px solid rgb(255, 255, 255) !important;
+    transition: 0.3s;
+    height: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    &:hover {
+      transition: 0.3s ease-in-out;
+      background: linear-gradient(145deg, #e4daff, #e4daff);
+    }
+  }
+  .tool-box-start {
+    background-color: #e5e4ed;
+    background-image: radial-gradient(
+        at 50% 53%,
+        rgba(132, 120, 242, 0.623) 0,
+        transparent 75%
+      ),
+      radial-gradient(at 82% 65%, hsl(246.67, 20%, 91%) 0, transparent 55%);
+  }
+  .tool-box-end {
+    border-top: 1px solid rgb(202, 202, 202);
+    -webkit-box-shadow: inset 0px 24px 7px -19px #ffffff;
+    box-shadow: inset 0px 24px 7px -19px #ffffff;
+  }
+
+  .tools-panel-wrapper {
+    width: 6rem;
+    top: 2.5rem;
+  }
+  @media screen and (max-height: 860px) {
+    .tools-panel-wrapper {
+      width: 5rem;
+      top: 10px;
+    }
+  }
+}

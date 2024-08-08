@@ -1,0 +1,3 @@
+export const SET_WHITEBOARDS = 'SET_WHITEBOARDS';
+export const ADD_WHITEBOARD = 'ADD_WHITEBOARD';
+export const SET_LOADING = 'SET_LOADING';
