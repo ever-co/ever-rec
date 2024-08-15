@@ -1,0 +1,12 @@
+{
+  "name": "@ever-rec/stylelint-config",
+  "version": "1.0.0",
+  "description": "Shared Stylelint configuration",
+  "main": "stylelint.shared.json",
+  "dependencies": {
+    "stylelint": "^14.0.0",
+    "stylelint-config-standard": "^24.0.0",
+    "stylelint-config-prettier": "^8.0.2"
+  },
+  "license": "MIT"
+}

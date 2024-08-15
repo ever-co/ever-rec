@@ -1,0 +1,16 @@
+{
+  "extends": [
+    "./react.json",
+    "plugin:@next/next/recommended",
+  ],
+  "rules": {
+    "@next/next/no-html-link-for-pages": "off"
+  },
+  "ignorePatterns": [
+    "node_modules/",
+    "dist/",
+    "build/",
+    ".next/",
+    "public/"
+  ]
+}

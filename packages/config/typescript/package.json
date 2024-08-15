@@ -1,0 +1,10 @@
+{
+  "name": "@ever-rec/typescript-config",
+  "version": "1.0.0",
+  "description": "Shared TypeScript configurations for different environments",
+  "main": "tsconfig.shared.json",
+  "peerDependencies": {
+    "typescript": "^4.5.4"
+  },
+  "license": "MIT"
+}

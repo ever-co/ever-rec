@@ -1,0 +1,10 @@
+{
+  "name": "@ever-rec/prettier-config",
+  "version": "1.0.0",
+  "description": "Shared Prettier configuration",
+  "main": "prettier.shared.json",
+  "dependencies": {
+    "prettier": "^2.4.1"
+  },
+  "license": "MIT"
+}

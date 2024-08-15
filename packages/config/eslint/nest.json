@@ -1,0 +1,17 @@
+{
+  "extends": [
+    "./node.json"
+  ],
+  "rules": {
+    "import/no-unresolved": "off",
+    "import/no-extraneous-dependencies": "off"
+  },
+  "ignorePatterns": [
+    "node_modules/",
+    "dist/",
+    "build/",
+    "logs/",
+    "coverage/",
+    "src/**/*.spec.ts"
+  ]
+}

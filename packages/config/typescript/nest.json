@@ -1,0 +1,6 @@
+{
+  "extends": "./node.json",
+  "compilerOptions": {
+  },
+  "include": ["src/**/*"]
+}
