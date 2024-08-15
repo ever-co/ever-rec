@@ -6,10 +6,5 @@
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "baseUrl": "../../",
-    "paths": {
-      "@/*": ["packages/*/src"]
-    }
-  },
-  "include": ["packages/**/*"]
+  }
 }

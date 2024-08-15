@@ -7,7 +7,7 @@
   "scripts": {
     "lint": "eslint ."
   },
-  "dependencies": {
+  "devDependencies": {
     "@ever-rec/typescript-config": "*",
     "eslint": "^9.9.0",
     "eslint-config-prettier": "^8.3.0",
