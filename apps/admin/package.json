@@ -2,5 +2,9 @@
   "name": "admin",
   "version": "1.0.0",
   "main": "index.js",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@ever-rec/typescript-config": "*",
+    "@ever-rec/eslint-config": "*"
+  }
 }
