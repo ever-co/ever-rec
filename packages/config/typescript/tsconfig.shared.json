@@ -5,6 +5,11 @@
     "lib": ["DOM", "ESNext"],
     "strict": true,
     "esModuleInterop": true,
-    "skipLibCheck": true
-  }
+    "skipLibCheck": true,
+    "baseUrl": "../../",
+    "paths": {
+      "@/*": ["packages/*/src"]
+    }
+  },
+  "include": ["packages/**/*"]
 }
