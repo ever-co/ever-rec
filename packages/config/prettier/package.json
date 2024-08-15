@@ -1,6 +1,7 @@
 {
   "name": "@ever-rec/prettier-config",
   "version": "1.0.0",
+  "private": true,
   "description": "Shared Prettier configuration",
   "main": "prettier.shared.json",
   "dependencies": {

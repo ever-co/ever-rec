@@ -1,6 +1,7 @@
 {
   "name": "@ever-rec/stylelint-config",
   "version": "1.0.0",
+  "private": true,
   "description": "Shared Stylelint configuration",
   "main": "stylelint.shared.json",
   "dependencies": {

@@ -56,15 +56,11 @@
 		"dep-graph": "nx dep-graph",
 		"help": "nx help"
 	},
-	"workspaces": {
-		"packages": [
-			"libs/*",
-			"apps/*",
-			"packages/*",
-			"tools"
-		],
-		"nohoist": []
-	},
+	"workspaces": [
+    "apps/*",
+    "packages/*",
+    "packages/config/*"
+  ],
 	"devDependencies": {
 		"husky": "^9.0.11",
 		"prettier": "^3.2.5",

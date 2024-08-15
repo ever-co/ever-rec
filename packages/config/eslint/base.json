@@ -8,7 +8,7 @@
     "eslint:recommended",
     "plugin:prettier/recommended",
     "@ever-rec/typescript-config",
-    "eslint-config-turbo"
+    "turbo"
   ],
   "rules": {
     "no-console": "warn",
