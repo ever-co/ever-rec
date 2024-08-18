@@ -35,6 +35,8 @@
     "release": "npm run build:prod && copy \".env.prod\" \"build/prod/.env\""
   },
   "devDependencies": {
+    "@ever-rec/eslint-config": "*",
+    "@ever-rec/typescript-config": "*",
     "@babel/core": "^7.13.10",
     "@babel/plugin-transform-runtime": "^7.13.10",
     "@babel/preset-env": "^7.13.12",

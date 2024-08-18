@@ -1,24 +1,9 @@
 {
-  "compilerOptions": {
-    "target": "es5",
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "skipLibCheck": true,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "strict": true,
-    "forceConsistentCasingInFileNames": true,
-    "noFallthroughCasesInSwitch": true,
-    "module": "esnext",
-    "moduleResolution": "node",
-    "resolveJsonModule": true,
-    "noEmit": false,
-    "jsx": "react-jsx",
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["src/*"]
-    }
-  },
+  "extends": "@ever-rec/typescript-config/react.json",
+  "exclude": ["build", "icons", "images", "node_modules"],
   "typeRoots": ["./src/@types", "node_modules/@types"],
-  "include": ["src/**/*.ts", "src/**/*.tsx", "./src/**/*.svg"],
-  "exclude": ["build", "icons", "images", "node_modules"]
+  "baseUrl": ".",
+  "paths": {
+    "@/*": ["src/*"]
+  }
 }

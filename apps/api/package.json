@@ -24,6 +24,8 @@
     "babel-preset-jest": "^27.4.5"
   },
   "dependencies": {
+    "@ever-rec/eslint-config": "*",
+    "@ever-rec/typescript-config": "*",
     "@api.video/nodejs-client": "^2.2.8",
     "@mux/mux-node": "^6.1.0",
     "@nestjs/common": "^8.0.0",

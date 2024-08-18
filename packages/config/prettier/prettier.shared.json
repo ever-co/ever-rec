@@ -1,11 +1,27 @@
 {
-  "printWidth": 80,
-  "tabWidth": 2,
-  "useTabs": false,
-  "semi": true,
+  "printWidth": 120,
   "singleQuote": true,
-  "trailingComma": "es5",
-  "bracketSpacing": true,
+  "semi": true,
+  "useTabs": true,
+  "tabWidth": 4,
   "arrowParens": "always",
-  "endOfLine": "lf"
+  "trailingComma": "none",
+  "quoteProps": "as-needed",
+  "trimTrailingWhitespace": true,
+  "overrides": [
+    {
+      "files": "*.scss",
+      "options": {
+        "useTabs": false,
+        "tabWidth": 2
+      }
+    },
+    {
+      "files": "*.yml",
+      "options": {
+        "useTabs": false,
+        "tabWidth": 2
+      }
+    }
+  ]
 }
