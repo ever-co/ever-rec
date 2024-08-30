@@ -342,7 +342,7 @@ export class EditorService {
 
     if (emojiOptions.url !== '') {
       toPng({ width: 600, height: 600, svg: emojiOptions.url })
-        .then((pngUrl) => {
+        .then((pngUrl: string | undefined) => {
           pngUrl &&
             Konva.Image.fromURL(pngUrl, (imageNode: Konva.Image) => {
               imageNode.setAttrs(drawOptions);
@@ -350,7 +350,7 @@ export class EditorService {
               if (stage) stage.container().style.cursor = `url(${emoji}), auto`;
             });
         })
-        .catch((err) => {
+        .catch((err: any) => {
           console.log(err);
         });
     } else {
@@ -384,7 +384,7 @@ export class EditorService {
     const cursortext: Text = new Text(baseMarkerTextOptions);
     cursortext?.setAttrs({
       id: 'markerText',
-      x: stage.getRelativePointerPosition()?.x + 10,
+      x: (stage.getRelativePointerPosition()?.x ?? 0) + 10,
       y: stage.getRelativePointerPosition()?.y,
       scale: {
         x: stageScale / 100,
@@ -398,7 +398,7 @@ export class EditorService {
     const cursornumbers: Text = new Text(baseMarkerTextOptions);
     cursornumbers.setAttrs({
       id: 'markerNumbers',
-      x: stage.getRelativePointerPosition()?.x + 7,
+      x: (stage.getRelativePointerPosition()?.x ?? 0) + 7,
       y: stage.getRelativePointerPosition()?.y,
       scale: {
         x: stageScale / 100,
@@ -578,7 +578,7 @@ export class EditorService {
   static checkShapeType(
     shape: any,
     setCurrentShape: (shape: any) => void,
-    dispatch: Function,
+    dispatch: (...args: any[]) => any,
     shapeGroupOptions: IShapeGroupOptions,
     setShapeGroupOptions: (
       value: React.SetStateAction<IShapeGroupOptions>,
@@ -614,14 +614,14 @@ export class EditorService {
       setCurrentShape(shape);
 
     if (
-      shape.attrs.shapeType == 'heart' ||
-      shape.attrs.shapeType == 'elipse' ||
-      shape.attrs.shapeType == 'rect' ||
-      shape.attrs.shapeType == 'star' ||
-      shape.attrs.shapeType == 'triangle' ||
-      shape.attrs.shapeType == 'square' ||
-      shape.attrs.shapeType == 'comment' ||
-      shape.attrs.shapeType == 'blob'
+      shape.attrs.shapeType === 'heart' ||
+      shape.attrs.shapeType === 'elipse' ||
+      shape.attrs.shapeType === 'rect' ||
+      shape.attrs.shapeType === 'star' ||
+      shape.attrs.shapeType === 'triangle' ||
+      shape.attrs.shapeType === 'square' ||
+      shape.attrs.shapeType === 'comment' ||
+      shape.attrs.shapeType === 'blob'
     ) {
       dispatch(PanelAC.setCurrentTool({ name: 'figure' }));
       const currentShapeGroupOptions = {
@@ -637,10 +637,10 @@ export class EditorService {
         setShapeGroupOptions(currentShapeGroupOptions);
       }
     }
-    if (shape.attrs.shapeType == 'emoji') {
+    if (shape.attrs.shapeType === 'emoji') {
       dispatch(PanelAC.setCurrentTool({ name: 'emoji' }));
     }
-    if (shape.attrs.shapeType == 'conversation') {
+    if (shape.attrs.shapeType === 'conversation') {
       dispatch(PanelAC.setCurrentTool({ name: 'conversation' }));
 
       const currentConversationOptions = {
@@ -666,7 +666,7 @@ export class EditorService {
       }
     }
 
-    if (shape.attrs.shapeType == 'marker') {
+    if (shape.attrs.shapeType === 'marker') {
       dispatch(PanelAC.setCurrentTool({ name: 'marker' }));
 
       const currentMarkerOptions = {
@@ -686,7 +686,7 @@ export class EditorService {
       }
     }
 
-    if (shape.attrs.shapeType == 'comments') {
+    if (shape.attrs.shapeType === 'comments') {
       dispatch(PanelAC.setCurrentTool({ name: 'comments' }));
 
       const currentCommentsOptions = {
@@ -707,10 +707,10 @@ export class EditorService {
       }
     }
 
-    if (shape.attrs.shapeType == 'blur') {
+    if (shape.attrs.shapeType === 'blur') {
       dispatch(PanelAC.setCurrentTool({ name: 'blur' }));
     }
-    if (shape.attrs.shapeType == 'free') {
+    if (shape.attrs.shapeType === 'free') {
       dispatch(PanelAC.setCurrentTool({ name: 'free' }));
       const currentPencilGroupOptions = {
         ...pencilGroupOptions,
@@ -724,7 +724,7 @@ export class EditorService {
         setPencilGroupOptions(currentPencilGroupOptions);
       }
     }
-    if (shape.attrs.shapeType == 'text') {
+    if (shape.attrs.shapeType === 'text') {
       dispatch(PanelAC.setCurrentTool({ name: 'text' }));
       const currentTextOptions = {
         ...textOptions,
@@ -744,10 +744,10 @@ export class EditorService {
       }
     }
     if (
-      shape.attrs.shapeType == 'arrow' ||
-      shape.attrs.shapeType == 'line' ||
-      shape.attrs.shapeType == 'direction' ||
-      shape.attrs.shapeType == 'curvaArrow'
+      shape.attrs.shapeType === 'arrow' ||
+      shape.attrs.shapeType === 'line' ||
+      shape.attrs.shapeType === 'direction' ||
+      shape.attrs.shapeType === 'curvaArrow'
     ) {
       dispatch(PanelAC.setCurrentTool({ name: 'arrow' }));
       const currentArrowGroupOptions = {
@@ -844,8 +844,8 @@ export class EditorService {
       }
 
       if (markers.data) {
-        const commentsArray: IMarkerComment[] = markers.data.reduce(
-          (acc, marker) => {
+        const commentsArray = markers.data.reduce(
+          (acc: string | any[], marker: { comments: { [x: string]: any } }) => {
             // Check if marker has comments before processing
             if (marker?.comments) {
               const markerComments: any = Object.keys(marker.comments).map(
@@ -859,7 +859,7 @@ export class EditorService {
             return acc; // If no comments, return the accumulator as is
           },
           [],
-        );
+        ) as IMarkerComment[];
 
         // Use the provided state updater function to set the comments in the state
         addComment(commentsArray);

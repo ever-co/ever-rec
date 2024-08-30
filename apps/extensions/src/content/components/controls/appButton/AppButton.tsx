@@ -56,8 +56,8 @@ const AppButton: React.FC<AppInputProps> = ({
     return disabled
       ? 'tw-opacity-50'
       : outlined
-      ? 'hover:tw-bg-opacity-20'
-      : 'hover:tw-bg-opacity-100';
+        ? 'hover:tw-bg-opacity-20'
+        : 'hover:tw-bg-opacity-100';
   };
 
   const clickHandler = (e: MouseEvent<HTMLDivElement>): void => {

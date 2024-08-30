@@ -10,7 +10,7 @@ export class SlackBoltService {
   private baseURL: string;
   private oauthRedirect: string;
   private signingSecrete: string;
-  private redirectUriPath: string = '/api/v1/slack/installation';
+  private redirectUriPath = '/api/v1/slack/installation';
   private boltApp: App;
 
   constructor(private readonly configService: ConfigService) {
@@ -18,7 +18,7 @@ export class SlackBoltService {
     this.clientSecrete = this.configService.get<string>('SLACK_CLIENT_SECRET');
     this.baseURL = this.configService.get<string>('API_BASE_URL');
     this.signingSecrete = this.configService.get<string>(
-      'SLACK_SIGNING_SECRET',
+      'SLACK_SIGNING_SECRET'
     );
     this.oauthRedirect = `${this.baseURL}${this.redirectUriPath}`;
 
@@ -57,7 +57,7 @@ export class SlackBoltService {
 
       if (users && users.members && users.members.length) {
         members = users.members
-          .map((item) => {
+          .map(item => {
             return !item.deleted
               ? {
                   id: item.id,
@@ -65,7 +65,7 @@ export class SlackBoltService {
                 }
               : null;
           })
-          .filter((x) => x);
+          .filter(x => x);
       }
 
       if (
@@ -73,7 +73,7 @@ export class SlackBoltService {
         conversions.channels &&
         conversions.channels.length > 0
       ) {
-        channels = conversions.channels.map((item) => {
+        channels = conversions.channels.map(item => {
           return {
             id: item.id,
             name: item.name || null,
@@ -91,7 +91,7 @@ export class SlackBoltService {
     token: string,
     channel: string,
     text,
-    blocks: any,
+    blocks: any
   ) {
     try {
       const result = await this.boltApp.client.chat.postMessage({
@@ -130,7 +130,7 @@ export class SlackBoltService {
       }
     } else {
       throw new BadRequestException(
-        'Slack ClientId or ClientSecret not set correctly',
+        'Slack ClientId or ClientSecret not set correctly'
       );
     }
   }

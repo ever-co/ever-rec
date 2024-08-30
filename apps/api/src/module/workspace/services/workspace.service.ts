@@ -26,7 +26,7 @@ export class WorkspacesService {
 
   constructor(
     private readonly utilitiesService: WorkspaceUtilitiesService,
-    private readonly workspaceMembersService: WorkspaceMembersService,
+    private readonly workspaceMembersService: WorkspaceMembersService
   ) {
     this.config = {
       action: 'read',
@@ -35,7 +35,7 @@ export class WorkspacesService {
   }
 
   async getUserWorkspaces(
-    uid: string,
+    uid: string
   ): Promise<IDataResponse<IWorkspace[] | null>> {
     try {
       const db = admin.database();
@@ -55,7 +55,7 @@ export class WorkspacesService {
       // for listing available workspaces, their names etc. Files data will be loaded on demand for each workspace.
       const userWorkspaces = userVal.workspaceIds || [];
       userWorkspaces.forEach(
-        (id) =>
+        id =>
           id &&
           workspaces.push({
             ...workspacesVal[id],
@@ -63,14 +63,14 @@ export class WorkspacesService {
             videos: [],
             id: id,
             folders: parseCollectionToArray(workspacesVal[id].folders, true),
-          }),
+          })
       );
 
       return sendResponse<IWorkspace[]>(workspaces);
     } catch (e) {
       console.log(e);
       return sendError(
-        'Error while trying to fetch user workspaces. Please try again later.',
+        'Error while trying to fetch user workspaces. Please try again later.'
       );
     }
   }
@@ -79,7 +79,7 @@ export class WorkspacesService {
     uid: string,
     userName: string,
     userEmail: string,
-    workspaceName: string,
+    workspaceName: string
   ): Promise<IDataResponse<IWorkspace | null>> {
     try {
       const db = admin.database();
@@ -130,16 +130,16 @@ export class WorkspacesService {
   async getSingleWorkspace(
     uid: string,
     workspaceId: string,
-    folderId: string | false,
+    folderId: string | false
   ): Promise<
     IDataResponse<(IWorkspace & { favFolders: IFavoriteFolders }) | null>
   > {
     try {
       const { workspaceVal, db } = await this.utilitiesService.getWorkspaceById(
-        workspaceId,
+        workspaceId
       );
       let { value: favFolders } = await getDataFromDB<IFavoriteFolders>(
-        `users/${uid}/favoriteFolders`,
+        `users/${uid}/favoriteFolders`
       );
 
       if (favFolders) {
@@ -152,8 +152,8 @@ export class WorkspacesService {
       }
 
       const memberIds: { id: string }[] = [...workspaceVal.members];
-      const memberPromises = memberIds.map((memberObj) =>
-        this.utilitiesService.getShortUserData(memberObj.id),
+      const memberPromises = memberIds.map(memberObj =>
+        this.utilitiesService.getShortUserData(memberObj.id)
       );
       const members = await promiseAllSettled(memberPromises);
 
@@ -170,9 +170,9 @@ export class WorkspacesService {
       const mapNotFoundMembers = (
         item: IDbWorkspaceImageData | IDbWorkspaceVideoData,
         index: number,
-        itemType: ItemType,
+        itemType: ItemType
       ) => {
-        const foundMember = members.find((member) => item.uid === member.id);
+        const foundMember = members.find(member => item.uid === member.id);
 
         let newItem = { ...item };
         if (foundMember) {
@@ -190,26 +190,26 @@ export class WorkspacesService {
 
       const screenshots = parseCollectionToArray(workspaceVal.screenshots)
         .filter(
-          (data: IDbWorkspaceImageData) => data.parentId === parsedFolderId,
+          (data: IDbWorkspaceImageData) => data.parentId === parsedFolderId
         )
         .map((screenshot: IDbWorkspaceImageData, index: number) =>
-          mapNotFoundMembers(screenshot, index, 'image'),
+          mapNotFoundMembers(screenshot, index, 'image')
         );
 
       const videos = parseCollectionToArray(workspaceVal.videos)
         .filter(
-          (data: IDbWorkspaceVideoData) => data.parentId === parsedFolderId,
+          (data: IDbWorkspaceVideoData) => data.parentId === parsedFolderId
         )
         .map((video: IDbWorkspaceVideoData, index: number) =>
-          mapNotFoundMembers(video, index, 'video'),
+          mapNotFoundMembers(video, index, 'video')
         );
 
       //? Extra logic for item owners that are no longer in the workspace. (notFoundMembers)
-      const notFoundMembersPromises = notFoundMembers.map((memberObj) =>
-        this.utilitiesService.getShortUserData(memberObj.id),
+      const notFoundMembersPromises = notFoundMembers.map(memberObj =>
+        this.utilitiesService.getShortUserData(memberObj.id)
       );
       const outsideWorkspaceMembers = await promiseAllSettled(
-        notFoundMembersPromises,
+        notFoundMembersPromises
       );
       notFoundMembers.forEach((member, index) => {
         if (member.id !== outsideWorkspaceMembers[index].id) return;
@@ -250,7 +250,7 @@ export class WorkspacesService {
 
   async leaveWorkspace(
     uid: string,
-    workspaceId: string,
+    workspaceId: string
   ): Promise<IDataResponse<IWorkspace[] | null>> {
     try {
       const db = admin.database();
@@ -262,12 +262,12 @@ export class WorkspacesService {
 
       if (userVal) {
         const filteredWorkspaceMembers = parseCollectionToArray(
-          workspaceVal.members,
-        ).filter((x) => x.id !== uid);
+          workspaceVal.members
+        ).filter(x => x.id !== uid);
         const newWorkspaceTeams = parseCollectionToArray(
-          workspaceVal.teams,
-        ).map((x) => {
-          const newMembers = (x.members || []).filter((x) => x.id !== uid);
+          workspaceVal.teams
+        ).map(x => {
+          const newMembers = (x.members || []).filter(x => x.id !== uid);
 
           return {
             ...x,
@@ -275,16 +275,16 @@ export class WorkspacesService {
           };
         });
         const updatedWorkspaceFolders = parseCollectionToArray(
-          workspaceVal.folders,
+          workspaceVal.folders
         ).map((x: IWorkspaceFolder) => {
           if (x.access?.members) {
-            x.access.members = x.access.members.filter((y) => y.uid !== uid);
+            x.access.members = x.access.members.filter(y => y.uid !== uid);
           }
 
           return x;
         });
         const newUserWorkspaces = userVal.workspaceIds.filter(
-          (x) => x !== workspaceId,
+          x => x !== workspaceId
         );
 
         //TODO: should be decided if user images/videos/folders should be removed from workspace
@@ -302,14 +302,14 @@ export class WorkspacesService {
     } catch (e) {
       console.log(e);
       return sendError(
-        e.message || 'Error while trying to leave workspace. Please try again.',
+        e.message || 'Error while trying to leave workspace. Please try again.'
       );
     }
   }
 
   async deleteWorkspace(
     uid: string,
-    workspaceId: string,
+    workspaceId: string
   ): Promise<IDataResponse<IWorkspace[] | null>> {
     const bucket = admin.storage().bucket();
     const db = admin.database();
@@ -324,7 +324,7 @@ export class WorkspacesService {
         { id: workspaceVal.admin, canManageFolders: true },
       ];
       await Promise.allSettled(
-        workspaceMembers.map(async (x) => {
+        workspaceMembers.map(async x => {
           try {
             const dbMemberRef = db.ref(`users/${x.id}`);
             const dbMemberSnap = await dbMemberRef.get();
@@ -332,7 +332,7 @@ export class WorkspacesService {
 
             if (dbMemberVal) {
               const newWorkspaceIds = dbMemberVal.workspaceIds.filter(
-                (y) => y !== workspaceId,
+                y => y !== workspaceId
               );
 
               await dbMemberRef.update({
@@ -346,14 +346,14 @@ export class WorkspacesService {
             console.log(e);
             return undefined;
           }
-        }),
+        })
       );
 
       // Remove existing invite link for workspace
       const inviteLinkId = workspaceVal?.inviteLinkId;
       if (inviteLinkId) {
         const inviteRef = db.ref(`workspaceInvites/${inviteLinkId}`);
-        inviteRef.remove().catch((error) => {
+        inviteRef.remove().catch(error => {
           console.log(error);
         });
       }
@@ -365,7 +365,7 @@ export class WorkspacesService {
       .deleteFiles({
         prefix: `workspaces/${workspaceId}/`,
       })
-      .catch((error) => {
+      .catch(error => {
         console.log('Error deleting files from workspace:', error);
       });
 
@@ -375,7 +375,7 @@ export class WorkspacesService {
   async renameWorkspace(
     uid: string,
     workspaceId: string,
-    newName: string,
+    newName: string
   ): Promise<IDataResponse<IWorkspace | null>> {
     try {
       const db = admin.database();
@@ -395,21 +395,21 @@ export class WorkspacesService {
 
   async changeWorkspaceAvatar(
     workspaceId: string,
-    file: any,
+    file: any
   ): Promise<IDataResponse<string>> {
     try {
       if (file.size > 30000) {
         return sendError('File size too big.');
       }
       const { workspaceRef } = await this.utilitiesService.getWorkspaceById(
-        workspaceId,
+        workspaceId
       );
       const { file: uploadedAvatar } =
         await this.utilitiesService.uploadImageInBucket(
           file,
           workspaceId,
           undefined,
-          `workspaces/${workspaceId}/avatar`,
+          `workspaces/${workspaceId}/avatar`
         );
       const downloadUrl = (
         await uploadedAvatar.getSignedUrl({
@@ -428,18 +428,18 @@ export class WorkspacesService {
 
   async changeWorkspaceThumbnail(
     workspaceId: string,
-    file: any,
+    file: any
   ): Promise<IDataResponse<string>> {
     try {
       const { workspaceRef } = await this.utilitiesService.getWorkspaceById(
-        workspaceId,
+        workspaceId
       );
       const { file: uploadedThumbnail } =
         await this.utilitiesService.uploadImageInBucket(
           file,
           workspaceId,
           undefined,
-          `workspaces/${workspaceId}/thumbnail`,
+          `workspaces/${workspaceId}/thumbnail`
         );
       const downloadUrl = (
         await uploadedThumbnail.getSignedUrl({

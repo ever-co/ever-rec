@@ -130,7 +130,6 @@ const CreateFolderModal: React.FC<ICreateFolderModalProps> = ({
     onClose();
   };
 
-
   return (
     <Modal
       visible={visible}

@@ -27,31 +27,52 @@ const StrokeWidthSelector: React.FC<IStrokeWidthSelectorProps> = ({
         onChange={onChange}
         className={classNames('stroke-selector', styles.mainSelector)}
         suffixIcon={
-          <AppSvg
-            path="/common/widthselector.svg"
-            className={styles.black}
-          />
+          <AppSvg path="/common/widthselector.svg" className={styles.black} />
         }
       >
         {tool === 'roller'
           ? rollerwidths.map((w) => (
               <Select.Option key={w} value={w}>
-                <div className={classNames('app-selectable', 'title', styles.flexContainer)}>
-                  <div className={classNames('app-selectable', styles.wrapper)}>{w} px</div>
+                <div
+                  className={classNames(
+                    'app-selectable',
+                    'title',
+                    styles.flexContainer,
+                  )}
+                >
+                  <div className={classNames('app-selectable', styles.wrapper)}>
+                    {w} px
+                  </div>
                   <div
                     style={{ height: `${w > 8 ? w / 3 : w / 2}px` }}
-                    className={classNames('app-selectable', 'bottom-line', styles.select)}
+                    className={classNames(
+                      'app-selectable',
+                      'bottom-line',
+                      styles.select,
+                    )}
                   ></div>
                 </div>
               </Select.Option>
             ))
           : pencilwidths.map((w) => (
               <Select.Option key={w} value={w}>
-                <div className={classNames('app-selectable', 'title', styles.flexContainer)}>
-                  <div className={classNames('app-selectable', styles.wrapper)}>{w} px</div>
+                <div
+                  className={classNames(
+                    'app-selectable',
+                    'title',
+                    styles.flexContainer,
+                  )}
+                >
+                  <div className={classNames('app-selectable', styles.wrapper)}>
+                    {w} px
+                  </div>
                   <div
                     style={{ height: `${w}px` }}
-                    className={classNames('app-selectable', 'bottom-line', styles.select)}
+                    className={classNames(
+                      'app-selectable',
+                      'bottom-line',
+                      styles.select,
+                    )}
                   ></div>
                 </div>
               </Select.Option>

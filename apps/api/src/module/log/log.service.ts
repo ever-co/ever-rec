@@ -10,7 +10,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class LogService {
-  constructor(private eventEmitter: EventEmitter2) { }
+  constructor(private eventEmitter: EventEmitter2) {}
 
   async deleteAppLog(ip: string): Promise<void> {
     const timestamp = moment().utc().valueOf();
@@ -27,9 +27,8 @@ export class LogService {
     const { event } = req.body;
     await this.eventEmitter.emit('analytics.track', event, {
       userId: req.user?.id,
-      ...req.body
+      ...req.body,
     });
     return true;
   }
-
 }

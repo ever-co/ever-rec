@@ -48,22 +48,22 @@ export class UniqueViewsSharedService {
       const collection = itemType === 'image' ? 'screenshots' : 'videos';
 
       const imageRef = db.ref(
-        `${rootDb}/${parentCollection}/${collection}/${itemData.id}`,
+        `${rootDb}/${parentCollection}/${collection}/${itemData.id}`
       );
 
       const imageSnapshot = await imageRef.get();
       const itemValues = imageSnapshot.val();
 
       const uniqueViewsDb: IUniqueView[] = formatDataToArray(
-        itemValues?.uniqueViews,
+        itemValues?.uniqueViews
       );
       const viewsDb: IView[] = formatDataToArray(itemValues?.views);
       let views = viewsDb.length;
 
       // Helper conditions
       const isWatchedAlreadyByUser =
-        user && uniqueViewsDb.some((viewer) => user.id === viewer.id);
-      const isWatchedAlreadyByIp = viewsDb.some((viewer) => viewer.ip === ip);
+        user && uniqueViewsDb.some(viewer => user.id === viewer.id);
+      const isWatchedAlreadyByIp = viewsDb.some(viewer => viewer.ip === ip);
       const isOwnVideo = user && user.id === itemValues.uid;
 
       if (!user) {
@@ -134,14 +134,14 @@ export class UniqueViewsSharedService {
       const collection = itemType === 'image' ? 'screenshots' : 'videos';
 
       const imageRef = db.ref(
-        `${rootDb}/${parentCollection}/${collection}/${itemData.id}`,
+        `${rootDb}/${parentCollection}/${collection}/${itemData.id}`
       );
 
       const imageSnapshot = await imageRef.get();
       const imageData = imageSnapshot.val();
 
       const uniqueViewsDb: IUniqueView[] = formatDataToArray(
-        imageData?.uniqueViews,
+        imageData?.uniqueViews
       );
 
       return sendResponse(uniqueViewsDb);

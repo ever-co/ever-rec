@@ -635,8 +635,8 @@ sm:tw-mr-13px lg:tw-mr-5px xl:tw-mr-13px"
                     {editCommentState.isBeingEdited
                       ? 'Update'
                       : localLoaderState
-                      ? 'Posting...'
-                      : 'Comment'}
+                        ? 'Posting...'
+                        : 'Comment'}
                   </button>
                   <div
                     onClick={cancelComment}

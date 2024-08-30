@@ -1,22 +1,22 @@
-import { ItemActionsEnum } from "app/enums/itemActionsEnum";
+import { ItemActionsEnum } from 'app/enums/itemActionsEnum';
 
 export interface ITrelloData {
-    boards: any[];
+  boards: any[];
 }
 
 export interface IShareItemSelected {
-    id?: string | null;
-    type?: string | null;
-    provider: ItemActionsEnum | null;
-    item?: any;
+  id?: string | null;
+  type?: string | null;
+  provider: ItemActionsEnum | null;
+  item?: any;
 }
 
 export interface IAtlassianSaveItem {
-    itemId: string,
-    itemType: string,
-    projectId: string,
-    issueType: string,
-    description: string,
-    title: string,
-    resourceId?: string,
+  itemId: string;
+  itemType: string;
+  projectId: string;
+  issueType: string;
+  description: string;
+  title: string;
+  resourceId?: string;
 }

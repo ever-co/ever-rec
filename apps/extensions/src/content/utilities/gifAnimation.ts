@@ -7,7 +7,6 @@ import { saveAs } from 'file-saver';
 import getPercentageFromRange from './scripts/getPercentageFromRange';
 import sendBadgeTextMessagePort from './scripts/sendBadgeTextMessagePort';
 
-
 let bitmaps: ImageBitmap[] = [];
 let mediaStreamTrack: MediaStreamTrack | null = null;
 export async function captureFrame(mediaStream: MediaStream) {

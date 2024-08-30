@@ -23,7 +23,7 @@ export class WhiteboardService {
     uid: string,
     userName: string,
     userEmail: string,
-    whiteboardName: string,
+    whiteboardName: string
   ): Promise<IDataResponse<IWhiteboard | null>> {
     try {
       const db = admin.database();
@@ -71,7 +71,7 @@ export class WhiteboardService {
   }
 
   async getUserWhiteboards(
-    uid: string,
+    uid: string
   ): Promise<IDataResponse<IWhiteboard[] | null>> {
     try {
       const db = admin.database();
@@ -79,7 +79,7 @@ export class WhiteboardService {
       if (!whiteboardIds) return;
 
       // Iterate over whiteboardIds as keys and get data
-      const whiteboardPromises = whiteboardIds.map(async (id) => {
+      const whiteboardPromises = whiteboardIds.map(async id => {
         const whiteboardsRef = db.ref(`${this.rootDb}/${id}`);
         const whiteboardsSnap = await whiteboardsRef.get();
         const whiteboardsVal: IWhiteboard = whiteboardsSnap.val();
@@ -88,21 +88,21 @@ export class WhiteboardService {
       });
 
       const whiteboards = await promiseAllSettled<IWhiteboard>(
-        whiteboardPromises,
+        whiteboardPromises
       );
 
       return sendResponse<IWhiteboard[]>(whiteboards);
     } catch (e) {
       console.log(e);
       return sendError(
-        'Error while trying to fetch user whiteboard. Please try again later.',
+        'Error while trying to fetch user whiteboard. Please try again later.'
       );
     }
   }
 
   async deleteWhiteboard(
     uid: string,
-    whiteboardId: string,
+    whiteboardId: string
   ): Promise<IDataResponse<IWhiteboard | null>> {
     try {
       const db = admin.database();
@@ -119,7 +119,7 @@ export class WhiteboardService {
         return sendError('Undefined whiteboard');
       }
 
-      const newWhiteboardIds = whiteboardIds.filter((y) => y !== whiteboardId);
+      const newWhiteboardIds = whiteboardIds.filter(y => y !== whiteboardId);
       await userRef.set(newWhiteboardIds);
 
       await whiteboardRef.remove();
@@ -137,7 +137,7 @@ export class WhiteboardService {
     trash: boolean,
     favorite: boolean,
     isPublic: boolean,
-    name?: string,
+    name?: string
   ): Promise<IDataResponse<IWhiteboard | null>> {
     try {
       if (whiteboardId === ':whiteboardId') {
@@ -163,14 +163,14 @@ export class WhiteboardService {
       return sendResponse<IWhiteboard>(whiteboardVal);
     } catch (e) {
       return sendError(
-        e.message || 'Error while trying to update whiteboard data.',
+        e.message || 'Error while trying to update whiteboard data.'
       );
     }
   }
 
   async getWhiteboardById(
     uid: string,
-    whiteboardId: string,
+    whiteboardId: string
   ): Promise<IDataResponse<IWhiteboard | null>> {
     try {
       const db = admin.database();
@@ -194,7 +194,7 @@ export class WhiteboardService {
   }
 
   async getWhiteboardByIdShared(
-    whiteboardId: string,
+    whiteboardId: string
   ): Promise<IDataResponse<IWhiteboard | null>> {
     try {
       const db = admin.database();

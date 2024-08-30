@@ -21,5 +21,5 @@ export const IsOptionalId = () =>
   applyDecorators(
     Transform(({ value }) => (value === 'false' ? false : value)),
     CanBe(false),
-    IsId(),
+    IsId()
   );

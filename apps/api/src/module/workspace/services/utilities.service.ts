@@ -45,13 +45,13 @@ export class WorkspaceUtilitiesService {
     const thumbnailExists = (
       await bucket
         .file(
-          `workspaces/${workspaceId}/screenshots/thumbnails/${fullFileName}`,
+          `workspaces/${workspaceId}/screenshots/thumbnails/${fullFileName}`
         )
         .exists()
     )[0];
     const imgRef = thumbnailExists
       ? bucket.file(
-          `workspaces/${workspaceId}/screenshots/thumbnails/${fullFileName}`,
+          `workspaces/${workspaceId}/screenshots/thumbnails/${fullFileName}`
         )
       : bucket.file(`workspaces/${workspaceId}/screenshots/${fullFileName}`);
 
@@ -83,13 +83,13 @@ export class WorkspaceUtilitiesService {
   changeFolderItemCountRecursive(
     folders: (IWorkspaceFolder | IDbFolder)[],
     parentId: string | false = false,
-    changeCount = 1,
+    changeCount = 1
   ) {
     if (parentId === false) {
       return parseCollectionToArray(folders);
     }
 
-    const parentIndex = folders.findIndex((x) => x.id === parentId);
+    const parentIndex = folders.findIndex(x => x.id === parentId);
     if (parentIndex !== -1) {
       folders[parentIndex] = {
         ...folders[parentIndex],
@@ -100,7 +100,7 @@ export class WorkspaceUtilitiesService {
       return this.changeFolderItemCountRecursive(
         folders,
         newParentId,
-        changeCount,
+        changeCount
       );
     } else {
       return this.changeFolderItemCountRecursive(folders, false);
@@ -113,7 +113,7 @@ export class WorkspaceUtilitiesService {
     folders: (IWorkspaceFolder | IDbFolder)[],
     folderIds: string[] | false = false,
     firstIteration = true,
-    deletedFolders: (IWorkspaceFolder | IDbFolder)[] = [],
+    deletedFolders: (IWorkspaceFolder | IDbFolder)[] = []
   ) {
     if (folderIds === false) {
       return {
@@ -124,9 +124,7 @@ export class WorkspaceUtilitiesService {
 
     // Remove the first folder
     if (firstIteration) {
-      const currentFolderIndex = folders.findIndex(
-        (x) => x.id === folderIds[0],
-      );
+      const currentFolderIndex = folders.findIndex(x => x.id === folderIds[0]);
 
       if (currentFolderIndex !== -1) {
         deletedFolders.push(folders[currentFolderIndex]);
@@ -137,18 +135,16 @@ export class WorkspaceUtilitiesService {
         folders,
         [folderIds[0]],
         false,
-        deletedFolders,
+        deletedFolders
       );
     }
 
     // Run recursion down each child tree
-    folderIds.forEach((folderId) => {
+    folderIds.forEach(folderId => {
       const childIndexes = indexesOf(folderId, 'parentId', folders);
 
       if (childIndexes.length !== 0) {
-        const newChildFolderIds = childIndexes.map(
-          (index) => folders[index].id,
-        );
+        const newChildFolderIds = childIndexes.map(index => folders[index].id);
 
         childIndexes.forEach((childIndex: number, index: number) => {
           if (index === 0) {
@@ -165,14 +161,14 @@ export class WorkspaceUtilitiesService {
           folders,
           newChildFolderIds,
           false,
-          deletedFolders,
+          deletedFolders
         );
       } else {
         return this.removeChildFoldersRecursive(
           folders,
           false,
           false,
-          deletedFolders,
+          deletedFolders
         );
       }
     });
@@ -181,7 +177,7 @@ export class WorkspaceUtilitiesService {
       folders,
       false,
       false,
-      deletedFolders,
+      deletedFolders
     );
   }
 
@@ -226,22 +222,22 @@ export class WorkspaceUtilitiesService {
     fileData: string | Express.Multer.File,
     workspaceId: string,
     fullFileName?: string,
-    filePath?: string,
+    filePath?: string
   ): Promise<any> {
     const bucket = admin.storage().bucket();
     const file = bucket.file(
-      filePath || `workspaces/${workspaceId}/screenshots/${fullFileName}`,
+      filePath || `workspaces/${workspaceId}/screenshots/${fullFileName}`
     );
     const thumbnail = bucket.file(
-      `workspaces/${workspaceId}/screenshots/thumbnails/${fullFileName}`,
+      `workspaces/${workspaceId}/screenshots/thumbnails/${fullFileName}`
     );
     let fileBuffer: Buffer;
 
     if (typeof fileData === 'string') {
-      const getBase64Data = (encoded) => {
+      const getBase64Data = encoded => {
         const base64EncodedString = encoded.replace(
           /^data:\w+\/\w+;base64,/,
-          '',
+          ''
         );
         return base64EncodedString;
       };
@@ -272,7 +268,7 @@ export class WorkspaceUtilitiesService {
   }
 
   async addVideoToDb(
-    props: AddToDbProps & { duration: string },
+    props: AddToDbProps & { duration: string }
   ): Promise<IDbWorkspaceVideoData> {
     const {
       id,
@@ -317,7 +313,7 @@ export class WorkspaceUtilitiesService {
     const bucket = admin.storage().bucket();
 
     const videosPromiseParsed = await Promise.allSettled(
-      parseCollectionToArray(workspace.videos).map(async (videoData) => {
+      parseCollectionToArray(workspace.videos).map(async videoData => {
         let ref: any | null = null;
         let url: string | null = '';
 
@@ -326,7 +322,7 @@ export class WorkspaceUtilitiesService {
             url = videoData.streamData.playbackUrl;
           } else {
             const video = bucket.file(
-              `workspaces/${workspace.id}/videos/${videoData.refName}`,
+              `workspaces/${workspace.id}/videos/${videoData.refName}`
             );
             ref = (await video.getMetadata())[0];
             url = (await video.getSignedUrl(this.config))[0];
@@ -337,16 +333,16 @@ export class WorkspaceUtilitiesService {
         }
 
         return { dbData: { ...videoData }, url, ref };
-      }),
+      })
     );
 
     const screenshotsPromiseParsed = await Promise.allSettled(
       parseCollectionToArray(workspace.screenshots).map(
-        async (screenshotData) => {
+        async screenshotData => {
           try {
             const imgRef = await this.getImageOrItsThumbnailRef(
               workspace.id,
-              screenshotData.refName,
+              screenshotData.refName
             );
             const url = (await imgRef.getSignedUrl(this.config))[0];
             const ref = (await imgRef.getMetadata())[0];
@@ -356,17 +352,17 @@ export class WorkspaceUtilitiesService {
             console.log(e);
             return null;
           }
-        },
-      ),
+        }
+      )
     );
 
     const videos = videosPromiseParsed
-      .map((x) => (x.status === 'fulfilled' ? x.value : null))
-      .filter((x) => x !== null);
+      .map(x => (x.status === 'fulfilled' ? x.value : null))
+      .filter(x => x !== null);
 
     const screenshots: IWorkspaceImage[] = screenshotsPromiseParsed
-      .map((x) => (x.status === 'fulfilled' ? x.value : null))
-      .filter((x) => x !== null);
+      .map(x => (x.status === 'fulfilled' ? x.value : null))
+      .filter(x => x !== null);
 
     // console.log(screenshots);
 

@@ -33,7 +33,7 @@ const UploadScreen: React.FC = () => {
     setLoading(true);
     const imageBase64 = await fileGetBase64(file);
 
-    if (typeof imageBase64 == 'string') {
+    if (typeof imageBase64 === 'string') {
       store.dispatch(
         PanelAC.setUnsavedBase64({
           unsavedBase64: imageBase64,

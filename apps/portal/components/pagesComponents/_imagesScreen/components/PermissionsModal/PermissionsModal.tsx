@@ -41,8 +41,8 @@ const PermissionsModal: React.FC<Props> = ({
   const permissionItemType: PermissionsItemType = folder
     ? 'folders'
     : itemType === 'image'
-    ? 'screenshots'
-    : 'videos';
+      ? 'screenshots'
+      : 'videos';
   const {
     members,
     teams,

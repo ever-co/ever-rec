@@ -23,14 +23,14 @@ export class WorkspaceInvitesService {
 
       // Check if an invite link for this workspace already exists
       const workspaceInviteLinkRef = db.ref(
-        `workspaces/${workspaceId}/inviteLinkId`,
+        `workspaces/${workspaceId}/inviteLinkId`
       );
       const workspaceInviteLinkData = (
         await workspaceInviteLinkRef.get()
       ).val();
       if (workspaceInviteLinkData) {
         return this.utilitiesService.sendError(
-          'An invite link already exists for this workspace',
+          'An invite link already exists for this workspace'
         );
       }
 
@@ -45,21 +45,21 @@ export class WorkspaceInvitesService {
       console.log(e);
       return this.utilitiesService.sendError(
         'There was a problem creating an invite link',
-        e.message,
+        e.message
       );
     }
   }
 
   async joinWorkspace(
     uid: string,
-    workspaceInviteId: string,
+    workspaceInviteId: string
   ): Promise<
     IDataResponse<{ workspaceId: string; hasAlreadyJoined: boolean } | null>
   > {
     try {
       const db = admin.database();
       const workspaceInviteRef = db.ref(
-        `workspaceInvites/${workspaceInviteId}`,
+        `workspaceInvites/${workspaceInviteId}`
       );
       const workspaceInviteData: IWorkspaceInvite = (
         await workspaceInviteRef.get()
@@ -80,7 +80,7 @@ export class WorkspaceInvitesService {
         (await workspaceMembersRef.get()).val() || [];
 
       const isAlreadyMember = workspaceMembersData.some(
-        (member) => member.id === uid,
+        member => member.id === uid
       );
       if (isAlreadyMember) {
         return this.utilitiesService.sendResponse({
@@ -106,7 +106,7 @@ export class WorkspaceInvitesService {
       console.log(e);
       return this.utilitiesService.sendError(
         'There was a problem joining the workspace',
-        e.message,
+        e.message
       );
     }
   }

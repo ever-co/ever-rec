@@ -15,7 +15,6 @@ import { panelRoutes } from '../../router/panelRoutes';
 import PreferencePartition from './PreferencePartition';
 import SavePathInput from './SavePathInput';
 
-
 const PreferencesScreen: React.FC = () => {
   const navigate = useNavigate();
 
@@ -53,8 +52,8 @@ const PreferencesScreen: React.FC = () => {
   const navigateToMainScreen = async () => {
     await browser.tabs.update({
       url: panelRoutes.images.path,
-    })
-  }
+    });
+  };
 
   return (
     <div className="tw-inline-grid tw-grid-cols-7 tw-p-4 tw-min-h-screen tw-w-screen tw-gap-36">
@@ -93,7 +92,8 @@ const PreferencesScreen: React.FC = () => {
           <PreferencePartition>
             <div className="tw-flex tw-justify-between tw-items-center">
               <div className="tw-font-semibold tw-mr-2">
-              Always get shareable links for screenshots, videos and GIFs [uploaded to Google Drive.]
+                Always get shareable links for screenshots, videos and GIFs
+                [uploaded to Google Drive.]
               </div>
               <AppSwitch
                 checked={preferences.showSharedGDriveLink}
@@ -118,7 +118,12 @@ const PreferencesScreen: React.FC = () => {
                 ></AppSwitch>
               </div>
               <div className="tw-my-5">
-              Note: to use this feature, you need to allow the extension to manage Downloads when the permission request window pops up. Only when this option is turned on can you choose where to save your files before downloading them. It automatically defaults to the Downloads folder on your local disk if this option is disabled. 
+                Note: to use this feature, you need to allow the extension to
+                manage Downloads when the permission request window pops up.
+                Only when this option is turned on can you choose where to save
+                your files before downloading them. It automatically defaults to
+                the Downloads folder on your local disk if this option is
+                disabled.
               </div>
               <SavePathInput
                 value={preferences.defaultSavePath}
@@ -130,7 +135,7 @@ const PreferencesScreen: React.FC = () => {
           <PreferencePartition>
             <div className="tw-flex tw-justify-between tw-items-center">
               <div className="tw-font-semibold tw-mr-2">
-              Add Date and URL at the top of your screenshots and videos
+                Add Date and URL at the top of your screenshots and videos
               </div>
               <AppSwitch
                 checked={preferences.addInfoOnTop}

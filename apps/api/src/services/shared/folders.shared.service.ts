@@ -18,14 +18,14 @@ export class FoldersSharedService {
     const parsedFolders = entries.reduce(
       (
         acc: IDbFolder[],
-        [id, folder]: [id: string, folder: DbFolderDataRaw],
+        [id, folder]: [id: string, folder: DbFolderDataRaw]
       ) => {
         const item: IDbFolder = { ...folder, id };
 
         acc.push(item);
         return acc;
       },
-      [],
+      []
     );
 
     return parsedFolders;
@@ -34,7 +34,7 @@ export class FoldersSharedService {
   async populateFolderChildren(
     uid: string,
     folder: DbFolderDataRaw | IDbFolder,
-    itemType: ItemType,
+    itemType: ItemType
   ): Promise<DbFolderDataRaw> {
     const db = admin.database();
     const children = folder.children;
@@ -43,13 +43,13 @@ export class FoldersSharedService {
 
     if (children) {
       await Promise.allSettled(
-        children.map(async (folderId) => {
+        children.map(async folderId => {
           const folderRef = db.ref(`users/${uid}/${folderString}/${folderId}`);
           const folderSnap = await folderRef.get();
           const folderVal = folderSnap.val();
 
           populatedChildren.push({ ...folderVal, id: folderId });
-        }),
+        })
       );
     }
     return { ...folder, children: populatedChildren };
@@ -60,16 +60,14 @@ export class FoldersSharedService {
     initial: boolean,
     itemType: ItemType,
     folders: IDbFolder[],
-    nestLevel?: number,
+    nestLevel?: number
   ): Promise<IDbFolder[]> {
     let foldersResult: IDbFolder[] = folders;
     const nestLevelToCut = nestLevel ? nestLevel : 0;
 
     if (folders && initial) {
       const reversedArray: any = folders.reverse();
-      foldersResult = reversedArray.filter(
-        (x) => x.nestLevel === nestLevelToCut,
-      );
+      foldersResult = reversedArray.filter(x => x.nestLevel === nestLevelToCut);
     }
 
     for (let i = 0; i < foldersResult?.length; i += 1) {
@@ -80,13 +78,13 @@ export class FoldersSharedService {
         const populatedFolder = await this.populateFolderChildren(
           uid,
           foldersResult[i],
-          itemType,
+          itemType
         );
         foldersResult[i].children = await this.mapDbFoldersToTreeArray(
           uid,
           false,
           itemType,
-          populatedFolder.children as IDbFolder[],
+          populatedFolder.children as IDbFolder[]
         );
       }
     }
@@ -97,7 +95,7 @@ export class FoldersSharedService {
   findFoldersToDeleteIds(
     folder: IDbFolder | DbFolderDataRaw,
     folderId: string,
-    idsProps?: string[],
+    idsProps?: string[]
   ) {
     const ids: string[] = idsProps || [folderId];
 
@@ -118,7 +116,7 @@ export class FoldersSharedService {
     uid: string,
     folderId: string,
     itemType: ItemType,
-    forceRemove?: boolean,
+    forceRemove?: boolean
   ) {
     try {
       const foldersString = itemType === 'image' ? 'folders' : 'videoFolders';
@@ -133,22 +131,22 @@ export class FoldersSharedService {
 
       if (foldersVal) {
         const folders = this.parseFoldersFromDb(foldersVal);
-        const rawFolderData = folders.find((x) => x.id === folderId);
+        const rawFolderData = folders.find(x => x.id === folderId);
         const populatedFolders = await this.mapDbFoldersToTreeArray(
           uid,
           true,
           itemType,
           folders,
-          rawFolderData.nestLevel,
+          rawFolderData.nestLevel
         );
-        const folderToDelete = populatedFolders.find((x) => x.id === folderId);
+        const folderToDelete = populatedFolders.find(x => x.id === folderId);
         const idsToDelete = this.findFoldersToDeleteIds(
           folderToDelete,
-          rawFolderData.id,
+          rawFolderData.id
         );
 
         if (filesVal) {
-          idsToDelete.forEach((x) => {
+          idsToDelete.forEach(x => {
             if (filesVal[x]) {
               delete filesVal[x];
             }
@@ -156,10 +154,10 @@ export class FoldersSharedService {
         }
 
         const foldersObj = folders
-          .map((x) => {
+          .map(x => {
             if (Array.isArray(x.children)) {
               const parentIndex = x.children.findIndex(
-                (y) => y === rawFolderData.id,
+                y => y === rawFolderData.id
               );
 
               if (parentIndex !== -1) {
@@ -169,7 +167,7 @@ export class FoldersSharedService {
 
             return x;
           })
-          .filter((x) => !idsToDelete.some((y) => y === x.id))
+          .filter(x => !idsToDelete.some(y => y === x.id))
           .reduce((acc, val) => {
             const id = val.id;
             acc[id] = val;
@@ -182,7 +180,7 @@ export class FoldersSharedService {
           folderId,
           itemType,
           undefined,
-          forceRemove,
+          forceRemove
         );
         if (folders && filesVal) {
           await Promise.all([
@@ -203,7 +201,7 @@ export class FoldersSharedService {
     folderId: string,
     itemType?: ItemType,
     workspaceId?: string,
-    forceRemove?: boolean,
+    forceRemove?: boolean
   ): Promise<IFavoriteFolders> {
     const db = admin.database();
     const favFoldersRef = db.ref(`users/${uid}/favoriteFolders`);
@@ -219,14 +217,14 @@ export class FoldersSharedService {
     if (workspaceId) {
       const { value: folder, ref: folderRef } =
         await getDataFromDB<IWorkspaceFolder | null>(
-          `workspaces/${workspaceId}/folders/${folderId}`,
+          `workspaces/${workspaceId}/folders/${folderId}`
         );
 
       const parsedWorkspaceFavs: SingleFavFolder[] = parseCollectionToArray(
-        favFolders?.workspaces[workspaceId],
+        favFolders?.workspaces[workspaceId]
       );
       const favFolderIndex = parsedWorkspaceFavs.findIndex(
-        (x) => x.id === folderId,
+        x => x.id === folderId
       );
 
       if (favFolderIndex === -1 && !forceRemove) {
@@ -238,7 +236,7 @@ export class FoldersSharedService {
           },
         };
 
-        if (!folder.isFavoredBy || folder.isFavoredBy?.some((x) => x !== uid)) {
+        if (!folder.isFavoredBy || folder.isFavoredBy?.some(x => x !== uid)) {
           folder.isFavoredBy = [
             ...parseCollectionToArray(folder.isFavoredBy),
             uid,
@@ -253,7 +251,7 @@ export class FoldersSharedService {
         }
 
         if (folder?.isFavoredBy) {
-          folder.isFavoredBy = folder.isFavoredBy.filter((x) => x !== uid);
+          folder.isFavoredBy = folder.isFavoredBy.filter(x => x !== uid);
         }
       }
 
@@ -271,7 +269,7 @@ export class FoldersSharedService {
       if (itemType === 'image') {
         const parsedFavImages = parseCollectionToArray(favFolders.images);
         const favImagesIndex = parsedFavImages.findIndex(
-          (x) => x.id === folderId,
+          x => x.id === folderId
         );
 
         favImagesIndex === -1 && !forceRemove
@@ -286,7 +284,7 @@ export class FoldersSharedService {
       } else {
         const parsedFavVideos = parseCollectionToArray(favFolders.videos);
         const favVideosIndex = parsedFavVideos.findIndex(
-          (x) => x.id === folderId,
+          x => x.id === folderId
         );
 
         favVideosIndex === -1 && !forceRemove
@@ -311,7 +309,7 @@ export class FoldersSharedService {
     folderId: string,
     itemType?: ItemType,
     workspaceId?: string,
-    forceRemove?: boolean,
+    forceRemove?: boolean
   ) {
     try {
       const favFolders = await this.addRemoveFavoriteService(
@@ -319,7 +317,7 @@ export class FoldersSharedService {
         folderId,
         itemType,
         workspaceId,
-        forceRemove,
+        forceRemove
       );
       return sendResponse<IFavoriteFolders>(favFolders);
     } catch (e) {
@@ -329,7 +327,7 @@ export class FoldersSharedService {
   }
 
   async getUserFavFolders(
-    uid: string,
+    uid: string
   ): Promise<IDataResponse<IFavoriteFolders | null>> {
     const db = admin.database();
     const favFoldersRef = db.ref(`users/${uid}/favoriteFolders`);

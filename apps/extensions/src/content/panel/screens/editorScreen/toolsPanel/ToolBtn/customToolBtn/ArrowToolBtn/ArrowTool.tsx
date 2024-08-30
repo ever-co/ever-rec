@@ -6,7 +6,6 @@ import StrokeWidthSelector from '../../../toolsOptions/strokeWidthSelector/Strok
 import ToolSubPanelBtn from '../../components/ToolSubPanelBtn';
 import ToolBtn from '../../ToolBtn';
 
-
 interface IArrowToolProps {
   options: IArrowGroupOptions;
   activeTool: ITool | null;

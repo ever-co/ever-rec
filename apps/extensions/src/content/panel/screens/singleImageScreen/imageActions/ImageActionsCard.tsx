@@ -1,6 +1,5 @@
 import classNames from 'classnames';
 
-
 const ImageActionsCard: React.FC<{ className?: string }> = ({
   children,
   className = '',

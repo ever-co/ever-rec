@@ -136,8 +136,8 @@ const SavingTool: React.FC<ISavingProps> = ({
                     data.type === 'png'
                       ? downloadPng
                       : data.type === 'jpg'
-                      ? downloadJpg
-                      : downloadPdf
+                        ? downloadJpg
+                        : downloadPdf
                   }
                 />
               ) : null,

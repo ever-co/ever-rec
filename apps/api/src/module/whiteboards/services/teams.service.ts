@@ -31,7 +31,7 @@ export class WhiteboardTeamService {
 
   async addTeam(
     uid: string,
-    teamName: string,
+    teamName: string
   ): Promise<IDataResponse<IWhiteboardTeam | null>> {
     try {
       const db = admin.database();
@@ -57,13 +57,13 @@ export class WhiteboardTeamService {
       console.log(e);
       return sendError(
         'Error while trying to add a whiteboard team.',
-        e.message,
+        e.message
       );
     }
   }
 
   async getTeams(
-    uid: string,
+    uid: string
   ): Promise<IDataResponse<IWhiteboardTeam[] | null>> {
     try {
       const db = admin.database();
@@ -74,8 +74,8 @@ export class WhiteboardTeamService {
 
       // Also parse members here so the client doesn't have to
       const whiteboardTeams = parseCollectionToArray<IWhiteboardTeam>(
-        whiteboardTeamVal,
-      ).map((team) => {
+        whiteboardTeamVal
+      ).map(team => {
         const parsed: IWhiteboardTeam = {
           ...team,
           members: parseCollectionToArray(team.members),
@@ -96,7 +96,7 @@ export class WhiteboardTeamService {
     teamId: string,
     name?: string,
     avatar?: Express.Multer.File,
-    thumbnail?: Express.Multer.File,
+    thumbnail?: Express.Multer.File
   ): Promise<IDataResponse<IWhiteboardTeam | null>> {
     try {
       const { whiteboardTeamRef, whiteboardTeamSnap } =
@@ -108,7 +108,7 @@ export class WhiteboardTeamService {
       if (avatar) {
         const file = await uploadImageInBucket(
           avatar,
-          `${this.rootDb}/${uid}/${teamId}/avatar`,
+          `${this.rootDb}/${uid}/${teamId}/avatar`
         );
 
         avatarUrl = (
@@ -122,7 +122,7 @@ export class WhiteboardTeamService {
       if (thumbnail) {
         const file = await uploadImageInBucket(
           thumbnail,
-          `${this.rootDb}/${uid}/${teamId}/thumbnail`,
+          `${this.rootDb}/${uid}/${teamId}/thumbnail`
         );
 
         thumbnailUrl = (
@@ -161,7 +161,7 @@ export class WhiteboardTeamService {
         .deleteFiles({
           prefix: `${this.rootDb}/${uid}/${teamId}`,
         })
-        .catch((error) => {
+        .catch(error => {
           console.log('Error deleting teams data for user: ' + uid, error);
         });
 
@@ -176,7 +176,7 @@ export class WhiteboardTeamService {
     try {
       const { whiteboardTeamSnap, db } = await this.checkIfTeamExists(
         teamAdminId,
-        teamId,
+        teamId
       );
       const whiteboardTeamVal = whiteboardTeamSnap.val();
 
@@ -185,7 +185,7 @@ export class WhiteboardTeamService {
       }
 
       const whiteboardTeamMemberRef = db.ref(
-        `${this.rootDb}/${whiteboardTeamVal.admin}/${teamId}/members/${uid}`,
+        `${this.rootDb}/${whiteboardTeamVal.admin}/${teamId}/members/${uid}`
       );
 
       await whiteboardTeamMemberRef.remove();
@@ -201,15 +201,15 @@ export class WhiteboardTeamService {
     try {
       const { whiteboardTeamSnap, db } = await this.checkIfTeamExists(
         uid,
-        teamId,
+        teamId
       );
 
       const whiteboardTeamVal = whiteboardTeamSnap.val();
       const whiteboardTeamMemberIds = parseCollectionToArray(
-        whiteboardTeamVal.members,
-      ).map((member) => member.id);
+        whiteboardTeamVal.members
+      ).map(member => member.id);
 
-      const membersDataPromises = whiteboardTeamMemberIds.map(async (id) => {
+      const membersDataPromises = whiteboardTeamMemberIds.map(async id => {
         const userRef = db.ref(`users/${id}`);
         const userSnap = await userRef.get();
         const userData: IUser = userSnap.val();
@@ -239,27 +239,26 @@ export class WhiteboardTeamService {
     try {
       const { whiteboardTeamSnap, db } = await this.checkIfTeamExists(
         uid,
-        teamId,
+        teamId
       );
 
       const whiteboardTeamVal = whiteboardTeamSnap.val();
       const whiteboardTeamMembers = parseCollectionToArray(
-        whiteboardTeamVal.members,
+        whiteboardTeamVal.members
       );
 
       const memberIndex = whiteboardTeamMembers.findIndex(
-        (member) =>
-          member.id === memberId && memberId !== whiteboardTeamVal.admin,
+        member => member.id === memberId && memberId !== whiteboardTeamVal.admin
       );
 
       if (memberIndex === -1) {
         throw new Error(
-          `Member with uid '${memberId}' is not a removable member of the team with ${whiteboardTeamVal.id}.`,
+          `Member with uid '${memberId}' is not a removable member of the team with ${whiteboardTeamVal.id}.`
         );
       }
 
       const whiteboardTeamMemberRef = db.ref(
-        `${this.rootDb}/${uid}/${teamId}/members/${memberId}`,
+        `${this.rootDb}/${uid}/${teamId}/members/${memberId}`
       );
 
       await whiteboardTeamMemberRef.remove();
@@ -269,7 +268,7 @@ export class WhiteboardTeamService {
       console.log(e);
       return sendError(
         'Error while trying to remove member from the Team.',
-        e.message,
+        e.message
       );
     }
   }
@@ -277,7 +276,7 @@ export class WhiteboardTeamService {
   // Helper Methods
   private async checkIfTeamExists(
     uid: string,
-    teamId: string,
+    teamId: string
   ): Promise<{
     whiteboardTeamRef: Reference;
     whiteboardTeamSnap: DataSnapshot;

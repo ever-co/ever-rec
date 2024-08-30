@@ -1,4 +1,4 @@
 export interface IPencilGroupOptions {
-  strokeColor: string,
-  strokeWidth: number,
+  strokeColor: string;
+  strokeWidth: number;
 }

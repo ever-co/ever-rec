@@ -57,7 +57,10 @@ const DefaultCaveat = () => {
           <strong>{CHAPTER_MIN_REQUIRED_SECONDS}</strong> seconds
         </li>
       </ul>
-      <p className={s.Paragraph}>To add a new chapter move the video progress bar and click on the Add Chapter button.</p>
+      <p className={s.Paragraph}>
+        To add a new chapter move the video progress bar and click on the Add
+        Chapter button.
+      </p>
     </div>
   );
 };

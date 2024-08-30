@@ -5,5 +5,5 @@ export const User = createParamDecorator(
   async (data: unknown, context: ExecutionContext) => {
     const req = context.switchToHttp().getRequest<{ user?: IRequestUser }>();
     return req.user;
-  },
+  }
 );

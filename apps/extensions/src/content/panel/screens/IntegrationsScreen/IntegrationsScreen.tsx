@@ -23,4 +23,3 @@ const IntegrationsScreen = () => {
 };
 
 export default IntegrationsScreen;
-

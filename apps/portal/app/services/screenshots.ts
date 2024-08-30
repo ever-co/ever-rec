@@ -225,8 +225,8 @@ const updateImage = async (
             emailImageLink: image.sharedLink
               ? image.sharedLink
               : image.dbData?.id
-              ? await getShareLink(image.dbData.id)
-              : null,
+                ? await getShareLink(image.dbData.id)
+                : null,
             itemPublicLink: image?.url,
           }),
         );

@@ -13,7 +13,7 @@ export class CanAccessItemGuard implements CanActivate {
     try {
       const requiredAccessLevel = this.reflector.get<PermissionAccessEnum>(
         REQUIRED_ITEM_ACCESS_METADATA,
-        context.getHandler(),
+        context.getHandler()
       );
       const { user, workspace, req } = await getUserAndWorkspace(context);
       const item = getItemData(context, req, workspace, this);

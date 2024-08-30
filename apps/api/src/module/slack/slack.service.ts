@@ -19,7 +19,7 @@ export class SlackService {
     private readonly videoService: VideoService,
     private readonly slackService: SlackBoltService,
     private readonly configService: ConfigService,
-    private eventEmitter: EventEmitter2,
+    private eventEmitter: EventEmitter2
   ) {}
 
   async storeInstallationInformation(query) {
@@ -50,7 +50,7 @@ export class SlackService {
       }
     } catch (error: any) {
       throw new BadRequestException(
-        error.message || 'Something went wrong, Please try again later.',
+        error.message || 'Something went wrong, Please try again later.'
       );
     }
   }
@@ -61,7 +61,7 @@ export class SlackService {
 
       if (userData && userData.isSlackIntegrate && userData.slackToken) {
         const response = await this.slackService.slackChannelList(
-          userData.slackToken,
+          userData.slackToken
         );
         return {
           status: ResStatusEnum.success,
@@ -71,13 +71,13 @@ export class SlackService {
         };
       } else {
         throw new BadRequestException(
-          'Something went wrong, Please try again later or try to reconnect to Slack.',
+          'Something went wrong, Please try again later or try to reconnect to Slack.'
         );
       }
     } catch (error) {
       throw new BadRequestException(
         error,
-        'Something went wrong, Please try again later or try to reconnect to Slack.',
+        'Something went wrong, Please try again later or try to reconnect to Slack.'
       );
     }
   }
@@ -101,12 +101,12 @@ export class SlackService {
           let sharedImageLink = null;
           if (resData.sharedLink) {
             sharedImageLink = `${this.configService.get<string>(
-              'WEBSITE_URL',
+              'WEBSITE_URL'
             )}/image/shared/${resData.sharedLink}`;
           } else {
             const sharedCode = await this.imageService.share(uid, id);
             sharedImageLink = `${this.configService.get<string>(
-              'WEBSITE_URL',
+              'WEBSITE_URL'
             )}/image/shared/${sharedCode}`;
           }
           if (resData) {
@@ -134,12 +134,12 @@ export class SlackService {
             let sharedLink = null;
             if (resData.sharedLink) {
               sharedLink = `${this.configService.get<string>(
-                'WEBSITE_URL',
+                'WEBSITE_URL'
               )}/video/shared/${resData.sharedLink}`;
             } else {
               const sharedCode = await this.videoService.share(uid, id);
               sharedLink = `${this.configService.get<string>(
-                'WEBSITE_URL',
+                'WEBSITE_URL'
               )}/video/shared/${sharedCode}`;
             }
             title = resData.dbData.title || 'Sent with Rec';
@@ -171,7 +171,7 @@ export class SlackService {
           userData.slackToken,
           channelId,
           title,
-          slackBlock,
+          slackBlock
         );
         return result;
       } else {
@@ -218,7 +218,7 @@ export class SlackService {
     try {
       if (userData && userData.slackBotToken) {
         const response = await this.slackService.slackDisconnectUser(
-          userData.slackBotToken,
+          userData.slackBotToken
         );
 
         const userRef = admin.database().ref(`users/${uid}`);
@@ -235,7 +235,7 @@ export class SlackService {
           {
             userId: uid,
             properties: { isSlackIntegrate: false },
-          },
+          }
         );
 
         return {
@@ -247,7 +247,7 @@ export class SlackService {
       } else {
         console.log(
           error,
-          'SlackBotToken is empty. We clean up user record anyway from any Slack details',
+          'SlackBotToken is empty. We clean up user record anyway from any Slack details'
         );
 
         if (userData) {
@@ -263,7 +263,7 @@ export class SlackService {
         await this.eventEmitter.emit(
           'analytics.track',
           'Slack Integration Disconnected',
-          { userId: uid },
+          { userId: uid }
         );
 
         return {

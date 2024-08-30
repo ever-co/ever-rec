@@ -10,6 +10,6 @@ export const FolderAccess = (requiredAccess: PermissionAccessEnum) =>
 export function CanAccessFolder(requiredAccess: PermissionAccessEnum) {
   return applyDecorators(
     FolderAccess(requiredAccess),
-    UseGuards(CanAccessFolderGuard),
+    UseGuards(CanAccessFolderGuard)
   );
 }

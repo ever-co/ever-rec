@@ -8,7 +8,7 @@ import micIcon from 'public/assets/svg/tools-panel/mic.svg';
 import { Howl, Howler } from 'howler';
 import { useStopwatch } from 'react-timer-hook';
 import AppSvg from 'components/elements/AppSvg';
-import styles from './audioPlayer.module.scss'
+import styles from './audioPlayer.module.scss';
 
 interface IPlayerProps {
   audioSrc: string;
@@ -59,14 +59,8 @@ const AudioPlayer: React.FC<IPlayerProps> = ({ audioSrc, audioDuration }) => {
     <>
       <div className={styles.audioContainer}>
         <div className={styles.iconWrapper}>
-          <AppSvg
-            path={micIcon.src}
-            size="17px"
-            className={styles.icon}
-          />
-          <label className={styles.label}>
-            Voice Note
-          </label>
+          <AppSvg path={micIcon.src} size="17px" className={styles.icon} />
+          <label className={styles.label}>Voice Note</label>
         </div>
 
         <div className={styles.duration}>

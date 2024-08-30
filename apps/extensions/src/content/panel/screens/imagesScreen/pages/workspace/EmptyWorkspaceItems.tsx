@@ -19,7 +19,7 @@ const EmptyWorkspaceItems: FC<IProps> = ({ workspaceName }) => {
         className="tw-w-max"
       />
       <h2 className="tw-text-2xl tw-mt-7 tw-mb-2 tw-font-semibold">
-        It's empty here...
+        {"It's empty here..."}
       </h2>
       <p className="tw-text-center">
         Add items in {element} by adding them from Add Image/Video button or

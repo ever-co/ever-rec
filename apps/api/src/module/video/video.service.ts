@@ -37,7 +37,7 @@ export class VideoService {
     private readonly sharedService: SharedService,
     private eventEmitter: EventEmitter2,
     private readonly streamService: StreamServiceService,
-    private readonly foldersSharedService: FoldersSharedService,
+    private readonly foldersSharedService: FoldersSharedService
   ) {
     this.config = {
       action: 'read',
@@ -111,7 +111,7 @@ export class VideoService {
 
   async getVideoBySharedId(
     link: string,
-    isWorkspace: boolean,
+    isWorkspace: boolean
   ): Promise<
     IDataResponse<{
       video: { owner: IUserShort; dbData: DbVideoData; url: string };
@@ -198,7 +198,7 @@ export class VideoService {
     blob: Express.Multer.File,
     title: string,
     duration: string,
-    fullFilename: string,
+    fullFilename: string
   ): Promise<IEditorVideo> {
     try {
       const editorVideo: IEditorVideo = { url: '' };
@@ -208,7 +208,7 @@ export class VideoService {
       const fixedVideoPath = join(TMP_PATH_FIXED, fullFilename);
       const { duration: ffmpegDuration, outputPath } = await fixVideoWithFFMPEG(
         inputPath,
-        fixedVideoPath,
+        fixedVideoPath
       );
 
       if (ffmpegDuration) {
@@ -231,7 +231,7 @@ export class VideoService {
           title,
           videoDuration,
           false,
-          `${fullFilename}`,
+          `${fullFilename}`
         );
         editorVideo.ref = metadata;
         editorVideo.url = downloadUrl;
@@ -256,7 +256,7 @@ export class VideoService {
     title: string,
     duration: string,
     fullFilename: string,
-    folderId?: string,
+    folderId?: string
   ): Promise<IDataResponse<IEditorVideo>> {
     try {
       let videoDuration = duration;
@@ -267,7 +267,7 @@ export class VideoService {
 
       const { duration: ffmpegDuration, outputPath } = await fixVideoWithFFMPEG(
         inputPath,
-        fixedVideoPath,
+        fixedVideoPath
       );
 
       // Set new duration calculated with FFMPEG
@@ -291,7 +291,7 @@ export class VideoService {
           title,
           videoDuration,
           folderId,
-          fullFilename,
+          fullFilename
         );
         editorVideo.dbData = dbData;
         editorVideo.ref = metadata;
@@ -326,7 +326,7 @@ export class VideoService {
   // comments on single video/image load.
   async getVideoFiles(
     uid: string,
-    folderId: string | false,
+    folderId: string | false
   ): Promise<IEditorVideo[]> {
     const files: IEditorVideo[] = [];
     const db = admin.database();
@@ -358,13 +358,13 @@ export class VideoService {
                 chaptersEnabled,
               } = value;
               const allComments = this.sharedService.sanitizeCommentsFromDB(
-                value.comments,
+                value.comments
               );
               const allViews = formatDataToArray(value.views);
 
               if (parentId) {
                 const folderRef = db.ref(
-                  `users/${uid}/videoFolders/${parentId}`,
+                  `users/${uid}/videoFolders/${parentId}`
                 );
                 const folderSnap = await folderRef.get();
                 const folderVal = folderSnap.val();
@@ -392,12 +392,12 @@ export class VideoService {
                   chaptersEnabled,
                 });
               }
-            },
-          ),
+            }
+          )
         );
 
         await Promise.allSettled(
-          dbVideoData.map(async (dbData) => {
+          dbVideoData.map(async dbData => {
             const streamData = dbData?.streamData;
             const refName = dbData?.refName;
 
@@ -413,7 +413,7 @@ export class VideoService {
               dbData,
               url,
             });
-          }),
+          })
         );
       }
     } catch (error: any) {
@@ -439,7 +439,7 @@ export class VideoService {
           uid,
           true,
           'video',
-          parsedFolders,
+          parsedFolders
         );
       }
       return {
@@ -461,7 +461,7 @@ export class VideoService {
 
   async getFolderById(
     uid: string,
-    folderId?: string,
+    folderId?: string
   ): Promise<IDataResponse<DbFolderData>> {
     try {
       const db = admin.database();
@@ -475,7 +475,7 @@ export class VideoService {
           await this.foldersSharedService.populateFolderChildren(
             uid,
             folderFromDb,
-            'video',
+            'video'
           );
         const folderData: DbFolderData = { ...populatedFolder, id: folderId };
 
@@ -503,7 +503,7 @@ export class VideoService {
     color: string,
     rootFolderId: string,
     newId: string,
-    parentId?: string,
+    parentId?: string
   ): Promise<IDataResponse<DbFolderData>> {
     const db = admin.database();
 
@@ -561,7 +561,7 @@ export class VideoService {
   async getVideoByIdPrivate(
     uid: string,
     id: string,
-    type?: string,
+    type?: string
   ): Promise<any> {
     const db = admin.database();
     const bucket = admin.storage().bucket();
@@ -575,7 +575,7 @@ export class VideoService {
 
       if (dbData.parentId) {
         const folderRef = db.ref(
-          `users/${uid}/videoFolders/${dbData.parentId}`,
+          `users/${uid}/videoFolders/${dbData.parentId}`
         );
         const folderSnap = await folderRef.get();
         const folderVal = folderSnap.val();
@@ -624,7 +624,7 @@ export class VideoService {
     parentId: string | false,
     trash: boolean,
     likes: { uid: string; timestamp: number }[],
-    title?: string,
+    title?: string
   ): Promise<void> {
     const db = admin.database();
     const dbVideoRef = db.ref(`users/${uid}/videos/${id}`);
@@ -656,7 +656,7 @@ export class VideoService {
   async deleteVideo(
     uid: string,
     videoId: string,
-    refName: string,
+    refName: string
   ): Promise<string> {
     try {
       const db = admin.database();
@@ -669,7 +669,7 @@ export class VideoService {
 
       if (videoData?.posterRef) {
         const posterRef = bucket.file(
-          `users/${uid}/videoPosters/${videoData.posterRef}`,
+          `users/${uid}/videoPosters/${videoData.posterRef}`
         );
         await posterRef.delete();
       }
@@ -678,7 +678,7 @@ export class VideoService {
       const serviceType = videoData?.streamData?.serviceType;
       this.streamService.deleteAsset(assetId, serviceType).catch(() => {
         console.log(
-          `Error deleting asset from service ${serviceType}: ${assetId}`,
+          `Error deleting asset from service ${serviceType}: ${assetId}`
         );
       });
 
@@ -691,7 +691,7 @@ export class VideoService {
         .deleteFiles({
           prefix: `users/${uid}/videosThumbnails/${videoId}/`,
         })
-        .catch((error) => {
+        .catch(error => {
           console.log('Error deleting video chapters:', error);
         });
 
@@ -713,15 +713,15 @@ export class VideoService {
 
   async deleteAllVideos(
     uid: string,
-    trashedVideos: IEditorVideo[],
+    trashedVideos: IEditorVideo[]
   ): Promise<IEditorVideo[]> {
     const deletedVideos: IEditorVideo[] = [];
 
     await Promise.allSettled(
-      trashedVideos.map(async (video) => {
+      trashedVideos.map(async video => {
         await this.deleteVideo(uid, video.dbData?.id, video.dbData.refName);
         deletedVideos.push(video);
-      }),
+      })
     );
 
     this.eventEmitter.emit('analytics.track', 'All Video Trashed');
@@ -746,7 +746,7 @@ export class VideoService {
       });
 
       await Promise.allSettled(
-        sharedData.map(async (data) => {
+        sharedData.map(async data => {
           const dbVideo = db.ref(`users/${uid}/videos/${data.videoId}`);
           const snapshot = await dbVideo.get();
           const dbData: any = snapshot.val();
@@ -780,7 +780,7 @@ export class VideoService {
               }
             }
           }
-        }),
+        })
       );
     }
 
@@ -823,11 +823,11 @@ export class VideoService {
             views: allViews.length,
             uid,
           });
-        },
+        }
       );
 
       await Promise.allSettled(
-        dbVideoData.map(async (dbData) => {
+        dbVideoData.map(async dbData => {
           const videoRef = bucket.file(`users/${uid}/videos/${dbData.refName}`);
 
           const url = (await videoRef.getSignedUrl(this.config))[0];
@@ -835,7 +835,7 @@ export class VideoService {
             dbData,
             url,
           });
-        }),
+        })
       );
     }
 
@@ -848,7 +848,7 @@ export class VideoService {
     name: string,
     parentId: string,
     items: number,
-    color: string,
+    color: string
   ): Promise<
     IDataResponse<{ folder: IDbFolder; favFolders: IFavoriteFolders } | null>
   > {
@@ -863,7 +863,7 @@ export class VideoService {
       ? parseCollectionToArray(favFolders.videos)
       : [];
     const favFoldersIndex = parsedFavVideoFolders.findIndex(
-      (x) => x.id === folderId,
+      x => x.id === folderId
     );
 
     if (favFoldersIndex !== -1) {
@@ -899,7 +899,7 @@ export class VideoService {
     title: string,
     duration: string,
     parentId: string | false,
-    refName: string,
+    refName: string
   ): Promise<DbVideoData> {
     const db = admin.database();
 
@@ -949,7 +949,7 @@ export class VideoService {
     if (videoDb) {
       if (videoDb.posterRef) {
         const video = bucket.file(
-          `users/${uid}/videoPosters/${videoDb.posterRef}`,
+          `users/${uid}/videoPosters/${videoDb.posterRef}`
         );
         const url = (await video.getSignedUrl(this.config))[0];
         link = url;
@@ -961,7 +961,7 @@ export class VideoService {
   async setPoster(
     uid: string,
     templateBase64: any,
-    { fullFilename, videoId }: { fullFilename: string; videoId: string },
+    { fullFilename, videoId }: { fullFilename: string; videoId: string }
   ): Promise<string | false> {
     let link: string | false = false;
 

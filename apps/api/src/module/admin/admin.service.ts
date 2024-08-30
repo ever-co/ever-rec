@@ -20,10 +20,10 @@ export class AdminService {
 
   constructor(private readonly configService: ConfigService) {
     const SUPER_ADMIN_ACCOUNT_UID = this.configService.get<string>(
-      'SUPER_ADMIN_ACCOUNT_UID',
+      'SUPER_ADMIN_ACCOUNT_UID'
     );
     const SUPER_ADMIN_ACCOUNT_EMAIL = this.configService.get<string>(
-      'SUPER_ADMIN_ACCOUNT_EMAIL',
+      'SUPER_ADMIN_ACCOUNT_EMAIL'
     );
 
     if (SUPER_ADMIN_ACCOUNT_UID && SUPER_ADMIN_ACCOUNT_EMAIL) {

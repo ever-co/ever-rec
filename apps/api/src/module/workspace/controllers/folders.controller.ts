@@ -32,7 +32,7 @@ export class WorkspaceFoldersController {
   constructor(
     private readonly foldersService: WorkspaceFoldersService,
     private readonly foldersSharedService: FoldersSharedService,
-    private readonly workspaceSharedService: WorkspaceSharedService,
+    private readonly workspaceSharedService: WorkspaceSharedService
   ) {
     // left blank intentionally
   }
@@ -41,7 +41,7 @@ export class WorkspaceFoldersController {
   async createWorkspaceFolder(
     @Param('workspaceId', ValidateId) workspaceId: string,
     @Body() body: CreateFolderDto,
-    @User() user: IRequestUser,
+    @User() user: IRequestUser
   ) {
     return this.foldersService.createWorkspaceFolder(
       user.id,
@@ -49,7 +49,7 @@ export class WorkspaceFoldersController {
       body.name,
       body.color,
       body.nestLevel,
-      body.parentId,
+      body.parentId
     );
   }
 
@@ -59,13 +59,13 @@ export class WorkspaceFoldersController {
     @Param('workspaceId', ValidateId) workspaceId: string,
     @Param('folderId', ValidateId) folderId: string,
     @Body() { folder }: UpdateFolderDto,
-    @User() user: IRequestUser,
+    @User() user: IRequestUser
   ) {
     return this.foldersService.updateFolderData(
       user.id,
       workspaceId,
       folderId,
-      folder,
+      folder
     );
   }
 
@@ -75,13 +75,13 @@ export class WorkspaceFoldersController {
     @Param('workspaceId', ValidateId) workspaceId: string,
     @Param('folderId', ValidateId) folderId: string,
     @Query() { currentFolderId }: DeleteFolderDto,
-    @User() user: IRequestUser,
+    @User() user: IRequestUser
   ) {
     return this.foldersService.deleteFolder(
       user.id,
       workspaceId,
       folderId,
-      currentFolderId,
+      currentFolderId
     );
   }
 
@@ -91,14 +91,14 @@ export class WorkspaceFoldersController {
     @Param('workspaceId', ValidateId) workspaceId: string,
     @Param('folderId', ParseOptionalId) toMoveFolderId: string | false,
     @Body() { fromFolderId, itemIds }: MoveItemsDto,
-    @User() user: IRequestUser,
+    @User() user: IRequestUser
   ) {
     return this.foldersService.moveItemsToFolder(
       user,
       workspaceId,
       itemIds,
       toMoveFolderId,
-      fromFolderId,
+      fromFolderId
     );
   }
 
@@ -107,13 +107,13 @@ export class WorkspaceFoldersController {
   async addFolderToFavorites(
     @Param('workspaceId', ValidateId) workspaceId: string,
     @Param('folderId', ValidateId) folderId: string,
-    @User() user: IRequestUser,
+    @User() user: IRequestUser
   ) {
     return this.foldersSharedService.addRemoveFavFolder(
       user.id,
       folderId,
       undefined,
-      workspaceId,
+      workspaceId
     );
   }
 
@@ -122,7 +122,7 @@ export class WorkspaceFoldersController {
   async changeFolderMemberPermission(
     @Param('workspaceId', ValidateId) workspaceId: string,
     @Param('folderId', ValidateId) folderId: string,
-    @Body() body: UpdateFolderMemberPermissionsDto,
+    @Body() body: UpdateFolderMemberPermissionsDto
   ) {
     return await this.workspaceSharedService.updatePermissions(
       body.id,
@@ -131,7 +131,7 @@ export class WorkspaceFoldersController {
       body.permissionItemType,
       body.write,
       body.read,
-      body.permissionType,
+      body.permissionType
     );
   }
 }

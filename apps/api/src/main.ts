@@ -57,7 +57,7 @@ async function bootstrap() {
       limit: '50mb',
       parameterLimit: 100000,
       extended: true,
-    }),
+    })
   );
 
   await app.listen(port);

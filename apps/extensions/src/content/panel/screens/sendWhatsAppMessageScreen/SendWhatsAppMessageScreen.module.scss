@@ -1,55 +1,55 @@
 .headerContainer {
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 3.5rem;
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 3.5rem;
 }
 
 .bgColor {
-    background-color: #6e6e6e;
+  background-color: #6e6e6e;
 }
 
 .btn {
-    padding-top: .25rem;
-    padding-bottom: .25rem;
-    margin-left: 1rem;
-    margin-right: 1rem;
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+  margin-left: 1rem;
+  margin-right: 1rem;
 }
 
 .btnPadding {
-    padding-left: 2rem;
-    padding-right: 2rem;
+  padding-left: 2rem;
+  padding-right: 2rem;
 }
 
 .btnContainer {
-    padding-top: .25rem;
-    padding-bottom: .25rem;
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
 }
 
 .title {
-    margin-bottom: 1.5rem !important; 
-    font-size: 1.5rem !important; 
-    line-height: 2rem !important; 
-    font-weight: 600 !important;
+  margin-bottom: 1.5rem !important;
+  font-size: 1.5rem !important;
+  line-height: 2rem !important;
+  font-weight: 600 !important;
 }
 .inputContainer {
+  outline: none;
+  appearance: none;
+  background: transparent;
+  &::placeholder {
+    color: black;
+  }
+  &:focus {
     outline: none;
     appearance: none;
-    background: transparent;
-    &::placeholder {
-        color: black
-    }
-    &:focus {
-        outline: none;
-        appearance: none;
-    }
-    &:hover {
-        outline: none;
-        appearance: none;
-    }
+  }
+  &:hover {
+    outline: none;
+    appearance: none;
+  }
 }
-.inputContainer[type=number]::-webkit-inner-spin-button {
-    -webkit-appearance: none;
+.inputContainer[type='number']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
 }
-.inputContainer[type=number]::-webkit-outer-spin-button {
-    -webkit-appearance: none;
+.inputContainer[type='number']::-webkit-outer-spin-button {
+  -webkit-appearance: none;
 }

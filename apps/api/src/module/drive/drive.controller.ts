@@ -26,14 +26,14 @@ export class DriveController {
     @Req() req,
     @Body() body,
     @Query() query,
-    @UploadedFile() blob: any,
+    @UploadedFile() blob: any
   ) {
     return await this.driveService.driveUploadFile(
       req.user?.id,
       body.metadata,
       blob,
       query.itemId,
-      query.itemType,
+      query.itemType
     );
   }
 
@@ -43,7 +43,7 @@ export class DriveController {
     return await this.driveService.deleteFile(
       req.user?.id,
       query.itemId,
-      query.itemType,
+      query.itemType
     );
   }
 

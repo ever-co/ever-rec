@@ -15,7 +15,7 @@ const ToolSubPanelBtn: React.FC<IToolSubPanelBtn> = ({
   disabled,
   active,
   onSelect,
-  toolTitle
+  toolTitle,
 }) => {
   const clickHandler = () => {
     !disabled && onSelect();
@@ -33,23 +33,23 @@ const ToolSubPanelBtn: React.FC<IToolSubPanelBtn> = ({
       onClick={clickHandler}
     >
       <Tooltip title={toolTitle}>
-      <div
-        className={classNames(
-          !active
-            ? 'tw-text-black tw-p-5px '
-            : 'tw-text-white tw-bg-purple2 tw-p-5px',
-        )}
-      >
-        {/* <IconContext.Provider
+        <div
+          className={classNames(
+            !active
+              ? 'tw-text-black tw-p-5px '
+              : 'tw-text-white tw-bg-purple2 tw-p-5px',
+          )}
+        >
+          {/* <IconContext.Provider
           value={{
             style: { strokeWidth: '0.5' },
           }}
         > */}
-        <div className="tw-flex tw-items-center tw-justify-center">
-          <img src={icon} />
+          <div className="tw-flex tw-items-center tw-justify-center">
+            <img src={icon} />
+          </div>
+          {/* </IconContext.Provider> */}
         </div>
-        {/* </IconContext.Provider> */}
-      </div>
       </Tooltip>
     </div>
   );

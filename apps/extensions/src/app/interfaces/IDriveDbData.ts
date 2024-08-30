@@ -1,5 +1,4 @@
 export interface IDriveDbData {
-    driveId: string;
-    email: string;
-  }
-  
+  driveId: string;
+  email: string;
+}

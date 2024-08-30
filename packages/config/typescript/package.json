@@ -4,8 +4,12 @@
   "private": true,
   "description": "Shared TypeScript configurations for different environments",
   "main": "tsconfig.shared.json",
+  "scripts": {
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx",
+    "format": "prettier --write ."
+  },
   "peerDependencies": {
-    "typescript": "latest"
+    "typescript": "^5"
   },
   "license": "MIT"
 }

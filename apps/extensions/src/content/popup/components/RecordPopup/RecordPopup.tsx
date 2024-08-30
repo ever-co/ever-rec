@@ -93,8 +93,8 @@ const RecordPopup = ({ recording }: IProps) => {
     type === 'stop'
       ? setStopBtnHover(!stopBtnHover)
       : type === 'bin'
-      ? setBinBtnHover(!binBtnHover)
-      : setPauseBtnHover(!pauseBtnHover);
+        ? setBinBtnHover(!binBtnHover)
+        : setPauseBtnHover(!pauseBtnHover);
 
   let container: JSX.Element;
   if (

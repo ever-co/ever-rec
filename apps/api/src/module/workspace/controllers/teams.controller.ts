@@ -36,7 +36,7 @@ export class WorkspaceTeamsController {
   async addTeam(
     @Param('workspaceId', ValidateId) workspaceId: string,
     @Param() { teamName }: AddTeamDto, // TODO should be part of body
-    @User() user: IRequestUser,
+    @User() user: IRequestUser
   ) {
     return this.teamsService.addTeam(user.id, workspaceId, teamName);
   }
@@ -51,7 +51,7 @@ export class WorkspaceTeamsController {
     FileFieldsInterceptor([
       { name: 'avatar', maxCount: 1 },
       { name: 'thumbnail', maxCount: 1 },
-    ]),
+    ])
   )
   async updateTeam(
     @Param('workspaceId', ValidateId) workspaceId: string,
@@ -61,14 +61,14 @@ export class WorkspaceTeamsController {
       avatar?: Express.Multer.File[];
       thumbnail?: Express.Multer.File[];
     },
-    @Body() body: UpdateTeamDto,
+    @Body() body: UpdateTeamDto
   ) {
     return this.teamsService.updateTeam(
       workspaceId,
       teamId,
       body.name,
       files?.avatar && files.avatar[0],
-      files?.thumbnail && files.thumbnail[0],
+      files?.thumbnail && files.thumbnail[0]
     );
   }
 
@@ -76,7 +76,7 @@ export class WorkspaceTeamsController {
   @UseGuards(IsWorkspaceAdminGuard)
   async deleteTeam(
     @Param('workspaceId', ValidateId) workspaceId: string,
-    @Param('teamId', ValidateId) teamId: string,
+    @Param('teamId', ValidateId) teamId: string
   ) {
     return this.teamsService.deleteTeam(workspaceId, teamId);
   }
@@ -85,7 +85,7 @@ export class WorkspaceTeamsController {
   async leaveTeam(
     @Param('workspaceId', ValidateId) workspaceId: string,
     @Param('teamId', ValidateId) teamId: string,
-    @User() user: IRequestUser,
+    @User() user: IRequestUser
   ) {
     return this.teamsService.leaveTeam(workspaceId, user.id, teamId);
   }
@@ -99,7 +99,7 @@ export class WorkspaceTeamsController {
   @UseGuards(IsWorkspaceAdminGuard)
   async addMember(
     @Param('workspaceId', ValidateId) workspaceId: string,
-    @Body() { teamId, memberId }: AddTeamMemberDto,
+    @Body() { teamId, memberId }: AddTeamMemberDto
   ) {
     return this.teamsService.addMember(workspaceId, teamId, memberId);
   }
@@ -108,7 +108,7 @@ export class WorkspaceTeamsController {
   @UseGuards(IsWorkspaceAdminGuard)
   async deleteMember(
     @Param('workspaceId', ValidateId) workspaceId: string,
-    @Body() { teamId, memberId }: DeleteTeamMemberDto,
+    @Body() { teamId, memberId }: DeleteTeamMemberDto
   ) {
     return this.teamsService.deleteMember(workspaceId, teamId, memberId);
   }

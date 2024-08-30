@@ -1,6 +1,6 @@
 import React from 'react';
 import classNames from 'classnames';
-import styles from "./AppContainer.module.scss"
+import styles from './AppContainer.module.scss';
 
 interface IAppContainerProps {
   className?: string;
@@ -21,7 +21,7 @@ const AppContainer: React.FC<IAppContainerProps> = ({
         className={classNames(
           'tw-w-full default:tw-px-2 sm:tw-px-2 md:tw-px-2 lg:tw-px-2 xl:tw-px-12 2xl:tw-px-32',
           className,
-          isHeader && styles.wrapper
+          isHeader && styles.wrapper,
         )}
         style={style || {}}
       >

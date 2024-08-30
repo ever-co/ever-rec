@@ -46,9 +46,7 @@ const PanelRegister: React.FC = () => {
   ];
 
   const passwordRules: ((v: string) => boolean | string)[] = [
-    passwordPatternRule(
-      'Minimum eight characters and at least one number',
-    ),
+    passwordPatternRule('Minimum eight characters and at least one number'),
   ];
 
   const usernameChangeHandler = async ({ value }: AppInputType) => {

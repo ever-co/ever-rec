@@ -24,7 +24,7 @@ import { ITEM_TYPE_METADATA } from '../decorators/CanAccessItem.decorator';
 // Also requires that the param name is :workspaceId.
 // Maybe can be rewritten, but it will be good, that it makes us write same code/convention everywhere for now.
 export const getUserAndWorkspace = async (
-  context: ExecutionContext,
+  context: ExecutionContext
 ): Promise<{ user: IRequestUser; workspace: IWorkspace; req: any }> => {
   const db = admin.database();
   const req = context.switchToHttp().getRequest();
@@ -41,11 +41,11 @@ export function getItemData(
   context: ExecutionContext,
   req: any,
   workspace: IWorkspace,
-  that: any,
+  that: any
 ): IDbWorkspaceImageData | IDbWorkspaceVideoData {
   const itemType: CanAccessWorkspaceItemType = that.reflector.get(
     ITEM_TYPE_METADATA,
-    context.getHandler(),
+    context.getHandler()
   );
   let itemId;
   let collection;
@@ -73,7 +73,7 @@ export function getItemData(
 
   const item: IDbWorkspaceImageData | IDbWorkspaceVideoData =
     parseCollectionToArray(collection).find(
-      (x: IDbWorkspaceImageData | IDbWorkspaceVideoData) => x.id === itemId,
+      (x: IDbWorkspaceImageData | IDbWorkspaceVideoData) => x.id === itemId
     );
 
   return item;
@@ -83,11 +83,11 @@ export const evaluateAccess = (
   item: IDbWorkspaceImageData | IDbWorkspaceVideoData | IWorkspaceFolder,
   workspace: IWorkspace,
   user: IUser,
-  requiredAccessLevel: PermissionAccessEnum,
+  requiredAccessLevel: PermissionAccessEnum
 ) => {
   let hasAccessByTeam: boolean;
   let hasAccessByMember: boolean;
-  const workspaceUser = workspace.members.find((x) => x.id === user.id);
+  const workspaceUser = workspace.members.find(x => x.id === user.id);
 
   if (item.access.teams) {
     hasAccessByTeam = parseCollectionToArray(workspaceUser.teams).some(
@@ -103,7 +103,7 @@ export const evaluateAccess = (
             accessTeam.teamId === workspaceTeam.id &&
             evaluateAccessType(givenAccess, requiredAccessLevel)
           );
-        }),
+        })
     );
   }
 
@@ -121,7 +121,7 @@ export const evaluateAccess = (
           member.uid === user.id &&
           evaluateAccessType(givenAccess, requiredAccessLevel)
         );
-      },
+      }
     );
   }
 

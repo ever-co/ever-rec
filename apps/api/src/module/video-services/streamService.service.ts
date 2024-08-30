@@ -16,7 +16,7 @@ export class StreamServiceService {
 
   constructor(
     private readonly muxService: MuxService,
-    private readonly apiVideoService: ApiVideoService,
+    private readonly apiVideoService: ApiVideoService
   ) {
     this.config = {
       action: 'read',
@@ -28,7 +28,7 @@ export class StreamServiceService {
     uid: string,
     data: IStreamingDbData,
     blob: Express.Multer.File,
-    fullFilename: string,
+    fullFilename: string
   ) {
     try {
       const db = admin.database();
@@ -60,7 +60,7 @@ export class StreamServiceService {
 
       // Dont await this, we have polling on the client for downloadStatus and downloadUrl
       fixVideoAndUploadToBucket(blob, fullFilename, uid)
-        .then(async (fileRef) => {
+        .then(async fileRef => {
           const downloadUrl = (await fileRef.getSignedUrl(this.config))[0];
           const streamDataRef = db.ref(`users/${uid}/videos/${id}/streamData`);
           await streamDataRef.update({
@@ -68,7 +68,7 @@ export class StreamServiceService {
             downloadUrl,
           });
         })
-        .catch((error) => console.error(error));
+        .catch(error => console.error(error));
 
       return { dbData: newVideo, url: data.playbackUrl };
     } catch (error) {
@@ -81,7 +81,7 @@ export class StreamServiceService {
     data: IStreamingDbData,
     videoId: string,
     blob: Express.Multer.File,
-    fullFilename: string,
+    fullFilename: string
   ) {
     try {
       const db = admin.database();
@@ -90,7 +90,7 @@ export class StreamServiceService {
 
       if (!videoData) {
         throw new Error(
-          `There is no video streamData: users/${uid}/videos/${videoId}`,
+          `There is no video streamData: users/${uid}/videos/${videoId}`
         );
       }
 
@@ -110,22 +110,22 @@ export class StreamServiceService {
       const refName = videoData?.refName;
       if (refName) {
         fixVideoAndUploadToBucket(blob, fullFilename, uid, refName)
-          .then(async (fileRef) => {
+          .then(async fileRef => {
             const downloadUrl = (await fileRef.getSignedUrl(this.config))[0];
             const streamDataRef = db.ref(
-              `users/${uid}/videos/${videoId}/streamData`,
+              `users/${uid}/videos/${videoId}/streamData`
             );
             await streamDataRef.update({
               downloadStatus: PSEnum.READY,
               downloadUrl,
             });
           })
-          .catch((error) => console.error(error));
+          .catch(error => console.error(error));
       }
 
       await this.deleteAsset(
         videoData.streamData.assetId,
-        videoData.streamData.serviceType,
+        videoData.streamData.serviceType
       );
 
       const dbData: DbVideoData = (await videoRef.get()).val();
@@ -151,7 +151,7 @@ export class StreamServiceService {
 
   async copyAsset(
     assetId: string,
-    serviceType: VideoServicesEnum,
+    serviceType: VideoServicesEnum
   ): Promise<IStreamingDbData | null> {
     switch (serviceType) {
       case VideoServicesEnum.MUX:

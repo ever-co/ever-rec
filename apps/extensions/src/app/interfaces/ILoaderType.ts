@@ -1,1 +1,1 @@
-export type LoaderTypes = 'idle' | 'loading' | 'complete'
+export type LoaderTypes = 'idle' | 'loading' | 'complete';

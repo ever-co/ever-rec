@@ -6,11 +6,7 @@ interface IFolderInfoProps {
   updatedAgo: string | false;
 }
 
-
-const FolderInfo: FC<IFolderInfoProps> = ({
-  itemsNumber,
-  updatedAgo,
-}) => {
+const FolderInfo: FC<IFolderInfoProps> = ({ itemsNumber, updatedAgo }) => {
   return (
     <div className={styles.folderInfo}>
       {itemsNumber && (

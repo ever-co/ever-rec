@@ -29,13 +29,13 @@ export class WorkspaceMembersController {
   @Post(':workspaceId/member')
   async addNewMemberToWorkspace(
     @Param('workspaceId', ValidateId) workspaceId: string,
-    @User() user: IRequestUser,
+    @User() user: IRequestUser
   ) {
     return this.membersService.addWorkspaceMember(
       user.id,
       user.name,
       user.email,
-      workspaceId,
+      workspaceId
     );
   }
 
@@ -43,7 +43,7 @@ export class WorkspaceMembersController {
   @Delete(':workspaceId/member')
   async removeMemberFromWorkspace(
     @Param('workspaceId', ValidateId) workspaceId: string,
-    @User() user: IRequestUser,
+    @User() user: IRequestUser
   ) {
     return this.membersService.removeMemberFromWorkspace(user.id, workspaceId);
   }
@@ -53,7 +53,7 @@ export class WorkspaceMembersController {
   async getPopulatedMembers(
     @Param('workspaceId', ValidateId) workspaceId: string,
     @User() user: IRequestUser,
-    @Query() { limit }: GetPopulatedMembersDto,
+    @Query() { limit }: GetPopulatedMembersDto
   ) {
     return this.membersService.getPopulatedMembers(user.id, workspaceId, limit);
   }

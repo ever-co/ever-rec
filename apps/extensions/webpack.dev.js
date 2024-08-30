@@ -9,6 +9,7 @@ require('dotenv').config({ path: `.env.${target}` });
 
 module.exports = merge(config, {
   mode: 'development',
+  stats: 'verbose',
   devtool: 'inline-source-map',
   output: {
     path: path.join(__dirname, 'build', target),

@@ -340,7 +340,10 @@ const VideoEditorScreen: FC<IProps> = ({ isWorkspace = false, workspace }) => {
   };
 
   const videoDelete = async (video: IEditorVideo) => {
-    if (video?.dbData?.parentId && typeof video?.dbData?.parentId == 'string') {
+    if (
+      video?.dbData?.parentId &&
+      typeof video?.dbData?.parentId === 'string'
+    ) {
       const { data } = await getFolderByIdAPI(video.dbData.parentId);
       data && (await decreaseFolderItems(data, 'video', 1));
     }

@@ -144,7 +144,7 @@ const ScreenshotsContainer: React.FC<IScreenshotsContainerProps> = ({
     setLoaderState(true);
     if (
       screenshot?.dbData?.parentId &&
-      typeof screenshot?.dbData?.parentId == 'string'
+      typeof screenshot?.dbData?.parentId === 'string'
     ) {
       const { data } = await getFolderByIdAPI(screenshot.dbData.parentId);
       if (data) {

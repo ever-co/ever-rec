@@ -56,7 +56,7 @@ export class WorkspaceFilesService {
     private readonly workspaceShareService: WorkspaceShareService,
     private readonly sharedService: SharedService,
     private eventEmitter: EventEmitter2,
-    private editorGateway: EditorGateway,
+    private editorGateway: EditorGateway
   ) {
     this.config = {
       action: 'read',
@@ -66,7 +66,7 @@ export class WorkspaceFilesService {
 
   async saveOriginalWSImageInBucket(
     workspaceId: string,
-    fullFileName: string,
+    fullFileName: string
   ): Promise<any> {
     const bucket = admin.storage().bucket();
 
@@ -83,12 +83,12 @@ export class WorkspaceFilesService {
       try {
         const res = await this.saveOriginalWSImageInBucket(
           workspaceId,
-          fullFileName,
+          fullFileName
         );
 
         if (res) {
           const copiedfile = bucket.file(
-            `workspaces/${workspaceId}/screenshots/originals/${fullFileName}`,
+            `workspaces/${workspaceId}/screenshots/originals/${fullFileName}`
           );
 
           const downloadUrl = (await copiedfile.getSignedUrl(this.config))[0];
@@ -106,19 +106,19 @@ export class WorkspaceFilesService {
     file: Express.Multer.File,
     title: string,
     fullFileName: string,
-    folderId: string | false,
+    folderId: string | false
   ): Promise<IDataResponse<IWorkspaceImage | null>> {
     try {
       const { thumbnail: uploadedImage } =
         await this.utilitiesService.uploadImageInBucket(
           file,
           workspaceId,
-          fullFileName,
+          fullFileName
         );
 
       const savedOriginal = await this.saveOriginalWSImage(
         workspaceId,
-        fullFileName,
+        fullFileName
       );
 
       const metadata = (await uploadedImage.getMetadata())[0];
@@ -149,7 +149,7 @@ export class WorkspaceFilesService {
         const updatedFolders =
           this.utilitiesService.changeFolderItemCountRecursive(
             parseCollectionToArray(workspaceVal.folders),
-            folderId,
+            folderId
           );
 
         await workspaceRef.update({ folders: updatedFolders });
@@ -161,7 +161,7 @@ export class WorkspaceFilesService {
             userId: uid,
             workspaceId: workspaceId,
             properties: { title, url: downloadUrl, uid, workspaceId },
-          },
+          }
         );
 
         return sendResponse<IWorkspaceImage>(image);
@@ -179,7 +179,7 @@ export class WorkspaceFilesService {
     workspaceId: string,
     itemId: string,
     itemType: ItemType,
-    folderId: string | false,
+    folderId: string | false
   ): Promise<IDataResponse<IWorkspaceImage | IWorkspaceVideo>> {
     // TODO validate folderId exists
     try {
@@ -204,7 +204,7 @@ export class WorkspaceFilesService {
         (await bucket
           .file(`users/${uid}/${itemLocation}/thumbnails/${itemVal.refName}`)
           .copy(
-            `workspaces/${workspaceId}/${itemLocation}/thumbnails/${itemVal.refName}`,
+            `workspaces/${workspaceId}/${itemLocation}/thumbnails/${itemVal.refName}`
           ));
       const metadata = (await file.getMetadata())[0];
       const downloadUrl = (await file.getSignedUrl(this.config))[0];
@@ -214,11 +214,11 @@ export class WorkspaceFilesService {
       await bucket
         .file(`users/${uid}/screenshots/originals/${itemVal.refName}`)
         .copy(
-          `workspaces/${workspaceId}/screenshots/originals/${itemVal.refName}`,
+          `workspaces/${workspaceId}/screenshots/originals/${itemVal.refName}`
         );
 
       const originalFile = await bucket.file(
-        `workspaces/${workspaceId}/screenshots/originals/${itemVal.refName}`,
+        `workspaces/${workspaceId}/screenshots/originals/${itemVal.refName}`
       );
 
       const originalImageURL = (
@@ -233,7 +233,7 @@ export class WorkspaceFilesService {
 
         copiedStreamData = await this.streamService.copyAsset(
           assetId,
-          serviceType,
+          serviceType
         );
 
         if (copiedStreamData) {
@@ -251,7 +251,7 @@ export class WorkspaceFilesService {
         workspaceId,
         itemId,
         newId,
-        parseCollectionToArray({ ...itemVal?.chapters }),
+        parseCollectionToArray({ ...itemVal?.chapters })
       );
 
       const stage = itemVal?.stage;
@@ -299,7 +299,7 @@ export class WorkspaceFilesService {
             uid,
             workspaceId,
           },
-        },
+        }
       );
 
       return sendResponse<IWorkspaceImage | IWorkspaceVideo>(item);
@@ -314,7 +314,7 @@ export class WorkspaceFilesService {
     workspaceId: string,
     itemId: string,
     newId: string,
-    chapters: IChapter[],
+    chapters: IChapter[]
   ): Promise<any> {
     if (!chapters.length) {
       return null;
@@ -324,7 +324,7 @@ export class WorkspaceFilesService {
     const thumbnailFileRefs = [];
     const chaptersMap = {};
 
-    const copyRefPromises = chapters.map(async (chapter) => {
+    const copyRefPromises = chapters.map(async chapter => {
       const refName = chapter.refName;
       const filePath = `users/${uid}/videosThumbnails/${itemId}/${refName}`;
       const copyPath = `workspaces/${workspaceId}/videosThumbnails/${newId}/${refName}`;
@@ -339,11 +339,11 @@ export class WorkspaceFilesService {
     await promiseAllSettled(copyRefPromises);
 
     // Get Signed URLs from copied files
-    const signedURLPromises = thumbnailFileRefs.map((ref) =>
-      ref.getSignedUrl(this.config),
+    const signedURLPromises = thumbnailFileRefs.map(ref =>
+      ref.getSignedUrl(this.config)
     );
-    const signedURLs = await promiseAllSettled(signedURLPromises).then(
-      (values) => values.flat(),
+    const signedURLs = await promiseAllSettled(signedURLPromises).then(values =>
+      values.flat()
     );
 
     // Update chapters thumbnailURL and create a new Map for the database
@@ -359,12 +359,12 @@ export class WorkspaceFilesService {
 
   async getImage(
     workspaceId: string,
-    imageId: string,
+    imageId: string
   ): Promise<IDataResponse<IWorkspaceImage | null>> {
     try {
       const db = admin.database();
       const imageRef = db.ref(
-        `workspaces/${workspaceId}/screenshots/${imageId}`,
+        `workspaces/${workspaceId}/screenshots/${imageId}`
       );
       const imageSnap = await imageRef.get();
       const imageVal = imageSnap.val();
@@ -372,12 +372,12 @@ export class WorkspaceFilesService {
       if (imageVal) {
         const bucket = admin.storage().bucket();
         const file = bucket.file(
-          `workspaces/${workspaceId}/screenshots/${imageVal.refName}`,
+          `workspaces/${workspaceId}/screenshots/${imageVal.refName}`
         );
         const url = (await file.getSignedUrl(this.config))[0];
 
         const userData = await this.utilitiesService.getShortUserData(
-          imageVal.uid,
+          imageVal.uid
         );
 
         const image = {
@@ -392,14 +392,14 @@ export class WorkspaceFilesService {
     } catch (e) {
       console.log(e);
       return sendError(
-        'Error while trying to get workspace image. Please try again later.',
+        'Error while trying to get workspace image. Please try again later.'
       );
     }
   }
 
   async getVideo(
     workspaceId: string,
-    videoId: string,
+    videoId: string
   ): Promise<IDataResponse<IWorkspaceVideo | null>> {
     try {
       const db = admin.database();
@@ -419,7 +419,7 @@ export class WorkspaceFilesService {
         url = streamData.playbackUrl;
       } else {
         const file = bucket.file(
-          `workspaces/${workspaceId}/videos/${videoVal.refName}`,
+          `workspaces/${workspaceId}/videos/${videoVal.refName}`
         );
         url = (await file.getSignedUrl(this.config))[0];
       }
@@ -428,7 +428,7 @@ export class WorkspaceFilesService {
       sharedLink = await this.findSharedLinkWorkspace(workspaceId, videoId);
 
       const userData = await this.utilitiesService.getShortUserData(
-        videoVal.uid,
+        videoVal.uid
       );
 
       const video = {
@@ -441,14 +441,14 @@ export class WorkspaceFilesService {
     } catch (e) {
       console.log(e);
       return sendError(
-        'There was a problem while trying to get the workspace video.',
+        'There was a problem while trying to get the workspace video.'
       );
     }
   }
 
   async findSharedLinkWorkspace(
     workspaceId: string,
-    itemId: string,
+    itemId: string
   ): Promise<string | null> {
     const db = admin.database();
     const query = `${workspaceId}|${itemId}`;
@@ -473,16 +473,16 @@ export class WorkspaceFilesService {
     workspaceId: string,
     blob: Express.Multer.File,
     refName: string,
-    location: string,
+    location: string
   ): Promise<string> {
     const bucket = admin.storage().bucket();
     const file = bucket.file(
-      `workspaces/${workspaceId}/screenshots/${refName ? refName : location}`,
+      `workspaces/${workspaceId}/screenshots/${refName ? refName : location}`
     );
     const thumnbnail = bucket.file(
       `workspaces/${workspaceId}/screenshots/thumbnails/${
         refName ? refName : location
-      }`,
+      }`
     );
 
     const buffer = Buffer.from(blob.buffer);
@@ -518,7 +518,7 @@ export class WorkspaceFilesService {
     title?: string,
     stage?: any,
     originalImage?: string,
-    markers?: string,
+    markers?: string
   ): Promise<IDataResponse<IWorkspaceVideo | null>> {
     const db = admin.database();
     const items = itemType === 'image' ? 'screenshots' : 'videos';
@@ -552,7 +552,7 @@ export class WorkspaceFilesService {
     blob: Express.Multer.File,
     title: string,
     fullFilename: string,
-    folderId: string | false,
+    folderId: string | false
   ): Promise<IDataResponse<IWorkspaceVideo | null>> {
     try {
       let videoDuration = undefined;
@@ -561,7 +561,7 @@ export class WorkspaceFilesService {
       const fixedVideoPath = join(TMP_PATH_FIXED, fullFilename);
       const { duration: ffmpegDuration } = await fixVideoWithFFMPEG(
         inputPath,
-        fixedVideoPath,
+        fixedVideoPath
       );
 
       // Set new duration calculated with FFMPEG
@@ -603,7 +603,7 @@ export class WorkspaceFilesService {
         const updatedFolders =
           this.utilitiesService.changeFolderItemCountRecursive(
             parseCollectionToArray(workspaceVal.folders),
-            folderId,
+            folderId
           );
 
         await workspaceRef.update({ folders: updatedFolders });
@@ -615,7 +615,7 @@ export class WorkspaceFilesService {
             userId: uid,
             workspaceId: workspaceId,
             properties: { url: downloadUrl, title, ...metadata, workspaceId },
-          },
+          }
         );
 
         // Should decide what to send to the Extension after and IF storageReference is resolved
@@ -633,7 +633,7 @@ export class WorkspaceFilesService {
     workspaceId: string,
     imageId: string,
     refName: string,
-    folderId: string | false,
+    folderId: string | false
   ): Promise<IDataResponse<string | null>> {
     try {
       const db = admin.database();
@@ -642,17 +642,17 @@ export class WorkspaceFilesService {
         await this.utilitiesService.getWorkspaceById(workspaceId);
 
       const imageReference = db.ref(
-        `workspaces/${workspaceId}/screenshots/${imageId}`,
+        `workspaces/${workspaceId}/screenshots/${imageId}`
       );
       const imageStorageRef = bucket.file(
-        `workspaces/${workspaceId}/screenshots/${refName}`,
+        `workspaces/${workspaceId}/screenshots/${refName}`
       );
       const imageThumbnailStorageRef = bucket.file(
-        `workspaces/${workspaceId}/screenshots/thumbnails/${refName}`,
+        `workspaces/${workspaceId}/screenshots/thumbnails/${refName}`
       );
 
       const imageOriginalStorageRef = bucket.file(
-        `workspaces/${workspaceId}/screenshots/originals/${refName}`,
+        `workspaces/${workspaceId}/screenshots/originals/${refName}`
       );
 
       this.workspaceShareService.deleteLinkById(workspaceId, imageId);
@@ -662,7 +662,7 @@ export class WorkspaceFilesService {
       });
       imageThumbnailStorageRef.delete().catch(() => {
         console.log(
-          'Error deleting image thumbnail from reference: ' + refName,
+          'Error deleting image thumbnail from reference: ' + refName
         );
       });
 
@@ -676,7 +676,7 @@ export class WorkspaceFilesService {
         this.utilitiesService.changeFolderItemCountRecursive(
           parseCollectionToArray(workspaceVal.folders),
           folderId,
-          -1,
+          -1
         );
 
       await workspaceRef.update({ folders: updatedFolders });
@@ -691,7 +691,7 @@ export class WorkspaceFilesService {
   async deleteVideo(
     workspaceId: string,
     videoId: string,
-    refName: string,
+    refName: string
   ): Promise<IDataResponse<string | null>> {
     try {
       const db = admin.database();
@@ -703,7 +703,7 @@ export class WorkspaceFilesService {
       const videoData = (await videoRef.get()).val();
 
       const fileRef = bucket.file(
-        `workspaces/${workspaceId}/videos/${refName}`,
+        `workspaces/${workspaceId}/videos/${refName}`
       );
       fileRef.delete().catch(() => {
         console.log('Error deleting video from reference: ' + refName);
@@ -713,7 +713,7 @@ export class WorkspaceFilesService {
         .deleteFiles({
           prefix: `workspaces/${workspaceId}/videosThumbnails/${videoId}/`,
         })
-        .catch((error) => {
+        .catch(error => {
           console.log('Error deleting video chapters:', error);
         });
 
@@ -721,7 +721,7 @@ export class WorkspaceFilesService {
       const serviceType = videoData?.streamData?.serviceType;
       this.streamService.deleteAsset(assetId, serviceType).catch(() => {
         console.log(
-          `Error deleting asset from service ${serviceType}: ${assetId}`,
+          `Error deleting asset from service ${serviceType}: ${assetId}`
         );
       });
 
@@ -733,7 +733,7 @@ export class WorkspaceFilesService {
         {
           workspaceId,
           properties: { id: videoId },
-        },
+        }
       );
 
       return sendResponse('Video deleted successfully');

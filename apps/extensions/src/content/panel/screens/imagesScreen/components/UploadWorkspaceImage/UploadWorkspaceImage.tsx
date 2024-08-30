@@ -8,7 +8,7 @@ import {
   useState,
 } from 'react';
 import { RootStateOrAny, useSelector } from 'react-redux';
-import {useDropzone} from "react-dropzone";
+import { useDropzone } from 'react-dropzone';
 import { errorHandler } from '@/app/services/helpers/errors';
 import { Modal } from 'antd';
 import AppSvg from '@/content/components/elements/AppSvg';
@@ -98,7 +98,8 @@ const UploadWorkspaceImageModal: React.FC<Props> = ({
             </h5>
           </div>
           <div className={styles.marginDiv}>
-            <AppButton onClick={() => {}} full={true}>
+            {/* eslint-disable-next-line @typescript-eslint/no-empty-function */}
+            <AppButton full={true} onClick={() => {}}>
               Save
             </AppButton>
           </div>
@@ -112,7 +113,9 @@ const UploadWorkspaceImageModal: React.FC<Props> = ({
       ) : (
         // @ts-ignore
         <div {...getRootProps()} ref={rootRef}>
-          <input {...getInputProps()} />
+          <input
+            {...(getInputProps() as React.InputHTMLAttributes<HTMLInputElement>)}
+          />
           <div className={classNames(styles.wrapper, styles.preUploadWrapper)}>
             {isDragActive ? (
               <div className={styles.preUploadWrapper}>
@@ -133,7 +136,7 @@ const UploadWorkspaceImageModal: React.FC<Props> = ({
                   className={styles.imageSVG}
                 />
                 <h3 className={styles.dragNDrop}>
-                  Drag 'n' drop images here or
+                  Drag &apos;n&apos; drop images here or
                 </h3>
                 <AppButton
                   onClick={handleClick}

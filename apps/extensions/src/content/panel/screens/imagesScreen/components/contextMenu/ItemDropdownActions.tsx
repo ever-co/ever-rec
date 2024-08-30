@@ -106,7 +106,11 @@ const ItemDropdownActions: React.FC<IItemDropdownActionsProps> = ({
     const restoreAction = {
       key: ItemActionsEnum.restore,
       icon: (
-        <AppSvg path="/images/images/restore.svg" size="20px" className="tw-mr-3" />
+        <AppSvg
+          path="/images/images/restore.svg"
+          size="20px"
+          className="tw-mr-3"
+        />
       ),
       label: 'Restore',
     };

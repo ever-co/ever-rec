@@ -105,7 +105,10 @@
     margin-left: -60px;
     visibility: hidden;
     opacity: 0;
-    transition: visibility 0s, opacity 0.4s linear, margin-left 0.2s ease-in-out;
+    transition:
+      visibility 0s,
+      opacity 0.4s linear,
+      margin-left 0.2s ease-in-out;
     cursor: pointer;
   }
 }

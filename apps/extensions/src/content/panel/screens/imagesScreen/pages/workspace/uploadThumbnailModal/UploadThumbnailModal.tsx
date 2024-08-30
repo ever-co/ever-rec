@@ -26,7 +26,10 @@ const UploadThumbnailModal: React.FC<Props> = ({
       closable={true}
       onCancel={onCancel}
       closeIcon={
-        <AppSvg path="images/panel/common/close-icon.svg" className="modalCloseButton" />
+        <AppSvg
+          path="images/panel/common/close-icon.svg"
+          className="modalCloseButton"
+        />
       }
       footer={
         <div

@@ -3,7 +3,6 @@ import AppHeader from '@/content/components/elements/AppHeader';
 import React from 'react';
 import { IStepProps } from './steps';
 
-
 const InstallPinn: React.FC<IStepProps> = ({ nextStep }) => {
   return (
     <div className="tw-w-full">

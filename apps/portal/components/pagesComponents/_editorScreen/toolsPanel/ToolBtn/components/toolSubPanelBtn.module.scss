@@ -24,7 +24,6 @@
 .active {
   color: #fbfaff;
   background: #998fff;
-
 }
 
 .notActive {
@@ -37,18 +36,18 @@
 }
 
 .container {
-    color: black;
-    padding: 5px;
+  color: black;
+  padding: 5px;
 }
 .activeContainer {
-    color: white;
-    background: #998FFF;
-    padding: 5px;
-    border-radius: 9999px;
+  color: white;
+  background: #998fff;
+  padding: 5px;
+  border-radius: 9999px;
 }
 
 .flexContainer {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

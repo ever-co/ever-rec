@@ -53,7 +53,7 @@ const TextTool: React.FC<ITextToolProps> = ({
   setActiveTool,
   onResetShape,
   title,
-  iconMore
+  iconMore,
 }) => {
   const optionsChangeHandler = (field: string, value: any) => {
     onChange({ ...options, [field]: value });
@@ -78,7 +78,7 @@ const TextTool: React.FC<ITextToolProps> = ({
           style={{ fontFamily: options.fontFamily }}
           onChange={(val) => optionsChangeHandler('fontFamily', val)}
           className="tw-w-full tw-rounded tw-bg-primary-violet app-selectable"
-    >
+        >
           {fonts.map((font, index) => (
             <Select.Option
               key={`font_${index}`}
@@ -99,10 +99,10 @@ const TextTool: React.FC<ITextToolProps> = ({
               options.fontStyle === ''
                 ? optionsChangeHandler('fontStyle', 'bold')
                 : options.fontStyle === 'italic'
-                ? optionsChangeHandler('fontStyle', 'italic bold')
-                : options.fontStyle === 'italic bold'
-                ? optionsChangeHandler('fontStyle', 'italic')
-                : optionsChangeHandler('fontStyle', '');
+                  ? optionsChangeHandler('fontStyle', 'italic bold')
+                  : options.fontStyle === 'italic bold'
+                    ? optionsChangeHandler('fontStyle', 'italic')
+                    : optionsChangeHandler('fontStyle', '');
             }}
           />
 
@@ -113,10 +113,10 @@ const TextTool: React.FC<ITextToolProps> = ({
               options.fontStyle === ''
                 ? optionsChangeHandler('fontStyle', 'italic')
                 : options.fontStyle === 'bold'
-                ? optionsChangeHandler('fontStyle', 'italic bold')
-                : options.fontStyle === 'italic bold'
-                ? optionsChangeHandler('fontStyle', 'bold')
-                : optionsChangeHandler('fontStyle', '');
+                  ? optionsChangeHandler('fontStyle', 'italic bold')
+                  : options.fontStyle === 'italic bold'
+                    ? optionsChangeHandler('fontStyle', 'bold')
+                    : optionsChangeHandler('fontStyle', '');
             }}
           />
 

@@ -85,9 +85,7 @@ export const FilterDropdown: FC<IProps> = ({
           justifyContent: 'center',
           border: filterTeamId ? '2px solid #5c4ebb' : undefined,
         }}
-        icon={
-          <AppSvg path="/images/panel/common/team-icon.svg" size="20px" />
-        }
+        icon={<AppSvg path="/images/panel/common/team-icon.svg" size="20px" />}
         size="large"
       ></Button>
     </Dropdown>

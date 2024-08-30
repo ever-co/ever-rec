@@ -23,12 +23,12 @@ export class VideoChapterController {
   async getChapters(
     @Req() request,
     @Param('videoId') videoId: string,
-    @Query('workspaceId') workspaceId: string,
+    @Query('workspaceId') workspaceId: string
   ) {
     return await this.videoChapterService.getChapters(
       request.user?.id,
       videoId,
-      workspaceId,
+      workspaceId
     );
   }
 
@@ -40,7 +40,7 @@ export class VideoChapterController {
     @Param('videoId') videoId: string,
     @Query('workspaceId') workspaceId: string,
     @Body() body: { chapters: string; chaptersBlobs: string },
-    @UploadedFiles() thumbnailFiles: Array<Express.Multer.File>,
+    @UploadedFiles() thumbnailFiles: Array<Express.Multer.File>
   ) {
     const chapters = JSON.parse(body.chapters);
     const chaptersBlobs = JSON.parse(body.chaptersBlobs);
@@ -51,7 +51,7 @@ export class VideoChapterController {
       chapters,
       chaptersBlobs,
       thumbnailFiles,
-      workspaceId,
+      workspaceId
     );
   }
 
@@ -61,13 +61,13 @@ export class VideoChapterController {
     @Req() request,
     @Body() body: { chaptersEnabled: boolean },
     @Param('videoId') videoId: string,
-    @Query('workspaceId') workspaceId: string,
+    @Query('workspaceId') workspaceId: string
   ) {
     return await this.videoChapterService.enableChapters(
       request.user?.id,
       videoId,
       body.chaptersEnabled,
-      workspaceId,
+      workspaceId
     );
   }
 

@@ -181,9 +181,12 @@ interface SlideDownProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 export const SlideDown = forwardRef(
-  (props: SlideDownProps, ref: React.Ref<HTMLDivElement>) => (
-    <SlideDownContent {...props} forwardedRef={ref} />
-  ),
+  (props: SlideDownProps, ref: React.Ref<HTMLDivElement>) => {
+    // @ts-ignore
+    return <SlideDownContent {...props} forwardedRef={ref} />;
+  },
 );
+
+SlideDown.displayName = 'SlideDown';
 
 export default SlideDown;

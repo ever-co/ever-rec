@@ -29,7 +29,6 @@ export const useCreateWorkspace = (shouldRouteToNewWorkspace = true) => {
     } else {
       const currentWorkspaces = workspaces || [];
 
-
       dispatch(PanelAC.setActiveWorkspace({ activeWorkspace: response.data }));
       dispatch(
         PanelAC.setWorkspaces({

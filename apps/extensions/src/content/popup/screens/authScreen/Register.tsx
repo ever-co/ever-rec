@@ -19,9 +19,8 @@ const Register: React.FC<IRegisterProps> = ({ changeAuthScreen }) => {
 
   const [email, setEmail] = useState<IAppControl>(initialControl());
   const [password, setPassword] = useState<IAppControl>(initialControl());
-  const [passwordConfirm, setPasswordConfirm] = useState<IAppControl>(
-    initialControl(),
-  );
+  const [passwordConfirm, setPasswordConfirm] =
+    useState<IAppControl>(initialControl());
   const [valid, setValid] = useState<boolean>(false);
 
   useEffect(() => {

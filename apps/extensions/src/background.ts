@@ -117,7 +117,7 @@ try {
       const imgBase64 = await chrome.tabs.captureVisibleTab();
       const payload = { ...message.payload, imgBase64 };
 
-      if (payload.action == 'copy' || payload.action == 'save') {
+      if (payload.action === 'copy' || payload.action === 'save') {
         saveSegmentEventData(payload.action + ' selected area screenshot', {
           type: 'chrome extensions',
         });
@@ -169,10 +169,10 @@ try {
     if (message.action === AppMessagesEnum.stopRecordingSW) {
       await removeStorageItems('recordStatus');
       const { videoType, command } = message.payload;
-      if (command == 'stop') {
+      if (command === 'stop') {
         await setBadgeText('');
       }
-      if (videoType == 'fullScreen') {
+      if (videoType === 'fullScreen') {
         await hideController();
       }
 
@@ -191,7 +191,7 @@ try {
         const badgeTime = await browser.action.getBadgeText({
           tabId: activeTabId,
         });
-        if (recordStatus && badgeTime != '') {
+        if (recordStatus && badgeTime !== '') {
           sendRuntimeMessage({
             action: AppMessagesEnum.sendTimeToPopup,
             payload: {
@@ -295,7 +295,7 @@ try {
         if (windows.id) {
           await setStorageItems({ winId: windows.id });
         }
-      } else if (videoType == 'cameraOnly') {
+      } else if (videoType === 'cameraOnly') {
         await createRecordingWindow(panelRoutes.cameraonly.path, 170);
       }
 
@@ -384,7 +384,7 @@ const sendImgToEditorPage = async (
   });
 
   browser.tabs.onUpdated.addListener(function listener(tabId, changeInfo) {
-    if (tabId === newTab.id && changeInfo.status == 'complete') {
+    if (tabId === newTab.id && changeInfo.status === 'complete') {
       chrome.tabs.onUpdated.removeListener(listener);
       newTab.id &&
         sendTabsMessage(newTab.id, {
@@ -418,81 +418,78 @@ const setVideoFile = async (
     await setStorageItems({ videoEditorTabId: videoEditorTab.id, winId });
   }
 
-  browser.tabs.onUpdated.addListener(async function listener(
-    tabId,
-    changeInfo,
-  ) {
-    if (changeInfo.status == 'complete') {
-      await sendTabsMessage(tabId, {
-        action: AppMessagesEnum.setVideoTitle,
-        payload: {
-          videoTitle,
-          blobUrls,
-          videoDuration,
-          winId,
-        },
-      });
-      chrome.tabs.onUpdated.removeListener(listener);
-    }
-  });
+  browser.tabs.onUpdated.addListener(
+    async function listener(tabId, changeInfo) {
+      if (changeInfo.status === 'complete') {
+        await sendTabsMessage(tabId, {
+          action: AppMessagesEnum.setVideoTitle,
+          payload: {
+            videoTitle,
+            blobUrls,
+            videoDuration,
+            winId,
+          },
+        });
+        chrome.tabs.onUpdated.removeListener(listener);
+      }
+    },
+  );
 };
 
-browser.tabs.onUpdated.addListener(async function updateTab(
-  tabId,
-  changeInfo,
-  tab,
-) {
-  const url = tab.url;
-  const {
-    recordStatus,
-    winId,
-    activeTabId,
-    pausedTime,
-    videoEditorTabId,
-    fromEditor,
-  } = await getStorageItems([
-    'recordStatus',
-    'winId',
-    'activeTabId',
-    'pausedTime',
-    'videoEditorTabId',
-    'fromEditor',
-  ]);
-  if (url !== undefined && changeInfo.status == 'complete') {
-    if (recordStatus) {
-      if (activeTabId == tabId && recordStatus.videoType == 'tabScreen') {
-        sendTabsMessage(activeTabId, {
-          action: AppMessagesEnum.showTabController,
-          payload: {
-            microphoneMuted: recordStatus.microphoneMuted,
-            microphoneEnabled: recordStatus.microphoneEnabled,
-            videoStatus: recordStatus.videoStatus,
-            fromEditor: fromEditor,
-          },
-        });
-      } else if (
-        tab.windowId != winId &&
-        recordStatus &&
-        recordStatus.videoType == 'fullScreen' &&
-        videoEditorTabId != tabId
-      ) {
-        sendTabsMessage(tabId, {
-          action: AppMessagesEnum.showTabController,
-          payload: {
-            microphoneMuted: recordStatus.microphoneMuted,
-            microphoneEnabled: recordStatus.microphoneEnabled,
-            videoStatus: recordStatus.videoStatus,
-            pausedTime,
-          },
-        });
+browser.tabs.onUpdated.addListener(
+  async function updateTab(tabId, changeInfo, tab) {
+    const url = tab.url;
+    const {
+      recordStatus,
+      winId,
+      activeTabId,
+      pausedTime,
+      videoEditorTabId,
+      fromEditor,
+    } = await getStorageItems([
+      'recordStatus',
+      'winId',
+      'activeTabId',
+      'pausedTime',
+      'videoEditorTabId',
+      'fromEditor',
+    ]);
+    if (url !== undefined && changeInfo.status === 'complete') {
+      if (recordStatus) {
+        if (activeTabId === tabId && recordStatus.videoType === 'tabScreen') {
+          sendTabsMessage(activeTabId, {
+            action: AppMessagesEnum.showTabController,
+            payload: {
+              microphoneMuted: recordStatus.microphoneMuted,
+              microphoneEnabled: recordStatus.microphoneEnabled,
+              videoStatus: recordStatus.videoStatus,
+              fromEditor: fromEditor,
+            },
+          });
+        } else if (
+          tab.windowId != winId &&
+          recordStatus &&
+          recordStatus.videoType == 'fullScreen' &&
+          videoEditorTabId != tabId
+        ) {
+          sendTabsMessage(tabId, {
+            action: AppMessagesEnum.showTabController,
+            payload: {
+              microphoneMuted: recordStatus.microphoneMuted,
+              microphoneEnabled: recordStatus.microphoneEnabled,
+              videoStatus: recordStatus.videoStatus,
+              pausedTime,
+            },
+          });
 
-        if (recordStatus.videoStatus == 'pause') {
-          await setBadgeText(pausedTime);
+          if (recordStatus.videoStatus === 'pause') {
+            await setBadgeText(pausedTime);
+          }
         }
       }
     }
-  }
-});
+  },
+);
 
 browser.tabs.onActivated.addListener(
   async (activeInfo: chrome.tabs.TabActiveInfo) => {
@@ -507,10 +504,13 @@ browser.tabs.onActivated.addListener(
 
     const windows = await (
       await browser.windows.getAll()
-    ).filter((win) => win.id == winId);
+    ).filter((win) => win.id === winId);
 
     if (activeTabId && recordStatus && windows.length > 0 && recordedWinId) {
-      if (recordStatus.videoType == 'fullScreen' && activeInfo.tabId != winId) {
+      if (
+        recordStatus.videoType === 'fullScreen' &&
+        activeInfo.tabId !== winId
+      ) {
         sendTabsMessage(activeTabId, {
           action: AppMessagesEnum.showTabController,
           payload: {
@@ -665,10 +665,10 @@ const closeWindowHandler = async (windowsId: number, filter?: any) => {
 
   const allWidows: chrome.windows.Window[] = await browser.windows.getAll();
 
-  if (winId == windowsId) {
+  if (winId === windowsId) {
     //If recording window is closed we 100% clear storage.
     await clearStorage();
-  } else if (allWidows.length == 1 && allWidows[0].id == winId) {
+  } else if (allWidows.length === 1 && allWidows[0].id === winId) {
     await clearStorage();
     try {
       removeWindow(winId);
@@ -694,8 +694,8 @@ const closeTabHandler = async (
 
   if (
     recordStatus &&
-    recordStatus.videoType == 'tabScreen' &&
-    activeTabId == tabId
+    recordStatus.videoType === 'tabScreen' &&
+    activeTabId === tabId
   ) {
     removeWindow(winId);
   } else if (videoEditorTabId === tabId) {
@@ -738,11 +738,11 @@ const onWindowChange = async (
     ]);
 
   if (
-    recordedWinId != windowId &&
+    recordedWinId !== windowId &&
     windowId !== -1 &&
     recordStatus &&
-    recordStatus.videoType == 'fullScreen' &&
-    winId != windowId
+    recordStatus.videoType === 'fullScreen' &&
+    winId !== windowId
   ) {
     sendToAllTabsMessage(AppMessagesEnum.hideTabController, recordedWinId);
 

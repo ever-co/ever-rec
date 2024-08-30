@@ -24,7 +24,7 @@ export class WorkspaceInvitesController {
   @Post('/invite/:workspaceId')
   async createInviteLink(
     @Param('workspaceId', ValidateId) workspaceId: string,
-    @User() user: IRequestUser,
+    @User() user: IRequestUser
   ) {
     return this.invitesService.createInviteLink(user.id, workspaceId);
   }
@@ -32,7 +32,7 @@ export class WorkspaceInvitesController {
   @Post('/join/:workspaceInviteId')
   async joinWorkspace(
     @Param('workspaceInviteId', ValidateId) workspaceInviteId: string,
-    @User() user: IRequestUser,
+    @User() user: IRequestUser
   ) {
     return this.invitesService.joinWorkspace(user.id, workspaceInviteId);
   }

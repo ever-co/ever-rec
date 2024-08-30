@@ -50,7 +50,7 @@ export class WhiteboardTeamController {
     FileFieldsInterceptor([
       { name: 'avatar', maxCount: 1 },
       { name: 'thumbnail', maxCount: 1 },
-    ]),
+    ])
   )
   @Put(':teamId')
   async updateTeam(
@@ -61,14 +61,14 @@ export class WhiteboardTeamController {
       avatar?: Express.Multer.File;
       thumbnail?: Express.Multer.File;
     },
-    @Body() body: IUpdateTeamNameBody,
+    @Body() body: IUpdateTeamNameBody
   ) {
     return this.teamsService.updateTeam(
       req.user?.id,
       teamId,
       body.name,
       files?.avatar && files.avatar[0],
-      files?.thumbnail && files.thumbnail[0],
+      files?.thumbnail && files.thumbnail[0]
     );
   }
 
@@ -83,7 +83,7 @@ export class WhiteboardTeamController {
   async leaveTeam(
     @Req() req,
     @Param('teamId') teamId: string,
-    @Param('teamAdminId') teamAdminId: string,
+    @Param('teamAdminId') teamAdminId: string
   ) {
     return this.teamsService.leaveTeam(req.user?.id, teamAdminId, teamId);
   }
@@ -108,7 +108,7 @@ export class WhiteboardTeamController {
   async deleteMember(
     @Req() req,
     @Param('teamId') teamId: string,
-    @Param('memberId') memberId: string,
+    @Param('memberId') memberId: string
   ) {
     return this.teamsService.deleteMember(req.user?.id, teamId, memberId);
   }

@@ -4,8 +4,8 @@ import { HttpService } from 'nestjs-http-promise';
 import { ResStatusEnum } from 'src/enums/ResStatusEnum';
 import * as admin from 'firebase-admin';
 import { Readable } from 'stream';
-const fetch = require('node-fetch');
-const FormData = require('form-data');
+import fetch from 'node-fetch';
+import FormData from 'form-data';
 
 @Injectable()
 export class AtlassianApiService {
@@ -14,20 +14,20 @@ export class AtlassianApiService {
   private baseURL: string;
   private websiteUrl: string;
   private oauthRedirect: string;
-  private redirectUriPath: string = '/api/v1/atlassian/jira/complete-oauth';
-  private jiraRestApiUrl: string = 'https://api.atlassian.com/ex/jira';
-  private jiraScope: string =
+  private redirectUriPath = '/api/v1/atlassian/jira/complete-oauth';
+  private jiraRestApiUrl = 'https://api.atlassian.com/ex/jira';
+  private jiraScope =
     'read:me write:jira-work read:jira-work manage:jira-project offline_access manage:jira-configuration read:jira-user manage:jira-webhook manage:jira-data-provider';
-  private trelloRestApiUrl: string = 'https://api.trello.com/1';
-  private restApi: string = 'rest/api/3';
+  private trelloRestApiUrl = 'https://api.trello.com/1';
+  private restApi = 'rest/api/3';
 
   private trelloKey: string;
   private oauthTrelloRedirect: string;
-  private redirectTrelloUriPath: string = '/media/integrations';
+  private redirectTrelloUriPath = '/media/integrations';
 
   constructor(
     private readonly configService: ConfigService,
-    private readonly httpService: HttpService,
+    private readonly httpService: HttpService
   ) {
     this.clientId = this.configService.get<string>('JIRA_CLIENT_ID');
     this.clientSecrete = this.configService.get<string>('JIRA_CLIENT_SECRET');
@@ -50,7 +50,7 @@ export class AtlassianApiService {
         `https://api.atlassian.com/oauth/token/accessible-resources`,
         {
           headers: headersRequest,
-        },
+        }
       );
 
       if (data) {
@@ -80,7 +80,7 @@ export class AtlassianApiService {
 
   async getAccessToken(
     code: string,
-    grant_type = 'authorization_code',
+    grant_type = 'authorization_code'
   ): Promise<any> {
     const body = {
       grant_type: grant_type,
@@ -99,10 +99,10 @@ export class AtlassianApiService {
       },
       body: JSON.stringify(body),
     })
-      .then(async (response) => {
+      .then(async response => {
         return await response.json();
       })
-      .then((res) => {
+      .then(res => {
         return {
           status: ResStatusEnum.success,
           data: res,
@@ -110,7 +110,7 @@ export class AtlassianApiService {
           message: null,
         };
       })
-      .catch((err) => {
+      .catch(err => {
         return {
           status: ResStatusEnum.error,
           message: 'Something went wrong, Please try again later.',
@@ -133,7 +133,7 @@ export class AtlassianApiService {
     resourceId: string,
     credentials: any,
     method: string,
-    formData: any,
+    formData: any
   ) {
     const { access_token = null } = credentials;
     const API_URL = `${this.jiraRestApiUrl}/${resourceId}/${this.restApi}/${method}`;
@@ -144,7 +144,7 @@ export class AtlassianApiService {
         'X-Atlassian-Token': 'no-check',
       },
       body: formData,
-    }).catch((err) => {
+    }).catch(err => {
       console.error(err, 'Jira Attachment Errors');
     });
   }
@@ -153,7 +153,7 @@ export class AtlassianApiService {
     resourceId: string,
     credentials: any,
     method: string,
-    bodyData: any,
+    bodyData: any
   ) {
     const { access_token = null } = credentials;
 
@@ -168,16 +168,16 @@ export class AtlassianApiService {
       },
       body: bodyData,
     })
-      .then(async (response) => {
+      .then(async response => {
         return await response.json();
       })
-      .then((res) => {
+      .then(res => {
         return {
           status: ResStatusEnum.success,
           data: res,
         };
       })
-      .catch((err) => {
+      .catch(err => {
         console.log(err, 'create issue err');
         return {
           status: ResStatusEnum.error,
@@ -200,7 +200,7 @@ export class AtlassianApiService {
     const { refresh_token = null } = credentials;
     const refreshTokenData = await this.getAccessToken(
       refresh_token,
-      'refresh_token',
+      'refresh_token'
     );
     if (
       refreshTokenData.status == ResStatusEnum.success &&
@@ -263,7 +263,7 @@ export class AtlassianApiService {
   async getDataFromRestAPI(
     projectsId: string,
     credentials: any,
-    method: string,
+    method: string
   ): Promise<any> {
     const { access_token = null } = credentials;
     if (access_token) {
@@ -276,10 +276,10 @@ export class AtlassianApiService {
           'Content-Type': 'application/json',
         },
       })
-        .then((response) => {
+        .then(response => {
           return response.json();
         })
-        .catch((err) => {
+        .catch(err => {
           console.log(err, 'err');
           return null;
         });
@@ -322,10 +322,10 @@ export class AtlassianApiService {
         'Content-Type': 'application/json',
       },
     })
-      .then((response) => {
+      .then(response => {
         return response.json();
       })
-      .then(async (res) => {
+      .then(async res => {
         return {
           status: ResStatusEnum.success,
           data: res,
@@ -333,7 +333,7 @@ export class AtlassianApiService {
           error: null,
         };
       })
-      .catch((err) => {
+      .catch(err => {
         return {
           status: ResStatusEnum.error,
           message: 'Something went wrong, Please try again later.',
@@ -353,10 +353,10 @@ export class AtlassianApiService {
         'Content-Type': 'application/json',
       },
     })
-      .then((response) => {
+      .then(response => {
         return response.json();
       })
-      .catch((err) => {
+      .catch(err => {
         return false;
       });
   }
@@ -370,10 +370,10 @@ export class AtlassianApiService {
         'Content-Type': 'application/json',
       },
     })
-      .then((response) => {
+      .then(response => {
         return response.json();
       })
-      .catch((err) => {
+      .catch(err => {
         console.log(err, 'err');
         return [];
       });
@@ -388,10 +388,10 @@ export class AtlassianApiService {
         'Content-Type': 'application/json',
       },
     })
-      .then((response) => {
+      .then(response => {
         return response.json();
       })
-      .catch((err) => {
+      .catch(err => {
         console.log(err, 'err');
         return [];
       });
@@ -407,10 +407,10 @@ export class AtlassianApiService {
       },
       body: JSON.stringify(bodyData),
     })
-      .then((response) => {
+      .then(response => {
         return response.json();
       })
-      .then(async (res) => {
+      .then(async res => {
         console.log(res, 'res card trello');
         return {
           status: ResStatusEnum.success,
@@ -419,7 +419,7 @@ export class AtlassianApiService {
           error: null,
         };
       })
-      .catch((err) => {
+      .catch(err => {
         console.log(err, 'err');
         return {
           status: ResStatusEnum.error,
@@ -439,10 +439,10 @@ export class AtlassianApiService {
       },
       body: formData,
     })
-      .then((response) => {
+      .then(response => {
         return response.json();
       })
-      .then(async (res) => {
+      .then(async res => {
         console.log(res, 'res trello attachment');
         return {
           status: ResStatusEnum.success,
@@ -451,7 +451,7 @@ export class AtlassianApiService {
           error: null,
         };
       })
-      .catch((err) => {
+      .catch(err => {
         console.log(err, 'err attach issue');
         return {
           status: ResStatusEnum.error,

@@ -267,7 +267,7 @@ module.exports = {
         '30px': '30px',
         '52px': '52px',
         '2point5p': '2.5%',
-        '1.25': '0.3rem'
+        1.25: '0.3rem',
       },
       padding: {
         '10px': '10px',

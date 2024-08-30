@@ -28,7 +28,7 @@ export class WorkspaceShareController {
   async share(
     @Param('workspaceId', ValidateId) workspaceId: string,
     @Param('itemId', ValidateId) itemId: string,
-    @User() user: IRequestUser,
+    @User() user: IRequestUser
   ): Promise<IDataResponse<string>> {
     return await this.shareService.getShareLink(workspaceId, itemId, user.id);
   }
@@ -38,7 +38,7 @@ export class WorkspaceShareController {
   async delete(
     @Param('workspaceId', ValidateId) workspaceId: string,
     @Param('itemId', ValidateId) itemId: string,
-    @User() user: IRequestUser,
+    @User() user: IRequestUser
   ): Promise<IDataResponse<string>> {
     return await this.shareService.deleteShareLink(user.id, itemId);
   }

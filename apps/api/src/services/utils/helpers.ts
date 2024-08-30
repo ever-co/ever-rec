@@ -3,16 +3,16 @@ import { database } from 'firebase-admin';
 import { Reference } from 'firebase-admin/database';
 
 export const parseCollectionToIdValueObj = (
-  collection: Object | Array<any>,
+  collection: Record<string, any> | Array<any>
 ) => {
   try {
     let result = collection;
 
     if (Array.isArray(collection)) {
-      result = collection.filter((x) => x).every((x) => x.id)
-        ? Object.fromEntries(collection.map((x) => [x.id, x]))
+      result = collection.filter(x => x).every(x => x.id)
+        ? Object.fromEntries(collection.map(x => [x.id, x]))
         : Object.fromEntries(
-            collection.map((x, i) => (x.id ? [x.id, x] : [i, x])),
+            collection.map((x, i) => (x.id ? [x.id, x] : [i, x]))
           );
     }
 
@@ -24,8 +24,8 @@ export const parseCollectionToIdValueObj = (
 };
 
 export const parseCollectionToArray = <T = any>(
-  collection: Object | Array<any>,
-  putKeyAsId?: boolean,
+  collection: Record<string, any> | Array<any>,
+  putKeyAsId?: boolean
 ): T[] => {
   try {
     if (collection === null || collection === undefined) {
@@ -37,7 +37,7 @@ export const parseCollectionToArray = <T = any>(
     }
 
     return Object.entries(collection).map(([key, value]) =>
-      putKeyAsId ? { ...value, id: key } : value,
+      putKeyAsId ? { ...value, id: key } : value
     );
   } catch (e) {
     console.log(e);
@@ -47,7 +47,7 @@ export const parseCollectionToArray = <T = any>(
 
 export const evaluateAccessType = (
   givenAccess: PermissionAccessEnum,
-  requiredAccess: PermissionAccessEnum,
+  requiredAccess: PermissionAccessEnum
 ) => {
   if (givenAccess === PermissionAccessEnum.NONE) {
     return false;
@@ -63,7 +63,7 @@ export const evaluateAccessType = (
       return givenAccess === PermissionAccessEnum.ADMIN;
     default:
       console.log(
-        'Got into default case when evaluating access. File src/services/helpers.ts. Probably a wrong passed SetMetadata on some controller',
+        'Got into default case when evaluating access. File src/services/helpers.ts. Probably a wrong passed SetMetadata on some controller'
       );
       return false;
   }
@@ -86,16 +86,16 @@ export const formatDataToArray = (data: any) => {
 };
 
 export const promiseAllSettled = async <T>(promises: Promise<T>[]) => {
-  return Promise.allSettled(promises).then((results) => {
+  return Promise.allSettled(promises).then(results => {
     const allValues: T[] = (
       results.filter(
-        (c) => c.status === 'fulfilled',
+        c => c.status === 'fulfilled'
       ) as PromiseFulfilledResult<any>[]
-    ).map((c) => c.value);
+    ).map(c => c.value);
 
     const failedResults = (
-      results.filter((c) => c.status === 'rejected') as PromiseRejectedResult[]
-    ).map((c) => c.reason);
+      results.filter(c => c.status === 'rejected') as PromiseRejectedResult[]
+    ).map(c => c.reason);
 
     failedResults.length > 0 && console.log(failedResults);
 
@@ -104,7 +104,7 @@ export const promiseAllSettled = async <T>(promises: Promise<T>[]) => {
 };
 
 export const getDataFromDB = async <T = any>(
-  path: string,
+  path: string
 ): Promise<{ ref: Reference; value: T }> => {
   const ref = database().ref(path);
   const snap = await ref.get();

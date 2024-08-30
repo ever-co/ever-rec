@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const cancelCommentsButton = document.querySelector('#cancel-comments');
 
   commentsButton.addEventListener('click', () => {
-    let buttonStatus = commentsButton.className;
+    const buttonStatus = commentsButton.className;
     if (!buttonStatus.includes('hidden')) {
       commentsButton.classList.add('hidden');
       commentsTextBlock.classList.remove('hidden');

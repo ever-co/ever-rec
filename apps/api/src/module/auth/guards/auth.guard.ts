@@ -19,7 +19,7 @@ export interface IRequestUser {
 export class AuthGuard implements CanActivate {
   constructor(
     private readonly httpService: HttpService,
-    private readonly configService: ConfigService,
+    private readonly configService: ConfigService
   ) {}
 
   async processToken(token: string, request: any): Promise<void> {
@@ -42,12 +42,12 @@ export class AuthGuard implements CanActivate {
   async refreshToken(refreshToken: string, request: any): Promise<any> {
     const { data } = await this.httpService.post<any, any>(
       `https://securetoken.googleapis.com/v1/token?key=${this.configService.get<string>(
-        'FIREBASE_API_KEY',
+        'FIREBASE_API_KEY'
       )}`,
       {
         grant_type: 'refresh_token',
         refresh_token: refreshToken,
-      },
+      }
     );
     // @ts-ignore
     await this.processToken(data.id_token, request);

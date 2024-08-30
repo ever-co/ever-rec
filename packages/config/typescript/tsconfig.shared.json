@@ -1,10 +1,13 @@
 {
   "compilerOptions": {
-    "target": "ESNext",
-    "module": "ESNext",
-    "lib": ["DOM", "ESNext"],
+    "target": "esnext",
+    "lib": ["dom", "esnext"],
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-  }
+    "allowJs": true,
+    "noEmit": true,
+    "module": "commonjs",
+  },
+  "exclude": ["node_modules"]
 }

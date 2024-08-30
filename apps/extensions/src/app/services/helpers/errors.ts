@@ -1,6 +1,5 @@
 import { errorMessage } from './toastMessages';
 
-
 export const errorHandler = (error: any) => {
   let errorMsg = 'There was an error.';
 
@@ -10,11 +9,11 @@ export const errorHandler = (error: any) => {
     errorMsg = customMessageErrors[error.message] || error.message;
   }
   errorMsg && errorMessage(errorMsg);
-}
+};
 
 const customMessageErrors: Record<string, string> = {
   'The user did not approve access.': 'Login with Google to use this Feature',
-}
+};
 
 const firebaseErrors: Record<string, string> = {
   'auth/wrong-password': 'Invalid email or password! Please enter again.',
@@ -38,7 +37,8 @@ const firebaseErrors: Record<string, string> = {
   'auth/invalid-email-verified': 'auth/invalid-email-verified',
   'auth/invalid-hash-algorithm': 'auth/invalid-hash-algorithm',
   'auth/invalid-hash-block-size': 'auth/invalid-hash-block-size',
-  'auth/invalid-hash-derived-key-length': 'auth/invalid-hash-derived-key-length',
+  'auth/invalid-hash-derived-key-length':
+    'auth/invalid-hash-derived-key-length',
   'auth/invalid-hash-key': 'auth/invalid-hash-key',
   'auth/invalid-hash-memory-cost': 'auth/invalid-hash-memory-cost',
   'auth/invalid-hash-parallelization': 'auth/invalid-hash-parallelization',
@@ -54,7 +54,8 @@ const firebaseErrors: Record<string, string> = {
   'auth/invalid-photo-url': 'auth/invalid-photo-url',
   'auth/invalid-provider-data': 'auth/invalid-provider-data',
   'auth/invalid-provider-id': 'auth/invalid-provider-id',
-  'auth/invalid-session-cookie-duration': 'auth/invalid-session-cookie-duration',
+  'auth/invalid-session-cookie-duration':
+    'auth/invalid-session-cookie-duration',
   'auth/invalid-uid': 'auth/invalid-uid',
   'auth/invalid-user-import': 'auth/invalid-user-import',
   'auth/maximum-user-count-exceeded': 'auth/maximum-user-count-exceeded',

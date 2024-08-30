@@ -10,14 +10,14 @@
   text-align: center;
 
   &:before {
-    content : "";
+    content: '';
     position: absolute;
-    left    : 50%;
-    bottom  : -5px;
+    left: 50%;
+    bottom: -5px;
     transform: translate(-50%);
-    height  : 1px;
-    width   : 90%;
-    border-bottom: 2px solid #5B4DBE;
+    height: 1px;
+    width: 90%;
+    border-bottom: 2px solid #5b4dbe;
   }
 
   &:after {

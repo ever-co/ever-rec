@@ -154,10 +154,7 @@ const RecordingContent: React.FC<IRecordingContentProps> = ({
   };
 
   return (
-    <div
-      ref={mainContainerGlobal}
-      className="remove-pointer-events rec-main"
-    >
+    <div ref={mainContainerGlobal} className="remove-pointer-events rec-main">
       <Draggable
         bounds={{
           left: 0,
@@ -169,11 +166,7 @@ const RecordingContent: React.FC<IRecordingContentProps> = ({
       >
         <div
           className={classNames(
-            `${
-              !fromEditor
-                ? 'rec-container'
-                : ' rec-container-editor'
-            }`,
+            `${!fromEditor ? 'rec-container' : ' rec-container-editor'}`,
           )}
           onMouseLeave={leaveMouseHandler}
           id="small-rec"

@@ -26,15 +26,15 @@ export class StreamServiceController {
 
   constructor(
     private readonly configService: ConfigService,
-    private readonly streamService: StreamServiceService,
+    private readonly streamService: StreamServiceService
   ) {
     const DEFAULT_STREAM_SERVICE = this.configService.get<VideoServicesEnum>(
-      'DEFAULT_STREAM_SERVICE',
+      'DEFAULT_STREAM_SERVICE'
     );
 
     if (!Object.values(VideoServicesEnum).includes(DEFAULT_STREAM_SERVICE)) {
       console.error(
-        `Streaming service is not configured properly - DEFAULT_STREAM_SERVICE: ${DEFAULT_STREAM_SERVICE}`,
+        `Streaming service is not configured properly - DEFAULT_STREAM_SERVICE: ${DEFAULT_STREAM_SERVICE}`
       );
       return;
     }
@@ -61,12 +61,12 @@ export class StreamServiceController {
           return cb(null, filename);
         },
       }),
-    }),
+    })
   )
   async saveVideoData(
     @Req() request,
     @Body() body: IStreamingDbData,
-    @UploadedFile() blob: Express.Multer.File,
+    @UploadedFile() blob: Express.Multer.File
   ): Promise<IEditorVideo | null> {
     const fileExtension = fileExtensionMap[blob.mimetype];
 
@@ -75,7 +75,7 @@ export class StreamServiceController {
       uid,
       body,
       blob,
-      blob.filename + fileExtension,
+      blob.filename + fileExtension
     );
   }
 
@@ -92,13 +92,13 @@ export class StreamServiceController {
           return cb(null, filename);
         },
       }),
-    }),
+    })
   )
   async updateVideoData(
     @Req() request,
     @Body() body: IStreamingDbData,
     @Param('videoId') videoId: string,
-    @UploadedFile() blob: Express.Multer.File,
+    @UploadedFile() blob: Express.Multer.File
   ): Promise<IEditorVideo | null> {
     const fileExtension = fileExtensionMap[blob.mimetype];
 
@@ -108,7 +108,7 @@ export class StreamServiceController {
       body,
       videoId,
       blob,
-      blob.filename + fileExtension,
+      blob.filename + fileExtension
     );
   }
 }

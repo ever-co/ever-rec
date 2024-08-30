@@ -29,7 +29,7 @@ import { IUser } from 'src/interfaces/IUser';
 export class WorkspaceFoldersService {
   constructor(
     private readonly utilitiesService: WorkspaceUtilitiesService,
-    private readonly foldersSharedService: FoldersSharedService,
+    private readonly foldersSharedService: FoldersSharedService
   ) {
     // left blank intentionally
   }
@@ -40,7 +40,7 @@ export class WorkspaceFoldersService {
     name: string,
     color: string,
     nestLevel: number,
-    parentId: string | false = false,
+    parentId: string | false = false
   ): Promise<IDataResponse<IWorkspaceFolder[] | null>> {
     try {
       const { workspaceVal, workspaceRef } =
@@ -75,12 +75,12 @@ export class WorkspaceFoldersService {
       await workspaceRef.update({ folders: updatedFolders });
 
       return sendResponse<IWorkspaceFolder[]>(
-        parseCollectionToArray(updatedFolders),
+        parseCollectionToArray(updatedFolders)
       );
     } catch (e) {
       console.log(e);
       return sendError(
-        e.message || 'Error while trying to add workspace folder.',
+        e.message || 'Error while trying to add workspace folder.'
       );
     }
   }
@@ -89,7 +89,7 @@ export class WorkspaceFoldersService {
     uid: string,
     workspaceId: string,
     folderId: string,
-    updatedFolder: IWorkspaceFolder,
+    updatedFolder: IWorkspaceFolder
   ): Promise<
     IDataResponse<{ folders: IWorkspaceFolder[]; favFolders } | null>
   > {
@@ -100,7 +100,7 @@ export class WorkspaceFoldersService {
       const favFoldersSnap = await favFoldersRef.get();
       const favFolders = favFoldersSnap.val();
       const folders = parseCollectionToArray(workspaceVal.folders);
-      const folderIndex = folders.findIndex((x) => x.id === folderId);
+      const folderIndex = folders.findIndex(x => x.id === folderId);
 
       if (folderIndex === -1) {
         return sendError('Folder not found.');
@@ -114,7 +114,7 @@ export class WorkspaceFoldersService {
         ? parseCollectionToArray(favFolders.workspaces[workspaceId])
         : [];
       const favFolderIndex = parsedFavWorkspaceFolders.findIndex(
-        (x) => x.id === folderId,
+        x => x.id === folderId
       );
 
       if (favFolderIndex !== -1) {
@@ -133,7 +133,7 @@ export class WorkspaceFoldersService {
     } catch (e) {
       console.log(e);
       return sendError(
-        e.message || 'Error while trying to update workspace folder.',
+        e.message || 'Error while trying to update workspace folder.'
       );
     }
   }
@@ -142,7 +142,7 @@ export class WorkspaceFoldersService {
     uid: string,
     workspaceId: string,
     folderId: string,
-    currentFolderId: string | false,
+    currentFolderId: string | false
   ): Promise<
     IDataResponse<(IWorkspace & { favFolders: IFavoriteFolders }) | null>
   > {
@@ -159,7 +159,7 @@ export class WorkspaceFoldersService {
           folderId,
           undefined,
           workspaceId,
-          true,
+          true
         );
 
       const { updatedFolders, deletedFolders } =
@@ -168,22 +168,22 @@ export class WorkspaceFoldersService {
       // Remove parentId of items from deletedFolders
       let changeCount = 0;
       const deletedFolderIds = await promiseAllSettled(
-        deletedFolders.map(async (deletedFolder) => {
+        deletedFolders.map(async deletedFolder => {
           if (deletedFolder.isFavoredBy) {
             await promiseAllSettled(
-              deletedFolder.isFavoredBy.map(async (favUserId) => {
+              deletedFolder.isFavoredBy.map(async favUserId => {
                 const { ref: folderRef } = await getDataFromDB(
-                  `/users/${favUserId}/favoriteFolders/workspaces/${workspaceId}/${deletedFolder.id}`,
+                  `/users/${favUserId}/favoriteFolders/workspaces/${workspaceId}/${deletedFolder.id}`
                 );
                 await folderRef.set(null);
-              }),
+              })
             );
           }
           return deletedFolder.id;
-        }),
+        })
       );
 
-      const updatedScreenshots = screenshots.map((screenshot) => {
+      const updatedScreenshots = screenshots.map(screenshot => {
         if (deletedFolderIds.includes(screenshot.parentId)) {
           changeCount--;
           return { ...screenshot, parentId: false };
@@ -191,7 +191,7 @@ export class WorkspaceFoldersService {
         return screenshot;
       });
 
-      const updatedVideos = videos.map((video) => {
+      const updatedVideos = videos.map(video => {
         if (deletedFolderIds.includes(video.parentId)) {
           changeCount--;
           return { ...video, parentId: false };
@@ -207,7 +207,7 @@ export class WorkspaceFoldersService {
       this.utilitiesService.changeFolderItemCountRecursive(
         updatedFolders,
         currentFolderId,
-        changeCount,
+        changeCount
       );
 
       await workspaceRef.update({
@@ -220,9 +220,9 @@ export class WorkspaceFoldersService {
         ...workspaceVal,
         folders: updatedFolders,
         screenshots: updatedScreenshots.filter(
-          (x) => x.parentId === currentFolderId,
+          x => x.parentId === currentFolderId
         ),
-        videos: updatedVideos.filter((x) => x.parentId === currentFolderId),
+        videos: updatedVideos.filter(x => x.parentId === currentFolderId),
       });
 
       return sendResponse<IWorkspace & { favFolders: IFavoriteFolders }>({
@@ -232,7 +232,7 @@ export class WorkspaceFoldersService {
     } catch (e) {
       console.log(e);
       return sendError(
-        e.message || 'Error while trying to delete workspace folder.',
+        e.message || 'Error while trying to delete workspace folder.'
       );
     }
   }
@@ -242,7 +242,7 @@ export class WorkspaceFoldersService {
     workspaceId: string,
     itemIds: string[],
     toMoveFolderId: string | false,
-    fromFolderId: string | false,
+    fromFolderId: string | false
   ): Promise<IDataResponse<IWorkspace | null>> {
     try {
       const { workspaceVal, workspaceRef } =
@@ -267,7 +267,7 @@ export class WorkspaceFoldersService {
             item,
             workspaceVal,
             user,
-            PermissionAccessEnum.WRITE,
+            PermissionAccessEnum.WRITE
           );
         }
 
@@ -281,14 +281,14 @@ export class WorkspaceFoldersService {
           folders = this.utilitiesService.changeFolderItemCountRecursive(
             folders,
             toMoveFolderId,
-            1,
+            1
           );
 
           // Recursively remove item count to parent folders
           folders = this.utilitiesService.changeFolderItemCountRecursive(
             folders,
             fromFolderId,
-            -1,
+            -1
           );
         } else {
           return sendError('Insuffucient permissions');
@@ -305,7 +305,7 @@ export class WorkspaceFoldersService {
       await workspaceRef.update(updatedWorkspace);
 
       const parsedWorkspace = await this.utilitiesService.parseWorkspaceItems(
-        updatedWorkspace,
+        updatedWorkspace
       );
 
       return sendResponse(parsedWorkspace);

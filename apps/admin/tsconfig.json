@@ -1,3 +1,13 @@
 {
-  "extends": "@ever-rec/typescript-config/next.json"
+  "extends": "@ever-rec/typescript-config/next.json",
+  "include": [
+    "next-env.d.ts",
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": ["node_modules"],
+  "compilerOptions": {
+    "forceConsistentCasingInFileNames": true
+  }
 }

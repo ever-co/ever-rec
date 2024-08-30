@@ -97,10 +97,12 @@ const ShareTool: React.FC<IShareProps> = ({
                     data.type === 'email'
                       ? openEmailModal(image)
                       : data.type === 'slack'
-                      ? setSlackModalState(!slackModalState)
-                      : data.type === 'whatsapp'
-                      ? setWhatsappModalState(!whatsappModalState)
-                      : infoMessage('We are working hard to add this feature!');
+                        ? setSlackModalState(!slackModalState)
+                        : data.type === 'whatsapp'
+                          ? setWhatsappModalState(!whatsappModalState)
+                          : infoMessage(
+                              'We are working hard to add this feature!',
+                            );
                   }}
                 />
               ) : (

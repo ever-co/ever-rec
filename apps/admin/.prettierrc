@@ -1,3 +1,3 @@
 {
-  "extends": "@ever-rec/prettier-config/prettier.shared.json"
+  "singleQuote": true
 }

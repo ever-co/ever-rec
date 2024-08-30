@@ -1,7 +1,6 @@
 import React from 'react';
 import Switch from 'react-switch';
 
-
 interface IAppSwitchProp {
   checked: boolean;
   onChange: (value: boolean) => void;

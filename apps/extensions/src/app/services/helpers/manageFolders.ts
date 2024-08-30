@@ -10,18 +10,18 @@ const increaseFolderItems = async (
   type: ItemType,
   index: number,
 ) => {
-  if (type == 'image') {
+  if (type === 'image') {
     const getItemsLength =
-      folderData.items || folderData.items == 0
+      folderData.items || folderData.items === 0
         ? folderData.items + index
         : (await getFilesImageAPI(folderData.id)).length;
     await updateFolderData({
       ...folderData,
       items: getItemsLength,
     });
-  } else if (type == 'video') {
+  } else if (type === 'video') {
     const getVideosLength =
-      folderData.items || folderData.items == 0
+      folderData.items || folderData.items === 0
         ? folderData.items + index
         : (await getVideoFilesAPI(folderData.id)).length;
     await updateVideoFolderData({
@@ -36,7 +36,7 @@ const decreaseFolderItems = async (
   type: MixedItemType,
   index: number,
 ) => {
-  if (type == 'image') {
+  if (type === 'image') {
     const filesInFolder = folderData.items
       ? folderData.items - index
       : (await getFilesImageAPI(folderData.id)).length - index;
@@ -45,7 +45,7 @@ const decreaseFolderItems = async (
       ...folderData,
       items: filesInFolder,
     });
-  } else if (type == 'video') {
+  } else if (type === 'video') {
     const filesInFolder = folderData.items
       ? folderData.items - index
       : (await getVideoFilesAPI(folderData.id)).length - index;

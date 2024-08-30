@@ -1,6 +1,5 @@
 import { AppMessagesEnum } from '@/app/messagess';
 
-
 const sendBadgeTextMessagePort = async (text: string) => {
   const port = chrome.runtime.connect();
 

@@ -21,10 +21,10 @@ const CaptureFooterMenuItem: React.FC<ICaptureFooterMenuItemProps> = ({
           item.placement === 'top'
             ? 'top'
             : item.placement === 'topLeft'
-            ? 'topLeft'
-            : item.placement === 'topRight'
-            ? 'topRight'
-            : 'top'
+              ? 'topLeft'
+              : item.placement === 'topRight'
+                ? 'topRight'
+                : 'top'
         }
         title={item.description}
       >

@@ -15,12 +15,12 @@ export const ItemType = (itemType: CanAccessWorkspaceItemType) =>
 
 export function CanAccessItem(
   requiredAccess: PermissionAccessEnum,
-  itemType: CanAccessWorkspaceItemType,
+  itemType: CanAccessWorkspaceItemType
 ) {
   return applyDecorators(
     CanAccessFolder(requiredAccess),
     ItemAccess(requiredAccess),
     ItemType(itemType),
-    UseGuards(CanAccessItemGuard),
+    UseGuards(CanAccessItemGuard)
   );
 }

@@ -66,14 +66,14 @@ export class MuxService {
     uid: string,
     videoId: string,
     assetId: string,
-    workspaceId: string,
+    workspaceId: string
   ): Promise<{ data: PSEnum }> {
     try {
       const db = admin.database();
       const rootDb = workspaceId ? 'workspaces' : 'users';
       const parentCollection = workspaceId ? workspaceId : uid;
       const dbStreamData = db.ref(
-        `${rootDb}/${parentCollection}/videos/${videoId}/streamData`,
+        `${rootDb}/${parentCollection}/videos/${videoId}/streamData`
       );
 
       const asset = await this.Video.Assets.get(assetId);
@@ -103,7 +103,7 @@ export class MuxService {
   async getDownloadStatus(
     uid: string,
     videoId: string,
-    assetId: string,
+    assetId: string
   ): Promise<{ downloadStatus: PSEnum; downloadUrl: string }> {
     try {
       const db = admin.database();

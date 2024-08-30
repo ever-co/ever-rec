@@ -1,5 +1,5 @@
 export interface IEmojiOptions {
-  id: number
+  id: number;
   url: string;
   filename: string;
   emoji: string;

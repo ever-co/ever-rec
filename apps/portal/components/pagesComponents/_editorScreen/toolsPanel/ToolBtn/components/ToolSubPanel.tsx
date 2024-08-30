@@ -9,12 +9,7 @@ interface IToolSubPanelProp {
 
 const ToolSubPanel: React.FC<IToolSubPanelProp> = ({ className, children }) => {
   return (
-    <div
-      className={classNames(
-        styles.toolssubpanel,
-        className,
-      )}
-    >
+    <div className={classNames(styles.toolssubpanel, className)}>
       {children}
     </div>
   );

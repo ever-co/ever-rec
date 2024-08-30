@@ -1,3 +1,4 @@
 {
-  "extends": "@ever-rec/eslint-config/next.json"
+  "extends": "@ever-rec/eslint-config/next.json",
+  "ignorePatterns": ["!**/*"]
 }

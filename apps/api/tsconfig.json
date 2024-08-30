@@ -1,3 +1,10 @@
 {
-  "extends": "@ever-rec/typescript-config/nest.json"
+  "extends": "@ever-rec/typescript-config/nestjs.json",
+  "compilerOptions": {
+    "target": "es2017",
+    "lib": ["es2021"],
+    "outDir": "./dist",
+    "baseUrl": "./"
+  },
+  "include": ["src/**/*", "public/**/*"]
 }

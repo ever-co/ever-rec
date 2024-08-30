@@ -190,7 +190,10 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
   };
 
   const videoDelete = async (video: IEditorVideo) => {
-    if (video?.dbData?.parentId && typeof video?.dbData?.parentId == 'string') {
+    if (
+      video?.dbData?.parentId &&
+      typeof video?.dbData?.parentId === 'string'
+    ) {
       const { data } = await getFolderByIdAPI(video.dbData.parentId);
       if (data) {
         await decreaseFolderItems(data, 'video', 1);

@@ -58,7 +58,7 @@ export class ApiVideoService {
       };
 
       const result = await this.ApiVideo.uploadTokens.createToken(
-        tokenCreationPayload,
+        tokenCreationPayload
       );
 
       return { token: result.token };
@@ -71,21 +71,21 @@ export class ApiVideoService {
     uid: string,
     videoId: string,
     assetId: string,
-    workspaceId: string,
+    workspaceId: string
   ): Promise<{ data: PSEnum }> {
     try {
       const db = admin.database();
       const rootDb = workspaceId ? 'workspaces' : 'users';
       const parentCollection = workspaceId ? workspaceId : uid;
       const dbStreamData = db.ref(
-        `${rootDb}/${parentCollection}/videos/${videoId}/streamData`,
+        `${rootDb}/${parentCollection}/videos/${videoId}/streamData`
       );
 
       const videoStatus = await this.ApiVideo.videos.getStatus(assetId);
 
       const encodedHLS = videoStatus.encoding.qualities
-        .filter((quality) => quality.type === 'hls')
-        .some((quality) => quality.status === 'encoded');
+        .filter(quality => quality.type === 'hls')
+        .some(quality => quality.status === 'encoded');
 
       const status = videoStatus.ingest.status as
         | 'uploaded'
@@ -116,7 +116,7 @@ export class ApiVideoService {
   async getDownloadStatus(
     uid: string,
     videoId: string,
-    assetId: string,
+    assetId: string
   ): Promise<{ downloadStatus: PSEnum; downloadUrl: string }> {
     try {
       const db = admin.database();
@@ -133,7 +133,7 @@ export class ApiVideoService {
       // Give us MP4 Rendition from Api.Video
       const videoStatus = await this.ApiVideo.videos.getStatus(assetId);
       const mp4Video = videoStatus.encoding.qualities.find(
-        (quality) => quality.type === 'mp4',
+        quality => quality.type === 'mp4'
       );
 
       if (
@@ -147,7 +147,7 @@ export class ApiVideoService {
         return { downloadStatus: PSEnum.READY, downloadUrl };
       } else if (
         mp4Video?.status === 'failed' ||
-        videoStatus.ingest.status === 'missing'
+        (videoStatus.ingest.status as unknown as string) === 'missing'
       ) {
         await streamDataRef.update({
           downloadStatus: PSEnum.ERRORED,

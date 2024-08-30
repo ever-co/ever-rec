@@ -1,16 +1,7 @@
 {
-  "extends": [
-    "./base.json",
-    "plugin:node/recommended"
-  ],
+  "extends": ["./base.json", "plugin:node/recommended"],
   "rules": {
     "node/no-unsupported-features/es-syntax": "off"
   },
-  "ignorePatterns": [
-    "node_modules/",
-    "dist/",
-    "build/",
-    "logs/",
-    "coverage/"
-  ]
+  "ignorePatterns": ["node_modules/", "dist/", "build/", "logs/", "coverage/"]
 }

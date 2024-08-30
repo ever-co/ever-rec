@@ -25,7 +25,7 @@ const PanelSlackIntegration: React.FC = () => {
     } else {
       router.push({
         pathname: '/auth/login',
-        query: { type: 'slack' }
+        query: { type: 'slack' },
       });
     }
   };
@@ -41,7 +41,9 @@ const PanelSlackIntegration: React.FC = () => {
               <AppHeader part1="Hello," part2="Welcome!" className="tw-mb-8" />
               <p className="tw-mb-6">We are glad you are here!</p>
               <p className="tw-mb-8">
-                Install the slack app to your workspace once Rec app installed to your slack workspace you can send send the screenshots and video to slack channel or user.
+                Install the slack app to your workspace once Rec app installed
+                to your slack workspace you can send send the screenshots and
+                video to slack channel or user.
               </p>
               <Layout>
                 <div className="">

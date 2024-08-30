@@ -3,7 +3,6 @@ import { Modal } from 'antd';
 import AppButton from '@/content/components/controls/appButton/AppButton';
 import classNames from 'classnames';
 
-
 interface ITrashModalProps {
   visible: boolean;
   title: string;

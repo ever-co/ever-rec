@@ -66,10 +66,10 @@ const drawCommentsListener = ({
     id: 'commentText',
     x: stage.getRelativePointerPosition().x - 30,
     y: stage.getRelativePointerPosition().y - 25,
-    
+
     fontSize: 54,
     text: options.text,
-    fill:"#5b4dbe",
+    fill: '#5b4dbe',
     height: 100,
     width: 100,
     padding: 20,
@@ -81,7 +81,6 @@ const drawCommentsListener = ({
     shadowBlur: 2,
     shadowOpacity: 0.5,
     shadowOffset: { x: 1, y: 1 },
-  
   });
 
   const commentsLayer: Layer | undefined = getLayer(stage, '#commentsLayer');
@@ -92,7 +91,7 @@ const drawCommentsListener = ({
 
   const comment = new Path(drawOptions);
   group.add(comment);
-  group.add(text)
+  group.add(text);
 
   if (commentsLayer) {
     stage.on('mouseup', () => drawCommentsMouseUpListener(stage, saveHistory));
@@ -102,8 +101,6 @@ const drawCommentsListener = ({
 };
 
 export const initEventListenersComments = (stage: Stage, comment: Path) => {
-
-
   comment.on('mouseover', () => {
     comment.setAttrs({
       shadowColor: 'black',
@@ -114,8 +111,6 @@ export const initEventListenersComments = (stage: Stage, comment: Path) => {
     stage.container().style.cursor = 'pointer';
   });
 
-
-
   comment.on('click', () => {
     comment.setAttrs({
       shadowOpacity: 0.6,
@@ -123,11 +118,9 @@ export const initEventListenersComments = (stage: Stage, comment: Path) => {
   });
   comment.on('mousedown', () => {
     stage.container().style.cursor = 'move';
- 
   });
   comment.on('mouseup', () => {
     stage.container().style.cursor = 'pointer';
-   
   });
 
   comment.on('mouseout', () => {

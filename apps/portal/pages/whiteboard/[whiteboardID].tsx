@@ -81,9 +81,8 @@ const WhiteboardEditor: React.FC = () => {
   const [stageList, setStageList] = useState<Array<Stage>>([]);
   const [stageScale, setStageScale] = useState<number>(100);
   const [active_tool, setActiveTool] = useState<ITool>(null);
-  const [textOptions, setTextOptions] = useState<ITextOptions>(
-    initTextOptions(),
-  );
+  const [textOptions, setTextOptions] =
+    useState<ITextOptions>(initTextOptions());
   const [commentsOptions, setCommentsOptions] = useState<ICommentsOptions>(
     initCommentsOptions(),
   );

@@ -177,16 +177,14 @@ const EditorScreen: React.FC = () => {
   const [cropperAreaState, setCropperAreaState] = useState<boolean>(false);
   const [pencilGroupOptions, setPencilGroupOptions] =
     useState<IPencilGroupOptions>(initPencilGroupOptions());
-  const [emojiOptions, setEmojiOptions] = useState<IEmojiOptions>(
-    initEmojiOptions(),
-  );
+  const [emojiOptions, setEmojiOptions] =
+    useState<IEmojiOptions>(initEmojiOptions());
   const [shapeGroupOptions, setShapeGroupOptions] =
     useState<IShapeGroupOptions>(initShapeGroupOptions());
   const [conversationOptions, setConversationOptions] =
     useState<IConversationOptions>(initConversationOptions());
-  const [markerOptions, setMarkerOptions] = useState<IMarkerOptions>(
-    initMarkerOptions(),
-  );
+  const [markerOptions, setMarkerOptions] =
+    useState<IMarkerOptions>(initMarkerOptions());
   const [commentsOptions, setCommentsOptions] = useState<ICommentsOptions>(
     initCommentsOptions(),
   );
@@ -195,9 +193,8 @@ const EditorScreen: React.FC = () => {
   );
   const [arrowGroupOptions, setArrowGroupOptions] =
     useState<IArrowGroupOptions>(initArrowGroupOptions());
-  const [textOptions, setTextOptions] = useState<ITextOptions>(
-    initTextOptions(),
-  );
+  const [textOptions, setTextOptions] =
+    useState<ITextOptions>(initTextOptions());
   const [currentShape, setCurrentShape] = useState(null);
   const [toolsOptions, setToolsOptions] = useState<IToolsOptions>({
     fillColor: 'rgba(255, 255, 255, 0)',

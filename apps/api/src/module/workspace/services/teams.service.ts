@@ -42,7 +42,7 @@ export class WorkspaceTeamsService {
       console.log(e);
       return sendError(
         'Error while trying to add a workspace Team.',
-        e.message,
+        e.message
       );
     }
   }
@@ -50,7 +50,7 @@ export class WorkspaceTeamsService {
   async getTeams(workspaceId: string) {
     try {
       const { workspaceVal } = await this.utilitiesService.getWorkspaceById(
-        workspaceId,
+        workspaceId
       );
 
       const teamsData = workspaceVal.teams || [];
@@ -60,7 +60,7 @@ export class WorkspaceTeamsService {
       console.log(e);
       return sendError(
         'Error while trying to get Teams in a workspace.',
-        e.message,
+        e.message
       );
     }
   }
@@ -70,7 +70,7 @@ export class WorkspaceTeamsService {
     teamId: string,
     name?: string,
     avatar?: any,
-    thumbnail?: any,
+    thumbnail?: any
   ): Promise<IDataResponse<IWorkspaceTeam | null>> {
     try {
       const { workspaceVal, workspaceRef } =
@@ -84,7 +84,7 @@ export class WorkspaceTeamsService {
           avatar,
           workspaceId,
           undefined,
-          `workspaces/${workspaceId}/teams/${teamId}/avatar`,
+          `workspaces/${workspaceId}/teams/${teamId}/avatar`
         );
         avatarUrl = (
           await file.getSignedUrl({
@@ -99,7 +99,7 @@ export class WorkspaceTeamsService {
           thumbnail,
           workspaceId,
           undefined,
-          `workspaces/${workspaceId}/teams/${teamId}/thumbnail`,
+          `workspaces/${workspaceId}/teams/${teamId}/thumbnail`
         );
         thumbnailUrl = (
           await file.getSignedUrl({
@@ -112,7 +112,7 @@ export class WorkspaceTeamsService {
       const teams = workspaceVal.teams || [];
       this.checkIfTeamExists(teams, teamId, workspaceId);
 
-      const newTeams = teams.map((team) => {
+      const newTeams = teams.map(team => {
         if (team.id === teamId) {
           updatedTeam = {
             ...team,
@@ -139,7 +139,7 @@ export class WorkspaceTeamsService {
       console.log(e);
       return sendError(
         'Error while trying to update Team from workspace',
-        e.message,
+        e.message
       );
     }
   }
@@ -167,10 +167,10 @@ export class WorkspaceTeamsService {
         .deleteFiles({
           prefix: `workspaces/${workspaceId}/teams/${teamId}`,
         })
-        .catch((error) => {
+        .catch(error => {
           console.log(
             'Error deleting teams data for workspace: ' + workspaceId,
-            error,
+            error
           );
         });
 
@@ -179,7 +179,7 @@ export class WorkspaceTeamsService {
       console.log(e);
       return sendError(
         'Error while trying to remove Team from workspace',
-        e.message,
+        e.message
       );
     }
   }
@@ -194,14 +194,14 @@ export class WorkspaceTeamsService {
       }
 
       const teams = workspaceVal.teams || [];
-      const index = teams.findIndex((t) => t.id === teamId);
+      const index = teams.findIndex(t => t.id === teamId);
 
       if (index === -1) {
         return sendError('Could not find the team for the workspace');
       }
 
       const members = teams[index]?.members || [];
-      const newMembers = members.filter((member) => member.id !== uid);
+      const newMembers = members.filter(member => member.id !== uid);
 
       teams[index] = {
         ...teams[index],
@@ -227,7 +227,7 @@ export class WorkspaceTeamsService {
   async getTeamsMembers(workspaceId: string) {
     try {
       const { workspaceVal, db } = await this.utilitiesService.getWorkspaceById(
-        workspaceId,
+        workspaceId
       );
 
       const teamMemberMap: ITeamsMembersMap = {};
@@ -237,8 +237,8 @@ export class WorkspaceTeamsService {
 
       if (!workspaceVal?.teams) return sendError('No workspace teams found.');
 
-      workspaceVal.teams.forEach(async (team) => {
-        team.members.forEach(async (member) => {
+      workspaceVal.teams.forEach(async team => {
+        team.members.forEach(async member => {
           // Check if user has already been fetched and escape if true
           for (const item of fetched) {
             if (item.memberId === member.id) {
@@ -251,7 +251,7 @@ export class WorkspaceTeamsService {
           }
 
           const memberRef = db.ref(`users/${member.id}`);
-          const memberPromise = memberRef.get().then((userSnapshotData) => {
+          const memberPromise = memberRef.get().then(userSnapshotData => {
             const userData = userSnapshotData.val();
             const { displayName, photoURL, email } = userData;
             const newMember: IWorkspaceUser = {
@@ -279,11 +279,11 @@ export class WorkspaceTeamsService {
       await promiseAllSettled(memberPromises);
 
       // Map escaped members to the teams they escaped from
-      escaped.forEach((esc) => {
+      escaped.forEach(esc => {
         let memberToAdd: IWorkspaceUser;
 
         for (const members of Object.values(teamMemberMap)) {
-          memberToAdd = members.find((member) => member.id === esc.memberId);
+          memberToAdd = members.find(member => member.id === esc.memberId);
 
           if (memberToAdd) {
             break;
@@ -304,7 +304,7 @@ export class WorkspaceTeamsService {
       console.log(e);
       return sendError(
         'Error while trying to get workspace team members',
-        e.message,
+        e.message
       );
     }
   }
@@ -317,28 +317,28 @@ export class WorkspaceTeamsService {
       // Check if to be added member is already a member in the workspace
       const workspaceMembers = workspaceVal.members || [];
       const workspaceMemberIndex = workspaceMembers.findIndex(
-        (member) => member.id === newMemberId,
+        member => member.id === newMemberId
       );
 
       if (workspaceMemberIndex === -1) {
         throw new Error(
-          `Member with uid '${newMemberId}' is not a member of workspace with id '${workspaceId}'.`,
+          `Member with uid '${newMemberId}' is not a member of workspace with id '${workspaceId}'.`
         );
       }
 
       const teams = workspaceVal.teams || [];
       this.checkIfTeamExists(teams, teamId, workspaceId);
 
-      const newTeams = teams.map((team) => {
+      const newTeams = teams.map(team => {
         if (team.id === teamId) {
           const newTeamMembers = [...team.members];
 
           const alreadyMember = newTeamMembers.findIndex(
-            (member) => member.id === newMemberId,
+            member => member.id === newMemberId
           );
           if (alreadyMember >= 0) {
             throw new Error(
-              `Member with uid '${newMemberId}' is already a member of Team with id '${teamId}'`,
+              `Member with uid '${newMemberId}' is already a member of Team with id '${teamId}'`
             );
           }
 
@@ -362,7 +362,7 @@ export class WorkspaceTeamsService {
       console.log(e);
       return sendError(
         'Error while trying to add member in the Team.',
-        e.message,
+        e.message
       );
     }
   }
@@ -373,27 +373,27 @@ export class WorkspaceTeamsService {
         await this.utilitiesService.getWorkspaceById(workspaceId);
       const worskpaceMembers = workspaceVal.members || [];
       const memberIndex = worskpaceMembers.findIndex(
-        (member) => member.id === memberId && memberId !== workspaceVal.admin,
+        member => member.id === memberId && memberId !== workspaceVal.admin
       );
 
       if (memberIndex === -1) {
         throw new Error(
-          `Member with uid '${memberId}' is not removable member of workspace with id '${workspaceId}'.`,
+          `Member with uid '${memberId}' is not removable member of workspace with id '${workspaceId}'.`
         );
       }
 
       const teams = workspaceVal.teams || [];
       this.checkIfTeamExists(teams, teamId, workspaceId);
 
-      const newTeams = teams.map((team) => {
+      const newTeams = teams.map(team => {
         if (team.id === teamId) {
           const foundIndex = team.members.findIndex(
-            (member) => member.id === memberId,
+            member => member.id === memberId
           );
 
           if (foundIndex === -1) {
             throw new Error(
-              `Member with uid '${memberId}' is not a member of Team with id '${teamId}'`,
+              `Member with uid '${memberId}' is not a member of Team with id '${teamId}'`
             );
           }
 
@@ -417,7 +417,7 @@ export class WorkspaceTeamsService {
       console.log(e);
       return sendError(
         'Error while trying to remove member from the Team.',
-        e.message,
+        e.message
       );
     }
   }
@@ -426,13 +426,13 @@ export class WorkspaceTeamsService {
   private checkIfTeamExists(
     teams: IWorkspaceTeam[],
     teamId: string,
-    workspaceId: string,
+    workspaceId: string
   ) {
-    const teamIndex = teams.findIndex((team) => team.id === teamId);
+    const teamIndex = teams.findIndex(team => team.id === teamId);
 
     if (teamIndex === -1) {
       throw new Error(
-        `Team with id '${teamId}' was not found in workspace with id '${workspaceId}'.`,
+        `Team with id '${teamId}' was not found in workspace with id '${workspaceId}'.`
       );
     }
 

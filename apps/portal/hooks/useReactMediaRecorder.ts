@@ -145,9 +145,8 @@ export function useReactMediaRecorder({
         }
         mediaStream.current = stream;
       } else {
-        const stream = await window.navigator.mediaDevices.getUserMedia(
-          requiredMedia,
-        );
+        const stream =
+          await window.navigator.mediaDevices.getUserMedia(requiredMedia);
         mediaStream.current = stream;
       }
       setStatus('idle');

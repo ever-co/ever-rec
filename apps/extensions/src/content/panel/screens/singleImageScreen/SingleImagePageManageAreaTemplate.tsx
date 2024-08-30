@@ -338,7 +338,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
   const imageDelete = async (screenshot: IEditorImage) => {
     if (
       screenshot?.dbData?.parentId &&
-      typeof screenshot?.dbData?.parentId == 'string'
+      typeof screenshot?.dbData?.parentId === 'string'
     ) {
       const { data } = await getFolderByIdAPI(screenshot.dbData.parentId);
       if (data) {

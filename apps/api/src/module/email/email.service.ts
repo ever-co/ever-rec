@@ -24,13 +24,13 @@ enum ResStatusEnum {
 export class EmailService {
   constructor(
     private readonly firebaseClient: FirebaseClient,
-    private readonly configService: ConfigService,
+    private readonly configService: ConfigService
   ) {}
 
   async sendWelcomeEmail({ email }: { email: string }): Promise<any> {
     try {
       const client = new postmark.ServerClient(
-        this.configService.get<string>('POSTMARK_CLIENT_TOKEN'),
+        this.configService.get<string>('POSTMARK_CLIENT_TOKEN')
       );
 
       await client.sendEmailWithTemplate({
@@ -60,7 +60,7 @@ export class EmailService {
     try {
       const auth = admin.auth();
       const client = new postmark.ServerClient(
-        this.configService.get<string>('POSTMARK_CLIENT_TOKEN'),
+        this.configService.get<string>('POSTMARK_CLIENT_TOKEN')
       );
       const user = await auth.getUserByEmail(email);
 
@@ -166,7 +166,7 @@ export class EmailService {
   }): Promise<any> {
     try {
       const client = new postmark.ServerClient(
-        this.configService.get<string>('POSTMARK_CLIENT_TOKEN'),
+        this.configService.get<string>('POSTMARK_CLIENT_TOKEN')
       );
       const url =
         this.configService.get<string>('WEBSITE_URL') +
@@ -176,7 +176,7 @@ export class EmailService {
       const firstName = userDisplayName && userDisplayName.split(' ')[0];
       const template: postmark.TemplatedMessage[] = [];
 
-      emails.forEach(async (email) => {
+      emails.forEach(async email => {
         const singleTemp: postmark.TemplatedMessage = {
           From: this.configService.get<string>('POSTMARK_SENDER_EMAIL'),
           To: email,
@@ -227,7 +227,7 @@ export class EmailService {
   }) {
     try {
       const client = new postmark.ServerClient(
-        this.configService.get<string>('POSTMARK_CLIENT_TOKEN'),
+        this.configService.get<string>('POSTMARK_CLIENT_TOKEN')
       );
       const inviteLink =
         this.configService.get<string>('WEBSITE_URL') +
@@ -236,7 +236,7 @@ export class EmailService {
       const workspaceName = await this.getWorkspaceName(inviteId);
 
       const templates: postmark.TemplatedMessage[] = [];
-      emails.forEach(async (email) => {
+      emails.forEach(async email => {
         const template: postmark.TemplatedMessage = {
           From: this.configService.get<string>('POSTMARK_SENDER_EMAIL'),
           To: email,
@@ -272,7 +272,7 @@ export class EmailService {
       await workspaceInviteRef.get()
     ).val();
     const workspaceRef = db.ref(
-      `workspaces/${workspaceInviteData.workspaceId}`,
+      `workspaces/${workspaceInviteData.workspaceId}`
     );
     const workspaceData: IWorkspace = (await workspaceRef.get()).val();
     const workspaceName = workspaceData?.name;

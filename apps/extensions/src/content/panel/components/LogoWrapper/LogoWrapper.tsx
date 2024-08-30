@@ -2,7 +2,6 @@ import React, { CSSProperties, FC, useEffect, useState } from 'react';
 import Logo from '@/content/components/elements/Logo';
 import classNames from 'classnames';
 
-
 const getWindowDimensions = () => {
   const { innerWidth: width, innerHeight: height } = window;
   return {

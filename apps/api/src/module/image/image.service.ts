@@ -31,7 +31,7 @@ export class ImageService {
     private readonly sharedService: SharedService,
     private readonly foldersSharedService: FoldersSharedService,
     private eventEmitter: EventEmitter2,
-    private editorGateway: EditorGateway,
+    private editorGateway: EditorGateway
   ) {
     this.config = {
       action: 'read',
@@ -105,7 +105,7 @@ export class ImageService {
 
   async deleteSharedImageByImageId(
     uid: string,
-    imageId: string,
+    imageId: string
   ): Promise<void> {
     const db = admin.database();
     const sharedRef: Reference = db.ref('shared');
@@ -122,7 +122,7 @@ export class ImageService {
 
   async getImageBySharedId(
     link: string,
-    isWorkspace: boolean,
+    isWorkspace: boolean
   ): Promise<{ image: { owner: any; dbData: DbImgData } }> {
     try {
       const db = admin.database();
@@ -194,18 +194,18 @@ export class ImageService {
   async updateOriginalImageFromBucket(
     uid: string,
     fullFileName: string,
-    fileData: string | Express.Multer.File,
+    fileData: string | Express.Multer.File
   ): Promise<any> {
     const bucket = admin.storage().bucket();
     const file = bucket.file(
-      `users/${uid}/screenshots/originals/${fullFileName}`,
+      `users/${uid}/screenshots/originals/${fullFileName}`
     );
     let fileBuffer: Buffer;
     if (typeof fileData === 'string') {
-      const getBase64Data = (encoded) => {
+      const getBase64Data = encoded => {
         const base64EncodedString = encoded.replace(
           /^data:\w+\/\w+;base64,/,
-          '',
+          ''
         );
         return base64EncodedString;
       };
@@ -223,20 +223,20 @@ export class ImageService {
   async uploadImageInBucket(
     fileData: string | Express.Multer.File,
     uid: string,
-    fullFileName: string,
+    fullFileName: string
   ): Promise<any> {
     const bucket = admin.storage().bucket();
     const file = bucket.file(`users/${uid}/screenshots/${fullFileName}`);
     const thumbnail = bucket.file(
-      `users/${uid}/screenshots/thumbnails/${fullFileName}`,
+      `users/${uid}/screenshots/thumbnails/${fullFileName}`
     );
     let fileBuffer: Buffer;
 
     if (typeof fileData === 'string') {
-      const getBase64Data = (encoded) => {
+      const getBase64Data = encoded => {
         const base64EncodedString = encoded.replace(
           /^data:\w+\/\w+;base64,/,
-          '',
+          ''
         );
         return base64EncodedString;
       };
@@ -263,7 +263,7 @@ export class ImageService {
 
   async saveOriginalImageInBucket(
     uid: string,
-    fullFileName: string,
+    fullFileName: string
   ): Promise<any> {
     const bucket = admin.storage().bucket();
 
@@ -280,13 +280,13 @@ export class ImageService {
     const imageRef = db.ref(`users/${uid}/screenshots/${id}`);
     let imageSnap = await imageRef.get();
 
-    imageRef.on('value', (snap) => {
+    imageRef.on('value', snap => {
       imageSnap = snap;
     });
 
     if (imageSnap.val()) {
       const file = bucket.file(
-        `users/${uid}/screenshots/${imageSnap.val().refName}`,
+        `users/${uid}/screenshots/${imageSnap.val().refName}`
       );
       const metadata = (await file.getMetadata())[0];
       const url = (await file.getSignedUrl(this.config))[0];
@@ -302,7 +302,7 @@ export class ImageService {
     file: Express.Multer.File,
     title: string,
     fullFileName: string,
-    folderId?: string,
+    folderId?: string
   ): Promise<IEditorImage> {
     if (file && title && fullFileName) {
       const editorImage: IEditorImage = { url: '' };
@@ -319,7 +319,7 @@ export class ImageService {
           '',
           folderId,
           `${fullFileName}`,
-          savedOriginal,
+          savedOriginal
         );
         editorImage.ref = metadata;
         editorImage.url = downloadUrl;
@@ -347,7 +347,7 @@ export class ImageService {
 
         if (res) {
           const copiedfile = bucket.file(
-            `users/${uid}/screenshots/originals/${fullFileName}`,
+            `users/${uid}/screenshots/originals/${fullFileName}`
           );
 
           const downloadUrl = (await copiedfile.getSignedUrl(this.config))[0];
@@ -362,7 +362,7 @@ export class ImageService {
   async getFiles(
     uid: string,
     folderId: string | false,
-    type?: string,
+    type?: string
   ): Promise<IEditorImage[]> {
     const files: IEditorImage[] = [];
 
@@ -397,7 +397,7 @@ export class ImageService {
                 markers,
               } = value;
               const allComments = this.sharedService.sanitizeCommentsFromDB(
-                value.comments,
+                value.comments
               );
               const allViews = formatDataToArray(value.views);
               if (parentId) {
@@ -429,19 +429,19 @@ export class ImageService {
                 };
                 dbImagesData.push(imageData);
               }
-            },
-          ),
+            }
+          )
         );
 
         await Promise.allSettled(
-          dbImagesData.map(async (dbData) => {
+          dbImagesData.map(async dbData => {
             const imgRef = await this.getImageOrItsThumbnailRef(
               uid,
-              dbData.refName,
+              dbData.refName
             );
             const url = (await imgRef.getSignedUrl(this.config))[0];
             files.push({ dbData, url });
-          }),
+          })
         );
       }
     } catch (error: any) {
@@ -474,7 +474,7 @@ export class ImageService {
           uid,
           true,
           'image',
-          parsedFolders,
+          parsedFolders
         );
       }
       return {
@@ -496,7 +496,7 @@ export class ImageService {
 
   async getFolderById(
     uid: string,
-    folderId?: string,
+    folderId?: string
   ): Promise<IDataResponse<IDbFolder>> {
     try {
       const db = admin.database();
@@ -510,7 +510,7 @@ export class ImageService {
           await this.foldersSharedService.populateFolderChildren(
             uid,
             folderFromDb,
-            'image',
+            'image'
           );
         const folderData: IDbFolder = { ...populatedFolder, id: folderId };
 
@@ -537,7 +537,7 @@ export class ImageService {
     imgBase64: string,
     title: string,
     sourceUrl: string | undefined,
-    fullFileName: string,
+    fullFileName: string
   ): Promise<IEditorImage> {
     if (imgBase64 && title && fullFileName) {
       const editorImage: IEditorImage = { url: imgBase64 };
@@ -554,7 +554,7 @@ export class ImageService {
           sourceUrl,
           false,
           `${fullFileName}`,
-          savedOriginal,
+          savedOriginal
         );
         editorImage.ref = metadata;
         editorImage.url = downloadUrl;
@@ -574,7 +574,7 @@ export class ImageService {
   async getImageByIdPrivate(
     uid: string,
     id: string,
-    type?: string,
+    type?: string
   ): Promise<IEditorImage> {
     let image: IEditorImage | null = null;
 
@@ -628,14 +628,14 @@ export class ImageService {
     uid: string,
     blob: any,
     refName: string,
-    location: string,
+    location: string
   ): Promise<string> {
     const bucket = admin.storage().bucket();
     const file = bucket.file(
-      `users/${uid}/screenshots/${refName ? refName : location}`,
+      `users/${uid}/screenshots/${refName ? refName : location}`
     );
     const thumbnail = bucket.file(
-      `users/${uid}/screenshots/thumbnails/${refName ? refName : location}`,
+      `users/${uid}/screenshots/thumbnails/${refName ? refName : location}`
     );
 
     const buffer = Buffer.from(blob.buffer);
@@ -671,7 +671,7 @@ export class ImageService {
     title?: string,
     stage?: any,
     originalImage?: string,
-    markers?: string,
+    markers?: string
   ): Promise<IEditorImage> {
     const db = admin.database();
     const dbImageRef = db.ref(`users/${uid}/screenshots/${id}`);
@@ -696,7 +696,7 @@ export class ImageService {
   async deleteImage(
     uid: string,
     imageId: string,
-    refName: string,
+    refName: string
   ): Promise<void> {
     const db = admin.database();
     const bucket = admin.storage().bucket();
@@ -705,10 +705,10 @@ export class ImageService {
     const data = dataSnapshot.val();
     const storageScreenRef = bucket.file(`users/${uid}/screenshots/${refName}`);
     const storageOriginalScreenRef = bucket.file(
-      `users/${uid}/screenshots/originals/${refName}`,
+      `users/${uid}/screenshots/originals/${refName}`
     );
     const storageThumbnailScreenRef = bucket.file(
-      `users/${uid}/screenshots/thumbnails/${refName}`,
+      `users/${uid}/screenshots/thumbnails/${refName}`
     );
 
     await Promise.all([
@@ -727,12 +727,12 @@ export class ImageService {
 
   async deleteAllImages(
     uid: string,
-    trashedImages: IEditorImage[],
+    trashedImages: IEditorImage[]
   ): Promise<void> {
     await Promise.allSettled(
-      trashedImages.map(async (image) => {
+      trashedImages.map(async image => {
         await this.deleteImage(uid, image.dbData?.id, image.dbData.refName);
-      }),
+      })
     );
   }
 
@@ -755,7 +755,7 @@ export class ImageService {
       });
 
       await Promise.allSettled(
-        sharedData.map(async (data) => {
+        sharedData.map(async data => {
           const dbImage = db.ref(`users/${uid}/screenshots/${data.imageId}`);
           const snapshot = await dbImage.get();
 
@@ -768,7 +768,7 @@ export class ImageService {
               dbData.commentsLength = dbData?.comments?.length;
               const imgRef = await this.getImageOrItsThumbnailRef(
                 uid,
-                dbData.refName,
+                dbData.refName
               );
               const url = (await imgRef.getSignedUrl(this.config))[0];
               shared.push({
@@ -778,7 +778,7 @@ export class ImageService {
               });
             }
           }
-        }),
+        })
       );
 
       this.eventEmitter.emit('analytics.track', 'All Image Shared', {
@@ -814,19 +814,19 @@ export class ImageService {
             views: allViews.length,
             uid,
           });
-        },
+        }
       );
 
       await Promise.allSettled(
-        dbImagesData.map(async (dbData) => {
+        dbImagesData.map(async dbData => {
           const imgRef = await this.getImageOrItsThumbnailRef(
             uid,
-            dbData.refName,
+            dbData.refName
           );
           const url = (await imgRef.getSignedUrl(this.config))[0];
 
           trashed.push({ dbData, url });
-        }),
+        })
       );
 
       this.eventEmitter.emit('analytics.page', {
@@ -845,7 +845,7 @@ export class ImageService {
     color: string,
     rootFolderId: string | false,
     newId: string,
-    parentId: string | false,
+    parentId: string | false
   ): Promise<IDataResponse<IDbFolder>> {
     const db = admin.database();
 
@@ -913,7 +913,7 @@ export class ImageService {
     name: string,
     parentId: string,
     items: number,
-    color: string,
+    color: string
   ): Promise<
     IDataResponse<{ folder: IDbFolder; favFolders: IFavoriteFolders } | null>
   > {
@@ -931,7 +931,7 @@ export class ImageService {
         ? parseCollectionToArray(favFolders.images)
         : [];
       const favFoldersIndex = parsedFavImageFolders.findIndex(
-        (x) => x.id === folderId,
+        x => x.id === folderId
       );
 
       if (favFoldersIndex !== -1) {
@@ -977,7 +977,7 @@ export class ImageService {
     sourceUrl: string,
     parentId: string | false,
     refName: string,
-    originalImage: string,
+    originalImage: string
   ): Promise<DbImgData | null> {
     try {
       const db = admin.database();

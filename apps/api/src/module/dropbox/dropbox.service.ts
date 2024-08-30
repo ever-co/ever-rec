@@ -15,14 +15,14 @@ export class DropboxService {
   private apiKey: string;
   private apiSecrete: string;
   private redirectURI: string;
-  private redirectUriPath: string = '/api/v1/dropbox/complete-oauth';
+  private redirectUriPath = '/api/v1/dropbox/complete-oauth';
   private baseURL: string;
 
   constructor(
     private eventEmitter: EventEmitter2,
     private readonly imageService: ImageService,
     private readonly configService: ConfigService,
-    private readonly videoService: VideoService,
+    private readonly videoService: VideoService
   ) {
     this.apiKey = this.configService.get<string>('DROPBOX_API_KEY');
     this.apiSecrete = this.configService.get<string>('DROPBOX_API_SECRET');
@@ -116,7 +116,7 @@ export class DropboxService {
                     data: null,
                   });
                 }
-              },
+              }
             );
           }
         } catch (e) {
@@ -218,7 +218,7 @@ export class DropboxService {
                 if (err.error && err.error['.tag'] == 'expired_access_token') {
                   return await this.refreshToken(
                     userData.dropboxAPISCredentials.credentials.refresh_token,
-                    req,
+                    req
                   );
                 }
                 res({
@@ -247,7 +247,7 @@ export class DropboxService {
                   data: response.name,
                 });
               }
-            },
+            }
           );
         } catch (e) {
           console.log(e, 'e 1');
@@ -327,7 +327,7 @@ export class DropboxService {
   async deleteFile(
     uid: string,
     itemId: string,
-    itemType: string,
+    itemType: string
   ): Promise<IDataResponse> {
     const db = admin.database();
     const userRef = db.ref(`/users/${uid}`);
@@ -371,7 +371,7 @@ export class DropboxService {
               data: response,
             };
           }
-        },
+        }
       );
     }
     return {

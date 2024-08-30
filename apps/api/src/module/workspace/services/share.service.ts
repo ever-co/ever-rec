@@ -12,13 +12,13 @@ export class WorkspaceShareService {
 
   constructor(
     private readonly utilitiesService: WorkspaceUtilitiesService,
-    private eventEmitter: EventEmitter2,
+    private eventEmitter: EventEmitter2
   ) {}
 
   async getShareLink(
     workspaceId: string,
     itemId: string,
-    uid: string,
+    uid: string
   ): Promise<IDataResponse<string>> {
     try {
       const db = admin.database();
@@ -56,7 +56,7 @@ export class WorkspaceShareService {
           userId: uid,
           workspaceId,
           properties: { link, id: itemId },
-        },
+        }
       );
 
       return this.utilitiesService.sendResponse(link);
@@ -64,14 +64,14 @@ export class WorkspaceShareService {
       console.log(e);
       return this.utilitiesService.sendError(
         'Could not create a shareable link.',
-        e.message,
+        e.message
       );
     }
   }
 
   async deleteShareLink(
     uid: string,
-    linkId: string,
+    linkId: string
   ): Promise<IDataResponse<string>> {
     try {
       const db = admin.database();
@@ -90,17 +90,17 @@ export class WorkspaceShareService {
         {
           userId: uid,
           properties: { linkId },
-        },
+        }
       );
 
       return this.utilitiesService.sendResponse(
-        'Deleted shareable link successfully!',
+        'Deleted shareable link successfully!'
       );
     } catch (e) {
       console.log(e);
       return this.utilitiesService.sendError(
         'Could not delete shareable link',
-        e.message,
+        e.message
       );
     }
   }

@@ -127,9 +127,7 @@ const SavingTool: React.FC<ISavingProps> = ({
         icon={tools.saving.icon}
       >
         <div className={styles.mainContainer}>
-          <h2 className={styles.title}>
-            Download formats
-          </h2>
+          <h2 className={styles.title}>Download formats</h2>
           <div className={styles.container}>
             {savingData.map((data, index) =>
               // eslint-disable-next-line @next/next/no-img-element
@@ -141,8 +139,8 @@ const SavingTool: React.FC<ISavingProps> = ({
                     data.type === 'png'
                       ? downloadPng
                       : data.type === 'jpg'
-                      ? downloadJpg
-                      : downloadPdf
+                        ? downloadJpg
+                        : downloadPdf
                   }
                 />
               ) : null,

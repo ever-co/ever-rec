@@ -1,7 +1,6 @@
 import React, { FC } from 'react';
 import Switch from 'react-switch';
 
-
 interface IAppSwitchProps {
   switched?: boolean;
   disabled?: boolean;

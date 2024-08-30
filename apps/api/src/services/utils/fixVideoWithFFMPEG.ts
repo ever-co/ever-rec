@@ -7,9 +7,8 @@ import Ffmpeg from 'fluent-ffmpeg'; // https://github.com/fluent-ffmpeg/node-flu
 // example: ffmpeg -i test.webm -vcodec vp9 -cpu-used -5 -deadline realtime out.webm
 const fixVideoWithFFMPEG = async (
   brokenVideoPath: string,
-  fixedVideoPath: string,
+  fixedVideoPath: string
 ) => {
-
   let outputPath = fixedVideoPath;
   const command = Ffmpeg(); // Package fluent-ffmpeg
   let duration = null;
@@ -25,7 +24,7 @@ const fixVideoWithFFMPEG = async (
     });
   });
 
-  data.streams.forEach((stream) => {
+  data.streams.forEach(stream => {
     if (stream.codec_name === 'vp8') {
       outputPath = fixedVideoPath.replace('mp4', 'webm');
     }
@@ -37,23 +36,25 @@ const fixVideoWithFFMPEG = async (
       .videoCodec('copy')
       .output(outputPath)
 
-      .on('end', async (event) => {
+      .on('end', async event => {
         console.log(event);
         resolve(null);
       })
 
-      .on('error', async (error) => {
+      .on('error', async error => {
         console.log(error);
         reject(error);
       })
 
-      .on('progress', async (progress) => {
+      .on('progress', async progress => {
         console.log('Processing: ' + progress.percent + '% done');
       })
 
-      .on('codecData', async (codecData) => {
+      .on('codecData', async codecData => {
         // ex. '00:01:30.52'
+        //@ts-ignore
         if (codecData.duration !== 'N/A') {
+          //@ts-ignore
           const durationArray = codecData.duration.split(':');
           const minutes = durationArray[1];
           const seconds = durationArray[2].split('.')[0];
@@ -65,7 +66,7 @@ const fixVideoWithFFMPEG = async (
   });
 
   // Remove initial video - don't await this - we don't care to continue
-  fs.unlink(brokenVideoPath).catch((error) => {
+  fs.unlink(brokenVideoPath).catch(error => {
     console.log(error);
   });
 

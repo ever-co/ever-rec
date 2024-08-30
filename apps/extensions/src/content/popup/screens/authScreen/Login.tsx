@@ -105,7 +105,7 @@ const Login: React.FC<ILoginProps> = ({ changeAuthScreen }) => {
           outlined
           className="tw-mr-3"
         >
-          I don't have account
+          {"I don't have account"}
         </AppButton>
         <AppButton
           onClick={() => changeScreenHandler(AuthScreenType.reset)}

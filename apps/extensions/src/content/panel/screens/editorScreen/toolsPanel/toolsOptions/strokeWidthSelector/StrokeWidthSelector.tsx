@@ -5,7 +5,6 @@ import React from 'react';
 
 import './stroke-width-selector.css';
 
-
 interface IStrokeWidthSelectorProps {
   width: number;
   onChange: (width: number) => void;

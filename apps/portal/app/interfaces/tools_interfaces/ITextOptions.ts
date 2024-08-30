@@ -8,5 +8,5 @@ export interface ITextOptions {
   align: string;
   textDecoration: string;
   fontVariant: string;
-  text:string
+  text: string;
 }

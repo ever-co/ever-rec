@@ -18,14 +18,14 @@ export class ApiVideoController {
     @Req() request,
     @Param('videoId') videoId: string,
     @Param('assetId') assetId: string,
-    @Query('workspaceId') workspaceId: string,
+    @Query('workspaceId') workspaceId: string
   ) {
     const uid = request.user?.id;
     return this.apiVideoService.getPlaybackStatus(
       uid,
       videoId,
       assetId,
-      workspaceId,
+      workspaceId
     );
   }
 
@@ -34,7 +34,7 @@ export class ApiVideoController {
   async getDownloadStatus(
     @Req() request,
     @Param('videoId') videoId: string,
-    @Param('assetId') assetId: string,
+    @Param('assetId') assetId: string
   ) {
     const uid = request.user?.id;
     return this.apiVideoService.getDownloadStatus(uid, videoId, assetId);

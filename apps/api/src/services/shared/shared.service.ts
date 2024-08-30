@@ -92,7 +92,7 @@ export class SharedService {
     userId: string,
     itemId: string,
     initialComments: DbCommentIntF[],
-    limit: string | number = '10',
+    limit: string | number = '10'
   ): Promise<ResponseComment[]> {
     try {
       const db = admin.database();
@@ -112,7 +112,7 @@ export class SharedService {
       }
 
       await Promise.allSettled(
-        comments.map(async (x) => {
+        comments.map(async x => {
           const userRef = db.ref(`users/${x.uid}`);
           const userVal = await userRef.get();
           const user = userVal.val();
@@ -126,7 +126,7 @@ export class SharedService {
               name: user?.displayName || null,
             },
           });
-        }),
+        })
       );
 
       commentsResult.sort((a, b) => b.timestamp - a.timestamp);
@@ -141,7 +141,7 @@ export class SharedService {
   async getSharedItemById(
     uid: string,
     itemId: string,
-    itemType: ItemType,
+    itemType: ItemType
   ): Promise<{ imageId: string; uid: string; uidImageId: string } | null> {
     const db = admin.database();
     const collectionName = dbEndpoints.userCollections[itemType];
@@ -159,12 +159,12 @@ export class SharedService {
       Object.entries(sharedVal).forEach(
         ([_, item]: [
           any,
-          { imageId: string; uid: string; uidImageId: string },
+          { imageId: string; uid: string; uidImageId: string }
         ]) => {
           if (item[sharedItemRefName] == itemId && item.uid == uid) {
             sharedItem = item;
           }
-        },
+        }
       );
       return sharedItem;
     }
@@ -178,14 +178,14 @@ export class SharedService {
     itemId: string,
     content: string,
     isPublic: boolean,
-    limit?: string,
+    limit?: string
   ): Promise<IDataResponse<DbCommentIntF>> {
     try {
       if (isPublic) {
         const sharedItem = await this.getSharedItemById(
           itemOwnerId,
           itemId,
-          itemType,
+          itemType
         );
 
         if (!sharedItem) {
@@ -208,7 +208,7 @@ export class SharedService {
 
       const id = nanoid(12);
       const newCommentRef = db.ref(
-        `/users/${itemOwnerId}/${userCollectionName}/${itemId}/comments/${id}`,
+        `/users/${itemOwnerId}/${userCollectionName}/${itemId}/comments/${id}`
       );
       const newComment: DbCommentIntF = {
         id,
@@ -231,7 +231,7 @@ export class SharedService {
       this.eventEmitter.emit(
         'analytics.track',
         'Added comment on ' + itemType,
-        { userId: currentUserId },
+        { userId: currentUserId }
       );
 
       return sendResponse(newCommentWithUser);
@@ -248,14 +248,14 @@ export class SharedService {
     commentId: string,
     content: string,
     isPublic: boolean,
-    limit?: string | number,
+    limit?: string | number
   ): Promise<IDataResponse<queryReturnType>> {
     try {
       if (isPublic) {
         const sharedItem = await this.getSharedItemById(
           ownerId,
           itemId,
-          itemType,
+          itemType
         );
         if (!sharedItem) {
           return sendError('Shared item not found.');
@@ -265,7 +265,7 @@ export class SharedService {
       const db = admin.database();
       const userCollectionName = dbEndpoints.userCollections[itemType];
       const commentRef = db.ref(
-        `users/${ownerId}/${userCollectionName}/${itemId}/comments/${commentId}`,
+        `users/${ownerId}/${userCollectionName}/${itemId}/comments/${commentId}`
       );
       const commentSnapshot = await commentRef.get();
 
@@ -292,14 +292,14 @@ export class SharedService {
     itemId: string,
     commentId: string,
     isPublic: boolean,
-    limit?: string | number,
+    limit?: string | number
   ): Promise<IDataResponse<queryReturnType>> {
     try {
       if (isPublic) {
         const sharedItem = await this.getSharedItemById(
           ownerId,
           itemId,
-          itemType,
+          itemType
         );
         if (!sharedItem) {
           return sendError('Shared item not found.');
@@ -309,7 +309,7 @@ export class SharedService {
       const db = admin.database();
       const userCollectionName = dbEndpoints.userCollections[itemType];
       const commentRef = db.ref(
-        `users/${ownerId}/${userCollectionName}/${itemId}/comments/${commentId}`,
+        `users/${ownerId}/${userCollectionName}/${itemId}/comments/${commentId}`
       );
 
       const commentSnapshot = await commentRef.get();
@@ -323,7 +323,7 @@ export class SharedService {
       this.eventEmitter.emit(
         'analytics.track',
         'Deleted comment on ' + itemType,
-        { userId },
+        { userId }
       );
 
       return sendResponse(null);
@@ -336,7 +336,7 @@ export class SharedService {
   async getItemById(
     itemType: ItemType,
     itemId: string,
-    userId: string,
+    userId: string
   ): Promise<
     { dbData: ImageViewModel | VideoViewModel } | { message: string }
   > {
@@ -354,7 +354,7 @@ export class SharedService {
           itemType,
           userId,
           itemId,
-          item.comments,
+          item.comments
         );
 
         return {
@@ -380,7 +380,7 @@ export class SharedService {
     userId: string,
     isPublic: boolean,
     ownerId: string | null,
-    limit?: string | number,
+    limit?: string | number
   ): Promise<
     | { comments: ResponseComment[]; commentsLength: number }
     | { message: string }
@@ -396,19 +396,19 @@ export class SharedService {
     const userCollectionName = dbEndpoints.userCollections[itemType];
     if (userRef) {
       const commentsRef = db.ref(
-        `users/${uid}/${userCollectionName}/${itemId}/comments`,
+        `users/${uid}/${userCollectionName}/${itemId}/comments`
       );
       if (commentsRef) {
         const commentsSnapshot = await commentsRef.get();
         const commentsFromDB = this.sanitizeCommentsFromDB(
-          commentsSnapshot.val(),
+          commentsSnapshot.val()
         );
         const comments = await this.parseCommentsForResponse(
           itemType,
           uid,
           itemId,
           commentsFromDB,
-          limit,
+          limit
         );
 
         return { comments, commentsLength: commentsFromDB.length };
@@ -423,7 +423,7 @@ export class SharedService {
   async getSharedItemBySharedId(
     itemType: ItemType,
     sharedId: string,
-    isWorkspace: boolean,
+    isWorkspace: boolean
   ): Promise<ISharedData> {
     try {
       const db = admin.database();
@@ -446,7 +446,7 @@ export class SharedService {
     itemId: string,
     ownerUid: string,
     userId: string,
-    workspaceId?: string,
+    workspaceId?: string
   ): Promise<IDataResponse<LikeIntF[]>> {
     try {
       if (!itemId) {
@@ -461,19 +461,19 @@ export class SharedService {
         : dbEndpoints.userCollections[itemType];
 
       const itemRef = db.ref(
-        `${rootDb}/${parentCollection}/${collection}/${itemId}`,
+        `${rootDb}/${parentCollection}/${collection}/${itemId}`
       );
       const itemSnapshot = await itemRef.get();
 
       if (!itemSnapshot.exists()) {
         throw new Error(
-          `Item doesn't exit for /${rootDb}/${ownerUid}/${collection}/${itemId}`,
+          `Item doesn't exit for /${rootDb}/${ownerUid}/${collection}/${itemId}`
         );
       }
 
       const itemData: ImageViewModel | VideoViewModel = itemSnapshot.val();
       const likes = itemData?.likes || [];
-      const isLikedIndex = likes.findIndex((x) => x.uid === userId);
+      const isLikedIndex = likes.findIndex(x => x.uid === userId);
 
       if (isLikedIndex === -1) {
         likes.push({ uid: userId, timestamp: Date.now() });

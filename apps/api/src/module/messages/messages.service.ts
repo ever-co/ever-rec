@@ -11,21 +11,21 @@ export class MessagesService {
     @InjectTwilio() private readonly client: TwilioClient,
     private readonly imageService: ImageService,
     private readonly videoService: VideoService,
-    private readonly configService: ConfigService,
+    private readonly configService: ConfigService
   ) {}
 
-  async sendSMS(toPhone: string, mediaUrl: string, body: string = '') {
+  async sendSMS(toPhone: string, mediaUrl: string, body = '') {
     return await this.client.messages
       .create({
         body: body,
         from: `whatsapp:${this.configService.get<string>(
-          'TWILIO_FROM_NUMBER',
+          'TWILIO_FROM_NUMBER'
         )}`,
         //to: 'whatsapp:+919998843025',
         to: `whatsapp:${toPhone}`,
         ...(mediaUrl && { mediaUrl }),
       })
-      .then((res) => {
+      .then(res => {
         console.log(res, 'res');
         return {
           status: ResStatusEnum.success,
@@ -59,16 +59,15 @@ export class MessagesService {
 
         if (resData.sharedLink) {
           sharedLink = `${this.configService.get<string>(
-            'WEBSITE_URL',
+            'WEBSITE_URL'
           )}/image/shared/${resData.sharedLink}`;
         } else {
           const sharedCode = await this.videoService.share(uid, id);
           sharedLink = `${this.configService.get<string>(
-            'WEBSITE_URL',
+            'WEBSITE_URL'
           )}/image/shared/${sharedCode}`;
         }
-        body =
-          '*Sent with Rec* Click to link for mor details: ' + sharedLink;
+        body = '*Sent with Rec* Click to link for mor details: ' + sharedLink;
         return await this.sendSMS(phone, mediaUrl, body);
       }
     } else {
@@ -77,17 +76,16 @@ export class MessagesService {
 
       if (resData.sharedLink) {
         sharedLink = `${this.configService.get<string>(
-          'WEBSITE_URL',
+          'WEBSITE_URL'
         )}/video/shared/${resData.sharedLink}`;
       } else {
         const sharedCode = await this.videoService.share(uid, id);
         sharedLink = `${this.configService.get<string>(
-          'WEBSITE_URL',
+          'WEBSITE_URL'
         )}/video/shared/${sharedCode}`;
       }
 
-      body =
-        '*Sent with Rec* Click to link for mor details: ' + sharedLink;
+      body = '*Sent with Rec* Click to link for mor details: ' + sharedLink;
 
       return await this.sendSMS(phone, mediaUrl, body);
     }

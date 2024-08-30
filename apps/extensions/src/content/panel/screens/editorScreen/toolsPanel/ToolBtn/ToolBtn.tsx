@@ -181,21 +181,21 @@ const ToolBtn = forwardRef<{ closePanel: () => void }, IToolBtn>(
                       borderRadius: '10px',
                     }
                   : placement === 'right' &&
-                    toolbarPosition.x < window.innerWidth / 2
-                  ? {
-                      left: '60px',
-                      borderRadius: '10px',
-                    }
-                  : placement === 'left' &&
-                    toolbarPosition.x > window.innerWidth / 2
-                  ? {
-                      right: '75px',
-                      borderRadius: '10px',
-                    }
-                  : {
-                      right: '100px',
-                      borderRadius: '10px',
-                    }
+                      toolbarPosition.x < window.innerWidth / 2
+                    ? {
+                        left: '60px',
+                        borderRadius: '10px',
+                      }
+                    : placement === 'left' &&
+                        toolbarPosition.x > window.innerWidth / 2
+                      ? {
+                          right: '75px',
+                          borderRadius: '10px',
+                        }
+                      : {
+                          right: '100px',
+                          borderRadius: '10px',
+                        }
               }
             >
               <ToolSubPanel className={toolSubPanelClasses}>
@@ -211,5 +211,7 @@ const ToolBtn = forwardRef<{ closePanel: () => void }, IToolBtn>(
     );
   },
 );
+
+ToolBtn.displayName = 'ToolBtn';
 
 export default ToolBtn;

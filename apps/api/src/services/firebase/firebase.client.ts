@@ -25,7 +25,7 @@ export class FirebaseClient {
       projectId: this.configService.get<string>('FIREBASE_PROJECT_ID'),
       storageBucket: this.configService.get<string>('FIREBASE_STORAGE_BUCKET'),
       messagingSenderId: this.configService.get<string>(
-        'FIREBASE_MESSAGING_SENDER_ID',
+        'FIREBASE_MESSAGING_SENDER_ID'
       ),
       appId: this.configService.get<string>('FIREBASE_APP_ID'),
       measurementId: this.configService.get<string>('FIREBASE_MASUREMENT_ID'),

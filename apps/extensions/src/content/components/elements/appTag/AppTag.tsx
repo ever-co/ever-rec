@@ -1,7 +1,6 @@
 import classNames from 'classnames';
 import React from 'react';
 
-
 export interface IAppTagProps {
   text: string;
   bgColor?: string;

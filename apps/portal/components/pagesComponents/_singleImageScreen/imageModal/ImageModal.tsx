@@ -122,8 +122,8 @@ const ImageModal: FC<IProps> = ({ imageUrl, visible, closeModal }) => {
             zoomPercentIndex === 1
               ? '70%'
               : zoomPercentIndex === 0
-              ? '50%'
-              : '',
+                ? '50%'
+                : '',
         }}
         className={classNames(
           'tw-max-w-none tw-w-full tw-rounded-md default:tw-p-2 tw-m-auto',

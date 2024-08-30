@@ -1,7 +1,6 @@
 import { removeStorageItems } from '@/app/services/localStorage';
 import hideController from '@/content/utilities/scripts/hideController';
 
-
 const clearStorage = async (): Promise<void> => {
   await hideController();
 

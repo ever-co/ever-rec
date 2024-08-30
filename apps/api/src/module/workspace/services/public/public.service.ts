@@ -12,12 +12,12 @@ import { Injectable } from '@nestjs/common';
 @Injectable()
 export class WorkspacePublicService {
   async getWorkspaceInviteData(
-    workspaceInviteId: string,
+    workspaceInviteId: string
   ): Promise<IDataResponse<IWorkspaceInviteData | null>> {
     try {
       const db = admin.database();
       const workspaceInviteRef = db.ref(
-        `workspaceInvites/${workspaceInviteId}`,
+        `workspaceInvites/${workspaceInviteId}`
       );
       const workspaceInviteData: IWorkspaceInvite = (
         await workspaceInviteRef.get()
@@ -36,7 +36,7 @@ export class WorkspacePublicService {
 
       // Get workspace name
       const workspaceRef = db.ref(
-        `workspaces/${workspaceInviteData.workspaceId}`,
+        `workspaces/${workspaceInviteData.workspaceId}`
       );
       const workspaceData: IWorkspace = (await workspaceRef.get()).val();
       const workspaceName = workspaceData.name;
@@ -47,16 +47,16 @@ export class WorkspacePublicService {
       const workspaceMembersData = workspaceData?.members;
       if (workspaceMembersData) {
         const workspaceMembersPromises = workspaceMembersData.map(
-          async (workspaceMember) => {
+          async workspaceMember => {
             const workspaceUserRef = db.ref(`users/${workspaceMember.id}`);
             return workspaceUserRef.get();
-          },
+          }
         );
         const workspaceMembersSnapshots = await Promise.allSettled(
-          workspaceMembersPromises,
+          workspaceMembersPromises
         );
         workspaceMembers = workspaceMembersSnapshots
-          .map((snap) => {
+          .map(snap => {
             if (snap.status === 'rejected') {
               return null;
             }
@@ -67,7 +67,7 @@ export class WorkspacePublicService {
 
             return displayName;
           })
-          .filter((x) => x !== null);
+          .filter(x => x !== null);
       }
 
       return sendResponse({
@@ -80,7 +80,7 @@ export class WorkspacePublicService {
       console.log(e);
       return sendError(
         'There was a problem getting workspace invitation data',
-        e.message,
+        e.message
       );
     }
   }

@@ -19,7 +19,7 @@ const UploadToCloudModal: React.FC<IUploadToCloudModalProps> = ({
   oldName,
   onClose,
   onOk,
-  type
+  type,
 }) => {
   const initialControl = (): IAppControl => ({
     value: '',
@@ -103,13 +103,15 @@ const UploadToCloudModal: React.FC<IUploadToCloudModalProps> = ({
             size={30 + 'px'}
           />
         )}
-        {type == "dropbox" && (
+        {type == 'dropbox' && (
           <AppSvg
             path="images/panel/common/dropbox-icon-dark.svg"
             size={30 + 'px'}
           />
         )}
-        <h2 className="tw-text-2xl tw-font-semibold">Save to {type ? type : "Google drive"}</h2>
+        <h2 className="tw-text-2xl tw-font-semibold">
+          Save to {type ? type : 'Google drive'}
+        </h2>
       </div>
       <AppInput
         inputClass="tw-bg-transparent"

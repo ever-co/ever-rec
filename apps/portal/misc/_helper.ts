@@ -34,7 +34,7 @@ const getUserTokens = (): ITokens | null => {
 
 const handleResponse = (response: IDataResponse) => {
   const { data, status } = response;
-  if (status != 'error') {
+  if (status !== 'error') {
     if ((data.refreshToken, data.idToken)) {
       cookie.set('refreshToken', data.refreshToken);
       cookie.set('idToken', data.idToken);
@@ -81,7 +81,7 @@ const sendExternalMessage = (
 };
 
 export const parseCollectionToIdValueObj = (
-  collection: Object | Array<any>,
+  collection: Record<string, any> | Array<any>,
 ) => {
   try {
     let result = collection;
@@ -102,7 +102,7 @@ export const parseCollectionToIdValueObj = (
 };
 
 export const parseCollectionToArray = (
-  collection: Object | Array<any>,
+  collection: Record<string, any> | Array<any>,
   putKeyAsId?: boolean,
 ): any[] => {
   try {

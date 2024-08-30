@@ -57,7 +57,7 @@ export type ToolName =
   | 'record'
   | 'task'
   | 'tag'
-  | 'upload'
+  | 'upload';
 
 export const tools: Record<ToolName, ITool> = {
   plus: {
@@ -171,22 +171,22 @@ export const tools: Record<ToolName, ITool> = {
     title: 'Pointer',
     icon: lock,
   },
-  record:{
+  record: {
     tool: 'record',
-    icon: record
+    icon: record,
   },
   task: {
     tool: 'task',
-    icon: task
+    icon: task,
   },
   tag: {
     tool: 'tag',
-    icon: tag
+    icon: tag,
   },
   upload: {
     tool: 'upload',
-    icon: upload
-  }
+    icon: upload,
+  },
 };
 export const compareWhiteboardTools = (
   firstTool: ITool | null,

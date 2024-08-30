@@ -100,10 +100,10 @@ const TextTool: React.FC<ITextToolProps> = ({
               options.fontStyle === ''
                 ? optionsChangeHandler('fontStyle', 'bold')
                 : options.fontStyle === 'italic'
-                ? optionsChangeHandler('fontStyle', 'italic bold')
-                : options.fontStyle === 'italic bold'
-                ? optionsChangeHandler('fontStyle', 'italic')
-                : optionsChangeHandler('fontStyle', '');
+                  ? optionsChangeHandler('fontStyle', 'italic bold')
+                  : options.fontStyle === 'italic bold'
+                    ? optionsChangeHandler('fontStyle', 'italic')
+                    : optionsChangeHandler('fontStyle', '');
             }}
             toolTitle="Bold"
           />
@@ -115,10 +115,10 @@ const TextTool: React.FC<ITextToolProps> = ({
               options.fontStyle === ''
                 ? optionsChangeHandler('fontStyle', 'italic')
                 : options.fontStyle === 'bold'
-                ? optionsChangeHandler('fontStyle', 'italic bold')
-                : options.fontStyle === 'italic bold'
-                ? optionsChangeHandler('fontStyle', 'bold')
-                : optionsChangeHandler('fontStyle', '');
+                  ? optionsChangeHandler('fontStyle', 'italic bold')
+                  : options.fontStyle === 'italic bold'
+                    ? optionsChangeHandler('fontStyle', 'bold')
+                    : optionsChangeHandler('fontStyle', '');
             }}
             toolTitle="Italic"
           />

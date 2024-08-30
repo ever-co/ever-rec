@@ -9,7 +9,8 @@
   transition: all 0.5s ease;
   margin-bottom: 10px;
 
-  &.active, &:hover{
+  &.active,
+  &:hover {
     transition: all 0.5s ease;
     color: white;
     background: #5b4dbe;

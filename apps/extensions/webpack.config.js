@@ -38,10 +38,16 @@ module.exports = {
         exclude: /node_modules/,
       },
       {
-        test: /\.(js|jsx)$/,
-        use: {
-          loader: 'babel-loader',
-        },
+        test: /\.tsx?$/,
+        use: [
+          {
+            loader: 'babel-loader',
+            options: {
+              presets: ['@babel/preset-env', '@babel/preset-react'],
+            },
+          },
+          'ts-loader',
+        ],
         exclude: /node_modules/,
       },
       {

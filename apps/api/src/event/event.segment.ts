@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { OnEvent } from '@nestjs/event-emitter';
-const Analytics = require('analytics-node');
+import Analytics from 'analytics-node';
 
 @Injectable()
 export class EventSegment {
@@ -18,7 +18,7 @@ export class EventSegment {
     try {
       await this.analytics.identify({
         userId,
-        ...(traits && { traits })
+        ...(traits && { traits }),
       });
     } catch (error: any) {
       console.log(error, 'error');
@@ -30,7 +30,7 @@ export class EventSegment {
     try {
       await this.analytics.track({
         event,
-        ...(payload && payload)
+        ...(payload && payload),
       });
     } catch (error: any) {
       console.log(error, 'error');

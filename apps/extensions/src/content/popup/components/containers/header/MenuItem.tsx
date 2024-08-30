@@ -6,7 +6,7 @@ interface IMainMenuItemProps {
   item: IMenuItem;
   title?: string;
   showTitle?: boolean;
-  onItemSelect: Function;
+  onItemSelect: (...args: any[]) => void;
 }
 
 const MenuItem: React.FC<IMainMenuItemProps> = ({
@@ -26,10 +26,12 @@ const MenuItem: React.FC<IMainMenuItemProps> = ({
         placement={'bottomLeft'}
         title={title}
       >
-        {item.icon}
-        {showTitle && (
-          <span className="tw-ml-2 tw-text-sm tw-font-semibold">{title}</span>
-        )}
+        <>
+          {item.icon}
+          {showTitle && (
+            <span className="tw-ml-2 tw-text-sm tw-font-semibold">{title}</span>
+          )}
+        </>
       </Tooltip>
     </div>
   );

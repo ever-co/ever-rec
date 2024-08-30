@@ -18,14 +18,16 @@ const ImageActionItem: React.FC<IImageActionCardProps> = ({
   circleClassName,
   iconColor = 'black',
   onClick,
-  additionalClass
+  additionalClass,
 }) => {
   return (
-    <div className={additionalClass ? "group" : "group tw-w-full"}>
+    <div className={additionalClass ? 'group' : 'group tw-w-full'}>
       <div
         className={classNames(
           outerClassName,
-          `tw-flex tw-flex-col tw-items-center tw-justify-center tw-select-none tw-rounded-md tw-py-13px ${additionalClass ? `tw-w-max` : `tw-w-full`}`,
+          `tw-flex tw-flex-col tw-items-center tw-justify-center tw-select-none tw-rounded-md tw-py-13px ${
+            additionalClass ? `tw-w-max` : `tw-w-full`
+          }`,
         )}
         onClick={onClick}
         title={title}

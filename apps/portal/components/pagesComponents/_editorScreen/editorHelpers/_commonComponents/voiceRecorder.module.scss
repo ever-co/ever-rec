@@ -51,35 +51,35 @@
 }
 
 .container {
-    margin-left: 0.75rem; 
-    font-weight: 600;
-    font-size: 1.25rem;
-    line-height: 1.75rem;
+  margin-left: 0.75rem;
+  font-weight: 600;
+  font-size: 1.25rem;
+  line-height: 1.75rem;
 }
 
 .iconWrapper {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
 }
 
 .firstIcon {
-    padding: 1px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #5b4dbe;
-    border-radius: 0.25rem;
-    height: 30px;
-    width: 30px;
+  padding: 1px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #5b4dbe;
+  border-radius: 0.25rem;
+  height: 30px;
+  width: 30px;
 }
 
 .secondIcon {
-    padding: 1px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 9999px;
-    height: 30px;
-    width: 30px;
+  padding: 1px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  height: 30px;
+  width: 30px;
 }

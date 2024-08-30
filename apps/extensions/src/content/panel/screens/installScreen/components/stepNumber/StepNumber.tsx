@@ -1,7 +1,6 @@
 import classnames from 'classnames';
 import React from 'react';
 
-
 interface IStepNUmberProps {
   step: number;
   hasNextStep: boolean;

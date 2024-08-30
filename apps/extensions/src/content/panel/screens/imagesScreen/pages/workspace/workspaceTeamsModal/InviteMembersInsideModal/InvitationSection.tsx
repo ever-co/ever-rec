@@ -128,7 +128,10 @@ interface ISendEmailProps {
   onEmailSend: () => void;
 }
 
-const SendEmailButton: FC<ISendEmailProps> = ({ disabled = false, onEmailSend }) => {
+const SendEmailButton: FC<ISendEmailProps> = ({
+  disabled = false,
+  onEmailSend,
+}) => {
   return (
     <AppButton
       onClick={onEmailSend}

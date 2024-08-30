@@ -5,7 +5,6 @@ import { sendRuntimeMessage } from '@/content/utilities/scripts/sendRuntimeMessa
 import React, { useState } from 'react';
 import { IStepProps } from './steps';
 
-
 const InstallFinished: React.FC<IStepProps> = () => {
   const [disabled, setDisabled] = useState(false);
 

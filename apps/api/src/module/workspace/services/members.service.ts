@@ -14,7 +14,7 @@ export class WorkspaceMembersService {
     uid: string,
     name: string,
     email: string,
-    workspaceId: string,
+    workspaceId: string
   ): Promise<IDataResponse<IWorkspace | null>> {
     try {
       const { workspaceVal, workspaceRef } =
@@ -24,7 +24,7 @@ export class WorkspaceMembersService {
 
       await workspaceRef.update({ members });
       const workspace = await this.utilitiesService.parseWorkspaceItems(
-        workspaceVal,
+        workspaceVal
       );
 
       return this.utilitiesService.sendResponse<IWorkspace>({
@@ -34,23 +34,23 @@ export class WorkspaceMembersService {
     } catch (e) {
       console.log(e);
       return this.utilitiesService.sendError(
-        e.message || 'Error while trying to add workspace member.',
+        e.message || 'Error while trying to add workspace member.'
       );
     }
   }
 
   async removeMemberFromWorkspace(
     uid: string,
-    workspaceId: string,
+    workspaceId: string
   ): Promise<IDataResponse<IWorkspace | null>> {
     const { workspaceVal, workspaceRef } =
       await this.utilitiesService.getWorkspaceById(workspaceId);
     const members: IWorkspaceUser[] = workspaceVal.members || [];
-    const index = members.findIndex((x) => x.id === uid);
+    const index = members.findIndex(x => x.id === uid);
 
     if (index === -1) {
       return this.utilitiesService.sendError(
-        'User not a member of this workspace.',
+        'User not a member of this workspace.'
       );
     }
 
@@ -69,7 +69,7 @@ export class WorkspaceMembersService {
   populateWorkspaceMembers(
     workspace: IWorkspace,
     users: IUser[],
-    limit?: string | number,
+    limit?: string | number
   ): IWorkspaceUser[] {
     const parsedUsers = parseCollectionToArray(users, true);
     let startIndex = 0;
@@ -81,8 +81,8 @@ export class WorkspaceMembersService {
     }
 
     const usersToParse = workspace.members.slice(startIndex, endIndex);
-    const result = usersToParse.map((workspaceUser) => {
-      const userFomDB = parsedUsers.find((y) => y.id === workspaceUser.id);
+    const result = usersToParse.map(workspaceUser => {
+      const userFomDB = parsedUsers.find(y => y.id === workspaceUser.id);
 
       return {
         id: workspaceUser.id,
@@ -98,7 +98,7 @@ export class WorkspaceMembersService {
   async getPopulatedMembers(
     uid: string,
     workspaceId: string,
-    limit?: string | number,
+    limit?: string | number
   ) {
     try {
       const db = admin.database();
@@ -108,12 +108,12 @@ export class WorkspaceMembersService {
       const usersVal: IUser[] = (await usersRef.get()).val();
 
       return sendResponse<IWorkspaceUser[]>(
-        this.populateWorkspaceMembers(workspaceVal, usersVal, limit),
+        this.populateWorkspaceMembers(workspaceVal, usersVal, limit)
       );
     } catch (e) {
       console.log(e);
       return sendError(
-        e.message || 'Something went wrong when getting workspace users.',
+        e.message || 'Something went wrong when getting workspace users.'
       );
     }
   }

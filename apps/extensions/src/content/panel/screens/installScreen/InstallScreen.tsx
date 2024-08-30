@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import InstallLayout from './InstallLayout';
 import { ISignStep, IStepProps, signSteps } from './steps/steps';
 
-
 const InstallScreen: React.FC = () => {
   const [currentStep, setCurrentStep] = useState<ISignStep>(
     signSteps.InstallPinn,

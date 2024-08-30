@@ -4,7 +4,7 @@ import { GoogleLogin, GoogleOAuthProvider } from '@react-oauth/google';
 import { errorHandler } from '../../../app/services/helpers/errors';
 // import { GoogleLogin } from 'react-google-login';
 
-const GoogleBtn = ({ onSuccess }: { onSuccess: (params: any ) => any }) => {
+const GoogleBtn = ({ onSuccess }: { onSuccess: (params: any) => any }) => {
   const router = useRouter();
 
   useEffect(() => {
@@ -13,14 +13,14 @@ const GoogleBtn = ({ onSuccess }: { onSuccess: (params: any ) => any }) => {
   }, []);
 
   const onError = () => {
-    errorHandler({message: 'Error while trying to log with google, please try again later.'})
-  }
+    errorHandler({
+      message: 'Error while trying to log with google, please try again later.',
+    });
+  };
 
   return (
     <div className="tw-w-full tw-flex tw-justify-center">
-        <GoogleLogin
-          onSuccess={onSuccess}
-          onError={onError}/>
+      <GoogleLogin onSuccess={onSuccess} onError={onError} />
     </div>
   );
 };

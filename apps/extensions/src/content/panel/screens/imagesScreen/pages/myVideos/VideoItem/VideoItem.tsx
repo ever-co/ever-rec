@@ -108,7 +108,7 @@ const VideoItem: React.FC<IVideoItemProps> = ({
     thumbnailUrl = video.dbData?.streamData?.thumbnailUrl;
     views = Array.isArray(video?.dbData?.views)
       ? video?.dbData?.views.length
-      : video?.dbData?.views ?? 0;
+      : (video?.dbData?.views ?? 0);
   }
 
   return (

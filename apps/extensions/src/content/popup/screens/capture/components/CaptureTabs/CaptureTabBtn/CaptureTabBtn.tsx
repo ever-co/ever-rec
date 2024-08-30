@@ -1,7 +1,6 @@
 import classNames from 'classnames';
 import { ReactElement } from 'react';
 
-
 interface ICaptureTabBtn {
   active: boolean;
   icon: ReactElement;

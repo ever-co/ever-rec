@@ -18,7 +18,7 @@ export class AtlassianService {
     private readonly imageService: ImageService,
     private readonly videoService: VideoService,
     private readonly atlassianApiService: AtlassianApiService,
-    private readonly configService: ConfigService,
+    private readonly configService: ConfigService
   ) {}
 
   async createJiraIssue(req): Promise<any> {
@@ -26,7 +26,7 @@ export class AtlassianService {
     const userVal = await this.getUserData(uid);
     const res = await this.atlassianApiService.checkTokenExpiration(
       uid,
-      userVal.jiraAPISCredentials.credentials,
+      userVal.jiraAPISCredentials.credentials
     );
 
     if (res) {
@@ -80,7 +80,7 @@ export class AtlassianService {
         resourceId,
         userData.jiraAPISCredentials.credentials,
         'issue',
-        bodyData,
+        bodyData
       );
       if (
         issueResponse &&
@@ -99,7 +99,7 @@ export class AtlassianService {
             resourceId,
             userData.jiraAPISCredentials.credentials,
             `issue/${issueResponse.data.key}/attachments`,
-            formData,
+            formData
           );
         }
         return {
@@ -143,9 +143,9 @@ export class AtlassianService {
     const fail = Symbol();
     return (
       await Promise.all(
-        arr.map(async (item) => ((await callback(item)) ? item : fail)),
+        arr.map(async item => ((await callback(item)) ? item : fail))
       )
-    ).filter((i) => i !== fail);
+    ).filter(i => i !== fail);
   }
 
   async generateJiraAuthUrl(uid): Promise<any> {
@@ -228,24 +228,24 @@ export class AtlassianService {
     const userVal = await this.getUserData(uid);
     const res = await this.atlassianApiService.checkTokenExpiration(
       uid,
-      userVal.jiraAPISCredentials.credentials,
+      userVal.jiraAPISCredentials.credentials
     );
     if (res) {
       const userData = await this.getUserData(uid);
       const resourcesData: any[] = [];
       const resources = await this.atlassianApiService.getAccessibleResources(
-        userData.jiraAPISCredentials.credentials.access_token,
+        userData.jiraAPISCredentials.credentials.access_token
       );
       if (resources && resources.data && resources.data.length > 0) {
         await this.mapAsync(resources.data, async (item, index) => {
-          let object = {
+          const object = {
             ...item,
             projects: [],
           };
           const projects = await this.atlassianApiService.getDataFromRestAPI(
             item.id,
             userData.jiraAPISCredentials.credentials,
-            'project',
+            'project'
           );
           const projectsData: any[] = [];
           if (projects && projects.length > 0) {
@@ -254,7 +254,7 @@ export class AtlassianService {
                 await this.atlassianApiService.getDataFromRestAPI(
                   item.id,
                   userData.jiraAPISCredentials.credentials,
-                  'issuetype/project?projectId=' + element.id,
+                  'issuetype/project?projectId=' + element.id
                 );
               projectsData.push({
                 ...element,
@@ -344,16 +344,16 @@ export class AtlassianService {
     const userVal = await this.getUserData(uid);
     if (userVal.trelloAPISCredentials.credentials) {
       let boards: any[] = [];
-      let boardsData: any[] = [];
+      const boardsData: any[] = [];
 
       boards = await this.atlassianApiService.getTrelloBoards(
-        userVal.trelloAPISCredentials.credentials.access_token,
+        userVal.trelloAPISCredentials.credentials.access_token
       );
       if (boards && boards.length > 0) {
         await this.mapAsync(boards, async (item, index) => {
           const lists = await this.atlassianApiService.getTrelloBoardsLists(
             userVal.trelloAPISCredentials.credentials.access_token,
-            item.id,
+            item.id
           );
           const object = {
             ...item,
@@ -404,18 +404,18 @@ export class AtlassianService {
 
     if (!streamData) {
       const readableStream = await bucket.file(
-        `users/${userVal.uid}/${collection}/${res.dbData.refName}`,
+        `users/${userVal.uid}/${collection}/${res.dbData.refName}`
       );
       const metadata = (await readableStream.getMetadata())[0];
       const buffer = await getRawBody(readableStream.createReadStream());
       return { buffer, size: metadata.size, name: metadata.name };
     } else {
       const steamResponse = await fetch(streamData.downloadUrl)
-        .then((res) => res.buffer())
-        .then((buffer) => {
+        .then(res => res.buffer())
+        .then(buffer => {
           return buffer;
         })
-        .catch((err) => {
+        .catch(err => {
           console.log(err, 'stream error');
           return false;
         });
@@ -449,29 +449,29 @@ export class AtlassianService {
 
         if (resData.sharedLink) {
           sharedLink = `${this.configService.get<string>(
-            'WEBSITE_URL',
+            'WEBSITE_URL'
           )}/image/shared/${resData.sharedLink}`;
         } else {
           const sharedCode = await this.imageService.share(uid, itemId);
           sharedLink = `${this.configService.get<string>(
-            'WEBSITE_URL',
+            'WEBSITE_URL'
           )}/image/shared/${sharedCode}`;
         }
       } else {
         resData = await this.videoService.getVideoByIdPrivate(uid, itemId);
         if (resData.sharedLink) {
           sharedLink = `${this.configService.get<string>(
-            'WEBSITE_URL',
+            'WEBSITE_URL'
           )}/video/shared/${resData.sharedLink}`;
         } else {
           const sharedCode = await this.videoService.share(uid, itemId);
           sharedLink = `${this.configService.get<string>(
-            'WEBSITE_URL',
+            'WEBSITE_URL'
           )}/video/shared/${sharedCode}`;
         }
       }
 
-      let body: any = {
+      const body: any = {
         name: title,
         idList: issueType,
         cardCovers: false,
@@ -488,7 +488,7 @@ export class AtlassianService {
       const trelloResponse = await this.atlassianApiService.createTrelloCard(
         userVal.trelloAPISCredentials.credentials.access_token,
         projectId,
-        body,
+        body
       );
       if (
         trelloResponse &&
@@ -507,7 +507,7 @@ export class AtlassianService {
             this.atlassianApiService.trelloAttachmentsIssue(
               userVal.trelloAPISCredentials.credentials.access_token,
               trelloResponse.data.id,
-              formData,
+              formData
             );
           }
         }

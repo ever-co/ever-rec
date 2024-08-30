@@ -105,33 +105,27 @@ const ToolButton: React.FC<IToolButton> = (props: IToolButton) => {
           <AppSvg
             // @ts-ignore
             path={icon.src}
-            width={
-              iconSize?.width ? iconSize?.width + 'px' : 18 + 'px'
-            }
-            height={
-              iconSize?.height ? iconSize?.height + 'px' : 16 + 'px'
-            }
+            width={iconSize?.width ? iconSize?.width + 'px' : 18 + 'px'}
+            height={iconSize?.height ? iconSize?.height + 'px' : 16 + 'px'}
           />
         </div>
       </Tooltip>
       {toolPanelState && !!children && (
-          <OutsideClickHandler onOutsideClick={outsideClickHandler}>
-            <div
-              className={classNames(
-                '!tw-bg-white tw-absolute tw-z-10 tw-shadow-2xl tw-rounded',
-              )}
-              style={{
-                left: '100px',
-                borderRadius: '4px',
-                background: '#FFFFFF'
-              }}
-            >
-              <SubPanel>
-                {children}
-              </SubPanel>
-            </div>
-          </OutsideClickHandler>
-        )}
+        <OutsideClickHandler onOutsideClick={outsideClickHandler}>
+          <div
+            className={classNames(
+              '!tw-bg-white tw-absolute tw-z-10 tw-shadow-2xl tw-rounded',
+            )}
+            style={{
+              left: '100px',
+              borderRadius: '4px',
+              background: '#FFFFFF',
+            }}
+          >
+            <SubPanel>{children}</SubPanel>
+          </div>
+        </OutsideClickHandler>
+      )}
     </>
   );
 };

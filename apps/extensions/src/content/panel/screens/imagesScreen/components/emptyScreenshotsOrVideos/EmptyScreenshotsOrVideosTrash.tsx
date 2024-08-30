@@ -10,7 +10,7 @@ const EmptyScreenshotsOrVideosTrash: FC = () => {
       />
       <h2 className="tw-text-2xl tw-mt-7 tw-mb-2">No items</h2>
       <p className="tw-text-center">
-          You haven’t sent any items to temporary storage for deletion yet.
+        You haven’t sent any items to temporary storage for deletion yet.
       </p>
     </div>
   );

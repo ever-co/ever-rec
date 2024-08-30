@@ -3,7 +3,6 @@ import { Modal } from 'antd';
 import AppButton from '@/content/components/controls/appButton/AppButton';
 import IEditorVideo from '@/app/interfaces/IEditorVideo';
 
-
 interface IDeleteVideoModalProps {
   visible: boolean;
   onOk: (video: IEditorVideo | null) => void;

@@ -12,7 +12,7 @@ export const sendResponse = <T>(data: T): IDataResponse<T> => {
 
 export const sendError = (
   message: string,
-  error?: any,
+  error?: any
 ): IDataResponse<null> => {
   return {
     status: ResStatusEnum.error,

@@ -58,7 +58,8 @@
       border-top-color: #8576ff;
       border-right-color: #8576ff;
       border-bottom-color: #8576ff;
-      transition: border-top-color 0.15s linear 0.1s,
+      transition:
+        border-top-color 0.15s linear 0.1s,
         border-right-color 0.15s linear 0.1s,
         border-bottom-color 0.15s linear 0.2s;
     }
@@ -68,7 +69,9 @@
       border-left-width: 3px;
       border-right-width: 3px;
       transform: rotate(270deg);
-      transition: transform 0.4s linear 0s, border-left-width 0s linear 0.35s,
+      transition:
+        transform 0.4s linear 0s,
+        border-left-width 0s linear 0.35s,
         -webkit-transform 0.4s linear 0s;
     }
   }

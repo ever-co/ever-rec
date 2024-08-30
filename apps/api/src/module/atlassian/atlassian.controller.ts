@@ -16,7 +16,7 @@ import { AtlassianService } from './atlassian.service';
 export class AtlassianController {
   constructor(
     private readonly atlassianService: AtlassianService,
-    private readonly configService: ConfigService,
+    private readonly configService: ConfigService
   ) {}
 
   @UseGuards(AuthGuard)
@@ -75,7 +75,7 @@ export class AtlassianController {
   async completeTrelloOAuth(@Req() req) {
     return await this.atlassianService.completeTrelloOAuth(
       req.user?.id,
-      req.body,
+      req.body
     );
   }
 

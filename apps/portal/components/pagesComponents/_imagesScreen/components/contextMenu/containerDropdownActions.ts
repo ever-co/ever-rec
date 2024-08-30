@@ -18,14 +18,15 @@ export const combinedContainerDropdownActions: IDropdownAvailableActions = {
   hasWhatAppShareAction: true,
 };
 
-export const combinedContainerDropdownActionsForTrash: IDropdownAvailableActions = {
-  hasMove: false,
-  hasMoveToWorkspace: false, // TODO: implement
-  hasSlackShareAction: false,
-  hasJiraShareAction: false,
-  hasTrelloShareAction: false,
-  hasWhatAppShareAction: false,
-};
+export const combinedContainerDropdownActionsForTrash: IDropdownAvailableActions =
+  {
+    hasMove: false,
+    hasMoveToWorkspace: false, // TODO: implement
+    hasSlackShareAction: false,
+    hasJiraShareAction: false,
+    hasTrelloShareAction: false,
+    hasWhatAppShareAction: false,
+  };
 
 export const workspaceDropdownActions: IDropdownAvailableActions = {
   hasMove: true,

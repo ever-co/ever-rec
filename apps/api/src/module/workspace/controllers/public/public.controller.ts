@@ -17,7 +17,7 @@ export class WorkspacePublicController {
 
   @Get('/invite/:workspaceInviteId')
   async getWorkspaceInviteData(
-    @Param('workspaceInviteId', ValidateId) workspaceInviteId: string,
+    @Param('workspaceInviteId', ValidateId) workspaceInviteId: string
   ) {
     return this.publicService.getWorkspaceInviteData(workspaceInviteId);
   }

@@ -9,5 +9,5 @@ export enum ItemActionsEnum {
   createTrelloIssue = 'createTrelloIssue',
   moveToWorkspace = 'moveToWorkspace',
   editPermissions = 'editPermissions',
-  restore = 'restore'
+  restore = 'restore',
 }

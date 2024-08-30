@@ -1,43 +1,42 @@
 .parentContainer {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
 .select {
-    width: 100%;
-    border-radius: 0.25rem;
-    background-color: white;
+  width: 100%;
+  border-radius: 0.25rem;
+  background-color: white;
 }
 .flexContainer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-top: 0.5rem;
-    width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.5rem;
+  width: 100%;
 }
 
 .cursor {
-    cursor: pointer;
+  cursor: pointer;
 }
 
 .container {
-    border-radius: 1rem;
-    background-color: white;
-    display: flex;
-    justify-content: center;
-    margin: 5px 0 5px 10px;
-    border: 2px solid #D8D8D8;
+  border-radius: 1rem;
+  background-color: white;
+  display: flex;
+  justify-content: center;
+  margin: 5px 0 5px 10px;
+  border: 2px solid #d8d8d8;
 }
 
 .colorSelectorWrapper {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 0.5rem;
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.5rem;
 }
 
-
 .colorSelector {
-    cursor: pointer;
-    margin-right: 0.5rem;
+  cursor: pointer;
+  margin-right: 0.5rem;
 }

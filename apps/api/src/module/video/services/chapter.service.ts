@@ -23,18 +23,18 @@ export class VideoChapterService {
   async getChapters(
     uid: string,
     videoId: string,
-    workspaceId: string,
+    workspaceId: string
   ): Promise<IDataResponse<IChapter[]>> {
     try {
       const db = admin.database();
       const rootDb = workspaceId ? 'workspaces' : 'users';
       const parentCollection = workspaceId ? workspaceId : uid;
       const chapterRef = db.ref(
-        `${rootDb}/${parentCollection}/videos/${videoId}/chapters`,
+        `${rootDb}/${parentCollection}/videos/${videoId}/chapters`
       );
 
       const chapterData: IChapter[] = parseCollectionToArray(
-        (await chapterRef.get()).val(),
+        (await chapterRef.get()).val()
       );
 
       return sendResponse(chapterData);
@@ -50,7 +50,7 @@ export class VideoChapterService {
     chaptersData: IChapter[],
     chaptersBlobData: IChapter[],
     thumbnailFiles: Array<Express.Multer.File>,
-    workspaceId?: string,
+    workspaceId?: string
   ) {
     try {
       const bucket = admin.storage().bucket();
@@ -58,7 +58,7 @@ export class VideoChapterService {
       const rootDb = workspaceId ? 'workspaces' : 'users';
       const parentCollection = workspaceId ? workspaceId : uid;
       const chaptersRef = db.ref(
-        `${rootDb}/${parentCollection}/videos/${videoId}`,
+        `${rootDb}/${parentCollection}/videos/${videoId}`
       );
 
       await this.checkIfVideoExists(rootDb, parentCollection, videoId);
@@ -95,11 +95,11 @@ export class VideoChapterService {
         await promiseAllSettled(saveFilePromises);
 
         // Get Signed URLs from uploaded files
-        const signedURLPromises = thumbnailFileRefs.map((ref) =>
-          ref.getSignedUrl(this.config),
+        const signedURLPromises = thumbnailFileRefs.map(ref =>
+          ref.getSignedUrl(this.config)
         );
         const signedURLs = await promiseAllSettled(signedURLPromises).then(
-          (values) => values.flat(),
+          values => values.flat()
         );
 
         // Update chapters thumbnailURL and create a new Map for the database
@@ -112,7 +112,7 @@ export class VideoChapterService {
       }
 
       // Map the rest of the chapters
-      chaptersData.forEach((chapter) => {
+      chaptersData.forEach(chapter => {
         if (!mappedChapters[chapter.id]) {
           mappedChapters[chapter.id] = chapter;
         }
@@ -130,7 +130,7 @@ export class VideoChapterService {
         updatedChapters,
         rootDb,
         parentCollection,
-        videoId,
+        videoId
       );
 
       this.createChapterEnabledSetting(rootDb, parentCollection, videoId);
@@ -141,7 +141,7 @@ export class VideoChapterService {
       return sendError(
         // tslint:disable-next-line: quotemark
         "Something wen't wrong when saving your chapters...",
-        error.message,
+        error.message
       );
     }
   }
@@ -150,14 +150,14 @@ export class VideoChapterService {
     uid: string,
     videoId: string,
     chaptersEnabled: boolean,
-    workspaceId?: string,
+    workspaceId?: string
   ): Promise<IDataResponse<string>> {
     try {
       const db = admin.database();
       const rootDb = workspaceId ? 'workspaces' : 'users';
       const parentCollection = workspaceId ? workspaceId : uid;
       const chaptersEnabledRef = db.ref(
-        `${rootDb}/${parentCollection}/videos/${videoId}/`,
+        `${rootDb}/${parentCollection}/videos/${videoId}/`
       );
 
       await chaptersEnabledRef.update({ chaptersEnabled });
@@ -172,14 +172,14 @@ export class VideoChapterService {
   private async checkIfVideoExists(
     rootDb: string,
     parentCollection: string,
-    videoId: string,
+    videoId: string
   ): Promise<void> {
     const db = admin.database();
     const videoRef = db.ref(`${rootDb}/${parentCollection}/videos/${videoId}`);
     const videoSnapshot = await videoRef.get();
     if (!videoSnapshot.exists()) {
       throw new Error(
-        `Video in path ${rootDb}/${parentCollection}/videos/${videoId} doesn't exist`,
+        `Video in path ${rootDb}/${parentCollection}/videos/${videoId} doesn't exist`
       );
     }
   }
@@ -188,7 +188,7 @@ export class VideoChapterService {
     chapters: IChapter[],
     rootDb: string,
     parentCollection: string,
-    videoId: string,
+    videoId: string
   ) {
     try {
       const bucket = admin.storage().bucket();
@@ -197,19 +197,19 @@ export class VideoChapterService {
         prefix: parentPath,
       });
 
-      const filesNames = files.map((file) => {
+      const filesNames = files.map(file => {
         const splitPath = file.name.split('/');
         const fileName = splitPath[splitPath.length - 1];
         return fileName;
       });
-      const refNames = chapters.map((chapter) => chapter.refName);
+      const refNames = chapters.map(chapter => chapter.refName);
 
       const filesToDelete = filesNames.filter(
-        (fileName) => !refNames.includes(fileName),
+        fileName => !refNames.includes(fileName)
       );
 
-      const filesToDeletePromises = filesToDelete.map((fileName) =>
-        bucket.file(parentPath + fileName).delete(),
+      const filesToDeletePromises = filesToDelete.map(fileName =>
+        bucket.file(parentPath + fileName).delete()
       );
 
       await promiseAllSettled(filesToDeletePromises);
@@ -221,7 +221,7 @@ export class VideoChapterService {
   private async createChapterEnabledSetting(
     rootDb: string,
     parentCollection: string,
-    videoId: string,
+    videoId: string
   ): Promise<boolean> {
     try {
       const db = admin.database();

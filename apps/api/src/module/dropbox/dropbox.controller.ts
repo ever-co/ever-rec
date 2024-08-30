@@ -21,7 +21,7 @@ import { DropboxService } from './dropbox.service';
 export class DropboxController {
   constructor(
     private readonly dropBoxService: DropboxService,
-    private readonly configService: ConfigService,
+    private readonly configService: ConfigService
   ) {}
 
   @UseGuards(AuthGuard)
@@ -31,7 +31,7 @@ export class DropboxController {
     @Req() req,
     @Body() body,
     @Query() query,
-    @UploadedFile() blob: any,
+    @UploadedFile() blob: any
   ) {
     req.body.itemId = query.itemId;
     req.body.itemType = query.itemType;
@@ -47,7 +47,7 @@ export class DropboxController {
     await this.dropBoxService.completeOAuth(query.state, query.code);
     return {
       url: `${this.configService.get<string>(
-        'WEBSITE_URL',
+        'WEBSITE_URL'
       )}/media/integrations`,
     };
   }
@@ -70,7 +70,7 @@ export class DropboxController {
     return await this.dropBoxService.deleteFile(
       req.user?.id,
       query.itemId,
-      query.itemType,
+      query.itemType
     );
   }
 

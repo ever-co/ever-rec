@@ -1,27 +1,26 @@
 .wrapper :global {
-    .ant-modal {
-      border-radius: 1rem;
-      background: #ffffff;
-      padding: 0;
-    }
-    .ant-modal-content {
-      background: #ffffff;
-      background: linear-gradient(
-        278deg,
-        rgba(236, 234, 244, 1) 0%,
-        rgba(101, 99, 255, 0.3) 49%,
-        rgba(236, 234, 244, 1) 100%
-      );
-    }
+  .ant-modal {
+    border-radius: 1rem;
+    background: #ffffff;
+    padding: 0;
   }
-  
-  .closeIcon {
-    position: absolute;
-    right: -20px;
-    top: -20px;
+  .ant-modal-content {
+    background: #ffffff;
+    background: linear-gradient(
+      278deg,
+      rgba(236, 234, 244, 1) 0%,
+      rgba(101, 99, 255, 0.3) 49%,
+      rgba(236, 234, 244, 1) 100%
+    );
   }
-  
-  .deleteButton {
-    background: #D1322B;
-  }
-  
+}
+
+.closeIcon {
+  position: absolute;
+  right: -20px;
+  top: -20px;
+}
+
+.deleteButton {
+  background: #d1322b;
+}

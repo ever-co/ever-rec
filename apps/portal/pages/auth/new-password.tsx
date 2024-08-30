@@ -40,15 +40,12 @@ const PanelNewPassword: React.FC<IPanelNewPasswordProps> = ({ veryfied }) => {
   });
   const router = useRouter();
   const [password, setPassword] = useState<IAppControl>(initialControl());
-  const [passwordConfirm, setPasswordConfirm] = useState<IAppControl>(
-    initialControl(),
-  );
+  const [passwordConfirm, setPasswordConfirm] =
+    useState<IAppControl>(initialControl());
   const [valid, setValid] = useState<boolean>(false);
 
   const passwordRules: ((v: string) => boolean | string)[] = [
-    passwordPatternRule(
-      'Minimum eight characters and at least one number',
-    ),
+    passwordPatternRule('Minimum eight characters and at least one number'),
   ];
 
   useEffect(() => {

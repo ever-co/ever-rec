@@ -1,17 +1,43 @@
 {
+  "parser": "@typescript-eslint/parser",
+  "plugins": ["@typescript-eslint/eslint-plugin"],
+  "parserOptions": {
+    "project": "tsconfig.json",
+    "sourceType": "module"
+  },
   "extends": [
-    "./node.json"
+    "plugin:@typescript-eslint/recommended",
+    "plugin:prettier/recommended"
   ],
-  "rules": {
-    "import/no-unresolved": "off",
-    "import/no-extraneous-dependencies": "off"
+  "env": {
+    "node": true,
+    "jest": true
   },
   "ignorePatterns": [
     "node_modules/",
     "dist/",
     "build/",
+    "public/",
+    "test/",
     "logs/",
     "coverage/",
-    "src/**/*.spec.ts"
-  ]
+    "src/**/*.spec.ts",
+    ".eslintrc.json"
+  ],
+  "rules": {
+    "@typescript-eslint/interface-name-prefix": "off",
+    "@typescript-eslint/explicit-function-return-type": "off",
+    "@typescript-eslint/explicit-module-boundary-types": "off",
+    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/no-empty-function": "off",
+    "@typescript-eslint/ban-ts-comment": "warn",
+    "@typescript-eslint/no-var-requires": "warn"
+  },
+  "settings": {
+    "import/resolver": {
+      "typescript": {
+        "project": "./tsconfig.json"
+      }
+    }
+  }
 }

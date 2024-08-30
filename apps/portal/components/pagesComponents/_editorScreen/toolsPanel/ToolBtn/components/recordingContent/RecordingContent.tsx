@@ -84,15 +84,9 @@ const RecordingContent: React.FC<IRecordingContentProps> = ({
     >
       <div
         ref={mainContainerGlobal}
-        className={classNames(
-          styles.removePointerEvents,
-          styles.recMain,
-        )}
+        className={classNames(styles.removePointerEvents, styles.recMain)}
       >
-        <div
-          className={classNames(styles.recContainerEditor)}
-          id="small-rec"
-        >
+        <div className={classNames(styles.recContainerEditor)} id="small-rec">
           <div className={classNames(styles.content)}>
             <div className={classNames(styles.timer)}>
               {textM}:{textS}

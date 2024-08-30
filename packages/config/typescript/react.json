@@ -1,8 +1,12 @@
 {
   "extends": "./tsconfig.shared.json",
   "compilerOptions": {
+    "allowJs": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
     "jsx": "react",
-    "allowJs": true
+    "incremental": true
   },
-  "include": ["src/**/*"]
+  "include": ["**/*.ts", "**/*.tsx"],
+  "exclude": ["node_modules/"]
 }

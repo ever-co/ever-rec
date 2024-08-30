@@ -7,17 +7,18 @@
   "settings": {
     "react": {
       "version": "detect"
+    },
+    "import/resolver": {
+      "typescript": {
+        "project": "./tsconfig.json"
+      }
     }
   },
-  "ignorePatterns": [
-    "node_modules/",
-    "dist/",
-    "build/",
-    "*.min.js",
-    "public/"
-  ],
+  "ignorePatterns": ["node_modules/", "dist/", "build/", "*.min.js", "public/"],
   "rules": {
     "react/prop-types": "off",
-    "react/react-in-jsx-scope": "off"
+    "react/react-in-jsx-scope": "off",
+    "@typescript-eslint/ban-ts-comment": "warn",
+    "@typescript-eslint/no-var-requires": "warn"
   }
 }

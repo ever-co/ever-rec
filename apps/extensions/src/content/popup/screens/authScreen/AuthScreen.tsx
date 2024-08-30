@@ -24,8 +24,8 @@ const AuthScreen: React.FC = () => {
     return currentSreenType === AuthScreenType.login
       ? { title1: 'SIGN', title2: 'IN' }
       : currentSreenType === AuthScreenType.register
-      ? { title1: 'SIGN', title2: 'UP' }
-      : { title1: 'RESET', title2: 'EMAIL' };
+        ? { title1: 'SIGN', title2: 'UP' }
+        : { title1: 'RESET', title2: 'EMAIL' };
   }, [currentSreenType]);
 
   const googleAuth = (): void => {

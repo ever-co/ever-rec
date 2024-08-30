@@ -7,7 +7,6 @@ import { requiredRule } from '@/app/rules';
 import IAppControl, { IAppControlData } from '@/app/interfaces/IAppControl';
 import AppSvg from '@/content/components/elements/AppSvg';
 
-
 interface IGoogleDriveProps {
   active: boolean;
   isOpenDriveTool: boolean;

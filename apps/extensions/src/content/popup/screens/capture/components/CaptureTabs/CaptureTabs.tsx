@@ -1,7 +1,6 @@
 import CaptureTabBtn from './CaptureTabBtn/CaptureTabBtn';
 import AppSvg from '@/content/components/elements/AppSvg';
 
-
 interface ICaptureTabsProps {
   isCaptureTab: boolean;
   setIsCaptureTab: (arg: boolean) => void;

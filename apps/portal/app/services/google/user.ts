@@ -4,7 +4,7 @@ import store from 'app/store/panel';
 import AuthAC from 'app/store/auth/actions/AuthAC';
 import { getDriveData } from './drive';
 import { sendExternalMessage } from '../../../misc/_helper';
-import api from "../api/api";
+import api from '../api/api';
 
 // const api = axios.create({
 //   baseURL: 'https://www.googleapis.com',
@@ -60,8 +60,8 @@ import api from "../api/api";
 // };
 
 export const getDriveUser = async (): Promise<any> => {
-  return api.get(`/api/v1/drive/user`)
-}
+  return api.get(`/api/v1/drive/user`);
+};
 
 export const setDriveUser = (driveUser: DriveUser) => {
   store.dispatch(AuthAC.setDriveUser({ driveUser }));
@@ -70,5 +70,5 @@ export const setDriveUser = (driveUser: DriveUser) => {
 
 export const removeDriveUser = () => {
   store.dispatch(AuthAC.setDriveUser({ driveUser: null }));
-  sendExternalMessage('setDriveUser', null)
+  sendExternalMessage('setDriveUser', null);
 };

@@ -54,7 +54,11 @@ const GoogleAuth = () => {
             <GoogleBtn onSuccess={googleLogin} />
           ) : (
             <div onClick={driveLogin} className="tw-cursor-pointer">
-              <AppSvg path="/sign/sign-in-google.svg" width="400px" height="60px"></AppSvg>
+              <AppSvg
+                path="/sign/sign-in-google.svg"
+                width="400px"
+                height="60px"
+              ></AppSvg>
             </div>
           )}
         </div>

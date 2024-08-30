@@ -2,7 +2,6 @@ import React from 'react';
 import LogoWrapper from '../../components/LogoWrapper/LogoWrapper';
 import StepNumber from './components/stepNumber/StepNumber';
 
-
 interface IInstallLayoutProps {
   imgPath: string;
   currentStep: number;

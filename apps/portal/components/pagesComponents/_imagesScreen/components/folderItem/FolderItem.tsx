@@ -241,8 +241,8 @@ const FolderItem: React.FC<IFolderItemProps> = ({
   const itemsNumber = folder.items
     ? `${folder.items} items`
     : folder.items == 0
-    ? `${folder.items} items`
-    : false;
+      ? `${folder.items} items`
+      : false;
 
   const updatedAgo = itemsNumber && moment(folder.updated).fromNow();
 

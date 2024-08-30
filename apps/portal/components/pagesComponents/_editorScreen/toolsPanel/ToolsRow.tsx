@@ -8,7 +8,10 @@ interface IToolsRowProps {
 
 const ToolsRow: React.FC<IToolsRowProps> = ({ className, children }) => {
   return (
-    <div style={{display: 'flex', justifyContent: 'space-around'}} className={classNames(className)}>
+    <div
+      style={{ display: 'flex', justifyContent: 'space-around' }}
+      className={classNames(className)}
+    >
       {children}
     </div>
   );

@@ -1,4 +1,3 @@
-
 # Ever Rec Platform
 
 [![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-Ready--to--Code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/ever-co/ever-rec)
@@ -7,7 +6,7 @@
 
 ## 🌟 What is it
 
-[Ever® Rec™](https://rec.so) -  Screen Capture, Screen Recording, Images & Video Sharing Platform.
+[Ever® Rec™](https://rec.so) - Screen Capture, Screen Recording, Images & Video Sharing Platform.
 
 **NOTE: Platform currently is in active development stage / WIP, please use with caution!**
 

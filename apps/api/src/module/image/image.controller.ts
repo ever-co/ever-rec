@@ -38,7 +38,7 @@ export class ImageController {
     private readonly imageService: ImageService,
     private readonly sharedService: SharedService,
     private readonly foldersSharedService: FoldersSharedService,
-    private readonly uniqueViewsSharedService: UniqueViewsSharedService,
+    private readonly uniqueViewsSharedService: UniqueViewsSharedService
   ) {}
 
   // This one is for deleting shared Images AND videos from user when he delets account.
@@ -60,7 +60,7 @@ export class ImageController {
   @Delete('deleteLink/:link')
   async delete(
     @Param('link') link: string,
-    @Req() request,
+    @Req() request
   ): Promise<void | { message: string }> {
     try {
       await this.imageService.deleteSharedImageById(request.user.id, link);
@@ -80,12 +80,12 @@ export class ImageController {
   async getImageREST(
     @Param('link') link: string,
     @Req() request,
-    @Res() res,
+    @Res() res
   ): Promise<queryReturnType> {
     const result = await this.sharedService.getItemById(
       'image',
       link,
-      request.user?.id,
+      request.user?.id
     );
 
     return res.send(result);
@@ -102,7 +102,7 @@ export class ImageController {
     @Query('limit') limit: string,
     @Query('isPublic') isPublicQuery: string,
     @Req() request,
-    @Res() res,
+    @Res() res
   ) {
     try {
       const isPublic = isPublicQuery === 'true';
@@ -113,7 +113,7 @@ export class ImageController {
         link,
         commentId,
         isPublic,
-        limit,
+        limit
       );
       return res.send(result);
     } catch (e) {
@@ -127,7 +127,7 @@ export class ImageController {
   async postNewComment(
     @Param('userId') userId: string,
     @Req() request,
-    @Body() body,
+    @Body() body
   ) {
     try {
       const { itemId, comment, isPublic, limit } = body;
@@ -138,7 +138,7 @@ export class ImageController {
         itemId,
         comment,
         isPublic,
-        limit,
+        limit
       );
     } catch (e) {
       console.log(e);
@@ -154,7 +154,7 @@ export class ImageController {
     @Param('ownerId') ownerId: string,
     @Req() req,
     @Body() body,
-    @Res() res,
+    @Res() res
   ) {
     const {
       comment,
@@ -169,7 +169,7 @@ export class ImageController {
       commentId,
       comment,
       isPublic,
-      limit,
+      limit
     );
 
     return res.send(result);
@@ -181,7 +181,7 @@ export class ImageController {
     @Param('link') itemId: string,
     @Body() body,
     @Req() req,
-    @Res() res,
+    @Res() res
   ) {
     const {
       ownerId,
@@ -195,7 +195,7 @@ export class ImageController {
       req.user?.id,
       isPublic,
       ownerId,
-      limit,
+      limit
     );
 
     return res.send(result);
@@ -207,12 +207,12 @@ export class ImageController {
     @Req() request,
     @Res() res,
     @Param('linkId') linkId: string,
-    @Query('isWorkspace') isWorkspace: boolean,
+    @Query('isWorkspace') isWorkspace: boolean
   ) {
     const sharedImage = await this.sharedService.getSharedItemBySharedId(
       'image',
       linkId,
-      isWorkspace,
+      isWorkspace
     );
 
     const itemId = isWorkspace ? sharedImage?.itemId : sharedImage?.imageId;
@@ -222,7 +222,7 @@ export class ImageController {
       itemId,
       sharedImage?.uid,
       request.user?.id,
-      sharedImage?.workspaceId,
+      sharedImage?.workspaceId
     );
 
     res.send(result);
@@ -236,7 +236,7 @@ export class ImageController {
       body.imgBase64,
       body.title,
       body.sourceUrl,
-      body.fullFileName,
+      body.fullFileName
     );
   }
 
@@ -246,7 +246,7 @@ export class ImageController {
     return await this.imageService.updateOriginalImageFromBucket(
       req.user?.id,
       body.fullFileName,
-      body.fileData,
+      body.fileData
     );
   }
 
@@ -262,14 +262,14 @@ export class ImageController {
   async uploadFile(
     @Req() req,
     @Body() body,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile() file: Express.Multer.File
   ) {
     return await this.imageService.uploadFile(
       req.user?.id,
       file,
       body.title,
       body.fullFileName,
-      body.folderId,
+      body.folderId
     );
   }
 
@@ -278,7 +278,7 @@ export class ImageController {
   async saveOriginalImage(@Req() req, @Body() body) {
     return await this.imageService.saveOriginalImage(
       req.user?.id,
-      body.fullFileName,
+      body.fullFileName
     );
   }
 
@@ -298,7 +298,7 @@ export class ImageController {
   @Get('folder/:folderId')
   async getFolderById(
     @Req() req,
-    @Param('folderId') folderId: string,
+    @Param('folderId') folderId: string
   ): Promise<IDataResponse<IDbFolder | null>> {
     return await this.imageService.getFolderById(req.user?.id, folderId);
   }
@@ -317,7 +317,7 @@ export class ImageController {
       req.user?.id,
       blob,
       body.refName,
-      body.location,
+      body.location
     );
   }
 
@@ -333,7 +333,7 @@ export class ImageController {
       body.title,
       body.stage,
       body.originalImage,
-      body.markers,
+      body.markers
     );
   }
 
@@ -342,7 +342,7 @@ export class ImageController {
   async deleteImage(
     @Req() req,
     @Query('imageId') imageId: string,
-    @Query('refName') refName: string,
+    @Query('refName') refName: string
   ) {
     return await this.imageService.deleteImage(req.user?.id, imageId, refName);
   }
@@ -352,7 +352,7 @@ export class ImageController {
   async deleteAllImages(@Req() req, @Body() body) {
     return await this.imageService.deleteAllImages(
       req.user?.id,
-      body.trashedImages,
+      body.trashedImages
     );
   }
 
@@ -366,21 +366,21 @@ export class ImageController {
   async getSharedImageBySharedId(
     @Req() req,
     @Param('sharedId') sharedId: string,
-    @Query('isWorkspace') isWorkspace: boolean,
+    @Query('isWorkspace') isWorkspace: boolean
   ) {
     return await this.imageService.getImageBySharedId(sharedId, isWorkspace);
   }
 
   @Post('shared/view-info')
   async addUniqueViewInfo(
-    @Body() reqBody,
+    @Body() reqBody
   ): Promise<IDataResponse<{ uniqueViewsDb: IUniqueView[]; views: number }>> {
     return await this.uniqueViewsSharedService.addUniqueView({ ...reqBody });
   }
 
   @Post('shared/get-view-info')
   async getUniqueViewInfo(
-    @Body() reqBody,
+    @Body() reqBody
   ): Promise<IDataResponse<IUniqueView[]>> {
     return await this.uniqueViewsSharedService.getUniqueView({ ...reqBody });
   }
@@ -400,7 +400,7 @@ export class ImageController {
       body.color,
       body.rootFolderId,
       body.newId,
-      body.parentId,
+      body.parentId
     );
   }
 
@@ -414,7 +414,7 @@ export class ImageController {
       name,
       parentId,
       items,
-      color,
+      color
     );
   }
 
@@ -425,7 +425,7 @@ export class ImageController {
       req.user?.id,
       folderId,
       'image',
-      true,
+      true
     );
   }
 
@@ -434,14 +434,14 @@ export class ImageController {
   async addFolderToFavorites(
     @Req() req,
     @Param() param,
-    @Body() body: { forceRemove?: boolean },
+    @Body() body: { forceRemove?: boolean }
   ) {
     return await this.foldersSharedService.addRemoveFavFolder(
       req.user.id,
       param.folderId,
       'image',
       undefined,
-      body?.forceRemove,
+      body?.forceRemove
     );
   }
 

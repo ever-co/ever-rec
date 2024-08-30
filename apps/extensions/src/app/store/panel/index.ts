@@ -2,7 +2,10 @@ import { combineReducers, createStore, applyMiddleware } from 'redux';
 import AuthReducer from '../auth/reducers/AuthReducer';
 import DriveReducer from '../drive/reducers/DriveReducer';
 import PanelReducer from './reducers/PanelReducer';
-import { createStateSyncMiddleware, initMessageListener } from 'redux-state-sync';
+import {
+  createStateSyncMiddleware,
+  initMessageListener,
+} from 'redux-state-sync';
 
 const reduxStateSyncConfig = {};
 
@@ -17,6 +20,6 @@ const store = createStore(
   applyMiddleware(createStateSyncMiddleware(reduxStateSyncConfig)),
 );
 
-initMessageListener(store)
+initMessageListener(store);
 
-export default store
+export default store;

@@ -25,28 +25,28 @@
 
 .title {
   font-size: 1.5rem;
-  line-height: 2rem; 
+  line-height: 2rem;
   font-weight: 600;
 }
 
 .inputWrapper {
-    width: 100%;
+  width: 100%;
 }
 
 .flexRowContainer {
-    display: flex;
-    width: 100%;
-    align-items: flex-end;
-    justify-content: flex-end;
-    flex-direction: row;
+  display: flex;
+  width: 100%;
+  align-items: flex-end;
+  justify-content: flex-end;
+  flex-direction: row;
 }
 
 .buttonWrapper {
-    padding: 0.25rem 2rem; 
-    margin-left: 0.5rem; 
-    margin-right: 0.5rem; 
+  padding: 0.25rem 2rem;
+  margin-left: 0.5rem;
+  margin-right: 0.5rem;
 }
 
 .button {
-    padding: 0.25rem 2rem; 
+  padding: 0.25rem 2rem;
 }

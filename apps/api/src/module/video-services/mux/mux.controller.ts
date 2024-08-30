@@ -25,7 +25,7 @@ export class MuxController {
     @Req() request,
     @Param('videoId') videoId: string,
     @Param('assetId') assetId: string,
-    @Query('workspaceId') workspaceId: string,
+    @Query('workspaceId') workspaceId: string
   ): Promise<{
     data: PlaybackStatusEnum;
   }> {
@@ -34,7 +34,7 @@ export class MuxController {
       uid,
       videoId,
       assetId,
-      workspaceId,
+      workspaceId
     );
   }
 
@@ -43,7 +43,7 @@ export class MuxController {
   async getDownloadStatus(
     @Req() request,
     @Param('videoId') videoId: string,
-    @Param('assetId') assetId: string,
+    @Param('assetId') assetId: string
   ) {
     const uid = request.user?.id;
     return this.muxService.getDownloadStatus(uid, videoId, assetId);

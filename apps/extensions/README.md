@@ -1,11 +1,11 @@
 ## RUN PROJECT
 
-#### *NPM*
+#### _NPM_
 
 - from project root folder
 - run command `npm run watch`
 
-Due to some *folder permission denied* happens under Linux -
+Due to some _folder permission denied_ happens under Linux -
 use command `sudo chown -R $(whoami) ./build` under root folder to get access
 
 CREATE ZIP FOLDER

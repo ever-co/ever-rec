@@ -46,7 +46,7 @@ export class AuthService {
     private readonly firebaseClient: FirebaseClient,
     private readonly sharedService: SharedService,
     private readonly imageService: ImageService,
-    private eventEmitter: EventEmitter2,
+    private eventEmitter: EventEmitter2
   ) {
     this.config = {
       action: 'read',
@@ -75,7 +75,7 @@ export class AuthService {
   }
 
   async addUserToDb(
-    user: User & { googleCredentials?: OAuthCredential },
+    user: User & { googleCredentials?: OAuthCredential }
   ): Promise<IUser | IResponseMetadata> {
     const userRef = admin.database().ref(`users/${user.uid}`);
     const snapshot = await userRef.get();
@@ -169,7 +169,7 @@ export class AuthService {
       const userCreds = await createUserWithEmailAndPassword(
         this.firebaseClient.firebaseAuth,
         email,
-        password,
+        password
       );
       const user = userCreds.user;
       let newDbUser;
@@ -267,7 +267,7 @@ export class AuthService {
     try {
       const checkProvider = await fetchSignInMethodsForEmail(
         this.firebaseClient.firebaseAuth,
-        email,
+        email
       );
 
       if (checkProvider.includes('google.com'))
@@ -276,7 +276,7 @@ export class AuthService {
       const userCreds = await signInWithEmailAndPassword(
         this.firebaseClient.firebaseAuth,
         email,
-        password,
+        password
       );
       const idToken = await userCreds.user.getIdToken();
       const { displayName, photoURL, isSlackIntegrate, dropbox, jira, trello } =
@@ -324,7 +324,7 @@ export class AuthService {
       const googleAuthCredential = GoogleAuthProvider.credential(credentials);
       const userCreds = await signInWithCredential(
         this.firebaseClient.firebaseAuth,
-        googleAuthCredential,
+        googleAuthCredential
       );
       const isNewUser = JSON.stringify(userCreds).includes('"isNewUser":true');
       userCreds.user &&
@@ -380,12 +380,12 @@ export class AuthService {
   async updateUserData(
     uid: string,
     displayName?: string,
-    photoURL?: string,
+    photoURL?: string
   ): Promise<IDataResponse> {
     try {
       const userRef = admin.database().ref(`users/${uid}`);
       let snapshot = await userRef.get();
-      userRef.on('value', (snap) => (snapshot = snap));
+      userRef.on('value', snap => (snapshot = snap));
 
       if (!snapshot.exists()) {
         throw `Could not get user reference with uid: ${uid}`;
@@ -421,7 +421,7 @@ export class AuthService {
 
   async uploadAvatar(
     uid: string,
-    avatar: Express.Multer.File,
+    avatar: Express.Multer.File
   ): Promise<IDataResponse> {
     try {
       const bucket = admin.storage().bucket();
@@ -492,7 +492,7 @@ export class AuthService {
     uid: string,
     email: string,
     oldPassword: string,
-    newPassword: string,
+    newPassword: string
   ): Promise<IDataResponse> {
     try {
       const auth = admin.auth();
@@ -501,7 +501,7 @@ export class AuthService {
       // but have a check regardless (defensive programming)
       const checkProvider = await fetchSignInMethodsForEmail(
         this.firebaseClient.firebaseAuth,
-        email,
+        email
       );
       if (checkProvider.includes('google.com'))
         throw { code: 'custom/user-uses-google-auth' };
@@ -509,7 +509,7 @@ export class AuthService {
       await signInWithEmailAndPassword(
         this.firebaseClient.firebaseAuth,
         email,
-        oldPassword,
+        oldPassword
       );
 
       await auth.updateUser(uid, { password: newPassword });
@@ -546,7 +546,7 @@ export class AuthService {
       this.eventEmitter.emit(
         'analytics.track',
         'User deleted! All user files deleted!',
-        { userId: uid },
+        { userId: uid }
       );
 
       return {

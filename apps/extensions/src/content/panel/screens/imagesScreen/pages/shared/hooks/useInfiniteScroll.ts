@@ -1,6 +1,5 @@
 import { useState } from 'react';
 
-
 const ITEMS_PER_PAGE = 9;
 
 const useInfiniteScroll = (toLoad?: number) => {

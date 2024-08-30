@@ -30,7 +30,7 @@ export class WorkspaceSharedService {
     permissionItemType: PermissionsItemType,
     write: boolean,
     read: boolean,
-    permissionType: 'member' | 'team',
+    permissionType: 'member' | 'team'
   ): Promise<
     IDataResponse<{
       item: IDbWorkspaceImageData | IDbWorkspaceVideoData | IWorkspaceFolder;
@@ -40,11 +40,11 @@ export class WorkspaceSharedService {
     try {
       const db = admin.database();
       const itemsRef = db.ref(
-        `workspaces/${workspaceId}/${permissionItemType}`,
+        `workspaces/${workspaceId}/${permissionItemType}`
       );
       const itemsSnap = await itemsRef.get();
       const itemsVal: IWorkspaceFolder[] = parseCollectionToArray(
-        itemsSnap.val(),
+        itemsSnap.val()
       );
 
       const { collection, item } =
@@ -54,7 +54,7 @@ export class WorkspaceSharedService {
               itemId,
               id,
               write,
-              read,
+              read
             )
           : await this.updateTeamPermissions(itemsVal, itemId, id, write, read);
 
@@ -78,7 +78,7 @@ export class WorkspaceSharedService {
   initializePermissionsMetadata = (
     write: boolean,
     itemId: string | false,
-    collection: PermissionCollectionType,
+    collection: PermissionCollectionType
   ): {
     collection: PermissionCollectionType;
     itemIndex: number;
@@ -87,7 +87,7 @@ export class WorkspaceSharedService {
     const access = write
       ? PermissionAccessEnum.WRITE
       : PermissionAccessEnum.READ;
-    const itemIndex = collection.findIndex((x) => x.id === itemId);
+    const itemIndex = collection.findIndex(x => x.id === itemId);
 
     if (!itemIndex && itemIndex === -1) {
       throw 'No such item';
@@ -107,7 +107,7 @@ export class WorkspaceSharedService {
     itemId: string | false,
     uid: string,
     write: boolean,
-    read: boolean,
+    read: boolean
   ): Promise<{
     collection: PermissionCollectionType;
     item: IDbWorkspaceImageData | IDbWorkspaceVideoData | IWorkspaceFolder;
@@ -117,7 +117,7 @@ export class WorkspaceSharedService {
 
     if (collection[itemIndex].access?.members) {
       const userIndex = collection[itemIndex].access.members.findIndex(
-        (x) => x.uid === uid,
+        x => x.uid === uid
       );
 
       if (write || read) {
@@ -161,7 +161,7 @@ export class WorkspaceSharedService {
     itemId: string | false,
     teamId: string,
     write: boolean,
-    read: boolean,
+    read: boolean
   ): Promise<{
     collection: PermissionCollectionType;
     item: IDbWorkspaceImageData | IDbWorkspaceVideoData | IWorkspaceFolder;
@@ -171,7 +171,7 @@ export class WorkspaceSharedService {
 
     if (collection[itemIndex].access?.teams) {
       const teamIndex = collection[itemIndex].access.teams.findIndex(
-        (x) => x.teamId === teamId,
+        x => x.teamId === teamId
       );
 
       if (write || read) {

@@ -39,7 +39,7 @@ export class VideoController {
     private readonly videoService: VideoService,
     private readonly sharedService: SharedService,
     private readonly foldersSharedService: FoldersSharedService,
-    private readonly uniqueViewsSharedService: UniqueViewsSharedService,
+    private readonly uniqueViewsSharedService: UniqueViewsSharedService
   ) {}
 
   @UseGuards(AuthGuard)
@@ -52,7 +52,7 @@ export class VideoController {
   @Delete('deleteLink/:link')
   async delete(
     @Param('link') link: string,
-    @Req() request,
+    @Req() request
   ): Promise<void | { message: string }> {
     try {
       return await this.videoService.deleteLink(request.user?.id, link);
@@ -73,7 +73,7 @@ export class VideoController {
     return await this.sharedService.getItemById(
       'video',
       link,
-      request.user?.id,
+      request.user?.id
     );
   }
 
@@ -88,7 +88,7 @@ export class VideoController {
     @Query('limit') limit: string,
     @Query('isPublic') isPublicQuery: string,
     @Req() request,
-    @Res() res,
+    @Res() res
   ) {
     try {
       const isPublic = isPublicQuery === 'true';
@@ -99,7 +99,7 @@ export class VideoController {
         itemId,
         commentId,
         isPublic,
-        limit,
+        limit
       );
       return res.send(result);
     } catch (e) {
@@ -114,7 +114,7 @@ export class VideoController {
   async postNewComment(
     @Param('ownerId') ownerId: string,
     @Req() request,
-    @Body() body,
+    @Body() body
   ) {
     try {
       const { itemId, comment, isPublic, limit } = body;
@@ -126,7 +126,7 @@ export class VideoController {
         itemId,
         comment,
         isPublic,
-        limit,
+        limit
       );
 
       return result;
@@ -144,7 +144,7 @@ export class VideoController {
     @Param('ownerId') ownerId: string,
     @Req() req,
     @Body() body,
-    @Res() res,
+    @Res() res
   ) {
     const {
       comment,
@@ -159,7 +159,7 @@ export class VideoController {
       commentId,
       comment,
       isPublic,
-      limit,
+      limit
     );
 
     return res.send(result);
@@ -171,7 +171,7 @@ export class VideoController {
     @Param('link') itemId: string,
     @Body() body,
     @Req() req,
-    @Res() res,
+    @Res() res
   ) {
     const {
       ownerId,
@@ -186,7 +186,7 @@ export class VideoController {
       req.user?.id,
       isPublic,
       ownerId,
-      limit,
+      limit
     );
 
     return res.send(result);
@@ -197,7 +197,7 @@ export class VideoController {
   async likeOwn(
     @Req() request,
     @Param('videoId') videoId: string,
-    @Body() body: { workspaceId?: string },
+    @Body() body: { workspaceId?: string }
   ) {
     const userId = request.user?.id;
     const workspaceId = body?.workspaceId;
@@ -207,7 +207,7 @@ export class VideoController {
       videoId,
       userId,
       userId,
-      workspaceId,
+      workspaceId
     );
 
     return result;
@@ -218,12 +218,12 @@ export class VideoController {
   async like(
     @Req() request,
     @Param('sharedId') sharedId: string,
-    @Query('isWorkspace') isWorkspace: boolean,
+    @Query('isWorkspace') isWorkspace: boolean
   ) {
     const sharedVideo = await this.sharedService.getSharedItemBySharedId(
       'video',
       sharedId,
-      isWorkspace,
+      isWorkspace
     );
 
     const itemId = isWorkspace ? sharedVideo?.itemId : sharedVideo?.videoId;
@@ -233,7 +233,7 @@ export class VideoController {
       itemId,
       sharedVideo?.uid,
       request.user?.id,
-      sharedVideo?.workspaceId,
+      sharedVideo?.workspaceId
     );
 
     return result;
@@ -251,13 +251,13 @@ export class VideoController {
           return cb(null, randomName);
         },
       }),
-    }),
+    })
   )
   @Post('upload')
   async uploadVideo(
     @Req() req,
     @Body() body,
-    @UploadedFile() blob: Express.Multer.File,
+    @UploadedFile() blob: Express.Multer.File
   ) {
     const fileExtension = fileExtensionMap[blob.mimetype];
 
@@ -266,7 +266,7 @@ export class VideoController {
       blob,
       body.title,
       body.duration,
-      blob.filename + fileExtension,
+      blob.filename + fileExtension
     );
   }
 
@@ -282,13 +282,13 @@ export class VideoController {
           return cb(null, randomName);
         },
       }),
-    }),
+    })
   )
   @Post('upload/file')
   async uploadFile(
     @Req() req,
     @Body() body,
-    @UploadedFile() blob: Express.Multer.File,
+    @UploadedFile() blob: Express.Multer.File
   ) {
     const fileExtension = fileExtensionMap[blob.mimetype];
 
@@ -298,7 +298,7 @@ export class VideoController {
       body.title,
       body.duration,
       blob.filename + fileExtension, // fullFilename
-      body.folderId,
+      body.folderId
     );
   }
 
@@ -336,7 +336,7 @@ export class VideoController {
       body.parentId,
       body.trash,
       body.likes,
-      body.title,
+      body.title
     );
   }
 
@@ -347,7 +347,7 @@ export class VideoController {
     return await this.videoService.updateVideo(
       req.user?.id,
       blob,
-      body.refName,
+      body.refName
     );
   }
 
@@ -356,7 +356,7 @@ export class VideoController {
   async deleteVideo(
     @Req() req,
     @Query('id') id: string,
-    @Query('refName') refName: string,
+    @Query('refName') refName: string
   ) {
     return await this.videoService.deleteVideo(req.user?.id, id, refName);
   }
@@ -366,7 +366,7 @@ export class VideoController {
   async deleteAllVideos(@Req() req, @Body() body) {
     return await this.videoService.deleteAllVideos(
       req.user?.id,
-      body.trashedVideos,
+      body.trashedVideos
     );
   }
 
@@ -380,21 +380,21 @@ export class VideoController {
   async getSharedImageBySharedId(
     @Req() req,
     @Param('sharedId') sharedId: string,
-    @Query('isWorkspace') isWorkspace: boolean,
+    @Query('isWorkspace') isWorkspace: boolean
   ) {
     return await this.videoService.getVideoBySharedId(sharedId, isWorkspace);
   }
 
   @Post('shared/view-info')
   async addUniqueViewInfo(
-    @Body() reqBody,
+    @Body() reqBody
   ): Promise<IDataResponse<{ uniqueViewsDb: IUniqueView[]; views: number }>> {
     return await this.uniqueViewsSharedService.addUniqueView({ ...reqBody });
   }
 
   @Post('shared/get-view-info')
   async getUniqueViewInfo(
-    @Body() reqBody,
+    @Body() reqBody
   ): Promise<IDataResponse<IUniqueView[]>> {
     return await this.uniqueViewsSharedService.getUniqueView({ ...reqBody });
   }
@@ -414,7 +414,7 @@ export class VideoController {
       body.color,
       body.rootFolderId,
       body.newId,
-      body.parentId,
+      body.parentId
     );
   }
 
@@ -428,7 +428,7 @@ export class VideoController {
       name,
       parentId,
       items,
-      color,
+      color
     );
   }
 
@@ -439,7 +439,7 @@ export class VideoController {
       req.user?.id,
       folderId,
       'video',
-      true,
+      true
     );
   }
 
@@ -447,7 +447,7 @@ export class VideoController {
   @Get('getPosterRef/:id')
   async poster(
     @Param('id') id: string,
-    @Req() request,
+    @Req() request
   ): Promise<string | false> {
     return await this.videoService.getPoster(request.user?.id, id);
   }
@@ -459,7 +459,7 @@ export class VideoController {
   async uploadPoster(
     @Req() req,
     @Body() posterBody,
-    @UploadedFile() templateBase64: any,
+    @UploadedFile() templateBase64: any
   ) {
     return await this.videoService.setPoster(req.user?.id, templateBase64, {
       ...posterBody,
@@ -471,14 +471,14 @@ export class VideoController {
   async addFolderToFavorites(
     @Req() req,
     @Param() param,
-    @Body() body: { forceRemove?: boolean },
+    @Body() body: { forceRemove?: boolean }
   ) {
     return await this.foldersSharedService.addRemoveFavFolder(
       req.user.id,
       param.folderId,
       'video',
       undefined,
-      body?.forceRemove,
+      body?.forceRemove
     );
   }
 

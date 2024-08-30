@@ -17,7 +17,10 @@ const DeleteDriveFileModal: React.FC<Props> = ({ onOk, onCancel, visible }) => {
       onCancel={onCancel}
       closable={true}
       closeIcon={
-        <AppSvg path="images/panel/common/close-icon.svg" className="modalCloseButton" />
+        <AppSvg
+          path="images/panel/common/close-icon.svg"
+          className="modalCloseButton"
+        />
       }
       footer={
         <div className={classNames('tw-flex tw-justify-end tw-mt-14')}>

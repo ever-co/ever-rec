@@ -2,7 +2,6 @@ import classNames from 'classnames';
 import React from 'react';
 import AppSvg from '../../elements/AppSvg';
 
-
 interface IAppNumberSelectorProps {
   value: number;
   valuesArr?: number[];

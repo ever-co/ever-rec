@@ -28,13 +28,13 @@ export class WhiteboardController {
   @UsePipes(ValidationPipe)
   async createNewWhiteboard(
     @Req() req,
-    @Query() query: CreateWhiteboardValidator,
+    @Query() query: CreateWhiteboardValidator
   ) {
     return this.whiteboardService.createNewWhiteboard(
       req.user?.id,
       req.user.name,
       req.user.email,
-      query.name,
+      query.name
     );
   }
 
@@ -49,7 +49,7 @@ export class WhiteboardController {
   async deleteWhiteboard(@Req() req, @Param() param) {
     return this.whiteboardService.deleteWhiteboard(
       req.user?.id,
-      param.whiteboardId,
+      param.whiteboardId
     );
   }
 
@@ -59,7 +59,7 @@ export class WhiteboardController {
   async updateWhiteboardData(
     @Req() req,
     @Param() param,
-    @Body() body: UpdateWhiteboardValidator,
+    @Body() body: UpdateWhiteboardValidator
   ) {
     return await this.whiteboardService.updateWhiteboardData(
       req.user?.id,
@@ -67,7 +67,7 @@ export class WhiteboardController {
       body.trash,
       body.favorite,
       body.isPublic,
-      body.name,
+      body.name
     );
   }
 
@@ -76,14 +76,14 @@ export class WhiteboardController {
   async getWhiteboardById(@Req() req, @Param() param) {
     return await this.whiteboardService.getWhiteboardById(
       req.user?.id,
-      param.whiteboardId,
+      param.whiteboardId
     );
   }
 
   @Get(':whiteboardId/get-shared')
   async getWhiteboardByIdShared(@Param() param) {
     return await this.whiteboardService.getWhiteboardByIdShared(
-      param.whiteboardId,
+      param.whiteboardId
     );
   }
 }

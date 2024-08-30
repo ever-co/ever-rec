@@ -1,7 +1,6 @@
 import ActionType from '@/app/interfaces/ActionType';
 import { SET_DRIVE_FOLDERS, SET_WORKING_FOLDER } from '../actions/actionTypes';
 
-
 const initState = {
   folders: [],
   workingFolder: null,

@@ -24,10 +24,10 @@ export class CanAccessFolderGuard implements CanActivate {
       }
 
       const folders = parseCollectionToArray(workspace.folders);
-      const folder: IWorkspaceFolder = folders.find((x) => x.id === folderId);
+      const folder: IWorkspaceFolder = folders.find(x => x.id === folderId);
       const requiredAccessLevel = this.reflector.get<PermissionAccessEnum>(
         REQUIRED_FOLDER_ACCESS_METADATA,
-        context.getHandler(),
+        context.getHandler()
       );
 
       if (folder.access) {

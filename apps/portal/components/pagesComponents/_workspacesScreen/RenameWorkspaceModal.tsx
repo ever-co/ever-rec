@@ -47,7 +47,9 @@ const RenameWorkspaceModal: React.FC<IProps> = ({
       }
     >
       <h2 className="tw-mb-6 tw-text-xl tw-font-bold">Rename Workspace</h2>
-      <p className="tw-pb-0">Name your workspace something that will represent its purpose</p>
+      <p className="tw-pb-0">
+        Name your workspace something that will represent its purpose
+      </p>
       <input
         value={newName}
         type="text"

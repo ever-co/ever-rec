@@ -2,7 +2,7 @@ import * as admin from 'firebase-admin';
 
 export const uploadImageInBucket = async (
   fileData: string | Express.Multer.File,
-  filePath: string,
+  filePath: string
 ): Promise<any> => {
   try {
     const bucket = admin.storage().bucket();
@@ -10,10 +10,10 @@ export const uploadImageInBucket = async (
 
     let fileBuffer: Buffer;
     if (typeof fileData === 'string') {
-      const getBase64Data = (encoded) => {
+      const getBase64Data = encoded => {
         const base64EncodedString = encoded.replace(
           /^data:\w+\/\w+;base64,/,
-          '',
+          ''
         );
         return base64EncodedString;
       };

@@ -37,7 +37,10 @@ const InviteMembersModal: FC<IProps> = ({
       destroyOnClose
       closable
       closeIcon={
-        <AppSvg path="images/panel/common/close-icon.svg" className="modalCloseButton" />
+        <AppSvg
+          path="images/panel/common/close-icon.svg"
+          className="modalCloseButton"
+        />
       }
       onCancel={onCancel}
       footer={<></>}

@@ -607,8 +607,8 @@ const useEnableComments = ({
                     {editCommentState.isBeingEdited
                       ? 'Update'
                       : localLoaderState
-                      ? 'Posting...'
-                      : 'Comment'}
+                        ? 'Posting...'
+                        : 'Comment'}
                   </button>
                   <div
                     onClick={cancelComment}

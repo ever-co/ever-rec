@@ -22,7 +22,7 @@ export function IsNonPrimitiveArray(validationOptions?: ValidationOptions) {
             Array.isArray(value) &&
             value.reduce(
               (a, b) => a && typeof b === 'object' && !Array.isArray(b),
-              true,
+              true
             )
           );
         },
@@ -38,10 +38,10 @@ export function IsNonPrimitiveArray(validationOptions?: ValidationOptions) {
  */
 export function CanBe(
   val: any,
-  validationOptions?: ValidationOptions,
+  validationOptions?: ValidationOptions
 ): PropertyDecorator {
   return function CanBeDecorator(object: object, propertyName: string): void {
-    ValidateIf((obj) => {
+    ValidateIf(obj => {
       return obj[propertyName] !== val;
     }, validationOptions)(object, propertyName);
   };
@@ -52,12 +52,12 @@ export function CanBe(
  */
 export function CanBeIn(
   values: any[],
-  validationOptions?: ValidationOptions,
+  validationOptions?: ValidationOptions
 ): PropertyDecorator {
   return function CanBeInDecorator(object: object, propertyName: string): void {
-    ValidateIf((obj) => !values.includes(obj[propertyName]), validationOptions)(
+    ValidateIf(obj => !values.includes(obj[propertyName]), validationOptions)(
       object,
-      propertyName,
+      propertyName
     );
   };
 }

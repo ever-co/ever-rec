@@ -26,7 +26,7 @@ export class DriveService {
       oAuth2Client = new google.auth.OAuth2(
         this.clientId,
         this.clientSecret,
-        this.redirectUrl,
+        this.redirectUrl
       );
 
       if (user?.googleAPISCredentials) {
@@ -49,7 +49,7 @@ export class DriveService {
       : new google.auth.OAuth2(
           this.clientId,
           this.clientSecret,
-          this.redirectUrl,
+          this.redirectUrl
         );
     return new Promise((res, rej) => {
       client.getToken(code, async (err, token) => {
@@ -106,7 +106,7 @@ export class DriveService {
     metadata: any,
     blob: Express.Multer.File,
     itemId: string,
-    itemType: ItemType,
+    itemType: ItemType
   ): Promise<IDataResponse> {
     // user getting can be extracted into shared function... its 4 lines every time...
     try {
@@ -168,12 +168,12 @@ export class DriveService {
 
       if (item && item.drivesData && userVal) {
         const currentDriveDataIndex = item.drivesData.findIndex(
-          (x) => x.email === userVal.googleAPISCredentials?.email,
+          x => x.email === userVal.googleAPISCredentials?.email
         );
 
         if (currentDriveDataIndex !== -1) {
           const currentDriveData = item.drivesData.find(
-            (x) => x.email === userVal.googleAPISCredentials?.email,
+            x => x.email === userVal.googleAPISCredentials?.email
           );
 
           try {

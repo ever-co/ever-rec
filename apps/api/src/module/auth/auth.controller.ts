@@ -21,7 +21,7 @@ import { IDataResponse } from '../../interfaces/_types';
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
-    private readonly sharedService: SharedService,
+    private readonly sharedService: SharedService
   ) {}
 
   @UseGuards(AuthGuard)
@@ -32,7 +32,7 @@ export class AuthController {
 
   @Post('register')
   async register(
-    @Body() body: { email: string; password: string; username: string },
+    @Body() body: { email: string; password: string; username: string }
   ): Promise<IDataResponse> {
     return await this.authService.register(body);
   }
@@ -56,7 +56,7 @@ export class AuthController {
     return this.authService.updateUserData(
       req.user?.id,
       body.displayName,
-      photo,
+      photo
     );
   }
 
@@ -65,14 +65,14 @@ export class AuthController {
   @UseInterceptors(FileInterceptor('file'))
   async updateUserAvatar(
     @Req() req,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile() file: Express.Multer.File
   ) {
     return this.authService.uploadAvatar(req.user?.id, file);
   }
 
   @Post('login-google')
   async loginGoogle(
-    @Body() { credentials }: { credentials: any },
+    @Body() { credentials }: { credentials: any }
   ): Promise<any> {
     return this.authService.processGoogleLogin(credentials);
   }
@@ -96,7 +96,7 @@ export class AuthController {
       req.user?.id,
       body.email,
       body.oldPassword,
-      body.newPassword,
+      body.newPassword
     );
   }
 }

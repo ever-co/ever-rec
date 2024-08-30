@@ -2,7 +2,6 @@ import React from 'react';
 import { Modal } from 'antd';
 import AppButton from '@/content/components/controls/appButton/AppButton';
 
-
 interface IDeleteScreenshotModalProps {
   visible: boolean;
   onOk: () => void;

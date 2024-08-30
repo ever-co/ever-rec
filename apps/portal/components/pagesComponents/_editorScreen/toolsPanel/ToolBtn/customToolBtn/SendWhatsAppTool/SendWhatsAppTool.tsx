@@ -114,9 +114,7 @@ const SendWhatsAppTool: React.FC<ISendWhatsAppToolProps> = ({
     >
       <div className={styles.parentContainer}>
         <div className={styles.flexContainer}>
-          <h2 className={styles.title}>
-            Share with WhatsApp
-          </h2>
+          <h2 className={styles.title}>Share with WhatsApp</h2>
           <AppInput
             type={'number'}
             placeholder="Enter WhatsApp Number with country code"
@@ -126,9 +124,7 @@ const SendWhatsAppTool: React.FC<ISendWhatsAppToolProps> = ({
             rules={newPhoneRules}
             className={styles.inputContainer}
           />
-          <div
-            className={styles.innerContainer}
-          >
+          <div className={styles.innerContainer}>
             <div className={styles.container}>
               <AppButton
                 className={styles.buttonContainer}

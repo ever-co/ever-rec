@@ -33,4 +33,3 @@ const CommentBtn = (props: ICommentToolProps) => {
 };
 
 export default CommentBtn;
-

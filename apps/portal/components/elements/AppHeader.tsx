@@ -4,7 +4,7 @@ import React from 'react';
 export interface IAppHeaderProps {
   part1: string;
   part2: string;
-  title?:string;
+  title?: string;
   className?: string;
   spacing?: boolean;
   textSize?: 'xl' | '2xl' | '4xl' | '5xl';
@@ -18,20 +18,18 @@ const AppHeader: React.FC<IAppHeaderProps> = ({
   className,
   textSize = '4xl',
 }) => {
-  return (
-    title ?
+  return title ? (
     <h1
       className={classNames(
         'tw-font-roboto',
         className,
         `tw-text-3xl`,
-        '!tw-mb-6'
+        '!tw-mb-6',
       )}
     >
       {title}
     </h1>
-    
-    :
+  ) : (
     <h1
       className={classNames(
         'tw-font-roboto tw-font-bold',

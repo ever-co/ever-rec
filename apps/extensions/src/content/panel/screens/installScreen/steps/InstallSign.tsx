@@ -5,7 +5,6 @@ import SignFlow from '../../signScreen/signFlow/SignFlow';
 import { IStepProps } from './steps';
 import { IUser } from '@/app/interfaces/IUserData';
 
-
 const InstallSign: React.FC<IStepProps> = ({ nextStep }) => {
   const user: IUser = useSelector((state: RootStateOrAny) => state.auth.user);
 

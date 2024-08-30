@@ -44,7 +44,7 @@ import { ValidateId } from '../pipes/validate-id.pipe';
 export class WorkspaceFilesController {
   constructor(
     private readonly filesService: WorkspaceFilesService,
-    private readonly workspaceSharedService: WorkspaceSharedService,
+    private readonly workspaceSharedService: WorkspaceSharedService
   ) {
     // left blank intentionally
   }
@@ -54,14 +54,14 @@ export class WorkspaceFilesController {
   async addVideoToWorkspaceFromPersonal(
     @Param('workspaceId', ValidateId) workspaceId: string,
     @User() user: IRequestUser,
-    @Query() { itemId, folderId }: MovePersonalItemDto,
+    @Query() { itemId, folderId }: MovePersonalItemDto
   ) {
     return this.filesService.moveItemFromPersonalToWorkspace(
       user.id,
       workspaceId,
       itemId,
       'video',
-      folderId,
+      folderId
     );
   }
 
@@ -70,14 +70,14 @@ export class WorkspaceFilesController {
   async addImageToWorkspaceFromPersonal(
     @Param('workspaceId', ValidateId) workspaceId: string,
     @User() user: IRequestUser,
-    @Query() { itemId, folderId }: MovePersonalItemDto,
+    @Query() { itemId, folderId }: MovePersonalItemDto
   ) {
     return this.filesService.moveItemFromPersonalToWorkspace(
       user.id,
       workspaceId,
       itemId,
       'image',
-      folderId,
+      folderId
     );
   }
 
@@ -85,7 +85,7 @@ export class WorkspaceFilesController {
   @CanAccessItem(PermissionAccessEnum.READ, 'image')
   async getWorkspaceImage(
     @Param('workspaceId', ValidateId) workspaceId: string,
-    @Param('imageId', ValidateId) imageId: string,
+    @Param('imageId', ValidateId) imageId: string
   ) {
     return this.filesService.getImage(workspaceId, imageId);
   }
@@ -94,7 +94,7 @@ export class WorkspaceFilesController {
   @CanAccessItem(PermissionAccessEnum.READ, 'video')
   async getWorkspaceVideo(
     @Param('workspaceId', ValidateId) workspaceId: string,
-    @Param('videoId', ValidateId) videoId: string,
+    @Param('videoId', ValidateId) videoId: string
   ) {
     return this.filesService.getVideo(workspaceId, videoId);
   }
@@ -112,13 +112,13 @@ export class WorkspaceFilesController {
           return cb(null, randomName);
         },
       }),
-    }),
+    })
   )
   async uploadNewVideoFromFile(
     @Param('workspaceId', ValidateId) workspaceId: string,
     @Body() uploadVideo: UploadVideoDto,
     @UploadedFile() file: Express.Multer.File,
-    @User() user: IRequestUser,
+    @User() user: IRequestUser
   ) {
     return this.filesService.addVideoFromFile(
       user.id,
@@ -126,7 +126,7 @@ export class WorkspaceFilesController {
       file,
       uploadVideo.title,
       uploadVideo.fullFileName,
-      uploadVideo.folderId,
+      uploadVideo.folderId
     );
   }
 
@@ -137,7 +137,7 @@ export class WorkspaceFilesController {
     @Param('workspaceId', ValidateId) workspaceId: string,
     @Body() updateImage: UploadImageDto,
     @UploadedFile() file: Express.Multer.File,
-    @User() user: IRequestUser,
+    @User() user: IRequestUser
   ) {
     return this.filesService.addImageFromFile(
       user.id,
@@ -145,7 +145,7 @@ export class WorkspaceFilesController {
       file,
       updateImage.title,
       updateImage.fullFileName,
-      updateImage.folderId,
+      updateImage.folderId
     );
   }
 
@@ -153,11 +153,11 @@ export class WorkspaceFilesController {
   @Post(':workspaceId/save-original')
   async saveOriginalWorkspaceImage(
     @Param('workspaceId') workspaceId: string,
-    @Body() body,
+    @Body() body
   ) {
     return this.filesService.saveOriginalWSImage(
       workspaceId,
-      body.fullFileName,
+      body.fullFileName
     );
   }
 
@@ -165,7 +165,7 @@ export class WorkspaceFilesController {
   @CanAccessItem(PermissionAccessEnum.WRITE, 'image')
   async deleteImage(
     @Param('workspaceId', ValidateId) workspaceId: string,
-    @Query() { imageId, refName: filename, folderId }: DeleteImageDto,
+    @Query() { imageId, refName: filename, folderId }: DeleteImageDto
   ) {
     const parentFolderId =
       folderId === 'false' || folderId === undefined ? false : folderId;
@@ -174,7 +174,7 @@ export class WorkspaceFilesController {
       workspaceId,
       imageId,
       filename,
-      parentFolderId,
+      parentFolderId
     );
   }
 
@@ -182,7 +182,7 @@ export class WorkspaceFilesController {
   @CanAccessItem(PermissionAccessEnum.WRITE, 'video')
   async deleteVideo(
     @Param('workspaceId', ValidateId) workspaceId: string,
-    @Query() { videoId, refName }: DeleteVideoDto,
+    @Query() { videoId, refName }: DeleteVideoDto
   ) {
     return await this.filesService.deleteVideo(workspaceId, videoId, refName);
   }
@@ -193,7 +193,7 @@ export class WorkspaceFilesController {
     @Req() req,
     @Param('workspaceId', ValidateId) workspaceId: string,
     @Param('imageId', ValidateId) imageId: string,
-    @Body() body: UpdateItemDataDto,
+    @Body() body: UpdateItemDataDto
   ) {
     return await this.filesService.updateItemData(
       req.user?.id,
@@ -206,7 +206,7 @@ export class WorkspaceFilesController {
       body.title,
       body.stage,
       body.originalImage,
-      body.markers,
+      body.markers
     );
   }
 
@@ -216,7 +216,7 @@ export class WorkspaceFilesController {
     @Req() req,
     @Param('workspaceId', ValidateId) workspaceId: string,
     @Param('videoId', ValidateId) videoId: string,
-    @Body() body: UpdateItemDataDto,
+    @Body() body: UpdateItemDataDto
   ) {
     return await this.filesService.updateItemData(
       req.user?.id,
@@ -226,7 +226,7 @@ export class WorkspaceFilesController {
       body.parentId,
       body.trash,
       body.likes,
-      body.title,
+      body.title
     );
   }
 
@@ -236,11 +236,11 @@ export class WorkspaceFilesController {
   async updateWorkspaceImage(
     @Param('workspaceId', ValidateId) workspaceId: string,
     @Body() body: UpdateImageDto,
-    @UploadedFile() blob: Express.Multer.File,
+    @UploadedFile() blob: Express.Multer.File
   ) {
     if (body.refName === undefined && body.location === undefined) {
       throw new BadRequestException(
-        'Either refName or location should be passed in body',
+        'Either refName or location should be passed in body'
       );
     }
 
@@ -248,7 +248,7 @@ export class WorkspaceFilesController {
       workspaceId,
       blob,
       body.refName,
-      body.location,
+      body.location
     );
   }
 
@@ -257,7 +257,7 @@ export class WorkspaceFilesController {
   async updateFilePermissions(
     @Param('workspaceId', ValidateId) workspaceId: string,
     @Param('itemId', ValidateId) itemId: string,
-    @Body() body: UpdateFileMemberPermissionsDto,
+    @Body() body: UpdateFileMemberPermissionsDto
   ) {
     return await this.workspaceSharedService.updatePermissions(
       body.id,
@@ -266,7 +266,7 @@ export class WorkspaceFilesController {
       body.permissionItemType,
       body.write,
       body.read,
-      body.permissionType,
+      body.permissionType
     );
   }
 }

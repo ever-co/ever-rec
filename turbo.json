@@ -1,20 +1,82 @@
 {
-	"$schema": "https://turbo.build/schema.json",
-	"globalDependencies": ["**/.env.*local"],
-	"tasks": {
-		"build": {
-			"dependsOn": ["^build"],
-			"outputs": ["dist/**", ".next/**", "!.next/cache/**"]
-		},
-		"lint": {},
-		"type-check": {},
-		"dev": {
-			"cache": false,
-			"persistent": true
-		},
-		"start": {},
-		"clean": {
-			"cache": false
-		}
-	}
+  "$schema": "https://turbo.build/schema.json",
+  "globalDependencies": [
+    "**/.env.*local"
+  ],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
+    },
+    "lint": {},
+    "type-check": {},
+    "dev": {
+      "cache": false,
+      "persistent": true,
+      "env": [
+        "EXTENSION_NAME",
+        "EXTENTION_ID",
+        "EXTENSION_ID",
+        "EXTENSION_REDIRECT_URL",
+        "REBRANDLY_API_KEY",
+        "API_BASE_URL",
+        "WEBSITE_URL",
+        "STATIC_FILES_URL",
+        "SENTRY_DSN",
+        "SENTRY_ORG",
+        "API_VIDEO_SERVICE_HOST",
+        "API_PORT",
+        "FIREBASE_API_KEY",
+        "FIREBASE_AUTH_DOMAIN",
+        "FIREBASE_DATABASE_URL",
+        "FIREBASE_PROJECT_ID",
+        "FIREBASE_STORAGE_BUCKET",
+        "FIREBASE_MESSAGING_SENDER_ID",
+        "FIREBASE_APP_ID",
+        "FIREBASE_MASUREMENT_ID",
+        "FIREBASE_ADMIN_PRIVATE_KEY",
+        "FIREBASE_ADMIN_CLIENT_EMAIL",
+        "POSTMARK_CLIENT_TOKEN",
+        "POSTMARK_SENDER_EMAIL",
+        "GOOGLE_CLIENT_ID",
+        "GOOGLE_CLIENT_SECRET",
+        "GOOGLE_REDIRECT_URL",
+        "SLACK_CLIENT_SECRET",
+        "SLACK_CLIENT_ID",
+        "SLACK_SIGNING_SECRET",
+        "TWILIO_ACCOUNT_SID",
+        "TWILIO_AUTH_TOKEN",
+        "TWILIO_FROM_NUMBER",
+        "SEGMENT_WRITE_KEY",
+        "MUX_TOKEN_ID",
+        "MUX_TOKEN_SECRET",
+        "APIVIDEO_TOKEN_ID",
+        "APIVIDEO_BASE_URI",
+        "DEFAULT_STREAM_SERVICE",
+        "DROPBOX_API_KEY",
+        "DROPBOX_API_SECRET",
+        "JIRA_CLIENT_ID",
+        "JIRA_CLIENT_SECRET",
+        "SUPER_ADMIN_ACCOUNT_UID",
+        "SUPER_ADMIN_ACCOUNT_EMAIL",
+        "TRELLO_KEY",
+        "FFMPEG_VERSION",
+        "NEXT_PUBLIC_EXTENSION_NAME",
+        "NEXT_PUBLIC_EXTENSION_ID",
+        "NEXT_PUBLIC_GOOGLE_CLIENT_ID",
+        "NEXT_PUBLIC_EXTENTION_REDIRECT_URL",
+        "NEXT_PUBLIC_REBRANDLY_API_KEY",
+        "NEXT_PUBLIC_API_BASE_URL",
+        "NEXT_PUBLIC_WEBSITE_URL",
+        "NEXT_PUBLIC_STATIC_FILES_URL",
+        "NEXT_PUBLIC_SENTRY_DSN",
+        "BUILD",
+        "MODE"
+      ]
+    },
+    "start": {},
+    "clean": {
+      "cache": false
+    }
+  }
 }

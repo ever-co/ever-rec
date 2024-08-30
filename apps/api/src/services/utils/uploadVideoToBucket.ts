@@ -8,7 +8,7 @@ export async function fixVideoAndUploadToBucket(
   blob: Express.Multer.File,
   fullFilename: string,
   uid: string,
-  refName?: string,
+  refName?: string
 ) {
   try {
     const inputPath = blob.path;
@@ -62,7 +62,7 @@ export async function uploadVideoToBucket({
     }
 
     const bucketRef = bucket.file(
-      `${rootPath}/${itemTypePath}/${bucketFilename}`,
+      `${rootPath}/${itemTypePath}/${bucketFilename}`
     );
 
     const fileBuffer = await fs.readFile(fullFilepath);

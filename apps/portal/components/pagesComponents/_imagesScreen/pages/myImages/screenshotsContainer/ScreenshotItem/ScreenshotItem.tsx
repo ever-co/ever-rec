@@ -157,8 +157,8 @@ const ScreenshotItem: React.FC<IScreenshotItemProps> = ({
             hasRestore
               ? 'tw-justify-center tw-items-center'
               : addSelected
-              ? 'tw-justify-between tw-items-start'
-              : 'tw-justify-end tw-items-start',
+                ? 'tw-justify-between tw-items-start'
+                : 'tw-justify-end tw-items-start',
           )}
           style={{ visibility: dropdownVisible ? 'visible' : null }}
           onClick={onSelect}

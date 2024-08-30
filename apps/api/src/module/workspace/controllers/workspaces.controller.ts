@@ -44,27 +44,27 @@ export class WorkspacesController {
   async getSingleWorkspace(
     @Param('workspaceId', ValidateId) workspaceId: string,
     @Query() { folderId }: GetWorkspaceDto,
-    @User() user: IRequestUser,
+    @User() user: IRequestUser
   ) {
     // TODO check folder id exists
 
     return this.workspacesService.getSingleWorkspace(
       user.id,
       workspaceId,
-      folderId,
+      folderId
     );
   }
 
   @Post('new')
   async createNewWorkspace(
     @Query() query: CreateWorkspaceDto, // TODO should be body
-    @User() user: IRequestUser,
+    @User() user: IRequestUser
   ) {
     return this.workspacesService.createNewWorkspace(
       user.id,
       user.name,
       user.email,
-      query.name,
+      query.name
     );
   }
 
@@ -72,7 +72,7 @@ export class WorkspacesController {
   @UseGuards(CanAccessWorkspaceGuard)
   async leaveWorkspace(
     @Param('workspaceId', ValidateId) workspaceId: string,
-    @User() user: IRequestUser,
+    @User() user: IRequestUser
   ) {
     return this.workspacesService.leaveWorkspace(user.id, workspaceId);
   }
@@ -81,7 +81,7 @@ export class WorkspacesController {
   @UseGuards(IsWorkspaceAdminGuard)
   async deleteWorkspace(
     @Param('workspaceId', ValidateId) workspaceId: string,
-    @User() user: IRequestUser,
+    @User() user: IRequestUser
   ) {
     return this.workspacesService.deleteWorkspace(user.id, workspaceId);
   }
@@ -91,12 +91,12 @@ export class WorkspacesController {
   async renameWorkspace(
     @Param('workspaceId', ValidateId) workspaceId: string,
     @User() user: IRequestUser,
-    @Body() { newName }: RenameWorkspaceDto,
+    @Body() { newName }: RenameWorkspaceDto
   ) {
     return this.workspacesService.renameWorkspace(
       user.id,
       workspaceId,
-      newName,
+      newName
     );
   }
 
@@ -105,7 +105,7 @@ export class WorkspacesController {
   @UseInterceptors(FileInterceptor('file'))
   async changeWorkspaceAvatar(
     @Param('workspaceId', ValidateId) workspaceId: string,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile() file: Express.Multer.File
   ) {
     return this.workspacesService.changeWorkspaceAvatar(workspaceId, file);
   }
@@ -115,7 +115,7 @@ export class WorkspacesController {
   @UseInterceptors(FileInterceptor('file'))
   async changeWorkspaceThumbnail(
     @Param('workspaceId', ValidateId) workspaceId: string,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile() file: Express.Multer.File
   ) {
     return this.workspacesService.changeWorkspaceThumbnail(workspaceId, file);
   }
