@@ -3,15 +3,16 @@
   "compilerOptions": {
     "target": "es5",
     "lib": ["dom", "dom.iterable", "esnext"],
-    "module": "esnext",
-    "moduleResolution": "node",
+    "skipLibCheck": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "strict": true,
-    "skipLibCheck": true,
-    "allowJs": true,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
     "noEmit": false,
-    "outDir": "./build",
     "jsx": "react-jsx",
     "baseUrl": ".",
     "paths": {
@@ -19,9 +20,6 @@
     }
   },
   "typeRoots": ["./src/@types", "node_modules/@types"],
-  "include": [
-    "src/**/*.ts",
-    "src/**/*.tsx"
-  ],
-  "exclude": ["build", "icons", "images", "node_modules/"],
+  "include": ["src/**/*.ts", "src/**/*.tsx", "./src/**/*.svg"],
+  "exclude": ["build", "icons", "images", "node_modules"]
 }

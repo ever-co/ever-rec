@@ -51,9 +51,10 @@ module.exports = {
         exclude: /node_modules/,
       },
       {
-        test: /\.s?css$/,
+        test: /\.(sa|sc|c)ss$/,
         use: [
           'style-loader',
+          'postcss-loader',
           'css-loader',
           {
             loader: 'sass-loader',
@@ -64,7 +65,6 @@ module.exports = {
                 ';',
             },
           },
-          'postcss-loader',
         ],
       },
       {
@@ -282,7 +282,7 @@ module.exports = {
           transform: transformManifest,
         },
       ],
-      { copyUnmodified: true },
+      { copyUnmodified: true }
     ),
   ],
   optimization: {
