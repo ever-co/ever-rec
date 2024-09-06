@@ -2,7 +2,7 @@
   "name": "ever-rec-admin",
   "version": "1.0.0",
   "main": "index.js",
-  "license": "MIT",
+  "license": "AGPL",
   "scripts": {
     "lint": "next lint && eslint \"**/*.{ts,tsx,md}\" --fix",
     "format": "prettier --write .",
