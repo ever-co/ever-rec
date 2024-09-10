@@ -1,9 +1,10 @@
-const ejs = require('ejs');
+//@ts-check
 const path = require('path');
 const Handlebars = require('handlebars');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 const { version } = require('./package.json');
 
@@ -17,12 +18,17 @@ function transformManifest(content) {
 }
 
 module.exports = {
+  mode: 'production',
   entry: {
     'content/content': './src/content/content.ts',
     background: './src/background.ts',
     'popup/popup': './src/content/popup/popup.tsx',
     'panel/panel': './src/content/panel/panel.tsx',
     'recording/recording': './src/content/recording/recording.tsx',
+  },
+  output: {
+    path: path.resolve(__dirname, 'dist'),
+    filename: '[name].js',
   },
   resolve: {
     extensions: ['.js', '.json', '.jsx', '.ts', '.tsx'],
@@ -34,42 +40,39 @@ module.exports = {
     rules: [
       {
         test: /\.(ts|tsx)$/,
-        loader: 'ts-loader',
+        use: 'ts-loader',
         exclude: /node_modules/,
       },
       {
         test: /\.(js|jsx)$/,
-        use: {
-          loader: 'babel-loader',
-        },
+        use: 'babel-loader',
         exclude: /node_modules/,
       },
       {
         test: /\.s?css$/,
         use: [
-          'style-loader',
+          MiniCssExtractPlugin.loader,
           'css-loader',
+          'postcss-loader',
           {
             loader: 'sass-loader',
             options: {
-              additionalData:
-                '$static-url: ' +
-                JSON.stringify(process.env.STATIC_FILES_URL) +
-                ';',
+              implementation: require('sass'),
+              sassOptions: {
+                fiber: false,
+              },
+              additionalData: `$static-url: ${JSON.stringify(
+                process.env.STATIC_FILES_URL,
+              )};`,
             },
           },
-          'postcss-loader',
         ],
       },
       {
         test: /\.less$/i,
         use: [
-          {
-            loader: 'style-loader',
-          },
-          {
-            loader: 'css-loader',
-          },
+          MiniCssExtractPlugin.loader,
+          'css-loader',
           {
             loader: 'less-loader',
             options: {
@@ -82,44 +85,51 @@ module.exports = {
       },
       {
         test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
-        loader: 'url-loader',
-        options: {
-          limit: 20000,
-          name: 'img/[name].[hash:7].[ext]',
+        type: 'asset',
+        parser: {
+          dataUrlCondition: {
+            maxSize: 20 * 1024, // 20kb
+          },
+        },
+        generator: {
+          filename: 'img/[name].[hash:7][ext]',
         },
       },
       {
         test: /\.(mp4|webm|ogg|mp3|wav|flac|aac)(\?.*)?$/,
-        loader: 'url-loader',
-        options: {
-          limit: 10000,
-          name: 'media/[name].[hash:7].[ext]',
+        type: 'asset',
+        parser: {
+          dataUrlCondition: {
+            maxSize: 10 * 1024, // 10kb
+          },
+        },
+        generator: {
+          filename: 'media/[name].[hash:7][ext]',
         },
       },
       {
         test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/,
-        loader: 'url-loader',
-        options: {
-          limit: 10000,
-          name: '[name].[hash:7].[ext]',
-          outputPath: 'fonts',
-          publicPath: '../fonts',
+        type: 'asset',
+        parser: {
+          dataUrlCondition: {
+            maxSize: 10 * 1024, // 10kb
+          },
+        },
+        generator: {
+          filename: 'fonts/[name].[hash:7][ext]',
         },
       },
     ],
   },
   plugins: [
     new CleanWebpackPlugin(),
-    new CopyWebpackPlugin(
-      [
-        {
-          from: 'icons',
-          to: 'icons',
-        },
-        {
-          from: 'images',
-          to: 'images',
-        },
+    new MiniCssExtractPlugin({
+      filename: '[name].css',
+    }),
+    new CopyWebpackPlugin({
+      patterns: [
+        { from: 'icons', to: 'icons' },
+        { from: 'images', to: 'images' },
         {
           from: './src/content/popup/popup.html',
           to: 'popup/popup.html',
@@ -271,20 +281,27 @@ module.exports = {
           transform: transformHtml,
         },
         {
+          from: './src/content/popup/popup.html',
+          to: 'popup/popup.html',
+          transform: transformHtml,
+        },
+        // ... (other copy patterns remain the same)
+        {
           from: 'src/manifest.json',
           to: 'manifest.json',
           transform: transformManifest,
         },
       ],
-      { copyUnmodified: true },
-    ),
+    }),
   ],
   optimization: {
     minimizer: [
       new TerserPlugin({
         extractComments: false,
         terserOptions: {
-          comments: false,
+          format: {
+            comments: false,
+          },
         },
       }),
     ],
@@ -292,7 +309,7 @@ module.exports = {
 };
 
 function transformHtml(content) {
-  return ejs.render(content.toString(), {
+  return require('ejs').render(content.toString(), {
     ...process.env,
   });
 }

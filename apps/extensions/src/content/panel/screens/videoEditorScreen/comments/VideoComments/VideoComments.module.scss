@@ -11,6 +11,10 @@
 }
 
 .inputWrapper {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+
   input {
     border: 1px solid grey;
     padding: 1rem;
@@ -18,8 +22,4 @@
     width: 100%;
     background-color: transparent;
   }
-
-  display: flex;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
 }
