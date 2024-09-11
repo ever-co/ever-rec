@@ -388,7 +388,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
           'image/png': blob,
         });
         try {
-          item && navigator.clipboard.write([item]);
+          item && navigator.clipboard.write([item as any]);
           successMessage('Copied to clipboard');
           saveSegmentEvent('Image Copied to clipboard');
         } catch (e) {

@@ -126,7 +126,7 @@ export class ToolbarService {
       const updatedPictureURL = await blobToDataURL(blob);
       const imageURL = await dataURLSetFormat(updatedPictureURL, 'jpg');
       const res = await fetch(imageURL);
-       
+
       // @ts-ignore
       const imageId = await driveUploadFile(name, await res.blob());
       if (imageId) {
@@ -216,7 +216,7 @@ export class ToolbarService {
         const item = new window.ClipboardItem({
           'image/png': blob,
         });
-        item && navigator.clipboard.write([item]);
+        item && navigator.clipboard.write([item as any]);
 
         successMessage('Copied to clipboard');
       }
@@ -294,7 +294,7 @@ export class ToolbarService {
         const item: ClipboardItemInterface = new window.ClipboardItem({
           'image/png': blob,
         });
-        item && (await navigator.clipboard.write([item]));
+        item && (await navigator.clipboard.write([item as any]));
         destroyPointerTransformer(stage);
         pointerTarget.destroy();
       }

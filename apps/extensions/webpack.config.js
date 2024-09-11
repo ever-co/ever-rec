@@ -6,6 +6,7 @@ const CopyPlugin = require('copy-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const { EsbuildPlugin } = require('esbuild-loader');
+const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 
 const { version } = require('./package.json');
 
@@ -140,6 +141,7 @@ const config = {
     ],
   },
   plugins: [
+    new ForkTsCheckerWebpackPlugin(),
     new MiniCssExtractPlugin({
       filename: '[name].css',
     }),

@@ -144,7 +144,7 @@ const copyImageToClipboard = async (imgBase64: string) => {
   const item: ClipboardItemInterface = new window.ClipboardItem({
     'image/png': blob,
   });
-  item && navigator.clipboard.write([item]);
+  item && navigator.clipboard.write([item as any]);
 };
 
 const startCaptureIntervalBadge = () => {
