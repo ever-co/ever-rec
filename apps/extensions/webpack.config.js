@@ -32,7 +32,7 @@ const config = {
     },
     alias: {
       '@': path.resolve(__dirname, 'src'),
-      'react-dom': '@hot-loader/react-dom',
+      // 'react-dom': '@hot-loader/react-dom',
     },
   },
   optimization: {
@@ -78,27 +78,11 @@ const config = {
           },
           'postcss-loader',
         ],
-        exclude: /\.module\.css$/,
-      },
-      {
-        test: /\.svg$/,
-        use: 'file-loader',
-      },
-      {
-        test: /\.png$/,
-        use: [
-          {
-            loader: 'url-loader',
-            options: {
-              mimetype: 'image/png',
-            },
-          },
-        ],
       },
       {
         test: /\.scss$/,
         use: [
-          MiniCssExtractPlugin.loader,
+          'style-loader',
           'css-loader',
           'postcss-loader',
           {
@@ -127,22 +111,6 @@ const config = {
           },
         ],
       },
-      {
-        test: /\.css$/,
-        use: [
-          MiniCssExtractPlugin.loader,
-          {
-            loader: 'css-loader',
-            options: {
-              importLoaders: 1,
-              modules: true,
-            },
-          },
-          'postcss-loader',
-        ],
-        include: /\.module\.css$/,
-      },
-
       {
         test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
         loader: 'url-loader',
