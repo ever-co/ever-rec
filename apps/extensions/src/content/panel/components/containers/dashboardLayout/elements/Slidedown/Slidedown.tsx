@@ -174,6 +174,8 @@ class SlideDownContent extends Component<
   }
 }
 
+const SlideDownContentReact = SlideDownContent as any;
+
 interface SlideDownProps extends React.HTMLAttributes<HTMLDivElement> {
   as?: keyof JSX.IntrinsicElements | React.ComponentType<any>;
   closed?: boolean;
@@ -182,7 +184,7 @@ interface SlideDownProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export const SlideDown = forwardRef(
   (props: SlideDownProps, ref: React.Ref<HTMLDivElement>) => (
-    <SlideDownContent {...props} forwardedRef={ref} />
+    <SlideDownContentReact {...props} forwardedRef={ref} />
   ),
 );
 

@@ -12,7 +12,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { panelRoutes } from '../../router/panelRoutes';
 import PanelAC from '@/app/store/panel/actions/PanelAC';
 import ImageActionsCard from '../singleImageScreen/imageActions/ImageActionsCard';
-import 'nouislider/distribute/nouislider.css';
+import 'nouislider/dist/nouislider.css';
 import VideoSlider from './videoSlider/VideoSlider';
 import {
   infoMessage,

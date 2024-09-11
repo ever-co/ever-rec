@@ -126,7 +126,7 @@ export class ToolbarService {
       const updatedPictureURL = await blobToDataURL(blob);
       const imageURL = await dataURLSetFormat(updatedPictureURL, 'jpg');
       const res = await fetch(imageURL);
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+       
       // @ts-ignore
       const imageId = await driveUploadFile(name, await res.blob());
       if (imageId) {

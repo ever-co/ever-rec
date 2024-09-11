@@ -1,6 +1,6 @@
 @use '/src/content/panel/styles/Shared.module.scss';
-@import '/src/content/utilities/partials/_dotSeparator.scss';
-@import '/src/content/utilities/partials/_colors.scss';
+@import '@/content/utilities/partials/_dotSeparator.scss';
+@import '@/content/utilities/partials/_colors.scss';
 
 .section {
   background-color: #fff;

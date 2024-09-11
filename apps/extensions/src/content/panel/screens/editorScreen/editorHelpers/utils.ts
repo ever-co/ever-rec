@@ -71,6 +71,7 @@ export const getBlobFromStage = async (
     x: 1,
     y: 1,
   });
+  // @ts-ignore
   cloned_stage.find('#blurred').forEach((element: Rect) => {
     element.cache();
   });

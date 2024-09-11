@@ -1,4 +1,4 @@
-/* eslint-disable no-var */
+ 
 import { Button } from 'antd';
 import classNames from 'classnames';
 import React, { useEffect, useState, useRef } from 'react';

@@ -1,6 +1,7 @@
 import React, { FC } from 'react';
 import Switch from 'react-switch';
 
+const SwitchReact = Switch as any;
 
 interface IAppSwitchProps {
   switched?: boolean;
@@ -14,7 +15,7 @@ const AppSwitchNew: FC<IAppSwitchProps> = ({
   handleSwitch,
 }) => {
   return (
-    <Switch
+    <SwitchReact
       onChange={handleSwitch}
       uncheckedIcon={false}
       checkedIcon={false}

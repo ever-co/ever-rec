@@ -8,7 +8,7 @@ import {
   useState,
 } from 'react';
 import { RootStateOrAny, useSelector } from 'react-redux';
-import {useDropzone} from "react-dropzone";
+import { useDropzone } from 'react-dropzone';
 import { errorHandler } from '@/app/services/helpers/errors';
 import { Modal } from 'antd';
 import AppSvg from '@/content/components/elements/AppSvg';
@@ -98,7 +98,7 @@ const UploadWorkspaceImageModal: React.FC<Props> = ({
             </h5>
           </div>
           <div className={styles.marginDiv}>
-            <AppButton onClick={() => {}} full={true}>
+            <AppButton onClick={() => console.log('TODO: save')} full={true}>
               Save
             </AppButton>
           </div>

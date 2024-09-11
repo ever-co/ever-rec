@@ -1,6 +1,7 @@
 import React from 'react';
 import Switch from 'react-switch';
 
+const SwitchReact = Switch as any;
 
 interface IAppSwitchProp {
   checked: boolean;
@@ -9,7 +10,7 @@ interface IAppSwitchProp {
 
 const AppSwitch: React.FC<IAppSwitchProp> = ({ checked, onChange }) => {
   return (
-    <Switch
+    <SwitchReact
       checked={checked}
       onChange={onChange}
       onColor="#cdc9eb"
@@ -21,7 +22,7 @@ const AppSwitch: React.FC<IAppSwitchProp> = ({ checked, onChange }) => {
       activeBoxShadow="0px 0px 1px 10px rgba(0, 0, 0, 0.2)"
       height={14}
       width={34}
-    ></Switch>
+    ></SwitchReact>
   );
 };
 

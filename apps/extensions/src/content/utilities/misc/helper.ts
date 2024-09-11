@@ -1,5 +1,5 @@
 export const parseCollectionToIdValueObj = (
-  collection: Object | Array<any>,
+  collection: object | Array<any>,
 ) => {
   try {
     let result = collection;
@@ -20,7 +20,7 @@ export const parseCollectionToIdValueObj = (
 };
 
 export const parseCollectionToArray = (
-  collection: Object | Array<any>,
+  collection: object | Array<any>,
   putKeyAsId?: boolean,
 ): any[] => {
   try {

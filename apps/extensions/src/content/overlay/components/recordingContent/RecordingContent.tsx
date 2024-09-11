@@ -8,6 +8,12 @@ import useWindowSize from '@/content/utilities/hooks/useWindowSize';
 import '@/content/overlay/components/recordingContent/recording-content.scss';
 import Draggable from 'react-draggable';
 
+const DraggableReact = Draggable as any;
+
+const CanvasDrawReact = CanvasDraw as any;
+
+const GithubPickerReact = GithubPicker as any;
+
 const colors = [
   '#B80000',
   '#DB3E00',
@@ -154,11 +160,8 @@ const RecordingContent: React.FC<IRecordingContentProps> = ({
   };
 
   return (
-    <div
-      ref={mainContainerGlobal}
-      className="remove-pointer-events rec-main"
-    >
-      <Draggable
+    <div ref={mainContainerGlobal} className="remove-pointer-events rec-main">
+      <DraggableReact
         bounds={{
           left: 0,
           bottom: 0,
@@ -169,11 +172,7 @@ const RecordingContent: React.FC<IRecordingContentProps> = ({
       >
         <div
           className={classNames(
-            `${
-              !fromEditor
-                ? 'rec-container'
-                : ' rec-container-editor'
-            }`,
+            `${!fromEditor ? 'rec-container' : ' rec-container-editor'}`,
           )}
           onMouseLeave={leaveMouseHandler}
           id="small-rec"
@@ -239,7 +238,7 @@ const RecordingContent: React.FC<IRecordingContentProps> = ({
               <div className="colorPicker" onClick={handleColorPicker}>
                 <div ref={colorPickerIcon} className="colorPicker-icon"></div>
                 {togglePicker && (
-                  <GithubPicker
+                  <GithubPickerReact
                     onChange={(color: ColorResult) => {
                       setColorPicker(color), setTogglePicker(false);
                     }}
@@ -247,15 +246,15 @@ const RecordingContent: React.FC<IRecordingContentProps> = ({
                     width="187px"
                     className={'color-picker-github'}
                     triangle={'hide'}
-                  ></GithubPicker>
+                  ></GithubPickerReact>
                 )}
               </div>
             </div>
           </div>
         </div>
-      </Draggable>
+      </DraggableReact>
 
-      <CanvasDraw
+      <CanvasDrawReact
         onChange={(canvas: CanvasDraw) => {
           setCanvas(canvas), setEraserImgSource('undo-active.svg');
         }}
@@ -272,7 +271,7 @@ const RecordingContent: React.FC<IRecordingContentProps> = ({
           position: 'absolute',
           zIndex: 9999900,
         }}
-      ></CanvasDraw>
+      ></CanvasDrawReact>
     </div>
   );
 };

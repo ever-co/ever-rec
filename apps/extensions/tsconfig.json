@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "ES2015",
     "lib": [
       "dom",
       "dom.iterable",
@@ -8,6 +8,8 @@
     ],
     "skipLibCheck": true,
     "esModuleInterop": true,
+    "strictNullChecks": false,
+    "noImplicitAny": false,
     "allowSyntheticDefaultImports": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
@@ -16,6 +18,8 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "noEmit": false,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
     "jsx": "react-jsx",
     "baseUrl": ".",
     "paths": {
