@@ -146,6 +146,7 @@ const config = {
   plugins: [
     new MiniCssExtractPlugin({
       filename: '[name].css',
+      experimentalUseImportModule: true,
     }),
     new CleanWebpackPlugin(),
     new CopyPlugin({

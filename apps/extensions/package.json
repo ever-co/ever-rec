@@ -25,7 +25,7 @@
     ]
   },
   "scripts": {
-    "lint": "eslint src",
+    "lint": "eslint",
     "watch": "webpack --watch --config webpack.dev.js",
     "build": "cross-env NODE_OPTIONS=--max_old_space_size=8192 webpack --progress --mode production --config webpack.prod.js",
     "build:prod": "cross-env NODE_OPTIONS=--max_old_space_size=8192 NODE_OPTIONS=--openssl-legacy-provider webpack --progress --mode production --config webpack.prod.js",
@@ -44,6 +44,7 @@
     "@eslint/js": "^9.10.0",
     "@fullhuman/postcss-purgecss": "^3.0.0",
     "@hot-loader/react-dom": "^17.0.2+4.13.0",
+    "@nrwl/eslint-plugin-nx": "^19.7.2",
     "@types/chrome": "0.0.163",
     "@types/dateformat": "^5.0.0",
     "@types/emoji-mart": "^3.0.9",
