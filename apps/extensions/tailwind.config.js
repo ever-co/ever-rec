@@ -281,5 +281,5 @@ module.exports = {
     extend: {},
     scrollbar: ['rounded'],
   },
-  plugins: [require('@tailwindcss/line-clamp'), require('tailwind-scrollbar')],
+  plugins: [require('tailwind-scrollbar')],
 };

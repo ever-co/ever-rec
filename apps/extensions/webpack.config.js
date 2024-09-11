@@ -100,6 +100,7 @@ const config = {
         use: [
           MiniCssExtractPlugin.loader,
           'css-loader',
+          'postcss-loader',
           {
             loader: 'sass-loader',
             options: {
@@ -141,12 +142,38 @@ const config = {
         ],
         include: /\.module\.css$/,
       },
+
+      {
+        test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
+        loader: 'url-loader',
+        options: {
+          limit: 20000,
+          name: 'img/[name].[hash:7].[ext]',
+        },
+      },
+      {
+        test: /\.(mp4|webm|ogg|mp3|wav|flac|aac)(\?.*)?$/,
+        loader: 'url-loader',
+        options: {
+          limit: 10000,
+          name: 'media/[name].[hash:7].[ext]',
+        },
+      },
+      {
+        test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/,
+        loader: 'url-loader',
+        options: {
+          limit: 10000,
+          name: '[name].[hash:7].[ext]',
+          outputPath: 'fonts',
+          publicPath: '../fonts',
+        },
+      },
     ],
   },
   plugins: [
     new MiniCssExtractPlugin({
       filename: '[name].css',
-      experimentalUseImportModule: true,
     }),
     new CleanWebpackPlugin(),
     new CopyPlugin({
