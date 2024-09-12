@@ -7,10 +7,12 @@
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
     "target": "es2017",
-    "lib": ["es2021"],
+    "lib": [
+      "es2021"
+    ],
     "sourceMap": true,
     "outDir": "./dist",
-    "baseUrl": "./",
+    "baseUrl": ".",
     "strict": false,
     "incremental": true,
     "skipLibCheck": true,
@@ -20,6 +22,8 @@
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
     "esModuleInterop": true
-    },
-  "include": ["src"],
+  },
+  "include": [
+    "src"
+  ],
 }
