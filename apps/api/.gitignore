@@ -39,3 +39,4 @@ tmp_videos/
 tmp_videos_fixed/
 
 .env
+.env.dev

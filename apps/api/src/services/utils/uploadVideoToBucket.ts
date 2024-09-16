@@ -4,6 +4,9 @@ import { join } from 'path';
 import { TMP_PATH_FIXED } from 'src/enums/tmpPathsEnums';
 import { fixVideoWithFFMPEG } from './fixVideoWithFFMPEG';
 
+/**
+ * @internal
+ */
 export async function fixVideoAndUploadToBucket(
   blob: Express.Multer.File,
   fullFilename: string,
@@ -38,6 +41,9 @@ interface IUploadToBucketParams {
   refName?: string;
 }
 
+/**
+ * @internal
+ */
 export async function uploadVideoToBucket({
   uid,
   workspaceId,

@@ -1,4 +1,4 @@
-import { StorageReference } from '@firebase/storage';
+import type { StorageReference } from '@firebase/storage';
 import { IComment } from './IComments';
 import { DbCommentIntF } from '../services/utils/models/shared.model';
 import {

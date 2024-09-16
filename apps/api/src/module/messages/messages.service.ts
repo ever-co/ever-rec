@@ -14,6 +14,9 @@ export class MessagesService {
     private readonly configService: ConfigService,
   ) {}
 
+  /**
+   * @internal
+   */
   async sendSMS(toPhone: string, mediaUrl: string, body: string = '') {
     return await this.client.messages
       .create({
@@ -44,6 +47,9 @@ export class MessagesService {
       });
   }
 
+  /**
+   * @internal
+   */
   public async sendWhatsAppMessage(req) {
     const uid = req.user.id;
     const { id, type, phone } = req.body;
@@ -67,8 +73,7 @@ export class MessagesService {
             'WEBSITE_URL',
           )}/image/shared/${sharedCode}`;
         }
-        body =
-          '*Sent with Rec* Click to link for mor details: ' + sharedLink;
+        body = '*Sent with Rec* Click to link for mor details: ' + sharedLink;
         return await this.sendSMS(phone, mediaUrl, body);
       }
     } else {
@@ -86,8 +91,7 @@ export class MessagesService {
         )}/video/shared/${sharedCode}`;
       }
 
-      body =
-        '*Sent with Rec* Click to link for mor details: ' + sharedLink;
+      body = '*Sent with Rec* Click to link for mor details: ' + sharedLink;
 
       return await this.sendSMS(phone, mediaUrl, body);
     }

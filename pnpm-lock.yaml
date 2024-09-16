@@ -47,6 +47,9 @@ importers:
       '@api.video/nodejs-client':
         specifier: ^2.2.8
         version: 2.6.1
+      '@firebase/storage':
+        specifier: ^0.13.1
+        version: 0.13.1(@firebase/app@0.9.13)
       '@mux/mux-node':
         specifier: ^6.1.0
         version: 6.4.0
@@ -89,9 +92,15 @@ importers:
       analytics-node:
         specifier: ^6.1.0
         version: 6.2.0
+      axios:
+        specifier: ^0.26.0
+        version: 0.26.1
       blob-to-stream:
         specifier: ^1.0.3
         version: 1.0.3
+      body-parser:
+        specifier: ^1.20.3
+        version: 1.20.3
       class-transformer:
         specifier: ^0.5.1
         version: 0.5.1
@@ -158,6 +167,9 @@ importers:
       sharp:
         specifier: ^0.31.3
         version: 0.31.3
+      socket.io:
+        specifier: ^4.7.5
+        version: 4.7.5
       twilio:
         specifier: ^3.80.0
         version: 3.84.1
@@ -165,6 +177,9 @@ importers:
         specifier: ^8.3.2
         version: 8.3.2
     devDependencies:
+      '@firebase/database-types':
+        specifier: ^1.0.4
+        version: 1.0.4
       '@nestjs/cli':
         specifier: ^8.0.0
         version: 8.2.8
@@ -1714,6 +1729,9 @@ packages:
   '@firebase/app-types@0.9.0':
     resolution: {integrity: sha512-AeweANOIo0Mb8GiYm3xhTEBVCmPwTYAu9Hcd2qSkLuga/6+j9b1Jskl5bpiSQWy9eJ/j5pavxj6eYogmnuzm+Q==}
 
+  '@firebase/app-types@0.9.2':
+    resolution: {integrity: sha512-oMEZ1TDlBz479lmABwWsWjzHwheQKiAgnuKxE0pz0IXCVx7/rtlkx1fQ6GfgK24WCrxDKMplZrT50Kh04iMbXQ==}
+
   '@firebase/app@0.9.13':
     resolution: {integrity: sha512-GfiI1JxJ7ecluEmDjPzseRXk/PX31hS7+tjgBopL7XjB2hLUdR+0FTMXy2Q3/hXezypDvU6or7gVFizDESrkXw==}
 
@@ -1748,6 +1766,9 @@ packages:
   '@firebase/component@0.6.4':
     resolution: {integrity: sha512-rLMyrXuO9jcAUCaQXCMjCMUsWrba5fzHlNK24xz5j2W6A/SRmK8mZJ/hn7V0fViLbxC0lPMtrK1eYzk6Fg03jA==}
 
+  '@firebase/component@0.6.8':
+    resolution: {integrity: sha512-LcNvxGLLGjBwB0dJUsBGCej2fqAepWyBubs4jt1Tiuns7QLbXHuyObZ4aMeBjZjWx4m8g1LoVI9QFpSaq/k4/g==}
+
   '@firebase/database-compat@0.2.10':
     resolution: {integrity: sha512-fK+IgUUqVKcWK/gltzDU+B1xauCOfY6vulO8lxoNTkcCGlSxuTtwsdqjGkFmgFRMYjXFWWJ6iFcJ/vXahzwCtA==}
 
@@ -1759,6 +1780,9 @@ packages:
 
   '@firebase/database-types@0.9.17':
     resolution: {integrity: sha512-YQm2tCZyxNtEnlS5qo5gd2PAYgKCy69tUKwioGhApCFThW+mIgZs7IeYeJo2M51i4LCixYUl+CvnOyAnb/c3XA==}
+
+  '@firebase/database-types@1.0.4':
+    resolution: {integrity: sha512-mz9ZzbH6euFXbcBo+enuJ36I5dR5w+enJHHjy9Y5ThCdKUseqfDjW3vCp1YxE9zygFCSjJJ/z1cQ+zodvUcwPQ==}
 
   '@firebase/database@0.13.10':
     resolution: {integrity: sha512-KRucuzZ7ZHQsRdGEmhxId5jyM2yKsjsQWF9yv0dIhlxYg0D8rCVDZc/waoPKA5oV3/SEIoptF8F7R1Vfe7BCQA==}
@@ -1872,11 +1896,19 @@ packages:
     peerDependencies:
       '@firebase/app': 0.x
 
+  '@firebase/storage@0.13.1':
+    resolution: {integrity: sha512-L6AJ5tWgHSi2g/gbc/2Pbm3qxmoEg9THmPIOpRsLwuz9LPeWbhyMQeGlqxWqtZGQO/z/LMjGYadNlupQj0HNfw==}
+    peerDependencies:
+      '@firebase/app': 0.x
+
   '@firebase/util@1.7.3':
     resolution: {integrity: sha512-wxNqWbqokF551WrJ9BIFouU/V5SL1oYCGx1oudcirdhadnQRFH5v1sjgGL7cUV/UsekSycygphdrF2lxBxOYKg==}
 
   '@firebase/util@1.9.3':
     resolution: {integrity: sha512-DY02CRhOZwpzO36fHpuVysz6JZrscPiBXD0fXp6qSrL9oNOx5KWICKdR95C0lSITzxp0TZosVyHqzatE8JbcjA==}
+
+  '@firebase/util@1.9.7':
+    resolution: {integrity: sha512-fBVNH/8bRbYjqlbIhZ+lBtdAAS4WqZumx03K06/u7fJSpz1TGjEMm1ImvKD47w+xaFKIP2ori6z8BrbakRfjJA==}
 
   '@firebase/webchannel-wrapper@0.10.1':
     resolution: {integrity: sha512-Dq5rYfEpdeel0bLVN+nfD1VWmzCkK+pJbSjIawGE+RY4+NIJqhbUDDQjvV0NUK84fMfwxvtFoCtEe70HfZjFcw==}
@@ -2104,8 +2136,8 @@ packages:
   '@maxim_mazurok/gapi.client.discovery-v1@0.1.20200806':
     resolution: {integrity: sha512-Wl6UfmZVDdWbY3PUu8E2ULk9RPLjnMqp/iOA4tcK8Ne+U/GmlnWP/e34IaZNGArfl7iXJNOG+/3Rj9L9jQyF9Q==}
 
-  '@maxim_mazurok/gapi.client.drive-v3@0.0.20240908':
-    resolution: {integrity: sha512-kUjojEXLmKs0bV3KYT/esHk0er/WTDTeZsZ6vE2WA1bdoeY54DlXGwSlLZ9xtbJVOuHKU5yHM2SfpFUVSPQueA==}
+  '@maxim_mazurok/gapi.client.drive-v3@0.0.20240912':
+    resolution: {integrity: sha512-CW7UMS2F7vf5afRyE57mmXJHya5+HmKaRBrFTEOZOfOtsc2fuP+JXE1sYzwZYC7YiJUokYAjTulDd9v2KLWieQ==}
 
   '@messageformat/core@3.3.0':
     resolution: {integrity: sha512-YcXd3remTDdeMxAlbvW6oV9d/01/DZ8DHUFwSttO3LMzIZj3iO0NRw+u1xlsNNORFI+u0EQzD52ZX3+Udi0T3g==}
@@ -4993,6 +5025,10 @@ packages:
   engine.io@6.2.1:
     resolution: {integrity: sha512-ECceEFcAaNRybd3lsGQKas3ZlMVjN3cyWwMP25D2i0zWfyiytVbTpRPa34qrr+FHddtpBVOmq4H/DCv1O0lZRA==}
     engines: {node: '>=10.0.0'}
+
+  engine.io@6.5.5:
+    resolution: {integrity: sha512-C5Pn8Wk+1vKBoHghJODM63yk8MvrO9EWZUfkAt5HAqIgPE4/8FF0PEGHXtEd40l223+cE5ABWuPzm38PHFXfMA==}
+    engines: {node: '>=10.2.0'}
 
   enhanced-resolve@5.17.1:
     resolution: {integrity: sha512-LMHl3dXhTcfv8gM4kEzIUeTQ+7fpdA0l2tUf34BddXPkz2A5xJ5L/Pchd5BL6rdccM9QGvu0sWZzK1Z1t4wwyg==}
@@ -9705,6 +9741,9 @@ packages:
   socket.io-adapter@2.4.0:
     resolution: {integrity: sha512-W4N+o69rkMEGVuk2D/cvca3uYsvGlMwsySWV447y99gUPghxq42BxqLNMndb+a1mm/5/7NeXVQS7RLa2XyXvYg==}
 
+  socket.io-adapter@2.5.5:
+    resolution: {integrity: sha512-eLDQas5dzPgOWCk9GuuJC2lBqItuhKI4uxGgo9aIV7MYbk2h9Q6uULEh8WBzThoI7l+qU9Ast9fVUmkqPP9wYg==}
+
   socket.io-client@4.7.5:
     resolution: {integrity: sha512-sJ/tqHOCe7Z50JCBCXrsY3I2k03iOiUe+tj1OmKeD2lXPiGH/RUCdTZFoqVyN7l1MnpIzPrGtLcijffmeouNlQ==}
     engines: {node: '>=10.0.0'}
@@ -9716,6 +9755,10 @@ packages:
   socket.io@4.5.3:
     resolution: {integrity: sha512-zdpnnKU+H6mOp7nYRXH4GNv1ux6HL6+lHL8g7Ds7Lj8CkdK1jJK/dlwsKDculbyOHifcJ0Pr/yeXnZQ5GeFrcg==}
     engines: {node: '>=10.0.0'}
+
+  socket.io@4.7.5:
+    resolution: {integrity: sha512-DmeAkF6cwM9jSfmp6Dr/5/mfMwb5Z5qRrSXLpo3Fq5SqyU8CMF15jIN4ZhfSwu35ksM1qmHZDQ/DK5XTccSTvA==}
+    engines: {node: '>=10.2.0'}
 
   sockjs@0.3.24:
     resolution: {integrity: sha512-GJgLTZ7vYb/JtPSSZ10hsOYIvEYsjbNU+zPdIHcUaWVNUEPivzxku31865sSSud0Da0W4lEeOPlmw93zLQchuQ==}
@@ -10502,6 +10545,10 @@ packages:
 
   undici-types@6.19.8:
     resolution: {integrity: sha512-ve2KP6f/JnbPBFyobGHuerC9g1FYGn/F8n1LWTwNxCEzd6IfqTwUQcNXgEtmmQ6DlRrC1hrSrBnCZPokRrDHjw==}
+
+  undici@6.19.7:
+    resolution: {integrity: sha512-HR3W/bMGPSr90i8AAp2C4DM3wChFdJPLrWYpIS++LxS8K+W535qftjt+4MyjNYHeWabMj1nvtmLIi7l++iq91A==}
+    engines: {node: '>=18.17'}
 
   unicode-canonical-property-names-ecmascript@2.0.0:
     resolution: {integrity: sha512-yY5PpDlfVIU5+y/BSCxAJRBIS1Zc2dDG3Ujq+sR0U+JjUevW2JhocOF+soROYDSaAezOzOKuyyixhD6mBknSmQ==}
@@ -12283,6 +12330,8 @@ snapshots:
 
   '@firebase/app-types@0.9.0': {}
 
+  '@firebase/app-types@0.9.2': {}
+
   '@firebase/app@0.9.13':
     dependencies:
       '@firebase/component': 0.6.4
@@ -12338,6 +12387,11 @@ snapshots:
       '@firebase/util': 1.9.3
       tslib: 2.7.0
 
+  '@firebase/component@0.6.8':
+    dependencies:
+      '@firebase/util': 1.9.7
+      tslib: 2.7.0
+
   '@firebase/database-compat@0.2.10(@firebase/app-types@0.9.0)':
     dependencies:
       '@firebase/component': 0.5.21
@@ -12367,6 +12421,11 @@ snapshots:
     dependencies:
       '@firebase/app-types': 0.8.1
       '@firebase/util': 1.7.3
+
+  '@firebase/database-types@1.0.4':
+    dependencies:
+      '@firebase/app-types': 0.9.2
+      '@firebase/util': 1.9.7
 
   '@firebase/database@0.13.10(@firebase/app-types@0.9.0)':
     dependencies:
@@ -12575,11 +12634,23 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
+  '@firebase/storage@0.13.1(@firebase/app@0.9.13)':
+    dependencies:
+      '@firebase/app': 0.9.13
+      '@firebase/component': 0.6.8
+      '@firebase/util': 1.9.7
+      tslib: 2.7.0
+      undici: 6.19.7
+
   '@firebase/util@1.7.3':
     dependencies:
       tslib: 2.7.0
 
   '@firebase/util@1.9.3':
+    dependencies:
+      tslib: 2.7.0
+
+  '@firebase/util@1.9.7':
     dependencies:
       tslib: 2.7.0
 
@@ -12962,7 +13033,7 @@ snapshots:
       '@types/gapi.client': 1.0.8
       '@types/gapi.client.discovery-v1': 0.0.4
 
-  '@maxim_mazurok/gapi.client.drive-v3@0.0.20240908':
+  '@maxim_mazurok/gapi.client.drive-v3@0.0.20240912':
     dependencies:
       '@types/gapi.client': 1.0.8
       '@types/gapi.client.discovery-v1': 0.0.4
@@ -14067,7 +14138,7 @@ snapshots:
 
   '@types/gapi.client.drive@3.0.15':
     dependencies:
-      '@maxim_mazurok/gapi.client.drive-v3': 0.0.20240908
+      '@maxim_mazurok/gapi.client.drive-v3': 0.0.20240912
 
   '@types/gapi.client@1.0.8': {}
 
@@ -16732,6 +16803,23 @@ snapshots:
       debug: 4.3.7(supports-color@8.1.1)
       engine.io-parser: 5.0.7
       ws: 8.2.3
+    transitivePeerDependencies:
+      - bufferutil
+      - supports-color
+      - utf-8-validate
+
+  engine.io@6.5.5:
+    dependencies:
+      '@types/cookie': 0.4.1
+      '@types/cors': 2.8.17
+      '@types/node': 22.5.4
+      accepts: 1.3.8
+      base64id: 2.0.0
+      cookie: 0.4.2
+      cors: 2.8.5
+      debug: 4.3.7(supports-color@8.1.1)
+      engine.io-parser: 5.2.3
+      ws: 8.17.1
     transitivePeerDependencies:
       - bufferutil
       - supports-color
@@ -22461,6 +22549,15 @@ snapshots:
 
   socket.io-adapter@2.4.0: {}
 
+  socket.io-adapter@2.5.5:
+    dependencies:
+      debug: 4.3.7(supports-color@8.1.1)
+      ws: 8.17.1
+    transitivePeerDependencies:
+      - bufferutil
+      - supports-color
+      - utf-8-validate
+
   socket.io-client@4.7.5:
     dependencies:
       '@socket.io/component-emitter': 3.1.2
@@ -22486,6 +22583,20 @@ snapshots:
       debug: 4.3.7(supports-color@8.1.1)
       engine.io: 6.2.1
       socket.io-adapter: 2.4.0
+      socket.io-parser: 4.2.4
+    transitivePeerDependencies:
+      - bufferutil
+      - supports-color
+      - utf-8-validate
+
+  socket.io@4.7.5:
+    dependencies:
+      accepts: 1.3.8
+      base64id: 2.0.0
+      cors: 2.8.5
+      debug: 4.3.7(supports-color@8.1.1)
+      engine.io: 6.5.5
+      socket.io-adapter: 2.5.5
       socket.io-parser: 4.2.4
     transitivePeerDependencies:
       - bufferutil
@@ -23437,6 +23548,8 @@ snapshots:
       which-boxed-primitive: 1.0.2
 
   undici-types@6.19.8: {}
+
+  undici@6.19.7: {}
 
   unicode-canonical-property-names-ecmascript@2.0.0: {}
 

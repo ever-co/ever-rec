@@ -2,7 +2,7 @@ import * as admin from 'firebase-admin';
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Reference } from '@firebase/database-types';
-import { FullMetadata } from '@firebase/storage';
+import type { FullMetadata } from '@firebase/storage';
 import { nanoid } from 'nanoid';
 import moment from 'moment';
 import { SharedService } from '../../services/shared/shared.service';
