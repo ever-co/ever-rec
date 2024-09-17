@@ -33,10 +33,11 @@ const IconBtn: React.FC<IIconBtn> = ({
       >
         <Image
           style={{ marginLeft: '5px', marginRight: '5px' }}
-          width={size}
-          height={size}
+          width={`${+size}`}
+          height={`${+size}`}
           className={className}
           src={icon}
+          alt="icon"
         />
       </label>
     </button>

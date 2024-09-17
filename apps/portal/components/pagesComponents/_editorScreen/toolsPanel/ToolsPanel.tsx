@@ -64,7 +64,7 @@ import IEditorImage from 'app/interfaces/IEditorImage';
 import Image from 'next/image';
 import { imgSrcLoader } from '../editorHelpers/imgSrcLoader';
 import useEditorVideo from 'hooks/useEditorVideo';
-import { Emoji } from 'emoji-mart/dist-es/utils/data';
+import { Emoji } from 'emoji-mart/dist/index';
 import { ICommentsOptions } from 'app/interfaces/tools_interfaces/ICommentsGroupOptions';
 import ShareTool from './ToolBtn/customToolBtn/ShareToolBtn/ShareToolBtn';
 import { IWorkspace } from 'app/interfaces/IWorkspace';

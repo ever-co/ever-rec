@@ -102,8 +102,8 @@ const Auth: React.FC<SignFlowComponent> = ({ children, componentType }) => {
                   componentType == 'resetPassword'
                     ? 'Reset your password'
                     : currentPathname
-                    ? 'Hello, Welcome!'
-                    : 'Register'
+                      ? 'Hello, Welcome!'
+                      : 'Register'
                 }
                 className="tw-mb-8 tw-font-bold"
               />
@@ -170,8 +170,8 @@ const Auth: React.FC<SignFlowComponent> = ({ children, componentType }) => {
                 src="/sign/signin1.svg"
                 alt="Google"
                 layout="intrinsic"
-                height="650px"
-                width="500px"
+                height="650"
+                width="500"
               />
             </div>
           )}

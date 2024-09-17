@@ -1,4 +1,4 @@
-import { AppProps } from 'next/app';
+import type { AppProps } from 'next/app';
 import Head from 'next/head';
 import { NextPage } from 'next';
 import store from 'app/store/panel';
@@ -19,12 +19,7 @@ export type NextApplicationPage<P = any, IP = P> = NextPage<P, IP> & {
   requireAuth?: boolean;
 };
 
-export interface CustomAppProps extends AppProps {
-  Component: NextApplicationPage;
-  pageProps: any;
-}
-
-function CustomApp({ Component, pageProps }: CustomAppProps) {
+function CustomApp({ Component, pageProps }: AppProps) {
   return (
     <Provider store={store}>
       <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID}>

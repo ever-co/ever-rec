@@ -272,8 +272,8 @@ const ManageWorkspaces: React.FC = () => {
                     <Image
                       src={workspace?.thumbnail || '/common/Thumbnail.svg'}
                       alt="workspace thumbnail"
-                      width={!workspace?.thumbnail && '200px'}
-                      height={!workspace?.thumbnail && '150px'}
+                      width={!workspace?.thumbnail ? '200' : undefined}
+                      height={!workspace?.thumbnail ? '150' : undefined}
                       layout={workspace?.thumbnail ? 'fill' : 'fixed'}
                       className={workspace?.thumbnail && styles.thumbnail}
                     />

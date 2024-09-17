@@ -145,9 +145,8 @@ export function useReactMediaRecorder({
         }
         mediaStream.current = stream;
       } else {
-        const stream = await window.navigator.mediaDevices.getUserMedia(
-          requiredMedia,
-        );
+        const stream =
+          await window.navigator.mediaDevices.getUserMedia(requiredMedia);
         mediaStream.current = stream;
       }
       setStatus('idle');
@@ -345,7 +344,7 @@ export function useReactMediaRecorder({
 
   const stopRecording = () => {
     if (timeout.current) {
-      clearInterval(timeout.current);
+      clearInterval(timeout.current as NodeJS.Timeout);
     }
 
     if (mediaRecorder.current) {

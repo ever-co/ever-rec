@@ -48,8 +48,8 @@ const MyTeamsInsideModal: FC<IMyTeamsProps> = ({
                     <Image
                       src={team.avatar || '/common/team-icon.svg'}
                       alt="team avatar"
-                      width="26px"
-                      height="26px"
+                      width="26"
+                      height="26"
                     />
                   </div>
                   <div className={styles.teamName}>{team.name}</div>

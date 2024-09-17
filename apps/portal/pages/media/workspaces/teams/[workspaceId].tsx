@@ -279,8 +279,8 @@ const WorkspaceTeams: FC = () => {
                         <Image
                           src={team?.thumbnail || '/common/Thumbnail.svg'}
                           alt="Team thumbnail"
-                          width={!team?.thumbnail && '200px'}
-                          height={!team?.thumbnail && '150px'}
+                          width={!team?.thumbnail ? '200' : undefined}
+                          height={!team?.thumbnail ? '150' : undefined}
                           layout={team?.thumbnail ? 'fill' : 'fixed'}
                           className={team?.thumbnail && styles.thumbnail}
                         />

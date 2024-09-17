@@ -140,7 +140,7 @@ const WhiteboardSidebar: React.FC<ISidebarProps> = ({
       <div className="tw-border tw-border-iron-grey tw-w-full tw-h-40px">
         <div className="tw-text-xl tw-p-1 tw-flex tw-align-center tw-justify-between">
           <div className="tw-border-r tw-border-iron-grey tw-px-2 ">
-            <Image src={mapicon} width={18} height={15} />
+            <Image src={mapicon} width={18} height={15} alt="mapicon" />
           </div>
           <ScaleSelector
             value={stageScale}

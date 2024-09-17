@@ -63,7 +63,7 @@ const AppSelect: React.FC<AppSelectProps> = ({
       >
         <select
           name={label}
-          placeholder={placeholder}
+          // placeholder={placeholder}
           onChange={(e) => onChange(e.target.value)}
           value={value}
           className={classNames(

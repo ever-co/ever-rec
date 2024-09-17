@@ -1,6 +1,6 @@
 import { FC } from 'react';
 import { IUser } from 'app/interfaces/IUserData';
-import 'plyr-react/dist/plyr.css';
+import 'plyr/dist/plyr.css';
 import { ISharedItem } from 'app/interfaces/ISharedItem';
 import { GetServerSideProps, GetServerSidePropsContext } from 'next';
 import { getUserServerSideProps } from 'app/services/api/auth';
