@@ -57,7 +57,7 @@ const ContentItemText: React.FC<IContentTextProps> = ({
         key="0"
         icon={<EditFilled />}
         onClick={() => {
-          editComment();
+          editComment?.();
         }}
       >
         Edit
@@ -68,9 +68,9 @@ const ContentItemText: React.FC<IContentTextProps> = ({
         icon={<DeleteFilled />}
         onClick={() => {
           MarkerService.removeCommentFromMarker(
-            markerId,
+            markerId as any,
             id,
-            setMarkers,
+            setMarkers as any,
             async (updatedMarkers) =>
               editorImage &&
               (await updateMarkers(
@@ -116,7 +116,10 @@ const ContentItemText: React.FC<IContentTextProps> = ({
 
       <div style={{ marginBottom: '0.5rem' }}>
         {audioSrc ? (
-          <AudioPlayer audioDuration={audioDuration} audioSrc={audioSrc} />
+          <AudioPlayer
+            audioDuration={audioDuration as string}
+            audioSrc={audioSrc}
+          />
         ) : null}
       </div>
       <small>

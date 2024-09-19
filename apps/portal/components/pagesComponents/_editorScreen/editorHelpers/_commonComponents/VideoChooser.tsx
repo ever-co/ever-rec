@@ -53,7 +53,7 @@ const VideoChooser: React.FC<Props> = ({ visible, onOk, onCancel, actual }) => {
       footer={
         <div className={styles.footer}>
           {explorerDataVideos.files.length > 0 ? (
-            <Row style={{width: '100%', padding: '1rem'}} gutter={30}>
+            <Row style={{ width: '100%', padding: '1rem' }} gutter={30}>
               {explorerDataVideos?.files?.map((item, index) => (
                 <Col
                   key={index}
@@ -62,7 +62,7 @@ const VideoChooser: React.FC<Props> = ({ visible, onOk, onCancel, actual }) => {
                   md={24}
                   lg={12}
                   xxl={8}
-                  style={{marginBottom: '2.5rem'}}
+                  style={{ marginBottom: '2.5rem' }}
                 >
                   <>
                     <div
@@ -72,7 +72,7 @@ const VideoChooser: React.FC<Props> = ({ visible, onOk, onCancel, actual }) => {
                       <Button
                         className={styles.button}
                         onClick={() => {
-                          onOk(item.url, true);
+                          onOk(item.url as string, true);
                         }}
                       >
                         Choose{' '}
@@ -81,9 +81,7 @@ const VideoChooser: React.FC<Props> = ({ visible, onOk, onCancel, actual }) => {
                       <PlyrPlayer videoURL={item.url} disableOptions={true} />
                     </div>
                     <div>
-                      <h1 className={styles.title}>
-                        {item.dbData.title}
-                      </h1>
+                      <h1 className={styles.title}>{item.dbData?.title}</h1>
                     </div>
                   </>
                 </Col>

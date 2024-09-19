@@ -62,7 +62,7 @@ const ImageChooser: React.FC<Props> = ({ visible, onOk, onCancel, actual }) => {
                     </div>
                   </div>
                   <div>
-                    <h1 className={styles.title}>{item.dbData.title}</h1>
+                    <h1 className={styles.title}>{item.dbData?.title}</h1>
                   </div>
                 </Col>
               ))}
