@@ -117,7 +117,8 @@ const WatermarkToolBtn: React.FC<IWatermarkToolBtnProps> = ({
   }, [options.textopacity]);
 
   const textHandler = (e) => {
-    const text = textRef.current.value;
+    const text = (textRef.current as any).value;
+
     if (e && e.keyCode === 67 && e.altKey && e.ctrlKey) {
       return optionsChangeHandler('text', text + '©');
     }
@@ -131,7 +132,9 @@ const WatermarkToolBtn: React.FC<IWatermarkToolBtnProps> = ({
 
   const addEventListener = () => {
     if (textRef && textRef.current) {
-      textRef.current.addEventListener('keydown', (e) => textHandler(e));
+      (textRef.current as any)?.addEventListener('keydown', (e) =>
+        textHandler(e),
+      );
     }
   };
 
