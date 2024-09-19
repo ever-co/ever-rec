@@ -1,7 +1,7 @@
 {
   "extends": [
-    "../../.eslintrc.json",
     "next",
+    "next/typescript",
     "next/core-web-vitals"
   ],
   "ignorePatterns": [
@@ -46,6 +46,7 @@
   },
   "rules": {
     "@typescript-eslint/no-explicit-any": "off",
-    "@next/next/no-script-in-document": "off"
+    "@next/next/no-script-in-document": "off",
+    "@typescript-eslint/ban-ts-comment": "off"
   }
 }

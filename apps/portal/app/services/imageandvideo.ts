@@ -34,7 +34,7 @@ export const sendItem = async (
       itemPublicLink,
       message,
       userDisplayName: user.displayName || user.email,
-      templateUrl,
+      templateUrl: templateUrl as any,
     });
     store.dispatch(
       PanelAC.setEmailImage({
