@@ -41,8 +41,8 @@ const drawCommentsListener = ({
   const drawOptions: any = {
     shapeType: shapeType,
     data: 'M0.5 15C0.5 12.1881 0.502422 10.8552 0.720969 9.75646C1.6284 5.19452 5.19452 1.6284 9.75646 0.720969C10.8552 0.502422 12.1881 0.5 15 0.5C17.8119 0.5 19.1448 0.502422 20.2435 0.720969C24.8055 1.6284 28.3716 5.19452 29.279 9.75646C29.4976 10.8552 29.5 12.1881 29.5 15C29.5 17.8119 29.4976 19.1448 29.279 20.2435C28.3716 24.8055 24.8055 28.3716 20.2435 29.279C19.1448 29.4976 17.8119 29.5 15 29.5H0.5V15Z',
-    x: stage.getRelativePointerPosition().x - 10,
-    y: stage.getRelativePointerPosition().y - 10,
+    x: (stage?.getRelativePointerPosition()?.x || 0) - 10,
+    y: (stage?.getRelativePointerPosition()?.y || 0) - 10,
     // fill: options.fill,
     fillLinearGradientStartPoint: { x: 0, y: 0 },
     fillLinearGradientEndPoint: { x: 50, y: 50 },
@@ -64,12 +64,11 @@ const drawCommentsListener = ({
 
   const text: Text = new Text({
     id: 'commentText',
-    x: stage.getRelativePointerPosition().x - 30,
-    y: stage.getRelativePointerPosition().y - 25,
-    
+    x: (stage?.getRelativePointerPosition()?.x || 0) - 30,
+    y: (stage?.getRelativePointerPosition()?.y || 0) - 25,
     fontSize: 54,
     text: options.text,
-    fill:"#5b4dbe",
+    fill: '#5b4dbe',
     height: 100,
     width: 100,
     padding: 20,
@@ -81,7 +80,6 @@ const drawCommentsListener = ({
     shadowBlur: 2,
     shadowOpacity: 0.5,
     shadowOffset: { x: 1, y: 1 },
-  
   });
 
   const commentsLayer: Layer | undefined = getLayer(stage, '#commentsLayer');
@@ -92,7 +90,7 @@ const drawCommentsListener = ({
 
   const comment = new Path(drawOptions);
   group.add(comment);
-  group.add(text)
+  group.add(text);
 
   if (commentsLayer) {
     stage.on('mouseup', () => drawCommentsMouseUpListener(stage, saveHistory));
@@ -102,8 +100,6 @@ const drawCommentsListener = ({
 };
 
 export const initEventListenersComments = (stage: Stage, comment: Path) => {
-
-
   comment.on('mouseover', () => {
     comment.setAttrs({
       shadowColor: 'black',
@@ -114,8 +110,6 @@ export const initEventListenersComments = (stage: Stage, comment: Path) => {
     stage.container().style.cursor = 'pointer';
   });
 
-
-
   comment.on('click', () => {
     comment.setAttrs({
       shadowOpacity: 0.6,
@@ -123,11 +117,9 @@ export const initEventListenersComments = (stage: Stage, comment: Path) => {
   });
   comment.on('mousedown', () => {
     stage.container().style.cursor = 'move';
- 
   });
   comment.on('mouseup', () => {
     stage.container().style.cursor = 'pointer';
-   
   });
 
   comment.on('mouseout', () => {
