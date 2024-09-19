@@ -1,11 +1,8 @@
 /** @type {import('tailwindcss').Config} */
-module.exports = {
+const config = {
   prefix: 'tw-',
   mode: 'jit',
-  purge: {
-    enabled: true,
-    content: ['./apps/portal/**/*.{tsx,ts,js,jsx}'],
-  },
+  content: ['./apps/portal/**/*.{tsx,ts,js,jsx}'],
   darkMode: 'class', // false | 'media' | 'class'
   theme: {
     fontFamily: {
@@ -267,7 +264,7 @@ module.exports = {
         '30px': '30px',
         '52px': '52px',
         '2point5p': '2.5%',
-        '1.25': '0.3rem'
+        1.25: '0.3rem',
       },
       padding: {
         '10px': '10px',
@@ -294,5 +291,7 @@ module.exports = {
     extend: {},
     scrollbar: ['rounded'],
   },
-  plugins: [require('@tailwindcss/line-clamp'), require('tailwind-scrollbar')],
+  plugins: [require('tailwind-scrollbar')],
 };
+
+module.exports = config;

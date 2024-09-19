@@ -1,6 +1,7 @@
-module.exports = {
+/** @type {import('postcss-load-config').Config} */
+const config = {
   plugins: {
-    tailwindcss: { config: 'apps/portal/tailwind.config.js' },
+    tailwindcss: {},
     autoprefixer: {},
     ...(process.env.BUILD ? { cssnano: {} } : {}),
     '@fullhuman/postcss-purgecss':
@@ -18,3 +19,5 @@ module.exports = {
         : false,
   },
 };
+
+export default config;

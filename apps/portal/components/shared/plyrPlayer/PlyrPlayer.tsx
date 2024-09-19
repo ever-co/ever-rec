@@ -8,7 +8,7 @@ import {
   sendThumbnailURLEvent,
   VideoCustomEventsEnum,
 } from 'misc/customEvents';
-import 'plyr-react/dist/plyr.css';
+import 'plyr/dist/plyr.css';
 import {
   CHAPTER_THUMBNAIL_HEIGHT,
   CHAPTER_THUMBNAIL_WIDTH,
