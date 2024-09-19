@@ -113,28 +113,28 @@ const MultiItemsSelect: React.FC<IMultiItemsSelectProps> = ({
   }, [loader, resetSelected, type]);
 
   useEffect(() => {
-    const mixedItems = screenshots?.concat(videos);
+    const mixedItems = screenshots?.concat(videos as any);
     if (type === 'image') {
       if (items.length > 0) {
-        addSelected({ state: true, items: screenshots });
+        addSelected?.({ state: true, items: screenshots } as any);
       }
-      if (!selected && items.length <= screenshots.length) {
+      if (!selected && items.length <= (screenshots?.length || 0)) {
         resetSelected({ state: false, items: [] });
       }
     }
     if (type === 'video') {
       if (items.length > 0) {
-        addSelected({ state: true, items: videos });
+        addSelected?.({ state: true, items: videos } as any);
       }
-      if (!selected && items.length <= videos.length) {
+      if (!selected && items.length <= (videos?.length || 0)) {
         resetSelected({ state: false, items: [] });
       }
     }
     if (type === 'mixed') {
       if (items.length > 0) {
-        addSelected({ state: true, items: mixedItems });
+        addSelected?.({ state: true, items: mixedItems } as any);
       }
-      if (!selected && items.length <= mixedItems.length) {
+      if (!selected && items.length <= (mixedItems?.length || 0)) {
         resetSelected({ state: false, items: [] });
       }
     }
@@ -243,11 +243,11 @@ const MultiItemsSelect: React.FC<IMultiItemsSelectProps> = ({
   const deleteAllItems = async () => {
     setDeleteModal(false);
 
-    if (screenshots.length === 0 && videos.length === 0) {
+    if ((screenshots?.length || 0) === 0 && (videos?.length || 0) === 0) {
       return infoMessage('No items to delete...');
     }
 
-    if (screenshots.length + videos.length === items.length) {
+    if ((screenshots?.length || 0) + (videos?.length || 0) === items.length) {
       setLoader(true);
       await deleteAllVideos();
       await deleteAllScreenshots();
@@ -256,15 +256,15 @@ const MultiItemsSelect: React.FC<IMultiItemsSelectProps> = ({
     } else {
       items.map((item) => {
         if (
-          item.dbData.refName.includes('jpeg') ||
-          item.dbData.refName.includes('jpg') ||
-          item.dbData.refName.includes('png')
+          item.dbData?.refName.includes('jpeg') ||
+          item.dbData?.refName.includes('jpg') ||
+          item.dbData?.refName.includes('png')
         ) {
           return deleteScreenshotConfirm(item);
         } else if (
-          item.dbData.refName.includes('mp4') ||
-          item.dbData.refName.includes('mov') ||
-          item.dbData.refName.includes('avi')
+          item.dbData?.refName.includes('mp4') ||
+          item.dbData?.refName.includes('mov') ||
+          item.dbData?.refName.includes('avi')
         ) {
           return deleteVideoConfirm(item);
         }
@@ -275,11 +275,11 @@ const MultiItemsSelect: React.FC<IMultiItemsSelectProps> = ({
   const restoreAllItems = async () => {
     setRestoreModal(false);
 
-    if (screenshots.length === 0 && videos.length === 0) {
+    if (screenshots?.length === 0 && videos?.length === 0) {
       return infoMessage('No items to restore...');
     }
 
-    if (screenshots.length + videos.length === items.length) {
+    if ((screenshots?.length || 0) + (videos?.length || 0) === items.length) {
       setLoader(true);
       await restoreAllVideos();
       await restoreAllScreenshots();
@@ -288,16 +288,16 @@ const MultiItemsSelect: React.FC<IMultiItemsSelectProps> = ({
     } else {
       items.map((item) => {
         if (
-          item.dbData.refName.includes('jpeg') ||
-          item.dbData.refName.includes('jpg') ||
-          item.dbData.refName.includes('png')
+          item.dbData?.refName.includes('jpeg') ||
+          item.dbData?.refName.includes('jpg') ||
+          item.dbData?.refName.includes('png')
         ) {
           return restoreFromTrashHandler(item, 'Image');
         } else if (
-          item.dbData.refName.includes('mp4') ||
-          item.dbData.refName.includes('mov') ||
-          item.dbData.refName.includes('avi') ||
-          item.dbData.refName.includes('webm')
+          item.dbData?.refName.includes('mp4') ||
+          item.dbData?.refName.includes('mov') ||
+          item.dbData?.refName.includes('avi') ||
+          item.dbData?.refName.includes('webm')
         ) {
           return restoreFromTrashHandler(item, 'Video');
         }
