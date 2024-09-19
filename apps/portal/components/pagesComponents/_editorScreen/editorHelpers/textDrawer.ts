@@ -51,7 +51,7 @@ const drawShapeMouseDownListener = ({
     stage.off('mousedown');
 
     const width = 400; // competitors don't have such predefined width, their textbox expands with each character
-    const stageX = stage.getRelativePointerPosition().x;
+    const stageX = stage?.getRelativePointerPosition()?.x || 0;
 
     // Adjust textbox position relative to pointer position and text align - left / center / right
     let x = stageX;
@@ -66,7 +66,7 @@ const drawShapeMouseDownListener = ({
       name: 'drawn',
       width,
       x,
-      y: stage.getRelativePointerPosition().y - 35,
+      y: (stage?.getRelativePointerPosition()?.y || 0) - 35,
       draggable: true,
       text: '',
       fontFamily: textOptions.fontFamily,

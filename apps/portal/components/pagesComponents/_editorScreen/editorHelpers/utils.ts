@@ -18,9 +18,12 @@ export const currentPointerPosition = (stage: Stage): Vector2d => {
   const pointerPos = stage.getPointerPosition();
   if (pointerPos) {
     pos.x =
-      pointerPos.x / stage.scale().x - stage.position().x / stage.scale().x;
+      pointerPos.x / (stage?.scale()?.x || 0) -
+      stage.position().x / (stage?.scale()?.x || 0);
+
     pos.y =
-      pointerPos.y / stage.scale().y - stage.position().y / stage.scale().y;
+      pointerPos.y / (stage?.scale()?.y || 0) -
+      stage.position().y / (stage?.scale()?.y || 0);
   }
   return pos;
 };
@@ -63,7 +66,7 @@ export const getBlobFromStage = async (
 
   const cloned_stage = stage.clone();
   const whiteBg = cloned_stage.findOne('#stageBackground');
-  whiteBg.destroy();
+  whiteBg?.destroy();
   cloned_stage.width(dimentions.width);
   cloned_stage.height(dimentions.height);
   cloned_stage.scale({
@@ -88,13 +91,13 @@ export const getBlobFromStage = async (
 };
 
 export const cloneStage = async (stage: Stage): Promise<Stage> => {
-  const img = stage?.findOne('#main').toDataURL({
+  const img = stage?.findOne('#main')?.toDataURL({
     pixelRatio: 1,
   });
   const stageObj = stage.toObject();
   const container = document.createElement('div');
   const newStage: Stage = Konva.Node.create(stageObj, container);
-  const imageObj = await imageFromUrl(img);
+  const imageObj = await imageFromUrl(img as any);
   (newStage?.findOne('#main') as Konva.Image).image(imageObj);
 
   const imgNodes: Konva.Image[] = [];

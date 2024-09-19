@@ -33,8 +33,8 @@ const IconBtn: React.FC<IIconBtn> = ({
       >
         <Image
           style={{ marginLeft: '5px', marginRight: '5px' }}
-          width={`${+size}`}
-          height={`${+size}`}
+          width={`${+(size || 0)}`}
+          height={`${+(size || 0)}`}
           className={className}
           src={icon}
           alt="icon"
