@@ -233,7 +233,10 @@ export class EditorService {
     if (dbData) {
       try {
         const originalImageURL = await saveOriginalImage(dbData.refName);
-        dbData.originalImage = originalImageURL;
+
+        if (dbData) {
+          dbData.originalImage = originalImageURL || undefined;
+        }
         await updateImageData(dbData);
       } catch (err) {
         console.error('Error in saveOriginalImageData function:', err);

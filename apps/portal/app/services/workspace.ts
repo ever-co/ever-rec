@@ -55,7 +55,7 @@ export const joinWorkspaceWithInvite = async (
 ): Promise<{ workspaceId: string; hasAlreadyJoined: boolean }> => {
   const res = await joinWorkspaceAPI(workspaceInviteId);
   const data = iDataResponseParser<typeof res.data>(res);
-  return data;
+  return data as any;
 };
 // End of Workspace Invite
 
@@ -125,7 +125,7 @@ export const updateWorkspaceFolderData = async (
 
   if (data) {
     const activeWorkspace = store.getState().panel.activeWorkspace;
-    const workFolders = activeWorkspace.workFolders || [];
+    const workFolders = activeWorkspace?.workFolders || [];
     const workFoldersIndex = workFolders.findIndex((x) => x.id === folder.id);
 
     if (workFoldersIndex !== -1) {
@@ -137,7 +137,7 @@ export const updateWorkspaceFolderData = async (
         activeWorkspace: {
           ...activeWorkspace,
           folders: data.folders,
-        },
+        } as any,
       }),
     );
 

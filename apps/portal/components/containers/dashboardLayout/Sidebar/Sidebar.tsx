@@ -56,7 +56,7 @@ const Sidebar: FC<IProps> = ({ isProfilePage, isWorkspaceSettingsPage }) => {
   const sidebarItemClicked = async (item: any) => {
     // Reset active workspace on each route except workspace routes and starred folders UI
     if (item.type !== 'favFolders' && !item?.isWorkspaceRoute) {
-      dispatch(PanelAC.setActiveWorkspace({ activeWorkspace: null }));
+      dispatch(PanelAC.setActiveWorkspace({ activeWorkspace: null } as any));
     }
 
     item.type === 'favFolders' && setShowFavoriteFolders(true);
@@ -87,7 +87,7 @@ const Sidebar: FC<IProps> = ({ isProfilePage, isWorkspaceSettingsPage }) => {
   };
 
   const renderMenuItems = () => {
-    let menuItems = [];
+    let menuItems: any[] = [];
 
     if (isWorkspaceSettingsPage) {
       const { workspaceId } = router.query;
