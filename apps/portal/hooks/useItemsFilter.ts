@@ -8,7 +8,7 @@ const useItemsFilter = (itemData: any[] | null) => {
     (filterValue: string) => {
       setFilter(filterValue);
 
-      let results = null;
+      let results: any[] | null = null;
       if (Array.isArray(itemData) && filterValue) {
         results = itemData.filter((item) => {
           return item.dbData.title

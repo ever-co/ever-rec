@@ -57,7 +57,7 @@ const useFetchWorkspacesData = () => {
         const response = await getUserWorkspacesAPI();
         if (response.status !== ResStatusEnum.error) {
           const userWorkspaces = response.data;
-          dispatch(PanelAC.setWorkspaces({ workspaces: userWorkspaces }));
+          dispatch(PanelAC.setWorkspaces({ workspaces: userWorkspaces || [] }));
         } else {
           errorHandler({ message: response.message });
         }

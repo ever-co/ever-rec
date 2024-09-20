@@ -24,7 +24,7 @@ export const workspaceImageDelete = async (
     return infoMessage('There was a problem trying to delete your image...');
   }
 
-  await deleteWorkspaceImage(workspace.id, id, refName, parentId);
+  await deleteWorkspaceImage(workspace.id, id, refName, parentId || false);
 
   const newScreenshots = (workspace?.screenshots || []).filter(
     (screenshot) => screenshot.dbData.id !== id,
