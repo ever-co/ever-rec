@@ -91,8 +91,12 @@ const ScreenshotsContainer: React.FC<IScreenshotsContainerProps> = ({
   );
   const firstRender = useFirstRender();
   const { itemsToLoad, loadMoreItems } = useInfiniteScroll();
-  const [slackItemSelected, setSlackItemSelected] = useState(null);
-  const [whatsAppItemSelected, setWhatsAppItemSelected] = useState(null);
+  const [slackItemSelected, setSlackItemSelected] = useState<string | null>(
+    null,
+  );
+  const [whatsAppItemSelected, setWhatsAppItemSelected] = useState<
+    string | null
+  >(null);
   const [shareItemSelected, setShareItemSelected] =
     useState<IShareItemSelected>(defaultShareItem);
   const [selectedItems, setSelectedItems] = useState<{
@@ -230,7 +234,7 @@ const ScreenshotsContainer: React.FC<IScreenshotsContainerProps> = ({
   const shareSlackHandler = useCallback(
     (screenshot: IEditorImage) => {
       if (user && user.isSlackIntegrate && user.isSlackIntegrate == true) {
-        setSlackItemSelected(screenshot.dbData.id);
+        setSlackItemSelected(screenshot?.dbData?.id || '');
       } else {
         router.push(preRoutes.media + panelRoutes.integrations);
       }
@@ -259,7 +263,7 @@ const ScreenshotsContainer: React.FC<IScreenshotsContainerProps> = ({
   );
 
   const shareWhatsappHandler = useCallback((screenshot: IEditorImage) => {
-    setWhatsAppItemSelected(screenshot.dbData.id);
+    setWhatsAppItemSelected(screenshot.dbData?.id || null);
   }, []);
 
   const download = async (screenshot: any) => {
@@ -319,7 +323,7 @@ const ScreenshotsContainer: React.FC<IScreenshotsContainerProps> = ({
       setLoaderState(true);
       const response = await addImageToWorkspaceAPI(
         workspace.id,
-        moveToWorkspaceState.screenshot.dbData.id,
+        moveToWorkspaceState.screenshot.dbData.id || '',
         false,
       );
       setLoaderState(false);
@@ -424,11 +428,14 @@ const ScreenshotsContainer: React.FC<IScreenshotsContainerProps> = ({
                               updateImageTitle(screenshot, title)
                             }
                             onDelete={() => deleteHandler(screenshot)}
-                            onSelect={() => setEditorImage(null)}
+                            onSelect={() => setEditorImage(null as any)}
                             addSelected={setSelectedItems}
                             selectedItems={selectedItems}
                             onDropdownVisibleChange={(visible) =>
-                              setDropdownVisible({ item: screenshot, visible })
+                              setDropdownVisible({
+                                item: screenshot as any,
+                                visible,
+                              })
                             }
                             onDropdownAction={(action, e) =>
                               handleAction(e, screenshot, action)

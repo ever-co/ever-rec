@@ -157,10 +157,10 @@ const ScreenshotItem: React.FC<IScreenshotItemProps> = ({
             hasRestore
               ? 'tw-justify-center tw-items-center'
               : addSelected
-              ? 'tw-justify-between tw-items-start'
-              : 'tw-justify-end tw-items-start',
+                ? 'tw-justify-between tw-items-start'
+                : 'tw-justify-end tw-items-start',
           )}
-          style={{ visibility: dropdownVisible ? 'visible' : null }}
+          style={{ visibility: dropdownVisible ? 'visible' : undefined }}
           onClick={onSelect}
         >
           {hasRestore && onRestoreFromTrash && (
@@ -190,7 +190,9 @@ const ScreenshotItem: React.FC<IScreenshotItemProps> = ({
               )}
               <Dropdown
                 getPopupContainer={() =>
-                  document.getElementById(`image_${screenshot?.dbData?.id}`)
+                  document.getElementById(
+                    `image_${screenshot?.dbData?.id}`,
+                  ) as any
                 }
                 trigger={['click']}
                 overlay={
@@ -252,7 +254,7 @@ const ScreenshotItem: React.FC<IScreenshotItemProps> = ({
         <ItemFooter
           views={views}
           likes={screenshot.dbData?.likes ? screenshot.dbData?.likes : []}
-          comments={screenshot.dbData?.commentsLength}
+          comments={screenshot.dbData?.commentsLength || 0}
         />
       </div>
     </div>

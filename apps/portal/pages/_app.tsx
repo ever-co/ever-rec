@@ -22,7 +22,9 @@ export type NextApplicationPage<P = any, IP = P> = NextPage<P, IP> & {
 function CustomApp({ Component, pageProps }: AppProps) {
   return (
     <Provider store={store}>
-      <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID}>
+      <GoogleOAuthProvider
+        clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ''}
+      >
         <Index />
         <Head>
           <title>Rec</title>

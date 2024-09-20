@@ -63,25 +63,27 @@ const Overlay: React.FC<OverlayProps> = ({
   return (
     <div
       className={containerClasses}
-      style={{ visibility: dropdownVisible ? 'visible' : null }}
+      style={{ visibility: dropdownVisible ? 'visible' : undefined }}
       onClick={onSelect}
     >
       {addSelected && (
         <SelectButton
-          isSelected={isSelected}
+          isSelected={isSelected || false}
           selectedItems={selectedItems}
-          selectItem={selectItem}
+          selectItem={selectItem as any}
         />
       )}
       {workspace && <div></div>}
 
       <Dropdown
-        getPopupContainer={() => document.getElementById(`scrollableDivItems`)}
+        getPopupContainer={() =>
+          document.getElementById(`scrollableDivItems`) as any
+        }
         trigger={['click']}
         overlay={
           <ItemDropdownActions
-            onAction={onDropdownActionHandler}
-            availableActions={availableActions}
+            onAction={onDropdownActionHandler as any}
+            availableActions={availableActions as any}
             canEdit={canEdit}
             canShare={canShare}
             hasRestore={hasRestore}

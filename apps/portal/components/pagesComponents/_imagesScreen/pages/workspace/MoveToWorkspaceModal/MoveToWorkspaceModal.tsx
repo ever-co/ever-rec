@@ -34,7 +34,7 @@ const MoveToWorkspaceModal: React.FC<Props> = ({
           <AppButton
             onClick={() => {
               setSelectedWorkspace(null);
-              onSuccess(selectedWorkspace);
+              selectedWorkspace && onSuccess(selectedWorkspace);
             }}
             className="tw-px-8 tw-pb-1 tw-pt-1"
             disabled={!selectedWorkspace}

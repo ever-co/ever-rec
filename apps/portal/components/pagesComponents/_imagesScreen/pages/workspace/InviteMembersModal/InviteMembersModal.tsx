@@ -24,7 +24,7 @@ const InviteMembersModal: FC<IProps> = ({
   onCancel,
 }) => {
   const { link, copied, setLink, primaryButtonClickHandler } =
-    useShareWorkspaceInviteModal({ workspace, visible });
+    useShareWorkspaceInviteModal({ workspace: workspace as any, visible });
 
   useEffect(() => {
     if (!visible) return setLink('');
