@@ -80,7 +80,7 @@ const WhiteboardEditor: React.FC = () => {
   const [whiteboardID, setWhiteboardID] = useState<any>({});
   const [stageList, setStageList] = useState<Array<Stage>>([]);
   const [stageScale, setStageScale] = useState<number>(100);
-  const [active_tool, setActiveTool] = useState<ITool>(null);
+  const [active_tool, setActiveTool] = useState<ITool | null>(null);
   const [textOptions, setTextOptions] =
     useState<ITextOptions>(initTextOptions());
   const [commentsOptions, setCommentsOptions] = useState<ICommentsOptions>(
@@ -99,8 +99,8 @@ const WhiteboardEditor: React.FC = () => {
   }>({ listener: null });
 
   const stageObj = null;
-  const mainDOMContainer = useRef(null);
-  const frameContainer = useRef(null);
+  const mainDOMContainer = useRef<HTMLDivElement | null>(null);
+  const frameContainer = useRef<HTMLIFrameElement | null>(null);
   const drawLayer = getLayer(current_stage, '#drawLayer');
 
   const getWhiteboard = useCallback(async () => {
@@ -260,13 +260,18 @@ const WhiteboardEditor: React.FC = () => {
   }, [active_tool, current_stage]);
 
   useEffect(() => {
+    if (!frameContainer.current) return;
+
     frameContainer.current.style.transform = `scale(${stageScale / 100})`;
-    frameContainer.current.style.width = mainDOMContainer;
+
+    if (mainDOMContainer.current) {
+      frameContainer.current.style.width = `${mainDOMContainer.current?.clientWidth}px`;
+    }
   }, [stageScale]);
   //START----------------------------------------------------------
   pointerTarget?.on('dragmove', function (e) {
     drawLayer?.find('.guid-line').forEach((l) => l.destroy());
-    var lineGuideStops = getLineGuideStops(pointerTarget, current_stage);
+    var lineGuideStops = getLineGuideStops(pointerTarget, current_stage as any);
     var itemBounds = getObjectSnappingEdges(pointerTarget);
     var guides = getGuides(lineGuideStops, itemBounds);
 
@@ -274,7 +279,7 @@ const WhiteboardEditor: React.FC = () => {
       return;
     }
 
-    drawGuides(guides, drawLayer);
+    drawGuides(guides, drawLayer as any);
 
     var absPos = pointerTarget.absolutePosition();
     guidesMove(guides, absPos);
@@ -346,7 +351,7 @@ const WhiteboardEditor: React.FC = () => {
       });
 
       const userImg = document.createElement('img');
-      userImg.src = user.photoURL;
+      userImg.src = user.photoURL || '';
       const cursorComment = new Line(baseCommentOptions);
       cursorComment.setAttrs({
         x: current_stage.getRelativePointerPosition()?.x,
@@ -497,7 +502,7 @@ const WhiteboardEditor: React.FC = () => {
         className={'tw-flex tw-items-center tw-justify-center tw-flex-col  '}
       >
         <CommentContentPopup
-          stage={current_stage}
+          stage={current_stage as any}
           user={user}
           //markerOptions={markerOptions}
           onCommentsOptionsChange={setCommentsOptions}

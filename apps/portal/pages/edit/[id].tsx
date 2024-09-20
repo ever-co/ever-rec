@@ -177,16 +177,14 @@ const EditorScreen: React.FC = () => {
   const [cropperAreaState, setCropperAreaState] = useState<boolean>(false);
   const [pencilGroupOptions, setPencilGroupOptions] =
     useState<IPencilGroupOptions>(initPencilGroupOptions());
-  const [emojiOptions, setEmojiOptions] = useState<IEmojiOptions>(
-    initEmojiOptions(),
-  );
+  const [emojiOptions, setEmojiOptions] =
+    useState<IEmojiOptions>(initEmojiOptions());
   const [shapeGroupOptions, setShapeGroupOptions] =
     useState<IShapeGroupOptions>(initShapeGroupOptions());
   const [conversationOptions, setConversationOptions] =
     useState<IConversationOptions>(initConversationOptions());
-  const [markerOptions, setMarkerOptions] = useState<IMarkerOptions>(
-    initMarkerOptions(),
-  );
+  const [markerOptions, setMarkerOptions] =
+    useState<IMarkerOptions>(initMarkerOptions());
   const [commentsOptions, setCommentsOptions] = useState<ICommentsOptions>(
     initCommentsOptions(),
   );
@@ -195,9 +193,8 @@ const EditorScreen: React.FC = () => {
   );
   const [arrowGroupOptions, setArrowGroupOptions] =
     useState<IArrowGroupOptions>(initArrowGroupOptions());
-  const [textOptions, setTextOptions] = useState<ITextOptions>(
-    initTextOptions(),
-  );
+  const [textOptions, setTextOptions] =
+    useState<ITextOptions>(initTextOptions());
   const [currentShape, setCurrentShape] = useState(null);
   const [toolsOptions, setToolsOptions] = useState<IToolsOptions>({
     fillColor: 'rgba(255, 255, 255, 0)',
@@ -210,7 +207,8 @@ const EditorScreen: React.FC = () => {
 
   const [markers, setMarkers] = useState<IMarker[]>([]);
 
-  const perfectScale = (mainScale * stageScale) / 100;
+  const perfectScale = ((mainScale || 0) * stageScale) / 100;
+
   const [recordingController, setRecordingController] =
     useState<JSX.Element | null>(null);
 
@@ -242,7 +240,7 @@ const EditorScreen: React.FC = () => {
       activeWorkspace,
       setImageLoaded,
       errorHandler,
-      getWorkspaceImageAPI,
+      getWorkspaceImageAPI as any,
       dispatch,
     );
   };
@@ -254,7 +252,7 @@ const EditorScreen: React.FC = () => {
   const uploadToCloudHandler = async (name: string) => {
     ToolbarService.uploadToCloudHandler(
       name,
-      stage,
+      stage as any,
       resizeDimentions,
       initialDimentions,
       stageScale,
@@ -263,7 +261,7 @@ const EditorScreen: React.FC = () => {
   };
 
   const clear = () => {
-    ToolbarService.clear(stage, history, setHistory);
+    ToolbarService.clear(stage as any, history, setHistory);
   };
 
   const undo = (all = false) => {
@@ -292,12 +290,16 @@ const EditorScreen: React.FC = () => {
   };
 
   const cut = async () => {
-    ToolbarService.cut(pointerTarget, stage, destroyPointerTransformer);
+    ToolbarService.cut(
+      pointerTarget as any,
+      stage as any,
+      destroyPointerTransformer,
+    );
   };
 
   const clipboardCopy = async () => {
     ToolbarService.clipboardCopy(
-      stage,
+      stage as any,
       resizeDimentions,
       initialDimentions,
       stageScale,
@@ -312,7 +314,7 @@ const EditorScreen: React.FC = () => {
     await ToolbarService.saveToDatabase(
       forWorkspace,
       activeWorkspace,
-      stage,
+      stage as any,
       markers,
       resizeDimentions,
       initialDimentions,
@@ -325,7 +327,7 @@ const EditorScreen: React.FC = () => {
 
   const pdfSave = async () => {
     await ToolbarService.saveImageAs(
-      stage,
+      stage as any,
       resizeDimentions,
       initialDimentions,
       stageScale,
@@ -337,7 +339,7 @@ const EditorScreen: React.FC = () => {
 
   const pngSave = () => {
     ToolbarService.saveImageAs(
-      stage,
+      stage as any,
       resizeDimentions,
       initialDimentions,
       stageScale,
@@ -349,7 +351,7 @@ const EditorScreen: React.FC = () => {
 
   const jpgSave = () => {
     ToolbarService.saveImageAs(
-      stage,
+      stage as any,
       resizeDimentions,
       initialDimentions,
       stageScale,
@@ -364,8 +366,8 @@ const EditorScreen: React.FC = () => {
       step,
       history,
       setResizeDimentions,
-      originalImageSourceRef,
-      stage,
+      originalImageSourceRef as any,
+      stage as any,
       reRenderElements,
       setStage,
     );
@@ -380,7 +382,7 @@ const EditorScreen: React.FC = () => {
       stageScale,
       saveHistory,
       setCurrentShape,
-      activeTool,
+      activeTool as any,
       setPointerTarget,
       markerOptions,
       setMarkers,
@@ -395,7 +397,7 @@ const EditorScreen: React.FC = () => {
       clear();
     }
     setUndoState(true);
-    const img = editorImage.dbData.originalImage
+    const img = editorImage.dbData?.originalImage
       ? editorImage.dbData.originalImage
       : editorImage.url;
 
@@ -532,8 +534,13 @@ const EditorScreen: React.FC = () => {
     const tr = getLayer(stage, '#cropperLayer')?.findOne('#cropperTransformer');
 
     if (tr && stage) {
-      const x = tr.x() / stage.scale().x - stage.position().x / stage.scale().x;
-      const y = tr.y() / stage.scale().y - stage.position().y / stage.scale().y;
+      const x =
+        tr.x() / (stage?.scale()?.x || 1) -
+        stage.position().x / (stage?.scale()?.x || 1);
+
+      const y =
+        tr.y() / (stage?.scale()?.y || 1) -
+        stage.position().y / (stage?.scale()?.y || 1);
 
       stage.offsetX(stage.offsetX() + x);
       stage.offsetY(stage.offsetY() + y);
@@ -568,14 +575,20 @@ const EditorScreen: React.FC = () => {
         if (pointerTarget?.parent?.getAttrs().id === 'markerGroup') {
           pointerTarget?.parent.destroy();
           if (markerOptions.type === 'number') {
-            const ctx = stage.find('#markerNumbers');
-            for (let index = 0; index < ctx.length; index++) {
-              ctx[index].setAttrs({ text: index + 1 });
+            const ctx = stage?.find('#markerNumbers');
+
+            if (ctx) {
+              for (let index = 0; index < ctx.length; index++) {
+                ctx[index].setAttrs({ text: index + 1 });
+              }
             }
           } else {
-            const ctx = stage.find('#markerText');
-            for (let index = 0; index < ctx.length; index++) {
-              ctx[index].setAttr('text', alphabet[index]);
+            const ctx = stage?.find('#markerText');
+
+            if (ctx) {
+              for (let index = 0; index < ctx.length; index++) {
+                ctx[index].setAttr('text', alphabet[index]);
+              }
             }
           }
         } else if (
@@ -854,7 +867,7 @@ const EditorScreen: React.FC = () => {
         }
       });
 
-      mainLayer.getChildren().forEach((figure: any) => {
+      mainLayer?.getChildren().forEach((figure: any) => {
         if (figure.attrs.id == 'stageBackground') {
           const rect: Rect = figure;
           rect.fillPatternScaleX(scaleX);
@@ -880,7 +893,7 @@ const EditorScreen: React.FC = () => {
 
   useEffect(() => {
     // Connect to your server
-    const socket = io(process.env.NEXT_PUBLIC_API_BASE_URL, {
+    const socket = io(process.env.NEXT_PUBLIC_API_BASE_URL || '', {
       transports: ['websocket'],
     });
 
@@ -937,7 +950,7 @@ const EditorScreen: React.FC = () => {
         ? EditorService.saveOriginalImageData(editorImage)
         : saveOriginalWSImageData(
             activeWorkspace?.id,
-            editorImage.dbData.refName,
+            editorImage.dbData?.refName || '',
             editorImage,
           );
     }
@@ -949,7 +962,7 @@ const EditorScreen: React.FC = () => {
     if (editorImage) {
       EditorService.loadStage(
         editorImage,
-        originalImageSourceRef,
+        originalImageSourceRef as any,
         setMainScale,
         setInitialDimentions,
         setPointerTarget,
@@ -957,18 +970,18 @@ const EditorScreen: React.FC = () => {
         setImageLoaded,
         setStage,
         setResizeDimentions,
-        stage,
+        stage as any,
         stageScale,
         saveHistory,
         setCurrentShape,
-        activeTool,
+        activeTool as any,
         markerOptions,
         setMarkers,
         activeWorkspace,
         forWorkspace,
       );
 
-      editorImage.dbData.markers &&
+      editorImage.dbData?.markers &&
         setMarkers(JSON.parse(editorImage.dbData.markers));
 
       // setComments(JSON.parse(editorImage.dbData.comments))
@@ -993,7 +1006,7 @@ const EditorScreen: React.FC = () => {
 
   useEffect(() => {
     if (stage && !initStage) {
-      !editorImage.dbData.stage && saveHistory();
+      !editorImage.dbData?.stage && saveHistory();
       setInitStage(true);
     }
   }, [stage, initStage]);
@@ -1002,7 +1015,7 @@ const EditorScreen: React.FC = () => {
     stage &&
       EditorService.changeCursor(
         stage,
-        activeTool,
+        activeTool as any,
         drawnName,
         stageScale,
         emojiOptions,
@@ -1012,7 +1025,7 @@ const EditorScreen: React.FC = () => {
       );
     stage && destroyPointerTransformer(stage);
     stage && destroyAnchor(stage);
-    stage && EditorService.toggleShapesActivity(stage, activeTool);
+    stage && EditorService.toggleShapesActivity(stage, activeTool as any);
     setPointerTarget(null);
   }, [activeTool?.tool]);
 
@@ -1020,7 +1033,7 @@ const EditorScreen: React.FC = () => {
     stage &&
       EditorService.changeCursor(
         stage,
-        activeTool,
+        activeTool as any,
         drawnName,
         stageScale,
         emojiOptions,
@@ -1031,10 +1044,10 @@ const EditorScreen: React.FC = () => {
   }, [shapeGroupOptions]);
 
   useEffect(() => {
-    EditorService.clearStageSettings(stage, setCropperAreaState);
+    EditorService.clearStageSettings(stage as any, setCropperAreaState);
     EditorService.setStageSettings(
-      stage,
-      activeTool,
+      stage as any,
+      activeTool as any,
       setPointerTarget,
       setActiveTool,
       checkShapeType,
@@ -1148,10 +1161,10 @@ const EditorScreen: React.FC = () => {
             fill: markerOptions.fill,
             type: markerOptions.type,
             position: commentsOptions.position,
-            text: user.displayName[0].toUpperCase(),
+            text: user.displayName?.[0]?.toUpperCase() || '',
           },
           shapeType: tools.marker.tool,
-          imageId: editorImage.dbData.id,
+          imageId: editorImage.dbData?.id || '',
           userId: user.id,
           saveHistory,
           setMarkers,
@@ -1168,14 +1181,20 @@ const EditorScreen: React.FC = () => {
             id: commentsOptions.id,
             fill: commentsOptions.fill,
             position: commentsOptions.position,
-            text: user.displayName[0].toUpperCase(),
+            text: user.displayName?.[0]?.toUpperCase() || '',
           },
           shapeType: tools.comments.tool,
           saveHistory,
         });
 
       compareTools(activeTool, tools.blur) &&
-        initBlurDraw({ stage, stageScale, saveHistory, mainScale, resized });
+        initBlurDraw({
+          stage,
+          stageScale,
+          saveHistory,
+          mainScale: mainScale || 0,
+          resized,
+        });
 
       compareTools(activeTool, tools.undo);
       compareTools(activeTool, tools.redo);
@@ -1250,8 +1269,8 @@ const EditorScreen: React.FC = () => {
       stage.scaleY(scaleCoefficient * mainScale);
     }
 
-    if (currentShape?.attrs.shapeType === tools.marker.tool) {
-      setPosition(stage, currentShape);
+    if ((currentShape as any)?.attrs.shapeType === tools.marker.tool) {
+      stage && currentShape && setPosition(stage, currentShape);
     }
   }, [stageScale, stage, resizeDimentions, initialDimentions, mainScale]);
 
@@ -1444,7 +1463,7 @@ const EditorScreen: React.FC = () => {
         />
       )}
       <div className={styles.popupContainer}>
-        {currentShape?.attrs.shapeType === tools.marker.tool ? (
+        {(currentShape as any)?.attrs.shapeType === tools.marker.tool ? (
           <MarkerContentPopup
             currentShape={currentShape}
             user={user}

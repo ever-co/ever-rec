@@ -55,7 +55,7 @@ const WorkspaceTeams: FC = () => {
   const activeWorkspace: IWorkspace | null = useSelector(
     (state: RootStateOrAny) => state.panel.activeWorkspace,
   );
-  const [teams, setTeams] = useState([]);
+  const [teams, setTeams] = useState<IWorkspaceTeam[]>([]);
   const [teamsMembersMap, setTeamsMembersMap] =
     useState<ITeamsMembersMap | null>(null);
   const [showCreateTeamModal, setShowCreateTeamModal] = useState(false);
@@ -67,7 +67,7 @@ const WorkspaceTeams: FC = () => {
   const [showUpdateWorkspaceTeamModal, setShowUpdateWorkspaceTeamModal] =
     useState<{ state: boolean; team: IWorkspaceTeam }>({
       state: false,
-      team: null,
+      team: null as any,
     });
 
   const isWorkspaceAdmin = activeWorkspace?.admin === user?.id;
@@ -103,7 +103,7 @@ const WorkspaceTeams: FC = () => {
 
     const teams = activeWorkspace?.teams ? [...activeWorkspace.teams] : null;
 
-    setTeams(teams);
+    setTeams(teams || []);
   }, [activeWorkspace]);
 
   const createTeamHandler = async (name: string) => {
@@ -111,8 +111,11 @@ const WorkspaceTeams: FC = () => {
     setShowCreateTeamModal(false);
 
     const id = loadingMessage('Creating a Team...');
-    const teamsData = await createWorkspaceTeam(activeWorkspace.id, name);
-    await getTeamsMembers(activeWorkspace.id);
+    const teamsData = await createWorkspaceTeam(
+      activeWorkspace?.id as any,
+      name,
+    );
+    await getTeamsMembers(activeWorkspace?.id as any);
 
     if (!teamsData) {
       return updateMessage(id, 'Could not create a workspace Team...', 'error');
@@ -120,7 +123,10 @@ const WorkspaceTeams: FC = () => {
 
     dispatch(
       PanelAC.setActiveWorkspace({
-        activeWorkspace: { ...activeWorkspace, teams: teamsData },
+        activeWorkspace: {
+          ...activeWorkspace,
+          teams: teamsData,
+        } as any,
       }),
     );
 
@@ -379,12 +385,12 @@ const WorkspaceTeams: FC = () => {
           removeMemberFromMembersMap={removeMemberFromMembersMap}
         />
         <UpdateWorkspaceTeamModal
-          workspace={activeWorkspace}
+          workspace={activeWorkspace as any}
           team={showUpdateWorkspaceTeamModal.team}
           isAdmin={isWorkspaceAdmin}
           visible={showUpdateWorkspaceTeamModal.state}
           onCancel={() =>
-            setShowUpdateWorkspaceTeamModal({ state: false, team: null })
+            setShowUpdateWorkspaceTeamModal({ state: false, team: null } as any)
           }
         />
       </MediaIndex>

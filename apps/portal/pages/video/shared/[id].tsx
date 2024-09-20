@@ -19,10 +19,10 @@ export const getServerSideProps: GetServerSideProps = async (
   if (refreshToken && idToken) {
     const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-    const user: IUser = await getUserServerSideProps(
+    const user: IUser | null = await getUserServerSideProps(
       refreshToken,
       idToken,
-      baseURL,
+      baseURL || '',
     );
     if (user) {
       return { props: { user, ip } };
