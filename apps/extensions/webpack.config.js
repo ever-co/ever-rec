@@ -141,7 +141,7 @@ const config = {
     ],
   },
   plugins: [
-    new ForkTsCheckerWebpackPlugin(),
+    // new ForkTsCheckerWebpackPlugin(),
     new MiniCssExtractPlugin({
       filename: '[name].css',
     }),
