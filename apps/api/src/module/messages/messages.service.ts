@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { InjectTwilio, TwilioClient } from 'nestjs-twilio';
+import { TwilioClient } from 'nestjs-twilio';
 import { ResStatusEnum } from 'src/enums/ResStatusEnum';
 import { ImageService } from '../image/image.service';
 import { VideoService } from '../video/video.service';
@@ -8,7 +8,7 @@ import { VideoService } from '../video/video.service';
 @Injectable()
 export class MessagesService {
   public constructor(
-    @InjectTwilio() private readonly client: TwilioClient,
+    private readonly client: TwilioClient,
     private readonly imageService: ImageService,
     private readonly videoService: VideoService,
     private readonly configService: ConfigService,
@@ -26,7 +26,7 @@ export class MessagesService {
         )}`,
         //to: 'whatsapp:+919998843025',
         to: `whatsapp:${toPhone}`,
-        ...(mediaUrl && { mediaUrl }),
+        ...(mediaUrl ? ({ mediaUrl } as any) : {}),
       })
       .then((res) => {
         console.log(res, 'res');
