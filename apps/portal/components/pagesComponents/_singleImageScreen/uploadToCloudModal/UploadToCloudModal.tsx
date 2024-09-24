@@ -53,7 +53,7 @@ const UploadToCloudModal: React.FC<IUploadToCloudModalProps> = ({
 
   const onOkHandler = async (): Promise<void> => {
     if (valid) {
-      onOk(name.value, type);
+      onOk(name.value, type as string);
       setName(initialControl());
     }
   };

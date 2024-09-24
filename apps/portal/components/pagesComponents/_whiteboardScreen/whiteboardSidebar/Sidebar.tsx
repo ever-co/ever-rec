@@ -56,7 +56,7 @@ const WhiteboardSidebar: React.FC<ISidebarProps> = ({
                       onTitleClick={() => {
                         document
                           .getElementById(stage.getAttr('id'))
-                          .scrollIntoView({
+                          ?.scrollIntoView({
                             behavior: 'auto',
                             block: 'center',
                             inline: 'center',
@@ -82,7 +82,7 @@ const WhiteboardSidebar: React.FC<ISidebarProps> = ({
                               onClick={() => {
                                 document
                                   .getElementById(stage.getAttr('id'))
-                                  .scrollIntoView({
+                                  ?.scrollIntoView({
                                     behavior: 'auto',
                                     block: 'center',
                                     inline: 'center',
@@ -104,7 +104,7 @@ const WhiteboardSidebar: React.FC<ISidebarProps> = ({
                       onClick={() => {
                         document
                           .getElementById(stage.getAttr('id'))
-                          .scrollIntoView({
+                          ?.scrollIntoView({
                             behavior: 'auto',
                             block: 'end',
                             inline: 'center',

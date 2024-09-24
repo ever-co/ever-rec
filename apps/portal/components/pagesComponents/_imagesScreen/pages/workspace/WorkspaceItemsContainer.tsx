@@ -169,7 +169,7 @@ const WorkspaceItemsContainer: FC<Props> = ({
           <FilterDropdown
             filterTeamId={filterTeamId}
             teams={workspace?.teams || []}
-            clicked={(teamId: string | null) => onTeamFilter(teamId)}
+            clicked={(teamId: string | null) => onTeamFilter(teamId as string)}
           />
         </div>
 
@@ -188,7 +188,7 @@ const WorkspaceItemsContainer: FC<Props> = ({
         />
       </div>
 
-      {itemData?.length > 0 ? (
+      {(itemData || []).length > 0 ? (
         <div
           id="scrollableDivItems"
           className={classNames(
@@ -203,7 +203,7 @@ const WorkspaceItemsContainer: FC<Props> = ({
           <InfiniteScroll
             dataLength={itemsToLoad}
             next={loadMoreItems}
-            hasMore={itemData.length > itemsToLoad}
+            hasMore={(itemData || []).length > itemsToLoad}
             loader={null}
             scrollableTarget="scrollableDivItems"
             className="scrollbar"
@@ -228,8 +228,8 @@ const WorkspaceItemsContainer: FC<Props> = ({
                             <VideoItem
                               id={index}
                               user={{
-                                name: item.dbData.user?.displayName,
-                                photoURL: item.dbData.user?.photoURL,
+                                name: item.dbData.user?.displayName || '',
+                                photoURL: item.dbData.user?.photoURL || '',
                               }}
                               type="video"
                               workspace={workspace}
@@ -242,7 +242,10 @@ const WorkspaceItemsContainer: FC<Props> = ({
                               addSelected={setSelectedItems}
                               selectedItems={selectedItems}
                               onDropdownVisibleChange={(visible) =>
-                                setDropdownVisible({ item, visible })
+                                setDropdownVisible({
+                                  item: item as any,
+                                  visible,
+                                })
                               }
                               onDropdownAction={(action, e) =>
                                 handleAction(e, item, action, 'video')
@@ -255,8 +258,8 @@ const WorkspaceItemsContainer: FC<Props> = ({
                               id={index}
                               type="image"
                               user={{
-                                name: item.dbData.user?.displayName,
-                                photoURL: item.dbData.user?.photoURL,
+                                name: item.dbData.user?.displayName as string,
+                                photoURL: item.dbData.user?.photoURL as string,
                               }}
                               workspace={workspace}
                               video={item}
@@ -268,7 +271,10 @@ const WorkspaceItemsContainer: FC<Props> = ({
                               addSelected={setSelectedItems}
                               selectedItems={selectedItems}
                               onDropdownVisibleChange={(visible) =>
-                                setDropdownVisible({ item, visible })
+                                setDropdownVisible({
+                                  item: item as any,
+                                  visible,
+                                })
                               }
                               onDropdownAction={(action, e) =>
                                 handleAction(e, item, action, 'image')
@@ -304,7 +310,7 @@ const WorkspaceItemsContainer: FC<Props> = ({
       <ShareItemModal
         item={shareModalState.item}
         visible={shareModalState.state}
-        itemType={shareModalState.itemType}
+        itemType={shareModalState.itemType as any}
         isWorkspace
         copystate={copyState}
         copied={copied}
@@ -314,7 +320,7 @@ const WorkspaceItemsContainer: FC<Props> = ({
       <DeleteItemModal
         visible={deletionModalState.state}
         item={deletionModalState.item}
-        itemType={deletionModalState.itemType}
+        itemType={deletionModalState.itemType as any}
         onOk={deleteScreenshotConfirm}
         onCancel={closeDeletionModalHandler}
       />
@@ -323,7 +329,7 @@ const WorkspaceItemsContainer: FC<Props> = ({
         workspaceId={workspace?.id}
         visible={permissionsModalState.state}
         item={permissionsModalState.item}
-        itemType={permissionsModalState.itemType}
+        itemType={permissionsModalState.itemType as any}
         onClose={closePermissionsHandler}
       />
 

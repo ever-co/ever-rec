@@ -77,8 +77,8 @@ const RenameItemModal: FC<IProps> = ({
       <AppInput
         placeholder={inputPlaceholder}
         value={title}
-        errors={null}
-        rules={null}
+        errors={[]}
+        rules={[]}
         inputClass={styles.appInputSecond}
         onChange={nameChangeHandler}
       />

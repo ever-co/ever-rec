@@ -24,8 +24,8 @@ const SlackChannelModal: React.FC<ISlackChannelModalProps> = ({
   forEditor,
   onSave,
 }) => {
-  const [selectedChannel, setSelectedChannel] = useState(null);
-  const [error, setError] = useState(null);
+  const [selectedChannel, setSelectedChannel] = useState('');
+  const [errors, setErrors] = useState<null | string[]>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [channelLoading, setChannelLoading] = useState<boolean>(false);
 
@@ -38,7 +38,7 @@ const SlackChannelModal: React.FC<ISlackChannelModalProps> = ({
       try {
         setLoading(true);
         if (forEditor) {
-          await onSave();
+          await onSave?.();
         }
         const res = await sendSlackPostMessage(channelId, selectedItemId, type);
         if (res.status != 'error') {
@@ -55,10 +55,10 @@ const SlackChannelModal: React.FC<ISlackChannelModalProps> = ({
 
   const handleOnsubmit = useCallback(() => {
     if (selectedItemId && selectedChannel) {
-      setError(null);
+      setErrors(null);
       sendSlackScreenShot(selectedItemId, selectedChannel);
     } else {
-      setError(['Please select channel']);
+      setErrors(['Please select channel']);
     }
   }, [selectedItemId, selectedChannel]);
 
@@ -107,9 +107,9 @@ const SlackChannelModal: React.FC<ISlackChannelModalProps> = ({
         label="Pick a channel or conversation to share and preview the code you've created in your Slack workspace."
         placeholder="Please select an option"
         value={selectedChannel}
-        errors={error}
+        errors={errors || undefined}
         onChange={(value) => {
-          setError(null);
+          setErrors(null);
           setSelectedChannel(value);
         }}
         options={channelsData}

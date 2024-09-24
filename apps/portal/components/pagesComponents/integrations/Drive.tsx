@@ -32,7 +32,7 @@ const Drive: React.FC = () => {
   const [loading, setLoading] = useState(false);
 
   const changeWorkingFolder = async (val: string) => {
-    const folder = val ? folders.find((folder) => folder.id === val) : null;
+    const folder = val ? folders?.find((folder) => folder.id === val) : null;
     await updateWorkingFolder(folder || null);
   };
 

@@ -19,17 +19,17 @@ const CommentInput: FC<ICommentInputProps> = ({
   const [inputValue, setInputValue] = useState(comment.content);
 
   useEffect(() => {
-    ref.current.focus();
+    ref.current?.focus();
 
     const handleKeyboardEvent = async (e: KeyboardEvent) => {
       if (e.key !== 'Enter') return;
 
-      !disabled.current && handleSave(comment, ref.current.value);
+      !disabled.current && handleSave(comment, ref.current?.value as string);
 
       disabled.current = true;
     };
 
-    ref.current.addEventListener('keydown', (e) => handleKeyboardEvent(e));
+    ref.current?.addEventListener('keydown', (e) => handleKeyboardEvent(e));
   }, [comment, handleSave]);
 
   return (

@@ -48,8 +48,8 @@ const CommentContentPopup: React.FC<ICommentsMediaProps> = ({
 
     user: {
       id: user?.id,
-      photoUrl: user?.photoURL,
-      displayName: user?.displayName,
+      photoUrl: user?.photoURL as string,
+      displayName: user?.displayName as string,
     },
   });
   const [activeSendBtn, setActiveSendBtn] = useState(false);

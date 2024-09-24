@@ -44,8 +44,8 @@ export function drawGuides(guides: Array<any>, drawLayer: Konva.Layer) {
 }
 
 export function getGuides(lineGuideStops, itemBounds) {
-  var resultV = [];
-  var resultH = [];
+  var resultV: any[] = [];
+  var resultH: any[] = [];
 
   lineGuideStops.vertical.forEach((lineGuide) => {
     itemBounds.vertical.forEach((itemBound) => {
@@ -76,7 +76,7 @@ export function getGuides(lineGuideStops, itemBounds) {
     });
   });
 
-  var guides = [];
+  var guides: any[] = [];
 
   // find closest snap
   var minV = resultV.sort((a, b) => a.diff - b.diff)[0];

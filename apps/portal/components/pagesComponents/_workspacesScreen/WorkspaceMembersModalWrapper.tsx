@@ -152,7 +152,7 @@ const WorkspaceMembersModalWrapper: FC<IProps> = ({
         }),
       );
 
-      let newMap = null;
+      let newMap: any = null;
       if (addMember) {
         newMap = await addMemberToMembersMap(teamId, memberId);
       } else {

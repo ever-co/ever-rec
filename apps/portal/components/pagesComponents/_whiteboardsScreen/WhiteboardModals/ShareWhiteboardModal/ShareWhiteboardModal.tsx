@@ -38,7 +38,7 @@ const ShareWhiteboardModal: FC<IProps> = ({ item, visible, onCancel }) => {
 
   return (
     <ShareModal
-      link={shareLink}
+      link={shareLink as string}
       linkTo="whiteboard"
       visible={visible}
       onCopyLink={copyLinkHandler}

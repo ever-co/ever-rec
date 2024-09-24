@@ -38,8 +38,8 @@ const CommentElement: FC<IProps> = ({
 }) => {
   const user: IUser = useSelector((state: RootStateOrAny) => state.auth.user);
 
-  const authorName = comment.user.name;
-  const authorPhotoURL = comment.user.photoURL;
+  const authorName = comment.user?.name;
+  const authorPhotoURL = comment.user?.photoURL;
   const isEdited = comment.isEdited;
   const dateElapsed = moment(comment.timestamp).fromNow();
 

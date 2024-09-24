@@ -8,7 +8,12 @@ const WorkspaceSingleVideoPage: FC = () => {
     (state: RootStateOrAny) => state.panel.activeWorkspace,
   );
 
-  return <SingleVideoPage isWorkspace activeWorkspace={activeWorkspace} />;
+  return (
+    <SingleVideoPage
+      isWorkspace
+      activeWorkspace={activeWorkspace || undefined}
+    />
+  );
 };
 
 export default WorkspaceSingleVideoPage;

@@ -117,12 +117,12 @@ const VideoChapterContentInput: FC<IProps> = ({
           'tw-mb-0 tw-bg-transparent tw-resize-none tw-w-full tw-overflow-hidden tw-p-2',
           s.ContentInput,
           isPublic && s.disabled,
-          "scroll-div"
+          'scroll-div',
         )}
         placeholder={`Type your chapter content here ${
           isFirst ? '(e.g.Introduction)' : ''
         }`}
-        ref={ref}
+        ref={ref as any}
         value={title}
         onClick={(e) => e.stopPropagation()}
         onChange={(e) => handleTitleChange(e)}

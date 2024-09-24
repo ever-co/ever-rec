@@ -15,7 +15,10 @@ export const destroyPointerTransformer = (stage: Stage | null): void => {
   layer?.findOne('#pointerTransformer')?.destroy();
   const drawLayer: Layer | undefined = getLayer(stage, '#drawLayer');
   drawLayer?.children.forEach((element: Shape | Group) => {
-    if (element.getAttr('id') === 'conversationGroup' && element.hasChildren) {
+    if (
+      element.getAttr('id') === 'conversationGroup' &&
+      element.hasChildren()
+    ) {
       // @ts-ignore
       element?.children[0].setAttrs({ shadowOpacity: 0 });
     }

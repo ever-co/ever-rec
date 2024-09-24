@@ -91,7 +91,7 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
   const user = useAuthenticateUser();
   const router = useRouter();
   const dispatch = useDispatch();
-  const [dropBoxImageId, setDropBoxImageId] = useState<string>('');
+  const [dropBoxImageId, setDropBoxImageId] = useState<string | null>('');
   const [showFolderModal, setShowFolderModal] = useState(false);
   const driveUser: DriveUser | null = useSelector(
     (state: RootStateOrAny) => state.auth.driveUser,
@@ -119,8 +119,9 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
   const [driveVideoId, setDriveVideoId] = useState<string | null>('');
   const [uploadToCloudModalState, setUploadToCloudModalState] =
     useState<boolean>(false);
-  const [showCloudDeleteFileModal, setShowCloudDeleteFileModal] =
-    useState(null);
+  const [showCloudDeleteFileModal, setShowCloudDeleteFileModal] = useState<
+    string | null
+  >(null);
   const [driveOperationLoading, setDriveOperationLoading] = useState(false);
   const [dropboxOperationLoading, setDropboxOperationLoading] = useState(false);
   const { driveLogin } = useGoogleDriveAuth({
@@ -129,7 +130,9 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
   const explorerDataVideos: IExplorerData = useSelector(
     (state: RootStateOrAny) => state.panel.explorerDataVideos,
   );
-  const [uploadToCloudType, setUploadToCloudType] = useState<string>(null);
+  const [uploadToCloudType, setUploadToCloudType] = useState<string | null>(
+    null,
+  );
   const {
     cloudBtnsRefs,
     onMouseEnterCloudButtonsHandler,
@@ -152,7 +155,12 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
     copyLinkHandler,
     getShareableLinkHandler,
     deleteShareLink,
-  } = useGenerateShareLink(video, 'video', workspace?.id, updateVideoState);
+  } = useGenerateShareLink(
+    video,
+    'video',
+    workspace?.id as string,
+    updateVideoState,
+  );
   const [shareLoadingState, setShareLoadingState] = useState(false);
   const {
     chapters,
@@ -179,10 +187,10 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
     setLoaderState(true);
 
     if (workspace) {
-      await workspaceVideoDelete(video, workspace);
+      await workspaceVideoDelete(video as IWorkspaceVideo, workspace);
       router.push(preRoutes.media + panelRoutes.workspace + `/${workspace.id}`);
     } else {
-      await videoDelete(video);
+      await videoDelete(video as IEditorVideo);
       router.push(preRoutes.media + panelRoutes.videos);
     }
 
@@ -219,7 +227,7 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
       (x) => x.dbData?.id === video.dbData?.id,
     );
     const explorerDatFilesCopy = explorerDataVideos.files.slice();
-    explorerDatFilesCopy[explorerDataIndex] = updatedVideo;
+    explorerDatFilesCopy[explorerDataIndex] = updatedVideo as any;
     dispatch(
       PanelAC.setExplorerDataVideos({
         explorerDataVideos: {
@@ -228,14 +236,17 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
         },
       }),
     );
-    dispatch(PanelAC.setEditorVideo({ editorVideo: updatedVideo }));
+    dispatch(PanelAC.setEditorVideo({ editorVideo: updatedVideo as any }));
   };
 
   const deleteDriveVideoConfirm = async () => {
     setShowCloudDeleteFileModal(null);
     if (showCloudDeleteFileModal == 'drive') {
       setDriveOperationLoading(true);
-      const response = await deleteDriveItem(video.dbData?.id, 'video');
+      const response = await deleteDriveItem(
+        video.dbData?.id as string,
+        'video',
+      );
 
       if (response.status === ResStatusEnum.error) {
         console.log(response.message);
@@ -250,7 +261,10 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
     }
     if (showCloudDeleteFileModal == 'Dropbox') {
       setDropboxOperationLoading(true);
-      const response = await deleteDropboxItem(video.dbData?.id, 'video');
+      const response = await deleteDropboxItem(
+        video.dbData?.id as string,
+        'video',
+      );
       if (response.status === ResStatusEnum.error) {
         console.log(response.message);
         setDropboxOperationLoading(false);
@@ -266,7 +280,7 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
   const uploadToCloudHandler = async (name: string, type?: string) => {
     closeUploadToCloudModal();
     let res: any;
-    res = await fetch(video.url);
+    res = await fetch(video.url as string);
     if (!type) {
       setDriveOperationLoading(true);
       if (video.dbData?.streamData) {
@@ -280,13 +294,13 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
 
         res = await fetch(video.dbData.streamData.downloadUrl);
       } else {
-        res = await fetch(video.url);
+        res = await fetch(video.url as string);
       }
 
       const { data } = await driveUploadFile(
         name,
         await res.blob(),
-        video.dbData?.id,
+        video.dbData?.id as string,
         'video',
       );
       if (data) {
@@ -303,7 +317,7 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
       const response = await dropboxFileUpload(
         name,
         await res.blob(),
-        video.dbData?.id,
+        video.dbData?.id as string,
         'video',
       );
       if (response.status == 'success') {
@@ -326,7 +340,7 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
       window &&
       window
         .open(`https://drive.google.com/file/d/${driveVideoId}/view`, '_blank')
-        .focus();
+        ?.focus();
   };
 
   //-------> end of drive
@@ -423,7 +437,7 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
           `https://www.dropbox.com/home/Apps/Rec?preview=${dropBoxImageId}`,
           '_blank',
         )
-        .focus();
+        ?.focus();
   };
 
   const hideEmojis = async () => {
@@ -819,10 +833,10 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
         item={emailModalState.video}
         onCancel={closeEmailModal}
         itemType={'video'}
-        itemPublicLink={video?.url}
+        itemPublicLink={video?.url as string}
       />
       <UploadToCloudModal
-        type={uploadToCloudType}
+        type={uploadToCloudType as string}
         oldName={video?.dbData?.title}
         visible={uploadToCloudModalState}
         onClose={closeUploadToCloudModal}
