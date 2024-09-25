@@ -6,9 +6,9 @@
     "private": true,
     "license": "UNLICENSED",
     "scripts": {
-        "dev": "next dev",
+        "dev": "next dev --port 4200",
         "build": "next build",
-        "start": "next start",
+        "start": "next start --port 4200",
         "lint": "next lint"
     },
     "dependencies": {
