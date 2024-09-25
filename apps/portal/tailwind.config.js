@@ -2,7 +2,12 @@
 const config = {
   prefix: 'tw-',
   mode: 'jit',
-  content: ['./apps/portal/**/*.{tsx,ts,js,jsx}'],
+  content: [
+    './pages/**/*.{js,ts,jsx,tsx,mdx}',
+    './components/**/*.{js,ts,jsx,tsx,mdx}',
+    './app/**/*.{js,ts,jsx,tsx,mdx}',
+    './misc/**/*.{js,ts,jsx,tsx,mdx}',
+  ],
   darkMode: 'class', // false | 'media' | 'class'
   theme: {
     fontFamily: {
