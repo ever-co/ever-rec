@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { ITool, tools } from '../../../tools';
 import ToolBtn from '../../ToolBtn';
 import { shareData } from 'app/utilities/popupsData';
-import Image from 'next/image';
+import Image from 'next/legacy/image';
 import PanelSplitter from '../../../PanelSplitter';
 import EmailModal from 'components/elements/EmailModal';
 import { infoMessage } from 'app/services/helpers/toastMessages';

@@ -22,7 +22,7 @@ import {
   updateWorkspaceAvatar,
   updateWorkspaceThumbnail,
 } from 'app/services/workspace';
-import Image from 'next/image';
+import Image from 'next/legacy/image';
 import AppSvg from 'components/elements/AppSvg';
 import UploadThumbnailModal from 'components/pagesComponents/_imagesScreen/pages/workspace/uploadThumbnailModal/UploadThumbnailModa';
 import { preRoutes, panelRoutes } from 'components/_routes';

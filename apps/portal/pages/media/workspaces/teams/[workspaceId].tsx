@@ -5,7 +5,7 @@ import PanelAC from 'app/store/panel/actions/PanelAC';
 import { RootStateOrAny, useDispatch, useSelector } from 'react-redux';
 import { IWorkspace, IWorkspaceUser } from 'app/interfaces/IWorkspace';
 import DashboardCard from 'components/containers/dashboardLayout/elements/DashboardCard';
-import Image from 'next/image';
+import Image from 'next/legacy/image';
 import AppSvg from 'components/elements/AppSvg';
 import MediaIndex from 'pages/media';
 import { useRouter } from 'next/router';

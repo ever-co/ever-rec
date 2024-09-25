@@ -20,7 +20,7 @@ import PlayButton from './PlayButton';
 import Overlay from './VideoItemOverlay';
 import VideoItemWrapper from './VideoItemWrapper';
 import ItemAuthor from './ItemAuthor';
-import Image from 'next/image';
+import Image from 'next/legacy/image';
 
 interface IVideoItemProps {
   id?: number;

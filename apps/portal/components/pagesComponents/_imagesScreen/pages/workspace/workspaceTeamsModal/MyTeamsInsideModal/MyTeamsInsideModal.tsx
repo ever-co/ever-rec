@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import Image from 'next/image';
+import Image from 'next/legacy/image';
 import styles from './MyTeamsInsideModal.module.scss';
 import classNames from 'classnames';
 import { IWorkspaceTeam } from 'app/interfaces/IWorkspaceTeams';

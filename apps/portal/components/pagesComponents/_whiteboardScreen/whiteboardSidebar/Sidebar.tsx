@@ -3,7 +3,7 @@
 /* eslint-disable no-var */
 import ScaleSelector from './components/ScaleSelector';
 import mapicon from 'public/assets/svg/whiteboard-tools-panel/map.svg';
-import Image from 'next/image';
+import Image from 'next/legacy/image';
 import React, { useEffect, useState } from 'react';
 import { Tabs } from 'antd';
 import { Stage } from 'konva/lib/Stage';

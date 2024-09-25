@@ -7,7 +7,7 @@ import Layout from 'antd/lib/layout/layout';
 import GoogleBtn from 'components/pagesComponents/_signScreen/GoogleBtn';
 import AppLink from 'components/controls/AppLink';
 import LinksDivider from 'components/pagesComponents/_signScreen/LinksDivider';
-import Image from 'next/image';
+import Image from 'next/legacy/image';
 import { CredentialResponse } from '@react-oauth/google';
 import { googleAuthorization } from '../../app/services/auth';
 import FeaturesSection from 'components/pagesComponents/_signScreen/FeaturesSection';

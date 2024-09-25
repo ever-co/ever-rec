@@ -2,7 +2,7 @@ import classNames from 'classnames';
 import React from 'react';
 import zoomIn from 'public/assets/svg/tools-panel/ZoomIn.svg';
 import zoomOut from 'public/assets/svg/tools-panel/ZoomOut.svg';
-import Image from 'next/image';
+import Image from 'next/legacy/image';
 
 interface IAppNumberSelectorProps {
   value: number;

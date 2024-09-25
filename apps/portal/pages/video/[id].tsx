@@ -55,7 +55,7 @@ import { IUserShort } from 'app/interfaces/IUserData';
 import AppContainer from 'components/containers/appContainer/AppContainer';
 import AppButton from 'components/controls/AppButton';
 import { Row, Col } from 'antd';
-import Image from 'next/image';
+import Image from 'next/legacy/image';
 import { IChapter } from 'app/interfaces/IChapter';
 import { addUniqueView } from 'app/services/imageandvideo';
 import AppSpinner from 'components/containers/appSpinner/AppSpinner';

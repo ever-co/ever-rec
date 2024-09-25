@@ -7,7 +7,7 @@ import {
 } from 'react';
 import styles from './toolBtn.module.scss';
 import classNames from 'classnames';
-import Image from 'next/image';
+import Image from 'next/legacy/image';
 import { RootStateOrAny, useDispatch, useSelector } from 'react-redux';
 import PanelAC from 'app/store/panel/actions/PanelAC';
 import OutsideClickHandler from 'react-outside-click-handler';
@@ -186,21 +186,21 @@ const ToolBtn = forwardRef<{ closePanel: () => void }, IToolBtn>(
                       borderRadius: '10px',
                     }
                   : placement === 'right' &&
-                    toolbarPosition.x < window.innerWidth / 2
-                  ? {
-                      left: '60px',
-                      borderRadius: '10px',
-                    }
-                  : placement === 'left' &&
-                    toolbarPosition.x > window.innerWidth / 2
-                  ? {
-                      right: '75px',
-                      borderRadius: '10px',
-                    }
-                  : {
-                      right: '100px',
-                      borderRadius: '10px',
-                    }
+                      toolbarPosition.x < window.innerWidth / 2
+                    ? {
+                        left: '60px',
+                        borderRadius: '10px',
+                      }
+                    : placement === 'left' &&
+                        toolbarPosition.x > window.innerWidth / 2
+                      ? {
+                          right: '75px',
+                          borderRadius: '10px',
+                        }
+                      : {
+                          right: '100px',
+                          borderRadius: '10px',
+                        }
               }
             >
               <ToolSubPanel className={toolSubPanelClasses}>

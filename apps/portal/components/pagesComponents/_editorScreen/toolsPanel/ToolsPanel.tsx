@@ -61,7 +61,7 @@ import ds from 'public/assets/svg/tools-panel/ds.svg';
 import { IUser } from 'app/interfaces/IUserData';
 import PanelSplitter from './PanelSplitter';
 import IEditorImage from 'app/interfaces/IEditorImage';
-import Image from 'next/image';
+import Image from 'next/legacy/image';
 import { imgSrcLoader } from '../editorHelpers/imgSrcLoader';
 import useEditorVideo from 'hooks/useEditorVideo';
 import { Emoji } from 'emoji-mart/dist/index';

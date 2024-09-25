@@ -6,7 +6,7 @@
 /* eslint-disable no-inner-declarations */
 import router, { useRouter } from 'next/router';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import Image from 'next/image';
+import Image from 'next/legacy/image';
 import Konva from 'konva';
 import { Stage } from 'konva/lib/Stage';
 import { KonvaEventObject } from 'konva/lib/Node';
