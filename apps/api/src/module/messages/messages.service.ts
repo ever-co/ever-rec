@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { TwilioClient } from 'nestjs-twilio';
+import { InjectTwilio, TwilioClient } from 'nestjs-twilio';
 import { ResStatusEnum } from 'src/enums/ResStatusEnum';
 import { ImageService } from '../image/image.service';
 import { VideoService } from '../video/video.service';
@@ -8,7 +8,8 @@ import { VideoService } from '../video/video.service';
 @Injectable()
 export class MessagesService {
   public constructor(
-    private readonly client: TwilioClient,
+    // @ts-ignore
+    @InjectTwilio() public readonly client: TwilioClient,
     private readonly imageService: ImageService,
     private readonly videoService: VideoService,
     private readonly configService: ConfigService,
