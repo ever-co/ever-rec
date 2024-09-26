@@ -131,7 +131,7 @@ const Auth: React.FC<SignFlowComponent> = ({ children, componentType }) => {
 
                       <GoogleBtn onSuccess={googleSubmit} />
 
-                      <div className="tw-flex tw-justify-center tw-flex tw-mt-7">
+                      <div className="tw-flex tw-justify-center tw-mt-7">
                         {filteredLinks().map((link, index, arr) => (
                           <React.Fragment key={`link_${index}`}>
                             {componentType !== link.name && (

@@ -87,9 +87,8 @@ export class WhiteboardService {
         return whiteboardsVal;
       });
 
-      const whiteboards = await promiseAllSettled<IWhiteboard>(
-        whiteboardPromises,
-      );
+      const whiteboards =
+        await promiseAllSettled<IWhiteboard>(whiteboardPromises);
 
       return sendResponse<IWhiteboard[]>(whiteboards);
     } catch (e) {
