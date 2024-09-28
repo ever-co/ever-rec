@@ -84,7 +84,10 @@ const config = {
         test: /\.scss$/,
         use: [
           'style-loader',
-          'css-loader',
+          {
+            loader: 'css-loader',
+            options: { importLoaders: 1 },
+          },
           'postcss-loader',
           {
             loader: 'sass-loader',
@@ -100,7 +103,7 @@ const config = {
         test: /\.less$/,
         use: [
           MiniCssExtractPlugin.loader,
-          'style-loader',
+          // 'style-loader',
           'css-loader',
           {
             loader: 'less-loader',
