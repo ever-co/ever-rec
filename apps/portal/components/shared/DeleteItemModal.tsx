@@ -25,7 +25,7 @@ const DeleteItemModal: React.FC<IDeleteItemModalProps> = ({
 
   return (
     <Modal
-      visible={visible}
+      open={visible}
       onCancel={onCancel}
       closable={true}
       closeIcon={

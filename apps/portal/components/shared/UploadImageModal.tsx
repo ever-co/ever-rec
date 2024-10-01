@@ -20,7 +20,7 @@ const UploadImageModal: React.FC<Props> = ({
 }) => {
   return (
     <Modal
-      visible={visible}
+      open={visible}
       closable={true}
       onCancel={onCancel}
       closeIcon={

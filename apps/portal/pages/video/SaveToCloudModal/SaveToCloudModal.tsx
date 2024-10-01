@@ -84,7 +84,7 @@ const SaveToCloudModal = ({ user, visible, item, onCancel }) => {
 
   return (
     <Modal
-      visible={visible}
+      open={visible}
       closable
       closeIcon={
         <AppSvg path="/common/close-icon.svg" className="modalCloseButton" />

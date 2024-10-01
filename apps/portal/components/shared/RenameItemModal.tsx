@@ -60,7 +60,7 @@ const RenameItemModal: FC<IProps> = ({
 
   return (
     <Modal
-      visible={visible}
+      open={visible}
       closable
       footer={
         <ModalSaveChangesFooter
