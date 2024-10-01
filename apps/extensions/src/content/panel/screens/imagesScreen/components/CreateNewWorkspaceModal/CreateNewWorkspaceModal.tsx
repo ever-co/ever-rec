@@ -30,7 +30,7 @@ const CreateNewWorkspaceModal: React.FC<IProps> = ({
   return (
     <Modal
       destroyOnClose
-      visible={visible}
+      open={visible}
       className={styles.modal}
       onCancel={cancelHandler}
       onOk={okHandler}

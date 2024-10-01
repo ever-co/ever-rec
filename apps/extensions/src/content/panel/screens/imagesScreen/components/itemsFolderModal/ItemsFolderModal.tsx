@@ -202,7 +202,7 @@ const ItemsFolderModal: React.FC<IItemsFolderModalProps> = ({
 
   return (
     <Modal
-      visible={visible}
+      open={visible}
       onCancel={onCancel}
       closeIcon={
         <AppSvg

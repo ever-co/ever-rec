@@ -171,7 +171,7 @@ const EmailModal: React.FC<IEmailModalProps> = ({
 
   return (
     <Modal
-      visible={visible}
+      open={visible}
       onCancel={onCancel}
       footer={
         <div className="tw-flex tw-justify-end tw-mt-14">

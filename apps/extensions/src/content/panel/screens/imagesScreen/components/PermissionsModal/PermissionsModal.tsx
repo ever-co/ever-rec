@@ -71,7 +71,7 @@ const PermissionsModal: React.FC<Props> = ({
 
   return (
     <Modal
-      visible={visible}
+      open={visible}
       destroyOnClose
       footer={null}
       closable

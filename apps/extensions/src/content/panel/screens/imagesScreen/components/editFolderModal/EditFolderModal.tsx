@@ -120,7 +120,7 @@ const EditFolderModal: React.FC<IEditFolderModalProps> = ({
 
   return (
     <Modal
-      visible={visible}
+      open={visible}
       onCancel={onClose}
       footer={
         <div className="tw-flex tw-justify-end tw-mt-4">

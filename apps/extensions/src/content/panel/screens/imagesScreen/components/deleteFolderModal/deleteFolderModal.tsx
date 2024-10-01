@@ -2,7 +2,6 @@ import React from 'react';
 import { Modal } from 'antd';
 import AppButton from '@/content/components/controls/appButton/AppButton';
 
-
 interface IDeleteScreenshotModalProps {
   visible: boolean;
   onOk: () => void;
@@ -16,7 +15,7 @@ const DeleteFolderModal: React.FC<IDeleteScreenshotModalProps> = ({
 }) => {
   return (
     <Modal
-      visible={visible}
+      open={visible}
       onCancel={onCancel}
       footer={
         <div className="tw-flex tw-justify-end tw-mt-14">
