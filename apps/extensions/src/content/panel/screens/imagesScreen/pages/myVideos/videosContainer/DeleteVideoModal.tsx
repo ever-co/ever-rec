@@ -3,7 +3,6 @@ import { Modal } from 'antd';
 import AppButton from '@/content/components/controls/appButton/AppButton';
 import IEditorVideo from '@/app/interfaces/IEditorVideo';
 
-
 interface IDeleteVideoModalProps {
   visible: boolean;
   onOk: (video: IEditorVideo | null) => void;
@@ -23,7 +22,7 @@ const DeleteVideoModal: React.FC<IDeleteVideoModalProps> = ({
 
   return (
     <Modal
-      visible={visible}
+      open={visible}
       onCancel={onCancel}
       footer={
         <div className="tw-flex tw-justify-end tw-mt-14">

@@ -60,7 +60,7 @@ const WorkspaceTeamsModal: FC<IProps> = ({
 
   return (
     <Modal
-      visible={visible}
+      open={visible}
       destroyOnClose
       closable
       closeIcon={

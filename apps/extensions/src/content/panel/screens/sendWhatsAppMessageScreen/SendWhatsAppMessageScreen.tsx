@@ -104,7 +104,7 @@ const SendWhatsAppMessageScreen: React.FC<ISendWhatsAppMessageScreenProps> = ({
 
   return (
     <Modal
-      visible={true}
+      open={true}
       onCancel={onCancel}
       footer={
         <div className={styles.headerContainer}>
@@ -128,9 +128,7 @@ const SendWhatsAppMessageScreen: React.FC<ISendWhatsAppMessageScreenProps> = ({
         </div>
       }
     >
-      <h2 className={styles.title}>
-        Share Message to WhatsApp
-      </h2>
+      <h2 className={styles.title}>Share Message to WhatsApp</h2>
       <AppInput
         type={'number'}
         placeholder="Enter WhatsApp Number with country code"

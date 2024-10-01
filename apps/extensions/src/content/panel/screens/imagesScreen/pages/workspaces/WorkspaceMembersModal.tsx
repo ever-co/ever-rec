@@ -47,7 +47,7 @@ const WorkspaceMembersModal: FC<IProps> = ({
 
   return (
     <Modal
-      visible={visible}
+      open={visible}
       onCancel={onClose}
       closable
       destroyOnClose

@@ -170,7 +170,7 @@ const UpdateWorkspaceTeamModal: React.FC<IProps> = ({
 
   return (
     <Modal
-      visible={visible}
+      open={visible}
       onCancel={onCancel}
       className={styles.modal}
       closeIcon={

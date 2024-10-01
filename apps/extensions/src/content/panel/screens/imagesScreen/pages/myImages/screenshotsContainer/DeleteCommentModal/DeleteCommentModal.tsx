@@ -25,7 +25,7 @@ const DeleteCommentModal: React.FC<IDeleteScreenshotModalProps> = ({
 
   return (
     <Modal
-      visible={visible}
+      open={visible}
       onCancel={onCancel}
       wrapClassName={styles.wrapper}
       closeIcon={

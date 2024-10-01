@@ -136,7 +136,7 @@ const WorkspaceMultiSelect: React.FC<Props> = ({
   return (
     <div
       className={classNames(
-        'tw-flex tw-flex tw-justify-around tw-items-center tw-bg-gallery-grey tw-rounded-md tw-p-5px tw-px-2',
+        'tw-flex tw-justify-around tw-items-center tw-bg-gallery-grey tw-rounded-md tw-p-5px tw-px-2',
         styles.workspace,
       )}
     >

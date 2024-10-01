@@ -3,7 +3,6 @@ import { Modal } from 'antd';
 import AppButton from '@/content/components/controls/appButton/AppButton';
 import classNames from 'classnames';
 
-
 interface ITrashModalProps {
   visible: boolean;
   title: string;
@@ -23,7 +22,7 @@ const TrashModal: React.FC<ITrashModalProps> = ({
 }) => {
   return (
     <Modal
-      visible={visible}
+      open={visible}
       onCancel={onCancel}
       footer={
         <div className="tw-flex tw-justify-end tw-mt-14">
