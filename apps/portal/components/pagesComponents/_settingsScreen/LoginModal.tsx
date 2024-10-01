@@ -111,7 +111,7 @@ const LoginModal: React.FC<ILoginModalProps> = ({
 
   return (
     <Modal
-      visible={visible}
+      open={visible}
       onCancel={onClose}
       closeIcon={
         <AppSvg path="/images/close-icon.svg" className="modalCloseButton" />

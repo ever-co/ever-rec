@@ -24,7 +24,7 @@ const MoveToWorkspaceModal: React.FC<Props> = ({
 
   return (
     <Modal
-      visible={visible}
+      open={visible}
       onCancel={onCancel}
       closeIcon={
         <AppSvg path="/common/close-icon.svg" className="modalCloseButton" />

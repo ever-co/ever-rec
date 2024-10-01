@@ -12,7 +12,7 @@ interface Props {
 const DeleteDriveFileModal: React.FC<Props> = ({ onOk, onCancel, visible }) => {
   return (
     <Modal
-      visible={visible}
+      open={visible}
       onCancel={onCancel}
       closable={true}
       closeIcon={

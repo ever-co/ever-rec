@@ -57,7 +57,7 @@ const ChangeEmailModal: React.FC<ICreateFolderModalProps> = ({
 
   return (
     <Modal
-      visible={visible}
+      open={visible}
       onCancel={onCancelHandler}
       width={600}
       footer={
