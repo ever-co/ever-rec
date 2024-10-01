@@ -109,7 +109,7 @@ const VideoChapterContentInput: FC<IProps> = ({
       placement="top"
       title={<div className="tw-p-2">Please fill this field</div>}
       trigger=""
-      visible={tooltipVisible}
+      open={tooltipVisible}
     >
       <TextArea
         className={classNames(

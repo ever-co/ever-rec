@@ -35,17 +35,17 @@ const EditFolderModal: React.FC<IEditFolderModalProps> = ({
   );
 
   useEffect(() => {
-    const existingPictureFolder = explorerData.folders.filter(function (
-      folder,
-    ) {
-      return folder.name === folderName.value && folder.name !== oldName;
-    });
+    const existingPictureFolder = explorerData.folders.filter(
+      function (folder) {
+        return folder.name === folderName.value && folder.name !== oldName;
+      },
+    );
 
-    const existingVideoFolder = explorerDataVideos.folders.filter(function (
-      folder,
-    ) {
-      return folder.name === folderName.value && folder.name !== oldName;
-    });
+    const existingVideoFolder = explorerDataVideos.folders.filter(
+      function (folder) {
+        return folder.name === folderName.value && folder.name !== oldName;
+      },
+    );
 
     if (
       (existingPictureFolder.length > 0 &&
@@ -119,7 +119,7 @@ const EditFolderModal: React.FC<IEditFolderModalProps> = ({
 
   return (
     <Modal
-      visible={visible}
+      open={visible}
       onCancel={onClose}
       footer={
         <div className="tw-flex tw-justify-end tw-mt-4">

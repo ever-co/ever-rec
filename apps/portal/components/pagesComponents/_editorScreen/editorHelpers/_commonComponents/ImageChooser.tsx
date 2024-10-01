@@ -28,7 +28,7 @@ const ImageChooser: React.FC<Props> = ({ visible, onOk, onCancel, actual }) => {
 
   return (
     <Modal
-      visible={visible}
+      open={visible}
       closable={true}
       onCancel={onCancel}
       width={1320}

@@ -59,7 +59,7 @@ const ShareItemModal: FC<IProps> = ({
 
   return (
     <Modal
-      visible={visible}
+      open={visible}
       footer={null}
       closable
       closeIcon={

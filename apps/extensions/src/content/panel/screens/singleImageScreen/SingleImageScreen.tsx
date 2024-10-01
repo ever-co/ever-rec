@@ -153,7 +153,7 @@ const SingleImageScreen: React.FC = () => {
                   </div>
 
                   <div className="tw-flex tw-mt-2 tw-mb-3">
-                    <div className="tw-w-full tw-flex tw-justify-between tw-w-full tw-items-center">
+                    <div className="tw-flex tw-justify-between tw-w-full tw-items-center">
                       {titleContainer}
                       {!editTitle && (
                         <div

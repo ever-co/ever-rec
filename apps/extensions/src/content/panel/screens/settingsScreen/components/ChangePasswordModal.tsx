@@ -95,7 +95,7 @@ const ChangePasswordModal: React.FC<IProps> = ({ visible, onClose, onOk }) => {
 
   return (
     <Modal
-      visible={visible}
+      open={visible}
       onCancel={onCancelHandler}
       width={600}
       footer={

@@ -62,7 +62,7 @@ const ChangeNameModal: React.FC<IProps> = ({
 
   return (
     <Modal
-      visible={visible}
+      open={visible}
       onCancel={onCancelHandler}
       width={600}
       footer={
