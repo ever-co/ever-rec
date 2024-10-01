@@ -107,7 +107,7 @@ const WorkspaceItemsFolderModal: React.FC<IItemsFolderModalProps> = ({
 
   return (
     <Modal
-      visible={visible}
+      open={visible}
       onCancel={onCancel}
       destroyOnClose={true}
       closeIcon={

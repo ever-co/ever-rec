@@ -28,8 +28,8 @@ const ShareVideoModal: React.FC<IShareVideoModalProps> = ({
     const absSharedLink = video?.sharedLink
       ? `${process.env.NEXT_PUBLIC_WEBSITE_URL}/video/shared/${video?.sharedLink}`
       : !video?.sharedLink
-      ? `${process.env.NEXT_PUBLIC_WEBSITE_URL}/video/shared/${editorVideo.sharedLink}`
-      : null;
+        ? `${process.env.NEXT_PUBLIC_WEBSITE_URL}/video/shared/${editorVideo.sharedLink}`
+        : null;
     absSharedLink && (await navigator.clipboard.writeText(absSharedLink));
     copied();
     successMessage('Copied');
@@ -37,7 +37,7 @@ const ShareVideoModal: React.FC<IShareVideoModalProps> = ({
 
   return (
     <Modal
-      visible={visible}
+      open={visible}
       onCancel={onCancel}
       footer={
         <div className="tw-flex tw-justify-center tw-items-center tw-mt-8">
