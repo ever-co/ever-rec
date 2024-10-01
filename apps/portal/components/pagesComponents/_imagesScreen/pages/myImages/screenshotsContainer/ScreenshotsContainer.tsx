@@ -396,25 +396,18 @@ const ScreenshotsContainer: React.FC<IScreenshotsContainerProps> = ({
             scrollableTarget="scrollableDivItems"
             style={{ minHeight: '400px' }}
           >
-            <Row className={styles.widthFull} gutter={[30, 25]}>
+            <Row className={styles.widthFull} gutter={[24, 16]}>
               {itemsToMap
                 ? itemsToMap.map((screenshot: IEditorImage, index: number) => {
                     if (index + 1 > itemsToLoad) return;
 
                     return (
-                      <Link
-                        key={screenshot?.dbData?.id}
-                        href={`/image/${screenshot.dbData?.id}`}
-                        passHref
-                      >
-                        <Col
-                          //
-                          xs={24}
-                          sm={24}
-                          md={24}
-                          lg={12}
-                          xl={8}
-                          xxl={xxl}
+                      <Col xs={24} sm={24} md={24} lg={12} xl={8} xxl={xxl}>
+                        <Link
+                          key={screenshot?.dbData?.id}
+                          href={`/image/${screenshot.dbData?.id}`}
+                          passHref
+                          className="tw-w-full tw-h-full"
                         >
                           <VideoItem
                             id={index}
@@ -443,8 +436,8 @@ const ScreenshotsContainer: React.FC<IScreenshotsContainerProps> = ({
                             {...shareThirdPartyOptions}
                             canEdit={true}
                           />
-                        </Col>
-                      </Link>
+                        </Link>
+                      </Col>
                     );
                   })
                 : !firstRender && (

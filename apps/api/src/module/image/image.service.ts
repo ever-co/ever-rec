@@ -371,11 +371,14 @@ export class ImageService {
 
     try {
       const db = admin.database();
-      const bucket = admin.storage().bucket();
+      // const bucket = admin.storage().bucket();
       const dbImages = db.ref(`users/${uid}/screenshots`);
-      const imagesQuery = dbImages
-        .orderByChild('parentId')
-        .equalTo(folderId || false);
+      let imagesQuery = dbImages.orderByChild('parentId');
+
+      if (folderId) {
+        imagesQuery = imagesQuery.equalTo(folderId);
+      }
+
       const imagesSnap = await imagesQuery.get();
 
       if (imagesSnap.val()) {

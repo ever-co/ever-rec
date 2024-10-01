@@ -16,6 +16,10 @@ release
 # OSX files
 .DS_Store
 
+# ENV
+.env.prod
+.env.dev
+
 # Webpack stats
 stats.json
 /src/content/panel/screens/imagesScreen/components/CreateNewWorkspaceModal/CreateNewWorkspaceModal.module.css
