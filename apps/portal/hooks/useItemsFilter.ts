@@ -45,7 +45,7 @@ export const getItemsToMapByReference = (
   let itemsToMap = itemData;
   if (filterItemData) {
     if (filterItemData.length) itemsToMap = filterItemData;
-    else itemsToMap = null;
+    // else itemsToMap = null;
   }
 
   return itemsToMap;

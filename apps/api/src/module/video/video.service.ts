@@ -334,9 +334,12 @@ export class VideoService {
 
     try {
       const dbVideos = db.ref(`users/${uid}/videos/`);
-      const videosQuery = dbVideos
-        .orderByChild('parentId')
-        .equalTo(folderId || false);
+      let videosQuery = dbVideos.orderByChild('parentId');
+
+      if (folderId) {
+        videosQuery = videosQuery.equalTo(folderId);
+      }
+
       const videosSnap = await videosQuery.get();
 
       if (videosSnap.val()) {

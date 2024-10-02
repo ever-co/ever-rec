@@ -95,7 +95,7 @@ const Overlay: React.FC<OverlayProps> = ({
           />
         }
         placement="bottomRight"
-        onVisibleChange={onDropdownVisibleChange}
+        onOpenChange={onDropdownVisibleChange}
       >
         <img
           src="/images/panel/item/options.svg"

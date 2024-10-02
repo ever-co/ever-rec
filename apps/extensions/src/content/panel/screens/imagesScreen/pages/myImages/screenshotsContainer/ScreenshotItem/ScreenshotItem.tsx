@@ -200,7 +200,7 @@ const ScreenshotItem: React.FC<IScreenshotItemProps> = ({
                   />
                 }
                 placement="bottomRight"
-                onVisibleChange={dropdownVisibleChangeHandler}
+                onOpenChange={dropdownVisibleChangeHandler}
               >
                 <img
                   src={browser.runtime.getURL('images/panel/item/options.svg')}

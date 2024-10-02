@@ -167,10 +167,12 @@ const getExplorerDataVideo = async (
     currentFolderResponse.status === ResStatusEnum.error
       ? false
       : (currentFolderResponse as any)?.data;
-  const files = filesResponse;
+
+  const files = filesResponse.filter((x) => x.dbData?.parentId === folderId);
 
   const allFolders =
     foldersResponse.status === ResStatusEnum.error ? [] : foldersResponse.data;
+
   const folders =
     allFolders.filter((x) => x.id === folderId).length > 0
       ? allFolders.filter((x) => x.id === folderId)

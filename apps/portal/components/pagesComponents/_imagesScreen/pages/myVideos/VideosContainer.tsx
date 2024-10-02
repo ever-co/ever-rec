@@ -419,19 +419,20 @@ const VideosContainer: React.FC<IVideosContainerProps> = forwardRef(
                       if (index + 1 > itemsToLoad) return;
 
                       return (
-                        <Link
-                          key={video.dbData?.id}
-                          href={`/video/${video.dbData?.id}`}
-                          passHref
+                        <Col
+                          //
+                          xs={24}
+                          sm={24}
+                          md={24}
+                          lg={12}
+                          xl={8}
+                          xxl={xxl}
                         >
-                          <Col
-                            //
-                            xs={24}
-                            sm={24}
-                            md={24}
-                            lg={12}
-                            xl={8}
-                            xxl={xxl}
+                          <Link
+                            key={video.dbData?.id}
+                            href={`/video/${video.dbData?.id}`}
+                            passHref
+                            className="tw-w-full tw-h-full"
                           >
                             <VideoItem
                               id={index}
@@ -460,8 +461,8 @@ const VideosContainer: React.FC<IVideosContainerProps> = forwardRef(
                               {...shareThirdPartyOptions}
                               canEdit={true}
                             />
-                          </Col>
-                        </Link>
+                          </Link>
+                        </Col>
                       );
                     })
                   : !firstRender && (

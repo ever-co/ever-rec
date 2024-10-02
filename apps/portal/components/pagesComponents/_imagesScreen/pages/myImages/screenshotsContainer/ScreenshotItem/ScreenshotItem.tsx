@@ -204,7 +204,7 @@ const ScreenshotItem: React.FC<IScreenshotItemProps> = ({
                   />
                 }
                 placement="bottomRight"
-                onVisibleChange={dropdownVisibleChangeHandler}
+                onOpenChange={dropdownVisibleChangeHandler}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
