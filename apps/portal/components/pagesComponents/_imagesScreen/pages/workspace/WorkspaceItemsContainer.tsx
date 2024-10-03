@@ -214,16 +214,17 @@ const WorkspaceItemsContainer: FC<Props> = ({
                     if (index + 1 > itemsToLoad) return;
 
                     return (
-                      <Link
-                        href={generateItemHref(item)}
-                        key={
-                          isIEditorVideo(item)
-                            ? `video_${item?.dbData?.id}`
-                            : `image_${item?.dbData?.id}`
-                        }
-                        passHref
-                      >
-                        <Col xs={24} sm={24} md={24} lg={12} xl={8} xxl={xxl}>
+                      <Col xs={24} sm={24} md={24} lg={12} xl={8} xxl={xxl}>
+                        <Link
+                          href={generateItemHref(item)}
+                          key={
+                            isIEditorVideo(item)
+                              ? `video_${item?.dbData?.id}`
+                              : `image_${item?.dbData?.id}`
+                          }
+                          passHref
+                          className="tw-h-full tw-w-full"
+                        >
                           {isIEditorVideo(item) ? (
                             <VideoItem
                               id={index}
@@ -283,8 +284,8 @@ const WorkspaceItemsContainer: FC<Props> = ({
                               canEdit={canEditItem(item.dbData)}
                             />
                           )}
-                        </Col>
-                      </Link>
+                        </Link>
+                      </Col>
                     );
                   })
                 : !firstRender && (

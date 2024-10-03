@@ -74,14 +74,13 @@ const useFetchWorkspacesData = () => {
 
     if (
       (routerHasWorkspaceId || !idQueryEqualsActiveWorkspaceId) &&
-      workspacesExist &&
-      !fetched.current
+      workspacesExist
     ) {
       fetched.current = true;
       fetchFullWorkspaceData();
     }
 
-    if (!workspacesExist && user && !fetched.current) {
+    if (!workspacesExist && user) {
       fetched.current = true;
       fetchWorkspaces();
     }
