@@ -1,4 +1,4 @@
-import { FC, useCallback, useRef, useState } from 'react';
+import React, { FC, useCallback, useRef, useState } from 'react';
 import styles from './WorkspaceItemsContainer.module.scss';
 import { useDispatch } from 'react-redux';
 import useInfiniteScroll from 'hooks/useInfiniteScroll';
@@ -211,17 +211,25 @@ const WorkspaceItemsContainer: FC<Props> = ({
             <Row className="tw-w-full" gutter={[30, 25]}>
               {itemsToMap
                 ? itemsToMap.map((item: WorkspaceItemType, index: number) => {
-                    if (index + 1 > itemsToLoad) return;
+                    if (index + 1 > itemsToLoad)
+                      return <React.Fragment key={index} />;
 
                     return (
-                      <Col xs={24} sm={24} md={24} lg={12} xl={8} xxl={xxl}>
+                      <Col
+                        xs={24}
+                        sm={24}
+                        md={24}
+                        lg={12}
+                        xl={8}
+                        xxl={xxl}
+                        key={
+                          isIEditorVideo(item)
+                            ? `video_${item?.dbData?.id}`
+                            : `image_${item?.dbData?.id}`
+                        }
+                      >
                         <Link
                           href={generateItemHref(item)}
-                          key={
-                            isIEditorVideo(item)
-                              ? `video_${item?.dbData?.id}`
-                              : `image_${item?.dbData?.id}`
-                          }
                           passHref
                           className="tw-h-full tw-w-full"
                         >

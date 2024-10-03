@@ -1,4 +1,4 @@
-import { forwardRef, useCallback, useRef, useState } from 'react';
+import React, { forwardRef, useCallback, useRef, useState } from 'react';
 import styles from './VideosContainer.module.scss';
 import classNames from 'classnames';
 import IEditorVideo from 'app/interfaces/IEditorVideo';
@@ -416,7 +416,8 @@ const VideosContainer: React.FC<IVideosContainerProps> = forwardRef(
               <Row className={styles.widthFull} gutter={[30, 25]}>
                 {itemsToMap
                   ? itemsToMap.map((video: IEditorVideo, index) => {
-                      if (index + 1 > itemsToLoad) return;
+                      if (index + 1 > itemsToLoad)
+                        return <React.Fragment key={index} />;
 
                       return (
                         <Col
@@ -427,9 +428,9 @@ const VideosContainer: React.FC<IVideosContainerProps> = forwardRef(
                           lg={12}
                           xl={8}
                           xxl={xxl}
+                          key={video.dbData?.id}
                         >
                           <Link
-                            key={video.dbData?.id}
                             href={`/video/${video.dbData?.id}`}
                             passHref
                             className="tw-w-full tw-h-full"

@@ -243,13 +243,11 @@ const WorkspaceTeams: FC = () => {
                 href={`${preRoutes.media}${panelRoutes.manageWorkspaces}`}
                 passHref
               >
-                <a>
-                  <AppSvg
-                    path="/common/arrow_back-light.svg"
-                    className="tw-cursor-pointer"
-                    size="30px"
-                  />
-                </a>
+                <AppSvg
+                  path="/common/arrow_back-light.svg"
+                  className="tw-cursor-pointer"
+                  size="30px"
+                />
               </Link>
               {activeWorkspace?.name} - Teams Overview
             </div>

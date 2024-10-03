@@ -48,6 +48,7 @@ import VideoItem from '../../myVideos/VideoItem/VideoItem';
 import IEditorVideo from 'app/interfaces/IEditorVideo';
 import { WorkspaceItemType } from 'app/interfaces/ItemType';
 import useGetXXL from 'hooks/useGetXXL';
+import React from 'react';
 
 const defaultShareItem = { id: null, type: null, provider: null };
 const defaultModalState = { state: false, screenshot: null };
@@ -399,12 +400,20 @@ const ScreenshotsContainer: React.FC<IScreenshotsContainerProps> = ({
             <Row className={styles.widthFull} gutter={[24, 16]}>
               {itemsToMap
                 ? itemsToMap.map((screenshot: IEditorImage, index: number) => {
-                    if (index + 1 > itemsToLoad) return;
+                    if (index + 1 > itemsToLoad)
+                      return <React.Fragment key={index} />;
 
                     return (
-                      <Col xs={24} sm={24} md={24} lg={12} xl={8} xxl={xxl}>
+                      <Col
+                        xs={24}
+                        sm={24}
+                        md={24}
+                        lg={12}
+                        xl={8}
+                        xxl={xxl}
+                        key={screenshot?.dbData?.id}
+                      >
                         <Link
-                          key={screenshot?.dbData?.id}
                           href={`/image/${screenshot.dbData?.id}`}
                           passHref
                           className="tw-w-full tw-h-full"

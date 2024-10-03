@@ -1,0 +1,53 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "users": {
+      "$userId": {
+        ".read": "$userId === auth.uid",
+        ".write": "$userId === auth.uid",
+        "screenshots": {
+          ".indexOn": [
+            "parentId",
+            "trash"
+          ],
+          ".read": "$userId === auth.uid",
+          ".write": "$userId === auth.uid"
+        },
+        "videos": {
+          ".indexOn": [
+            "parentId",
+            "trash"
+          ],
+          ".read": "$userId === auth.uid",
+          ".write": "$userId === auth.uid"
+        },
+        "profile": {
+          ".read": true,
+          ".write": "$userId === auth.uid"
+        }
+      }
+    },
+    "shared": {
+      ".indexOn": [
+        "uidImageId",
+        "uid"
+      ],
+      ".read": "auth != null",
+      ".write": "auth != null"
+    },
+    "sharedVideos": {
+      ".indexOn": [
+        "uidVideoId",
+        "uid"
+      ],
+      ".read": "auth != null",
+      ".write": "auth != null"
+    },
+    "sharedWorkspaceItems": {
+      ".indexOn": "queryField",
+      ".read": "auth != null",
+      ".write": "auth != null"
+    }
+  }
+}

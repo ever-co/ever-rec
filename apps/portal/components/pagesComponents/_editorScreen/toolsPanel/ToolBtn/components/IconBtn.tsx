@@ -24,6 +24,8 @@ const IconBtn: React.FC<IIconBtn> = ({
   actual,
   disabled,
 }) => {
+  size = size?.replace('px', '');
+
   return (
     <button disabled={disabled} onClick={onSelect} id={id}>
       <label
