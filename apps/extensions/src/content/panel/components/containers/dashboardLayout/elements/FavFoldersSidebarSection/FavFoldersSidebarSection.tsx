@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import styles from './FavFoldersSidebarSection.module.scss';
+import * as styles from './FavFoldersSidebarSection.module.scss';
 import { IFavoriteFolders, SingleFavFolder } from '@/app/interfaces/Folders';
 import { getExplorerData } from '@/app/services/screenshots';
 import { getExplorerDataVideo } from '@/app/services/videos';
@@ -190,50 +190,55 @@ const FavFoldersSidebarSection = ({ visible, setVisible }: Props) => {
             <hr className={styles.hr} />
             <div className={classNames(styles.foldersWrapper, 'scroll-div')}>
               {favorites.length ? (
-                favorites.sort((a, b) => a.name.localeCompare(b.name))
-                .map((folder) => {
-                  return (
-                    <div
-                      key={folder.id}
-                      className={styles.singleFolder}
-                      onClick={() =>
-                        handleClick(folder.id, folder.type, folder?.workspaceId)
-                      }
-                    >
-                      <div className={styles.singleFolderIconName}>
-                        <AppSvg
-                          path="images/panel/common/fav-folder.svg"
-                          size="35px"
-                        />
-                        <div className={styles.folderName}>{folder.name}</div>
-                      </div>
-
-                      <Tooltip
-                        className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-cursor-pointer"
-                        placement="topRight"
-                        title="Unfavorite folder"
-                        mouseEnterDelay={1}
+                favorites
+                  .sort((a, b) => a.name.localeCompare(b.name))
+                  .map((folder) => {
+                    return (
+                      <div
+                        key={folder.id}
+                        className={styles.singleFolder}
+                        onClick={() =>
+                          handleClick(
+                            folder.id,
+                            folder.type,
+                            folder?.workspaceId,
+                          )
+                        }
                       >
-                        <div
-                          className={styles.singleFolderUnstar}
-                          onClick={(e) =>
-                            handleUnfavorite(
-                              e,
-                              folder.id,
-                              folder.type,
-                              folder?.workspaceId,
-                            )
-                          }
-                        >
+                        <div className={styles.singleFolderIconName}>
                           <AppSvg
-                            path={'/images/panel/common/star.svg'}
-                            size="18px"
+                            path="images/panel/common/fav-folder.svg"
+                            size="35px"
                           />
+                          <div className={styles.folderName}>{folder.name}</div>
                         </div>
-                      </Tooltip>
-                    </div>
-                  );
-                })
+
+                        <Tooltip
+                          className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-cursor-pointer"
+                          placement="topRight"
+                          title="Unfavorite folder"
+                          mouseEnterDelay={1}
+                        >
+                          <div
+                            className={styles.singleFolderUnstar}
+                            onClick={(e) =>
+                              handleUnfavorite(
+                                e,
+                                folder.id,
+                                folder.type,
+                                folder?.workspaceId,
+                              )
+                            }
+                          >
+                            <AppSvg
+                              path={'/images/panel/common/star.svg'}
+                              size="18px"
+                            />
+                          </div>
+                        </Tooltip>
+                      </div>
+                    );
+                  })
               ) : (
                 <p>There are no favorite folders.</p>
               )}

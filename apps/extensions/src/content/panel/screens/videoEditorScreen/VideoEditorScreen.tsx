@@ -1,5 +1,5 @@
 import { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import styles from './VideoEditorScreen.module.scss';
+import * as styles from './VideoEditorScreen.module.scss';
 // @ts-ignore
 import { Tab, TabList, TabPanel, Tabs } from 'react-tabs';
 import classNames from 'classnames';
@@ -500,7 +500,7 @@ const VideoEditorScreen: FC<IProps> = ({ isWorkspace = false, workspace }) => {
         </div>
       </div>
 
-      {/* 
+      {/*
       <EmailModal
         visible={emailModalState.state}
         item={emailModalState.video}

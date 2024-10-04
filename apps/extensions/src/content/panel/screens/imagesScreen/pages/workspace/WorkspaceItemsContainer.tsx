@@ -1,5 +1,5 @@
 import { FC, useRef, useState } from 'react';
-import styles from './WorkspaceItemsContainer.module.scss';
+import * as styles from './WorkspaceItemsContainer.module.scss';
 import {
   IDbWorkspaceImageData,
   IDbWorkspaceVideoData,

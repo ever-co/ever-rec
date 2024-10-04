@@ -1,7 +1,7 @@
 import { FC } from 'react';
 import AppSvg from '@/content/components/elements/AppSvg';
 import { Dropdown } from 'antd';
-import styles from './FolderItem.module.scss';
+import * as styles from './FolderItem.module.scss';
 import classNames from 'classnames';
 
 interface IFolderHeaderProps {

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import styles from './IntegrationPage.module.scss';
+import * as styles from './IntegrationPage.module.scss';
 import { RootStateOrAny, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { trelloOauthUrl } from '@/app/services/api/messages';

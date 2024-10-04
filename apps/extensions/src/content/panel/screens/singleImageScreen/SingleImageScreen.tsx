@@ -21,7 +21,7 @@ import AppSvg from '@/content/components/elements/AppSvg';
 import { IUser } from '@/app/interfaces/IUserData';
 import { copySourceURL } from '@/content/utilities/scripts/singleItemFunctions';
 //@ts-ignore
-import styles from './SingleImageScreen.module.scss';
+import * as styles from './SingleImageScreen.module.scss';
 import UniqueViews from '../../components/UniqueViews/UniqueViews';
 import useInitImageVideoItem from '@/content/utilities/hooks/useInitImageVideoItem';
 import SingleImagePageManageAreaTemplate from '@/content/panel/screens/singleImageScreen/SingleImagePageManageAreaTemplate';

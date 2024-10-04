@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import styles from './MyTeamsInsideModal.module.scss';
+import * as styles from './MyTeamsInsideModal.module.scss';
 import classNames from 'classnames';
 import WorkspacesTeamsEmpty from '../../../workspaces/WorkspacesTeamsEmpty';
 import { IWorkspaceTeam } from '@/app/interfaces/IWorkspaceTeams';

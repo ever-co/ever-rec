@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import styles from './VideoChapter.module.scss';
+import * as styles from './VideoChapter.module.scss';
 import classNames from 'classnames';
 import VideoChapterContentInput from '../VideoChapterContentInput/VideoChapterContentInput';
 import AppSvg from '@/content/components/elements/AppSvg';

@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import styles from './ItemTitleAuthor.module.scss';
+import * as styles from './ItemTitleAuthor.module.scss';
 
 interface IItemTitleAuthorProps {
   title?: string;

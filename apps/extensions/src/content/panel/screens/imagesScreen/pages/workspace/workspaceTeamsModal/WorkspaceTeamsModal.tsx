@@ -1,7 +1,7 @@
 // @ts-ignore
 import { Tab, TabList, TabPanel, Tabs } from 'react-tabs';
 import { FC, useEffect } from 'react';
-import styles from './WorkspaceTeamsModal.module.scss';
+import * as styles from './WorkspaceTeamsModal.module.scss';
 import classNames from 'classnames';
 import { Modal } from 'antd';
 import AppSvg from '@/content/components/elements/AppSvg';

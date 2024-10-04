@@ -1,6 +1,6 @@
 import { Dispatch, SetStateAction, useMemo, useState } from 'react';
 import classNames from 'classnames';
-import styles from './VideoItem.module.scss';
+import * as styles from './VideoItem.module.scss';
 import '../videosContainer/video.scss';
 import { IWorkspace, IWorkspaceVideo } from '@/app/interfaces/IWorkspace';
 import ItemFooter from '../../../components/itemFooter/ItemFooter';

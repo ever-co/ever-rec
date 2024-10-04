@@ -1,6 +1,6 @@
 import React, { ReactElement } from 'react';
 import classNames from 'classnames';
-import styles from './SidebarItemsStyles.module.scss';
+import * as styles from './SidebarItemsStyles.module.scss';
 
 interface ISidebarMenuItemProps {
   icon: ReactElement;

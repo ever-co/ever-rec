@@ -1,5 +1,5 @@
 import { FC, useEffect, useState } from 'react';
-import styles from '../../../styles/Modal.module.scss';
+import * as styles from '../../../styles/Modal.module.scss';
 import classNames from 'classnames';
 import { Modal } from 'antd';
 import IAppControl, { IAppControlData } from '@/app/interfaces/IAppControl';

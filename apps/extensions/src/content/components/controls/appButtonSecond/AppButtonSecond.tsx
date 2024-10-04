@@ -1,5 +1,5 @@
 import { MouseEvent, ReactNode } from 'react';
-import styles from './AppButtonSecond.module.scss';
+import * as styles from './AppButtonSecond.module.scss';
 import classNames from 'classnames';
 
 interface AppInputProps {

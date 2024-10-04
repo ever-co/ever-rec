@@ -9,7 +9,7 @@ import {
 import { sendWhatsAppMessage } from '@/app/services/screenshots';
 import AppButton from '@/content/components/controls/appButton/AppButton';
 import AppInput from '@/content/components/controls/appInput/AppInput';
-import styles from './SendWhatsAppMessageScreen.module.scss';
+import * as styles from './SendWhatsAppMessageScreen.module.scss';
 
 interface ISendWhatsAppMessageScreenProps {
   selectedItemId: string;

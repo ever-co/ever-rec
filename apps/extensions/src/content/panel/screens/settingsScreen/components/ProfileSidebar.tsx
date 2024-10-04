@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import styles from './ProfileSidebar.module.scss';
+import * as styles from './ProfileSidebar.module.scss';
 import classNames from 'classnames';
 import AppSvg from '@/content/components/elements/AppSvg';
 

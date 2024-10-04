@@ -1,5 +1,5 @@
 //@ts-ignore
-import styles from './AppSpinnerLocal.module.scss';
+import * as styles from './AppSpinnerLocal.module.scss';
 
 interface Props {
   circleInnerColor?: string;

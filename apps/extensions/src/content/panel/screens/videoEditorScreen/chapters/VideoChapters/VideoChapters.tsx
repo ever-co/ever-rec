@@ -1,5 +1,5 @@
 import { FC, useEffect, useState } from 'react';
-import styles from './VideoChapters.module.scss';
+import * as styles from './VideoChapters.module.scss';
 import classNames from 'classnames';
 import VideoChapter from '../VideoChapter/VideoChapter';
 import useFirstRender from '@/content/panel/hooks/useFirstRender';

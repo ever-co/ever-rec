@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import styles from './IntegrationPage.module.scss';
+import * as styles from './IntegrationPage.module.scss';
 import { RootStateOrAny, useSelector } from 'react-redux';
 import {
   getDropBoxLoginUrl,

@@ -3,7 +3,7 @@ import AppSvg from '@/content/components/elements/AppSvg';
 import { Modal } from 'antd';
 import classNames from 'classnames';
 //@ts-ignore
-import styles from './UploadThumbnailModal.module.scss';
+import * as styles from './UploadThumbnailModal.module.scss';
 
 interface Props {
   visible: boolean;

@@ -1,6 +1,6 @@
 import { FC } from 'react';
 import { Dropdown, Menu } from 'antd';
-import styles from './CommentElement.module.scss';
+import * as styles from './CommentElement.module.scss';
 import moment from 'moment';
 import CommentInput from '../CommentInput/CommentInput';
 import { RootStateOrAny, useSelector } from 'react-redux';

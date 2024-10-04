@@ -28,7 +28,7 @@ import { IUser } from '@/app/interfaces/IUserData';
 import useCommentsEmoji from '../useCommentsEmoji';
 import { Tooltip } from 'antd';
 //@ts-ignore
-import styles from './useEnableComments.module.scss';
+import * as styles from './useEnableComments.module.scss';
 import { dataResponseParser } from '@/app/services/helpers/dataResponseParser';
 import { ResStatusEnum } from '@/app/interfaces/IDataResponse';
 

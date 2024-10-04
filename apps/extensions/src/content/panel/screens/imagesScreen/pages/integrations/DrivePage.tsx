@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import browser from '@/app/utilities/browser';
-import styles from './IntegrationPage.module.scss';
+import * as styles from './IntegrationPage.module.scss';
 import AuthAC from '@/app/store/auth/actions/AuthAC';
 import { RootStateOrAny, useDispatch, useSelector } from 'react-redux';
 import { driveSignOut, DriveUser } from '@/app/services/google/auth';

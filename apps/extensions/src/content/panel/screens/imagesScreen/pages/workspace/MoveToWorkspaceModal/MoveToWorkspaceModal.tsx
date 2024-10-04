@@ -5,7 +5,7 @@ import { Modal } from 'antd';
 import classNames from 'classnames';
 import { useState } from 'react';
 //@ts-ignore
-import styles from './MoveToWorkspaceModal.module.scss';
+import * as styles from './MoveToWorkspaceModal.module.scss';
 
 interface Props {
   visible: boolean;

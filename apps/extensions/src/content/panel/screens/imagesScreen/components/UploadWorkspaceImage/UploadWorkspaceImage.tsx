@@ -1,5 +1,5 @@
 //@ts-ignore
-import styles from './UploadWorkspaceImage.module.scss';
+import * as styles from './UploadWorkspaceImage.module.scss';
 import {
   ChangeEvent,
   SyntheticEvent,

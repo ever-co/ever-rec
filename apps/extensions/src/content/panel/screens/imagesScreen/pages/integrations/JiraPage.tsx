@@ -1,4 +1,4 @@
-import styles from './IntegrationPage.module.scss';
+import * as styles from './IntegrationPage.module.scss';
 import { jiraOauthUrl } from '@/app/services/api/messages';
 import { disconnectJiraUser } from '@/app/services/general';
 import {

@@ -1,5 +1,5 @@
 import { ChangeEvent, useState } from 'react';
-import styles from './CreateNewWorkspaceModal.module.scss';
+import * as styles from './CreateNewWorkspaceModal.module.scss';
 import { Modal } from 'antd';
 import AppSvg from '@/content/components/elements/AppSvg';
 import AppButton from '@/content/components/controls/appButton/AppButton';

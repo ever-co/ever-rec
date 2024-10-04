@@ -1,5 +1,5 @@
 import { ChangeEvent, FC, useRef } from 'react';
-import styles from './SCHeader.module.scss';
+import * as styles from './SCHeader.module.scss';
 import classNames from 'classnames';
 import { useSelector, RootStateOrAny } from 'react-redux';
 import { Tooltip, Dropdown, Menu } from 'antd';

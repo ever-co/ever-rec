@@ -7,7 +7,7 @@ import classNames from 'classnames';
 import ItemDropdownActions, {
   IDropdownAvailableActions,
 } from '../../../components/contextMenu/ItemDropdownActions';
-import styles from './VideoItemOverlay.module.scss';
+import * as styles from './VideoItemOverlay.module.scss';
 import { ItemActionsEnum } from '@/app/enums/itemActionsEnum';
 
 interface OverlayProps {

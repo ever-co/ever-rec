@@ -2,7 +2,7 @@
 import { TabList, Tab, TabPanel, Tabs } from 'react-tabs';
 import { FC, useEffect } from 'react';
 import 'react-tabs/style/react-tabs.css';
-import styles from './InviteMembersModal.module.scss';
+import * as styles from './InviteMembersModal.module.scss';
 import classNames from 'classnames';
 import { Modal } from 'antd';
 import { IUser } from '@/app/interfaces/IUserData';

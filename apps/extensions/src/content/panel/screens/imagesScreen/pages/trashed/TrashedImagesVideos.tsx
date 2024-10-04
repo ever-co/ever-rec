@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import styles from './TrashedImagesVideos.module.scss';
+import * as styles from './TrashedImagesVideos.module.scss';
 import classNames from 'classnames';
 import IEditorImage from '@/app/interfaces/IEditorImage';
 import IEditorVideo from '@/app/interfaces/IEditorVideo';

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import styles from '../../../styles/Modal.module.scss';
+import * as styles from '../../../styles/Modal.module.scss';
 import { Modal } from 'antd';
 import IAppControl, { IAppControlData } from '@/app/interfaces/IAppControl';
 import { passwordPatternRule } from '@/app/rules';

@@ -1,5 +1,5 @@
 // @ts-ignore
-import styles from './VideoChapterContentInput.module.scss';
+import * as styles from './VideoChapterContentInput.module.scss';
 import React, { FC, useEffect, useRef, useState } from 'react';
 import classNames from 'classnames';
 import TextArea from 'antd/lib/input/TextArea';

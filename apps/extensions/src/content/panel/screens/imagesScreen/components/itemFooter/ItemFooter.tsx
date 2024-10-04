@@ -1,6 +1,6 @@
 import { FC } from 'react';
 import AppSvg from '@/content/components/elements/AppSvg';
-import styles from './ItemFooter.module.scss';
+import * as styles from './ItemFooter.module.scss';
 
 type Like = {
   uid: string;

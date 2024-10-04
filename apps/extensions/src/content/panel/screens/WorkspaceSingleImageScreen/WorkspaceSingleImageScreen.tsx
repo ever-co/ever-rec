@@ -15,7 +15,7 @@ import ItemsFolderModal from '@/content/panel/screens/imagesScreen/components/it
 import { useSearchParams } from 'react-router-dom';
 import classNames from 'classnames';
 //@ts-ignore
-import styles from '../singleImageScreen/SingleImageScreen.module.scss';
+import * as styles from '../singleImageScreen/SingleImageScreen.module.scss';
 import { Col, Row } from 'antd';
 import AppSvg from '@/content/components/elements/AppSvg';
 import SingleImagePageManageAreaTemplate from '@/content/panel/screens/singleImageScreen/SingleImagePageManageAreaTemplate';

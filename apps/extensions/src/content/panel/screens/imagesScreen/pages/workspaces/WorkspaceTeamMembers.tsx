@@ -1,6 +1,6 @@
 import React, { FC } from 'react';
 import classNames from 'classnames';
-import styles from './WorkspaceTeamMembers.module.scss';
+import * as styles from './WorkspaceTeamMembers.module.scss';
 import { IWorkspaceUser } from '@/app/interfaces/IWorkspace';
 import { IWorkspaceTeam } from '@/app/interfaces/IWorkspaceTeams';
 import { sortByEmail } from './WorkspaceMembersModalMembersWrapper';

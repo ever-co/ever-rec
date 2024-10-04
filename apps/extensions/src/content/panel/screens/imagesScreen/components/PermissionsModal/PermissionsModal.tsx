@@ -1,6 +1,6 @@
 import React from 'react';
 import { Modal } from 'antd';
-import styles from './PermissionsModal.module.scss';
+import * as styles from './PermissionsModal.module.scss';
 import classNames from 'classnames';
 import {
   IWorkspace,

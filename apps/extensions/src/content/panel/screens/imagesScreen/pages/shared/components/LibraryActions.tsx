@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import styles from './LibraryActions.module.scss';
+import * as styles from './LibraryActions.module.scss';
 import classNames from 'classnames';
 import AppButton2 from '@/content/components/controls/AppButton2/AppButton2';
 import AppSvg from '@/content/components/elements/AppSvg';

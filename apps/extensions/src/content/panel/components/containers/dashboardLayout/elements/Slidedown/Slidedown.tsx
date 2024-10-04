@@ -1,6 +1,6 @@
 import React, { Component, forwardRef } from 'react';
 //@ts-ignore
-import styles from './Slidedown.module.scss';
+import * as styles from './Slidedown.module.scss';
 import classNames from 'classnames';
 
 // THis is the component copied from the library. Dont ask. Just use.

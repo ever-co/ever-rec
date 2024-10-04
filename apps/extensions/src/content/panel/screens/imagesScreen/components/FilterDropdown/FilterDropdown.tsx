@@ -1,6 +1,6 @@
 import React, { FC } from 'react';
 import classNames from 'classnames';
-import styles from '../sortingDropDown/sortingDropDown.module.scss';
+import * as styles from '../sortingDropDown/sortingDropDown.module.scss';
 import { Menu, Dropdown, Button } from 'antd';
 import { IWorkspaceTeam } from '@/app/interfaces/IWorkspaceTeams';
 import AppSvg from '@/content/components/elements/AppSvg';
@@ -85,9 +85,7 @@ export const FilterDropdown: FC<IProps> = ({
           justifyContent: 'center',
           border: filterTeamId ? '2px solid #5c4ebb' : undefined,
         }}
-        icon={
-          <AppSvg path="/images/panel/common/team-icon.svg" size="20px" />
-        }
+        icon={<AppSvg path="/images/panel/common/team-icon.svg" size="20px" />}
         size="large"
       ></Button>
     </Dropdown>

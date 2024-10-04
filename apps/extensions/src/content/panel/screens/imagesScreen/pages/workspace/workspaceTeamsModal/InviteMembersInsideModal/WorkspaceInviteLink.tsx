@@ -3,7 +3,7 @@ import { IInviteMembersInsideModalProps } from './InviteMembersInsideModal';
 import classNames from 'classnames';
 import AppButton from '@/content/components/controls/appButton/AppButton';
 import AppSvg from '@/content/components/elements/AppSvg';
-import styles from './InviteMembersInsideModal.module.scss';
+import * as styles from './InviteMembersInsideModal.module.scss';
 
 type Props = Omit<IInviteMembersInsideModalProps, 'userName'>;
 

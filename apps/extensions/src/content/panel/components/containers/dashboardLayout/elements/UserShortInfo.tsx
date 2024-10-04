@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import styles from './UserShortInfo.module.scss';
+import * as styles from './UserShortInfo.module.scss';
 import classNames from 'classnames';
 import AppSvg from '@/content/components/elements/AppSvg';
 import { panelRoutes } from '@/content/panel/router/panelRoutes';

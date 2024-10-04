@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import styles from '@/content/panel/screens/imagesScreen/components/multiItemsSelect/MultiItemsSelect.module.scss';
+import * as styles from '@/content/panel/screens/imagesScreen/components/multiItemsSelect/MultiItemsSelect.module.scss';
 import classNames from 'classnames';
 import store from '@/app/store/panel';
 import PanelAC from '@/app/store/panel/actions/PanelAC';
