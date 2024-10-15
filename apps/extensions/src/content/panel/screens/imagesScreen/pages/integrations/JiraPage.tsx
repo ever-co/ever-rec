@@ -57,8 +57,8 @@ const JiraPage: React.FC<ISettingsPageProps> = () => {
       user.jira.isIntegrated &&
       user.jira.isIntegrated == true ? (
         <>
-          <h2>
-            <div className="tw-flex">
+          <h2 className="tw-max-w-full tw-text-center">
+            <div className="tw-flex tw-flex-col tw-gap-2 tw-justify-center">
               <div className="tw-mr-2">Connected to: </div>
               <div className="tw-flex">
                 <span className="tw-text-primary-purple tw-font-bold">
@@ -67,6 +67,7 @@ const JiraPage: React.FC<ISettingsPageProps> = () => {
               </div>
             </div>
           </h2>
+
           <div className="tw-w-90p">
             <AppButton
               className={styles.disconnectBtn}
