@@ -77,7 +77,15 @@ const CommentElement: FC<IProps> = ({
 
   return (
     <div className={styles.commentWrapper}>
-      <img src={authorPhotoURL} alt="user photo" />
+      {authorPhotoURL ? (
+        <img src={authorPhotoURL} alt="user photo" />
+      ) : (
+        <AppSvg
+          path="/sign/default-profile.svg"
+          size="30px"
+          className="tw-flex tw-justify-center tw-items-center"
+        />
+      )}
 
       <div className={styles.commentDetails}>
         <div className={styles.commentAuthor}>
