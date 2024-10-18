@@ -28,9 +28,7 @@ export class SlackController {
   async slackInstallation(@Req() req): Promise<{ url: string }> {
     await this.slackService.storeInstallationInformation(req.query);
     return {
-      url: `${this.configService.get<string>(
-        'WEBSITE_URL',
-      )}/integrations/slack`,
+      url: `${this.configService.get<string>('WEBSITE_URL')}/integrations`,
     };
   }
 

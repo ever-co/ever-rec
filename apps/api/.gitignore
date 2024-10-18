@@ -40,3 +40,6 @@ tmp_videos_fixed/
 
 .env
 .env.dev
+
+# Ignore Certificates
+src/cert
