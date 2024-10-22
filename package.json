@@ -18,19 +18,24 @@
 		"url": "https://ever.co"
 	},
 	"scripts": {
-		"build": "turbo build",
 		"dev": "turbo dev",
-		"lint": "turbo lint",
-		"type-check": "turbo type-check",
-		"clean": "turbo clean",
-		"format": "prettier --write \"**/*.{ts,tsx,md}\"",
+		"dev:api": "pnpm dev --filter=ever-rec-api",
+		"dev:portal": "pnpm dev --filter=ever-rec-portal",
+		"dev:extensions": "pnpm dev --filter=ever-rec-extension",
+		"build": "turbo build",
+		"build:api": "pnpm build --filter=ever-rec-api",
+		"build:portal": "pnpm build --filter=ever-rec-portal",
 		"build:extensions": "pnpm build --filter=ever-rec-extension",
-		"prepare:husky": "pnpx husky install .husky",
 		"build:manual": "pnpm build:api && pnpm build:admin && pnpm build:portal && pnpm build:website",
+		"prepare:husky": "pnpx husky install .husky",
 		"seed": "pnpm ts-node -r tsconfig-paths/register --project ./apps/api/tsconfig.json apps/api/src/seeder.ts",
 		"seed:refresh": "pnpm seed --refresh",
 		"sdk:generate": "pnpm graphql-codegen --config ./apps/api/src/schemas/codegen.yml",
-		"sdk:watch": "pnpm sdk:generate --watch"
+		"sdk:watch": "pnpm sdk:generate --watch",
+		"lint": "turbo lint",
+		"type-check": "turbo type-check",
+		"clean": "turbo clean",
+		"format": "prettier --write \"**/*.{ts,tsx,md}\""
 	},
 	"workspaces": {
 		"packages": [
