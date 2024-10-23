@@ -496,7 +496,7 @@ const useEnableComments = ({
                       src={
                         comment.user?.photoURL
                           ? comment.user?.photoURL
-                          : `images/panel/sign/default-profile.svg`
+                          : `/images/panel/sign/default-profile.svg`
                       }
                       alt=""
                       className="tw-w-full tw-h-full tw-rounded-full"

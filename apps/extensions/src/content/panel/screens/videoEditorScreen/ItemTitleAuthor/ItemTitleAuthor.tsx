@@ -19,7 +19,10 @@ const ItemTitleAuthor: FC<IItemTitleAuthorProps> = ({
       <h3>{title || 'Title'}</h3>
 
       <div className={styles.itemAuthorDetails}>
-        <img src={photoURL || 'images/panel/sign/default-profile.svg'} alt="" />
+        <img
+          src={photoURL || '/images/panel/sign/default-profile.svg'}
+          alt=""
+        />
         <span>{displayName || 'User'}</span>
         {date && (
           <>

@@ -133,13 +133,18 @@ const config = {
       },
       {
         test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/,
-        loader: 'url-loader',
-        options: {
-          limit: 10000,
-          name: '[name].[hash:7].[ext]',
-          outputPath: 'fonts',
-          publicPath: '../fonts',
-        },
+        dependency: { not: ['url'] },
+        use: [
+          {
+            loader: 'url-loader',
+            options: {
+              limit: 10000,
+              name: '[name].[hash:7].[ext]',
+              outputPath: 'fonts',
+              publicPath: '../fonts',
+            },
+          },
+        ],
       },
     ],
   },

@@ -32,7 +32,7 @@ const SCHeader: FC<ISCHeaderProps> = ({
   onFilterChange,
   onInviteMembersButtonClick,
 }) => {
-  const photoURL = userPhotoURL ?? 'images/panel/sign/default-profile.svg';
+  const photoURL = userPhotoURL ?? '/images/panel/sign/default-profile.svg';
   const clickedNotifications = useRef(false); // to be removed when implemented
   const clickedHelpCenter = useRef(false); // to be removed when implemented
   const navigate = useNavigate();
