@@ -236,7 +236,7 @@ pnpm build:extensions
     - Check the extension's background page console for logs
     - Use Chrome's developer tools to debug popup and content scripts
 
-[Other browsers](./apps/extensions/)
+[Other browsers](./apps/extensions#run-project)
 
 ## Firebase Integration
 
