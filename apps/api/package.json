@@ -21,9 +21,6 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
-  "resolutions": {
-    "babel-preset-jest": "^27.4.5"
-  },
   "dependencies": {
     "@api.video/nodejs-client": "^2.2.8",
     "@firebase/storage": "^0.13.1",
@@ -51,6 +48,7 @@
     "firebase": "^9.6.1",
     "firebase-admin": "^10.0.0",
     "fluent-ffmpeg": "^2.1.2",
+    "form-data": "^4.0.1",
     "google-auth-library": "^8.1.1",
     "googleapis": "^105.0.0",
     "jwt-decode": "^3.1.2",
