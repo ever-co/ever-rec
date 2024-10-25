@@ -1,6 +1,6 @@
 import { getStorageItems, setStorageItems } from './services/localStorage';
 import { v4 as uuidv4 } from 'uuid';
-import { publicIp } from 'public-ip';
+import publicIp from 'public-ip';
 import moment from 'moment';
 
 export type LogEventType =
