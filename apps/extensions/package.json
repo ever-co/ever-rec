@@ -122,7 +122,7 @@
     "@mux/upchunk": "2.3.1",
     "@picmo/popup-picker": "^5.1.0",
     "@picmo/renderer-twemoji": "^5.1.0",
-    "@sentry/browser": "^8.30.0",
+    "@sentry/browser": "^8.33.0",
     "@sentry/react": "^7.8.0",
     "@sentry/tracing": "^7.8.0",
     "@tailwindcss/postcss7-compat": "^2.2.17",
