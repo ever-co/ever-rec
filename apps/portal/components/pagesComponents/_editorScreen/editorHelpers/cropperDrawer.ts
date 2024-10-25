@@ -23,8 +23,8 @@ export const initCrop = ({ stage, setCropperAreaState }: ICropDrawer) => {
 const cropMouseDownListener = ({ stage, setCropperAreaState }: ICropDrawer) => {
   const cropperLayer: Layer = new Konva.Layer({ id: 'cropperLayer' });
   const rect: Rect = new Konva.Rect({
-    x: stage.getRelativePointerPosition().x,
-    y: stage.getRelativePointerPosition().y,
+    x: stage?.getRelativePointerPosition()?.x,
+    y: stage?.getRelativePointerPosition()?.y,
     width: 20,
     height: 20,
     draggable: true,
@@ -280,8 +280,8 @@ const cropMouseDownListener = ({ stage, setCropperAreaState }: ICropDrawer) => {
 };
 
 const cropMouseMoveListener = (stage: Stage, rect: Rect) => {
-  rect.width(stage.getRelativePointerPosition().x - rect.x());
-  rect.height(stage.getRelativePointerPosition().y - rect.y());
+  rect.width((stage?.getRelativePointerPosition()?.x || 0) - rect.x());
+  rect.height((stage?.getRelativePointerPosition()?.y || 0) - rect.y());
 };
 
 const cropMouseUpListener = (

@@ -1,7 +1,7 @@
 import { FC, ChangeEvent, useRef } from 'react';
 import styles from './SCHeader.module.scss';
 import classNames from 'classnames';
-import Image from 'next/image';
+import Image from 'next/legacy/image';
 import { NextRouter, useRouter } from 'next/router';
 import { useSelector, RootStateOrAny, useDispatch } from 'react-redux';
 import { Dropdown, Menu, Tooltip } from 'antd';

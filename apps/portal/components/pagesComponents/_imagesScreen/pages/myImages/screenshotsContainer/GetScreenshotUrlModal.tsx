@@ -19,7 +19,7 @@ const GetScreenshotUrlModal: React.FC<IGetScreenshotUrlModalProps> = ({
   return (
     <Modal
       title="Screenshot URL"
-      visible={visible}
+      open={visible}
       onCancel={onClose}
       onOk={onOkHandler}
       okText="Copy"

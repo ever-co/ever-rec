@@ -5,7 +5,7 @@ import React, { FC, useEffect, useState } from 'react';
 import classNames from 'classnames';
 import AppSvg from '@/content/components/elements/AppSvg';
 import { Modal } from 'antd';
-import styles from './WorkspaceMembersModal.module.scss';
+import * as styles from './WorkspaceMembersModal.module.scss';
 import { IWorkspaceUser } from '@/app/interfaces/IWorkspace';
 import WorkspaceMembersModalMembersWrapper from './WorkspaceMembersModalMembersWrapper';
 import { IMemberLoadingIds } from './WorkspaceMembersModalWrapper';
@@ -47,7 +47,7 @@ const WorkspaceMembersModal: FC<IProps> = ({
 
   return (
     <Modal
-      visible={visible}
+      open={visible}
       onCancel={onClose}
       closable
       destroyOnClose

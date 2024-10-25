@@ -1,4 +1,4 @@
-/* eslint-disable no-case-declarations */
+ 
 import IEditorImage from '@/app/interfaces/IEditorImage';
 import { saveOriginalImage, updateImageData } from '../screenshots';
 import { Stage } from 'konva/lib/Stage';

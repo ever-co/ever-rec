@@ -33,8 +33,9 @@ const SaveToCloudModal = ({ user, visible, item, onCancel }) => {
   const [driveOperationLoading, setDriveOperationLoading] = useState(false);
   const [driveVideoId, setDriveVideoId] = useState<string | null>('');
   const [uploadToCloudModalState, setUploadToCloudModalState] = useState(false);
-  const [showCloudDeleteFileModal, setShowCloudDeleteFileModal] =
-    useState(null);
+  const [showCloudDeleteFileModal, setShowCloudDeleteFileModal] = useState<
+    string | null
+  >(null);
   const [dropBoxImageId, setDropBoxImageId] = useState('');
   const [dropboxOperationLoading, setDropboxOperationLoading] = useState(false);
   const [uploadToCloudType, setUploadToCloudType] = useState<string | null>(
@@ -47,7 +48,7 @@ const SaveToCloudModal = ({ user, visible, item, onCancel }) => {
       window &&
       window
         .open(`https://drive.google.com/file/d/${driveVideoId}/view`, '_blank')
-        .focus();
+        ?.focus();
   };
 
   const openVideoOnDropBox = async () => {
@@ -58,7 +59,7 @@ const SaveToCloudModal = ({ user, visible, item, onCancel }) => {
           `https://www.dropbox.com/home/Apps/Rec?preview=${dropBoxImageId}`,
           '_blank',
         )
-        .focus();
+        ?.focus();
   };
 
   const openUploadToDropBoxCloudModal = useCallback(
@@ -83,7 +84,7 @@ const SaveToCloudModal = ({ user, visible, item, onCancel }) => {
 
   return (
     <Modal
-      visible={visible}
+      open={visible}
       closable
       closeIcon={
         <AppSvg path="/common/close-icon.svg" className="modalCloseButton" />

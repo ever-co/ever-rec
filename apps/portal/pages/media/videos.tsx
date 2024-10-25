@@ -260,7 +260,7 @@ const Videos: FC = () => {
             openModalHandler={openModalHandler}
             clickAddVideoHandler={clickAddVideoHandler}
             showAddFolderButton={
-              explorerDataVideos?.currentFolder?.nestLevel < 2 ||
+              (explorerDataVideos?.currentFolder?.nestLevel || 0) < 2 ||
               explorerDataVideos.currentFolder === null
             }
           />
@@ -293,7 +293,7 @@ const Videos: FC = () => {
                     onDrop={(e) => onDrop(e, folder)}
                     setLoading={(loadingState) => setLoading(loadingState)}
                     forVideos
-                    isFavorite={isFavorite(folder)}
+                    isFavorite={isFavorite(folder) || false}
                     canEdit={true}
                   />
                 ))}
@@ -306,8 +306,8 @@ const Videos: FC = () => {
           <VideosContainer
             foldersCount={folderData?.length || 0}
             videos={explorerDataVideos.files}
-            itemData={itemData}
-            filterItemData={filterItemData}
+            itemData={itemData || []}
+            filterItemData={filterItemData || []}
             itemOrder={itemOrder}
             handleItemOrderByDate={handleItemOrderByDate}
             handleItemOrderByName={handleItemOrderByName}

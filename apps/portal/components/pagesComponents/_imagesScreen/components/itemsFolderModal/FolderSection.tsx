@@ -59,12 +59,12 @@ const FolderSection: React.FC<IFolderSectionProps> = ({
       <>
         <h2 className="tw-mb-6 tw-text-2xl tw-font-semibold">Select folder</h2>
         <Folder
-          folder={null}
+          folder={null as any}
           leftMargin={0}
           RootFolderName={itemType === 'image' ? 'My images' : 'My videos'}
           highlightedRef={highlightedRef}
           setHighlightedRef={setHighlightedRef}
-          setSelectedFolder={() => setSelectedFolder(null)}
+          setSelectedFolder={() => setSelectedFolder(null as any)}
         />
         {initialOpened && buildFolderTree(explorerData.allFolders)}
       </>
@@ -80,12 +80,12 @@ const FolderSection: React.FC<IFolderSectionProps> = ({
   } else {
     return (
       <Folder
-        folder={null}
+        folder={null as any}
         leftMargin={0}
         RootFolderName={itemType === 'image' ? 'My images' : 'My videos'}
         highlightedRef={highlightedRef}
         setHighlightedRef={setHighlightedRef}
-        setSelectedFolder={() => setSelectedFolder(null)}
+        setSelectedFolder={() => setSelectedFolder(null as any)}
       />
     );
   }

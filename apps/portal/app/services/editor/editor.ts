@@ -71,15 +71,15 @@ export class EditorService {
     activeWorkspace: any,
     forWorkspace: boolean,
   ) {
-    if (editorImage.dbData.stage?.renderDimentions) {
+    if (editorImage.dbData?.stage?.renderDimentions) {
       setResizeDimentions({
-        width: editorImage?.dbData.stage?.renderDimentions?.width,
-        height: editorImage?.dbData.stage?.renderDimentions?.height,
+        width: editorImage?.dbData?.stage?.renderDimentions?.width,
+        height: editorImage?.dbData?.stage?.renderDimentions?.height,
       });
     }
 
     const newStage = Konva.Node.create(
-      editorImage?.dbData.stage?.stage,
+      editorImage?.dbData?.stage?.stage,
       'stage',
     );
     const background = newStage?.findOne('#main');
@@ -104,8 +104,8 @@ export class EditorService {
     setStage(newStage);
 
     saveHistory(
-      editorImage.dbData.stage?.renderDimentions,
-      editorImage?.dbData.stage?.stage,
+      editorImage.dbData?.stage?.renderDimentions,
+      editorImage?.dbData?.stage?.stage,
     );
   }
 
@@ -136,7 +136,7 @@ export class EditorService {
       innerImage.crossOrigin = 'Anonymous';
       innerImage.src = editorImage.dbData?.originalImage
         ? editorImage.dbData?.originalImage
-        : editorImage.url;
+        : editorImage.url || '';
 
       originalImageSourceRef.current = innerImage;
 
@@ -189,7 +189,7 @@ export class EditorService {
         mainLayer.draw();
 
         backgroundImage.on('click', () => {
-          setPointerTarget(null);
+          setPointerTarget(null as any);
           destroyPointerTransformer(stage);
           resetShape();
         });
@@ -233,7 +233,10 @@ export class EditorService {
     if (dbData) {
       try {
         const originalImageURL = await saveOriginalImage(dbData.refName);
-        dbData.originalImage = originalImageURL;
+
+        if (dbData) {
+          dbData.originalImage = originalImageURL || undefined;
+        }
         await updateImageData(dbData);
       } catch (err) {
         console.error('Error in saveOriginalImageData function:', err);
@@ -271,8 +274,9 @@ export class EditorService {
     setCurrentShape: (shape: any) => void,
   ) {
     const layer: Layer | undefined = getLayer(stage, '#drawLayer');
-    const lastChild: Shape<ShapeConfig> | Group =
-      layer?.getChildren()[layer.getChildren().length - 1];
+    const lastChild: Shape<ShapeConfig> | Group = layer?.getChildren()[
+      layer.getChildren().length - 1
+    ] as any;
     setPointerTarget(lastChild);
     if (lastChild instanceof Group) {
       setCurrentShape(lastChild.children[0]);
@@ -325,7 +329,7 @@ export class EditorService {
         if (id && typeof id === 'string') {
           const image = await getImageById(id);
           !image && router.push(preRoutes.media + panelRoutes.images);
-          dispatch(PanelAC.setEditorImage({ editorImage: image }));
+          dispatch(PanelAC.setEditorImage({ editorImage: image as any }));
         }
       } catch (e) {
         console.log(e);
@@ -347,7 +351,7 @@ export class EditorService {
         return new Konva.Circle(shapeOptions);
 
       case tools.rect.tool:
-        return;
+        return null;
 
       case tools.square.tool:
         return new Konva.Rect(shapeOptions);
@@ -521,7 +525,7 @@ export class EditorService {
     const cursortext: Text = new Text(baseMarkerTextOptions);
     cursortext?.setAttrs({
       id: 'markerText',
-      x: stage.getRelativePointerPosition()?.x + 10,
+      x: (stage.getRelativePointerPosition()?.x || 0) + 10,
       y: stage.getRelativePointerPosition()?.y,
       scale: {
         x: stageScale / 100,
@@ -535,7 +539,7 @@ export class EditorService {
 
     cursornumbers.setAttrs({
       id: 'markerNumbers',
-      x: stage.getRelativePointerPosition()?.x + 7,
+      x: (stage.getRelativePointerPosition()?.x || 0) + 7,
       y: stage.getRelativePointerPosition()?.y,
       scale: {
         x: stageScale / 100,
@@ -702,8 +706,8 @@ export class EditorService {
     });
 
     const background = stage.findOne('#main');
-    background.on('click', () => {
-      setPointerTarget(null);
+    background?.on('click', () => {
+      setPointerTarget(null as any);
       destroyPointerTransformer(stage);
       setCurrentShape(null);
     });
@@ -834,7 +838,7 @@ export class EditorService {
     try {
       const markers = await MarkerAPI.getAllMarkersByImageId(id);
 
-      if (!markers.data[0]) {
+      if (!markers?.data?.length) {
         console.error('No comments found for the marker.');
         return;
       }
@@ -847,7 +851,7 @@ export class EditorService {
               ...marker.comments[key],
               id: key,
             }));
-            return acc.concat(markerComments);
+            return acc.concat(markerComments as any);
           }
           return acc; // If no comments, return the accumulator as is
         },

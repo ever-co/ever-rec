@@ -6,8 +6,10 @@ declare module '*.svg' {
 }
 
 declare module '*.module.scss' {
-  const classes: { readonly [key: string]: string };
-  export default classes;
+  const styles: {
+    [className: string]: string;
+  };
+  export = styles;
 }
 
 declare module '@emoji-mart/react';

@@ -17,7 +17,7 @@ import {
 import DeleteFolderModal from '../deleteFolderModal/deleteFolderModal';
 import AppSvg from '@/content/components/elements/AppSvg';
 import moment from 'moment';
-import styles from './FolderItem.module.scss';
+import * as styles from './FolderItem.module.scss';
 import classNames from 'classnames';
 import colorPalet from '../createFolderModal/colorPalet';
 import ColorElement from '../ColorElement/ColorElement';

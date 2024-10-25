@@ -5,6 +5,8 @@ import AppSvg from '@/content/components/elements/AppSvg';
 import { SketchPicker } from 'react-color';
 import useClickOrKeyOutside from '@/content/utilities/hooks/useClickOrKeyOutside';
 
+const SketchPickerReact = SketchPicker as any;
+
 interface IColorSelectorProps {
   color: string;
   icon?: string;
@@ -125,7 +127,7 @@ const ColorSelector: React.FC<IColorSelectorProps> = ({
             style={sketchStyles}
             ref={colorContainerRef}
           >
-            <SketchPicker
+            <SketchPickerReact
               className="sketch-picker"
               color={localColor}
               onChange={onChangeHandler}

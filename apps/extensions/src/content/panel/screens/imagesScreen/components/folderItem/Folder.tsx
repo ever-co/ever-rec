@@ -2,7 +2,7 @@ import { IDbFolderData } from '@/app/interfaces/IEditorImage';
 import { useEffect, useRef, useState } from 'react';
 import SidebarFolderItem from '@/content/panel/screens/imagesScreen/components/folderItem/SidebarFolderItem';
 //@ts-ignore
-import styles from './Folder.module.scss';
+import * as styles from './Folder.module.scss';
 import classNames from 'classnames';
 import { IWorkspaceDbFolder } from '@/app/interfaces/IWorkspace';
 import SlideDown from '@/content/panel/components/containers/dashboardLayout/elements/Slidedown/Slidedown';

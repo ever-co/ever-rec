@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { IWorkspace } from 'app/interfaces/IWorkspace';
 import {
   getFullWorkspaceDataAPI,
@@ -15,6 +15,7 @@ import { IUser } from 'app/interfaces/IUserData';
 const useFetchWorkspacesData = () => {
   const router = useRouter();
   const dispatch = useDispatch();
+  const fetched = useRef(false);
 
   const user: IUser = useSelector((state: RootStateOrAny) => state.auth.user);
   const workspaces = useSelector(
@@ -57,7 +58,7 @@ const useFetchWorkspacesData = () => {
         const response = await getUserWorkspacesAPI();
         if (response.status !== ResStatusEnum.error) {
           const userWorkspaces = response.data;
-          dispatch(PanelAC.setWorkspaces({ workspaces: userWorkspaces }));
+          dispatch(PanelAC.setWorkspaces({ workspaces: userWorkspaces || [] }));
         } else {
           errorHandler({ message: response.message });
         }
@@ -65,21 +66,25 @@ const useFetchWorkspacesData = () => {
     };
 
     const routerHasWorkspaceId = router.query['workspaceId'] && router.isReady;
+
     const idQueryEqualsActiveWorkspaceId =
       workspaceIdQuery === activeWorkspace?.id;
+
     const workspacesExist = workspaces.length > 0;
 
     if (
       (routerHasWorkspaceId || !idQueryEqualsActiveWorkspaceId) &&
       workspacesExist
     ) {
+      fetched.current = true;
       fetchFullWorkspaceData();
     }
 
     if (!workspacesExist && user) {
+      fetched.current = true;
       fetchWorkspaces();
     }
-  }, [router.isReady, router.query, user, dispatch, workspaces]);
+  }, [router.isReady, router.query, user, fetched, dispatch, workspaces]);
 };
 
 export default useFetchWorkspacesData;

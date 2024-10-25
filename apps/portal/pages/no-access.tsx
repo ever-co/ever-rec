@@ -1,5 +1,5 @@
 import { Col, Row } from 'antd';
-import Image from 'next/image';
+import Image from 'next/legacy/image';
 import AppButton from 'components/controls/AppButton';
 import { panelRoutes, preRoutes } from 'components/_routes';
 import AppContainer from 'components/containers/appContainer/AppContainer';

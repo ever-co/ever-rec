@@ -1,5 +1,5 @@
 import { FC, useRef, useState, useEffect } from 'react';
-import styles from './CommentInput.module.scss';
+import * as styles from './CommentInput.module.scss';
 import { IComment } from '../CommentElement/CommentElement';
 
 interface ICommentInputProps {

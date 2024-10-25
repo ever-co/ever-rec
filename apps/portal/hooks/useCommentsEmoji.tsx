@@ -73,9 +73,9 @@ const useCommentsEmoji = ({
             emojiButtonSize={36}
           />
         }
-        visible={showPicker}
+        open={showPicker}
         trigger="click"
-        onVisibleChange={onChangeVisible}
+        onOpenChange={onChangeVisible}
       >
         <img
           id="emoji-main-button"

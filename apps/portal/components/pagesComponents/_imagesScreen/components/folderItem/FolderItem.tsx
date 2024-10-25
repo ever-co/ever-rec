@@ -82,7 +82,7 @@ const FolderItem: React.FC<IFolderItemProps> = ({
     closeFolderModal();
     const id = loadingMessage('Renaming folder...');
 
-    let data = null;
+    let data: any = null;
     if (workspace && isWorkspaceFolder(folder)) {
       data = await updateWorkspaceFolderData(
         workspace.id,
@@ -241,8 +241,8 @@ const FolderItem: React.FC<IFolderItemProps> = ({
   const itemsNumber = folder.items
     ? `${folder.items} items`
     : folder.items == 0
-    ? `${folder.items} items`
-    : false;
+      ? `${folder.items} items`
+      : false;
 
   const updatedAgo = itemsNumber && moment(folder.updated).fromNow();
 

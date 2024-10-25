@@ -1,5 +1,5 @@
 // @ts-ignore
-import styles from './VideoChapterContentInput.module.scss';
+import * as styles from './VideoChapterContentInput.module.scss';
 import React, { FC, useEffect, useRef, useState } from 'react';
 import classNames from 'classnames';
 import TextArea from 'antd/lib/input/TextArea';
@@ -109,7 +109,7 @@ const VideoChapterContentInput: FC<IProps> = ({
       placement="top"
       title={<div className="tw-p-2">Please fill this field</div>}
       trigger=""
-      visible={tooltipVisible}
+      open={tooltipVisible}
     >
       <TextArea
         className={classNames(

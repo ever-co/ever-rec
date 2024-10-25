@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import styles from './ImagesAndVideos.module.scss';
+import * as styles from './ImagesAndVideos.module.scss';
 import classNames from 'classnames';
 import PanelAC from '@/app/store/panel/actions/PanelAC';
 import { RootStateOrAny, useDispatch, useSelector } from 'react-redux';

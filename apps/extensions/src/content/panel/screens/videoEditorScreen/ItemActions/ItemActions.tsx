@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import styles from './ItemActions.module.scss';
+import * as styles from './ItemActions.module.scss';
 import classNames from 'classnames';
 import { Dropdown, Menu } from 'antd';
 import IEditorImage, { ILike } from '@/app/interfaces/IEditorImage';

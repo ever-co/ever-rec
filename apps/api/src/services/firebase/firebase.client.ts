@@ -31,10 +31,10 @@ export class FirebaseClient {
       measurementId: this.configService.get<string>('FIREBASE_MASUREMENT_ID'),
     };
 
-    this.firebaseApp = initializeApp(firebaseConfig);
-    this.firebaseAuth = getAuth(this.firebaseApp);
-    this.firebaseGoogleAuthProvider = new GoogleAuthProvider();
-    this.firebaseDb = getDatabase(this.firebaseApp);
-    this.firebaseStorage = getStorage(this.firebaseApp);
+    this.firebaseApp ??= initializeApp(firebaseConfig);
+    this.firebaseAuth ??= getAuth(this.firebaseApp);
+    this.firebaseGoogleAuthProvider ??= new GoogleAuthProvider();
+    this.firebaseDb ??= getDatabase(this.firebaseApp);
+    this.firebaseStorage ??= getStorage(this.firebaseApp);
   }
 }

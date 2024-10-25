@@ -139,7 +139,8 @@ const getExplorerData = async (
       currentFolderResponse.status &&
       currentFolderResponse.status === ResStatusEnum.error
         ? false
-        : currentFolderResponse.data;
+        : (currentFolderResponse as any)?.data;
+
     const files = filesResponse;
 
     const allFolders =
@@ -185,6 +186,8 @@ const getImageById = async (id: string): Promise<IEditorImage | null> => {
     console.log(error);
     errorHandler(error);
   }
+
+  return null;
 };
 
 const updateImage = async (
@@ -193,7 +196,8 @@ const updateImage = async (
   workspace?: IWorkspace,
   disableNotification?: boolean,
 ): Promise<void> => {
-  const id = !disableNotification && loadingMessage();
+  const id = !disableNotification ? loadingMessage() : (null as any);
+
   const refName = image.dbData?.refName;
   const location =
     image.ref?.fullPath.split('/')[image.ref?.fullPath.split('/').length - 1];
@@ -225,9 +229,9 @@ const updateImage = async (
             emailImageLink: image.sharedLink
               ? image.sharedLink
               : image.dbData?.id
-              ? await getShareLink(image.dbData.id)
-              : null,
-            itemPublicLink: image?.url,
+                ? await getShareLink(image.dbData.id)
+                : null,
+            itemPublicLink: image?.url as any,
           }),
         );
         updateMessage(id, 'Email sent successfully.', 'success');
@@ -252,7 +256,7 @@ const updateStage = async (
   try {
     const dbData = {
       stage: newStage,
-      id: image.dbData.id,
+      id: image.dbData?.id,
     } as DbImgData;
 
     if (!workspace) {
@@ -277,7 +281,7 @@ const updateMarkers = async (
   try {
     const dbData = {
       markers: JSON.stringify(newMarkers),
-      id: image.dbData.id,
+      id: image.dbData?.id,
     } as DbImgData;
 
     if (!workspace) {
@@ -314,7 +318,7 @@ const updateImageData = async ({
   stage,
   originalImage,
   markers,
-}: DbImgData): Promise<IEditorImage> => {
+}: DbImgData): Promise<IEditorImage | null> => {
   try {
     return await updateImageDataAPI(
       id,
@@ -324,22 +328,26 @@ const updateImageData = async ({
       likes,
       views,
       stage,
-      originalImage,
-      markers,
+      originalImage as any,
+      markers as any,
     );
   } catch (error: any) {
     console.log(error);
     errorHandler(error);
   }
+
+  return null;
 };
 
-const saveOriginalImage = async (fullFileName): Promise<string> => {
+const saveOriginalImage = async (fullFileName): Promise<string | null> => {
   try {
     return await saveOriginalImageAPI(fullFileName);
   } catch (error: any) {
     console.log(error);
     errorHandler(error);
   }
+
+  return null;
 };
 
 const updateOriginalImage = async (

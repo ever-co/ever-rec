@@ -1,4 +1,4 @@
-import { forwardRef, useCallback, useRef, useState } from 'react';
+import React, { forwardRef, useCallback, useRef, useState } from 'react';
 import styles from './VideosContainer.module.scss';
 import classNames from 'classnames';
 import IEditorVideo from 'app/interfaces/IEditorVideo';
@@ -90,8 +90,12 @@ const VideosContainer: React.FC<IVideosContainerProps> = forwardRef(
     );
     const { itemsToLoad, loadMoreItems } = useInfiniteScroll();
     const [copystate, setCopyState] = useState(false);
-    const [slackItemSelected, setSlackItemSelected] = useState(null);
-    const [whatsAppItemSelected, setWhatsAppItemSelected] = useState(null);
+    const [slackItemSelected, setSlackItemSelected] = useState<string | null>(
+      null,
+    );
+    const [whatsAppItemSelected, setWhatsAppItemSelected] = useState<
+      string | null
+    >(null);
     const [shareItemSelected, setShareItemSelected] =
       useState<IShareItemSelected>(defaultShareItem);
     const [loaderState, setLoaderState] = useState(false);
@@ -242,7 +246,7 @@ const VideosContainer: React.FC<IVideosContainerProps> = forwardRef(
     const shareSlackHandler = useCallback(
       (video: IEditorVideo) => {
         if (user && user.isSlackIntegrate && user.isSlackIntegrate == true) {
-          setSlackItemSelected(video.dbData.id);
+          setSlackItemSelected(video.dbData?.id || null);
         } else {
           router.push(preRoutes.media + panelRoutes.integrations);
         }
@@ -271,7 +275,7 @@ const VideosContainer: React.FC<IVideosContainerProps> = forwardRef(
     );
 
     const shareWhatsappHandler = useCallback((video: IEditorVideo) => {
-      setWhatsAppItemSelected(video.dbData.id);
+      setWhatsAppItemSelected(video.dbData?.id || null);
     }, []);
 
     const download = async (video: IEditorVideo) => {
@@ -329,7 +333,7 @@ const VideosContainer: React.FC<IVideosContainerProps> = forwardRef(
         setLoaderState(true);
         const response = await addVideoToWorkspaceAPI(
           workspace.id,
-          moveToWorkspaceState.video.dbData.id,
+          moveToWorkspaceState.video.dbData.id || '',
           false,
         );
         setLoaderState(false);
@@ -412,22 +416,24 @@ const VideosContainer: React.FC<IVideosContainerProps> = forwardRef(
               <Row className={styles.widthFull} gutter={[30, 25]}>
                 {itemsToMap
                   ? itemsToMap.map((video: IEditorVideo, index) => {
-                      if (index + 1 > itemsToLoad) return;
+                      if (index + 1 > itemsToLoad)
+                        return <React.Fragment key={index} />;
 
                       return (
-                        <Link
+                        <Col
+                          //
+                          xs={24}
+                          sm={24}
+                          md={24}
+                          lg={12}
+                          xl={8}
+                          xxl={xxl}
                           key={video.dbData?.id}
-                          href={`/video/${video.dbData?.id}`}
-                          passHref
                         >
-                          <Col
-                            //
-                            xs={24}
-                            sm={24}
-                            md={24}
-                            lg={12}
-                            xl={8}
-                            xxl={xxl}
+                          <Link
+                            href={`/video/${video.dbData?.id}`}
+                            passHref
+                            className="tw-w-full tw-h-full"
                           >
                             <VideoItem
                               id={index}
@@ -445,7 +451,10 @@ const VideosContainer: React.FC<IVideosContainerProps> = forwardRef(
                               addSelected={setSelectedItems}
                               selectedItems={selectedItems}
                               onDropdownVisibleChange={(visible) =>
-                                setDropdownVisible({ item: video, visible })
+                                setDropdownVisible({
+                                  item: video as any,
+                                  visible,
+                                })
                               }
                               onDropdownAction={(action, e) => {
                                 handleAction(e, video, action);
@@ -453,8 +462,8 @@ const VideosContainer: React.FC<IVideosContainerProps> = forwardRef(
                               {...shareThirdPartyOptions}
                               canEdit={true}
                             />
-                          </Col>
-                        </Link>
+                          </Link>
+                        </Col>
                       );
                     })
                   : !firstRender && (

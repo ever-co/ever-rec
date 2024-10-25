@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ResStatusEnum } from '../../enums/ResStatusEnum';
 import * as admin from 'firebase-admin';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-const dropboxV2Api = require('dropbox-v2-api');
+import dropboxV2Api from 'dropbox-v2-api';
 import * as fs from 'fs';
 import { ImageService } from '../image/image.service';
 import { ConfigService } from '@nestjs/config';
@@ -70,16 +70,19 @@ export class DropboxService {
 
     const db = admin.database();
     const userRef = db.ref(`/users/${uid}`);
+
     return new Promise((res, rej) => {
       dropbox.getToken(code, async (err, result, response) => {
         try {
           if (err) {
             rej('Error retrieving access token');
           }
+
           if (result) {
             const userDropbox = dropboxV2Api.authenticate({
               token: result.access_token,
             });
+
             await userDropbox(
               {
                 resource: 'users/get_account',
@@ -93,6 +96,7 @@ export class DropboxService {
                     account_id: result.account_id,
                     email: accResult.email,
                   };
+
                   await userRef.update({
                     dropboxAPISCredentials: {
                       credentials: {
@@ -102,6 +106,7 @@ export class DropboxService {
                       ...dropboxUserData,
                     },
                   });
+
                   res({
                     status: ResStatusEnum.success,
                     message: 'Success',

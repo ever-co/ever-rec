@@ -1,4 +1,4 @@
-import styles from './Integrations.module.scss';
+import * as styles from './Integrations.module.scss';
 import classNames from 'classnames';
 import DashboardCard from '../../components/containers/dashboardLayout/elements/DashboardCard';
 import DrivePage from '../imagesScreen/pages/integrations/DrivePage';
@@ -23,4 +23,3 @@ const IntegrationsScreen = () => {
 };
 
 export default IntegrationsScreen;
-

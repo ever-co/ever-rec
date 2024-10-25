@@ -10,7 +10,7 @@ import { useLocation, useNavigate } from 'react-router';
 import DashboardCard from '../DashboardCard';
 import SidebarMenuItem from '../SidebarMenuItems/SidebarMenuItem';
 import UserShortInfo from '../UserShortInfo';
-import styles from './Sidebar.module.scss';
+import * as styles from './Sidebar.module.scss';
 import PanelAC from '@/app/store/panel/actions/PanelAC';
 import UploadWorkspaceImageModal from '@/content/panel/screens/imagesScreen/components/UploadWorkspaceImage/UploadWorkspaceImage';
 import {

@@ -10,7 +10,7 @@ import PanelAC from '@/app/store/panel/actions/PanelAC';
 import AppSpinner from '@/content/components/containers/appSpinner/AppSpinner';
 import { FolderTypeEnum } from './enums/folderTypeEnum';
 import { IUser } from '@/app/interfaces/IUserData';
-import styles from '@/content/panel/styles/Shared.module.scss';
+import * as styles from '@/content/panel/styles/Shared.module.scss';
 import classNames from 'classnames';
 import SCHeader from '@/content/panel/shared/SCHeader/SCHeader';
 

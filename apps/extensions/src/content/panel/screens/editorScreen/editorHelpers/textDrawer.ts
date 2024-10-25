@@ -157,10 +157,12 @@ export const editTextListener = (
   textarea.style.fontFamily = textNode.fontFamily();
   textarea.style.transformOrigin = 'left top';
   textarea.style.textAlign = textNode.align();
+  // @ts-ignore
   textarea.style.color = textNode.fill();
   textarea.style.fontStyle = textNode.fontStyle();
   textarea.style.fontVariant = textNode.fontVariant();
   textarea.style.webkitTextStrokeWidth = textNode.strokeWidth() + 'px';
+  // @ts-ignore
   textarea.style.webkitTextStrokeColor = textNode.stroke();
   textarea.style.padding = '8px';
   textarea.style.textDecoration = textNode.textDecoration();

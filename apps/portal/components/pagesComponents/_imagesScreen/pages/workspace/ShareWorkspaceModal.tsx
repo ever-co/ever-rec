@@ -28,7 +28,7 @@ const ShareWorkspaceModal: FC<IShareWorkspaceModalProps> = ({
 
   return (
     <Modal
-      visible={visible}
+      open={visible}
       onCancel={onModalClose}
       footer={
         <div className="tw-flex tw-justify-center tw-items-center tw-mt-8">

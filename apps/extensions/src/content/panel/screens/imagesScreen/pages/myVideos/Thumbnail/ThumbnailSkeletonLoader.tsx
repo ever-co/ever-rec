@@ -1,4 +1,4 @@
-import styles from './ThumbnailSkeletonLoader.module.scss';
+import * as styles from './ThumbnailSkeletonLoader.module.scss';
 
 const SkeletonLoader = ({
   width,

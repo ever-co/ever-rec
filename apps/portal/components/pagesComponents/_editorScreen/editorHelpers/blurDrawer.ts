@@ -63,20 +63,22 @@ const drawBlurMouseDownListener = async ({
   const shape = new Rect({
     id: 'blurred',
     name: blurName,
-    x: stage.getRelativePointerPosition().x,
-    y: stage.getRelativePointerPosition().y,
+    x: stage?.getRelativePointerPosition()?.x,
+    y: stage?.getRelativePointerPosition()?.y,
     width: 1,
     height: 1,
     draggable: true,
     fillPatternImage: image,
     fillPatternOffset: {
-      x: stage.getRelativePointerPosition().x * blurScale,
-      y: stage.getRelativePointerPosition().y * blurScale,
+      x: (stage?.getRelativePointerPosition()?.x || 0) * blurScale,
+      y: (stage?.getRelativePointerPosition()?.y || 0) * blurScale,
     },
     fillPatternScaleX: 1 / blurScale,
     fillPatternScaleY: 1 / blurScale,
-    fillPatternOffsetX: stage.getRelativePointerPosition().x * blurScale,
-    fillPatternOffsetY: stage.getRelativePointerPosition().y * blurScale,
+    fillPatternOffsetX:
+      (stage?.getRelativePointerPosition()?.x || 0) * blurScale,
+    fillPatternOffsetY:
+      (stage?.getRelativePointerPosition()?.y || 0) * blurScale,
     shadowBlur: 0.1,
     blurRadius: 10,
     visible: false,
@@ -131,7 +133,7 @@ const drawBlureTransformListener = async (
   shape?.fillPatternScaleY(1 / (event.target.attrs.scaleY * scaleCoefficient));
   shape?.fillPatternRotation(360 - event.target.attrs.rotation);
   if (shape?.attrs.width && shape?.attrs.height) {
-    shape = shape.cache();
+    shape = shape?.cache() as any;
   }
   shape?.filters([Konva.Filters.Blur]);
 };
@@ -143,7 +145,7 @@ const drawBlureTransformedListener = async (
   shape?.fillPatternOffsetX(shape.attrs.x * scaleCoefficient);
   shape?.fillPatternOffsetY(shape.attrs.y * scaleCoefficient);
   if (shape.attrs.width && shape.attrs.height) {
-    shape = shape.cache();
+    shape = shape.cache() as any;
   }
   shape?.filters([Konva.Filters.Blur]);
 };
@@ -157,7 +159,7 @@ const drawBlurDragmoveListener = async (
   shape?.fillPatternOffsetX(shape.attrs.x * scaleCoefficient);
   shape?.fillPatternOffsetY(shape.attrs.y * scaleCoefficient);
   if (shape?.attrs.width && shape?.attrs.height) {
-    shape = shape.cache();
+    shape = shape.cache() as any;
   }
   shape?.filters([Konva.Filters.Blur]);
 };
@@ -187,12 +189,12 @@ const drawBlurMouseMoveListener = async (
   scaleCoefficient: number,
 ) => {
   shape.show();
-  const x = stage.getRelativePointerPosition().x;
-  const y = stage.getRelativePointerPosition().y;
-  const width = x - shape.x();
-  const height = y - shape.y();
+  const x = stage?.getRelativePointerPosition()?.x;
+  const y = stage?.getRelativePointerPosition()?.y;
+  const width = (x || 0) - shape.x();
+  const height = (y || 0) - shape.y();
   if (shape?.attrs.width && shape?.attrs.height) {
-    shape = shape.cache();
+    shape = shape.cache() as any;
   }
   shape?.filters([Konva.Filters.Blur]);
   shape?.width(width);

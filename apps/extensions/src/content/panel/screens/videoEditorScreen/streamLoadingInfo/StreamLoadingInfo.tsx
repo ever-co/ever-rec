@@ -1,7 +1,7 @@
 import React, { FC, useEffect, useState } from 'react';
 import classNames from 'classnames';
 //@ts-ignore
-import styles from '../VideoEditorScreen.module.scss';
+import * as styles from '../VideoEditorScreen.module.scss';
 
 import { PlaybackStatusEnum } from '@/app/enums/StreamingServicesEnums';
 import { IAppMessage, AppMessagesEnum } from '@/app/messagess';

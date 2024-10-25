@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import browser from '@/app/utilities/browser';
-import styles from './IntegrationPage.module.scss';
+import * as styles from './IntegrationPage.module.scss';
 import AuthAC from '@/app/store/auth/actions/AuthAC';
 import { RootStateOrAny, useDispatch, useSelector } from 'react-redux';
 import { driveSignOut, DriveUser } from '@/app/services/google/auth';
@@ -83,8 +83,8 @@ const DrivePage: React.FC<ISettingsPageProps> = ({ imagePath }) => {
 
       {driveUser ? (
         <>
-          <h2>
-            <div className="tw-flex">
+          <h2 className="tw-max-w-full tw-text-center">
+            <div className="tw-flex tw-flex-col tw-gap-2 tw-justify-center">
               <div className="tw-mr-2">Connected to: </div>
               <div className="tw-flex">
                 <span className="tw-text-primary-purple tw-font-bold">
@@ -93,6 +93,7 @@ const DrivePage: React.FC<ISettingsPageProps> = ({ imagePath }) => {
               </div>
             </div>
           </h2>
+
           <div className="tw-w-90p">
             <AppButton
               full

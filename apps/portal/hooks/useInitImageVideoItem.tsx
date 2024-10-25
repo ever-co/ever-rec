@@ -41,15 +41,15 @@ const useInitImageVideoItem = ({
       const createdFormat =
         item?.dbData?.created &&
         moment(item.dbData?.created).format(appDateFormat);
-      setCreated(createdFormat);
+      setCreated(createdFormat || '');
       setInitialTitle(item?.dbData?.title);
-      setNewTitle(item?.dbData?.title);
-      setTitle(item?.dbData?.title);
+      setNewTitle(item?.dbData?.title || '');
+      setTitle(item?.dbData?.title || '');
     }
   }, [itemState]);
 
   const setTitleFocus = async () => {
-    titleRef.current.focus();
+    titleRef.current?.focus();
     setEditTitle(true);
   };
 
@@ -59,7 +59,7 @@ const useInitImageVideoItem = ({
       updateTitle(newTitle);
     } else if (newTitle == '') {
       initialTitle && setNewTitle(initialTitle);
-      setTitle(initialTitle);
+      setTitle(initialTitle || '');
       infoMessage("Item title can't be empty.");
     }
   };
@@ -84,8 +84,8 @@ const useInitImageVideoItem = ({
           onBlur={blurTitleHandler}
           style={{
             fontSize: forSinglePage ? '2.15rem' : '1rem',
-            height: forSinglePage && 70,
-            lineHeight: !forSinglePage && 1.17,
+            height: forSinglePage ? 70 : undefined,
+            lineHeight: !forSinglePage ? 1.17 : undefined,
           }}
           maxLength={200}
         />
@@ -98,8 +98,8 @@ const useInitImageVideoItem = ({
               : 'tw-text-xl',
           )}
           style={{
-            height: forSinglePage && 70,
-            lineHeight: !forSinglePage && 1.17,
+            height: forSinglePage ? 70 : undefined,
+            lineHeight: !forSinglePage ? 1.17 : undefined,
           }}
         >
           {title}

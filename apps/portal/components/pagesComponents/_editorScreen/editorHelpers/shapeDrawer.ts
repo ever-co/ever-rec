@@ -61,8 +61,8 @@ const drawShapeMouseDownListener = ({
 
   const shapeOptions: any = {
     name: drawnName,
-    x: stage.getRelativePointerPosition().x + 32,
-    y: stage.getRelativePointerPosition().y + 32,
+    x: (stage?.getRelativePointerPosition()?.x || 0) + 32,
+    y: (stage?.getRelativePointerPosition()?.y || 0) + 32,
     width: 164,
     height: 164,
     draggable: true,
@@ -89,8 +89,8 @@ const drawShapeMouseDownListener = ({
    */
   if (compareTools(activeTool, tools.rect)) {
     shapeOptions.shapeType = 'rect';
-    shapeOptions.x = stage.getRelativePointerPosition().x;
-    shapeOptions.y = stage.getRelativePointerPosition().y;
+    shapeOptions.x = stage?.getRelativePointerPosition()?.x || 0;
+    shapeOptions.y = stage?.getRelativePointerPosition()?.y || 0;
   }
 
   /**
@@ -128,8 +128,8 @@ const drawShapeMouseDownListener = ({
     shapeOptions.closed = true;
     shapeOptions.tension = 0.025;
     shapeOptions.shapeType = 'comment';
-    shapeOptions.x = stage.getRelativePointerPosition().x - 4;
-    shapeOptions.y = stage.getRelativePointerPosition().y - 2;
+    shapeOptions.x = (stage?.getRelativePointerPosition()?.x || 0) - 4;
+    shapeOptions.y = (stage?.getRelativePointerPosition()?.y || 0) - 2;
   }
 
   /**
@@ -140,16 +140,16 @@ const drawShapeMouseDownListener = ({
     shapeOptions.closed = true;
     shapeOptions.tension = 0.1;
     shapeOptions.shapeType = 'blob';
-    shapeOptions.x = stage.getRelativePointerPosition().x + 2;
-    shapeOptions.y = stage.getRelativePointerPosition().y + 2;
+    shapeOptions.x = (stage?.getRelativePointerPosition()?.x || 0) + 2;
+    shapeOptions.y = (stage?.getRelativePointerPosition()?.y || 0) + 2;
   }
 
   /**
    * set additional options fot figure with type "heart"
    */
   if (compareTools(activeTool, tools.heart)) {
-    shapeOptions.x = stage.getRelativePointerPosition().x;
-    shapeOptions.y = stage.getRelativePointerPosition().y;
+    shapeOptions.x = stage?.getRelativePointerPosition()?.x || 0;
+    shapeOptions.y = stage?.getRelativePointerPosition()?.y || 0;
     shapeOptions.sceneFunc = heartSceneFunc;
     shapeOptions.shapeType = 'heart';
   }
@@ -167,9 +167,9 @@ const drawShapeMouseDownListener = ({
 
 // const drawShapeMouseMoveListener = (stage: Stage, shape: Shape) => {
 //   // shape.show();
-//   const x = stage.getRelativePointerPosition().x;
-//   const y = stage.getRelativePointerPosition().y;
-//   let width = x - shape.x();
+//   const x = stage?(.getRelativePointerPosition()?.x;
+//   || 0) const y = stage?(.getRelativePointerPosition()?.y;
+//   || 0) let width = x - shape.x();
 //   let height = y - shape.y();
 
 //   if (

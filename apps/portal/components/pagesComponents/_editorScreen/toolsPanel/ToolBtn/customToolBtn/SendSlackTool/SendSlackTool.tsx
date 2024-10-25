@@ -55,7 +55,7 @@ const SendSlackTool: React.FC<ISlackToolProps> = ({
   }, [channelsData, user]);
 
   const sendSlackScreenShot = async () => {
-    const id = image.dbData.id;
+    const id = image.dbData?.id;
     if (id && selectedChannel) {
       try {
         setLoading(true);
@@ -83,13 +83,11 @@ const SendSlackTool: React.FC<ISlackToolProps> = ({
       onSubpanelClose={closeSubPanelHandler}
       ref={subPanelRef}
       placement="left"
-      toolTitle='Share on Slack'
+      toolTitle="Share on Slack"
     >
       <div className={styles.parentContainer}>
         <div className={styles.innerContainer}>
-          <h2 className={styles.title}>
-            Share with slack
-          </h2>
+          <h2 className={styles.title}>Share with slack</h2>
           <AppSelect
             placeholder="Please select an option"
             value={selectedChannel}
@@ -100,9 +98,7 @@ const SendSlackTool: React.FC<ISlackToolProps> = ({
             }}
             options={channelsData}
           />
-          <div
-            className={styles.wrapper}
-          >
+          <div className={styles.wrapper}>
             <div className={styles.flexContainer}>
               <AppButton
                 className={styles.button}

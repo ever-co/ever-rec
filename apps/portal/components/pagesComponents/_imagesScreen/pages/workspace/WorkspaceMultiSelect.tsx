@@ -79,7 +79,7 @@ const WorkspaceMultiSelect: React.FC<Props> = ({
   const deleteItemsConfirm = async () => {
     closeAllModals();
 
-    const deletedItemIds = [];
+    const deletedItemIds: any[] = [];
     const deletePromises = selectedItems.map((item) => {
       const type = item.ref.contentType.split('/')[0];
       const id = item?.dbData?.id;
@@ -88,10 +88,15 @@ const WorkspaceMultiSelect: React.FC<Props> = ({
 
       if (type === 'image') {
         deletedItemIds.push(id);
-        return deleteWorkspaceImage(workspace.id, id, refName, parentId);
+        return deleteWorkspaceImage(
+          workspace.id,
+          id as string,
+          refName,
+          parentId,
+        );
       } else if (type === 'video') {
         deletedItemIds.push(id);
-        return deleteWorkspaceVideo(workspace.id, id, refName);
+        return deleteWorkspaceVideo(workspace.id, id as string, refName);
       }
     });
 
@@ -136,7 +141,7 @@ const WorkspaceMultiSelect: React.FC<Props> = ({
   return (
     <div
       className={classNames(
-        'multi-items tw-flex tw-flex tw-justify-around tw-items-center tw-bg-gallery-grey tw-rounded-md tw-p-5px tw-px-2',
+        'multi-items tw-flex tw-justify-around tw-items-center tw-bg-gallery-grey tw-rounded-md tw-p-5px tw-px-2',
         styles.workspace,
       )}
     >

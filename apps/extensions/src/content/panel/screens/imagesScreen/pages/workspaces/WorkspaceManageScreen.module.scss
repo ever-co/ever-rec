@@ -1,4 +1,4 @@
-@import '/src/content/utilities/partials/_mixins.scss';
+@import '@/content/utilities/partials/_mixins.scss';
 
 @mixin backgroundTransition {
   transition: background-color 0.2s ease-in;

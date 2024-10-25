@@ -3,7 +3,7 @@ import AppSvg from '@/content/components/elements/AppSvg';
 import { Modal } from 'antd';
 import classNames from 'classnames';
 //@ts-ignore
-import styles from './UploadThumbnailModal.module.scss';
+import * as styles from './UploadThumbnailModal.module.scss';
 
 interface Props {
   visible: boolean;
@@ -22,11 +22,14 @@ const UploadThumbnailModal: React.FC<Props> = ({
 }) => {
   return (
     <Modal
-      visible={visible}
+      open={visible}
       closable={true}
       onCancel={onCancel}
       closeIcon={
-        <AppSvg path="images/panel/common/close-icon.svg" className="modalCloseButton" />
+        <AppSvg
+          path="images/panel/common/close-icon.svg"
+          className="modalCloseButton"
+        />
       }
       footer={
         <div

@@ -31,7 +31,7 @@ const CreateTrelloTicketModal: React.FC<ICreateTrelloTicketModalProps> = ({
   onCancel,
 }) => {
   const [boards, setBoards] = useState<any[] | null>(null);
-  const [issueList, setIssueList] = useState([]);
+  const [issueList, setIssueList] = useState<any[]>([]);
   const [selectedBoard, setSelectedBoard] = useState<string | null>(null);
   const [selectedIssueType, setSelectedIssueType] = useState<string | null>(
     null,
@@ -105,7 +105,7 @@ const CreateTrelloTicketModal: React.FC<ICreateTrelloTicketModalProps> = ({
 
   const updateListData = useCallback(
     (value: string) => {
-      let listRes = [];
+      let listRes: any[] = [];
 
       boards &&
         boards.find((item) => {
@@ -126,7 +126,7 @@ const CreateTrelloTicketModal: React.FC<ICreateTrelloTicketModalProps> = ({
       footer={
         <Footer
           hideBoardsText={boards === null || boards.length > 0}
-          isFormValid={isFormValid}
+          isFormValid={!!isFormValid}
           projectLoading={loading}
           handleOnSubmit={handleOnSubmit}
           onCancel={onCancel}

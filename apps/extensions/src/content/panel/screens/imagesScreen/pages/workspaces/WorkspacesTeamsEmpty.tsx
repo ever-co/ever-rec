@@ -1,6 +1,6 @@
 import React, { FC } from 'react';
 import classNames from 'classnames';
-import styles from './WorkspacesTeamsEmpty.module.scss';
+import * as styles from './WorkspacesTeamsEmpty.module.scss';
 import AppButton from '@/content/components/controls/appButton/AppButton';
 import AppSvg from '@/content/components/elements/AppSvg';
 

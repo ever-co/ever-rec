@@ -29,7 +29,7 @@ export const initConversationDraw = ({
   saveHistory,
 }: IConversationDrawer) => {
   stage.on('mousedown', (e) => {
-    if (e.target.parent.getAttr('id') !== 'conversationGroup') {
+    if (e.target.parent?.getAttr('id') !== 'conversationGroup') {
       drawImageMouseDownListener({
         stage,
         options,
@@ -69,8 +69,8 @@ const drawImageMouseDownListener = ({
   const shape = new Konva.Path({
     shapeType: options.shapeType,
     name: drawnName,
-    x: stage.getRelativePointerPosition().x - 62,
-    y: stage.getRelativePointerPosition().y - 62,
+    x: (stage?.getRelativePointerPosition()?.x || 0) - 62,
+    y: (stage?.getRelativePointerPosition()?.y || 0) - 62,
     width: 64,
     height: 64,
     scale: {

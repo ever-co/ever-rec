@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import styles from './UserShortInfo.module.scss';
+import * as styles from './UserShortInfo.module.scss';
 import classNames from 'classnames';
 import AppSvg from '@/content/components/elements/AppSvg';
 import { panelRoutes } from '@/content/panel/router/panelRoutes';
@@ -36,7 +36,7 @@ const UserShortInfo: FC<IUserShortInfoProps> = ({
       <div
         className={classNames(
           styles.userPhotoContainer,
-          `tw-rounded-full tw-overflow-hidden tw-cursor-pointer tw-flex tw-justify-center tw-flex tw-mr-4 tw-h-full px tw-h-full`,
+          `tw-rounded-full tw-overflow-hidden tw-cursor-pointer tw-justify-center tw-flex tw-mr-4 tw-h-full`,
         )}
         style={{ width: `${avaSize}px`, height: `${avaSize}px` }}
         onClick={goToProfile}

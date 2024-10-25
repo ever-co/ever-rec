@@ -25,7 +25,7 @@ export const toPng = async (data) => {
   canvas.width = width;
   canvas.height = height;
   const ctx = canvas.getContext('2d');
-  const v = await Canvg.from(ctx, svg, preset);
+  const v = await Canvg.from(ctx as any, svg, preset as any);
   // Render only first frame, ignoring animations and mouse.
   await v.render();
   const pngUrl = canvas.toDataURL();
@@ -71,8 +71,8 @@ const drawImageMouseDownListener = ({
             imageName: options.imageName,
             srcPath: pngUrl,
             name: drawnName,
-            x: stage.getRelativePointerPosition().x - 42,
-            y: stage.getRelativePointerPosition().y - 42,
+            x: (stage?.getRelativePointerPosition()?.x || 0) - 42,
+            y: (stage?.getRelativePointerPosition()?.y || 0) - 42,
             scaleX: scaleCoefficient,
             scaleY: scaleCoefficient,
             width: 164,

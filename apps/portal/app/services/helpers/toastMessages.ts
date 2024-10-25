@@ -20,6 +20,7 @@ export const successMessage = (text: string) => {
     },
   });
 };
+
 export const errorMessage = (text: string) => {
   toast.error(text, {
     theme: 'light',

@@ -20,7 +20,7 @@ import PlayButton from './PlayButton';
 import Overlay from './VideoItemOverlay';
 import VideoItemWrapper from './VideoItemWrapper';
 import ItemAuthor from './ItemAuthor';
-import Image from 'next/image';
+import Image from 'next/legacy/image';
 
 interface IVideoItemProps {
   id?: number;
@@ -108,23 +108,23 @@ const VideoItem: FC<IVideoItemProps> = ({
     onDropdownVisibleChange(visible);
   };
 
-  let thumbnailUrl = null;
+  let thumbnailUrl: string | null = null;
   let views = 0;
   if (video?.dbData) {
-    thumbnailUrl = video.dbData?.streamData?.thumbnailUrl;
+    thumbnailUrl = video.dbData?.streamData?.thumbnailUrl || null;
     views = Array.isArray(video?.dbData?.views)
       ? video?.dbData?.views.length
-      : video?.dbData?.views ?? 0;
+      : (video?.dbData?.views ?? 0);
   }
 
   return (
     <>
       <VideoItemWrapper
-        videoId={video?.dbData?.id}
+        videoId={video?.dbData?.id || undefined}
         isDraggable={isDraggable}
         isSelected={isSelected}
         dropdownVisible={dropdownVisible}
-        selectedItems={selectedItems}
+        selectedItems={selectedItems as any}
         onDragStart={(ev: DragEvent) => {
           ev.dataTransfer.effectAllowed = 'move';
           video.dbData?.id && ev.dataTransfer.setData('id', video.dbData?.id);
@@ -135,8 +135,8 @@ const VideoItem: FC<IVideoItemProps> = ({
           {type === 'video' ? (
             <>
               <Thumbnail
-                thumbnailUrl={thumbnailUrl}
-                videoUrl={video.url}
+                thumbnailUrl={thumbnailUrl || ''}
+                videoUrl={video.url || ''}
                 loading={loading}
                 setLoading={setLoading}
               />
@@ -166,7 +166,7 @@ const VideoItem: FC<IVideoItemProps> = ({
             canEdit={canEdit}
             canShare={canShare}
             hasRestore={hasRestore}
-            videoId={video?.dbData?.id}
+            videoId={video?.dbData?.id || undefined}
             onDelete={onDelete}
             dropdownVisible={dropdownVisible}
             onDropdownVisibleChange={dropdownVisibleChangeHandler}

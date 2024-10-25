@@ -119,7 +119,7 @@ export class ToolbarService {
     }
 
     new Promise<boolean>((res) => {
-      setActiveTool(null);
+      setActiveTool(null as any);
       res(true);
     }).then(async (res) => {
       await download();
@@ -164,7 +164,7 @@ export class ToolbarService {
 
     await copy();
 
-    setActiveTool(null);
+    setActiveTool(null as any);
     setTimeout(() => setClipboardCopyEnabled(true), 2000);
   }
 
@@ -200,7 +200,7 @@ export class ToolbarService {
       setHistoryStep(newStep);
       renderStep(newStep);
       setUndoState(false);
-      setPointerTarget(null);
+      setPointerTarget(null as any);
     }
     clearActiveTool();
   }
@@ -222,7 +222,7 @@ export class ToolbarService {
       setHistoryStep(newStep);
       renderStep(newStep);
       setUndoState(false);
-      setPointerTarget(null);
+      setPointerTarget(null as any);
     }
 
     if (all) {

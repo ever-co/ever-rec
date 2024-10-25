@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import styles from './colorSelector.module.scss';
 import classNames from 'classnames';
-import Image from 'next/image';
+import Image from 'next/legacy/image';
 import { SketchPicker } from 'react-color';
 import widthselector from 'public/common/widthselector.svg';
 import useClickOrKeyOutside from 'hooks/useClickOrKeyOutside';

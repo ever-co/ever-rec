@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import classNames from 'classnames';
-import styles from './UpdateWorkspaceTeamModal.module.scss';
+import * as styles from './UpdateWorkspaceTeamModal.module.scss';
 import { IWorkspace } from '@/app/interfaces/IWorkspace';
 import { IWorkspaceTeam } from '@/app/interfaces/IWorkspaceTeams';
 import { iDataResponseParser } from '@/app/services/helpers/iDataResponseParser';
@@ -170,7 +170,7 @@ const UpdateWorkspaceTeamModal: React.FC<IProps> = ({
 
   return (
     <Modal
-      visible={visible}
+      open={visible}
       onCancel={onCancel}
       className={styles.modal}
       closeIcon={

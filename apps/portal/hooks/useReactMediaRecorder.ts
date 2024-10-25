@@ -145,9 +145,8 @@ export function useReactMediaRecorder({
         }
         mediaStream.current = stream;
       } else {
-        const stream = await window.navigator.mediaDevices.getUserMedia(
-          requiredMedia,
-        );
+        const stream =
+          await window.navigator.mediaDevices.getUserMedia(requiredMedia);
         mediaStream.current = stream;
       }
       setStatus('idle');
@@ -303,7 +302,7 @@ export function useReactMediaRecorder({
 
     const blobInitial = new Blob(mediaChunks.current, blobProperty);
     let duration = 0;
-    let blobDuration = null;
+    let blobDuration: Blob | null = null;
     if (startTime.current) {
       duration = Date.now() - startTime.current;
       blobDuration = await fixWebmDuration(blobInitial, duration, {
@@ -345,7 +344,7 @@ export function useReactMediaRecorder({
 
   const stopRecording = () => {
     if (timeout.current) {
-      clearInterval(timeout.current);
+      clearInterval(timeout.current as NodeJS.Timeout);
     }
 
     if (mediaRecorder.current) {
@@ -402,7 +401,8 @@ export const ReactMediaRecorder = (props: ReactMediaRecorderProps) =>
   props.render(useReactMediaRecorder(props));
 
 export const transformBlobURLs = async (blobUrls: string[]) => {
-  const blobs = [];
+  const blobs: Blob[] = [];
+
   for await (const blobUrl of blobUrls) {
     const blob = await fetch(blobUrl).then((response) => response.blob());
 

@@ -38,8 +38,8 @@ const CommentElement: FC<IProps> = ({
 }) => {
   const user: IUser = useSelector((state: RootStateOrAny) => state.auth.user);
 
-  const authorName = comment.user.name;
-  const authorPhotoURL = comment.user.photoURL;
+  const authorName = comment.user?.name;
+  const authorPhotoURL = comment.user?.photoURL;
   const isEdited = comment.isEdited;
   const dateElapsed = moment(comment.timestamp).fromNow();
 
@@ -78,7 +78,15 @@ const CommentElement: FC<IProps> = ({
   return (
     <div className={styles.commentWrapper}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={authorPhotoURL} alt="user photo" />
+      {authorPhotoURL ? (
+        <img src={authorPhotoURL} alt="user photo" />
+      ) : (
+        <AppSvg
+          path="/sign/default-profile.svg"
+          size="30px"
+          className="tw-flex tw-justify-center tw-items-center"
+        />
+      )}
 
       <div className={styles.commentDetails}>
         <div className={styles.commentAuthor}>

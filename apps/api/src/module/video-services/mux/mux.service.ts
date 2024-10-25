@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 // tslint:disable-next-line: no-var-requires
-const Mux = require('@mux/mux-node');
 import * as admin from 'firebase-admin';
 import { Asset } from '@mux/mux-node/dist/video/domain';
 import { Injectable } from '@nestjs/common';
@@ -10,6 +9,7 @@ import {
   VideoServicesEnum,
 } from '../../../enums/StreamingServicesEnums';
 import { IStreamingDbData } from 'src/interfaces/IEditorVideo';
+import Mux from '@mux/mux-node';
 
 // https://muxinc.github.io/mux-node-sdk/identifiers.html - Check the reference for mux-node, there is no TypeScript version of the library
 // Alongside https://docs.mux.com/api-reference/video#operation/list-assets
@@ -24,11 +24,15 @@ const createThumbnailUrl = (playbackId: string) => {
 
 @Injectable()
 export class MuxService {
-  private readonly Video: any;
+  private readonly Video: InstanceType<typeof Mux>['Video'];
 
   constructor(private readonly configService: ConfigService) {
-    const MUX_TOKEN_ID = this.configService.get<string>('MUX_TOKEN_ID');
-    const MUX_TOKEN_SECRET = this.configService.get<string>('MUX_TOKEN_SECRET');
+    const MUX_TOKEN_ID =
+      this.configService.get<string>('MUX_TOKEN_ID') || String('invalid');
+
+    const MUX_TOKEN_SECRET =
+      this.configService.get<string>('MUX_TOKEN_SECRET') || String('invalid');
+
     const { Video: VideoMux } = new Mux(MUX_TOKEN_ID, MUX_TOKEN_SECRET);
 
     this.Video = VideoMux;

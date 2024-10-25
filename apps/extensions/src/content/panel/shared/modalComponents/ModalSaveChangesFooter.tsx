@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import styles from './ModalSaveChangesFooter.module.scss';
+import * as styles from './ModalSaveChangesFooter.module.scss';
 import AppButtonSecond from '@/content/components/controls/appButtonSecond/AppButtonSecond';
 
 interface IProps {

@@ -29,7 +29,7 @@ const ShareItemModal: FC<IProps> = ({
     copyLinkHandler,
     getShareableLinkHandler,
     deleteShareLink,
-  } = useGenerateShareLink(item, 'video', workspaceId, updateVideoState);
+  } = useGenerateShareLink(item, 'video', workspaceId || '', updateVideoState);
   const [shareLinkCopied, setShareLinkCopied] = useState(false);
   const [shareLoadingState, setShareLoadingState] = useState(false);
 
@@ -60,7 +60,7 @@ const ShareItemModal: FC<IProps> = ({
 
   return (
     <Modal
-      visible={visible}
+      open={visible}
       footer={null}
       closable
       closeIcon={

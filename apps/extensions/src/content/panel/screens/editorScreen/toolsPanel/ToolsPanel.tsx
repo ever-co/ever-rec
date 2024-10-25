@@ -161,6 +161,8 @@ interface IToolsPanelProps {
   setLoading: (imageLoaded: boolean) => void;
 }
 
+const DraggableReact = Draggable as any;
+
 const ToolsPanel: React.FC<IToolsPanelProps> = ({
   onSaveHistory,
   onUndo,
@@ -395,11 +397,15 @@ const ToolsPanel: React.FC<IToolsPanelProps> = ({
   };
 
   return (
-    <Draggable onStop={handleStop} position={{ x: x, y: y }} disabled={locked}>
+    <DraggableReact
+      onStop={handleStop}
+      position={{ x: x, y: y }}
+      disabled={locked}
+    >
       <div
         className={classNames(
-          ` tools-panel-wrapper tw-fixed tw-z-10 tw-left-4 tw-rotate-90 tw-flex tw-flex-col tw-justify-between 
-        tw-bg-toolbox-light tw-rounded-2lg tw-shadow-2xl tw-select-none 
+          ` tools-panel-wrapper tw-fixed tw-z-10 tw-left-4 tw-rotate-90 tw-flex tw-flex-col tw-justify-between
+        tw-bg-toolbox-light tw-rounded-2lg tw-shadow-2xl tw-select-none
         `,
         )}
       >
@@ -1459,7 +1465,7 @@ const ToolsPanel: React.FC<IToolsPanelProps> = ({
           <ToolBtn onSelect={onRedo} icon={BiRedo} disabled={!canRedo} />
         </div>
         <div className="tw-flex tw-items-center">
-        { user &&  
+        { user &&
           <React.Fragment>
             <AppButton
               onClick={() =>
@@ -1480,7 +1486,7 @@ const ToolsPanel: React.FC<IToolsPanelProps> = ({
           }
         </div> */}
       </div>
-    </Draggable>
+    </DraggableReact>
   );
 };
 

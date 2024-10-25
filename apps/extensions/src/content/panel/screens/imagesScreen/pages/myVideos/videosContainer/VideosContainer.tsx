@@ -1,5 +1,5 @@
 import { FC, useCallback, useRef, useState } from 'react';
-import styles from './VideosContainer.module.scss';
+import * as styles from './VideosContainer.module.scss';
 import IEditorVideo from '@/app/interfaces/IEditorVideo';
 import {
   downloadVideo,

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import styles from './WorkspaceSettingsScreen.module.scss';
+import * as styles from './WorkspaceSettingsScreen.module.scss';
 import { IWorkspace } from '@/app/interfaces/IWorkspace';
 import { renameWorkspaceAPI } from '@/app/services/api/workspace';
 import { iDataResponseParser } from '@/app/services/helpers/iDataResponseParser';

@@ -111,15 +111,15 @@ browser.runtime.onMessage.addListener(
       } catch (error) {
         console.error(error);
         if (captureTimeInterval) {
-          clearInterval(captureTimeInterval);
+          clearInterval(captureTimeInterval as any);
         }
       }
     }
 
     if (message.action === AppMessagesEnum.stopCaptureCS) {
       if (captureInterval && captureTimeInterval) {
-        clearInterval(captureInterval);
-        clearInterval(captureTimeInterval);
+        clearInterval(captureInterval as any);
+        clearInterval(captureTimeInterval as any);
       }
 
       sendRuntimeMessage({
@@ -144,7 +144,7 @@ const copyImageToClipboard = async (imgBase64: string) => {
   const item: ClipboardItemInterface = new window.ClipboardItem({
     'image/png': blob,
   });
-  item && navigator.clipboard.write([item]);
+  item && navigator.clipboard.write([item as any]);
 };
 
 const startCaptureIntervalBadge = () => {

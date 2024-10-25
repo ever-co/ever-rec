@@ -1,6 +1,6 @@
 import { FC } from 'react';
 import { IUser } from 'app/interfaces/IUserData';
-import 'plyr-react/dist/plyr.css';
+import 'plyr/dist/plyr.css';
 import { ISharedItem } from 'app/interfaces/ISharedItem';
 import { GetServerSideProps, GetServerSidePropsContext } from 'next';
 import { getUserServerSideProps } from 'app/services/api/auth';
@@ -19,10 +19,10 @@ export const getServerSideProps: GetServerSideProps = async (
   if (refreshToken && idToken) {
     const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-    const user: IUser = await getUserServerSideProps(
+    const user: IUser | null = await getUserServerSideProps(
       refreshToken,
       idToken,
-      baseURL,
+      baseURL || '',
     );
     if (user) {
       return { props: { user, ip } };

@@ -5,7 +5,7 @@ import {
   OnGatewayDisconnect,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { Server } from 'socket.io';
+import type { Server } from 'socket.io';
 
 @WebSocketGateway()
 export class EditorGateway implements OnGatewayConnection, OnGatewayDisconnect {

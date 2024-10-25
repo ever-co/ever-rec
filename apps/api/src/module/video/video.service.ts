@@ -2,7 +2,7 @@ import * as admin from 'firebase-admin';
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Reference } from '@firebase/database-types';
-import { FullMetadata } from '@firebase/storage';
+import type { FullMetadata } from '@firebase/storage';
 import { nanoid } from 'nanoid';
 import moment from 'moment';
 import { SharedService } from '../../services/shared/shared.service';
@@ -334,9 +334,12 @@ export class VideoService {
 
     try {
       const dbVideos = db.ref(`users/${uid}/videos/`);
-      const videosQuery = dbVideos
-        .orderByChild('parentId')
-        .equalTo(folderId || false);
+      let videosQuery = dbVideos.orderByChild('parentId');
+
+      if (folderId) {
+        videosQuery = videosQuery.equalTo(folderId);
+      }
+
       const videosSnap = await videosQuery.get();
 
       if (videosSnap.val()) {

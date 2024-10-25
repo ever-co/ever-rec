@@ -1,5 +1,10 @@
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+
 .rec {
-  @tailwind base;
-  @tailwind components;
-  @tailwind utilities;
+  @import 'tailwindcss/utilities';
 }
+
+// @tailwind base;
+// @tailwind components;
+// @tailwind utilities;

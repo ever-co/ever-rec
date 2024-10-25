@@ -66,17 +66,18 @@ const LoginModal: React.FC<ILoginModalProps> = ({
   ];
 
   const onLoginHandler = async (): Promise<void> => {
-    let response: IDataResponse;
-    let reAuthorizedUser: IUserData;
-    let isSameUser: boolean;
+    let response: IDataResponse | null = null;
+    let reAuthorizedUser: IUserData | null = null;
+    let isSameUser: boolean | null = null;
 
     if (valid && user) {
       response = await login(user.email, password.value);
       reAuthorizedUser = {
         ...response.data,
       };
-      isSameUser = reAuthorizedUser.id === user.id;
+      isSameUser = reAuthorizedUser?.id === user.id;
     }
+
     if (reAuthorizedUser && isSameUser) {
       try {
         setPassword(initialControl());
@@ -110,7 +111,7 @@ const LoginModal: React.FC<ILoginModalProps> = ({
 
   return (
     <Modal
-      visible={visible}
+      open={visible}
       onCancel={onClose}
       closeIcon={
         <AppSvg path="/images/close-icon.svg" className="modalCloseButton" />

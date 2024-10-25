@@ -158,7 +158,7 @@ const useEditorVideo = (): EditorVideoRenderProps => {
             muteAudio={muteAudio}
             unMuteAudio={unMuteAudio}
             onCancelRecording={cancelRecording}
-            recordStatus={recordingStatus}
+            recordStatus={recordingStatus || undefined}
           />
         )}
       </div>

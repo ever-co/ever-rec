@@ -46,9 +46,7 @@ const PanelRegister: React.FC = () => {
   ];
 
   const passwordRules: ((v: string) => boolean | string)[] = [
-    passwordPatternRule(
-      'Minimum eight characters and at least one number',
-    ),
+    passwordPatternRule('Minimum eight characters and at least one number'),
   ];
 
   const usernameChangeHandler = async ({ value }: AppInputType) => {
@@ -168,6 +166,7 @@ const PanelRegister: React.FC = () => {
         </div>
 
         <div className="tw-flex tw-mt-10 tw-gap-4">
+          {/* @ts-ignore */}
           <Checkbox
             checked={TOS}
             onChange={() => setTOS((prevTos) => !prevTos)}

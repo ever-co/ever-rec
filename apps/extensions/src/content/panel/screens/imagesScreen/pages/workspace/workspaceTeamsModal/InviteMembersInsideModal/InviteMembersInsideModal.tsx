@@ -1,5 +1,5 @@
 import { useState, useEffect, FC } from 'react';
-import styles from './InviteMembersInsideModal.module.scss';
+import * as styles from './InviteMembersInsideModal.module.scss';
 import AppSvg from '@/content/components/elements/AppSvg';
 import InvitationSection from './InvitationSection';
 import { changeWheelSpeed } from '@/content/utilities/scripts/changeWheelSpeed';

@@ -12,7 +12,7 @@ const useHeadTitle = (pageMenuItems: IPageMenuItems[]) => {
       router.pathname.includes(item.type),
     )?.title;
 
-    setActiveRouteTitle(activeRouteTitle);
+    setActiveRouteTitle(activeRouteTitle || null);
   }, [pageMenuItems, router.pathname]);
 
   let headTitle = '';

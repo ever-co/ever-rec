@@ -1,5 +1,5 @@
 import { ChangeEvent, FC, useRef } from 'react';
-import styles from './SCHeader.module.scss';
+import * as styles from './SCHeader.module.scss';
 import classNames from 'classnames';
 import { useSelector, RootStateOrAny } from 'react-redux';
 import { Tooltip, Dropdown, Menu } from 'antd';
@@ -32,7 +32,7 @@ const SCHeader: FC<ISCHeaderProps> = ({
   onFilterChange,
   onInviteMembersButtonClick,
 }) => {
-  const photoURL = userPhotoURL ?? 'images/panel/sign/default-profile.svg';
+  const photoURL = userPhotoURL ?? '/images/panel/sign/default-profile.svg';
   const clickedNotifications = useRef(false); // to be removed when implemented
   const clickedHelpCenter = useRef(false); // to be removed when implemented
   const navigate = useNavigate();

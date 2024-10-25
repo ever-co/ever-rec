@@ -1,7 +1,6 @@
 /* eslint-disable react/jsx-no-target-blank */
 /* eslint-disable jsx-a11y/alt-text */
 /* eslint-disable @next/next/no-img-element */
-/* eslint-disable @next/next/link-passhref */
 import { useEffect, useState } from 'react';
 import classNames from 'classnames';
 import styles from './WhiteboardCard.module.scss';

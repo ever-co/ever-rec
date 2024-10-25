@@ -17,7 +17,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { IMarker } from '@/app/interfaces/IMarker';
 import { MarkerService } from '@/app/services/editor/markers';
 import { CloseOutlined } from '@ant-design/icons';
-import styles from './markerContentPopup.module.scss';
+import * as styles from './markerContentPopup.module.scss';
 import IEditorImage from '@/app/interfaces/IEditorImage';
 import { IWorkspaceImage } from '@/app/interfaces/IWorkspace';
 import { updateMarkers } from '@/app/services/screenshots';

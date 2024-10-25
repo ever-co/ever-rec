@@ -81,7 +81,9 @@ const EmailModal: React.FC<IEmailModalProps> = ({
             itemType == 'video' && (await getTemplateRefName(item.dbData?.id));
 
           if (!templateRefName && itemType == 'video') {
-            const template: Blob | null = await createVideoTemplate(item.url);
+            const template: Blob | null = await createVideoTemplate(
+              item.url as string,
+            );
 
             if (template) {
               templateUrl = await setTemplateRefName(template, item.dbData.id);
@@ -97,7 +99,7 @@ const EmailModal: React.FC<IEmailModalProps> = ({
             itemLink,
             itemType,
             itemPublicLink,
-            id,
+            id as any,
             templateUrl,
             message,
           );
@@ -112,7 +114,7 @@ const EmailModal: React.FC<IEmailModalProps> = ({
             itemLink,
             itemType,
             itemPublicLink,
-            id,
+            id as any,
             templateUrl,
           );
           await saveSegmentEvent(itemType + ' send by email', {
@@ -140,7 +142,7 @@ const EmailModal: React.FC<IEmailModalProps> = ({
             itemPublicLink: null,
           }),
         );
-        await onSave();
+        await onSave?.();
       } catch (error: any) {
         errorHandler(error);
         dispatch(
@@ -166,7 +168,7 @@ const EmailModal: React.FC<IEmailModalProps> = ({
         emailImageLink,
         'image',
         itemPublicLink,
-        id,
+        id as any,
         false,
         message,
       );
@@ -176,7 +178,7 @@ const EmailModal: React.FC<IEmailModalProps> = ({
 
   return (
     <Modal
-      visible={visible}
+      open={visible}
       onCancel={onCancel}
       footer={
         <div className="tw-flex tw-justify-end tw-mt-14">

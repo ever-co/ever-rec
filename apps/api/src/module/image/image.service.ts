@@ -5,7 +5,7 @@ import { Injectable } from '@nestjs/common';
 import { nanoid } from 'nanoid';
 import { Reference } from '@firebase/database-types';
 import { SharedService } from '../../services/shared/shared.service';
-import { FullMetadata } from '@firebase/storage';
+import type { FullMetadata } from '@firebase/storage';
 import IEditorImage, {
   IDbFolder,
   DbImgData,
@@ -39,6 +39,9 @@ export class ImageService {
     };
   }
 
+  /**
+   * @internal
+   */
   async getImageOrItsThumbnailRef(uid: string, refName: string) {
     const bucket = admin.storage().bucket();
     const thumbnailExists = (
@@ -368,11 +371,14 @@ export class ImageService {
 
     try {
       const db = admin.database();
-      const bucket = admin.storage().bucket();
+      // const bucket = admin.storage().bucket();
       const dbImages = db.ref(`users/${uid}/screenshots`);
-      const imagesQuery = dbImages
-        .orderByChild('parentId')
-        .equalTo(folderId || false);
+      let imagesQuery = dbImages.orderByChild('parentId');
+
+      if (folderId) {
+        imagesQuery = imagesQuery.equalTo(folderId);
+      }
+
       const imagesSnap = await imagesQuery.get();
 
       if (imagesSnap.val()) {
