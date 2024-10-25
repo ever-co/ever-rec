@@ -19,8 +19,8 @@ import { EditorWebsocketModule } from '../editor-websocket-module/editor-websock
     TwilioModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (cfg: ConfigService) => ({
-        accountSid: cfg.get('TWILIO_ACCOUNT_SID'),
-        authToken: cfg.get('TWILIO_AUTH_TOKEN'),
+        accountSid: cfg.get('TWILIO_ACCOUNT_SID') || String('AC-invalid'),
+        authToken: cfg.get('TWILIO_AUTH_TOKEN') || String('invalid'),
       }),
       inject: [ConfigService],
     }),

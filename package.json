@@ -27,7 +27,7 @@
 		"build:portal": "npm run build --filter=ever-rec-portal",
 		"build:extensions": "npm run build --filter=ever-rec-extension",
 		"build:manual": "npm run build:api && npm run build:admin && npm run build:portal && npm run build:website",
-		"prepare:husky": "pnpx husky install .husky",
+		"prepare:husky": "npx husky install .husky",
 		"seed": "npm run ts-node -r tsconfig-paths/register --project ./apps/api/tsconfig.json apps/api/src/seeder.ts",
 		"seed:refresh": "npm run seed --refresh",
 		"sdk:generate": "npm run graphql-codegen --config ./apps/api/src/schemas/codegen.yml",
