@@ -139,7 +139,7 @@ FIREBASE_PROJECT_ID=your_project_id
 FIREBASE_STORAGE_BUCKET=your_project.appspot.com
 FIREBASE_MESSAGING_SENDER_ID=your_sender_id
 FIREBASE_APP_ID=your_app_id
-FIREBASE_MASUREMENT_ID=your_measurement_id
+FIREBASE_MEASUREMENT_ID=your_measurement_id
 
 # Firebase Admin Configuration
 FIREBASE_ADMIN_PRIVATE_KEY=your_private_key

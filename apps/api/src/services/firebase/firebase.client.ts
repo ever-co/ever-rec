@@ -28,7 +28,7 @@ export class FirebaseClient {
         'FIREBASE_MESSAGING_SENDER_ID',
       ),
       appId: this.configService.get<string>('FIREBASE_APP_ID'),
-      measurementId: this.configService.get<string>('FIREBASE_MASUREMENT_ID'),
+      measurementId: this.configService.get<string>('FIREBASE_MEASUREMENT_ID'),
     };
 
     this.firebaseApp ??= initializeApp(firebaseConfig);
