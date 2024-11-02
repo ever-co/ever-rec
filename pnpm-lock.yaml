@@ -93,8 +93,8 @@ importers:
         specifier: ^6.1.0
         version: 6.2.0
       axios:
-        specifier: ^0.26.0
-        version: 0.26.1
+        specifier: ^0.28.0
+        version: 0.28.0
       blob-to-stream:
         specifier: ^1.0.3
         version: 1.0.3
@@ -307,8 +307,8 @@ importers:
         specifier: ^9.8.8
         version: 9.8.8
       axios:
-        specifier: ^0.26.0
-        version: 0.26.1
+        specifier: ^0.28.0
+        version: 0.28.0
       base64-arraybuffer:
         specifier: ^1.0.2
         version: 1.0.2
@@ -4686,6 +4686,9 @@ packages:
 
   axios@0.27.2:
     resolution: {integrity: sha512-t+yRIyySRTp/wua5xEr+z1q60QmLq8ABsS5O9Me1AsE5dfKqgnCFzwiCZZ/cGNd1lq4/7akDWMxdhVlucjmnOQ==}
+
+  axios@0.28.0:
+    resolution: {integrity: sha512-Tu7NYoGY4Yoc7I+Npf9HhUMtEEpV7ZiLH9yndTCoNhcpBH0kwcvFbzYN9/u5QKI5A6uefjsNNWaz5olJVYS62Q==}
 
   axios@1.7.7:
     resolution: {integrity: sha512-S4kL7XrjgBmvdGut0sN3yJxqYzrDOnivkBiN0OFs6hLiUam3UPvswUo0kqGyhqUZGEOytHyumEdXsAkgCOUf3Q==}
@@ -17793,6 +17796,14 @@ snapshots:
     dependencies:
       follow-redirects: 1.15.9
       form-data: 4.0.1
+    transitivePeerDependencies:
+      - debug
+
+  axios@0.28.0:
+    dependencies:
+      follow-redirects: 1.15.9
+      form-data: 4.0.1
+      proxy-from-env: 1.1.0
     transitivePeerDependencies:
       - debug
 
