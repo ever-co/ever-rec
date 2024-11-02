@@ -13,8 +13,14 @@ if (
   }/node_modules/canvas/build/Release:${process.env.LD_LIBRARY_PATH || ''}`;
 }
 
+/**
+ * @type any
+ */
+const OUTPUT = process.env.NEXT_BUILD_OUTPUT;
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: ['standalone', 'export'].includes(OUTPUT) ? OUTPUT : undefined,
   sassOptions: {
     includePaths: [join(__dirname, 'styles')],
   },
