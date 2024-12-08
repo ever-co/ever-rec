@@ -45,7 +45,7 @@
     "class-validator": "^0.13.2",
     "dateformat": "^4.6.3",
     "dropbox-v2-api": "^2.5.4",
-    "firebase": "^9.6.1",
+    "firebase": "^10.9.0",
     "firebase-admin": "^10.0.0",
     "fluent-ffmpeg": "^2.1.2",
     "form-data": "^4.0.1",
