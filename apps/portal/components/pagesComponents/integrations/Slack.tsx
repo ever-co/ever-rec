@@ -56,15 +56,10 @@ const Slack: React.FC<ISettingsPageProps> = () => {
             You are successfully connected to slack, Now you can share your
             screenshots to your workspace.
           </p>
-          <div className="tw-flex tw-mb-2">
-            <AppSvg
-              className="tw-mr-1"
-              path="/settings/success.svg"
-              size="22px"
-            />
-            <div className="tw-font-medium">
-              You&apos;re signed in with slack workspace
-            </div>
+          <div className="tw-flex tw-mb-2 tw-justify-center tw-text-center tw-gap-1 tw-mt-3 tw-mx-4">
+            <AppSvg path="/settings/success.svg" size="22px" />
+
+            <div>You&apos;re signed in with slack workspace</div>
           </div>
           <div className="tw-w-90p">
             <AppButton

@@ -3,7 +3,7 @@ import { Button, Dropdown, Menu } from 'antd';
 import { ItemOrderEnum } from '../../pages/shared/enums/itemOrderEnum';
 import AppSvg from '@/content/components/elements/AppSvg';
 //@ts-ignore
-import styles from './sortingDropDown.module.scss';
+import * as styles from './sortingDropDown.module.scss';
 import classNames from 'classnames';
 
 interface SortingDropDown {

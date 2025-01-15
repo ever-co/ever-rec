@@ -91,7 +91,7 @@ const RenameModal: React.FC<Props> = ({ onOk, onCancel, visible }) => {
   };
   return (
     <Modal
-      visible={visible}
+      open={visible}
       onCancel={() => {
         setName(initialControl());
         onCancel();

@@ -19,7 +19,7 @@ const LeaveWorkspaceModal: React.FC<IProps> = ({
 }) => {
   return (
     <Modal
-      visible={visible}
+      open={visible}
       onCancel={onCancel}
       closable={true}
       closeIcon={

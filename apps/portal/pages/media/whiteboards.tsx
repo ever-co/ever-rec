@@ -33,7 +33,7 @@ const WhiteboardsScreen: FC = () => {
   const createWhiteboardHandler = async (name: string) => {
     setWhiteboardModalVisibility(false);
     const id = loadingMessage();
-    const data: IWhiteboard = await createNewWhiteboard(name);
+    const data: IWhiteboard | null = await createNewWhiteboard(name);
     if (!data)
       return updateMessage(id, 'Error while creating whiteboard!', 'error');
 
@@ -43,7 +43,7 @@ const WhiteboardsScreen: FC = () => {
 
   const fetchUserWhiteboards = async () => {
     dispatch(WhiteboardAC.setLoading(true));
-    const data: IWhiteboard[] = await getUserWhiteboards();
+    const data: IWhiteboard[] | null = await getUserWhiteboards();
     data && dispatch(WhiteboardAC.setWhiteboards({ whiteboards: data }));
     dispatch(WhiteboardAC.setLoading(false));
   };

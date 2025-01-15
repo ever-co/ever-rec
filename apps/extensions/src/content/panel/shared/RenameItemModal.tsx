@@ -1,5 +1,5 @@
 import { FC, useEffect, useState } from 'react';
-import styles from '../styles/Modal.module.scss';
+import * as styles from '../styles/Modal.module.scss';
 import { Modal } from 'antd';
 import ModalSaveChangesFooter from './modalComponents/ModalSaveChangesFooter';
 import useEnterKeyPress from '@/content/utilities/hooks/useEnterKeyPress';
@@ -60,7 +60,7 @@ const RenameItemModal: FC<IProps> = ({
 
   return (
     <Modal
-      visible={visible}
+      open={visible}
       closable
       footer={
         <ModalSaveChangesFooter

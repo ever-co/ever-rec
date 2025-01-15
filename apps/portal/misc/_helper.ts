@@ -42,7 +42,7 @@ const handleResponse = (response: IDataResponse) => {
   }
 };
 
-const parseUserData = (props: IUserData): IUser => {
+const parseUserData = (props: IUserData): IUser | null => {
   try {
     // TODO: can implement interface for the user data here
     const decodedToken: any = jwt_decode(props.idToken);
@@ -62,6 +62,8 @@ const parseUserData = (props: IUserData): IUser => {
   } catch (e) {
     console.log('Malformed token.', e);
   }
+
+  return null;
 };
 
 const sendExternalMessage = (

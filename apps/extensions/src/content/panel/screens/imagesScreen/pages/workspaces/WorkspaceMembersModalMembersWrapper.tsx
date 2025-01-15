@@ -3,7 +3,7 @@ import { IWorkspaceUser } from '@/app/interfaces/IWorkspace';
 import AppSpinnerLocal from '@/content/components/containers/appSpinnerLocal/AppSpinnerLocal';
 import AppButton from '@/content/components/controls/appButton/AppButton';
 import classNames from 'classnames';
-import styles from './WorkspaceMembersModalMembersWrapper.module.scss';
+import * as styles from './WorkspaceMembersModalMembersWrapper.module.scss';
 import { IMemberLoadingIds } from './WorkspaceMembersModalWrapper';
 
 export const sortByEmail = (a: IWorkspaceUser, b: IWorkspaceUser) => {

@@ -1,9 +1,15 @@
 {
   "compilerOptions": {
-    "target": "es5",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "target": "ES2015",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "skipLibCheck": true,
     "esModuleInterop": true,
+    "strictNullChecks": false,
+    "noImplicitAny": false,
     "allowSyntheticDefaultImports": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
@@ -12,13 +18,29 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "noEmit": false,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
     "jsx": "react-jsx",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": [
+        "src/*"
+      ]
     }
   },
-  "typeRoots": ["./src/@types", "node_modules/@types"],
-  "include": ["src/**/*.ts", "src/**/*.tsx", "./src/**/*.svg"],
-  "exclude": ["build", "icons", "images", "node_modules"]
+  "typeRoots": [
+    "./src/@types",
+    "node_modules/@types"
+  ],
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "./src/**/*.svg"
+  ],
+  "exclude": [
+    "build",
+    "icons",
+    "images",
+    "node_modules"
+  ]
 }

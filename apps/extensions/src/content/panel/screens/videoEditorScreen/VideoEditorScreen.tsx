@@ -1,5 +1,5 @@
 import { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import styles from './VideoEditorScreen.module.scss';
+import * as styles from './VideoEditorScreen.module.scss';
 // @ts-ignore
 import { Tab, TabList, TabPanel, Tabs } from 'react-tabs';
 import classNames from 'classnames';
@@ -12,7 +12,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { panelRoutes } from '../../router/panelRoutes';
 import PanelAC from '@/app/store/panel/actions/PanelAC';
 import ImageActionsCard from '../singleImageScreen/imageActions/ImageActionsCard';
-import 'nouislider/distribute/nouislider.css';
+import 'nouislider/dist/nouislider.css';
 import VideoSlider from './videoSlider/VideoSlider';
 import {
   infoMessage,
@@ -500,7 +500,7 @@ const VideoEditorScreen: FC<IProps> = ({ isWorkspace = false, workspace }) => {
         </div>
       </div>
 
-      {/* 
+      {/*
       <EmailModal
         visible={emailModalState.state}
         item={emailModalState.video}

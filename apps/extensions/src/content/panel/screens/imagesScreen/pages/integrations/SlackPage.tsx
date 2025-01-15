@@ -12,7 +12,7 @@ import {
   getSlackLoginUrl,
 } from '@/app/services/screenshots';
 //@ts-ignore
-import styles from './IntegrationPage.module.scss';
+import * as styles from './IntegrationPage.module.scss';
 import DisconnectServiceModal from '@/content/components/shared/DisconnectServiceModal';
 
 const SlackPage: React.FC<ISettingsPageProps> = () => {

@@ -2,7 +2,7 @@ import React from 'react';
 import { Modal } from 'antd';
 import AppButton from '@/content/components/controls/appButton/AppButton';
 //@ts-ignore
-import styles from './DeleteCommentModal.module.scss';
+import * as styles from './DeleteCommentModal.module.scss';
 import AppSvg from '@/content/components/elements/AppSvg';
 import classNames from 'classnames';
 
@@ -25,7 +25,7 @@ const DeleteCommentModal: React.FC<IDeleteScreenshotModalProps> = ({
 
   return (
     <Modal
-      visible={visible}
+      open={visible}
       onCancel={onCancel}
       wrapClassName={styles.wrapper}
       closeIcon={

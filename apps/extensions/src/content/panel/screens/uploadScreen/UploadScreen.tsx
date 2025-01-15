@@ -16,7 +16,7 @@ import store from '@/app/store/panel';
 import PanelAC from '@/app/store/panel/actions/PanelAC';
 import IEditorImage from '@/app/interfaces/IEditorImage';
 import { warnMessage } from '@/app/services/helpers/toastMessages';
-import styles from './UploadScreen.module.scss';
+import * as styles from './UploadScreen.module.scss';
 import classNames from 'classnames';
 
 const fileType = ['image/png', 'image/jpeg', 'image/jpg'];

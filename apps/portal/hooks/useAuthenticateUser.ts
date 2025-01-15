@@ -14,7 +14,7 @@ const useAuthenticateUser = () => {
     if (user) return;
 
     const updateUser = async () => {
-      const user: IUser = await updateUserDataFromTokens();
+      const user: IUser | null = await updateUserDataFromTokens();
       if (!user) return;
 
       dispatch(AuthAC.setUser({ user }));

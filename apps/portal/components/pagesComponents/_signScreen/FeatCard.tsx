@@ -1,8 +1,8 @@
-import Image from 'next/image';
+import Image from 'next/legacy/image';
 import AppSvg from 'components/elements/AppSvg';
 import AppButton from 'components/controls/AppButton';
 
-interface IFeatureCard {
+export interface IFeatureCard {
   pageTitle?: string;
   imgPath: string;
   title: string;
@@ -11,6 +11,7 @@ interface IFeatureCard {
   rightImgPath: string;
   buttonText: string;
   id?: string;
+  priority?: boolean;
 }
 
 export const features: IFeatureCard[] = [
@@ -88,6 +89,7 @@ const FeatCard: React.FC<IFeatureCard> = ({
   rightImgPath,
   buttonText,
   id,
+  priority,
 }) => {
   return (
     <div id={id} className="tw-flex tw-mt-30px">
@@ -113,7 +115,12 @@ const FeatCard: React.FC<IFeatureCard> = ({
         </div>
       </div>
       <div className="tw-relative tw-w-60 tw-h-56 tw-ml-12">
-        <Image src={rightImgPath} alt="image" layout="fill" />
+        <Image
+          src={rightImgPath}
+          priority={priority}
+          alt="image"
+          layout="fill"
+        />
       </div>
     </div>
   );

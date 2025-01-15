@@ -1,5 +1,5 @@
 import { FC, useEffect, useState } from 'react';
-import styles from './ShareItemModal.module.scss';
+import * as styles from './ShareItemModal.module.scss';
 import { useDispatch } from 'react-redux';
 import { Modal } from 'antd';
 import IEditorVideo from '@/app/interfaces/IEditorVideo';
@@ -59,7 +59,7 @@ const ShareItemModal: FC<IProps> = ({
 
   return (
     <Modal
-      visible={visible}
+      open={visible}
       footer={null}
       closable
       closeIcon={

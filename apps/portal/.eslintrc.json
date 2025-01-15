@@ -1,32 +1,52 @@
 {
   "extends": [
-    "plugin:@nrwl/nx/react-typescript",
-    "../../.eslintrc.json",
     "next",
+    "next/typescript",
     "next/core-web-vitals"
   ],
-  "ignorePatterns": ["!**/*"],
+  "ignorePatterns": [
+    "!**/*"
+  ],
   "overrides": [
     {
-      "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
+      "files": [
+        "*.ts",
+        "*.tsx",
+        "*.js",
+        "*.jsx"
+      ],
       "rules": {
-        "@next/next/no-html-link-for-pages": ["error", "apps/portal/pages"]
+        "@next/next/no-html-link-for-pages": [
+          "error",
+          "apps/portal/pages"
+        ]
       }
     },
     {
-      "files": ["*.ts", "*.tsx"],
+      "files": [
+        "*.ts",
+        "*.tsx"
+      ],
       "rules": {}
     },
     {
-      "files": ["*.js", "*.jsx"],
+      "files": [
+        "*.js",
+        "*.jsx"
+      ],
       "rules": {}
     }
   ],
   "env": {
-    "jest": true
+    "jest": true,
+    "node": true,
+    "browser": true,
+    "commonjs": true,
+    "amd": true
   },
   "rules": {
     "@typescript-eslint/no-explicit-any": "off",
-    "@next/next/no-script-in-document": "off"
+    "@next/next/no-script-in-document": "off",
+    "@typescript-eslint/ban-ts-comment": "off"
   }
 }

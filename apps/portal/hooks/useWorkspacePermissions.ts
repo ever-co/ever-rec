@@ -106,7 +106,7 @@ const useWorkspacePermissions = ({
           accessItem.access.teams.map((x) => {
             const teamFromWorkspace = activeWorkspace.teams.find(
               (y) => y.id === x.teamId,
-            );
+            ) as any;
 
             return {
               ...teamFromWorkspace,
@@ -128,7 +128,7 @@ const useWorkspacePermissions = ({
     const response = await changeWorkspaceItemPermissionsAPI(
       collection[i].id,
       activeWorkspace.id,
-      folder ? folder.id : item.dbData.id,
+      (folder ? folder.id : item.dbData.id) || '',
       collection[i].write,
       collection[i].read,
       permissionsType,

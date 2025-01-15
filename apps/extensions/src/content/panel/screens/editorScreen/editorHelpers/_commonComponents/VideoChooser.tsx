@@ -47,7 +47,7 @@ const VideoChooser: React.FC<Props> = ({ visible, onOk, onCancel, actual }) => {
 
   return (
     <Modal
-      visible={visible}
+      open={visible}
       closable={true}
       onCancel={onCancel}
       width={1320}
@@ -67,7 +67,7 @@ const VideoChooser: React.FC<Props> = ({ visible, onOk, onCancel, actual }) => {
                 >
                   <>
                     <div
-                      className="tw-border tw-border-4 tw-border-primary-purple   tw-rounded-lg tw-bg-black tw-flex tw-items-center tw-justify-center tw-flex-col  "
+                      className="tw-border-4 tw-border-primary-purple   tw-rounded-lg tw-bg-black tw-flex tw-items-center tw-justify-center tw-flex-col  "
                       style={{ height: '210px' }}
                     >
                       <Button

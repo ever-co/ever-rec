@@ -55,7 +55,7 @@ import { IUserShort } from 'app/interfaces/IUserData';
 import AppContainer from 'components/containers/appContainer/AppContainer';
 import AppButton from 'components/controls/AppButton';
 import { Row, Col } from 'antd';
-import Image from 'next/image';
+import Image from 'next/legacy/image';
 import { IChapter } from 'app/interfaces/IChapter';
 import { addUniqueView } from 'app/services/imageandvideo';
 import AppSpinner from 'components/containers/appSpinner/AppSpinner';
@@ -114,7 +114,7 @@ const SingleVideoPage: FC<IProps> = ({
     saveChanges,
     setHasChangesHandler,
   } = useVideoChapters({
-    video,
+    video: video as any,
     isPublic,
     chaptersEnabled,
     prefetchedChapters,
@@ -162,7 +162,7 @@ const SingleVideoPage: FC<IProps> = ({
       setVideo(video);
       setVideoLikes(video);
       setVideoOwner(video.owner as IUserShort);
-      setPrefetchedChapters(video.dbData?.chapters);
+      setPrefetchedChapters(video.dbData?.chapters || []);
       setIsPublicWorkspace(Boolean(ws));
       setParam('shVideo=' + id);
     }
@@ -191,7 +191,7 @@ const SingleVideoPage: FC<IProps> = ({
       const video = response.data as IWorkspaceVideo;
       setVideo(video);
       setVideoLikes(video);
-      setVideoOwner(video.dbData?.user);
+      setVideoOwner(video.dbData?.user || null);
     }
   }, [router, setVideo, setVideoLikes, setVideoOwner]);
 
@@ -207,10 +207,10 @@ const SingleVideoPage: FC<IProps> = ({
       !video && router.push('video');
 
       setVideo(video);
-      setVideoLikes(video);
+      video && setVideoLikes(video);
 
-      getExplorerDataVideo(video.dbData?.parentId);
-      dispatch(PanelAC.setEditorVideo({ editorVideo: video }));
+      getExplorerDataVideo(video?.dbData?.parentId);
+      dispatch(PanelAC.setEditorVideo({ editorVideo: video as any }));
       dispatch(PanelAC.resetExplorerDataLoaderVideos());
     }
 
@@ -261,19 +261,23 @@ const SingleVideoPage: FC<IProps> = ({
       });
     } else {
       const url = video.url;
-      setUrlLink(url);
+      url && setUrlLink(url);
     }
 
     setVideoLoaded(true);
   }, [video, setStreamState, setUrlLink, setVideoLoaded]);
 
   useEffect(() => {
-    if (streamState?.playbackStatus === PlaybackStatusEnum.READY) {
-      fallbackVideoURL(video?.url, video.dbData?.streamData?.downloadUrl).then(
-        (url) => {
-          setUrlLink(url);
-        },
-      );
+    if (
+      streamState?.playbackStatus === PlaybackStatusEnum.READY &&
+      video?.url
+    ) {
+      fallbackVideoURL(
+        video?.url,
+        video?.dbData?.streamData?.downloadUrl || '',
+      ).then((url) => {
+        setUrlLink(url);
+      });
     }
   }, [video, streamState, setUrlLink, dispatch]);
 
@@ -301,10 +305,10 @@ const SingleVideoPage: FC<IProps> = ({
 
     const updatedDbData = { ...video.dbData, title: newTitle };
 
-    let data = null;
+    let data: IEditorVideo | null = null;
     if (isWorkspace) {
       data = await updateItemDataWorkspace(
-        activeWorkspace.id,
+        activeWorkspace?.id || '',
         updatedDbData as IDbWorkspaceVideoData,
         'video',
       );
@@ -356,7 +360,7 @@ const SingleVideoPage: FC<IProps> = ({
       return;
     }
 
-    let data = null;
+    let data: ILike[] | null = null;
 
     if (isPublic) {
       const { id: sharedLinkId, ws } = router.query;
@@ -364,7 +368,7 @@ const SingleVideoPage: FC<IProps> = ({
         data = await likeVideo(sharedLinkId, Boolean(ws));
       }
     } else {
-      data = await likeVideoOwn(video.dbData.id, activeWorkspace?.id);
+      data = await likeVideoOwn(video.dbData?.id || '', activeWorkspace?.id);
     }
 
     if (!data) return;
@@ -484,19 +488,22 @@ const SingleVideoPage: FC<IProps> = ({
 
         <div className={styles.itemActionSection}>
           <ItemTitleAuthor
-            title={video?.dbData?.title}
+            title={video?.dbData?.title || ''}
             displayName={
-              videoOwner?.displayName || (!isWorkspace && user?.displayName)
+              videoOwner?.displayName ||
+              (!isWorkspace ? user?.displayName || '' : '')
             }
-            photoURL={videoOwner?.photoURL || (!isWorkspace && user?.photoURL)}
-            date={videoDateFormatted}
+            photoURL={
+              videoOwner?.photoURL || (!isWorkspace ? user?.photoURL || '' : '')
+            }
+            date={videoDateFormatted || ''}
           />
 
           <ItemActions
             isPublic={isPublic}
             isWorkspace={isWorkspace}
             user={user}
-            item={video}
+            item={video as any}
             itemType="video"
             isLiked={isLiked}
             likes={likes}
@@ -539,8 +546,8 @@ const SingleVideoPage: FC<IProps> = ({
         <div className={styles.videoCommentsWrapper}>
           <VideoComments
             userId={user?.id}
-            itemOwnerId={isPublic ? videoOwner?.id : user?.id}
-            itemId={video?.dbData?.id}
+            itemOwnerId={(isPublic ? videoOwner?.id : user?.id) || ''}
+            itemId={video?.dbData?.id || ''}
           />
         </div>
       </div>
@@ -551,7 +558,7 @@ const SingleVideoPage: FC<IProps> = ({
         modalHeading="Edit title"
         inputLabel="Current item title:"
         inputPlaceholder="Edit a new item title"
-        onOk={(title) => updateTitle(title, video, isWorkspace)}
+        onOk={(title) => updateTitle(title, video as any, isWorkspace)}
         onCancel={() => setShowRenameModal(false)}
       />
 
@@ -560,7 +567,7 @@ const SingleVideoPage: FC<IProps> = ({
           visible={showFolderModal}
           mainItem={video}
           type="video"
-          loader={null}
+          loader={null as any}
           onCancel={() => setShowFolderModal(false)}
         />
       )}
@@ -577,7 +584,7 @@ const SingleVideoPage: FC<IProps> = ({
       )}
 
       <ShareItemModal
-        item={video}
+        item={video as any}
         visible={showShareModal}
         workspaceId={activeWorkspace?.id}
         onCancel={() => setShowShareModal(false)}

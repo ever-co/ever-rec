@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import styles from '@/content/panel/screens/singleImageScreen/SingleImageScreen.module.scss';
+import * as styles from '@/content/panel/screens/singleImageScreen/SingleImageScreen.module.scss';
 import browser from '@/app/utilities/browser';
 import { useNavigate } from 'react-router-dom';
 import AuthAC from '@/app/store/auth/actions/AuthAC';
@@ -388,7 +388,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
           'image/png': blob,
         });
         try {
-          item && navigator.clipboard.write([item]);
+          item && navigator.clipboard.write([item as any]);
           successMessage('Copied to clipboard');
           saveSegmentEvent('Image Copied to clipboard');
         } catch (e) {

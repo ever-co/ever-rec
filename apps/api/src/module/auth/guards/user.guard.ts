@@ -51,14 +51,19 @@ export class UserGuard implements CanActivate {
     try {
       const idToken = request.headers.idtoken;
 
-      await this.processToken(idToken, request);
+      if (idToken) {
+        await this.processToken(idToken, request);
+      }
 
       return true;
     } catch (e) {
       if (e.code === 'auth/id-token-expired') {
         try {
           const refreshToken = request.headers.refreshtoken;
-          await this.refreshToken(refreshToken, request);
+
+          if (refreshToken) {
+            await this.refreshToken(refreshToken, request);
+          }
 
           return true;
         } catch (e) {

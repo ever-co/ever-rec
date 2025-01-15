@@ -24,7 +24,7 @@ const CreateWorkspaceTeamModal: FC<IProps> = ({ onClose, onOk, visible }) => {
 
   return (
     <Modal
-      visible={visible}
+      open={visible}
       onCancel={close}
       destroyOnClose={true}
       footer={

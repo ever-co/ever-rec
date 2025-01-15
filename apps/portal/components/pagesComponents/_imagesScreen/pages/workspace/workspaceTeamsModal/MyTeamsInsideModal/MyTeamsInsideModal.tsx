@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import Image from 'next/image';
+import Image from 'next/legacy/image';
 import styles from './MyTeamsInsideModal.module.scss';
 import classNames from 'classnames';
 import { IWorkspaceTeam } from 'app/interfaces/IWorkspaceTeams';
@@ -48,8 +48,8 @@ const MyTeamsInsideModal: FC<IMyTeamsProps> = ({
                     <Image
                       src={team.avatar || '/common/team-icon.svg'}
                       alt="team avatar"
-                      width="26px"
-                      height="26px"
+                      width="26"
+                      height="26"
                     />
                   </div>
                   <div className={styles.teamName}>{team.name}</div>

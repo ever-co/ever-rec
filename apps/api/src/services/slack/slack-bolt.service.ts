@@ -87,6 +87,9 @@ export class SlackBoltService {
     return result;
   }
 
+  /**
+   * @internal
+   */
   public async slackPostMessage(
     token: string,
     channel: string,
@@ -115,6 +118,9 @@ export class SlackBoltService {
     }
   }
 
+  /**
+   * @internal
+   */
   public async slackAuthorizeToken(code: string) {
     if (this.clientId && this.clientSecrete) {
       try {

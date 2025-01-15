@@ -1,5 +1,5 @@
 import { FC, Dispatch, SetStateAction } from 'react';
-import styles from './Thumbnail.module.scss';
+import * as styles from './Thumbnail.module.scss';
 import classNames from 'classnames';
 import ThumbnailSkeletonLoader from './ThumbnailSkeletonLoader';
 

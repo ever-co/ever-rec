@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import styles from '@/content/panel/screens/videoEditorScreen/VideoEditorScreen.module.scss';
+import * as styles from '@/content/panel/screens/videoEditorScreen/VideoEditorScreen.module.scss';
 import { IUser } from '@/app/interfaces/IUserData';
 import { RootStateOrAny, useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';

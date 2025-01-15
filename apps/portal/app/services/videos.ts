@@ -82,12 +82,14 @@ const updateVideoData = async ({
   trash,
   views,
   likes,
-}: DbVideoData): Promise<IEditorVideo> => {
+}: DbVideoData): Promise<IEditorVideo | null> => {
   try {
     return await updateVideoDataAPI(id, title, parentId, trash, likes, views);
   } catch (error: any) {
     errorHandler(error);
   }
+
+  return null;
 };
 
 const getVideoForPublicPage = async (
@@ -96,24 +98,24 @@ const getVideoForPublicPage = async (
 ): Promise<{ video: { owner: IUser } & IWorkspaceVideo }> => {
   const response = await getVideoBySharedIdAPI(id, isWorkspace);
   const data = iDataResponseParser(response, false);
-  return data;
+  return data as any;
 };
 
 const downloadVideo = async (video?: IEditorVideo): Promise<boolean> => {
   try {
-    let vid: IEditorVideo = video;
+    let vid: IEditorVideo | undefined = video;
     if (!vid) {
       vid = store.getState().panel.editorVideo;
     }
 
-    let filename = handleFilename(vid.dbData?.title || 'Rec');
-    let blob = null;
-    const downloadUrl = vid.dbData?.streamData?.downloadUrl;
+    let filename = handleFilename(vid?.dbData?.title || 'Rec');
+    let blob: Blob | null = null;
+    const downloadUrl = vid?.dbData?.streamData?.downloadUrl;
     if (downloadUrl) {
       blob = await fetch(downloadUrl).then((res) => res.blob());
       filename += '.mp4';
     } else {
-      blob = await fetch(vid.url).then((res) => res.blob());
+      blob = await fetch(vid?.url as string).then((res) => res.blob());
     }
 
     saveAs(blob, filename);
@@ -164,11 +166,13 @@ const getExplorerDataVideo = async (
     currentFolderResponse.status &&
     currentFolderResponse.status === ResStatusEnum.error
       ? false
-      : currentFolderResponse.data;
-  const files = filesResponse;
+      : (currentFolderResponse as any)?.data;
+
+  const files = filesResponse.filter((x) => x.dbData?.parentId === folderId);
 
   const allFolders =
     foldersResponse.status === ResStatusEnum.error ? [] : foldersResponse.data;
+
   const folders =
     allFolders.filter((x) => x.id === folderId).length > 0
       ? allFolders.filter((x) => x.id === folderId)

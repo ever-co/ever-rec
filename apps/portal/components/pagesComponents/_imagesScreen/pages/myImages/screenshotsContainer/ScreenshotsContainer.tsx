@@ -48,6 +48,7 @@ import VideoItem from '../../myVideos/VideoItem/VideoItem';
 import IEditorVideo from 'app/interfaces/IEditorVideo';
 import { WorkspaceItemType } from 'app/interfaces/ItemType';
 import useGetXXL from 'hooks/useGetXXL';
+import React from 'react';
 
 const defaultShareItem = { id: null, type: null, provider: null };
 const defaultModalState = { state: false, screenshot: null };
@@ -91,8 +92,12 @@ const ScreenshotsContainer: React.FC<IScreenshotsContainerProps> = ({
   );
   const firstRender = useFirstRender();
   const { itemsToLoad, loadMoreItems } = useInfiniteScroll();
-  const [slackItemSelected, setSlackItemSelected] = useState(null);
-  const [whatsAppItemSelected, setWhatsAppItemSelected] = useState(null);
+  const [slackItemSelected, setSlackItemSelected] = useState<string | null>(
+    null,
+  );
+  const [whatsAppItemSelected, setWhatsAppItemSelected] = useState<
+    string | null
+  >(null);
   const [shareItemSelected, setShareItemSelected] =
     useState<IShareItemSelected>(defaultShareItem);
   const [selectedItems, setSelectedItems] = useState<{
@@ -230,7 +235,7 @@ const ScreenshotsContainer: React.FC<IScreenshotsContainerProps> = ({
   const shareSlackHandler = useCallback(
     (screenshot: IEditorImage) => {
       if (user && user.isSlackIntegrate && user.isSlackIntegrate == true) {
-        setSlackItemSelected(screenshot.dbData.id);
+        setSlackItemSelected(screenshot?.dbData?.id || '');
       } else {
         router.push(preRoutes.media + panelRoutes.integrations);
       }
@@ -259,7 +264,7 @@ const ScreenshotsContainer: React.FC<IScreenshotsContainerProps> = ({
   );
 
   const shareWhatsappHandler = useCallback((screenshot: IEditorImage) => {
-    setWhatsAppItemSelected(screenshot.dbData.id);
+    setWhatsAppItemSelected(screenshot.dbData?.id || null);
   }, []);
 
   const download = async (screenshot: any) => {
@@ -319,7 +324,7 @@ const ScreenshotsContainer: React.FC<IScreenshotsContainerProps> = ({
       setLoaderState(true);
       const response = await addImageToWorkspaceAPI(
         workspace.id,
-        moveToWorkspaceState.screenshot.dbData.id,
+        moveToWorkspaceState.screenshot.dbData.id || '',
         false,
       );
       setLoaderState(false);
@@ -392,25 +397,26 @@ const ScreenshotsContainer: React.FC<IScreenshotsContainerProps> = ({
             scrollableTarget="scrollableDivItems"
             style={{ minHeight: '400px' }}
           >
-            <Row className={styles.widthFull} gutter={[30, 25]}>
+            <Row className={styles.widthFull} gutter={[24, 16]}>
               {itemsToMap
                 ? itemsToMap.map((screenshot: IEditorImage, index: number) => {
-                    if (index + 1 > itemsToLoad) return;
+                    if (index + 1 > itemsToLoad)
+                      return <React.Fragment key={index} />;
 
                     return (
-                      <Link
+                      <Col
+                        xs={24}
+                        sm={24}
+                        md={24}
+                        lg={12}
+                        xl={8}
+                        xxl={xxl}
                         key={screenshot?.dbData?.id}
-                        href={`/image/${screenshot.dbData?.id}`}
-                        passHref
                       >
-                        <Col
-                          //
-                          xs={24}
-                          sm={24}
-                          md={24}
-                          lg={12}
-                          xl={8}
-                          xxl={xxl}
+                        <Link
+                          href={`/image/${screenshot.dbData?.id}`}
+                          passHref
+                          className="tw-w-full tw-h-full"
                         >
                           <VideoItem
                             id={index}
@@ -424,11 +430,14 @@ const ScreenshotsContainer: React.FC<IScreenshotsContainerProps> = ({
                               updateImageTitle(screenshot, title)
                             }
                             onDelete={() => deleteHandler(screenshot)}
-                            onSelect={() => setEditorImage(null)}
+                            onSelect={() => setEditorImage(null as any)}
                             addSelected={setSelectedItems}
                             selectedItems={selectedItems}
                             onDropdownVisibleChange={(visible) =>
-                              setDropdownVisible({ item: screenshot, visible })
+                              setDropdownVisible({
+                                item: screenshot as any,
+                                visible,
+                              })
                             }
                             onDropdownAction={(action, e) =>
                               handleAction(e, screenshot, action)
@@ -436,8 +445,8 @@ const ScreenshotsContainer: React.FC<IScreenshotsContainerProps> = ({
                             {...shareThirdPartyOptions}
                             canEdit={true}
                           />
-                        </Col>
-                      </Link>
+                        </Link>
+                      </Col>
                     );
                   })
                 : !firstRender && (

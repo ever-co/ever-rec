@@ -119,7 +119,7 @@ const Images: React.FC = () => {
       explorerData?.currentFolder?.id || false,
       name,
       color,
-      rootFolderId,
+      rootFolderId || false,
     );
     closeModalHandler();
   };
@@ -233,11 +233,11 @@ const Images: React.FC = () => {
   };
 
   const enableDropping = (event: DragEvent<HTMLDivElement> | undefined) => {
-    event.preventDefault();
+    event?.preventDefault();
   };
 
   const onDrop = async (e: DragEvent<HTMLDivElement> | undefined) => {
-    e.preventDefault();
+    e?.preventDefault();
     const file = e?.dataTransfer.files[0];
 
     if (file) {
@@ -298,7 +298,7 @@ const Images: React.FC = () => {
             openModalHandler={openModalHandler}
             clickAddImageHandler={() => setShowAddImageModal(true)}
             showAddFolderButton={
-              explorerData?.currentFolder?.nestLevel < 2 ||
+              (explorerData?.currentFolder?.nestLevel || 0) < 2 ||
               explorerData.currentFolder === null
             }
           />
@@ -330,7 +330,7 @@ const Images: React.FC = () => {
                     onClick={() => openFolderHandler(folder)}
                     onDrop={(e) => onDrop(e)}
                     setLoading={(loadingState) => setLoading(loadingState)}
-                    isFavorite={isFavorite(folder)}
+                    isFavorite={isFavorite(folder) || false}
                     canEdit={true}
                   />
                 ))}

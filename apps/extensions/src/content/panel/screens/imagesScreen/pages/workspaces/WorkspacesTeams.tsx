@@ -1,5 +1,5 @@
 import React, { useState, useEffect, FC, useCallback } from 'react';
-import styles from './WorkspaceManageScreen.module.scss';
+import * as styles from './WorkspaceManageScreen.module.scss';
 import { useNavigate } from 'react-router';
 import { useSearchParams } from 'react-router-dom';
 import classNames from 'classnames';

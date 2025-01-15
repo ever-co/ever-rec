@@ -1,5 +1,4 @@
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const withNx = require('@nrwl/next/plugins/with-nx');
+//@ts-check
 const { join } = require('path');
 const { withSentryConfig } = require('@sentry/nextjs');
 
@@ -15,16 +14,15 @@ if (
 }
 
 /**
- * @type {import('@nrwl/next/plugins/with-nx').WithNxOptions}
- **/
+ * @type any
+ */
+const OUTPUT = process.env.NEXT_BUILD_OUTPUT;
+
+/** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: ['standalone', 'export'].includes(OUTPUT) ? OUTPUT : undefined,
   sassOptions: {
     includePaths: [join(__dirname, 'styles')],
-  },
-  nx: {
-    // Set this to true if you would like to to use SVGR
-    // See: https://github.com/gregberge/svgr
-    svgr: false,
   },
   images: {
     domains: ['storage.googleapis.com'],
@@ -50,10 +48,8 @@ const nextConfig = {
   },
 };
 
-const moduleExports = withNx(nextConfig);
-
 const sentryWebpackPluginOptions = {
   silent: true,
 };
 
-module.exports = withSentryConfig(moduleExports, sentryWebpackPluginOptions);
+module.exports = withSentryConfig(nextConfig, sentryWebpackPluginOptions);

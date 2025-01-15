@@ -137,7 +137,7 @@ const useEnableComments = ({
               itemType,
               item.dbData.id,
               isPublic,
-              isPublic ? item.dbData.uid : null,
+              isPublic ? item.dbData.uid || null : null,
               limit,
             );
 
@@ -231,7 +231,7 @@ const useEnableComments = ({
     const queryId = isPublic ? router.query.id : item?.dbData?.id;
 
     if (id) {
-      router.query = { id: queryId, limit: `${limit + 10}` };
+      router.query = { id: queryId, limit: `${limit + 10}` } as any;
       router.replace({ query: router.query });
 
       // User presses NEXT, we take the current comments and store them as PREVIOUS now.
@@ -251,7 +251,7 @@ const useEnableComments = ({
         itemType,
         id,
         isPublic,
-        isPublic ? item.dbData.uid : null,
+        isPublic ? item.dbData?.uid || null : null,
         limit + 20,
       );
     }
@@ -262,7 +262,7 @@ const useEnableComments = ({
     const queryId = isPublic ? router.query.id : item?.dbData?.id;
 
     if (id) {
-      router.query = { id: queryId, limit: `${limit - 10 || null}` };
+      router.query = { id: queryId, limit: `${limit - 10 || null}` } as any;
       router.replace({ query: router.query });
 
       // User presses PREVIOUS, we take the current comments and store them as NEXT now.
@@ -286,7 +286,7 @@ const useEnableComments = ({
               itemType,
               id,
               isPublic,
-              isPublic ? item.dbData.uid : null,
+              isPublic ? item.dbData?.uid || null : null,
               limit - 20,
             )
           : { comments: [], commentsLength: NaN };
@@ -328,7 +328,7 @@ const useEnableComments = ({
           commentId &&
           (await deleteComment(
             itemType,
-            isPublic ? item.dbData.uid : user.id,
+            isPublic ? (item.dbData.uid as string) : user.id,
             item.dbData.id,
             commentId,
             isPublic,
@@ -385,7 +385,7 @@ const useEnableComments = ({
         ) {
           const response = await updateComment(
             itemType,
-            isPublic ? item.dbData.uid : user.id,
+            isPublic ? (item.dbData.uid as string) : user.id,
             item.dbData.id,
             editCommentState.commentId,
             commentValue,
@@ -402,7 +402,7 @@ const useEnableComments = ({
         } else if (!editCommentState.isBeingEdited) {
           const response = await addComment(
             itemType,
-            isPublic ? item.dbData.uid : user.id,
+            isPublic ? (item.dbData.uid as string) : user.id,
             item.dbData.id,
             commentValue,
             isPublic,
@@ -434,7 +434,8 @@ const useEnableComments = ({
   };
 
   const handleCommentsLengthInState = (DbItemData: DbImgData | DbVideoData) => {
-    const comments: IComment[] = DbItemData.comments;
+    const comments: IComment[] = DbItemData.comments || [];
+
     if (itemType == 'image') {
       const image: IEditorImage = { ...item };
       if (image.dbData) {
@@ -635,8 +636,8 @@ sm:tw-mr-13px lg:tw-mr-5px xl:tw-mr-13px"
                     {editCommentState.isBeingEdited
                       ? 'Update'
                       : localLoaderState
-                      ? 'Posting...'
-                      : 'Comment'}
+                        ? 'Posting...'
+                        : 'Comment'}
                   </button>
                   <div
                     onClick={cancelComment}

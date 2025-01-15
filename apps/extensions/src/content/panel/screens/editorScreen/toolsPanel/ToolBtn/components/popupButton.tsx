@@ -1,7 +1,7 @@
 import React from 'react';
 import classNames from 'classnames';
 import { Tooltip } from 'antd';
-import styles from './popupButton.module.scss';
+import * as styles from './popupButton.module.scss';
 
 interface IIconBtn {
   key: number;

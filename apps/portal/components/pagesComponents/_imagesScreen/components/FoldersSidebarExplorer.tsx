@@ -95,7 +95,7 @@ const FoldersSidebarExplorer: React.FC = () => {
   return (
     <>
       {folderType == FolderTypeEnum.imageFolders &&
-        folderImageData?.length > 0 && (
+        !!folderImageData?.length && (
           <>
             <HorizontalDivider className="tw-my-5 tw-opacity-50" />
             <div>
@@ -128,7 +128,7 @@ const FoldersSidebarExplorer: React.FC = () => {
           </>
         )}
       {folderType == FolderTypeEnum.videoFolders &&
-        folderVideoData?.length > 0 && (
+        !!folderVideoData?.length && (
           <>
             <HorizontalDivider className="tw-my-5 tw-opacity-50" />
             <div>

@@ -51,25 +51,25 @@ const updateDottedLines = (
   const lines = group.findOne('#quadLinePath');
   if (centralCircle1 && centralCircle2) {
     toolsOptions.points = [
-      leftCircle.x(),
-      leftCircle.y(),
+      leftCircle?.x() as number,
+      leftCircle?.y() as number,
       centralCircle1.x(),
       centralCircle1.y(),
       centralCircle2.x(),
       centralCircle2.y(),
-      rightCircle.x(),
-      rightCircle.y(),
+      rightCircle?.x() as number,
+      rightCircle?.y() as number,
     ];
-    lines.setAttrs({
+    lines?.setAttrs({
       points: [
-        leftCircle.x(),
-        leftCircle.y(),
+        leftCircle?.x() as number,
+        leftCircle?.y() as number,
         centralCircle1.x(),
         centralCircle1.y(),
         centralCircle2.x(),
         centralCircle2.y(),
-        rightCircle.x(),
-        rightCircle.y(),
+        rightCircle?.x() as number,
+        rightCircle?.y() as number,
       ],
     });
 
@@ -77,22 +77,22 @@ const updateDottedLines = (
       points: toolsOptions.points,
       sceneFunc: (ctx: any, shape: any) => {
         ctx.beginPath();
-        ctx.moveTo(leftCircle.x(), leftCircle.y());
+        ctx.moveTo(leftCircle?.x() as number, leftCircle?.y()) as number;
         ctx.bezierCurveTo(
           centralCircle1.x(),
           centralCircle1.y(),
           centralCircle2.x(),
           centralCircle2.y(),
-          rightCircle.x(),
-          rightCircle.y(),
+          rightCircle?.x() as number,
+          rightCircle?.y() as number,
         );
         const PI2 = Math.PI * 2;
-        const dx = rightCircle.x() - centralCircle2.x();
-        const dy = rightCircle.y() - centralCircle2.y();
+        const dx = (rightCircle?.x() as number) - centralCircle2.x();
+        const dy = (rightCircle?.y() as number) - centralCircle2.y();
         const radians = (Math.atan2(dy, dx) + PI2) % PI2;
         const length = shape.getAttr('pointerLength');
         const width = shape.getAttr('pointerWidth');
-        ctx.translate(rightCircle.x(), rightCircle.y());
+        ctx.translate(rightCircle?.x() as number, rightCircle?.y()) as number;
         ctx.rotate(radians);
         ctx.moveTo(0, 0);
         ctx.lineTo(-length, width / 2);
@@ -104,10 +104,10 @@ const updateDottedLines = (
     });
   } else {
     toolsOptions.points1 = [
-      leftCircle.x(),
-      leftCircle.y(),
-      rightCircle.x(),
-      rightCircle.y(),
+      leftCircle?.x() as number,
+      leftCircle?.y() as number,
+      rightCircle?.x() as number,
+      rightCircle?.y() as number,
     ];
     shape?.setAttrs({ points: toolsOptions.points1 });
   }
@@ -225,21 +225,21 @@ const arrowDrawMouseDownListener = ({
 
   if (compareTools(activeTool, tools.line)) {
     const pos = stage.getRelativePointerPosition();
-    shapeOptions.points = [pos.x, pos.y, pos.x, pos.y];
+    shapeOptions.points = [pos?.x, pos?.y, pos?.x, pos?.y];
     shapeOptions.tension = 30;
     shapeOptions.shapeType = 'line';
   }
 
   if (compareTools(activeTool, tools.arrow)) {
     const pos = stage.getRelativePointerPosition();
-    shapeOptions.points = [pos.x, pos.y, pos.x, pos.y];
+    shapeOptions.points = [pos?.x, pos?.y, pos?.x, pos?.y];
     shapeOptions.tension = 30;
     shapeOptions.shapeType = 'arrow';
   }
 
   if (compareTools(activeTool, tools.curvaArrow)) {
     const pos = stage.getRelativePointerPosition();
-    shapeOptions.points = [pos.x, pos.y, pos.x, pos.y];
+    shapeOptions.points = [pos?.x, pos?.y, pos?.x, pos?.y];
     shapeOptions.shapeType = 'curvaArrow';
     shapeOptions.fillEnabled = false;
     shapeOptions.lineJoin = 'round';
@@ -248,7 +248,7 @@ const arrowDrawMouseDownListener = ({
 
   if (compareTools(activeTool, tools.direction)) {
     const pos = stage.getRelativePointerPosition();
-    shapeOptions.points = [pos.x, pos.y, pos.x, pos.y];
+    shapeOptions.points = [pos?.x, pos?.y, pos?.x, pos?.y];
     shapeOptions.shapeType = 'direction';
     shapeOptions.pointerLength = 50;
     shapeOptions.pointerWidth = 50;
@@ -434,8 +434,8 @@ const arrowDrawMouseDownListener = ({
     const pos = stage.getRelativePointerPosition();
     if (shape instanceof Line || shape instanceof Arrow) {
       const newPoints = shape.points();
-      newPoints[2] = pos.x;
-      newPoints[3] = pos.y;
+      newPoints[2] = pos?.x as number;
+      newPoints[3] = pos?.y as number;
       shape.points(newPoints);
     }
   };

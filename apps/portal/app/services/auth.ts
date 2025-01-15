@@ -35,8 +35,8 @@ import {
 import { errorMessage, successMessage } from './helpers/toastMessages';
 import { iDataResponseParser } from './helpers/iDataResponseParser';
 
-const processUserData = (userData: IUserData): IUser => {
-  if (userData.idToken && userData.refreshToken) {
+const processUserData = (userData: IUserData | null): IUser | null => {
+  if (userData?.idToken && userData?.refreshToken) {
     storeUserTokens(userData);
 
     return parseUserData(userData);
@@ -100,7 +100,7 @@ export const googleAuthorization = async (
   credsResponse: CredentialResponse,
 ): Promise<IDataResponse> => {
   const response: IDataResponse = await signInWithGoogleAPI(
-    credsResponse.credential,
+    credsResponse.credential as string,
   );
 
   if (response.status == 'success') {
@@ -127,10 +127,10 @@ export const signOut = (skipMessage?: boolean) => {
   localStorage.removeItem('driveUser');
 
   !skipMessage &&
-    updateExtensionAuthData({ idToken: null, refreshToken: null });
+    updateExtensionAuthData({ idToken: null, refreshToken: null } as any);
 };
 
-export const updateUserDataFromTokens = async (): Promise<IUser> => {
+export const updateUserDataFromTokens = async (): Promise<IUser | null> => {
   const refreshToken = cookie.get('refreshToken');
   const idToken = cookie.get('idToken');
 
@@ -148,7 +148,7 @@ export const updateUserDataFromTokens = async (): Promise<IUser> => {
     updateExtensionAuthData(userData);
     return processUserData(userData);
   } else {
-    updateExtensionAuthData({ idToken: null, refreshToken: null });
+    updateExtensionAuthData({ idToken: null, refreshToken: null } as any);
     return null;
   }
 };
@@ -213,6 +213,8 @@ export const uploadAvatar = async (avatar: File): Promise<string | null> => {
   } else {
     message.error('This file type is not supported.');
   }
+
+  return null;
 };
 
 export const changeUserEmail = async (
@@ -236,7 +238,8 @@ export const deleteUser = async (): Promise<void> => {
 
 // TODO refactor
 export const getPreferences = async (): Promise<IPreferences | undefined> => {
-  const tokens: ITokens = getUserTokens();
+  const tokens: ITokens | null = getUserTokens();
+
   if (tokens) {
     try {
       const res = await getStorageItems('preferences');
@@ -252,7 +255,8 @@ export const getPreferences = async (): Promise<IPreferences | undefined> => {
 export const setPreferences = async (
   preferences: IPreferences,
 ): Promise<void> => {
-  const tokens: ITokens = getUserTokens();
+  const tokens: ITokens | null = getUserTokens();
+
   if (tokens) {
     try {
       await setStorageItems({ preferences });

@@ -60,7 +60,7 @@ const freeDrawMouseDownListener = ({
   const drawLayer: Layer | undefined = getLayer(stage, '#drawLayer');
   drawLayer?.add(lastLine);
   stage.on('mousemove', () => freeDrawMouseMoveListener(stage, lastLine));
-  stage.on('mouseup', () => freeDrawMouseUpListener(stage, saveHistory));
+  stage.on('mouseup', () => freeDrawMouseUpListener(stage, saveHistory as any));
 };
 
 const freeDrawMouseMoveListener = (stage: Stage, lastLine: Line) => {

@@ -111,8 +111,8 @@ const drawMarkerListener = ({
   const marker = new Path(baseMarkerOptions);
   marker.setAttrs({
     shapeType: shapeType,
-    x: stage.getRelativePointerPosition().x,
-    y: stage.getRelativePointerPosition().y,
+    x: stage?.getRelativePointerPosition()?.x,
+    y: stage?.getRelativePointerPosition()?.y,
     fill: options.fill,
     name: markerName,
     id: markerId,
@@ -121,8 +121,8 @@ const drawMarkerListener = ({
   const text: Text = new Text(baseMarkerTextOptions);
   text.setAttrs({
     id: 'markerText',
-    x: stage.getRelativePointerPosition().x,
-    y: stage.getRelativePointerPosition().y,
+    x: stage?.getRelativePointerPosition()?.x,
+    y: stage?.getRelativePointerPosition()?.y,
     text: alphabet[stage.find('#markerText').length],
     name: markerName + 'Text',
   });
@@ -130,8 +130,8 @@ const drawMarkerListener = ({
   const numbers: Text = new Text(baseMarkerTextOptions);
   numbers.setAttrs({
     id: 'markerNumbers',
-    x: stage.getRelativePointerPosition().x,
-    y: stage.getRelativePointerPosition().y,
+    x: stage?.getRelativePointerPosition()?.x,
+    y: stage?.getRelativePointerPosition()?.y,
     name: markerName + 'Text',
     text: String(stage.find('#markerNumbers').length + 1),
   });
@@ -163,7 +163,8 @@ const drawMarkerListener = ({
       activeWorkspace,
       forWorkspace,
     );
-    MarkerService.addMarker(userId, markerId, imageId, setMarkers);
+
+    MarkerService.addMarker(userId, markerId as any, imageId, setMarkers);
 
     // await MarkerAPI.create(markerId, imageId);
     // save(true);

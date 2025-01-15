@@ -6,7 +6,7 @@ interface IWatermarkToolSliderProps {
   title: string;
   min?: number;
   max?: number;
-  onChange: (options: Number) => void;
+  onChange: (options: number) => void;
 }
 
 const WatermarkToolSlider: React.FC<IWatermarkToolSliderProps> = ({

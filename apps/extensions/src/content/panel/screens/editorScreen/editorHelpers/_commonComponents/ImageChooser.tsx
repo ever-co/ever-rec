@@ -25,7 +25,7 @@ const ImageChooser: React.FC<Props> = ({ visible, onOk, onCancel, actual }) => {
 
   return (
     <Modal
-      visible={visible}
+      open={visible}
       closable={true}
       onCancel={onCancel}
       width={1320}
@@ -43,7 +43,7 @@ const ImageChooser: React.FC<Props> = ({ visible, onOk, onCancel, actual }) => {
                   xxl={8}
                   className="tw-mb-8 !tw-overflow-hidden "
                 >
-                  <div className="tw-border tw-border-2 tw-border-primary-purple tw-h-220px tw-rounded-lg tw-bg-black tw-flex tw-items-center tw-justify-center tw-flex-col !tw-overflow-hidden tw-cursor-pointer">
+                  <div className="tw-border-2 tw-border-primary-purple tw-h-220px tw-rounded-lg tw-bg-black tw-flex tw-items-center tw-justify-center tw-flex-col !tw-overflow-hidden tw-cursor-pointer">
                     <div id="cover">
                       <Image
                         width={390}

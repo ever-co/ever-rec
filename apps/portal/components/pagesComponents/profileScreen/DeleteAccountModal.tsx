@@ -97,7 +97,7 @@ const DeleteAccountModal: React.FC<IProps> = ({
 
   return (
     <Modal
-      visible={visible}
+      open={visible}
       onCancel={onCancelHandler}
       width={600}
       footer={
@@ -154,7 +154,7 @@ const EnterCurrentPassword: FC<IEnterCurrentPasswordProps> = ({
           placeholder="Enter password"
           type={passwordShown ? 'text' : 'password'}
           autoComplete={'new-password'}
-          rules={null}
+          rules={[]}
           value={passwordState.value}
           errors={passwordState.errors}
           inputClass={styles.appInputSecond}

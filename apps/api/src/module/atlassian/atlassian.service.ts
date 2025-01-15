@@ -48,33 +48,33 @@ export class AtlassianService {
         resData = await this.videoService.getVideoByIdPrivate(uid, itemId);
       }
 
-      const bodyData = `{
-            "update": {},
-            "fields": {
-              "summary": "${title}",
-              "issuetype": {
-                "id": "${issueType}"
-              },
-              "project": {
-                "id": "${projectId}"
-              },
-              "description": {
-                "type": "doc",
-                "version": 1,
-                "content": [
+      const bodyData = JSON.stringify({
+        update: {},
+        fields: {
+          summary: title,
+          issuetype: {
+            id: issueType,
+          },
+          project: {
+            id: projectId,
+          },
+          description: {
+            type: 'doc',
+            version: 1,
+            content: [
+              {
+                type: 'paragraph',
+                content: [
                   {
-                    "type": "paragraph",
-                    "content": [
-                      {
-                        "text": "${description}",
-                        "type": "text"
-                      }
-                    ]
-                  }
-                ]
-              }
-            }
-      }`;
+                    text: description,
+                    type: 'text',
+                  },
+                ],
+              },
+            ],
+          },
+        },
+      });
 
       const issueResponse = await this.atlassianApiService.createIssue(
         resourceId,
@@ -82,6 +82,9 @@ export class AtlassianService {
         'issue',
         bodyData,
       );
+
+      console.log(issueResponse);
+
       if (
         issueResponse &&
         issueResponse.status == ResStatusEnum.success &&

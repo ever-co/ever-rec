@@ -1,6 +1,6 @@
 import { FC, MouseEvent, ReactNode } from 'react';
 import classNames from 'classnames';
-import styles from './AppButton2.module.scss';
+import * as styles from './AppButton2.module.scss';
 
 interface AppInputProps {
   children: ReactNode;

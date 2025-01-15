@@ -45,7 +45,7 @@ const ShareItemModal: React.FC<IShareItemModalProps> = ({
 
   return (
     <Modal
-      visible={visible}
+      open={visible}
       onCancel={onCancel}
       footer={
         <div className="tw-flex tw-justify-center tw-items-center tw-mt-8">

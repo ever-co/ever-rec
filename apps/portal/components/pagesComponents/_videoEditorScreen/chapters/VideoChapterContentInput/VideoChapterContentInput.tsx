@@ -110,19 +110,19 @@ const VideoChapterContentInput: FC<IProps> = ({
       placement="top"
       title={<div className="tw-p-2">Please fill this field</div>}
       trigger=""
-      visible={tooltipVisible}
+      open={tooltipVisible}
     >
       <TextArea
         className={classNames(
           'tw-mb-0 tw-bg-transparent tw-resize-none tw-w-full tw-overflow-hidden tw-p-2',
           s.ContentInput,
           isPublic && s.disabled,
-          "scroll-div"
+          'scroll-div',
         )}
         placeholder={`Type your chapter content here ${
           isFirst ? '(e.g.Introduction)' : ''
         }`}
-        ref={ref}
+        ref={ref as any}
         value={title}
         onClick={(e) => e.stopPropagation()}
         onChange={(e) => handleTitleChange(e)}

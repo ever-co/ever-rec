@@ -47,7 +47,7 @@ import {
   uploadWorkspaceImageFile,
   uploadWorkspaceVideoFile,
 } from '@/app/services/workspace';
-import styles from '@/content/panel/styles/Shared.module.scss';
+import * as styles from '@/content/panel/styles/Shared.module.scss';
 import useItemsFilter from '@/content/panel/hooks/useItemsFilter';
 import { ItemTypeEnum } from '../shared/enums/itemTypeEnum';
 import useItemOrder from '../shared/hooks/useItemOrder';

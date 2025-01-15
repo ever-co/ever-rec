@@ -3,7 +3,7 @@ import classNames from 'classnames';
 
 import { UniqueView } from '@/app/interfaces/IUniqueView';
 //@ts-ignore
-import styles from './../UniqueViews.module.scss';
+import * as styles from './../UniqueViews.module.scss';
 
 interface IUniqueImageProps {
   view: UniqueView;

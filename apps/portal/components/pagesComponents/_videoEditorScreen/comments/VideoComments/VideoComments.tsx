@@ -20,7 +20,7 @@ interface IProps {
 const VideoComments: FC<IProps> = ({ userId, itemOwnerId, itemId }) => {
   const [showNotification, setShowNotification] = useState(true);
   const [comments, setComments] = useState<IComment[] | null>(null);
-  const [editComments, setEditComments] = useState([]);
+  const [editComments, setEditComments] = useState<any[]>([]);
   const [userComment, setUserComment] = useState('');
   const [addCommentDisabled, setAddCommentDisabled] = useState(false);
 
@@ -114,11 +114,11 @@ const VideoComments: FC<IProps> = ({ userId, itemOwnerId, itemId }) => {
     const updatedComment: IComment = { ...comment, ...response.data };
 
     setComments((prevComments) => {
-      const newComments = prevComments.map((comment) =>
+      const newComments = prevComments?.map((comment) =>
         comment.id === updatedComment.id ? updatedComment : comment,
       );
 
-      return newComments;
+      return newComments || [];
     });
 
     commentEditCancel(comment.id);
@@ -138,8 +138,8 @@ const VideoComments: FC<IProps> = ({ userId, itemOwnerId, itemId }) => {
     if (response.status === ResStatusEnum.error)
       return console.log(response.message);
 
-    const newComments = comments.filter((comment) => comment.id !== commentId);
-    setComments(newComments);
+    const newComments = comments?.filter((comment) => comment.id !== commentId);
+    setComments(newComments || []);
   };
 
   const commentsLength = comments ? comments.length : 0;

@@ -2,7 +2,7 @@ import { FC, useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootStateOrAny } from 'react-redux';
 import { useRouter } from 'next/router';
-import Image from 'next/image';
+import Image from 'next/legacy/image';
 import Link from 'next/link';
 import classNames from 'classnames';
 import { Tooltip } from 'antd';

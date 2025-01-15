@@ -370,10 +370,10 @@ const ImagesAndVideosContainer: React.FC<IImagesAndVideosProps> = ({
         shareAtlassianTicketHandler(action, screenshot);
         break;
       case ItemActionsEnum.shareWhatsApp:
-        shareWhatsappHandler(screenshot.dbData.id, 'image', action);
+        shareWhatsappHandler(screenshot.dbData?.id || '', 'image', action);
         break;
       case ItemActionsEnum.shareSlack:
-        shareSlackHandler(screenshot.dbData.id, 'image', action);
+        shareSlackHandler(screenshot.dbData?.id || '', 'image', action);
         break;
       case ItemActionsEnum.delete:
         deleteImageHandler(screenshot);
@@ -404,10 +404,10 @@ const ImagesAndVideosContainer: React.FC<IImagesAndVideosProps> = ({
         shareAtlassianTicketHandler(action, video, 'video');
         break;
       case ItemActionsEnum.shareWhatsApp:
-        shareWhatsappHandler(video.dbData.id, 'video', action);
+        shareWhatsappHandler(video.dbData?.id || '', 'video', action);
         break;
       case ItemActionsEnum.shareSlack:
-        shareSlackHandler(video.dbData.id, 'video', action);
+        shareSlackHandler(video.dbData?.id || '', 'video', action);
         break;
       case ItemActionsEnum.delete:
         deleteVideoHandler(video);
@@ -468,7 +468,7 @@ const ImagesAndVideosContainer: React.FC<IImagesAndVideosProps> = ({
             onSelect={() => selectVideoHandler(video)}
             onRestoreFromTrash={() => restoreFromTrashHandler(video, 'Video')}
             onDropdownVisibleChange={(visible) =>
-              setDropdownVisible({ item: video, visible })
+              setDropdownVisible({ item: video as any, visible })
             }
             onDropdownAction={(action) => handleActionVideo(video, action)}
             {...shareThirdPartyOptions}
@@ -514,7 +514,7 @@ const ImagesAndVideosContainer: React.FC<IImagesAndVideosProps> = ({
             onDelete={() => deleteImageHandler(screenshot)}
             onSelect={() => selectScreenshotHandler(screenshot)}
             onDropdownVisibleChange={(visible) =>
-              setDropdownVisible({ item: screenshot, visible })
+              setDropdownVisible({ item: screenshot as any, visible })
             }
             onDropdownAction={(action) =>
               handleActionScreenshot(screenshot, action)
@@ -581,7 +581,7 @@ const ImagesAndVideosContainer: React.FC<IImagesAndVideosProps> = ({
           <CreateJiraTicketModal
             selectedItem={shareItemSelected}
             user={user}
-            type={shareItemSelected.type}
+            type={shareItemSelected.type || undefined}
             onCancel={() => setShareItemSelected({ ...defaultShareItem })}
           />
         )}
@@ -590,7 +590,7 @@ const ImagesAndVideosContainer: React.FC<IImagesAndVideosProps> = ({
           <CreateTrelloTicketModal
             selectedItem={shareItemSelected}
             user={user}
-            type={shareItemSelected.type}
+            type={shareItemSelected.type || undefined}
             onCancel={() => setShareItemSelected({ ...defaultShareItem })}
           />
         )}

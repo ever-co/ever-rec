@@ -60,8 +60,8 @@ const Image: React.FC = () => {
         if (id && typeof id === 'string') {
           const image = await getImageById(id);
           !image && router.push(preRoutes.media + panelRoutes.images);
-          dispatch(PanelAC.setEditorImage({ editorImage: image }));
-          getExplorerData(image.dbData?.parentId);
+          dispatch(PanelAC.setEditorImage({ editorImage: image as any }));
+          getExplorerData(image?.dbData?.parentId);
           dispatch(PanelAC.resetExplorerDataLoader());
         }
         setLoaderState(false);
@@ -219,7 +219,7 @@ tw-items-center tw-justify-center tw-bg-blue-grey tw-h-600px"
                 </div>
 
                 <VideoComments
-                  itemId={image?.dbData?.id}
+                  itemId={image?.dbData?.id as any}
                   userId={user?.id}
                   itemOwnerId={user?.id}
                 />
@@ -244,7 +244,7 @@ tw-items-center tw-justify-center tw-bg-blue-grey tw-h-600px"
       )}
 
       <ImageModal
-        imageUrl={image?.url}
+        imageUrl={image?.url as any}
         closeModal={() => setImageModalState(false)}
         visible={imageModalState}
       />

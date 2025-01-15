@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import styles from './ScreenshotItem.module.scss';
+import * as styles from './ScreenshotItem.module.scss';
 import classNames from 'classnames';
 import browser from '@/app/utilities/browser';
 // TODO: Fix styles - check the portal on how we should handle this
@@ -200,7 +200,7 @@ const ScreenshotItem: React.FC<IScreenshotItemProps> = ({
                   />
                 }
                 placement="bottomRight"
-                onVisibleChange={dropdownVisibleChangeHandler}
+                onOpenChange={dropdownVisibleChangeHandler}
               >
                 <img
                   src={browser.runtime.getURL('images/panel/item/options.svg')}

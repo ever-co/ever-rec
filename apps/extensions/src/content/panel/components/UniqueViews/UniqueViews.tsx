@@ -1,5 +1,5 @@
 import { ReactElement, useEffect, useRef, useState } from 'react';
-import styles from './UniqueViews.module.scss';
+import * as styles from './UniqueViews.module.scss';
 import { Popover, Spin } from 'antd';
 import classNames from 'classnames';
 import UserShortInfo from '../containers/dashboardLayout/elements/UserShortInfo';

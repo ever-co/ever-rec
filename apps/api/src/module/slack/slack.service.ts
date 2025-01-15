@@ -22,6 +22,9 @@ export class SlackService {
     private eventEmitter: EventEmitter2,
   ) {}
 
+  /**
+   * @internal
+   */
   async storeInstallationInformation(query) {
     const { code, state } = query;
 
@@ -82,6 +85,9 @@ export class SlackService {
     }
   }
 
+  /**
+   * @internal
+   */
   public async slackPostMessage(req) {
     try {
       const uid = req.user?.id;

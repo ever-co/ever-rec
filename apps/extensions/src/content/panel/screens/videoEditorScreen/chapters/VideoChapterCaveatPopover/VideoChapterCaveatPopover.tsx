@@ -1,5 +1,5 @@
 // @ts-ignore
-import styles from './VideoChapterCaveatPopover.module.scss';
+import * as styles from './VideoChapterCaveatPopover.module.scss';
 import React, { FC } from 'react';
 import { Popover } from 'antd';
 import AppSvg from '@/content/components/elements/AppSvg';
@@ -58,7 +58,10 @@ const DefaultCaveat = () => {
           <strong>{CHAPTER_MIN_REQUIRED_SECONDS}</strong> seconds
         </li>
       </ul>
-      <p className={s.Paragraph}>To add a new chapter move the video progress bar and click on the Add Chapter button.</p>
+      <p className={s.Paragraph}>
+        To add a new chapter move the video progress bar and click on the Add
+        Chapter button.
+      </p>
     </div>
   );
 };

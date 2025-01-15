@@ -24,7 +24,7 @@ const MoveToWorkspaceModal: React.FC<Props> = ({
 
   return (
     <Modal
-      visible={visible}
+      open={visible}
       onCancel={onCancel}
       closeIcon={
         <AppSvg path="/common/close-icon.svg" className="modalCloseButton" />
@@ -34,7 +34,7 @@ const MoveToWorkspaceModal: React.FC<Props> = ({
           <AppButton
             onClick={() => {
               setSelectedWorkspace(null);
-              onSuccess(selectedWorkspace);
+              selectedWorkspace && onSuccess(selectedWorkspace);
             }}
             className="tw-px-8 tw-pb-1 tw-pt-1"
             disabled={!selectedWorkspace}

@@ -1,5 +1,5 @@
 import classNames from 'classnames';
-import styles from './VideoItemWrapper.module.scss';
+import * as styles from './VideoItemWrapper.module.scss';
 import { memo } from 'react';
 
 // Provide a more specific type for selectedItems

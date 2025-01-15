@@ -79,8 +79,8 @@ const MarkerContentPopup: React.FC<IMarkersMediaProps> = ({
 
     user: {
       id: user?.id,
-      photoUrl: user?.photoURL,
-      displayName: user?.displayName,
+      photoUrl: user?.photoURL as string,
+      displayName: user?.displayName as string,
     },
   });
   const [filteredComments, setFilteredComments] = useState<IMarkerComment[]>(
@@ -114,8 +114,8 @@ const MarkerContentPopup: React.FC<IMarkersMediaProps> = ({
 
       user: {
         id: user?.id,
-        photoUrl: user.photoURL,
-        displayName: user.displayName,
+        photoUrl: user.photoURL as string,
+        displayName: user.displayName as string,
       },
     });
     setImageSrc('');
@@ -175,7 +175,7 @@ const MarkerContentPopup: React.FC<IMarkersMediaProps> = ({
   const element = area.current;
   useEffect(() => {
     if (element) {
-      element?.addEventListener(
+      (element as HTMLElement)?.addEventListener(
         'paste',
         (evt) => {
           const clipboardItems = evt.clipboardData?.items;
@@ -224,8 +224,8 @@ const MarkerContentPopup: React.FC<IMarkersMediaProps> = ({
           audioDuration: audioDuration,
           user: {
             id: user?.id,
-            photoUrl: user.photoURL,
-            displayName: user.displayName,
+            photoUrl: user.photoURL as string,
+            displayName: user.displayName as string,
           },
         };
 
@@ -305,7 +305,7 @@ const MarkerContentPopup: React.FC<IMarkersMediaProps> = ({
                       icon={<CloseOutlined />}
                       shape="circle"
                       size="small"
-                      onClick={() => setImageSrc(null)}
+                      onClick={() => setImageSrc(null as any)}
                       className={styles.close_icon}
                     />
 
@@ -323,7 +323,7 @@ const MarkerContentPopup: React.FC<IMarkersMediaProps> = ({
                         icon={<CloseOutlined />}
                         shape="circle"
                         size="small"
-                        onClick={() => setVideoSrc(null)}
+                        onClick={() => setVideoSrc(null as any)}
                         className={styles.close_icon}
                       />
 
@@ -362,12 +362,12 @@ const MarkerContentPopup: React.FC<IMarkersMediaProps> = ({
             ) : uploadState === 'voice' ? (
               <div className={styles.voiceRecorder}>
                 <VoiceRecorder
-                  duration={audioDuration}
+                  duration={audioDuration as string}
                   setAudioDuration={setDuration}
                   uploadState={uploadState}
                   setUploadState={setUploadState}
                   setAudioSrc={setAudioSrc}
-                  audioSrc={audioSrc}
+                  audioSrc={audioSrc as string}
                 />
               </div>
             ) : (

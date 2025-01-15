@@ -19,7 +19,7 @@ const GetVideoUrlModal: React.FC<IGetVideoUrlModalProps> = ({
   return (
     <Modal
       title="Video URL"
-      visible={visible}
+      open={visible}
       onCancel={onClose}
       onOk={onOkHandler}
       okText="Copy"

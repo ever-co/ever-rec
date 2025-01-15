@@ -3,7 +3,7 @@
 /* eslint-disable no-var */
 import ScaleSelector from './components/ScaleSelector';
 import mapicon from 'public/assets/svg/whiteboard-tools-panel/map.svg';
-import Image from 'next/image';
+import Image from 'next/legacy/image';
 import React, { useEffect, useState } from 'react';
 import { Tabs } from 'antd';
 import { Stage } from 'konva/lib/Stage';
@@ -56,7 +56,7 @@ const WhiteboardSidebar: React.FC<ISidebarProps> = ({
                       onTitleClick={() => {
                         document
                           .getElementById(stage.getAttr('id'))
-                          .scrollIntoView({
+                          ?.scrollIntoView({
                             behavior: 'auto',
                             block: 'center',
                             inline: 'center',
@@ -82,7 +82,7 @@ const WhiteboardSidebar: React.FC<ISidebarProps> = ({
                               onClick={() => {
                                 document
                                   .getElementById(stage.getAttr('id'))
-                                  .scrollIntoView({
+                                  ?.scrollIntoView({
                                     behavior: 'auto',
                                     block: 'center',
                                     inline: 'center',
@@ -104,7 +104,7 @@ const WhiteboardSidebar: React.FC<ISidebarProps> = ({
                       onClick={() => {
                         document
                           .getElementById(stage.getAttr('id'))
-                          .scrollIntoView({
+                          ?.scrollIntoView({
                             behavior: 'auto',
                             block: 'end',
                             inline: 'center',
@@ -140,7 +140,7 @@ const WhiteboardSidebar: React.FC<ISidebarProps> = ({
       <div className="tw-border tw-border-iron-grey tw-w-full tw-h-40px">
         <div className="tw-text-xl tw-p-1 tw-flex tw-align-center tw-justify-between">
           <div className="tw-border-r tw-border-iron-grey tw-px-2 ">
-            <Image src={mapicon} width={18} height={15} />
+            <Image src={mapicon} width={18} height={15} alt="mapicon" />
           </div>
           <ScaleSelector
             value={stageScale}

@@ -41,7 +41,7 @@ const WorkspaceSingleImage = () => {
   const { titleContainer, editTitle, created, setTitleFocus } =
     useInitImageVideoItem({
       updateTitle,
-      item: image,
+      item: image as IWorkspaceImage,
       forSinglePage: true,
       canEditTitle: canEditItem(image?.dbData),
     });
@@ -60,7 +60,7 @@ const WorkspaceSingleImage = () => {
 
       const image = response.data;
       setImage(image);
-      setImageOwner(image.dbData?.user || null);
+      setImageOwner(image?.dbData?.user || null);
     }
     setLoaderState(false);
   }, [activeWorkspace, router.query]);
@@ -87,7 +87,11 @@ const WorkspaceSingleImage = () => {
     const { dbData } = image;
     if (dbData) {
       dbData.title = newTitle;
-      await updateItemDataWorkspace(activeWorkspace.id, dbData, 'image');
+      await updateItemDataWorkspace(
+        activeWorkspace?.id as string,
+        dbData,
+        'image',
+      );
     }
   }
 
@@ -168,7 +172,7 @@ tw-items-center tw-justify-center tw-bg-blue-grey tw-h-500px"
 
                   <div className="tw-flex default:tw-justify-between mx-lg:tw-flex-wrap">
                     <UserShortInfo
-                      user={imageOwner}
+                      user={imageOwner as IUserShort}
                       avaSize={80}
                       fullNameClasses="tw-text-xl tw-font-semibold"
                       emailClasses="tw-text-base"
@@ -218,9 +222,9 @@ tw-items-center tw-justify-center tw-bg-blue-grey tw-h-500px"
                 </div>
 
                 <VideoComments
-                  itemId={image?.dbData?.id}
+                  itemId={image?.dbData?.id as string}
                   userId={user?.id}
-                  itemOwnerId={imageOwner?.id}
+                  itemOwnerId={imageOwner?.id as string}
                 />
               </Col>
 
@@ -234,8 +238,8 @@ tw-items-center tw-justify-center tw-bg-blue-grey tw-h-500px"
               >
                 <SingleImagePageManageAreaTemplate
                   image={image}
-                  setImage={setImage}
-                  workspace={activeWorkspace}
+                  setImage={setImage as any}
+                  workspace={activeWorkspace || undefined}
                   setLoaderState={setLoaderState}
                 />
               </Col>
@@ -245,7 +249,7 @@ tw-items-center tw-justify-center tw-bg-blue-grey tw-h-500px"
       )}
 
       <ImageModal
-        imageUrl={image?.url}
+        imageUrl={image?.url as string}
         closeModal={() => setImageModalState(false)}
         visible={imageModalState}
       />

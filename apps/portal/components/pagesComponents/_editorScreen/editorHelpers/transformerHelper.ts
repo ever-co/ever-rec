@@ -12,7 +12,7 @@ export const destroyPointerTransformer = (stage: Stage | null): void => {
   layer?.findOne('#pointerTransformer')?.destroy();
   const drawLayer: Layer | undefined = getLayer(stage, '#drawLayer');
   drawLayer?.children.forEach((element: Shape | Group) => {
-    if (element.getAttr('id') === 'conversationGroup' && element.hasChildren) {
+    if (element.getAttr('id') === 'conversationGroup') {
       // @ts-ignore
       element?.children[0].setAttrs({ shadowOpacity: 0 });
     }
@@ -97,7 +97,9 @@ export const initPointerTransformer = (
       pixelRatio: 1,
       keepRatio: false,
       enabledAnchors:
-        nodes[0].attrs.id === 'text' ? ['middle-left', 'middle-right'] : null,
+        nodes[0].attrs.id === 'text'
+          ? ['middle-left', 'middle-right']
+          : undefined,
       nodes,
       rotateAnchorOffset,
       rotateEnabled: nodes[0].attrs.name == blurName ? false : true,

@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import styles from '../../../styles/Modal.module.scss';
+import * as styles from '../../../styles/Modal.module.scss';
 import { Modal } from 'antd';
 import { IAppControlData } from '@/app/interfaces/IAppControl';
 import { requiredRule } from '@/app/rules';
@@ -62,7 +62,7 @@ const ChangeNameModal: React.FC<IProps> = ({
 
   return (
     <Modal
-      visible={visible}
+      open={visible}
       onCancel={onCancelHandler}
       width={600}
       footer={

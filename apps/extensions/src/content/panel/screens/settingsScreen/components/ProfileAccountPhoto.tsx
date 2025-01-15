@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import styles from './ProfileAccountPhoto.module.scss';
+import * as styles from './ProfileAccountPhoto.module.scss';
 import AppSvg from '@/content/components/elements/AppSvg';
 
 interface IProps {

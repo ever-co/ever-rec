@@ -74,17 +74,17 @@ const WorkspaceFolderSection: React.FC<IFolderSectionProps> = ({
       <>
         <h2 className="tw-mb-6 tw-text-2xl tw-font-semibold">Select folder</h2>
         <Folder
-          folder={null}
+          folder={null as any}
           leftMargin={0}
           RootFolderName={workspace.name}
           highlightedRef={highlightedRef}
           setHighlightedRef={setHighlightedRef}
-          setSelectedFolder={() => setSelectedFolder(null)}
+          setSelectedFolder={() => setSelectedFolder(null as any)}
         />
         {initialOpened && buildFolderTree(folders)}
       </>
     );
-  } else if (items.every((x) => x.dbData.parentId === false)) {
+  } else if (items.every((x) => x.dbData?.parentId === false)) {
     folderSection = (
       <>
         <h3 className="tw-mb-6 tw-text-2xl tw-font-semibold">
@@ -95,11 +95,11 @@ const WorkspaceFolderSection: React.FC<IFolderSectionProps> = ({
   } else {
     return (
       <Folder
-        folder={null}
+        folder={null as any}
         leftMargin={0}
         highlightedRef={highlightedRef}
         setHighlightedRef={setHighlightedRef}
-        setSelectedFolder={() => setSelectedFolder(null)}
+        setSelectedFolder={() => setSelectedFolder(null as any)}
       />
     );
   }

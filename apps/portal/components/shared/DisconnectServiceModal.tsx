@@ -24,7 +24,7 @@ const DisconnectServiceModal: React.FC<IDisconnectServiceModalProps> = ({
 
   return (
     <Modal
-      visible={true}
+      open={true}
       onCancel={onCancel}
       closeIcon={
         <AppSvg path="/common/close-icon.svg" className="modalCloseButton" />

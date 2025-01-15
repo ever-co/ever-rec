@@ -106,21 +106,24 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
   const driveUser: DriveUser | null = useSelector(
     (state: RootStateOrAny) => state.auth.driveUser,
   );
-  const [uploadToCloudType, setUploadToCloudType] = useState<string>(null);
+  const [uploadToCloudType, setUploadToCloudType] = useState<string | null>(
+    null,
+  );
   const [driveImageId, setDriveImageId] = useState<string | null>('');
-  const [dropBoxImageId, setDropBoxImageId] = useState<string>('');
+  const [dropBoxImageId, setDropBoxImageId] = useState<string | null>('');
   const [uploadToCloudModalState, setUploadToCloudModalState] =
     useState<boolean>(false);
-  const [showCloudDeleteFileModal, setShowCloudDeleteFileModal] =
-    useState(null);
+  const [showCloudDeleteFileModal, setShowCloudDeleteFileModal] = useState<
+    string | null
+  >(null);
   const [driveOperationLoading, setDriveOperationLoading] = useState(false);
   const [dropboxOperationLoading, setDropboxOperationLoading] = useState(false);
   const folderName = image?.dbData?.folderData?.name || 'My Images';
   const currentlySavedIn = useMemo(
     () =>
       workspace
-        ? workspace.folders.find((x) => x.id === image.dbData.parentId)?.name ||
-          workspace.name
+        ? workspace.folders.find((x) => x.id === image.dbData?.parentId)
+            ?.name || workspace.name
         : folderName,
     [image, workspace, folderName],
   );
@@ -129,7 +132,12 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
     copyLinkHandler,
     getShareableLinkHandler,
     deleteShareLink,
-  } = useGenerateShareLink(image, 'image', workspace?.id, updateImageState);
+  } = useGenerateShareLink(
+    image,
+    'image',
+    workspace?.id as string,
+    updateImageState,
+  );
   const [shareLoadingState, setShareLoadingState] = useState(false);
 
   async function updateImageState(updatedImage: IEditorImage) {
@@ -165,13 +173,13 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
       (x) => x.dbData?.id === image.dbData?.id,
     );
     const explorerDatFilesCopy = explorerData.files.slice();
-    explorerDatFilesCopy[explorerDataIndex] = updatedImage;
+    explorerDatFilesCopy[explorerDataIndex] = updatedImage as any;
     dispatch(
       PanelAC.setExplorerData({
         explorerData: { ...explorerData, files: explorerDatFilesCopy },
       }),
     );
-    dispatch(PanelAC.setEditorImage({ editorImage: updatedImage }));
+    dispatch(PanelAC.setEditorImage({ editorImage: updatedImage as any }));
   };
 
   const openUploadToCloudModal = async () => {
@@ -189,13 +197,13 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
 
   const uploadToCloudHandler = async (name: string, type?: string) => {
     closeUploadToCloudModal();
-    const res = await fetch(image.url);
+    const res = await fetch(image.url as string);
     if (!type) {
       setDriveOperationLoading(true);
       const { data } = await driveUploadFile(
         name,
         await res.blob(),
-        image.dbData?.id,
+        image.dbData?.id as string,
         'image',
       );
       if (data && explorerData?.files) {
@@ -212,7 +220,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
       const response = await dropboxFileUpload(
         name,
         await res.blob(),
-        image.dbData?.id,
+        image.dbData?.id as string,
         'image',
       );
       if (response.status == ResStatusEnum.success) {
@@ -231,7 +239,10 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
     setShowCloudDeleteFileModal(null);
     if (showCloudDeleteFileModal == 'drive') {
       setDriveOperationLoading(true);
-      const response = await deleteDriveItem(image.dbData?.id, 'image');
+      const response = await deleteDriveItem(
+        image.dbData?.id as string,
+        'image',
+      );
 
       if (response.status === ResStatusEnum.error) {
         setDriveOperationLoading(false);
@@ -245,7 +256,10 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
     }
     if (showCloudDeleteFileModal == 'Dropbox') {
       setDropboxOperationLoading(true);
-      const response = await deleteDropboxItem(image.dbData?.id, 'image');
+      const response = await deleteDropboxItem(
+        image.dbData?.id as string,
+        'image',
+      );
       if (response.status === ResStatusEnum.error) {
         console.log(response.message);
         setDropboxOperationLoading(false);
@@ -263,7 +277,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
       window &&
       window
         .open(`https://drive.google.com/file/d/${driveImageId}/view`, '_blank')
-        .focus();
+        ?.focus();
     await saveSegmentEvent('Opened google drive Image', {
       title: image.dbData?.title,
     });
@@ -278,7 +292,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
           `https://www.dropbox.com/home/Apps/Rec?preview=${dropBoxImageId}`,
           '_blank',
         )
-        .focus();
+        ?.focus();
     await saveSegmentEvent('Opened dropbox Image', {
       title: image.dbData?.title,
     });
@@ -319,10 +333,10 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
     setLoaderState(true);
 
     if (workspace) {
-      await workspaceImageDelete(screenshot, workspace);
+      await workspaceImageDelete(screenshot as IWorkspaceImage, workspace);
       router.push(preRoutes.media + panelRoutes.workspace + `/${workspace.id}`);
     } else {
-      await imageDelete(screenshot);
+      await imageDelete(screenshot as IWorkspaceImage);
       router.push(preRoutes.media + panelRoutes.images);
     }
 
@@ -361,7 +375,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
 
   const pdfSave = async () => {
     if (image) {
-      const blob = await pdfFromImageUrl(image.url);
+      const blob = await pdfFromImageUrl(image.url as string);
       successMessage('Image downloaded!');
       saveAs(blob, image.dbData?.title);
       await saveSegmentEvent('Image PDF Downloaded', {
@@ -372,7 +386,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
 
   const clipboardCopy = async () => {
     try {
-      const blob: Blob | null = await getBlobfromUrl(image.url);
+      const blob: Blob | null = await getBlobfromUrl(image.url as string);
       if (blob) {
         const item = new window.ClipboardItem({
           'image/png': blob,
@@ -722,7 +736,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
         </Tabs>
       </div>
       <UploadToCloudModal
-        type={uploadToCloudType}
+        type={uploadToCloudType as string}
         oldName={image?.dbData?.title}
         visible={uploadToCloudModalState}
         onClose={closeUploadToCloudModal}
@@ -740,7 +754,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
         item={emailModalState.screenshot}
         onCancel={closeEmailModal}
         itemType={'image'}
-        itemPublicLink={image?.url}
+        itemPublicLink={image?.url as string}
       />
       {!workspace && (
         <ItemsFolderModal

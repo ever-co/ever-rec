@@ -39,7 +39,11 @@ export class WorkspaceUtilitiesService {
     };
   }
 
-  // same as images function. should be extracted.
+  /**
+   * @internal
+   *
+   * Same as images function. should be extracted.
+   */
   async getImageOrItsThumbnailRef(workspaceId: string, fullFileName: string) {
     const bucket = admin.storage().bucket();
     const thumbnailExists = (

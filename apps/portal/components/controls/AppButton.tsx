@@ -1,4 +1,4 @@
-import classNames from 'classnames';
+import { cn } from 'app/utilities/cn';
 import React, { MouseEvent, ReactNode } from 'react';
 
 const DEFAULT_BG_COLOR = 'tw-bg-primary-purple';
@@ -52,8 +52,8 @@ const AppButton: React.FC<AppInputProps> = ({
     return disabled
       ? 'default:tw-opacity-50'
       : outlined
-      ? 'default:hover:tw-bg-opacity-20'
-      : 'default:hover:tw-bg-opacity-100';
+        ? 'default:hover:tw-bg-opacity-20'
+        : 'default:hover:tw-bg-opacity-100';
   };
 
   const clickHandler = (e: MouseEvent<HTMLDivElement>): void => {
@@ -67,7 +67,7 @@ const AppButton: React.FC<AppInputProps> = ({
   return (
     <div
       id={id}
-      className={classNames(
+      className={cn(
         'tw-cursor-pointer tw-select-none tw-text-base',
         full ? 'tw-w-full' : 'tw-w-max',
         outlined ? 'tw-bg-app-grey' : bgColor,
@@ -83,10 +83,9 @@ const AppButton: React.FC<AppInputProps> = ({
       onMouseLeave={onMouseLeave}
     >
       <div
-        className={classNames(
+        className={cn(
           'tw-flex tw-items-center tw-justify-center tw-font-semibold',
-          textColor,
-          twTextColor,
+          twTextColor || textColor,
           twTextSize,
         )}
       >

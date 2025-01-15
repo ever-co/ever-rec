@@ -50,7 +50,7 @@ const VoiceRecorder: React.FC<IRecorderProps> = ({
             start();
           }, 500);
 
-          const audioChunks = [];
+          const audioChunks: Blob[] = [];
           mediaRecorder.addEventListener('dataavailable', (event) => {
             audioChunks.push(event.data);
           });
@@ -79,16 +79,22 @@ const VoiceRecorder: React.FC<IRecorderProps> = ({
           };
 
           const acceptBtn = document.getElementById('accept');
-          acceptBtn.onclick = () => {
-            accepted = true;
-            finishRecording();
-          };
+
+          if (acceptBtn) {
+            acceptBtn.onclick = () => {
+              accepted = true;
+              finishRecording();
+            };
+          }
 
           const cancelBtn = document.getElementById('cancel');
-          cancelBtn.onclick = () => {
-            accepted = false;
-            finishRecording();
-          };
+
+          if (cancelBtn) {
+            cancelBtn.onclick = () => {
+              accepted = false;
+              finishRecording();
+            };
+          }
         })
         .catch((err) => {
           errorMessage(err.message);

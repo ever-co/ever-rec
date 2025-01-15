@@ -1,22 +1,19 @@
-const ejs = require('ejs');
+// @ts-check
+const webpack = require('webpack');
 const path = require('path');
 const Handlebars = require('handlebars');
-const CopyWebpackPlugin = require('copy-webpack-plugin');
-const TerserPlugin = require('terser-webpack-plugin');
+const CopyPlugin = require('copy-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const { EsbuildPlugin } = require('esbuild-loader');
+const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 
 const { version } = require('./package.json');
 
-function transformManifest(content) {
-  const template = Handlebars.compile(content.toString('utf8'));
-  const name = process.env.EXTENSION_NAME;
-
-  const manifest = JSON.parse(template({ name, version }));
-
-  return JSON.stringify(manifest, null, 2);
-}
-
-module.exports = {
+/**
+ * @var {import('webpack').Configuration} config
+ */
+const config = {
   entry: {
     'content/content': './src/content/content.ts',
     background: './src/background.ts',
@@ -24,52 +21,90 @@ module.exports = {
     'panel/panel': './src/content/panel/panel.tsx',
     'recording/recording': './src/content/recording/recording.tsx',
   },
+  output: {
+    path: path.resolve(__dirname, 'dist'),
+    filename: '[name].js',
+  },
   resolve: {
     extensions: ['.js', '.json', '.jsx', '.ts', '.tsx'],
+    fallback: {
+      stream: require.resolve('stream-browserify'),
+      buffer: require.resolve('buffer/'),
+    },
     alias: {
       '@': path.resolve(__dirname, 'src'),
+      // 'react-dom': '@hot-loader/react-dom',
     },
+  },
+  optimization: {
+    minimizer: [
+      new EsbuildPlugin({
+        target: 'es2015',
+        css: true,
+      }),
+    ],
   },
   module: {
     rules: [
+      // {
+      //   test: /\.(js|jsx)$/,
+      //   use: "babel-loader",
+      //   exclude: /node_modules/,
+      // },
+      // {
+      //   test: /\.ts(x)?$/,
+      //   loader: "ts-loader",
+      //   exclude: /node_modules/,
+      // },
+
+      // Use esbuild to compile JavaScript & TypeScript
       {
-        test: /\.(ts|tsx)$/,
-        loader: 'ts-loader',
-        exclude: /node_modules/,
-      },
-      {
-        test: /\.(js|jsx)$/,
-        use: {
-          loader: 'babel-loader',
+        // Match `.js`, `.jsx`, `.ts` or `.tsx` files
+        test: /\.[jt]sx?$/,
+        loader: 'esbuild-loader',
+        options: {
+          // JavaScript version to compile to
+          target: 'es2015',
         },
-        exclude: /node_modules/,
       },
       {
-        test: /\.s?css$/,
+        test: /\.css$/,
         use: [
-          'style-loader',
-          'css-loader',
+          MiniCssExtractPlugin.loader,
           {
-            loader: 'sass-loader',
+            loader: 'css-loader',
             options: {
-              additionalData:
-                '$static-url: ' +
-                JSON.stringify(process.env.STATIC_FILES_URL) +
-                ';',
+              importLoaders: 1,
             },
           },
           'postcss-loader',
         ],
       },
       {
-        test: /\.less$/i,
+        test: /\.scss$/,
         use: [
-          {
-            loader: 'style-loader',
-          },
+          'style-loader',
           {
             loader: 'css-loader',
+            options: { importLoaders: 1 },
           },
+          'postcss-loader',
+          {
+            loader: 'sass-loader',
+            options: {
+              additionalData: `$static-url: ${JSON.stringify(
+                process.env.STATIC_FILES_URL,
+              )};`,
+            },
+          },
+        ],
+      },
+      {
+        test: /\.less$/,
+        use: [
+          MiniCssExtractPlugin.loader,
+          // 'style-loader',
+          'css-loader',
           {
             loader: 'less-loader',
             options: {
@@ -98,20 +133,29 @@ module.exports = {
       },
       {
         test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/,
-        loader: 'url-loader',
-        options: {
-          limit: 10000,
-          name: '[name].[hash:7].[ext]',
-          outputPath: 'fonts',
-          publicPath: '../fonts',
-        },
+        dependency: { not: ['url'] },
+        use: [
+          {
+            loader: 'url-loader',
+            options: {
+              limit: 10000,
+              name: '[name].[hash:7].[ext]',
+              outputPath: 'fonts',
+              publicPath: '../fonts',
+            },
+          },
+        ],
       },
     ],
   },
   plugins: [
+    // new ForkTsCheckerWebpackPlugin(),
+    new MiniCssExtractPlugin({
+      filename: '[name].css',
+    }),
     new CleanWebpackPlugin(),
-    new CopyWebpackPlugin(
-      [
+    new CopyPlugin({
+      patterns: [
         {
           from: 'icons',
           to: 'icons',
@@ -276,23 +320,29 @@ module.exports = {
           transform: transformManifest,
         },
       ],
-      { copyUnmodified: true },
-    ),
+    }),
   ],
-  optimization: {
-    minimizer: [
-      new TerserPlugin({
-        extractComments: false,
-        terserOptions: {
-          comments: false,
-        },
-      }),
-    ],
+
+  devServer: {
+    static: {
+      directory: './dist',
+    },
   },
 };
 
+function transformManifest(content) {
+  const template = Handlebars.compile(content.toString('utf8'));
+  const name = process.env.EXTENSION_NAME;
+
+  const manifest = JSON.parse(template({ name, version }));
+
+  return JSON.stringify(manifest, null, 2);
+}
+
 function transformHtml(content) {
-  return ejs.render(content.toString(), {
+  return require('ejs').render(content.toString(), {
     ...process.env,
   });
 }
+
+module.exports = config;

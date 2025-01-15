@@ -1,7 +1,7 @@
 import { FC, ReactNode } from 'react';
 import { Col, Row } from 'antd';
 import Sidebar from './elements/Sidebar/Sidebar';
-import styles from './DashboardLayout.module.scss';
+import * as styles from './DashboardLayout.module.scss';
 
 interface IDashboardLayoutProps {
   children?: ReactNode;

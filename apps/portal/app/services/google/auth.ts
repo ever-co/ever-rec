@@ -1,6 +1,6 @@
 import querystring from 'querystring';
 import { getStorageItems, setStorageItems } from '../localStorage';
-import api from "../api/api";
+import api from '../api/api';
 
 export interface DriveToken {
   access_token: string;
@@ -74,9 +74,9 @@ export interface DriveUser {
 
 export function getDriveToken() {
   const driveToken = localStorage.getItem('driveToken');
-  return JSON.parse(driveToken) || null;
+  return JSON.parse(driveToken || '{}') || null;
 }
 
 export const driveSignOut = () => {
-  return api.delete(`/api/v1/drive/sign-out`)
-}
+  return api.delete(`/api/v1/drive/sign-out`);
+};
