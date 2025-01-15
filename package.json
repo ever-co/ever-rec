@@ -39,8 +39,7 @@
 		"format": "prettier --write \"**/*.{ts,tsx,md}\""
 	},
 	"workspaces": {
-		"packages": [
-			"libs/*",
+		"packages": [			
 			"apps/*",
 			"packages/*",
 			"tools"
