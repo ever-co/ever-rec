@@ -1,10 +1,7 @@
 module.exports = {
   prefix: 'tw-',
   mode: 'jit',
-  purge: {
-    enabled: true,
-    content: ['./src/**/*.{tsx,ts,js,jsx}'],
-  },
+  content: ['./src/**/*.{tsx,ts,js,jsx}'],
   darkMode: 'class', // false | 'media' | 'class'
   theme: {
     fontFamily: {
@@ -281,5 +278,5 @@ module.exports = {
     extend: {},
     scrollbar: ['rounded'],
   },
-  plugins: [require('@tailwindcss/line-clamp'), require('tailwind-scrollbar')],
+  plugins: [require('tailwind-scrollbar')],
 };

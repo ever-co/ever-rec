@@ -37,10 +37,10 @@ export const getServerSideProps: GetServerSideProps = async (
   if (refreshToken && idToken) {
     const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-    const user: IUser = await getUserServerSideProps(
+    const user: IUser | null = await getUserServerSideProps(
       refreshToken,
       idToken,
-      baseURL,
+      baseURL as any,
     );
     if (user) {
       return { props: { user, ip } };
@@ -66,9 +66,9 @@ const SharedImage: React.FC<ISharedItem> = ({ user, ip }) => {
   const [imageHeight, setImageHeight] = useState(0);
   const { commentsTemplate } = useEnableComments({
     itemType: 'image',
-    item: image,
+    item: image as any,
     isPublic: true,
-    user,
+    user: user as any,
     isWorkspace,
     setPublicError: setNoImage,
     urlParams: param,
@@ -162,7 +162,7 @@ const SharedImage: React.FC<ISharedItem> = ({ user, ip }) => {
 
   return (
     <>
-      <TopMenuBar user={user} fromPage="image" />
+      <TopMenuBar user={user as any} fromPage="image" />
       {noImage ? (
         <NoAccess />
       ) : (
@@ -231,7 +231,7 @@ tw-items-center tw-justify-center tw-bg-blue-grey tw-h-500px"
 
                     <div className="tw-flex default:tw-justify-between mx-md:tw-flex-wrap">
                       <UserShortInfo
-                        user={itemOwner}
+                        user={itemOwner as any}
                         avaSize={80}
                         fullNameClasses="tw-text-xl tw-font-semibold"
                         emailClasses="tw-text-base"
@@ -246,7 +246,7 @@ tw-items-center tw-justify-center tw-bg-blue-grey tw-h-500px"
                             <div className="tw-mr-2">&bull;</div>
                             <UniqueViews
                               item={image}
-                              user={user}
+                              user={user as any}
                               isOwner={user?.id == image?.dbData?.uid}
                               itemType="image"
                               isWorkspace={isWorkspace}
@@ -277,7 +277,7 @@ tw-items-center tw-justify-center tw-bg-blue-grey tw-h-500px"
       )}
 
       <ImageModal
-        imageUrl={image?.dbData?.link}
+        imageUrl={image?.dbData?.link as any}
         closeModal={closeImageModal}
         visible={showImageModal}
       />

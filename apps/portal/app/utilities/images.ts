@@ -101,8 +101,8 @@ export const handleFilename = (filename: string) =>
 
 export const localSave = async (image: IEditorImage) => {
   try {
-    const blob = await fetch(image.url).then((res) => res.blob());
-    const title = handleFilename(image.dbData?.title) + '.jpg';
+    const blob = await fetch(image.url as string).then((res) => res.blob());
+    const title = handleFilename(image.dbData?.title as any) + '.jpg';
 
     saveAs(blob, title);
     return true;

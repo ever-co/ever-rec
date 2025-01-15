@@ -30,8 +30,8 @@ const CreateJiraTicketModal: React.FC<ICreateJiraTicketModalProps> = ({
   user,
   type = 'image',
 }) => {
-  const [selectedProject, setSelectedProject] = useState(null);
-  const [selectedResource, setSelectedResource] = useState(null);
+  const [selectedProject, setSelectedProject] = useState<null | string>(null);
+  const [selectedResource, setSelectedResource] = useState<null | string>(null);
   const [selectedIssueType, setSelectedIssueType] = useState(null);
   const [description, setSelectedDescription] = useState('');
   const [title, setSelectedTitle] = useState('');
@@ -39,9 +39,9 @@ const CreateJiraTicketModal: React.FC<ICreateJiraTicketModalProps> = ({
   const [loading, setLoading] = useState<boolean>(false);
   const [projectLoading, setProjectLoading] = useState<boolean>(false);
 
-  const [resource, setResource] = useState([]);
-  const [projects, setProjects] = useState([]);
-  const [issueTypes, setIssueTypes] = useState([]);
+  const [resource, setResource] = useState<any[]>([]);
+  const [projects, setProjects] = useState<any[]>([]);
+  const [issueTypes, setIssueTypes] = useState<any[]>([]);
 
   const jiraProjectData = useSelector(
     (state: RootStateOrAny) => state.panel.jiraData,
@@ -154,7 +154,7 @@ const CreateJiraTicketModal: React.FC<ICreateJiraTicketModalProps> = ({
 
   return (
     <Modal
-      visible={true}
+      open={true}
       onCancel={onCancel}
       footer={
         <div className="tw-flex tw-justify-end tw-mt-8">

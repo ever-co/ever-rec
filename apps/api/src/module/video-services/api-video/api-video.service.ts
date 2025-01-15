@@ -147,6 +147,7 @@ export class ApiVideoService {
         return { downloadStatus: PSEnum.READY, downloadUrl };
       } else if (
         mp4Video?.status === 'failed' ||
+        // @ts-ignore
         videoStatus.ingest.status === 'missing'
       ) {
         await streamDataRef.update({

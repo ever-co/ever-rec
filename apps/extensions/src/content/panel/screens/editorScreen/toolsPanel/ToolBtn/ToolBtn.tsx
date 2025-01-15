@@ -18,6 +18,8 @@ import { tools } from '../tools';
 
 type ToolPlacement = 'left' | 'right';
 
+const OutsideClickHandlerReact = OutsideClickHandler as any;
+
 interface IToolBtn {
   icon: string;
   active?: boolean;
@@ -161,7 +163,7 @@ const ToolBtn = forwardRef<{ closePanel: () => void }, IToolBtn>(
         </Tooltip>
 
         {toolPanelState && !!children && (
-          <OutsideClickHandler onOutsideClick={outsideClickHandler}>
+          <OutsideClickHandlerReact onOutsideClick={outsideClickHandler}>
             <div
               className={classNames(
                 'tw-absolute  tw-z-10  tw-shadow-2xl tw-rounded-10px tw-flex ',
@@ -205,7 +207,7 @@ const ToolBtn = forwardRef<{ closePanel: () => void }, IToolBtn>(
                 <img src={closeIcon}></img>
               </div>
             </div>
-          </OutsideClickHandler>
+          </OutsideClickHandlerReact>
         )}
       </div>
     );

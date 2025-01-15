@@ -95,7 +95,7 @@ const ChangePasswordModal: React.FC<IProps> = ({ visible, onClose, onOk }) => {
 
   return (
     <Modal
-      visible={visible}
+      open={visible}
       onCancel={onCancelHandler}
       width={600}
       footer={
@@ -115,7 +115,7 @@ const ChangePasswordModal: React.FC<IProps> = ({ visible, onClose, onOk }) => {
             placeholder="Enter password"
             type={passwordShown ? 'text' : 'password'}
             autoComplete={'new-password'}
-            rules={null}
+            rules={[]}
             value={passwordState.value}
             errors={passwordState.errors}
             inputClass={styles.appInputSecond}
@@ -135,7 +135,7 @@ const ChangePasswordModal: React.FC<IProps> = ({ visible, onClose, onOk }) => {
             placeholder="Enter new password"
             type={passwordShown ? 'text' : 'password'}
             autoComplete={'new-password'}
-            rules={null}
+            rules={[]}
             value={newPasswordState.value}
             errors={newPasswordState.errors}
             inputClass={styles.appInputSecond}

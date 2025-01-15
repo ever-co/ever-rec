@@ -43,7 +43,9 @@ const ItemsFolderModal: React.FC<IItemsFolderModalProps> = ({
   const explorerDataVideos: IExplorerData = useSelector(
     (state: RootStateOrAny) => state.panel.explorerDataVideos,
   );
-  const [selectedFolder, setSelectedFolder] = useState<IDbFolderData>(null);
+  const [selectedFolder, setSelectedFolder] = useState<IDbFolderData | null>(
+    null,
+  );
   const [valid, setValid] = useState(false);
   const [initialOpened, setInitialOpened] = useState(true);
   const dispatch = useDispatch();
@@ -76,7 +78,7 @@ const ItemsFolderModal: React.FC<IItemsFolderModalProps> = ({
           }
 
           const image = await updateImageData(dbData as DbImgData);
-          dispatch(PanelAC.setEditorImage({ editorImage: image }));
+          dispatch(PanelAC.setEditorImage({ editorImage: image as any }));
         }
         await getExplorerData(explorerDataImages.currentFolder?.id);
         infoMessage(`Image moved to ${selectedFolder?.name || 'My Images'}`);
@@ -95,7 +97,7 @@ const ItemsFolderModal: React.FC<IItemsFolderModalProps> = ({
           }
 
           const video = await updateVideoData(dbData as DbVideoData);
-          dispatch(PanelAC.setEditorVideo({ editorVideo: video }));
+          dispatch(PanelAC.setEditorVideo({ editorVideo: video as any }));
         }
         mainItem && (await updateVideoData(dbData as DbVideoData));
         await getExplorerDataVideo(explorerDataImages.currentFolder?.id);
@@ -165,7 +167,7 @@ const ItemsFolderModal: React.FC<IItemsFolderModalProps> = ({
       if (selectedFolder) {
         setValid(selectedFolder?.id !== mainItem.dbData?.parentId);
       } else {
-        setValid(mainItem?.dbData.parentId !== false);
+        setValid(mainItem?.dbData?.parentId !== false);
       }
     } else {
       type === 'image'
@@ -176,7 +178,7 @@ const ItemsFolderModal: React.FC<IItemsFolderModalProps> = ({
 
   return (
     <Modal
-      visible={visible}
+      open={visible}
       onCancel={onCancel}
       closeIcon={
         <AppSvg path="/common/close-icon.svg" className="modalCloseButton" />
@@ -207,7 +209,7 @@ const ItemsFolderModal: React.FC<IItemsFolderModalProps> = ({
       {type === 'image' ? (
         <FolderSection
           explorerData={explorerDataImages}
-          item={mainItem}
+          item={mainItem as any}
           initialOpened={initialOpened}
           setSelectedFolder={setSelectedFolder}
           itemType="image"
@@ -215,7 +217,7 @@ const ItemsFolderModal: React.FC<IItemsFolderModalProps> = ({
       ) : (
         <FolderSection
           explorerData={explorerDataVideos}
-          item={mainItem}
+          item={mainItem as any}
           initialOpened={initialOpened}
           setSelectedFolder={setSelectedFolder}
           itemType="video"

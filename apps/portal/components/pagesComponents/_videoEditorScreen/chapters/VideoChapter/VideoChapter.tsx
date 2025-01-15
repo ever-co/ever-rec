@@ -3,7 +3,7 @@ import styles from './VideoChapter.module.scss';
 import classNames from 'classnames';
 import AppSvg from 'components/elements/AppSvg';
 import VideoChapterContentInput from '../VideoChapterContentInput/VideoChapterContentInput';
-import Image from 'next/image';
+import Image from 'next/legacy/image';
 import { IChapter } from 'app/interfaces/IChapter';
 
 const s = styles;

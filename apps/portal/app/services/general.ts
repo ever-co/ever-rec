@@ -57,7 +57,10 @@ const disconnectJiraUser = async (): Promise<any> => {
     if (res && res.status && res.status == 'success') {
       store.dispatch(
         AuthAC.removeJiraUser({
-          payload: { isIntegrated: false, email: null },
+          payload: {
+            isIntegrated: false,
+            email: null as any,
+          },
         }),
       );
     }
@@ -73,7 +76,10 @@ const disconnectTrelloUser = async (): Promise<any> => {
     if (res && res.status && res.status == 'success') {
       store.dispatch(
         AuthAC.removeTrelloUser({
-          payload: { isIntegrated: false, email: null },
+          payload: {
+            isIntegrated: false,
+            email: null as any,
+          },
         }),
       );
     }
@@ -149,7 +155,7 @@ const trelloIssueWithAttachment = async (
 
 const trelloSaveToken = async (token: string): Promise<any> => {
   try {
-    token = token.split('=').pop();
+    token = token.split('=').pop() as any;
     const res = await trelloSaveOauthToken(token);
     if (res && res.status == ResStatusEnum.success && res.data) {
       store.dispatch(

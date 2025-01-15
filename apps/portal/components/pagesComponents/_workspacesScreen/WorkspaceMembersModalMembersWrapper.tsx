@@ -39,7 +39,7 @@ const WorkspaceMembersModalMembersWrapper: FC<IProps> = ({
   const membersLoadingIds =
     teamId && membersLoading[teamId] ? [...membersLoading[teamId]] : [];
 
-  let adminIndex = null;
+  let adminIndex: number | null = null;
   const rowElements = members.sort(sortByEmail).map((member, index) => {
     const isTeamAdmin = teamAdminId === member.id;
     const isInTeam = teamMemberIds.includes(member.id);
@@ -73,11 +73,12 @@ const WorkspaceMembersModalMembersWrapper: FC<IProps> = ({
   });
 
   // Put Team Admin on top
-  let adminElement = null;
+  let adminElement: any[] = [];
+
   if (adminIndex !== null) {
     adminElement = rowElements.splice(adminIndex, 1);
   }
-  adminElement && rowElements.unshift(adminElement);
+  adminElement && rowElements.unshift(...adminElement);
 
   return (
     <div className={classNames(styles.MembersWrapper, 'scroll-div')}>
@@ -123,7 +124,9 @@ const MemberRow: FC<IMemberRow> = ({
 
       {addButton && !isInTeam && (
         <AppButton
-          onClick={() => !isLoading && onAdd && onAdd(teamId, member.id)}
+          onClick={() =>
+            !isLoading && onAdd && onAdd(teamId as string, member.id)
+          }
           bgColor="tw-bg-primary-purple"
           className={styles.MemberButton}
         >
@@ -139,7 +142,9 @@ const MemberRow: FC<IMemberRow> = ({
 
       {removeButton && isInTeam && !isTeamAdmin && (
         <AppButton
-          onClick={() => !isLoading && onRemove && onRemove(teamId, member.id)}
+          onClick={() =>
+            !isLoading && onRemove && onRemove(teamId as string, member.id)
+          }
           bgColor="tw-bg-app-grey-darker"
           twTextColor="tw-text-white"
           className={styles.MemberButton}

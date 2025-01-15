@@ -11,7 +11,7 @@ export interface ICommentDrawer {
   options: ICommentOptions;
   shapeType: string;
   saveHistory: () => void;
-  userImg
+  userImg;
 }
 
 export interface ICommentOptions {
@@ -25,7 +25,7 @@ export const initCommentDraw = ({
   options,
   shapeType,
   saveHistory,
-  userImg
+  userImg,
 }: ICommentDrawer) => {
   stage.on('mousedown', (e) => {
     if (e.target.getAttr('shapeType') !== 'comments') {
@@ -34,8 +34,8 @@ export const initCommentDraw = ({
         options,
         shapeType,
         saveHistory,
-        userImg
-      })
+        userImg,
+      });
     }
   });
 };
@@ -56,14 +56,14 @@ export const baseCommentOptions: any = {
   fillPatternRepeat: 'no-repeat',
   stroke: '#1C1C1E',
   strokeWidth: 3,
-}
+};
 
 const drawCommentListener = ({
   stage,
   options,
   shapeType,
   saveHistory,
-  userImg
+  userImg,
 }: ICommentDrawer) => {
   const drawLayer: Layer | undefined = getLayer(stage, '#drawLayer');
 
@@ -78,8 +78,8 @@ const drawCommentListener = ({
   const userBubble = new Line(baseCommentOptions);
   userBubble.setAttrs({
     shapeType: shapeType,
-    x: stage.getRelativePointerPosition().x,
-    y: stage.getRelativePointerPosition().y,
+    x: stage.getRelativePointerPosition()?.x,
+    y: stage.getRelativePointerPosition()?.y,
     fillPatternImage: image,
   });
 

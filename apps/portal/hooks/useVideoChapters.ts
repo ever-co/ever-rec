@@ -218,7 +218,7 @@ const useVideoChapters = ({
   return {
     chapters,
     chaptersInitial,
-    chapterActive,
+    chapterActive: chapterActive as any,
     hasChanges,
     isSaving,
     chapterActivate,

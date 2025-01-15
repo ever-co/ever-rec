@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import styles from './ProfileDetail.module.scss';
+import * as styles from './ProfileDetail.module.scss';
 import classNames from 'classnames';
 import AppSvg from '@/content/components/elements/AppSvg';
 

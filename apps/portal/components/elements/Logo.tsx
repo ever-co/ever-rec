@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import { MouseEventHandler, FC } from 'react';
-import Image from 'next/image';
+import Image from 'next/legacy/image';
 
 interface ILogoProps {
   type?: string;

@@ -18,56 +18,35 @@
 		"url": "https://ever.co"
 	},
 	"scripts": {
-		"prepare:husky": "npx husky install .husky",
-		"build": "turbo build",
 		"dev": "turbo dev",
+		"dev:api": "npm run dev --filter=ever-rec-api",
+		"dev:portal": "npm run dev --filter=ever-rec-portal",
+		"dev:extensions": "npm run dev --filter=ever-rec-extension",
+		"build": "turbo build",
+		"build:api": "npm run build --filter=ever-rec-api",
+		"build:portal": "npm run build --filter=ever-rec-portal",
+		"build:extensions": "npm run build --filter=ever-rec-extension",
+		"build:manual": "npm run build:api && npm run build:admin && npm run build:portal && npm run build:website",
+		"prepare:husky": "npx husky install .husky",
+		"seed": "npm run ts-node -r tsconfig-paths/register --project ./apps/api/tsconfig.json apps/api/src/seeder.ts",
+		"seed:refresh": "npm run seed --refresh",
+		"sdk:generate": "npm run graphql-codegen --config ./apps/api/src/schemas/codegen.yml",
+		"sdk:watch": "npm run sdk:generate --watch",
+		"api:prod": "cd apps/api && npm run start:prod",
 		"lint": "turbo lint",
 		"type-check": "turbo type-check",
 		"clean": "turbo clean",
-		"format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "build:manual": "yarn build:api && yarn build:admin && yarn build:portal && yarn build:website",
-    "start:website": "nx serve website",
-    "build:website": "nx build website",
-    "export:website": "nx export website",
-    "start:api": "nx serve api",
-    "build:api": "nx build api",
-    "seed": "yarn ts-node -r tsconfig-paths/register --project ./apps/api/tsconfig.json apps/api/src/seeder.ts",
-    "seed:refresh": "yarn seed --refresh",
-    "start:portal": "nx serve portal",
-    "build:portal": "nx build portal",
-    "start:admin": "nx serve admin",
-    "build:admin": "nx build admin",
-    "test:website": "nx test website",
-    "test:portal": "nx test portal",
-    "test:admin": "nx test admin",
-    "e2e": "nx e2e",
-    "sdk:generate": "yarn graphql-codegen --config ./apps/api/src/schemas/codegen.yml",
-    "sdk:watch": "yarn sdk:generate --watch",
-    "affected:apps": "nx affected:apps",
-    "affected:libs": "nx affected:libs",
-    "affected:build": "nx affected:build",
-    "affected:e2e": "nx affected:e2e",
-    "affected:test": "nx affected:test",
-    "affected:lint": "nx affected:lint",
-    "affected:dep-graph": "nx affected:dep-graph",
-    "affected": "nx affected",
-    "update": "nx migrate latest",
-    "workspace-generator": "nx workspace-generator",
-    "dep-graph": "nx dep-graph",
-    "help": "nx help"
+		"format": "prettier --write \"**/*.{ts,tsx,md}\""
 	},
-  "private": true,
-  "workspaces": {
-    "packages": [
-      "libs/*",
-      "apps/*",
-      "packages/*",
-      "tools"
-    ],
-    "nohoist": []
-  },
+	"workspaces": {
+		"packages": [			
+			"apps/*",
+			"packages/*",
+			"tools"
+		],
+		"nohoist": []
+	},
 	"devDependencies": {
-		"@ever-rec/typescript-config": "*",
 		"eslint": "^8.57.0",
 		"eslint-config-prettier": "^8.5.0",
 		"eslint-plugin-react": "^7.31.8",
@@ -78,7 +57,7 @@
 		"pretty-quick": "^4.0.0",
 		"rimraf": "^5.0.5",
 		"semantic-release": "^22.0.12",
-		"turbo": "latest"
+		"turbo": "^2.2"
 	},
 	"husky": {
 		"hooks": {
@@ -87,10 +66,10 @@
 		}
 	},
 	"engines": {
-		"node": ">=18",
-		"yarn": ">=1.13.0"
+		"node": ">=20",
+		"pnpm": ">=9.9.0"
 	},
-	"packageManager": "yarn@1.22.19",
+	"packageManager": "pnpm@9.9.0",
 	"prettier": {
 		"printWidth": 120,
 		"singleQuote": true,

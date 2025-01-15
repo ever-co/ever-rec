@@ -392,7 +392,7 @@ export function useReactMediaRecorder({
 
   const stopRecording = () => {
     if (timeout.current) {
-      clearInterval(timeout.current);
+      clearInterval(timeout.current as any);
     }
 
     if (mediaRecorder.current) {

@@ -1,16 +1,12 @@
 import { FC } from 'react';
-import styles from './FolderItem.module.scss';
+import * as styles from './FolderItem.module.scss';
 
 interface IFolderInfoProps {
   itemsNumber: string | false;
   updatedAgo: string | false;
 }
 
-
-const FolderInfo: FC<IFolderInfoProps> = ({
-  itemsNumber,
-  updatedAgo,
-}) => {
+const FolderInfo: FC<IFolderInfoProps> = ({ itemsNumber, updatedAgo }) => {
   return (
     <div className={styles.folderInfo}>
       {itemsNumber && (

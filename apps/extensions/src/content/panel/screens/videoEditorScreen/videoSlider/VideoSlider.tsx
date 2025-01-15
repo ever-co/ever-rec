@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import Nouislider from 'nouislider-react';
-import 'nouislider/distribute/nouislider.css';
+import 'nouislider/dist/nouislider.css';
 import EditorButton from '../editorButton/EditorButton';
+
+const NouisliderReact = Nouislider as any;
 
 interface IVideoSlider {
   videoStart: string;
@@ -95,7 +97,7 @@ const VideoSlider: React.FC<IVideoSlider> = ({
             />
           </div>
         </div>
-        <Nouislider
+        <NouisliderReact
           instanceRef={(instance) => {
             if (instance && !ref) {
               setRef(instance);

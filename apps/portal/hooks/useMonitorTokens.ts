@@ -6,7 +6,10 @@ import { preRoutes, panelRoutes } from 'components/_routes';
 // - redirect user if they are not;
 // - reload the page if the user logs in.
 const useMonitorTokens = () => {
-  const savedTokensRef = useRef(null);
+  const savedTokensRef = useRef<null | {
+    idToken: string | undefined;
+    refreshToken: string | undefined;
+  }>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -15,13 +18,16 @@ const useMonitorTokens = () => {
       const idTokenArray = cookies.filter((cookie) =>
         cookie.includes('idToken'),
       );
-      const idToken = idTokenArray.length && idTokenArray[0].split('=')[1];
+      const idToken = idTokenArray.length
+        ? idTokenArray[0].split('=')[1]
+        : null;
 
       const refreshTokenArray = cookies.filter((cookie) =>
         cookie.includes('refreshToken'),
       );
-      const refreshToken =
-        refreshTokenArray.length && refreshTokenArray[0].split('=')[1];
+      const refreshToken = refreshTokenArray.length
+        ? refreshTokenArray[0].split('=')[1]
+        : null;
 
       // If there no tokens, redirect to login
       if (!refreshToken && !idToken) {
@@ -30,7 +36,10 @@ const useMonitorTokens = () => {
       }
 
       if (!savedTokensRef.current) {
-        savedTokensRef.current = { idToken, refreshToken };
+        savedTokensRef.current = {
+          idToken: idToken || undefined,
+          refreshToken: refreshToken || undefined,
+        };
         return;
       }
 

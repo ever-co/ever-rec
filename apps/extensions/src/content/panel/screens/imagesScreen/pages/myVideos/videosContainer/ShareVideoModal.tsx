@@ -38,7 +38,7 @@ const ShareVideoModal: React.FC<IShareVideoModalProps> = ({
 
   return (
     <Modal
-      visible={visible}
+      open={visible}
       onCancel={onCancel}
       footer={
         <div className="tw-flex tw-justify-center tw-items-center tw-mt-8">

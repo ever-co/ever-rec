@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootStateOrAny } from 'react-redux';
 import classNames from 'classnames';
 import { Tooltip } from 'antd';
-import styles from './SidebarWorkspaces.module.scss';
+import * as styles from './SidebarWorkspaces.module.scss';
 import { IWorkspace } from '@/app/interfaces/IWorkspace';
 import PanelAC from '@/app/store/panel/actions/PanelAC';
 import AppSvg from '@/content/components/elements/AppSvg';

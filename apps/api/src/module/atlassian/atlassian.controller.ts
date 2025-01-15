@@ -36,7 +36,7 @@ export class AtlassianController {
   async completeOAuth(@Query() query) {
     await this.atlassianService.completeJiraOAuth(query.state, query.code);
     return {
-      url: `${this.configService.get<string>('WEBSITE_URL')}/integrations/jira`,
+      url: `${this.configService.get<string>('WEBSITE_URL')}/media/integrations`,
     };
   }
 

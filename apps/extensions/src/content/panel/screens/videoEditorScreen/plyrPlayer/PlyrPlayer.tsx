@@ -140,7 +140,7 @@ export const PlyrPlayer: FC<IPlyrProps> = ({ videoURL, disableOptions }) => {
         });
       } else {
         console.error(
-          // eslint-disable-next-line max-len
+           
           'This is an old browser that does not support MSE https://developer.mozilla.org/en-US/docs/Web/API/Media_Source_Extensions_API',
         );
       }

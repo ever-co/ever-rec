@@ -85,7 +85,7 @@ const SlackShareScreen: React.FC<ISlackShareScreenProps> = ({
 
   return (
     <Modal
-      visible={true}
+      open={true}
       onCancel={onCancel}
       footer={
         <div className="tw-flex tw-justify-end tw-mt-14">

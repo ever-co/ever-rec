@@ -52,8 +52,8 @@ const UploadWorkspaceImageModal: React.FC<Props> = ({
   }, [uploadedImageElementRef.current, file]);
 
   const handleFileUploadButton = (e: ChangeEvent<HTMLInputElement>) => {
-    const uploadedFile = e.target.files[0];
-    if (uploadedFile.size > 30000) {
+    const uploadedFile = e.target?.files ? e.target.files[0] : null;
+    if (uploadedFile && uploadedFile.size > 30000) {
       errorHandler({ message: 'Image too big.' });
     } else {
       setFile(uploadedFile);
@@ -71,7 +71,7 @@ const UploadWorkspaceImageModal: React.FC<Props> = ({
   return (
     <Modal
       className={styles.modal}
-      visible={visible}
+      open={visible}
       onCancel={onClose}
       closeIcon={
         <AppSvg path="/common/close-icon.svg" className="modalCloseButton" />
@@ -95,14 +95,19 @@ const UploadWorkspaceImageModal: React.FC<Props> = ({
             </h5>
           </div>
           <div className={styles.marginDiv}>
-            <AppButton onClick={() => {}} full={true}>
+            <AppButton
+              onClick={() => {
+                console.log('click save');
+              }}
+              full={true}
+            >
               Save
             </AppButton>
           </div>
           <div className={styles.marginDiv}>
             <h5 className={styles.headingUploaded}>
-              <span className={styles.actionSpan}>Restore</span> previous image
-              or logo.
+              <span className={styles.actionSpan}>Restore</span>
+              previous image or logo.
             </h5>
           </div>
         </div>
@@ -130,7 +135,7 @@ const UploadWorkspaceImageModal: React.FC<Props> = ({
                   className={styles.imageSVG}
                 />
                 <h3 className={styles.dragNDrop}>
-                  Drag 'n' drop images here or
+                  {"Drag 'n' drop images here or"}
                 </h3>
                 <AppButton
                   onClick={handleClick}

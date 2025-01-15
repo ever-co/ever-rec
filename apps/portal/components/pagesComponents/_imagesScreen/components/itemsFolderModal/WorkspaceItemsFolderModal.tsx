@@ -56,10 +56,10 @@ const WorkspaceItemsFolderModal: React.FC<IItemsFolderModalProps> = ({
   );
 
   useEffect(() => {
-    const isValid = items.every(
+    const isValid = items?.every(
       (item) => item.dbData.parentId !== (selectedFolder?.id || false),
     );
-    setValid(isValid);
+    setValid(!!isValid);
   }, [items, selectedFolder, activeWorkspace]);
 
   const moveHandler = async () => {
@@ -70,11 +70,11 @@ const WorkspaceItemsFolderModal: React.FC<IItemsFolderModalProps> = ({
       : `${activeWorkspace.name}`;
     const toast = loadingMessage(`Moving items to ${folderNameString}...`);
 
-    const itemIds = items.map((x) => x.dbData?.id);
+    const itemIds = items?.map((x) => x.dbData?.id);
 
     const response = await updateItemsFolderAPI(
       activeWorkspace?.id,
-      itemIds,
+      itemIds || ([] as any[]),
       selectedFolder?.id || false,
       currentWorkspaceFolder?.id || false,
     );
@@ -88,7 +88,7 @@ const WorkspaceItemsFolderModal: React.FC<IItemsFolderModalProps> = ({
       );
     }
 
-    if (items.length === 1 && updateSingleItem) {
+    if (items?.length === 1 && updateSingleItem) {
       const newSingleItem = Object.prototype.hasOwnProperty.call(
         items[0].dbData,
         'duration',
@@ -96,7 +96,7 @@ const WorkspaceItemsFolderModal: React.FC<IItemsFolderModalProps> = ({
         ? data.videos.find((x) => x.dbData?.id === items[0].dbData?.id)
         : data.screenshots.find((x) => x.dbData?.id === items[0].dbData?.id);
 
-      updateSingleItem(newSingleItem);
+      updateSingleItem(newSingleItem as any);
     }
 
     setSelectedState && setSelectedState({ state: false, items: [] });
@@ -107,7 +107,7 @@ const WorkspaceItemsFolderModal: React.FC<IItemsFolderModalProps> = ({
 
   return (
     <Modal
-      visible={visible}
+      open={visible}
       onCancel={onCancel}
       destroyOnClose={true}
       closeIcon={
@@ -134,7 +134,7 @@ const WorkspaceItemsFolderModal: React.FC<IItemsFolderModalProps> = ({
       }
     >
       <WorkspaceFolderSection
-        items={items}
+        items={items || []}
         workspace={activeWorkspace}
         folders={activeWorkspace?.folders}
         initialOpened={initialOpened}

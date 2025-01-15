@@ -13,14 +13,14 @@ import AppSvg from '../../components/elements/AppSvg';
 type loginTypes = 'google' | 'drive';
 
 const GoogleAuth = () => {
-  const { driveLogin } = useGoogleDriveAuth({ pathname: null });
+  const { driveLogin } = useGoogleDriveAuth({ pathname: undefined });
   const router = useRouter();
   const [loginType, setLoginType] = useState<loginTypes>('google');
 
   const googleLogin = (credentials: CredentialResponse) => {
     try {
       const cookieToken = cookie.get('idToken');
-      const decodedToken: any = jwtDecode(credentials.credential);
+      const decodedToken: any = jwtDecode(credentials.credential || '');
       const decodedCookie: any = jwtDecode(cookieToken);
 
       if (decodedToken.email === decodedCookie.email) {
@@ -54,7 +54,11 @@ const GoogleAuth = () => {
             <GoogleBtn onSuccess={googleLogin} />
           ) : (
             <div onClick={driveLogin} className="tw-cursor-pointer">
-              <AppSvg path="/sign/sign-in-google.svg" width="400px" height="60px"></AppSvg>
+              <AppSvg
+                path="/sign/sign-in-google.svg"
+                width="400px"
+                height="60px"
+              ></AppSvg>
             </div>
           )}
         </div>

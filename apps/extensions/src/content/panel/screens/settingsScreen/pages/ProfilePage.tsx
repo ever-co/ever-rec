@@ -1,5 +1,5 @@
 import { ChangeEvent, useEffect, useState } from 'react';
-import styles from './ProfilePage.module.scss';
+import * as styles from './ProfilePage.module.scss';
 import {
   changeUserEmail,
   changeUserPassword,

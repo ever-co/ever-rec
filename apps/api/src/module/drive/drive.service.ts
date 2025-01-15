@@ -44,13 +44,16 @@ export class DriveService {
     const db = admin.database();
     const userRef = db.ref(`/users/${uid}`);
 
-    const client = this.oAuth2Clients[uid]
+    const client: InstanceType<typeof google.auth.OAuth2> = this.oAuth2Clients[
+      uid
+    ]
       ? this.oAuth2Clients[uid]
       : new google.auth.OAuth2(
           this.clientId,
           this.clientSecret,
           this.redirectUrl,
         );
+
     return new Promise((res, rej) => {
       client.getToken(code, async (err, token) => {
         try {

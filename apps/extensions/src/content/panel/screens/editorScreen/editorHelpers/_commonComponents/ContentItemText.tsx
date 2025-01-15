@@ -7,7 +7,7 @@ import { IMarker } from '@/app/interfaces/IMarker';
 import { EditFilled, DeleteFilled } from '@ant-design/icons';
 import { formatDistanceToNow } from 'date-fns';
 import ContextMenu from './ContextMenu';
-import styles from './contentItemText.module.scss';
+import * as styles from './contentItemText.module.scss';
 import { IWorkspaceImage } from '@/app/interfaces/IWorkspace';
 import IEditorImage from '@/app/interfaces/IEditorImage';
 import { updateMarkers } from '@/app/services/screenshots';

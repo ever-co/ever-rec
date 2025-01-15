@@ -1,16 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { OnEvent } from '@nestjs/event-emitter';
-const Analytics = require('analytics-node');
+import Analytics from 'analytics-node';
 
 @Injectable()
 export class EventSegment {
   private analytics;
 
   constructor(private readonly configService: ConfigService) {
-    this.analytics = new Analytics(
-      this.configService.get<string>('SEGMENT_WRITE_KEY')
-    );
+    const key =
+      this.configService.get<string>('SEGMENT_WRITE_KEY') || String('invalid');
+
+    this.analytics = new Analytics(key);
   }
 
   @OnEvent('analytics.identify')
@@ -18,7 +19,7 @@ export class EventSegment {
     try {
       await this.analytics.identify({
         userId,
-        ...(traits && { traits })
+        ...(traits && { traits }),
       });
     } catch (error: any) {
       console.log(error, 'error');
@@ -30,7 +31,7 @@ export class EventSegment {
     try {
       await this.analytics.track({
         event,
-        ...(payload && payload)
+        ...(payload && payload),
       });
     } catch (error: any) {
       console.log(error, 'error');

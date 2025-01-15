@@ -27,7 +27,7 @@ const WorkspaceTeamMembers: FC<IProps> = ({
   let numberOfPhotos = 3;
   if (isWorkspace) numberOfPhotos = 5;
 
-  let memberIcons = null;
+  let memberIcons: any = null;
   if (teamMembers) {
     memberIcons = teamMembers.sort(sortByEmail).map((member, index: number) => {
       if (index > numberOfPhotos - 1) return null;

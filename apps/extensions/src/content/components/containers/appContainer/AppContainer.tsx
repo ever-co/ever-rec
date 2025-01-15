@@ -2,7 +2,7 @@ import React from 'react';
 import 'clipboard-polyfill/overwrite-globals';
 import classNames from 'classnames';
 //@ts-ignore
-import styles from './AppContainer.module.scss';
+import * as styles from './AppContainer.module.scss';
 
 interface IAppContainerProps {
   className?: string;

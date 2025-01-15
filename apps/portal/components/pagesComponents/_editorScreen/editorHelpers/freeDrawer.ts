@@ -45,7 +45,12 @@ const freeDrawMouseDownListener = ({
     strokeWidth: options.strokeWidth,
     globalCompositeOperation: operation,
     lineCap: 'round',
-    points: [pos.x, pos.y, pos.x, pos.y],
+    points: [
+      pos?.x as number,
+      pos?.y as number,
+      pos?.x as number,
+      pos?.y as number,
+    ],
     draggable: true,
     shapeType: 'free',
     listening: false,

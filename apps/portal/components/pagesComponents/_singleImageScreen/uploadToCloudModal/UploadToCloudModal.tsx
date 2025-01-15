@@ -53,7 +53,7 @@ const UploadToCloudModal: React.FC<IUploadToCloudModalProps> = ({
 
   const onOkHandler = async (): Promise<void> => {
     if (valid) {
-      onOk(name.value, type);
+      onOk(name.value, type as string);
       setName(initialControl());
     }
   };
@@ -68,7 +68,7 @@ const UploadToCloudModal: React.FC<IUploadToCloudModalProps> = ({
 
   return (
     <Modal
-      visible={visible}
+      open={visible}
       onCancel={onClose}
       closeIcon={
         <AppSvg path="/common/close-icon.svg" className="modalCloseButton" />

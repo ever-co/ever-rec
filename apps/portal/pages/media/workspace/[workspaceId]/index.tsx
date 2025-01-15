@@ -147,7 +147,7 @@ const Workspace: FC = () => {
     const { folder } = router.query;
     const currentFolder = activeWorkspace.folders?.find((x) => x.id === folder);
 
-    const parsedFolders = parseWorkFolders(currentFolder?.id);
+    const parsedFolders = parseWorkFolders(currentFolder?.id as any);
 
     dispatch(
       PanelAC.setCurrentWorkspaceFolder({
@@ -171,7 +171,7 @@ const Workspace: FC = () => {
         (x) => x.id === folder,
       );
 
-      const parsedFolders = parseWorkFolders(currentFolder?.id);
+      const parsedFolders = parseWorkFolders(currentFolder?.id as any);
 
       dispatch(
         PanelAC.setActiveWorkspace({
@@ -238,7 +238,7 @@ const Workspace: FC = () => {
   };
 
   const openFolderHandler = (folder: IDbFolderData | null) => {
-    router.push({ query: { ...router.query, folder: folder.id } });
+    router.push({ query: { ...router.query, folder: folder?.id } });
   };
 
   const isFavorite = useCallback(
@@ -459,7 +459,7 @@ const Workspace: FC = () => {
                       onDrop={(e) => onDrop(e, folder)}
                       setLoading={(loadingState) => setLoading(loadingState)}
                       workspace={activeWorkspace}
-                      isFavorite={isFavorite(folder)}
+                      isFavorite={isFavorite(folder) as any}
                       canEdit={canEditItem(folder)}
                     />
                   );
@@ -486,7 +486,7 @@ const Workspace: FC = () => {
               handleItemOrderByName={handleItemOrderByName}
               handleItemOrderByDate={handleItemOrderByDate}
               itemData={itemData}
-              filterItemData={filterItemData}
+              filterItemData={filterItemData || []}
               itemOrder={itemOrder}
             />
           )}

@@ -108,10 +108,10 @@ const MenuButton: FC<MenuButtonProps> = ({
   return (
     <Dropdown
       trigger={['click']}
-      visible={isDropdownVisible}
+      open={isDropdownVisible}
       overlay={overlay}
       placement={placement}
-      onVisibleChange={onVisibleChange}
+      onOpenChange={onVisibleChange}
     >
       <div
         onClick={(e) => {

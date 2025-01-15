@@ -22,7 +22,7 @@ import {
   updateWorkspaceAvatar,
   updateWorkspaceThumbnail,
 } from 'app/services/workspace';
-import Image from 'next/image';
+import Image from 'next/legacy/image';
 import AppSvg from 'components/elements/AppSvg';
 import UploadThumbnailModal from 'components/pagesComponents/_imagesScreen/pages/workspace/uploadThumbnailModal/UploadThumbnailModa';
 import { preRoutes, panelRoutes } from 'components/_routes';
@@ -94,7 +94,9 @@ const ManageWorkspaces: React.FC = () => {
         dispatch(PanelAC.setWorkspaces({ workspaces: data }));
 
         if (activeWorkspace?.id === showLeaveDeleteModal.workspace.id) {
-          dispatch(PanelAC.setActiveWorkspace({ activeWorkspace: null }));
+          dispatch(
+            PanelAC.setActiveWorkspace({ activeWorkspace: null } as any),
+          );
         }
 
         showLeaveDeleteModal.action === 'leave'
@@ -119,14 +121,17 @@ const ManageWorkspaces: React.FC = () => {
       const data = iDataResponseParser<typeof response.data>(response);
 
       if (data) {
-        const workspaceIndex = workspaces.findIndex(
+        const workspaceIndex = workspaces?.findIndex(
           (x) => x.id === workspace.id,
         );
 
         if (workspaceIndex !== -1) {
-          const workspacesCopy = workspaces.slice();
-          workspacesCopy[workspaceIndex] = data;
-          dispatch(PanelAC.setWorkspaces({ workspaces: workspacesCopy }));
+          const workspacesCopy = workspaces?.slice();
+
+          if (workspacesCopy && workspaceIndex !== undefined) {
+            workspacesCopy[workspaceIndex] = data;
+            dispatch(PanelAC.setWorkspaces({ workspaces: workspacesCopy }));
+          }
         }
         if (activeWorkspace?.id === workspace.id) {
           dispatch(
@@ -158,12 +163,18 @@ const ManageWorkspaces: React.FC = () => {
     const workspace = { ...showIconModal.workspace };
     setShowIconModal({ state: false, workspace: null });
     setLoading(true);
-    const newAvatar = await updateWorkspaceAvatar(file, workspace.id);
-    const workspaceIndex = workspaces.findIndex((x) => x.id === workspace.id);
 
-    if (workspaceIndex !== -1) {
-      workspaces[workspaceIndex].avatar = newAvatar;
-      dispatch(PanelAC.setWorkspaces({ workspaces }));
+    if (workspace.id) {
+      const newAvatar = await updateWorkspaceAvatar(file, workspace.id);
+      const workspaceIndex = workspaces?.findIndex(
+        (x) => x.id === workspace.id,
+      );
+
+      if (workspaceIndex !== -1 && workspaces && workspaceIndex !== undefined) {
+        workspaces[workspaceIndex].avatar = newAvatar || undefined;
+
+        dispatch(PanelAC.setWorkspaces({ workspaces }));
+      }
     }
     setLoading(false);
   };
@@ -198,12 +209,17 @@ const ManageWorkspaces: React.FC = () => {
     const workspace = { ...showThumbnailModal.workspace };
     setShowThumbnailModal({ state: false, workspace: null });
     setLoading(true);
-    const newThumbnail = await updateWorkspaceThumbnail(file, workspace.id);
-    const workspaceIndex = workspaces.findIndex((x) => x.id === workspace.id);
 
-    if (workspaceIndex !== -1) {
-      workspaces[workspaceIndex].thumbnail = newThumbnail;
-      dispatch(PanelAC.setWorkspaces({ workspaces }));
+    if (workspace.id) {
+      const newThumbnail = await updateWorkspaceThumbnail(file, workspace.id);
+      const workspaceIndex = workspaces?.findIndex(
+        (x) => x.id === workspace.id,
+      );
+
+      if (workspaceIndex !== -1 && workspaces && workspaceIndex !== undefined) {
+        workspaces[workspaceIndex].thumbnail = newThumbnail || undefined;
+        dispatch(PanelAC.setWorkspaces({ workspaces }));
+      }
     }
     setLoading(false);
   };
@@ -272,8 +288,8 @@ const ManageWorkspaces: React.FC = () => {
                     <Image
                       src={workspace?.thumbnail || '/common/Thumbnail.svg'}
                       alt="workspace thumbnail"
-                      width={!workspace?.thumbnail && '200px'}
-                      height={!workspace?.thumbnail && '150px'}
+                      width={!workspace?.thumbnail ? '200' : undefined}
+                      height={!workspace?.thumbnail ? '150' : undefined}
                       layout={workspace?.thumbnail ? 'fill' : 'fixed'}
                       className={workspace?.thumbnail && styles.thumbnail}
                     />
@@ -408,7 +424,7 @@ const ManageWorkspaces: React.FC = () => {
           onOk={leaveDeleteSubmitHandler}
           onCancel={cancelLeaveDeleteHandler}
           visible={showLeaveDeleteModal.state}
-          action={showLeaveDeleteModal.action}
+          action={showLeaveDeleteModal.action as any}
         />
         <UploadIconModal
           visible={showIconModal.state}

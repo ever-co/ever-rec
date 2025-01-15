@@ -21,7 +21,7 @@ import AppSvg from '@/content/components/elements/AppSvg';
 import { IUser } from '@/app/interfaces/IUserData';
 import { copySourceURL } from '@/content/utilities/scripts/singleItemFunctions';
 //@ts-ignore
-import styles from './SingleImageScreen.module.scss';
+import * as styles from './SingleImageScreen.module.scss';
 import UniqueViews from '../../components/UniqueViews/UniqueViews';
 import useInitImageVideoItem from '@/content/utilities/hooks/useInitImageVideoItem';
 import SingleImagePageManageAreaTemplate from '@/content/panel/screens/singleImageScreen/SingleImagePageManageAreaTemplate';
@@ -153,7 +153,7 @@ const SingleImageScreen: React.FC = () => {
                   </div>
 
                   <div className="tw-flex tw-mt-2 tw-mb-3">
-                    <div className="tw-w-full tw-flex tw-justify-between tw-w-full tw-items-center">
+                    <div className="tw-flex tw-justify-between tw-w-full tw-items-center">
                       {titleContainer}
                       {!editTitle && (
                         <div

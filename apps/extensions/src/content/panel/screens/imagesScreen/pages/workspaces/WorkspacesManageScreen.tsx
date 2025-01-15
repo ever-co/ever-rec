@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import styles from './WorkspaceManageScreen.module.scss';
+import * as styles from './WorkspaceManageScreen.module.scss';
 import classNames from 'classnames';
 import { RootStateOrAny, useDispatch, useSelector } from 'react-redux';
 import { IWorkspace } from '@/app/interfaces/IWorkspace';

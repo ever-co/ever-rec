@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import styles from './MultiItemsSelect.module.scss';
+import * as styles from './MultiItemsSelect.module.scss';
 import { MixedItemType } from '@/app/interfaces/ItemTypes';
 import IEditorImage from '@/app/interfaces/IEditorImage';
 import IEditorVideo from '@/app/interfaces/IEditorVideo';

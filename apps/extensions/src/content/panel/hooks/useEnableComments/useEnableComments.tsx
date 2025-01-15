@@ -28,7 +28,7 @@ import { IUser } from '@/app/interfaces/IUserData';
 import useCommentsEmoji from '../useCommentsEmoji';
 import { Tooltip } from 'antd';
 //@ts-ignore
-import styles from './useEnableComments.module.scss';
+import * as styles from './useEnableComments.module.scss';
 import { dataResponseParser } from '@/app/services/helpers/dataResponseParser';
 import { ResStatusEnum } from '@/app/interfaces/IDataResponse';
 
@@ -496,7 +496,7 @@ const useEnableComments = ({
                       src={
                         comment.user?.photoURL
                           ? comment.user?.photoURL
-                          : `images/panel/sign/default-profile.svg`
+                          : `/images/panel/sign/default-profile.svg`
                       }
                       alt=""
                       className="tw-w-full tw-h-full tw-rounded-full"

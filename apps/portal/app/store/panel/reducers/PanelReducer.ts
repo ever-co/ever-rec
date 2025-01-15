@@ -390,12 +390,12 @@ export default function PanelReducer(state = initState, action: ActionType) {
         trelloData: action.payload,
       };
     case SET_ACTIVE_WORKSPACE: {
-      const workspaces = state.workspaces;
+      const workspaces = state.workspaces as any[];
       let activeWorkspace: IWorkspace | null = null;
 
       if (state.workspaces && action.payload) {
         const activeWorkspaceIndex = workspaces.findIndex(
-          (x) => x.id === action.payload.id,
+          (x) => (x as any).id === action.payload.id,
         );
         if (activeWorkspaceIndex !== -1) {
           workspaces[activeWorkspaceIndex] = action.payload;

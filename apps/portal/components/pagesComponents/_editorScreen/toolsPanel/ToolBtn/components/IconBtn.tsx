@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/alt-text */
-import Image from 'next/image';
+import Image from 'next/legacy/image';
 import React from 'react';
 import classNames from 'classnames';
 
@@ -24,6 +24,8 @@ const IconBtn: React.FC<IIconBtn> = ({
   actual,
   disabled,
 }) => {
+  size = size?.replace('px', '');
+
   return (
     <button disabled={disabled} onClick={onSelect} id={id}>
       <label
@@ -33,10 +35,11 @@ const IconBtn: React.FC<IIconBtn> = ({
       >
         <Image
           style={{ marginLeft: '5px', marginRight: '5px' }}
-          width={size}
-          height={size}
+          width={`${+(size || 0)}`}
+          height={`${+(size || 0)}`}
           className={className}
           src={icon}
+          alt="icon"
         />
       </label>
     </button>

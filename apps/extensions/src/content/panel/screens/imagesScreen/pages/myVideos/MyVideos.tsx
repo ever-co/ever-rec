@@ -6,7 +6,7 @@ import {
   useRef,
   useState,
 } from 'react';
-import styles from './MyVideos.module.scss';
+import * as styles from './MyVideos.module.scss';
 import IExplorerData from '@/app/interfaces/IExplorerData';
 import {
   createVideosFolder,

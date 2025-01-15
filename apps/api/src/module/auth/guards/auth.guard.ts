@@ -63,6 +63,10 @@ export class AuthGuard implements CanActivate {
     try {
       const idToken = request.headers.idtoken;
 
+      if (!idToken) {
+        throw new UnauthorizedException('Unauthorized user');
+      }
+
       await this.processToken(idToken, request);
 
       return true;
@@ -70,6 +74,11 @@ export class AuthGuard implements CanActivate {
       if (e.code === 'auth/id-token-expired') {
         try {
           const refreshToken = request.headers.refreshtoken;
+
+          if (!refreshToken) {
+            throw new UnauthorizedException('Unauthorized user');
+          }
+
           await this.refreshToken(refreshToken, request);
 
           return true;

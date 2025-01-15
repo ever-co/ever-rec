@@ -185,7 +185,7 @@ const renderMoreMenuJSX = (
       {!isPublic && (
         <Menu.Item
           key="change-folder"
-          className={null}
+          className={''}
           icon={
             <AppSvg
               path="/common/icon-folder-move.svg"

@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState } from 'react';
-import styles from './ScreenshotsContainer.module.scss';
+import * as styles from './ScreenshotsContainer.module.scss';
 import classNames from 'classnames';
 import IEditorImage from '@/app/interfaces/IEditorImage';
 import {

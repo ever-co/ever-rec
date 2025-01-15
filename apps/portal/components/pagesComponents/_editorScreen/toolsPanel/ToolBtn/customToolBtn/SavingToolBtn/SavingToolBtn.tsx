@@ -61,7 +61,9 @@ const SavingTool: React.FC<ISavingProps> = ({
   stageScale,
   setLoading,
 }) => {
-  const [uploadToCloudType, setUploadToCloudType] = useState<string>(null);
+  const [uploadToCloudType, setUploadToCloudType] = useState<string | null>(
+    null,
+  );
   const driveUser: DriveUser | null = useSelector(
     (state: RootStateOrAny) => state.auth.driveUser,
   );
@@ -92,7 +94,7 @@ const SavingTool: React.FC<ISavingProps> = ({
       const response = await dropboxFileUpload(
         name,
         blob,
-        image.dbData?.id,
+        image.dbData?.id as string,
         'image',
       );
       if (response.status == ResStatusEnum.success) {
@@ -115,7 +117,7 @@ const SavingTool: React.FC<ISavingProps> = ({
       <ToolBtn
         toolTitle={tools.saving.title}
         isOpenEditTool={isOpenEditTool}
-        onSubpanelClose={() => onToolChange(null)}
+        onSubpanelClose={() => onToolChange(null as any)}
         active={active}
         placement="right"
         title={title}
@@ -127,9 +129,7 @@ const SavingTool: React.FC<ISavingProps> = ({
         icon={tools.saving.icon}
       >
         <div className={styles.mainContainer}>
-          <h2 className={styles.title}>
-            Download formats
-          </h2>
+          <h2 className={styles.title}>Download formats</h2>
           <div className={styles.container}>
             {savingData.map((data, index) =>
               // eslint-disable-next-line @next/next/no-img-element
@@ -141,8 +141,8 @@ const SavingTool: React.FC<ISavingProps> = ({
                     data.type === 'png'
                       ? downloadPng
                       : data.type === 'jpg'
-                      ? downloadJpg
-                      : downloadPdf
+                        ? downloadJpg
+                        : downloadPdf
                   }
                 />
               ) : null,
@@ -187,8 +187,8 @@ const SavingTool: React.FC<ISavingProps> = ({
       </ToolBtn>
 
       <UploadToCloudModal
-        type={uploadToCloudType}
-        oldName={image.dbData.title}
+        type={uploadToCloudType || undefined}
+        oldName={image.dbData?.title}
         visible={uploadToCloudModalState}
         onClose={() => setUploadToCloudModalState(false)}
         onOk={uploadToCloudHandler}

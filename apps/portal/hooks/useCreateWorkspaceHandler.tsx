@@ -29,16 +29,20 @@ export const useCreateWorkspace = (shouldRouteToNewWorkspace = true) => {
     } else {
       const currentWorkspaces = workspaces || [];
 
+      dispatch(
+        PanelAC.setActiveWorkspace({
+          activeWorkspace: response.data as any,
+        }),
+      );
 
-      dispatch(PanelAC.setActiveWorkspace({ activeWorkspace: response.data }));
       dispatch(
         PanelAC.setWorkspaces({
-          workspaces: [...currentWorkspaces, response.data],
+          workspaces: [...currentWorkspaces, response.data] as any,
         }),
       );
 
       shouldRouteToNewWorkspace &&
-        router.push(`/media/workspace/${response.data.id}`);
+        router.push(`/media/workspace/${response.data?.id}`);
     }
 
     setShowCreateWorkspaceModal(false);

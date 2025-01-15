@@ -41,8 +41,8 @@ const PermissionsModal: React.FC<Props> = ({
   const permissionItemType: PermissionsItemType = folder
     ? 'folders'
     : itemType === 'image'
-    ? 'screenshots'
-    : 'videos';
+      ? 'screenshots'
+      : 'videos';
   const {
     members,
     teams,
@@ -50,7 +50,12 @@ const PermissionsModal: React.FC<Props> = ({
     handleMemberReadChange,
     handleTeamReadChange,
     handleTeamWriteChange,
-  } = useWorkspacePermissions({ folder, item, permissionItemType });
+  } = useWorkspacePermissions({
+    folder,
+    item: item as any,
+    permissionItemType,
+  });
+
   const activeWorkspace: IWorkspace = useSelector(
     (state: RootStateOrAny) => state.panel.activeWorkspace,
   );
@@ -69,7 +74,7 @@ const PermissionsModal: React.FC<Props> = ({
 
   return (
     <Modal
-      visible={visible}
+      open={visible}
       footer={null}
       destroyOnClose
       closable

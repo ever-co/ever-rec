@@ -2,7 +2,7 @@ import { FC, ReactNode } from 'react';
 import { CircularProgressbarWithChildren } from 'react-circular-progressbar';
 import { IProgressIndicatorData } from '../../../utilities/interfaces/IProgressIndicatorData';
 import getPercentageFromRange from '@/content/utilities/scripts/getPercentageFromRange';
-import styles from './ProgressIndicator.module.scss';
+import * as styles from './ProgressIndicator.module.scss';
 
 interface IProgressIndicatorProps {
   title: string;

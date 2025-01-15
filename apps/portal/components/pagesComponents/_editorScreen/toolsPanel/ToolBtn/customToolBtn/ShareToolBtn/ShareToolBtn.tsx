@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { ITool, tools } from '../../../tools';
 import ToolBtn from '../../ToolBtn';
 import { shareData } from 'app/utilities/popupsData';
-import Image from 'next/image';
+import Image from 'next/legacy/image';
 import PanelSplitter from '../../../PanelSplitter';
 import EmailModal from 'components/elements/EmailModal';
 import { infoMessage } from 'app/services/helpers/toastMessages';
@@ -71,7 +71,7 @@ const ShareTool: React.FC<IShareProps> = ({
         active={active}
         placement="right"
         title={title}
-        onSubpanelClose={() => onToolChange(null)}
+        onSubpanelClose={() => onToolChange(null as any)}
         onSelect={() => {
           onResetShape();
           onToolChange(tools.share);
@@ -97,10 +97,12 @@ const ShareTool: React.FC<IShareProps> = ({
                     data.type === 'email'
                       ? openEmailModal(image)
                       : data.type === 'slack'
-                      ? setSlackModalState(!slackModalState)
-                      : data.type === 'whatsapp'
-                      ? setWhatsappModalState(!whatsappModalState)
-                      : infoMessage('We are working hard to add this feature!');
+                        ? setSlackModalState(!slackModalState)
+                        : data.type === 'whatsapp'
+                          ? setWhatsappModalState(!whatsappModalState)
+                          : infoMessage(
+                              'We are working hard to add this feature!',
+                            );
                   }}
                 />
               ) : (
@@ -122,14 +124,14 @@ const ShareTool: React.FC<IShareProps> = ({
         item={emailModalState.screenshot}
         onCancel={closeEmailModal}
         itemType={'image'}
-        itemPublicLink={image?.url}
+        itemPublicLink={image?.url as string}
         onSave={save}
         fromEditor={true}
       />
 
       {slackModalState ? (
         <SlackChannelModal
-          selectedItemId={image.dbData.id}
+          selectedItemId={image.dbData?.id as string}
           user={user}
           onCancel={() => setSlackModalState(false)}
           forEditor={true}
@@ -139,7 +141,7 @@ const ShareTool: React.FC<IShareProps> = ({
 
       {whatsappModalState ? (
         <SendWhatsAppMessageModal
-          selectedItemId={image.dbData.id}
+          selectedItemId={image.dbData?.id as string}
           onCancel={() => setWhatsappModalState(false)}
           forEditor={true}
           onSave={save}

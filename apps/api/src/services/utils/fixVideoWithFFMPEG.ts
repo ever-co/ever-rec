@@ -9,7 +9,6 @@ const fixVideoWithFFMPEG = async (
   brokenVideoPath: string,
   fixedVideoPath: string,
 ) => {
-
   let outputPath = fixedVideoPath;
   const command = Ffmpeg(); // Package fluent-ffmpeg
   let duration = null;
@@ -53,7 +52,9 @@ const fixVideoWithFFMPEG = async (
 
       .on('codecData', async (codecData) => {
         // ex. '00:01:30.52'
+        // @ts-ignore
         if (codecData.duration !== 'N/A') {
+          // @ts-ignore
           const durationArray = codecData.duration.split(':');
           const minutes = durationArray[1];
           const seconds = durationArray[2].split('.')[0];

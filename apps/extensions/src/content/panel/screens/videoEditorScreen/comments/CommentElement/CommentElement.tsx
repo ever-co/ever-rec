@@ -1,6 +1,6 @@
 import { FC } from 'react';
 import { Dropdown, Menu } from 'antd';
-import styles from './CommentElement.module.scss';
+import * as styles from './CommentElement.module.scss';
 import moment from 'moment';
 import CommentInput from '../CommentInput/CommentInput';
 import { RootStateOrAny, useSelector } from 'react-redux';
@@ -77,7 +77,15 @@ const CommentElement: FC<IProps> = ({
 
   return (
     <div className={styles.commentWrapper}>
-      <img src={authorPhotoURL} alt="user photo" />
+      {authorPhotoURL ? (
+        <img src={authorPhotoURL} alt="user photo" />
+      ) : (
+        <AppSvg
+          path="/sign/default-profile.svg"
+          size="30px"
+          className="tw-flex tw-justify-center tw-items-center"
+        />
+      )}
 
       <div className={styles.commentDetails}>
         <div className={styles.commentAuthor}>

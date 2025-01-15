@@ -18,7 +18,7 @@ export function middleware(request: NextRequest) {
 
   if (refreshToken && idToken) {
     try {
-      const decodedToken: any = jwt_decode(idToken);
+      const decodedToken: any = jwt_decode(idToken.value);
       if (decodedToken) {
         return NextResponse.next();
       }

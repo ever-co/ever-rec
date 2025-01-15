@@ -8,6 +8,8 @@ export const ascendTimestampSecondsSort = (arr: IChapter[]) => {
     if (a.timestampSeconds === b.timestampSeconds) return 0;
 
     if (a.timestampSeconds > b.timestampSeconds) return 1;
+
+    return 0;
   });
 };
 

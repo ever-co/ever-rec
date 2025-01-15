@@ -1,5 +1,5 @@
 import classNames from 'classnames';
-import Image from 'next/image';
+import Image from 'next/legacy/image';
 import React from 'react';
 import styles from './toolSubPanelBtn.module.scss';
 import { Tooltip } from 'antd';
@@ -17,7 +17,7 @@ const ToolSubPanelBtn: React.FC<IToolSubPanelBtn> = ({
   disabled,
   active,
   onSelect,
-  toolTitle
+  toolTitle,
 }) => {
   const clickHandler = () => {
     !disabled && onSelect();
@@ -28,32 +28,26 @@ const ToolSubPanelBtn: React.FC<IToolSubPanelBtn> = ({
       className={classNames(
         styles.parentContainer,
         disabled ? styles.lowOpacity : styles.highOpacity,
-        active
-          ? styles.active
-          : styles.notActive,
+        active ? styles.active : styles.notActive,
       )}
       onClick={clickHandler}
     >
-      <Tooltip 
-        title={toolTitle}
+      <Tooltip title={toolTitle}>
+        <div
+          className={classNames(
+            !active ? styles.container : styles.activeContainer,
+          )}
         >
-      <div
-        className={classNames(
-          !active
-            ? styles.container
-            : styles.activeContainer,
-        )}
-      >
-        {/* <IconContext.Provider
+          {/* <IconContext.Provider
           value={{
             style: { strokeWidth: '0.5' },
           }}
         > */}
-        <div className={styles.flexContainer}>
-          <Image src={icon} />
+          <div className={styles.flexContainer}>
+            <Image src={icon} alt="icon" />
+          </div>
+          {/* </IconContext.Provider> */}
         </div>
-        {/* </IconContext.Provider> */}
-      </div>
       </Tooltip>
     </div>
   );

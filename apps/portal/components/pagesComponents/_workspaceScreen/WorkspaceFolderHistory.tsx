@@ -36,8 +36,12 @@ const WorkspaceFolderHistory: FC<IFoldersProps> = ({
     const result = tempFolders || [];
     if (parentId !== false) {
       const parentFolder = folders?.find((x) => x.id === parentId);
-      result.unshift(parentFolder);
-      return recursiveFolderNavBuild(folders, parentFolder?.parentId, result);
+      parentFolder && result.unshift(parentFolder);
+      return recursiveFolderNavBuild(
+        folders,
+        parentFolder?.parentId as string,
+        result,
+      );
     } else {
       return result;
     }
@@ -46,7 +50,10 @@ const WorkspaceFolderHistory: FC<IFoldersProps> = ({
   if (!navigationFolders || navigationFolders?.length === 0) return null;
 
   const switchFolder = (folderId: string | undefined) => {
-    const params = new URLSearchParams({ ...router.query, folder: folderId });
+    const params = new URLSearchParams({
+      ...router.query,
+      folder: folderId,
+    } as any);
     !folderId && params.delete('folder');
     router.push({ query: params.toString() });
   };

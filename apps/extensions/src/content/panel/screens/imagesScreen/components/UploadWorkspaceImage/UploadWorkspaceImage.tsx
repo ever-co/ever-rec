@@ -1,5 +1,5 @@
 //@ts-ignore
-import styles from './UploadWorkspaceImage.module.scss';
+import * as styles from './UploadWorkspaceImage.module.scss';
 import {
   ChangeEvent,
   SyntheticEvent,
@@ -8,7 +8,7 @@ import {
   useState,
 } from 'react';
 import { RootStateOrAny, useSelector } from 'react-redux';
-import {useDropzone} from "react-dropzone";
+import { useDropzone } from 'react-dropzone';
 import { errorHandler } from '@/app/services/helpers/errors';
 import { Modal } from 'antd';
 import AppSvg from '@/content/components/elements/AppSvg';
@@ -74,7 +74,7 @@ const UploadWorkspaceImageModal: React.FC<Props> = ({
   return (
     <Modal
       className={styles.modal}
-      visible={visible}
+      open={visible}
       onCancel={onClose}
       closeIcon={
         <AppSvg path="/common/close-icon.svg" className="modalCloseButton" />
@@ -98,7 +98,7 @@ const UploadWorkspaceImageModal: React.FC<Props> = ({
             </h5>
           </div>
           <div className={styles.marginDiv}>
-            <AppButton onClick={() => {}} full={true}>
+            <AppButton onClick={() => console.log('TODO: save')} full={true}>
               Save
             </AppButton>
           </div>

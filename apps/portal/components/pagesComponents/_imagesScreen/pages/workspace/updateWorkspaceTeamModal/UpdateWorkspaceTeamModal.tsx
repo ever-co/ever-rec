@@ -55,11 +55,11 @@ const UpdateWorkspaceTeamModal: React.FC<IProps> = ({
   }, [team]);
 
   const uploadAvatarHandler = useCallback(() => {
-    iconUploadRef.current.click();
+    iconUploadRef.current?.click();
   }, []);
 
   const uploadThumbnailHandler = useCallback(() => {
-    thumbnailUploadRef.current.click();
+    thumbnailUploadRef.current?.click();
   }, []);
 
   const resetTeamName = () => {
@@ -68,12 +68,16 @@ const UpdateWorkspaceTeamModal: React.FC<IProps> = ({
   };
 
   const resetAvatar = () => {
-    avatarImgRef.current.src = team?.avatar || '/common/team-icon.svg';
+    if (avatarImgRef.current) {
+      avatarImgRef.current.src = team?.avatar || '/common/team-icon.svg';
+    }
     setAvatar(null);
   };
 
   const resetThumbnail = () => {
-    thumbnailImgRef.current.src = team?.thumbnail || '/common/Thumbnail.svg';
+    if (thumbnailImgRef.current) {
+      thumbnailImgRef.current.src = team?.thumbnail || '/common/Thumbnail.svg';
+    }
     setThumbnail(null);
   };
 
@@ -83,14 +87,18 @@ const UpdateWorkspaceTeamModal: React.FC<IProps> = ({
         return errorMessage('File too large.');
       }
 
-      avatarImgRef.current.src = URL.createObjectURL(e.target.files[0]);
+      if (avatarImgRef.current) {
+        avatarImgRef.current.src = URL.createObjectURL(e.target.files[0]);
+      }
       setAvatar(e.target.files[0]);
     }
   };
 
   const processThumbnail = (e) => {
     if (e.target.files[0]) {
-      thumbnailImgRef.current.src = URL.createObjectURL(e.target.files[0]);
+      if (thumbnailImgRef.current) {
+        thumbnailImgRef.current.src = URL.createObjectURL(e.target.files[0]);
+      }
       setThumbnail(e.target.files[0]);
     }
   };
@@ -102,15 +110,15 @@ const UpdateWorkspaceTeamModal: React.FC<IProps> = ({
     setLoading(true);
     const response = await updateWorkspaceTeamAPI({
       workspaceId: workspace.id,
-      teamId: team.id,
+      teamId: team?.id as any,
       name: teamName,
-      avatar: avatar,
-      thumbnail: thumbnail,
+      avatar: avatar as any,
+      thumbnail: thumbnail as any,
     });
     const data = iDataResponseParser<typeof response.data>(response);
 
     if (data) {
-      const teamIndex = workspace?.teams?.findIndex((x) => x.id === team.id);
+      const teamIndex = workspace?.teams?.findIndex((x) => x.id === team?.id);
 
       if (teamIndex !== undefined && teamIndex !== -1) {
         workspace.teams[teamIndex] = data;
@@ -132,11 +140,14 @@ const UpdateWorkspaceTeamModal: React.FC<IProps> = ({
     setSaveLoadingDeleteTeam(true);
 
     const data = await deleteWorkspaceTeam(workspace.id, team.id);
-    const newTeams = !data.length ? null : data;
+    const newTeams = !data?.length ? null : data;
 
     dispatch(
       PanelAC.setActiveWorkspace({
-        activeWorkspace: { ...workspace, teams: newTeams },
+        activeWorkspace: {
+          ...workspace,
+          teams: newTeams || [],
+        },
       }),
     );
 
@@ -157,7 +168,7 @@ const UpdateWorkspaceTeamModal: React.FC<IProps> = ({
 
   return (
     <Modal
-      visible={visible}
+      open={visible}
       onCancel={() => onCancelHandler()}
       className={styles.modal}
       closeIcon={

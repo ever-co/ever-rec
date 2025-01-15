@@ -8,7 +8,7 @@ import {
   sendThumbnailURLEvent,
   VideoCustomEventsEnum,
 } from 'misc/customEvents';
-import 'plyr-react/dist/plyr.css';
+import 'plyr/dist/plyr.css';
 import {
   CHAPTER_THUMBNAIL_HEIGHT,
   CHAPTER_THUMBNAIL_WIDTH,
@@ -16,7 +16,7 @@ import {
 import { createVideoThumbnailURL } from 'misc/videoChapterHelperFunctions';
 import { windowEventListenerHandler } from 'misc/windowEventListenerHandler';
 import { IChapter } from 'app/interfaces/IChapter';
-const mux = require('mux-embed');
+import mux from 'mux-embed';
 
 type PlyrTypes = APITypes & { plyr: { media: HTMLVideoElement } };
 
@@ -133,7 +133,6 @@ export const PlyrPlayer: FC<IPlyrProps> = ({ videoURL, disableOptions }) => {
         Hls,
         data: {
           env_key: MUX_DATA,
-
           player_name: 'hls.js player',
           video_id: videoURL,
           video_title: videoURL,
@@ -176,7 +175,7 @@ export const PlyrPlayer: FC<IPlyrProps> = ({ videoURL, disableOptions }) => {
       });
       const markers = { enabled: true, points: markerPoints };
 
-      setPlayerOptions({ ...playerOptions, markers });
+      setPlayerOptions({ ...playerOptions, markers: markers as any });
     };
 
     const removeMarkers = () => {
@@ -206,7 +205,7 @@ export const PlyrPlayer: FC<IPlyrProps> = ({ videoURL, disableOptions }) => {
     };
 
     const createThumbnail = async (event: any) => {
-      const sourceURL = videoRef.current.plyr.source as unknown as string;
+      const sourceURL = videoRef.current?.plyr.source as unknown as string;
       const isHLS = sourceURL.includes('blob');
       const url = isHLS ? sourceURL : videoURL;
 
@@ -214,14 +213,14 @@ export const PlyrPlayer: FC<IPlyrProps> = ({ videoURL, disableOptions }) => {
       const timestampSeconds = event.detail.timestampSeconds;
 
       const thumbnailURL = await createVideoThumbnailURL(
-        url,
+        url as string,
         CHAPTER_THUMBNAIL_WIDTH,
         CHAPTER_THUMBNAIL_HEIGHT,
         timestampSeconds,
         isHLS,
       );
 
-      sendThumbnailURLEvent(chapterId, thumbnailURL);
+      sendThumbnailURLEvent(chapterId, thumbnailURL as string);
     };
 
     const events = [
@@ -256,7 +255,7 @@ export const PlyrPlayer: FC<IPlyrProps> = ({ videoURL, disableOptions }) => {
 
     const video = videoRef.current.plyr.media;
     video.addEventListener('timeupdate', (event: any) => {
-      const duration = videoRef.current.plyr.duration;
+      const duration = videoRef.current?.plyr.duration;
       const currTime = event.target.currentTime;
       currentTime.current = currTime;
 

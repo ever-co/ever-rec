@@ -45,12 +45,12 @@ const WorkspaceSettings = () => {
 
     if (!data) return;
 
-    const workspaceIndex = workspaces.findIndex(
+    const workspaceIndex = workspaces?.findIndex(
       (x) => x.id === activeWorkspace.id,
     );
 
-    if (workspaceIndex !== -1) {
-      const workspacesCopy = [...workspaces];
+    if (workspaceIndex !== -1 && workspaceIndex !== undefined) {
+      const workspacesCopy = [...(workspaces || [])];
       workspacesCopy[workspaceIndex] = data;
       dispatch(PanelAC.setWorkspaces({ workspaces: workspacesCopy }));
     }

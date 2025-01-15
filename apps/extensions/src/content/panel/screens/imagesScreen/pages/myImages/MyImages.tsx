@@ -36,7 +36,7 @@ import {
   increaseFolderItems,
 } from '@/app/services/helpers/manageFolders';
 import { IFavoriteFolders } from '@/app/interfaces/Folders';
-import styles from './MyImages.module.scss';
+import * as styles from './MyImages.module.scss';
 import { parseCollectionToArray } from '@/content/utilities/misc/helper';
 import LibraryActions from '../shared/components/LibraryActions';
 import UploadImageModal from '../../components/uploadImageModal/UploadImageModal';

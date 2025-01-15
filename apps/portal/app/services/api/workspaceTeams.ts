@@ -32,9 +32,9 @@ export const updateWorkspaceTeamAPI = async ({
 }): Promise<IDataResponse<IWorkspaceTeam | null>> => {
   const formData = new FormData();
 
-  formData.append('avatar', avatar);
-  formData.append('thumbnail', thumbnail);
-  formData.append('name', name);
+  formData.append('avatar', avatar as any);
+  formData.append('thumbnail', thumbnail as any);
+  formData.append('name', name as any);
 
   return api.put(`${rootPath(workspaceId)}/${teamId}`, formData);
 };

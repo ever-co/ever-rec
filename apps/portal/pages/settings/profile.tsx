@@ -76,7 +76,7 @@ const Profile: React.FC = () => {
 
       const photoURL = await uploadAvatar(event.target.files[0]);
 
-      updateReduxUser({ photoURL });
+      updateReduxUser({ photoURL: photoURL || undefined });
       dispatch(PanelAC.setLoaderState(false));
     }
   };
@@ -199,7 +199,7 @@ const Profile: React.FC = () => {
                 {({ onFileSelectorOpen }) => (
                   <div>
                     <ProfileAccountPhoto
-                      photoURL={user?.photoURL}
+                      photoURL={user?.photoURL || ''}
                       avatarSize={avaSize}
                       clicked={onFileSelectorOpen}
                     />

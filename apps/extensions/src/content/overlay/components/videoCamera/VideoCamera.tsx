@@ -3,6 +3,8 @@ import '@/content/content';
 import './video-camera.scss';
 import Draggable from 'react-draggable';
 
+const DraggableReact = Draggable as any;
+
 interface IVideoCameraProps {
   vRef: any;
 }
@@ -11,7 +13,7 @@ const VideoCamera: React.FC<IVideoCameraProps> = ({ vRef }) => {
   const isInOurEditor = window.location.pathname.includes('/edit');
 
   return (
-    <Draggable
+    <DraggableReact
       defaultPosition={{ x: isInOurEditor ? 100 : 0, y: -window.innerHeight }}
       bounds={{
         top: -window.innerHeight,
@@ -29,7 +31,7 @@ const VideoCamera: React.FC<IVideoCameraProps> = ({ vRef }) => {
           playsInline={true}
         ></video>
       </div>
-    </Draggable>
+    </DraggableReact>
   );
 };
 

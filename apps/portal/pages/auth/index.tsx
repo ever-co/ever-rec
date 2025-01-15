@@ -7,7 +7,7 @@ import Layout from 'antd/lib/layout/layout';
 import GoogleBtn from 'components/pagesComponents/_signScreen/GoogleBtn';
 import AppLink from 'components/controls/AppLink';
 import LinksDivider from 'components/pagesComponents/_signScreen/LinksDivider';
-import Image from 'next/image';
+import Image from 'next/legacy/image';
 import { CredentialResponse } from '@react-oauth/google';
 import { googleAuthorization } from '../../app/services/auth';
 import FeaturesSection from 'components/pagesComponents/_signScreen/FeaturesSection';
@@ -102,8 +102,8 @@ const Auth: React.FC<SignFlowComponent> = ({ children, componentType }) => {
                   componentType == 'resetPassword'
                     ? 'Reset your password'
                     : currentPathname
-                    ? 'Hello, Welcome!'
-                    : 'Register'
+                      ? 'Hello, Welcome!'
+                      : 'Register'
                 }
                 className="tw-mb-8 tw-font-bold"
               />
@@ -131,7 +131,7 @@ const Auth: React.FC<SignFlowComponent> = ({ children, componentType }) => {
 
                       <GoogleBtn onSuccess={googleSubmit} />
 
-                      <div className="tw-flex tw-justify-center tw-flex tw-mt-7">
+                      <div className="tw-flex tw-justify-center tw-mt-7">
                         {filteredLinks().map((link, index, arr) => (
                           <React.Fragment key={`link_${index}`}>
                             {componentType !== link.name && (
@@ -170,8 +170,8 @@ const Auth: React.FC<SignFlowComponent> = ({ children, componentType }) => {
                 src="/sign/signin1.svg"
                 alt="Google"
                 layout="intrinsic"
-                height="650px"
-                width="500px"
+                height="650"
+                width="500"
               />
             </div>
           )}

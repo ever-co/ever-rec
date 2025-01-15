@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import styles from './ItemAuthor.module.scss';
+import * as styles from './ItemAuthor.module.scss';
 
 interface IItemAuthorProps {
   name: string | null;

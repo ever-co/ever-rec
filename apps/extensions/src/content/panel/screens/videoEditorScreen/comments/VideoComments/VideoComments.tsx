@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, FC, useRef } from 'react';
-import styles from './VideoComments.module.scss';
+import * as styles from './VideoComments.module.scss';
 import CommentElement, { IComment } from '../CommentElement/CommentElement';
 import {
   addComment,

@@ -14,7 +14,7 @@ const ConfirmModal: React.FC<Props> = ({ visible, onClose, onOk }) => {
   return (
     <Modal
       className={styles.modal}
-      visible={visible}
+      open={visible}
       destroyOnClose={true}
       onCancel={() => {
         onClose();

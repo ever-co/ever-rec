@@ -8,12 +8,16 @@ import { VideoService } from '../video/video.service';
 @Injectable()
 export class MessagesService {
   public constructor(
-    @InjectTwilio() private readonly client: TwilioClient,
+    // @ts-ignore
+    @InjectTwilio() public readonly client: TwilioClient,
     private readonly imageService: ImageService,
     private readonly videoService: VideoService,
     private readonly configService: ConfigService,
   ) {}
 
+  /**
+   * @internal
+   */
   async sendSMS(toPhone: string, mediaUrl: string, body: string = '') {
     return await this.client.messages
       .create({
@@ -23,7 +27,7 @@ export class MessagesService {
         )}`,
         //to: 'whatsapp:+919998843025',
         to: `whatsapp:${toPhone}`,
-        ...(mediaUrl && { mediaUrl }),
+        ...(mediaUrl ? ({ mediaUrl } as any) : {}),
       })
       .then((res) => {
         console.log(res, 'res');
@@ -44,6 +48,9 @@ export class MessagesService {
       });
   }
 
+  /**
+   * @internal
+   */
   public async sendWhatsAppMessage(req) {
     const uid = req.user.id;
     const { id, type, phone } = req.body;
@@ -67,8 +74,7 @@ export class MessagesService {
             'WEBSITE_URL',
           )}/image/shared/${sharedCode}`;
         }
-        body =
-          '*Sent with Rec* Click to link for mor details: ' + sharedLink;
+        body = '*Sent with Rec* Click to link for mor details: ' + sharedLink;
         return await this.sendSMS(phone, mediaUrl, body);
       }
     } else {
@@ -86,8 +92,7 @@ export class MessagesService {
         )}/video/shared/${sharedCode}`;
       }
 
-      body =
-        '*Sent with Rec* Click to link for mor details: ' + sharedLink;
+      body = '*Sent with Rec* Click to link for mor details: ' + sharedLink;
 
       return await this.sendSMS(phone, mediaUrl, body);
     }
