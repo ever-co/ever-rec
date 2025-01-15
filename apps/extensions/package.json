@@ -1,10 +1,15 @@
 {
   "name": "ever-rec-extension",
-  "version": "0.83.0",
-  "version_name": "0.83.0",
+  "version": "0.1.0",
+  "version_name": "0.1.0",
   "description": "Ever Rec Chrome Extension",
-  "author": "Ever Co. LTD",
-  "license": "UNLICENSED",
+  "author": {
+		"name": "Ever Co. LTD",
+		"email": "ever@ever.co",
+		"url": "https://ever.co"
+	},
+  "license": "AGPL-3.0",
+  "homepage": "https://rec.so",
   "private": true,
   "engines": {
     "node": ">=18"
