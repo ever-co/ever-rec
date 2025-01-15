@@ -10,8 +10,6 @@
 
 **NOTE: Platform currently is in active development stage / WIP, please use with caution!**
 
-## 🧱 Technology Stack and Requirements
-
 ## ✨ Features
 
 -   Screen Capture
@@ -21,7 +19,7 @@
 ## 📑 Table of Contents
 
 -   [Prerequisites](#prerequisites)
--   [Technology Stack](#technology-stack)
+-   [Technology Stack](#-technology-stack)
 -   [Project Structure](#project-structure)
 -   [Getting Started](#getting-started)
     -   [Development Environment Setup](#development-environment-setup)
@@ -44,26 +42,31 @@
 
 Before you begin, ensure you have the following installed:
 
--   Node.js v20 or higher
--   PNPM (Package Manager)
+-   [Node.js](https://nodejs.org) v20 or higher
+-   [PNPM](https://github.com/pnpm/pnpm) (Package Manager)
 
 ## Technology Stack
 
+-   **Common:**
+
+    - [TypeScript](https://www.typescriptlang.org)
+
 -   **Backend:**
 
-    -   NestJS (API Server)
-    -   Firebase
+    -   [NodeJs](https://nodejs.org) / [NestJs](https://github.com/nestjs/nest)
+    -   [Firebase](https://firebase.google.com)
 
 -   **Frontend:**
 
-    -   NextJS
-    -   ReactJS
-    -   Tailwind CSS
-    -   SASS
-    -   Ant Design (antd)
+    -   [Next.js](https://nextjs.org)
+    -   [React](https://reactjs.org)
+    -   [Tailwind](https://tailwindcss.com)
+    -   [SASS](https://sass-lang.com)
+    -   [Ant Design](https://github.com/ant-design/ant-design)
 
 -   **Development Tools:**
-    -   Turborepo (Monorepo Management)
+
+    -   [Turborepo](https://github.com/vercel/turborepo) (Monorepo Management)
 
 ## Project Structure
 
@@ -227,8 +230,8 @@ pnpm build:extensions
 2. **Load Extension**
 
     - Click "Load unpacked"
-    - Navigate to project directory
-    - Select appropriate build folder:
+    - Navigate to the project directory
+    - Select the appropriate build folder:
         - Development: `apps/extensions/build/dev`
         - Production: `apps/extensions/build/prod`
 
@@ -251,8 +254,8 @@ pnpm build:extensions
 2. **Web App Setup**
     - In Firebase Console, click "Add app"
     - Select web platform (</>)
-    - Register app with a nickname
-    - Copy configuration to appropriate `.env` file
+    - Register the app with a nickname
+    - Copy configuration to the appropriate `.env` file
 
 ### Authentication Setup
 
@@ -266,7 +269,7 @@ pnpm build:extensions
 ### Database Configuration
 
 1. **Realtime Database Setup**
-    - Create new Realtime Database
+    - Create a new Realtime Database
     - Start in test mode
     - Update security rules using `database.rules.json`:
         ```json
@@ -292,7 +295,7 @@ pnpm build:extensions
 4. Download credentials and configure for all apps:
     - `GOOGLE_CLIENT_ID`
     - `GOOGLE_CLIENT_SECRET`
-5. Configure OAuth consent screen
+5. Configure the OAuth consent screen
 
 ## Production Build
 
@@ -306,11 +309,80 @@ pnpm build:portal   # Build web portal
 pnpm build:extensions  # Build extensions
 ```
 
+## 💌 Contact Us
+
+-   [Ever.co Website Contact Us page](https://ever.co/contacts)
+-   [Slack Community](https://join.slack.com/t/gauzy/shared_invite/enQtNzc5MTA5MDUwODg2LTI0MGEwYTlmNWFlNzQzMzBlOWExNTk0NzAyY2IwYWYwMzZjMTliYjMwNDI3NTJmYmM4MDQ4NDliMDNiNDY1NWU)
+-   [Discord Chat](https://discord.gg/hKQfn4j)
+-   [CodeMentor](https://www.codementor.io/evereq)
+-   For business inquiries: <mailto:rec@ever.co>
+-   Please report security vulnerabilities to <mailto:security@ever.co>
+
+## 🔐 Security
+
+**Ever Rec Platform** follows good security practices, but 100% security cannot be guaranteed in any software!
+**Ever Rec Platform** is provided AS IS without any warranty. Use at your own risk!
+See more details in the [LICENSES.md](LICENSES.md).
+
+In a production setup, all client-side to server-side (backend, APIs) communications should be encrypted using HTTPS/WSS/SSL (REST APIs, GraphQL endpoint, Socket.io WebSockets, etc.).
+
+If you discover any issue regarding security, please disclose the information responsibly by emailing <mailto:security@ever.co> and not by creating a GitHub issue.
+
 ## 🛡️ License
 
-This software is NOT YET Open-Sourced.
-It's proprietary software.
-Do NOT share/redistribute!
+This software is available under the following licenses:
+
+-   [Ever® Rec™ Platform Community Edition](https://github.com/ever-co/ever-rec/blob/master/LICENSES.md#ever-rec-platform-community-edition-license)
+-   [Ever® Rec™ Platform Small Business](https://github.com/ever-co/ever-rec/blob/master/LICENSES.md#ever-rec-platform-small-business-license)
+-   [Ever® Rec™ Platform Enterprise](https://github.com/ever-co/ever-rec/blob/master/LICENSES.md#ever-rec-platform-enterprise-license)
+
+#### The default Ever® Rec™ Platform license, without a valid Ever® Rec™ Platform Enterprise or Ever® Rec™ Platform Small Business License agreement, is the Ever® Rec™ Platform Community Edition License
+
+We support the open-source community. If you're building awesome non-profit/open-source projects, we're happy to help and will provide (subject to [acceptance criteria](https://github.com/ever-co/ever-rec/wiki/Free-license-and-hosting-for-Non-profit-and-Open-Source-projects)) Ever Teams Enterprise edition license and free hosting option! Feel free to contact us at <mailto:ever@ever.co> to make a request. More details are explained in our [Wiki](https://github.com/ever-co/ever-rec/wiki/Free-license-and-hosting-for-Non-profit-and-Open-Source-projects).
+
+#### Please see [LICENSES](LICENSES.md) for more information on licenses
+
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fever-co%2Fever-rec.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fever-co%2Fever-rec?ref=badge_large)
+
+## ™️ Trademarks
+
+**Ever**® is a registered trademark of [Ever Co. LTD](https://ever.co).
+**Ever® Rec™**, **Ever® Demand™**, **Ever® Gauzy™**, **Ever® Teams™** and **Ever® OpenSaaS™** are all trademarks of [Ever Co. LTD](https://ever.co).
+
+The trademarks may only be used with the written permission of Ever Co. LTD. and may not be used to promote or otherwise market competitive products or services.
+
+All other brand and product names are trademarks, registered trademarks, or service marks of their respective holders.
+
+## 🍺 Contribute
+
+-   Please give us a :star: on Github, it **helps**!
+-   You are more than welcome to submit feature requests in the [separate repo](https://github.com/ever-co/feature-requests/issues)
+-   Pull requests are always welcome! Please base pull requests against the _develop_ branch and follow the [contributing guide](.github/CONTRIBUTING.md).
+
+## 💪 Thanks to our Contributors
+
+See our contributors list in [CONTRIBUTORS.md](https://github.com/ever-co/ever-rec/blob/develop/.github/CONTRIBUTORS.md).
+You can also view a full list of our [contributors tracked by Github](https://github.com/ever-co/ever-rec/graphs/contributors).
+
+<img src="https://contributors-img.web.app/image?repo=ever-co/ever-rec" />
+
+## ⭐ Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=ever-co/ever-rec&type=Date)](https://star-history.com/#ever-co/ever-rec&Date)
+
+## ❤️ Powered By
+
+<p>
+  <a href="https://www.digitalocean.com/?utm_medium=opensource&utm_source=ever-co">
+    <img src="https://opensource.nyc3.cdn.digitaloceanspaces.com/attribution/assets/PoweredByDO/DO_Powered_by_Badge_blue.svg" width="201px">
+  </a>
+</p>
+
+<p>
+ <a href="https://vercel.com/?utm_source=ever-co&utm_campaign=oss">
+     <img src=".github/vercel-logo.svg" alt="Powered by Vercel" />
+ </a>
+</p>
 
 ## ©️ Copyright
 
