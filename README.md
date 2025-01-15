@@ -19,7 +19,7 @@
 ## 📑 Table of Contents
 
 -   [Prerequisites](#prerequisites)
--   [Technology Stack](#-technology-stack)
+-   [Technology Stack](#technology-stack)
 -   [Project Structure](#project-structure)
 -   [Getting Started](#getting-started)
     -   [Development Environment Setup](#development-environment-setup)
