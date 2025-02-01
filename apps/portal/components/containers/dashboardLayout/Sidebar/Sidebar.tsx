@@ -158,7 +158,7 @@ const Sidebar: FC<IProps> = ({ isProfilePage, isWorkspaceSettingsPage }) => {
               setFavFoldersVisible={setFavFoldersVisible}
             /> */}
 
-            <div className='tw-mt-24'>{renderMenuItems()}</div>
+            <div className='tw-mt-20'>{renderMenuItems()}</div>
           </div>
         </div>
       </div>

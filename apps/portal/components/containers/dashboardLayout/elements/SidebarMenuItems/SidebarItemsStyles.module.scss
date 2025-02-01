@@ -34,8 +34,8 @@
 
   .icon,
   .title {
-    color: #2A292F; // Initial color
-    transition: color 0.2s ease-in; // Smooth transition effect
+    color: #2A292F;
+    transition: color 0.2s ease-in;
   }
 
   &:hover {
@@ -45,7 +45,7 @@
 
     .icon,
     .title {
-      color: #5B4DBE; // Change color on hover
+      color: #5B4DBE;
     }
 
     &.active {
