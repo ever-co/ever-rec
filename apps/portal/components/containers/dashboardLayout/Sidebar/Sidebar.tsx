@@ -128,8 +128,8 @@ const Sidebar: FC<IProps> = ({ isProfilePage, isWorkspaceSettingsPage }) => {
         addNewWorkspaceClicked={() => setShowCreateWorkspaceModal(true)}
       />
 
-      <div className={styles.sidebarContainer}>
-        <div className={styles.sidebarWrapper}>
+      <div className={`${styles.sidebarContainer}`}>
+        <div className={`${styles.sidebarWrapper} tw-px-4`}>
           <div className={styles.logoWrapper}>
             <Logo
               className="tw-w-full"
@@ -137,7 +137,7 @@ const Sidebar: FC<IProps> = ({ isProfilePage, isWorkspaceSettingsPage }) => {
             />
           </div>
 
-          <hr className={styles.lineSeparator} />
+          {/* <hr className={styles.lineSeparator} /> */}
 
           {(isProfilePage || isWorkspaceSettingsPage) && (
             <div className={styles.sidebarHeading}>
@@ -158,7 +158,7 @@ const Sidebar: FC<IProps> = ({ isProfilePage, isWorkspaceSettingsPage }) => {
               setFavFoldersVisible={setFavFoldersVisible}
             /> */}
 
-            <div>{renderMenuItems()}</div>
+            <div className='tw-mt-24'>{renderMenuItems()}</div>
           </div>
         </div>
       </div>
