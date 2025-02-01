@@ -139,12 +139,12 @@ const PanelLogin: React.FC = () => {
         </div>
 
         <div className="tw-flex tw-justify-between tw-items-center tw-mt-8">
-          <div className="tw-flex tw-gap-2">
+          <div className="tw-flex tw-gap-2 !tw-text-sm">
             <Checkbox onChange={() => ''} />
             <p>Remember me</p>
           </div>
           <AppLink
-            className="tw-text-overlay-black"
+            className="tw-text-overlay-black !tw-font-extralight !tw-text-sm"
             onClick={() => router.push(`/auth/reset`)}
           >
             Forgot Password?
@@ -154,7 +154,7 @@ const PanelLogin: React.FC = () => {
         <AppButton
           full
           disabled={!valid}
-          className="tw-mt-8"
+          className="tw-mt-10"
           twPadding="tw-p-4"
           onClick={submitHandler}
         >
