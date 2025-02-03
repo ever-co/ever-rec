@@ -75,7 +75,7 @@
   },
   "devDependencies": {
     "@fullhuman/postcss-purgecss": "^3.0.0",
-    "@sentry/nextjs": "^8.30.0",
+    "@sentry/nextjs": "^8.49.0",
     "@tailwindcss/line-clamp": "^0.4.4",
     "@types/jest": "27.0.2",
     "@types/node": "^20",
