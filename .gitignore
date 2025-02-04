@@ -59,9 +59,6 @@ dist/
 !.vscode/launch.json
 !.vscode/extensions.json
 
-# NVIM IDE
-session_control.json
-
 # misc
 /.sass-cache
 /connect.lock

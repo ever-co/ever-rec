@@ -25,7 +25,7 @@ const nextConfig = {
     includePaths: [join(__dirname, 'styles')],
   },
   images: {
-    domains: ['storage.googleapis.com', 'lh3.googleusercontent.com'],
+    domains: ['storage.googleapis.com'],
   },
   async redirects() {
     return [
