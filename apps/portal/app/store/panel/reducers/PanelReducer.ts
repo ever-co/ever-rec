@@ -53,6 +53,7 @@ import {
   SET_TOOLPANEL_POSITION,
   SET_WORKSPACE_ITEM_ORDER,
   SET_WORKSPACE_FOLDER_ORDER,
+  SET_WORKSPACE_FETCHED,
 } from '../actions/actionTypes';
 import IExplorerData from '../../../interfaces/IExplorerData';
 import { IWorkspace } from '../../../interfaces/IWorkspace';
@@ -126,6 +127,7 @@ const initState = {
   currentWorkspaceFolder: false,
   workspaces: [],
   workspaceLoaded: false,
+  workspaceFetched: false,
   workspaceFolderOrder: ItemOrderEnum.dateOldest,
   workspaceItemOrder: ItemOrderEnum.dateNewest,
   favoriteFolders: { images: [], videos: [], workspaces: {} },
@@ -456,6 +458,11 @@ export default function PanelReducer(state = initState, action: ActionType) {
       return {
         ...state,
         workspaceLoaded: action.payload,
+      };
+    case SET_WORKSPACE_FETCHED:
+      return {
+        ...state,
+        workspaceFetched: action.payload,
       };
     case SET_FAVORITE_FOLDERS:
       return {

@@ -57,6 +57,7 @@ import {
   SET_TOOLPANEL_POSITION,
   SET_WORKSPACE_ITEM_ORDER,
   SET_WORKSPACE_FOLDER_ORDER,
+  SET_WORKSPACE_FETCHED,
 } from './actionTypes';
 import { ITrelloData } from 'app/interfaces/IIntegrationTypes';
 import { IWorkspace, IWorkspaceImage } from 'app/interfaces/IWorkspace';
@@ -361,6 +362,13 @@ export default class PanelAC {
     workspaceLoaded: boolean;
   }): ActionType {
     return { type: SET_WORKSPACE_LOADED, payload: workspaceLoaded };
+  }
+  static setWorkspaceFetched({
+    workspaceFetched,
+  }: {
+    workspaceFetched: boolean;
+  }): ActionType {
+    return { type: SET_WORKSPACE_FETCHED, payload: workspaceFetched };
   }
 
   static setFavoriteFolders({
