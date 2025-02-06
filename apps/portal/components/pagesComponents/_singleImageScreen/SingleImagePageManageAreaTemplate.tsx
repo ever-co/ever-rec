@@ -602,7 +602,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
                 <div className="tw-font-semibold tw-text-sm tw-mb-2 tw-text-center">
                   Save to Cloud
                 </div>
-                <div className={styles.cloudProvidersWrapper}>
+                <div className={`${styles.cloudProvidersWrapper} tw-space-x-1`}>
                   <div className={`${styles.cloudProviderButton}`}>
                     {driveOperationLoading ? (
                       <AppButton
@@ -632,7 +632,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
                       <button
                         className={classNames(
                           styles.appButton,
-                          'tw-text-white tw-rounded-md hover:tw-opacity-80 !tw-w-[354px]',
+                          'tw-text-white tw-rounded-md hover:tw-opacity-80 ',
                         )}
                         onClick={
                           driveImageId && driveUser
