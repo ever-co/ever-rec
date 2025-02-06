@@ -583,7 +583,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
                   <AppButton
                     onClick={generateShareableLink}
                     full
-                    className={styles.generateLink}
+                    className={`${styles.generateLink} hover:tw-opacity-80 `}
                   >
                     {shareLoadingState ? (
                       <div className={styles.localAppSpinnerWrapper}>
@@ -603,12 +603,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
                   Save to Cloud
                 </div>
                 <div className={styles.cloudProvidersWrapper}>
-                  <div
-                    ref={cloudBtnsRefs[0]}
-                    onMouseEnter={() => onMouseEnterCloudButtonsHandler(0)}
-                    onMouseLeave={onMouseLeaveCloudButtonsHandler}
-                    className={`${styles.cloudProviderButton}`}
-                  >
+                  <div className={`${styles.cloudProviderButton}`}>
                     {driveOperationLoading ? (
                       <AppButton
                         className={styles.appButton}
@@ -634,16 +629,18 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
                         </div>
                       </AppButton>
                     ) : (
-                      <AppButton
-                        className={styles.appButton}
-                        twPadding="tw-px-0 tw-py-3"
-                        twRounded="tw-rounded-none"
+                      <button
+                        className={classNames(
+                          styles.appButton,
+                          'tw-text-white tw-rounded-md hover:tw-opacity-80 !tw-w-[354px]',
+                        )}
                         onClick={
                           driveImageId && driveUser
                             ? openImageOnDrive
                             : openUploadToCloudModal
                         }
                       >
+                        Google Drive
                         <div
                           className={classNames(styles.svgWrapper, 'tw-flex')}
                         >
@@ -651,43 +648,29 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
                             path="/images/google-drive-logo.svg"
                             size="25px"
                           />
-                          <div className={styles.providerText}>
-                            {driveImageId && driveUser ? (
-                              <div className={styles.openImageText}>
-                                Open image
-                              </div>
-                            ) : (
-                              driveUser?.email || 'Google drive'
-                            )}
-                          </div>
                         </div>
-                      </AppButton>
+                      </button>
                     )}
                     {driveImageId && (
                       <AppButton
                         onClick={() => setShowCloudDeleteFileModal('drive')}
-                        onMouseLeave={onMouseLeaveCloudButtonsHandler}
                         className={styles.deleteDriveItemBtn}
                       >
                         <AppSvg size="24px" path="/images/delete-bin.svg" />
                       </AppButton>
                     )}
                   </div>
-                  <div
-                    ref={cloudBtnsRefs[1]}
-                    onMouseEnter={() => onMouseEnterCloudButtonsHandler(1)}
-                    onMouseLeave={onMouseLeaveCloudButtonsHandler}
-                    className={`${styles.cloudProviderButton}`}
-                  >
-                    <AppButton
+                  <div className={`${styles.cloudProviderButton}`}>
+                    <button
+                      className={classNames(
+                        styles.appButton,
+                        'tw-text-white tw-rounded-md hover:tw-opacity-80 ',
+                      )}
                       onClick={() =>
                         dropBoxImageId
                           ? openImageOnDropBox()
                           : openUploadToDropBoxCloudModal('dropbox')
                       }
-                      twPadding="tw-px-0 tw-py-3"
-                      className={styles.appButton}
-                      twRounded="tw-rounded-none"
                     >
                       {dropboxOperationLoading ? (
                         <div
@@ -710,15 +693,11 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
                         <div
                           className={classNames(styles.svgWrapper, 'tw-flex')}
                         >
+                          DropBox
                           <AppSvg path="/images/dropbox-logo.svg" size="25px" />
-                          <div className={styles.providerText}>
-                            {dropBoxImageId
-                              ? 'Open image'
-                              : user?.dropbox?.email || 'Dropbox'}
-                          </div>
                         </div>
                       )}
-                    </AppButton>
+                    </button>
                     {dropBoxImageId && (
                       <AppButton
                         onClick={() => setShowCloudDeleteFileModal('Dropbox')}
