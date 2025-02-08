@@ -86,6 +86,8 @@ const VideoItem: FC<IVideoItemProps> = ({
     false;
 
   const selectItem = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
     if (addSelected && video && selectedItems) {
       const selected = isSelected;
       const newItems = selected
@@ -153,7 +155,6 @@ const VideoItem: FC<IVideoItemProps> = ({
               <img src={video?.url} alt="" />
             </div>
           )}
-
           <Overlay
             onRestoreFromTrash={onRestoreFromTrash}
             addSelected={addSelected}
