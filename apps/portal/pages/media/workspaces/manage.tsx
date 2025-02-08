@@ -59,8 +59,7 @@ const ManageWorkspaces: React.FC = () => {
   const activeWorkspace: IWorkspace | null = useSelector(
     (state: RootStateOrAny) => state.panel.activeWorkspace,
   );
-  //const { Modal: CreateWSModal, setShowCreateWorkspaceModal } =
-  //  useCreateWorkspace(true);
+
   const { Modal: CreateWSModal, setShowCreateWorkspaceModal } =
     useCreateWorkspace(false);
 
