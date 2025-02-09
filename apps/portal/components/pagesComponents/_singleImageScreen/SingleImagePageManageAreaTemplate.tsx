@@ -462,6 +462,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
     setShareLoadingState(false);
   };
 
+  const imageOpenDrive = driveImageId && driveUser;
   return (
     <>
       <div className="tw-bg-blue-grey tw-rounded-2lg tw-py-0 tw-px-0 tw-shadow-md">
@@ -602,8 +603,10 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
                 <div className="tw-font-semibold tw-text-sm tw-mb-2 tw-text-center">
                   Save to Cloud
                 </div>
-                <div className={`${styles.cloudProvidersWrapper} tw-space-x-1`}>
-                  <div className={`${styles.cloudProviderButton}`}>
+                <div
+                  className={`${styles.cloudProvidersWrapper} !tw-w-full tw-space-x-1`}
+                >
+                  <div className={`${styles.cloudProviderButton} `}>
                     {driveOperationLoading ? (
                       <AppButton
                         className={styles.appButton}
@@ -635,12 +638,16 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
                           'tw-text-white tw-rounded-md hover:tw-opacity-80 ',
                         )}
                         onClick={
-                          driveImageId && driveUser
+                          imageOpenDrive
                             ? openImageOnDrive
                             : openUploadToCloudModal
                         }
                       >
-                        Google Drive
+                        {imageOpenDrive ? (
+                          <div className={styles.openImageText}>Open image</div>
+                        ) : (
+                          driveUser?.email || 'Google drive'
+                        )}
                         <div
                           className={classNames(styles.svgWrapper, 'tw-flex')}
                         >
@@ -693,7 +700,9 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
                         <div
                           className={classNames(styles.svgWrapper, 'tw-flex')}
                         >
-                          DropBox
+                          {dropBoxImageId
+                            ? 'Open image'
+                            : user?.dropbox?.email || 'Dropbox'}
                           <AppSvg path="/images/dropbox-logo.svg" size="25px" />
                         </div>
                       )}
