@@ -632,7 +632,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
                         </div>
                       </AppButton>
                     ) : (
-                      <button
+                      <AppButton
                         className={classNames(
                           styles.appButton,
                           'tw-text-white tw-rounded-md hover:tw-opacity-80 ',
@@ -656,7 +656,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
                             size="25px"
                           />
                         </div>
-                      </button>
+                      </AppButton>
                     )}
                     {driveImageId && (
                       <AppButton
@@ -668,7 +668,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
                     )}
                   </div>
                   <div className={`${styles.cloudProviderButton}`}>
-                    <button
+                    <AppButton
                       className={classNames(
                         styles.appButton,
                         'tw-text-white tw-rounded-md hover:tw-opacity-80 ',
@@ -706,7 +706,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
                           <AppSvg path="/images/dropbox-logo.svg" size="25px" />
                         </div>
                       )}
-                    </button>
+                    </AppButton>
                     {dropBoxImageId && (
                       <AppButton
                         onClick={() => setShowCloudDeleteFileModal('Dropbox')}
