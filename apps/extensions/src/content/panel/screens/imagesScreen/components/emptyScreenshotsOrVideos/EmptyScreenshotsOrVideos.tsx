@@ -27,20 +27,22 @@ const EmptyScreenshotsOrVideos: FC<IProps> = ({ emptyType }) => {
   return (
     <div className="tw-flex tw-flex-col tw-items-center">
       <AppSvg path={imagePath} className="tw-w-max" />
-      <h2 className="tw-text-2xl tw-mt-7 tw-mb-2 tw-font-semibold">{heading}</h2>
+      <h2 className="tw-text-2xl tw-mt-7 tw-mb-2 tw-font-semibold">
+        {heading}
+      </h2>
       <p className="tw-text-center">
-      {type == 'a video or screenshot' ?
+        {type == 'a video or screenshot' ? (
           `The items you have created and shared with others `
-           : 
-          
-          <>Start {taking}. Click the <b>{type}</b> button</>}
-          
+        ) : (
+          <>
+            Start {taking}. Click the <b>{type}</b> button
+          </>
+        )}
+
         <br />
-        {type == 'a video or screenshot' ?
-         `will be displayed here.`
-         :
-         `in the extension’s popup menu.`
-        } 
+        {type == 'a video or screenshot'
+          ? `will be displayed here.`
+          : `in the extension’s popup menu.`}
       </p>
     </div>
   );

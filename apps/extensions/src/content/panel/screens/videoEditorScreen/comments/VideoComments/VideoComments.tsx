@@ -151,7 +151,17 @@ const VideoComments: FC<IProps> = ({ userId, itemOwnerId, itemId }) => {
   };
 
   const commentsLength = comments ? comments.length : 0;
-
+  useEffect(() => {
+    const handleKeyPress = (event: KeyboardEvent) => {
+      if (event.key === 'Enter' && !addCommentDisabled) {
+        addCommentHandler();
+      }
+    };
+    document.addEventListener('keydown', handleKeyPress);
+    return () => {
+      document.removeEventListener('keydown', handleKeyPress);
+    };
+  });
   return (
     <div className={styles.comments}>
       <h3>{commentsLength} Comments</h3>

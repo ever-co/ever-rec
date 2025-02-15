@@ -213,13 +213,32 @@ const MyImages: FC = () => {
     event: ChangeEvent<HTMLInputElement>,
   ) => {
     if (event.target.value.length && event.target.files?.length) {
-      // setUploadState(false);
+      //setUploadState(false);
+      setShowAddImageModal(false);
       setLoading(true);
-      await uploadFile(
-        explorerData.currentFolder?.id || false,
-        event.target.files[0],
-        explorerData.currentFolder,
-      );
+
+      const files = Array.from(event.target.files);
+
+      const multipleUpload = files.length > 1;
+      const uploadPromises = files.map((file, i) => async () => {
+        try {
+          console.log('Uploading file:', file.name);
+          await uploadFile(
+            explorerData.currentFolder?.id || false,
+            file,
+            explorerData.currentFolder,
+            multipleUpload,
+          );
+          console.log('File uploaded successfully:', file.name);
+        } catch (error) {
+          console.error('Error uploading file:', file.name, error);
+        }
+      });
+
+      // Execute promises sequentially using for...of
+      for (const uploadPromise of uploadPromises) {
+        await uploadPromise();
+      }
       setLoading(false);
     }
   };
@@ -275,6 +294,7 @@ const MyImages: FC = () => {
         <input
           type="file"
           id="file"
+          multiple
           ref={fileUploader}
           style={{ display: 'none' }}
           accept="image/png, image/gif, image/jpeg"

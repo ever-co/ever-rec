@@ -9,6 +9,7 @@ import IExplorerData from '@/app/interfaces/IExplorerData';
 import colorPalet from './colorPalet';
 import ColorElement from '../ColorElement/ColorElement';
 import { IWorkspace } from '@/app/interfaces/IWorkspace';
+import { ColorPicker } from '../ColorElement/ColorPicker';
 
 interface ICreateFolderModalProps {
   visible: boolean;
@@ -171,7 +172,11 @@ const CreateFolderModal: React.FC<ICreateFolderModalProps> = ({
           color
         </span>
       </div>
+      <div className="tw-flex tw-items-center tw-space-x-4"></div>
       <div className="tw-my-4 tw-flex tw-w-full tw-justify-center tw-h-25px tw-items-center">
+        <p className="tw-mt-2 tw-mr-1">Custom</p>{' '}
+        <ColorPicker color={color} setColor={handleColor} />
+        <p className="tw-h-7 tw-w-[1px] tw-mt-1 tw-bg-black tw-mx-2"></p>{' '}
         {colorPalet.map((item, index) => (
           <div key={index}>
             <ColorElement
