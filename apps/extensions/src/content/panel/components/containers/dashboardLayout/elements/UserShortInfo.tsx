@@ -45,7 +45,6 @@ const UserShortInfo: FC<IUserShortInfoProps> = ({
           height: `${avaSize}px`,
           pointerEvents: disableGoToProfile ? 'none' : 'auto',
         }}
-        onClick={goToProfile}
       >
         {user.photoURL ? (
           <img
@@ -80,7 +79,9 @@ const UserShortInfo: FC<IUserShortInfoProps> = ({
             to={panelRoutes.profile.path}
             title={user?.displayName || 'User'}
             className={classNames(fullNameClasses, styles.userName)}
-            onClick={goToProfile}
+            style={{
+              pointerEvents: disableGoToProfile ? 'none' : 'auto',
+            }}
           >
             {user?.displayName || 'User'}
           </Link>
