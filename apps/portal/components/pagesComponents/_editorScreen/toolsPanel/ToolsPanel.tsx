@@ -480,7 +480,6 @@ const ToolsPanel: React.FC<IToolsPanelProps> = ({
             <Image src={ds} style={{ userSelect: 'none' }} alt="" />
           </ToolsColumn>
         </div>
-
         <div className={`${show ? styles.hidden : ''}`}>
           <ToolsRow>
             <ResizeTool
@@ -647,6 +646,7 @@ const ToolsPanel: React.FC<IToolsPanelProps> = ({
             </ToolBtn>
           </ToolsRow>
           <ToolsRow>
+            asdf
             <ToolBtn
               isOpenEditTool={currentTool?.name == 'figure' ? true : false}
               title="figure"
@@ -669,7 +669,6 @@ const ToolsPanel: React.FC<IToolsPanelProps> = ({
                     active={isActive(tools.elipse)}
                     toolTitle={tools.elipse.title}
                   />
-
                   <ToolSubPanelBtn
                     icon={tools.square.icon}
                     active={isActive(tools.square)}
@@ -679,7 +678,6 @@ const ToolsPanel: React.FC<IToolsPanelProps> = ({
                     }}
                     toolTitle={tools.square.title}
                   />
-
                   <ToolSubPanelBtn
                     icon={tools.blob.icon}
                     active={isActive(tools.blob)}
@@ -689,7 +687,6 @@ const ToolsPanel: React.FC<IToolsPanelProps> = ({
                     }}
                     toolTitle={tools.blob.title}
                   />
-
                   <ToolSubPanelBtn
                     icon={tools.triangle.icon}
                     active={isActive(tools.triangle)}
@@ -771,7 +768,6 @@ const ToolsPanel: React.FC<IToolsPanelProps> = ({
                 </div>
               </div>
             </ToolBtn>
-
             <ToolBtn
               isOpenEditTool={false}
               onSelect={() => onToolChange(tools.blur)}
@@ -1274,7 +1270,6 @@ const ToolsPanel: React.FC<IToolsPanelProps> = ({
             history={history}
           />
         </ToolsRow> */}
-
         <ToolsRow>
           {/* <CommentsTool
             options={commentsOptions}

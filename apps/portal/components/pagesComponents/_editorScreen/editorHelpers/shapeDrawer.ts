@@ -58,7 +58,7 @@ const drawShapeMouseDownListener = ({
   stageScale,
 }: IShapeDrawer) => {
   const scaleCoefficient = stageScale / 100;
-
+  // IMAGE_EDITER:  Creating Shape after click
   const shapeOptions: any = {
     name: drawnName,
     x: (stage?.getRelativePointerPosition()?.x || 0) + 32,
@@ -150,7 +150,7 @@ const drawShapeMouseDownListener = ({
   if (compareTools(activeTool, tools.heart)) {
     shapeOptions.x = stage?.getRelativePointerPosition()?.x || 0;
     shapeOptions.y = stage?.getRelativePointerPosition()?.y || 0;
-    shapeOptions.sceneFunc = heartSceneFunc;
+    //shapeOptions.sceneFunc = heartSceneFunc;
     shapeOptions.shapeType = 'heart';
   }
 
