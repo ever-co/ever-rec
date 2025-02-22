@@ -46,6 +46,7 @@
         "*.html",
         "images/*",
         "fonts/*",
+        "styles/*",
         "*/install.html",
         "firebase/*.js"
       ],
