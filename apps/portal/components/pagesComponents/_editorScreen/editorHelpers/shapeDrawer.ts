@@ -11,6 +11,13 @@ import { compareTools, ITool, tools } from '../toolsPanel/tools';
 import { IShapeGroupOptions } from '../toolsPanel/toolsOptions/interface/IShapeGroupOptions';
 import { drawnName, getLayer } from './editorHelper';
 import { heartSceneFunc } from './drawerHelpers';
+import { initPointerTransformer } from './transformerHelper';
+import {
+  drawBlurDragmoveListener,
+  drawBlurMouseMoveListener,
+  drawBlurMouseUpListener,
+  initEventListeners,
+} from './blurDrawer';
 
 export interface IShapeDrawer {
   stage: Stage;
@@ -58,13 +65,15 @@ const drawShapeMouseDownListener = ({
   stageScale,
 }: IShapeDrawer) => {
   const scaleCoefficient = stageScale / 100;
-  // IMAGE_EDITER:  Creating Shape after click
+  // Creating Shape after click
+  const blurScale = stageScale * scaleCoefficient;
+
   const shapeOptions: any = {
     name: drawnName,
-    x: (stage?.getRelativePointerPosition()?.x || 0) + 32,
-    y: (stage?.getRelativePointerPosition()?.y || 0) + 32,
-    width: 164,
-    height: 164,
+    x: stage?.getRelativePointerPosition()?.x || 0,
+    y: stage?.getRelativePointerPosition()?.y || 0,
+    width: 1,
+    height: 1,
     draggable: true,
     // fillEnabled: false,
     scaleX: scaleCoefficient,
@@ -77,6 +86,7 @@ const drawShapeMouseDownListener = ({
     pixelRatio: 1,
   };
 
+  console.log('shapeOptions:', shapeOptions);
   /**
    * set additional options fot figure with type "star"
    */
@@ -150,7 +160,7 @@ const drawShapeMouseDownListener = ({
   if (compareTools(activeTool, tools.heart)) {
     shapeOptions.x = stage?.getRelativePointerPosition()?.x || 0;
     shapeOptions.y = stage?.getRelativePointerPosition()?.y || 0;
-    //shapeOptions.sceneFunc = heartSceneFunc;
+    shapeOptions.sceneFunc = heartSceneFunc;
     shapeOptions.shapeType = 'heart';
   }
 
@@ -162,6 +172,24 @@ const drawShapeMouseDownListener = ({
     stage?.on('mouseup', () =>
       drawShapeMouseUpListener(stage, shape, saveHistory),
     );
+  }
+
+  let layer: Layer | undefined = getLayer(stage, '#drawLayer');
+  stage.clearCache();
+  if (layer) {
+    initPointerTransformer(stage, [shape], saveHistory);
+    layer.add(shape);
+    stage.on('mousemove', () =>
+      drawBlurMouseMoveListener(stage, shape, layer as Layer, blurScale),
+    );
+    stage?.on('mouseup', () =>
+      drawBlurMouseUpListener(stage, shape, saveHistory),
+    );
+    shape.on('transform', () => {
+      drawBlurDragmoveListener(stage, shape, blurScale);
+    });
+
+    initEventListeners(stage, shape, layer, blurScale);
   }
 };
 

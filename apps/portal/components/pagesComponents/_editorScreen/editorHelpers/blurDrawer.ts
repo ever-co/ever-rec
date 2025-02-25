@@ -150,7 +150,7 @@ const drawBlureTransformedListener = async (
   shape?.filters([Konva.Filters.Blur]);
 };
 
-const drawBlurDragmoveListener = async (
+export const drawBlurDragmoveListener = async (
   stage: Stage,
   shape: Shape,
   scaleCoefficient: number,
@@ -164,7 +164,7 @@ const drawBlurDragmoveListener = async (
   shape?.filters([Konva.Filters.Blur]);
 };
 
-const drawBlurDragstartListener = async (
+export const drawBlurDragstartListener = async (
   stage: Stage,
   shape: Shape,
   scaleCoefficient: number,
@@ -177,12 +177,12 @@ const drawBlurDragstartListener = async (
   }
 };
 
-const drawBlurDragedListener = async (stage: Stage) => {
+export const drawBlurDragedListener = async (stage: Stage) => {
   stage?.off('dragend');
   stage?.off('dragmove');
 };
 
-const drawBlurMouseMoveListener = async (
+export const drawBlurMouseMoveListener = async (
   stage: Stage,
   shape: Shape,
   layer: Layer,
@@ -201,7 +201,7 @@ const drawBlurMouseMoveListener = async (
   shape?.height(height);
 };
 
-const drawBlurMouseUpListener = (
+export const drawBlurMouseUpListener = (
   stage: Stage,
   shape: Shape,
   saveHistory: () => void,

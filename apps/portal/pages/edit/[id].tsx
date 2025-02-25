@@ -1095,10 +1095,10 @@ const EditorScreen: React.FC = () => {
           saveHistory,
           stageScale,
         });
-        //
-        [tools.arrow, tools.line, tools.curvaArrow, tools.direction].some(
-          (tool) => compareTools(tool, activeTool),
-        ) &&
+      //
+      [tools.arrow, tools.line, tools.curvaArrow, tools.direction].some(
+        (tool) => compareTools(tool, activeTool),
+      ) &&
         initArrowDraw({
           stage,
           activeTool,
@@ -1189,6 +1189,7 @@ const EditorScreen: React.FC = () => {
           saveHistory,
         });
 
+      // IMAGE_EDITER _ Add draw blur logic here
       compareTools(activeTool, tools.blur) &&
         initBlurDraw({
           stage,

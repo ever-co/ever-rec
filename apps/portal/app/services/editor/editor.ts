@@ -340,7 +340,7 @@ export class EditorService {
   // IMAGE_EDITOR Change the icon of cursor based on the shape
   static setShapeCursor(stage: Stage, shape: Konva.Shape) {
     const shapeCursor = shape.toDataURL();
-    stage.container().style.cursor = `url(${shapeCursor}), auto`;
+    //stage.container().style.cursor = `url(${shapeCursor}), auto`;
   }
 
   static getShapeByTool(
