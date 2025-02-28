@@ -9,10 +9,10 @@ import { MarkerService } from 'app/services/editor/markers';
 import { IMarker } from 'app/interfaces/IMarker';
 import ContextMenu from './ContextMenu';
 import { EditFilled, DeleteFilled } from '@ant-design/icons';
-import { formatDistanceToNow } from 'date-fns';
 import IEditorImage from 'app/interfaces/IEditorImage';
 import { IWorkspaceImage } from 'app/interfaces/IWorkspace';
 import { updateMarkers } from 'app/services/screenshots';
+import moment from 'moment';
 
 interface IContentTextProps {
   id: string;
@@ -95,7 +95,6 @@ const ContentItemText: React.FC<IContentTextProps> = ({
           {enableContextMenu && <ContextMenu menu={menu} />}
         </div>
       </div>
-
       <p>{content}</p>
       <div style={{ marginBottom: '0.5rem' }}>
         {imageSrc ? (
@@ -106,14 +105,12 @@ const ContentItemText: React.FC<IContentTextProps> = ({
           />
         ) : null}
       </div>
-
       <div style={{ marginBottom: '0.5rem' }}>
         {' '}
         {videoSrc ? (
           <PlyrPlayer videoURL={videoSrc} disableOptions={true} />
         ) : null}
       </div>
-
       <div style={{ marginBottom: '0.5rem' }}>
         {audioSrc ? (
           <AudioPlayer
@@ -122,12 +119,7 @@ const ContentItemText: React.FC<IContentTextProps> = ({
           />
         ) : null}
       </div>
-      <small>
-        {formatDistanceToNow(Date.parse(timestamp.toString()), {
-          addSuffix: true,
-          includeSeconds: true,
-        })}
-      </small>
+      <small>{moment(Date.parse(timestamp.toString())).fromNow()}</small>
     </div>
   );
 };
