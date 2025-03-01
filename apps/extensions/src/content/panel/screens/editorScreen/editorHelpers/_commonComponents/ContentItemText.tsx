@@ -5,12 +5,12 @@ import PlyrPlayer from '../../../videoEditorScreen/plyrPlayer/PlyrPlayer';
 import { MarkerService } from '@/app/services/editor/markers';
 import { IMarker } from '@/app/interfaces/IMarker';
 import { EditFilled, DeleteFilled } from '@ant-design/icons';
-import { formatDistanceToNow } from 'date-fns';
 import ContextMenu from './ContextMenu';
 import * as styles from './contentItemText.module.scss';
 import { IWorkspaceImage } from '@/app/interfaces/IWorkspace';
 import IEditorImage from '@/app/interfaces/IEditorImage';
 import { updateMarkers } from '@/app/services/screenshots';
+import moment from 'moment';
 
 interface IContentTextProps {
   id: string;
@@ -122,10 +122,7 @@ const ContentItemText: React.FC<IContentTextProps> = ({
         ) : null}
       </div>
       <small>
-        {formatDistanceToNow(Date.parse(timestamp.toString()), {
-          addSuffix: true,
-          includeSeconds: true,
-        })}
+      {moment(Date.parse(timestamp.toString())).fromNow()}
       </small>
     </div>
   );
