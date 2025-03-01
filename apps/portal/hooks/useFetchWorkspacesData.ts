@@ -21,6 +21,9 @@ const useFetchWorkspacesData = () => {
   const workspaces = useSelector(
     (state: RootStateOrAny) => state.panel.workspaces,
   );
+  const workspaceLoaded = useSelector(
+    (state: RootStateOrAny) => state.panel?.workspaceFetched,
+  );
   const activeWorkspace: IWorkspace = useSelector(
     (state: RootStateOrAny) => state.panel.activeWorkspace,
   );
@@ -36,6 +39,7 @@ const useFetchWorkspacesData = () => {
     const fetchFullWorkspaceData = async () => {
       if (!workspaceIdQuery) return;
 
+      dispatch(PanelAC.setWorkspaceFetched({ workspaceFetched: false }));
       dispatch(PanelAC.setWorkspaceLoaded({ workspaceLoaded: false }));
 
       const response = await getFullWorkspaceDataAPI(
@@ -44,18 +48,24 @@ const useFetchWorkspacesData = () => {
           ? (folderIdQuery as string)
           : undefined,
       );
+
+      console.log('response:', response);
       const data = iDataResponseParser<typeof response.data>(response);
 
       if (data) {
         dispatch(PanelAC.setActiveWorkspace({ activeWorkspace: data }));
         dispatch(PanelAC.setWorkspaceLoaded({ workspaceLoaded: true }));
+        dispatch(PanelAC.setWorkspaceFetched({ workspaceFetched: true }));
         dispatch(PanelAC.setFavoriteFolders({ folders: data.favFolders }));
       }
     };
 
+    console.log('workspaces:', workspaces);
+
     const fetchWorkspaces = async () => {
-      if (!workspaces || workspaces.length === 0) {
+      if (!workspaceLoaded) {
         const response = await getUserWorkspacesAPI();
+        dispatch(PanelAC.setWorkspaceFetched({ workspaceFetched: true }));
         if (response.status !== ResStatusEnum.error) {
           const userWorkspaces = response.data;
           dispatch(PanelAC.setWorkspaces({ workspaces: userWorkspaces || [] }));
@@ -70,17 +80,17 @@ const useFetchWorkspacesData = () => {
     const idQueryEqualsActiveWorkspaceId =
       workspaceIdQuery === activeWorkspace?.id;
 
-    const workspacesExist = workspaces.length > 0;
+    const workspacesExist = Array.isArray(workspaces);
 
     if (
       (routerHasWorkspaceId || !idQueryEqualsActiveWorkspaceId) &&
-      workspacesExist
+      !workspaceLoaded
     ) {
       fetched.current = true;
       fetchFullWorkspaceData();
     }
 
-    if (!workspacesExist && user) {
+    if (!workspaceLoaded && user) {
       fetched.current = true;
       fetchWorkspaces();
     }

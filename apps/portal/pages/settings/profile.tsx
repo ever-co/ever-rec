@@ -32,6 +32,7 @@ import { preRoutes, panelRoutes } from 'components/_routes';
 import { useRouter } from 'next/router';
 import { errorHandler } from 'app/services/helpers/errors';
 import SCHeader from 'components/shared/SCHeader/SCHeader';
+import { BiLoaderAlt } from 'react-icons/bi';
 
 const avaSize = 88;
 
@@ -39,6 +40,9 @@ const Profile: React.FC = () => {
   const dispatch = useDispatch();
   const router = useRouter();
   const user: IUser = useSelector((state: RootStateOrAny) => state.auth.user);
+  const imageLoader: boolean = useSelector(
+    (state: RootStateOrAny) => state.panel.loaderState,
+  );
   const [isGoogleAccount, setIsGoogleAccount] = useState(false);
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [showNameModal, setShowNameModal] = useState(false);
@@ -198,6 +202,23 @@ const Profile: React.FC = () => {
               <FileUploader onFileSelected={onFileSelectedHandler}>
                 {({ onFileSelectorOpen }) => (
                   <div>
+                    {imageLoader && (
+                      <div
+                        style={{
+                          height: avaSize - 1,
+                          width: avaSize,
+                        }}
+                        className="tw-bg-black/40 tw-absolute tw-rounded-full tw-flex tw-justify-center tw-item-center"
+                      >
+                        <BiLoaderAlt
+                          style={{
+                            height: avaSize / 3,
+                            width: avaSize / 3,
+                          }}
+                          className={'tw-animate-spin tw-text-white '}
+                        />
+                      </div>
+                    )}
                     <ProfileAccountPhoto
                       photoURL={user?.photoURL || ''}
                       avatarSize={avaSize}

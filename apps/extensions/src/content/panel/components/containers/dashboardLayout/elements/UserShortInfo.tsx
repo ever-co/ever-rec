@@ -5,6 +5,7 @@ import AppSvg from '@/content/components/elements/AppSvg';
 import { panelRoutes } from '@/content/panel/router/panelRoutes';
 import { IUser, IUserShort } from '@/app/interfaces/IUserData';
 import { useNavigate } from 'react-router';
+import { Link } from 'react-router-dom';
 
 interface IUserShortInfoProps {
   user: IUser | IUserShort | null;
@@ -33,13 +34,17 @@ const UserShortInfo: FC<IUserShortInfoProps> = ({
 
   return user ? (
     <div className="tw-flex tw-items-center tw-h-full">
-      <div
+      <Link
+        to={panelRoutes.profile.path}
         className={classNames(
           styles.userPhotoContainer,
           `tw-rounded-full tw-overflow-hidden tw-cursor-pointer tw-justify-center tw-flex tw-mr-4 tw-h-full`,
         )}
-        style={{ width: `${avaSize}px`, height: `${avaSize}px` }}
-        onClick={goToProfile}
+        style={{
+          width: `${avaSize}px`,
+          height: `${avaSize}px`,
+          pointerEvents: disableGoToProfile ? 'none' : 'auto',
+        }}
       >
         {user.photoURL ? (
           <img
@@ -66,17 +71,20 @@ const UserShortInfo: FC<IUserShortInfoProps> = ({
             />
           </div>
         )}
-      </div>
+      </Link>
 
       {!hideInfo && (
         <div className="tw-flex tw-flex-col tw-w-200px tw-relative tw-text-ellipsis tw-overflow-hidden">
-          <div
+          <Link
+            to={panelRoutes.profile.path}
             title={user?.displayName || 'User'}
             className={classNames(fullNameClasses, styles.userName)}
-            onClick={goToProfile}
+            style={{
+              pointerEvents: disableGoToProfile ? 'none' : 'auto',
+            }}
           >
             {user?.displayName || 'User'}
-          </div>
+          </Link>
 
           <div className={classNames(styles.emailStyle, emailClasses)}>
             {user?.email}

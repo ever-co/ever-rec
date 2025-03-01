@@ -1,11 +1,10 @@
 /* eslint-disable @next/next/no-img-element */
-import { FC } from 'react';
 import { panelRoutes, preRoutes } from 'components/_routes';
 import classNames from 'classnames';
-import { useRouter } from 'next/router';
 import { IUser, IUserShort } from 'app/interfaces/IUserData';
 import styles from './UserShortInfo.module.scss';
 import AppSvg from '../../../../elements/AppSvg';
+import Link from 'next/link';
 
 interface IUserShortInfoProps {
   user: IUser | IUserShort;
@@ -26,21 +25,19 @@ const UserShortInfo: React.FC<IUserShortInfoProps> = ({
   publicPage,
   disableGoToProfile = false,
 }) => {
-  const router = useRouter();
-
-  const goToProfile = () =>
-    !disableGoToProfile &&
-    router.push(preRoutes.settings + panelRoutes.profile);
-
   return (
     <div className="tw-flex tw-items-center tw-h-full tw-max-w-100p">
-      <div
+      <Link
+        href={preRoutes.settings + panelRoutes.profile}
         className={classNames(
           styles.userPhotoContainer,
           `tw-rounded-full tw-overflow-hidden tw-cursor-pointer tw-flex tw-justify-center tw-mr-4 tw-h-full px tw-h-full`,
         )}
-        style={{ width: `${avaSize}px`, height: `${avaSize}px` }}
-        onClick={goToProfile}
+        style={{
+          width: `${avaSize}px`,
+          height: `${avaSize}px`,
+          pointerEvents: disableGoToProfile ? 'none' : 'auto',
+        }}
       >
         {user?.photoURL ? (
           <img
@@ -52,34 +49,41 @@ const UserShortInfo: React.FC<IUserShortInfoProps> = ({
             alt=""
           />
         ) : !publicPage ? (
-          <div
+          <Link
+            href={preRoutes.settings + panelRoutes.profile}
             className={classNames(
               styles,
               `tw-cursor-pointer tw-w-full tw-object-cover`,
             )}
-            style={{ width: `${avaSize}px`, height: `${avaSize}px` }}
-            onClick={goToProfile}
+            style={{
+              width: `${avaSize}px`,
+              height: `${avaSize}px`,
+              pointerEvents: disableGoToProfile ? 'none' : 'auto',
+            }}
           >
             <AppSvg
               path="/sign/default-profile.svg"
               size={avaSize - 10 + 'px'}
               className="tw-flex tw-justify-center tw-content-center tw-mt-0.5"
             />
-          </div>
+          </Link>
         ) : (
           ''
         )}
-      </div>
+      </Link>
 
       {!hideInfo && (
         <div className="tw-flex tw-flex-col tw-w-200px tw-relative tw-overflow-hidden tw-text-ellipsis">
-          <div
+          <Link
+            style={{
+              pointerEvents: disableGoToProfile ? 'none' : 'auto',
+            }}
+            href={preRoutes.settings + panelRoutes.profile}
             title={user?.displayName}
             className={classNames(fullNameClasses, styles.userName)}
-            onClick={goToProfile}
           >
             {user?.displayName || 'User'}
-          </div>
+          </Link>
 
           <div className={classNames(styles.emailStyle, emailClasses)}>
             {user?.email}
