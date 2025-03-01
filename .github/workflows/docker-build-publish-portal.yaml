@@ -33,8 +33,7 @@ jobs:
                   tags: |
                       ghcr.io/ever-co/ever-rec-portal:latest
                       everco/ever-rec-portal:latest
-                      registry.digitalocean.com/ever/ever-rec-portal:latest
-                      ${{ secrets.CW_DOCKER_REGISTRY }}/ever-co/ever-rec-portal:latest
+                      registry.digitalocean.com/ever/ever-rec-portal:latest                      
                   cache-from: type=registry,ref=everco/ever-rec-portal:latest
                   cache-to: type=inline
                   build-args: |
@@ -43,11 +42,9 @@ jobs:
                       NEXT_PUBLIC_GOOGLE_CLIENT_ID=${{ secrets.NEXT_PUBLIC_GOOGLE_CLIENT_ID }}
                       NEXT_PUBLIC_EXTENTION_REDIRECT_URL=${{ secrets.NEXT_PUBLIC_EXTENTION_REDIRECT_URL }}
                       NEXT_PUBLIC_REBRANDLY_API_KEY=${{ secrets.NEXT_PUBLIC_REBRANDLY_API_KEY }}
-
                       NEXT_PUBLIC_API_BASE_URL=${{ secrets.NEXT_PUBLIC_API_BASE_URL }}
                       NEXT_PUBLIC_WEBSITE_URL=${{ secrets.NEXT_PUBLIC_WEBSITE_URL }}
                       NEXT_PUBLIC_STATIC_FILES_URL=${{ secrets.NEXT_PUBLIC_STATIC_FILES_URL }}
-
                       NEXT_PUBLIC_SENTRY_DSN=${{ secrets.NEXT_PUBLIC_SENTRY_DSN }}
 
             - name: Login to DockerHub
@@ -82,14 +79,3 @@ jobs:
             - name: Push to Github Registry
               run: |
                   docker push ghcr.io/ever-co/ever-rec-portal:latest
-
-            - name: Login to CW Container Registry
-              uses: docker/login-action@v3
-              with:
-                  registry: ${{ secrets.CW_DOCKER_REGISTRY }}
-                  username: ${{ secrets.CW_DOCKER_USER }}
-                  password: ${{ secrets.CW_DOCKER_USER_PASSWORD }}
-
-        #  - name: Push to CW Registry
-        #    run: |
-        #      docker push ${{ secrets.CW_DOCKER_REGISTRY }}/ever-co/ever-rec-portal:latest
