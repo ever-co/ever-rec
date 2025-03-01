@@ -33,8 +33,7 @@ jobs:
                   tags: |
                       ghcr.io/ever-co/ever-rec-api:latest
                       everco/ever-rec-api:latest
-                      registry.digitalocean.com/ever/ever-rec-api:latest
-                      ${{ secrets.CW_DOCKER_REGISTRY }}/ever-co/ever-rec-api:latest
+                      registry.digitalocean.com/ever/ever-rec-api:latest                      
                   cache-from: type=registry,ref=everco/ever-rec-api:latest
                   cache-to: type=inline
                   build-args: |
@@ -83,14 +82,3 @@ jobs:
             - name: Push to Github Registry
               run: |
                   docker push ghcr.io/ever-co/ever-rec-api:latest
-
-            - name: Login to CW Container Registry
-              uses: docker/login-action@v3
-              with:
-                  registry: ${{ secrets.CW_DOCKER_REGISTRY }}
-                  username: ${{ secrets.CW_DOCKER_USER }}
-                  password: ${{ secrets.CW_DOCKER_USER_PASSWORD }}
-
-        #  - name: Push to CW Registry
-        #    run: |
-        #      docker push ${{ secrets.CW_DOCKER_REGISTRY }}/ever-co/ever-rec-api:latest
