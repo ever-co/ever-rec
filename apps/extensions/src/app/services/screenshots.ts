@@ -107,6 +107,7 @@ const uploadFile = async (
   folderId: string | false,
   file: File,
   folderData: IDbFolderData | null,
+  multipleUpload: boolean = false,
 ): Promise<void> => {
   const filename: { name: string; ext: string } = splitFilename(file.name);
 
@@ -121,14 +122,26 @@ const uploadFile = async (
       if (folderData) {
         await increaseFolderItems(folderData, 'image', 1);
       }
-
-      res && successMessage('File loaded successfully');
+      const subStr = filename.name.slice(0, 10);
+      res &&
+        successMessage(
+          `File ${
+            multipleUpload
+              ? filename.name.length > 10
+                ? `${subStr}...`
+                : filename.name
+              : ''
+          } loaded successfully`,
+        );
       getExplorerData(folderId);
     } catch (error: any) {
       errorHandler(error);
     }
   } else {
-    errorMessage('This file type is not supported.');
+    errorMessage(
+      // also check if multiple upload then show name
+      `This file type is not supported. ${multipleUpload ? file.name : ''}`,
+    );
   }
 };
 

@@ -27,6 +27,8 @@ import AppSvg from 'components/elements/AppSvg';
 import UploadThumbnailModal from 'components/pagesComponents/_imagesScreen/pages/workspace/uploadThumbnailModal/UploadThumbnailModa';
 import { preRoutes, panelRoutes } from 'components/_routes';
 import router from 'next/router';
+import AppButton from 'components/controls/AppButton';
+import { useCreateWorkspace } from 'hooks/useCreateWorkspaceHandler';
 
 export type LeaveDeleteActions = 'leave' | 'delete';
 
@@ -57,6 +59,10 @@ const ManageWorkspaces: React.FC = () => {
   const activeWorkspace: IWorkspace | null = useSelector(
     (state: RootStateOrAny) => state.panel.activeWorkspace,
   );
+
+  const { Modal: CreateWSModal, setShowCreateWorkspaceModal } =
+    useCreateWorkspace(false);
+
   const [loading, setLoading] = useState(false);
   const [showShareModal, setShowShareModal] =
     useState<IWorkspaceModalState>(initialModalState);
@@ -252,6 +258,7 @@ const ManageWorkspaces: React.FC = () => {
 
   return (
     <>
+      {CreateWSModal}
       <input
         type="file"
         id="file"
@@ -279,7 +286,29 @@ const ManageWorkspaces: React.FC = () => {
           <div className={styles.mainHeader}>
             <span>Workspaces - Settings</span>
           </div>
+          {workspaces?.length === 0 && (
+            <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-h-full ">
+              {/* Large Text */}
+              <h1 className="tw-text-6xl tw-font-bold tw-text-gray-800 tw-mb-4">
+                No Workspace Found
+              </h1>
 
+              {/* Description */}
+              <p className="tw-text-lg tw-text-gray-600 tw-mb-8">
+                It looks like you don't have any workspaces yet. Click the
+                button below to create one.
+              </p>
+
+              {/* Create Workspace Button */}
+              <AppButton
+                //addNewWorkspaceClicked={() => setShowCreateWorkspaceModal(true)}
+                onClick={() => setShowCreateWorkspaceModal(true)}
+                className={styles.createWorkspaceButton}
+              >
+                Create workspace
+              </AppButton>
+            </div>
+          )}
           <div className={classNames(styles.workspacesContainer, 'scroll-div')}>
             {workspaces?.map((workspace) => (
               <div key={workspace.id}>

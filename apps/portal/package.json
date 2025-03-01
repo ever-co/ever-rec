@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "description": "Ever Rec Web App",
   "author": {
-		"name": "Ever Co. LTD",
-		"email": "ever@ever.co",
-		"url": "https://ever.co"
-	},
+    "name": "Ever Co. LTD",
+    "email": "ever@ever.co",
+    "url": "https://ever.co"
+  },
   "private": true,
   "license": "AGPL-3.0",
   "homepage": "https://rec.so",
@@ -20,7 +20,6 @@
     "@ant-design/icons": "^5.2.5",
     "@emoji-mart/data": "^1.0.5",
     "@emoji-mart/react": "^1.0.1",
-    "@mui/system": "^6.1.0",
     "@react-oauth/google": "^0.12.1",
     "antd": "^4.21.3",
     "axios": "^0.26.0",
@@ -28,11 +27,9 @@
     "canvg": "^4.0.2",
     "classnames": "^2.5.1",
     "clsx": "^2.1.1",
-    "date-fns": "^2.30.0",
     "emoji-mart": "^5.6.0",
     "file-saver": "^2.0.5",
     "fix-webm-duration": "^1.0.6",
-    "fraction.js": "^4.3.7",
     "hls.js": "^1.5.15",
     "howler": "^2.2.4",
     "js-cookie": "^3.0.5",
@@ -75,7 +72,7 @@
   },
   "devDependencies": {
     "@fullhuman/postcss-purgecss": "^3.0.0",
-    "@sentry/nextjs": "^8.30.0",
+    "@sentry/nextjs": "^8.49.0",
     "@tailwindcss/line-clamp": "^0.4.4",
     "@types/jest": "27.0.2",
     "@types/node": "^20",

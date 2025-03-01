@@ -223,15 +223,33 @@ const Images: React.FC = () => {
     if (event.target.value.length && event.target.files?.length) {
       setShowAddImageModal(false);
       setLoading(true);
-      await uploadFile(
-        explorerData.currentFolder?.id || false,
-        event.target.files[0],
-        explorerData.currentFolder,
-      );
+
+      const files = Array.from(event.target.files);
+
+      const multipleUpload = files.length > 1;
+      const uploadPromises = files.map((file, i) => async () => {
+        try {
+          console.log('Uploading file:', file.name);
+          await uploadFile(
+            explorerData.currentFolder?.id || false,
+            file,
+            explorerData.currentFolder,
+            multipleUpload,
+          );
+          console.log('File uploaded successfully:', file.name);
+        } catch (error) {
+          console.error('Error uploading file:', file.name, error);
+        }
+      });
+
+      // Execute promises sequentially using for...of
+      for (const uploadPromise of uploadPromises) {
+        await uploadPromise();
+      }
+
       setLoading(false);
     }
   };
-
   const enableDropping = (event: DragEvent<HTMLDivElement> | undefined) => {
     event?.preventDefault();
   };
@@ -239,7 +257,6 @@ const Images: React.FC = () => {
   const onDrop = async (e: DragEvent<HTMLDivElement> | undefined) => {
     e?.preventDefault();
     const file = e?.dataTransfer.files[0];
-
     if (file) {
       setShowAddImageModal(false);
       setLoading(true);
@@ -284,6 +301,7 @@ const Images: React.FC = () => {
           <input
             type="file"
             id="file"
+            multiple
             ref={fileUploader}
             style={{ display: 'none' }}
             accept="image/png, image/gif, image/jpeg"
