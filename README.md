@@ -70,7 +70,9 @@ Before you begin, ensure you have the following installed:
 
 ## Project Structure
 
-This is a monorepo containing three main applications:
+### Mono-repo
+
+A mono-repo containing three main applications:
 
 ```
 ever-rec/
@@ -79,6 +81,11 @@ ever-rec/
 │   ├── portal/       # Web UI Portal
 │   └── extensions/   # Browser Extensions Portal
 ```
+
+### Desktop App
+
+Our Desktop App is currently **not** released as open-source. The private repository is available at: <https://github.com/ever-co/ever-rec-desktop>.  
+We are considering a future release under the GPLv3 license.
 
 ## Getting Started
 
