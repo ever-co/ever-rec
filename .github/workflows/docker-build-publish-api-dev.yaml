@@ -1,18 +1,18 @@
-name: Build and Publish Portal Docker Images Prod
+name: Build and Publish API Docker Images Dev
 
 on:
     push:
-        branches: [main]
+        branches: [develop]
 
 concurrency:
     group: ${{ github.ref }}-${{ github.workflow }}
     cancel-in-progress: true
 
 jobs:
-    ever-rec-portal:
+    ever-rec-api:
         runs-on: buildjet-8vcpu-ubuntu-2204
 
-        environment: prod
+        environment: dev
 
         steps:
             - name: Checkout
@@ -31,21 +31,24 @@ jobs:
                   file: ./.deploy/portal/Dockerfile
                   load: true
                   tags: |
-                      ghcr.io/ever-co/ever-rec-portal:latest
-                      everco/ever-rec-portal:latest
-                      registry.digitalocean.com/ever/ever-rec-portal:latest                      
-                  cache-from: type=registry,ref=everco/ever-rec-portal:latest
+                      ghcr.io/ever-co/ever-rec-api-dev:latest
+                      everco/ever-rec-api-dev:latest
+                      registry.digitalocean.com/ever/ever-rec-api-dev:latest                      
+                  cache-from: type=registry,ref=everco/ever-rec-api-dev:latest
                   cache-to: type=inline
                   build-args: |
-                      NEXT_PUBLIC_EXTENSION_NAME=${{ secrets.NEXT_PUBLIC_EXTENSION_NAME }}
-                      NEXT_PUBLIC_EXTENSION_ID=${{ secrets.NEXT_PUBLIC_EXTENSION_ID }}
-                      NEXT_PUBLIC_GOOGLE_CLIENT_ID=${{ secrets.NEXT_PUBLIC_GOOGLE_CLIENT_ID }}
-                      NEXT_PUBLIC_EXTENTION_REDIRECT_URL=${{ secrets.NEXT_PUBLIC_EXTENTION_REDIRECT_URL }}
-                      NEXT_PUBLIC_REBRANDLY_API_KEY=${{ secrets.NEXT_PUBLIC_REBRANDLY_API_KEY }}
-                      NEXT_PUBLIC_API_BASE_URL=${{ secrets.NEXT_PUBLIC_API_BASE_URL }}
-                      NEXT_PUBLIC_WEBSITE_URL=${{ secrets.NEXT_PUBLIC_WEBSITE_URL }}
-                      NEXT_PUBLIC_STATIC_FILES_URL=${{ secrets.NEXT_PUBLIC_STATIC_FILES_URL }}
-                      NEXT_PUBLIC_SENTRY_DSN=${{ secrets.NEXT_PUBLIC_SENTRY_DSN }}
+                      NODE_ENV=development
+                      FIREBASE_API_KEY=${{ secrets.FIREBASE_API_KEY }}
+                      FIREBASE_AUTH_DOMAIN=${{ secrets.FIREBASE_AUTH_DOMAIN }}
+                      FIREBASE_DATABASE_URL=${{ secrets.FIREBASE_DATABASE_URL }}
+                      FIREBASE_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }}
+                      FIREBASE_STORAGE_BUCKET=${{ secrets.FIREBASE_STORAGE_BUCKET }}
+                      FIREBASE_MESSAGING_SENDER_ID=${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}
+                      FIREBASE_APP_ID=${{ secrets.FIREBASE_APP_ID }}
+                      FIREBASE_MEASUREMENT_ID=${{ secrets.FIREBASE_MEASUREMENT_ID }}
+                      # FIREBASE ADMIN
+                      FIREBASE_ADMIN_PRIVATE_KEY=${{ secrets.FIREBASE_ADMIN_PRIVATE_KEY }}
+                      FIREBASE_ADMIN_CLIENT_EMAIL=${{ secrets.FIREBASE_ADMIN_CLIENT_EMAIL }}
 
             - name: Login to DockerHub
               uses: docker/login-action@v3
@@ -55,7 +58,7 @@ jobs:
 
             - name: Push to Docker Hub Registry
               run: |
-                  docker push everco/ever-rec-portal:latest
+                  docker push everco/ever-rec-api-dev:latest
 
             - name: Install doctl
               uses: digitalocean/action-doctl@v2
@@ -67,7 +70,7 @@ jobs:
 
             - name: Push to DigitalOcean Registry
               run: |
-                  docker push registry.digitalocean.com/ever/ever-rec-portal:latest
+                  docker push registry.digitalocean.com/ever/ever-rec-api-dev:latest
 
             - name: Login to GitHub Container Registry
               uses: docker/login-action@v3
@@ -78,4 +81,4 @@ jobs:
 
             - name: Push to Github Registry
               run: |
-                  docker push ghcr.io/ever-co/ever-rec-portal:latest
+                  docker push ghcr.io/ever-co/ever-rec-api-dev:latest

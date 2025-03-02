@@ -12,10 +12,16 @@ ARG SENTRY_ORG=ever-co
 
 # NodeJS Base
 FROM node:20-alpine AS base
+# Update npm and configure corepack
+RUN npm install -g npm@latest && \
+    npm install -g corepack@latest && \
+    npm install -g turbo@latest && \
+    corepack disable && \
+    corepack enable
+
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
-RUN corepack enable
-RUN corepack use pnpm@latest
+RUN corepack use pnpm@9.9.0
 # Create and set permissions for PNPM_HOME
 RUN mkdir -p "$PNPM_HOME" && \
     chown -R node:node "$PNPM_HOME"
@@ -25,7 +31,6 @@ RUN mkdir -p "$PNPM_HOME" && \
 FROM base AS builder
 USER node
 WORKDIR /app
-RUN pnpm add turbo --global
 COPY . .
 RUN turbo prune --scope=ever-rec-portal --docker
 

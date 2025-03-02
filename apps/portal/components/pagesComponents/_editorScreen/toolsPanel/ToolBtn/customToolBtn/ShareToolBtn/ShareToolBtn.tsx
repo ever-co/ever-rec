@@ -18,7 +18,6 @@ import styles from './shareToolBtn.module.scss';
 import { useRouter } from 'next/router';
 import { panelRoutes, preRoutes } from 'components/_routes';
 import { Tooltip } from 'antd';
-import { height } from '@mui/system';
 
 interface IShareProps {
   isOpenEditTool: boolean;
