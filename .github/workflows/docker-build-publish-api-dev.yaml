@@ -1,4 +1,4 @@
-name: Build and Publish Docker Images Dev
+name: Build and Publish API Docker Images Dev
 
 on:
     push:
