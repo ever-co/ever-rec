@@ -1,8 +1,8 @@
-name: Build and Publish Portal Docker Images Prod
+name: Build and Publish Portal Docker Images Dev
 
 on:
     push:
-        branches: [main]
+        branches: [develop]
 
 concurrency:
     group: ${{ github.ref }}-${{ github.workflow }}
@@ -12,7 +12,7 @@ jobs:
     ever-rec-portal:
         runs-on: buildjet-8vcpu-ubuntu-2204
 
-        environment: prod
+        environment: dev
 
         steps:
             - name: Checkout
@@ -31,10 +31,10 @@ jobs:
                   file: ./.deploy/portal/Dockerfile
                   load: true
                   tags: |
-                      ghcr.io/ever-co/ever-rec-portal:latest
-                      everco/ever-rec-portal:latest
-                      registry.digitalocean.com/ever/ever-rec-portal:latest                      
-                  cache-from: type=registry,ref=everco/ever-rec-portal:latest
+                      ghcr.io/ever-co/ever-rec-portal-dev:latest
+                      everco/ever-rec-portal-dev:latest
+                      registry.digitalocean.com/ever/ever-rec-portal-dev:latest                      
+                  cache-from: type=registry,ref=everco/ever-rec-portal-dev:latest
                   cache-to: type=inline
                   build-args: |
                       NEXT_PUBLIC_EXTENSION_NAME=${{ secrets.NEXT_PUBLIC_EXTENSION_NAME }}
@@ -55,7 +55,7 @@ jobs:
 
             - name: Push to Docker Hub Registry
               run: |
-                  docker push everco/ever-rec-portal:latest
+                  docker push everco/ever-rec-portal-dev:latest
 
             - name: Install doctl
               uses: digitalocean/action-doctl@v2
@@ -67,7 +67,7 @@ jobs:
 
             - name: Push to DigitalOcean Registry
               run: |
-                  docker push registry.digitalocean.com/ever/ever-rec-portal:latest
+                  docker push registry.digitalocean.com/ever/ever-rec-portal-dev:latest
 
             - name: Login to GitHub Container Registry
               uses: docker/login-action@v3
@@ -78,4 +78,4 @@ jobs:
 
             - name: Push to Github Registry
               run: |
-                  docker push ghcr.io/ever-co/ever-rec-portal:latest
+                  docker push ghcr.io/ever-co/ever-rec-portal-dev:latest
