@@ -1,4 +1,4 @@
-name: Build and Publish Docker Images Prod
+name: Build and Publish Portal Docker Images Prod
 
 on:
     push:
