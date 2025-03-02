@@ -375,6 +375,7 @@ export class ImageService {
       const dbImages = db.ref(`users/${uid}/screenshots`);
       let imagesQuery = dbImages.orderByChild('parentId');
 
+      console.log('value:', uid);
       if (folderId) {
         imagesQuery = imagesQuery.equalTo(folderId);
       }
@@ -402,9 +403,13 @@ export class ImageService {
                 originalImage,
                 markers,
               } = value;
-              const allComments = this.sharedService.sanitizeCommentsFromDB(
-                value.comments,
-              );
+              const comments = db.ref(`users/${uid}/videos/${id}/comments`);
+              const newComments = await comments.get();
+              const gettedComments = newComments.val();
+
+              const allComments =
+                this.sharedService.sanitizeCommentsFromDB(gettedComments);
+              console.log('newComments:', allComments);
               const allViews = formatDataToArray(value.views);
               if (parentId) {
                 const folderRef = db.ref(`users/${uid}/folders/${parentId}`);
