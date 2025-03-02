@@ -92,7 +92,7 @@ const uploadFile = async (
   folderId: string | false,
   file: File,
   folderData: IDbFolderData | null,
-  multipleUpload: boolean = false,
+  multipleUpload = false,
 ): Promise<void> => {
   const filename: { name: string; ext: string } = splitFilename(file.name);
 
