@@ -295,7 +295,7 @@ const ManageWorkspaces: React.FC = () => {
 
               {/* Description */}
               <p className="tw-text-lg tw-text-gray-600 tw-mb-8">
-                It looks like you don't have any workspaces yet. Click the
+                It looks like you {"don't"} have any workspaces yet. Click the
                 button below to create one.
               </p>
 
