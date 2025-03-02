@@ -38,6 +38,23 @@
 -   [Google OAuth Configuration](#google-oAuth-configuration)
 -   [Production Build](#production-build)
 
+## 🌼 Screenshots
+
+<details>
+<summary>Show / Hide Screenshots</summary>
+
+TODO
+
+</details>
+
+## 🔗 Links
+
+-   **<https://ever.co>** - get more information about our company products.
+
+## 📊 Activity
+
+![Alt](https://repobeats.axiom.co/api/embed/bab1e3591d76a1a346dfda363ccb315dbd1d58fa.svg "Repobeats analytics image")
+
 ## Prerequisites
 
 Before you begin, ensure you have the following installed:
