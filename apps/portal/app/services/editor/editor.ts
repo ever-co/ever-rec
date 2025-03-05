@@ -340,7 +340,7 @@ export class EditorService {
   // IMAGE_EDITOR Change the icon of cursor based on the shape
   static setShapeCursor(stage: Stage, shape: Konva.Shape) {
     const shapeCursor = shape.toDataURL();
-    //stage.container().style.cursor = `url(${shapeCursor}), auto`;
+    stage.container().style.cursor = `url(${shapeCursor}), auto`;
   }
 
   static getShapeByTool(
@@ -517,37 +517,44 @@ export class EditorService {
       fill: markerOptions.fill,
       name: markerName,
       scale: {
-        x: (stageScale / 100) * 2,
-        y: (stageScale / 100) * 2,
+        x: (stageScale / 100) * 1.1,
+        y: (stageScale / 100) * 1.1,
       },
       opacity: 0.7,
     });
 
-    const cursortext: Text = new Text(baseMarkerTextOptions);
+    const cursortext: Text = new Text({
+      ...baseMarkerTextOptions,
+      padding: baseMarkerTextOptions.padding - 6, // padding is reduced to maintain cursor position
+    });
+
     cursortext?.setAttrs({
       id: 'markerText',
-      x: (stage.getRelativePointerPosition()?.x || 0) + 10,
-      y: stage.getRelativePointerPosition()?.y,
+      x: stage.getRelativePointerPosition()?.x || 0,
+      y: stage.getRelativePointerPosition()?.y || 0,
       scale: {
         x: stageScale / 100,
         y: stageScale / 100,
       },
       text: alphabet[stage.find('#markerText').length],
-      fontSize: 44,
+      fontSize: 20,
       opacity: 0.7,
     });
-    const cursornumbers: Text = new Text(baseMarkerTextOptions);
+    const cursornumbers: Text = new Text({
+      ...baseMarkerTextOptions,
+      padding: baseMarkerTextOptions.padding - 6, // padding is reduced to maintain cursor position
+    });
 
     cursornumbers.setAttrs({
       id: 'markerNumbers',
-      x: (stage.getRelativePointerPosition()?.x || 0) + 7,
-      y: stage.getRelativePointerPosition()?.y,
+      x: stage.getRelativePointerPosition()?.x || 0,
+      y: stage.getRelativePointerPosition()?.y || 0,
       scale: {
         x: stageScale / 100,
         y: stageScale / 100,
       },
       text: String(stage.find('#markerNumbers').length + 1),
-      fontSize: 44,
+      fontSize: 20,
       opacity: 0.7,
     });
 
@@ -562,6 +569,7 @@ export class EditorService {
       cursorgroup.add(cursortext);
     }
     cursormarker.setAttr('text', Number(cursormarker.getAttr('text')) + 1);
+    cursorgroup.to;
     const mark = cursorgroup.toDataURL();
     stage.container().style.cursor = `url(${mark}), auto`;
   }
