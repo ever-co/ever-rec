@@ -569,7 +569,6 @@ export class EditorService {
       cursorgroup.add(cursortext);
     }
     cursormarker.setAttr('text', Number(cursormarker.getAttr('text')) + 1);
-    cursorgroup.to;
     const mark = cursorgroup.toDataURL();
     stage.container().style.cursor = `url(${mark}), auto`;
   }

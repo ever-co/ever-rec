@@ -464,8 +464,8 @@ const EditorScreen: React.FC = () => {
   };
 
   const updateDependedActiveTool = (dependencies: ITool[]) => {
-    //dependencies.some((tool) => compareTools(activeTool, tool)) &&
-    //  setActiveTool(Object.assign({}, activeTool));
+    dependencies.some((tool) => compareTools(activeTool, tool)) &&
+      setActiveTool(Object.assign({}, activeTool));
   };
 
   const updateFigureProperties = (shape: any, options: any) => {
