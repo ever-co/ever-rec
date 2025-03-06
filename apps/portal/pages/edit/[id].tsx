@@ -1087,7 +1087,7 @@ const EditorScreen: React.FC = () => {
         tools.blob,
         tools.comment,
       ].some((tool) => compareTools(tool, activeTool)) &&
-        // IMAGE_EDITER _ Add draw shape logic here
+        // IMAGE_EDITOR _ Add draw shape logic here
         initShapeDraw({
           stage,
           activeTool,
@@ -1189,7 +1189,7 @@ const EditorScreen: React.FC = () => {
           saveHistory,
         });
 
-      // IMAGE_EDITER _ Add draw blur logic here
+      // IMAGE_EDITOR _ Add draw blur logic here
       compareTools(activeTool, tools.blur) &&
         initBlurDraw({
           stage,

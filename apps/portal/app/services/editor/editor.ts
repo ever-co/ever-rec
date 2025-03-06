@@ -476,8 +476,8 @@ export class EditorService {
         x: stageScale / 100,
         y: stageScale / 100,
       },
-      width: (64 * stageScale) / 100,
-      height: (64 * stageScale) / 100,
+      width: (128 * stageScale) / 100,
+      height: (128 * stageScale) / 100,
       opacity: 0.8,
     };
 
