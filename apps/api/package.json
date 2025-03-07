@@ -43,7 +43,7 @@
     "@slack/web-api": "^6.7.2",
     "@types/sharp": "^0.31.1",
     "analytics-node": "^6.1.0",
-    "axios": "^0.28.0",
+    "axios": "^1.8.2",
     "blob-to-stream": "^1.0.3",
     "body-parser": "^1.20.3",
     "class-transformer": "^0.5.1",
