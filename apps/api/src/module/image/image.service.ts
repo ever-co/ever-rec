@@ -402,8 +402,12 @@ export class ImageService {
                 originalImage,
                 markers,
               } = value;
+              const comments = db.ref(`users/${uid}/videos/${id}/comments`);
+              const newComments = await comments.get();
+              const retrievedComments = newComments.val();
+
               const allComments = this.sharedService.sanitizeCommentsFromDB(
-                value.comments,
+                retrievedComments || {},
               );
               const allViews = formatDataToArray(value.views);
               if (parentId) {
