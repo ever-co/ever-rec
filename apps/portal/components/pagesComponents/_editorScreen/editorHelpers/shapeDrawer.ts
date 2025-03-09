@@ -179,18 +179,47 @@ const drawShapeMouseDownListener = ({
   if (layer) {
     initPointerTransformer(stage, [shape], saveHistory);
     layer.add(shape);
-    stage.on('mousemove', () =>
-      drawBlurMouseMoveListener(stage, shape, layer as Layer, blurScale),
-    );
+    stage.on('mousemove', () => drawShapeMouseMoveListener(stage, shape));
     stage?.on('mouseup', () =>
-      drawBlurMouseUpListener(stage, shape, saveHistory),
+      drawShapeMouseUpListener(stage, shape, saveHistory),
     );
-    shape.on('transform', () => {
-      drawBlurDragmoveListener(stage, shape, blurScale);
-    });
+    //shape.on('transform', () => {
+    //  drawBlurDragmoveListener(stage, shape, blurScale);
+    //});
 
     initEventListeners(stage, shape, layer, blurScale);
   }
+};
+
+const drawShapeMouseMoveListener = (stage: Stage, shape: Shape) => {
+  console.log('stage-scale', shape);
+  console.log('stage-scale', shape);
+  const x = stage.getRelativePointerPosition()?.x || 0;
+  const y = stage.getRelativePointerPosition()?.y || 0;
+  let width = x - shape.x();
+  let height = y - shape.y();
+
+  // Handle specific shapes that use scaling
+  if (['heart', 'blob', 'comment'].includes(shape.attrs.shapeType)) {
+    shape.scaleX(width / shape.width());
+    shape.scaleY(height / shape.height());
+  }
+  if (['circle', 'elipse'].includes(shape.attrs.shapeType)) {
+    shape.width(width * 2);
+    shape.height(height * 2);
+  } else if (['triangle'].includes(shape.attrs.shapeType)) {
+    shape.width(width * 4);
+    shape.height(height * 4);
+  } else {
+    shape.width(width);
+    shape.height(height);
+  }
+  // Ensure positive dimensions for circles/ellipses
+  //if (['circle', 'ellipse', 'star'].includes(shape.attrs.shapeType)) {
+  //  width = Math.abs(width * 2);
+  //  height = Math.abs(height * 2);
+  //}
+  //}
 };
 
 // const drawShapeMouseMoveListener = (stage: Stage, shape: Shape) => {
