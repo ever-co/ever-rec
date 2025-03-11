@@ -137,6 +137,7 @@ const EditorScreen: React.FC = () => {
   const [stage, setStage] = useState<Stage | null>(null);
   const [stageScale, setStageScale] = useState<number>(100);
   //const [backgroundImage, setBackgroundImage] = useState<Rect | null>(null);
+  console.log('stage---stage', stage);
   const [mainScale, setMainScale] = useState<number | null>(null);
   const [initStage, setInitStage] = useState<boolean>(false);
   const [panel3D, setPanel3D] = useState<boolean>(false);
@@ -611,6 +612,7 @@ const EditorScreen: React.FC = () => {
   //=================================================================================================================================
   //THIS ============================================================================================================================
 
+  // This is checking shape type color size etc
   const checkShapeType = (shape: any) => {
     if (
       shape.getAttr('id') !== 'main' &&
@@ -1086,6 +1088,7 @@ const EditorScreen: React.FC = () => {
         tools.blob,
         tools.comment,
       ].some((tool) => compareTools(tool, activeTool)) &&
+        // IMAGE_EDITOR _ Add draw shape logic here
         initShapeDraw({
           stage,
           activeTool,
@@ -1093,7 +1096,7 @@ const EditorScreen: React.FC = () => {
           saveHistory,
           stageScale,
         });
-
+      //
       [tools.arrow, tools.line, tools.curvaArrow, tools.direction].some(
         (tool) => compareTools(tool, activeTool),
       ) &&
@@ -1187,6 +1190,7 @@ const EditorScreen: React.FC = () => {
           saveHistory,
         });
 
+      // IMAGE_EDITOR _ Add draw blur logic here
       compareTools(activeTool, tools.blur) &&
         initBlurDraw({
           stage,
@@ -1256,6 +1260,7 @@ const EditorScreen: React.FC = () => {
     ]);
   }, [arrowGroupOptions]);
 
+  // this useEffect us used to update the stage size
   useEffect(() => {
     const scaleCoefficient = stageScale / 100;
     const { width, height } =
@@ -1274,6 +1279,7 @@ const EditorScreen: React.FC = () => {
     }
   }, [stageScale, stage, resizeDimentions, initialDimentions, mainScale]);
 
+  // this useEffect is used to resize the stage
   useEffect(() => {
     if (resizerState) {
       setResized(true);
@@ -1377,7 +1383,6 @@ const EditorScreen: React.FC = () => {
         redoListener();
       }
     };
-
     window.addEventListener('keydown', handleChange);
     return () => {
       window.removeEventListener('keydown', handleChange);
