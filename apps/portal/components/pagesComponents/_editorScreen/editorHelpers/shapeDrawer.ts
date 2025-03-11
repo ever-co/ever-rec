@@ -88,14 +88,14 @@ const drawShapeMouseDownListener = ({
 
   console.log('shapeOptions:', shapeOptions);
   /**
-   * set additional options fot figure with type "star"
+   * set additional options fot figure with type "circle"
    */
   if (compareTools(activeTool, tools.elipse)) {
     shapeOptions.shapeType = 'elipse';
   }
 
   /**
-   * set additional options fot figure with type "star"
+   * set additional options fot figure with type "rectangel"
    */
   if (compareTools(activeTool, tools.rect)) {
     shapeOptions.shapeType = 'rect';
@@ -192,7 +192,7 @@ const drawShapeMouseDownListener = ({
 };
 
 const drawShapeMouseMoveListener = (stage: Stage, shape: Shape) => {
-  console.log('stage-scale', shape);
+  //console.log('stage-scale', stage);
   console.log('stage-scale', shape);
   const x = stage.getRelativePointerPosition()?.x || 0;
   const y = stage.getRelativePointerPosition()?.y || 0;
@@ -200,14 +200,14 @@ const drawShapeMouseMoveListener = (stage: Stage, shape: Shape) => {
   let height = y - shape.y();
 
   // Handle specific shapes that use scaling
-  if (['heart', 'blob', 'comment'].includes(shape.attrs.shapeType)) {
+  if (['blob', 'comment'].includes(shape.attrs.shapeType)) {
     shape.scaleX(width / shape.width());
     shape.scaleY(height / shape.height());
   }
   if (['circle', 'elipse'].includes(shape.attrs.shapeType)) {
     shape.width(width * 2);
     shape.height(height * 2);
-  } else if (['triangle'].includes(shape.attrs.shapeType)) {
+  } else if (['triangle', 'star'].includes(shape.attrs.shapeType)) {
     shape.width(width * 4);
     shape.height(height * 4);
   } else {

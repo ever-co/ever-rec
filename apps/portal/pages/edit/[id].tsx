@@ -137,6 +137,7 @@ const EditorScreen: React.FC = () => {
   const [stage, setStage] = useState<Stage | null>(null);
   const [stageScale, setStageScale] = useState<number>(100);
   //const [backgroundImage, setBackgroundImage] = useState<Rect | null>(null);
+  console.log('stage---stage', stage);
   const [mainScale, setMainScale] = useState<number | null>(null);
   const [initStage, setInitStage] = useState<boolean>(false);
   const [panel3D, setPanel3D] = useState<boolean>(false);
