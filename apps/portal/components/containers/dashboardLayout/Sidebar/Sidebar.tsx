@@ -1,4 +1,4 @@
-import { FC, useCallback, useRef, useState } from 'react';
+import { FC, useRef, useState } from 'react';
 import styles from './Sidebar.module.scss';
 import { useRouter } from 'next/router';
 import { RootStateOrAny, useDispatch, useSelector } from 'react-redux';
@@ -8,7 +8,6 @@ import Logo from '../../../elements/Logo';
 import SidebarMenuItem from '../elements/SidebarMenuItems/SidebarMenuItem';
 import DashboardCard from '../elements/DashboardCard';
 import SidebarWorkspaces from '../SidebarWorkspaces/SidebarWorkspaces';
-import FavFoldersSidebarSection from 'components/elements/FavFoldersSidebarSection/FavFoldersSidebarSection';
 import AppSpinner from 'components/containers/appSpinner/AppSpinner';
 import UploadWorkspaceImageModal from 'components/pagesComponents/_imagesScreen/components/uploadWorkspaceImageModal/UploadWorkspaceImageModal';
 import PanelAC from '../../../../app/store/panel/actions/PanelAC';
@@ -81,7 +80,7 @@ const Sidebar: FC<IProps> = ({ isProfilePage, isWorkspaceSettingsPage }) => {
   };
 
   const isActive = (item: IMainMenuItem) => {
-    if (item.type === 'favFolders' || item.type === 'back') return false;
+    if (item.type === 'back') return false;
 
     return router.asPath.includes(item.route);
   };
@@ -110,9 +109,9 @@ const Sidebar: FC<IProps> = ({ isProfilePage, isWorkspaceSettingsPage }) => {
       );
 
       // We don't need to wrap "Favorite Folders" in <Link> component
-      if (item.type === 'favFolders') {
-        return sidebarItem;
-      }
+      //if (item.type === 'favFolders') {
+      //  return sidebarItem;
+      //}
 
       return (
         <Link href={item.route} key={`menu_item${index}`}>
@@ -146,12 +145,12 @@ const Sidebar: FC<IProps> = ({ isProfilePage, isWorkspaceSettingsPage }) => {
           )}
 
           <div>
-            <div ref={favFoldersRef}>
+            {/* <div ref={favFoldersRef}>
               <FavFoldersSidebarSection
                 visible={showFavoriteFolders}
                 setVisible={setShowFavoriteFolders}
               />
-            </div>
+            </div>*/}
 
             {/* <WhiteboardsButton
               isActive={isActive}

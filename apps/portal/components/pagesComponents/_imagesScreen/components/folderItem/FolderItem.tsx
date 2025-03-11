@@ -357,6 +357,7 @@ const FolderItem: React.FC<IFolderItemProps> = ({
           styles.mainWrapper,
           isDropdownVisible && styles.active,
         )}
+        style={{ height: '58px' }}
         onDrop={onDrop}
         onClick={(e: any) => {
           // stopping onClick if the user clicks just a little bit outside a button inside the dropdown
