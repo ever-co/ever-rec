@@ -75,12 +75,15 @@ const StarredPage: React.FC = () => {
         try {
           setLoading(true);
           await getExplorerData();
+        } catch (error) {
+          console.error("Failed to load explorer data:", error);
+          // Consider displaying an error message to the user
         } finally {
           setLoading(false);
         }
       })();
     }
-  }, [user, explorerDataLoaded]);
+  }, [user, explorerDataLoaded, getExplorerData]);
 
   const isFavorite = useCallback(
     (folder: IDbFolderData) => {
