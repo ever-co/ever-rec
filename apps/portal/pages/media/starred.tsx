@@ -67,7 +67,7 @@ const StarredPage: React.FC = () => {
 
   useEffect(() => {
     dispatch(PanelAC.showFolders(foldersType));
-  }, []);
+  }, [dispatch, foldersType]);
 
   useEffect(() => {
     if (!explorerDataLoaded) {
