@@ -92,6 +92,7 @@ const StarredPage: React.FC = () => {
           (x) => x.id === folder.id,
         );
       }
+      return false;
     },
     [favoriteFolders],
   );
