@@ -364,8 +364,8 @@ importers:
         specifier: ^1.10.11
         version: 1.10.27
       jspdf:
-        specifier: ^2.5.1
-        version: 2.5.1
+        specifier: ^3.0.1
+        version: 3.0.1
       jwt-decode:
         specifier: ^3.1.2
         version: 3.1.2
@@ -788,8 +788,8 @@ importers:
         specifier: ^3.0.5
         version: 3.0.5
       jspdf:
-        specifier: ^2.5.1
-        version: 2.5.1
+        specifier: ^3.0.1
+        version: 3.0.1
       jwt-decode:
         specifier: ^3.1.2
         version: 3.1.2
@@ -1701,6 +1701,10 @@ packages:
     resolution: {integrity: sha512-VBj9MYyDb9tuLq7yzqjgzt6Q+IBQLrGZfdjOekyEirZPHxXWoTSGUTMrpsfi58Up73d13NfYLv8HT9vmznjzhQ==}
     engines: {node: '>=6.9.0'}
 
+  '@babel/runtime@7.26.10':
+    resolution: {integrity: sha512-2WJMeRQPHKSPemqk/awGrAiuFfzBmOIPXKizAsVhWH9YJqLZ0H+HS4c8loHGgW6utJ3E/ejXQUsiGaQy2NZ9Fw==}
+    engines: {node: '>=6.9.0'}
+
   '@babel/template@7.25.0':
     resolution: {integrity: sha512-aOOgh1/5XzKvg1jvVz7AVrx2piJ2XBi227DHmbY6y+bM9H2FlN+IfecYu4Xl0cNiiVejlsCri89LUsbj8vJD9Q==}
     engines: {node: '>=6.9.0'}
@@ -2513,8 +2517,8 @@ packages:
   '@maxim_mazurok/gapi.client.discovery-v1@0.1.20200806':
     resolution: {integrity: sha512-Wl6UfmZVDdWbY3PUu8E2ULk9RPLjnMqp/iOA4tcK8Ne+U/GmlnWP/e34IaZNGArfl7iXJNOG+/3Rj9L9jQyF9Q==}
 
-  '@maxim_mazurok/gapi.client.drive-v3@0.0.20250305':
-    resolution: {integrity: sha512-t/sxXA1MQ0tj2sRiQNjCZiqyqGhuHzfqC3GuxmipAMMQEo7EuZpPi17aEZRRyupBZggrz8UIGNpGkGpTFRFihg==}
+  '@maxim_mazurok/gapi.client.drive-v3@0.0.20250306':
+    resolution: {integrity: sha512-blwOqFkUpI3UTcudVg2BJ+l2O/C5KU/dyeDmLlUUKW3vzvCdJ9kZpqPy2pvzVOiYlqJUXDRCO/O7rDUCdNPINQ==}
 
   '@messageformat/core@3.4.0':
     resolution: {integrity: sha512-NgCFubFFIdMWJGN5WuQhHCNmzk7QgiVfrViFxcS99j7F5dDS5EP6raR54I+2ydhe4+5/XTn/YIEppFaqqVWHsw==}
@@ -4009,6 +4013,9 @@ packages:
   '@types/tedious@4.0.14':
     resolution: {integrity: sha512-KHPsfX/FoVbUGbyYvk1q9MMQHLPeRZhRJZdO45Q4YjvFkv4hMNghCWTvy7rdKessBsmtz4euWCWAB6/tVpI1Iw==}
 
+  '@types/trusted-types@2.0.7':
+    resolution: {integrity: sha512-ScaPdn1dQczgbl0QFTeTOmVHFULt394XJgOQNoyVhZ6r2vLnMLJfBPd53SB52T/3G36VI1/g2MZaX0cwDuXsfw==}
+
   '@types/tsscmp@1.0.2':
     resolution: {integrity: sha512-cy7BRSU8GYYgxjcx0Py+8lo5MthuDhlyu076KUcYzVNXL23luYgRHkMG2fIFEc6neckeh/ntP82mw+U4QjZq+g==}
 
@@ -5105,8 +5112,8 @@ packages:
     resolution: {integrity: sha512-ItanGBMrmRV7Py2Z+Xhs7cT+FNt5K0vPL4p9EZ/UX/Mu7hFbkxSjKF2KVtPwX7UYWp7dRKnrTvReflgrItJbdw==}
     engines: {node: '>=6'}
 
-  canvg@3.0.10:
-    resolution: {integrity: sha512-qwR2FRNO9NlzTeKIPIKpnTY6fqwuYSequ8Ru8c0YkYU7U0oW+hLUvWadLvAu1Rl72OMNiFhoLu4f8eUjQ7l/+Q==}
+  canvg@3.0.11:
+    resolution: {integrity: sha512-5ON+q7jCTgMp9cjpu4Jo6XbvfYwSB2Ow3kzHKfIyJfaCAOHLbdKPQqGKgfED/R5B+3TFFfe8pegYA+b423SRyA==}
     engines: {node: '>=10.0.0'}
 
   canvg@4.0.3:
@@ -5976,8 +5983,8 @@ packages:
     engines: {node: '>=8'}
     deprecated: Use your platform's native DOMException instead
 
-  dompurify@2.5.6:
-    resolution: {integrity: sha512-zUTaUBO8pY4+iJMPE1B9XlO2tXVYIcEA4SNGtvDELzTSCQO7RzH+j7S180BmhmJId78lqGU2z19vgVx2Sxs/PQ==}
+  dompurify@3.2.4:
+    resolution: {integrity: sha512-ysFSFEDVduQpyhzAob/kkuJjf5zWkZD8/A9ywSp1byueyuCfHamrCBa14/Oc2iiB0e51B+NpxSl5gmzn+Ms/mg==}
 
   domutils@1.7.0:
     resolution: {integrity: sha512-Lgd2XcJ/NjEw+7tFvfKxOzCYKZsdct5lczQ2ZaQY8Djz7pfAD3Gbp8ySJWtreII/vDlMVmxwa6pHmdxIYgttDg==}
@@ -6653,8 +6660,8 @@ packages:
       picomatch:
         optional: true
 
-  fflate@0.4.8:
-    resolution: {integrity: sha512-FJqqoDBR00Mdj9ppamLa/Y7vxm+PRmNWA67N846RvsoYVMKB4q3y/de5PA7gUmRMYK/8CMz2GDZQmCRN1wBcWA==}
+  fflate@0.8.2:
+    resolution: {integrity: sha512-cPJU47OaAoCbg0pBvzsgpTPhmhqI5eJjh/JIu8tPj5q+T7iLvW/JAYUqmE7KOB4R1ZyEhzBaIQpQpardBF5z8A==}
 
   figgy-pudding@3.5.2:
     resolution: {integrity: sha512-0btnI/H8f2pavGMN8w40mlSKOfTK2SVJmBfBeVIj3kNw0swwgzyRq0d5TJVOwodFmtvpPeWPN/MCcfuWF0Ezbw==}
@@ -8465,8 +8472,8 @@ packages:
     resolution: {integrity: sha512-PRp66vJ865SSqOlgqS8hujT5U4AOgMfhrwYIuIhfKaoSCZcirrmASQr8CX7cUg+RMih+hgznrjp99o+W4pJLHQ==}
     engines: {node: '>=12', npm: '>=6'}
 
-  jspdf@2.5.1:
-    resolution: {integrity: sha512-hXObxz7ZqoyhxET78+XR34Xu2qFGrJJ2I2bE5w4SM8eFaFEkW2xcGRVUss360fYelwRSid/jT078kbNvmoW0QA==}
+  jspdf@3.0.1:
+    resolution: {integrity: sha512-qaGIxqxetdoNnFQQXxTKUD9/Z7AloLaw94fFsOiJMxbfYdBbrBuhWmbzI8TVjrw7s3jBY1PFHofBKMV/wZPapg==}
 
   jsprim@1.4.2:
     resolution: {integrity: sha512-P2bSOMAc/ciLz6DzgjVlGJP9+BrJWu5UDGK70C2iweC5QBIeFf0ZXRvGjEj2uYgrY2MkAAhsSWHDWlFtEroZWw==}
@@ -14103,6 +14110,10 @@ snapshots:
     dependencies:
       regenerator-runtime: 0.14.1
 
+  '@babel/runtime@7.26.10':
+    dependencies:
+      regenerator-runtime: 0.14.1
+
   '@babel/template@7.25.0':
     dependencies:
       '@babel/code-frame': 7.24.7
@@ -15317,7 +15328,7 @@ snapshots:
       '@types/gapi.client': 1.0.8
       '@types/gapi.client.discovery-v1': 0.0.4
 
-  '@maxim_mazurok/gapi.client.drive-v3@0.0.20250305':
+  '@maxim_mazurok/gapi.client.drive-v3@0.0.20250306':
     dependencies:
       '@types/gapi.client': 1.0.8
       '@types/gapi.client.discovery-v1': 0.0.4
@@ -15731,7 +15742,7 @@ snapshots:
       '@babel/plugin-transform-runtime': 7.25.4(@babel/core@7.25.2)
       '@babel/preset-env': 7.25.4(@babel/core@7.25.2)
       '@babel/preset-typescript': 7.24.7(@babel/core@7.25.2)
-      '@babel/runtime': 7.25.6
+      '@babel/runtime': 7.26.10
       '@nrwl/js': 19.7.2(@babel/traverse@7.26.7)(@swc/core@1.7.28(@swc/helpers@0.5.5))(@types/node@22.5.4)(nx@19.7.2(@swc/core@1.7.28(@swc/helpers@0.5.5)))(typescript@5.6.2)
       '@nx/devkit': 19.7.2(nx@19.7.2(@swc/core@1.7.28(@swc/helpers@0.5.5)))
       '@nx/workspace': 19.7.2(@swc/core@1.7.28(@swc/helpers@0.5.5))
@@ -16218,7 +16229,7 @@ snapshots:
 
   '@rc-component/portal@1.1.2(react-dom@17.0.2(react@17.0.2))(react@17.0.2)':
     dependencies:
-      '@babel/runtime': 7.25.6
+      '@babel/runtime': 7.26.10
       classnames: 2.5.1
       rc-util: 5.43.0(react-dom@17.0.2(react@17.0.2))(react@17.0.2)
       react: 17.0.2
@@ -16226,7 +16237,7 @@ snapshots:
 
   '@rc-component/portal@1.1.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
-      '@babel/runtime': 7.25.6
+      '@babel/runtime': 7.26.10
       classnames: 2.5.1
       rc-util: 5.43.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react: 18.3.1
@@ -16234,7 +16245,7 @@ snapshots:
 
   '@rc-component/trigger@2.2.3(react-dom@17.0.2(react@17.0.2))(react@17.0.2)':
     dependencies:
-      '@babel/runtime': 7.25.6
+      '@babel/runtime': 7.26.10
       '@rc-component/portal': 1.1.2(react-dom@17.0.2(react@17.0.2))(react@17.0.2)
       classnames: 2.5.1
       rc-motion: 2.9.2(react-dom@17.0.2(react@17.0.2))(react@17.0.2)
@@ -16245,7 +16256,7 @@ snapshots:
 
   '@rc-component/trigger@2.2.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
-      '@babel/runtime': 7.25.6
+      '@babel/runtime': 7.26.10
       '@rc-component/portal': 1.1.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       classnames: 2.5.1
       rc-motion: 2.9.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -16903,7 +16914,7 @@ snapshots:
 
   '@tanem/svg-injector@10.1.68':
     dependencies:
-      '@babel/runtime': 7.25.6
+      '@babel/runtime': 7.26.10
       content-type: 1.0.5
       tslib: 2.8.1
 
@@ -17041,7 +17052,7 @@ snapshots:
 
   '@types/gapi.client.drive@3.0.15':
     dependencies:
-      '@maxim_mazurok/gapi.client.drive-v3': 0.0.20250305
+      '@maxim_mazurok/gapi.client.drive-v3': 0.0.20250306
 
   '@types/gapi.client@1.0.8': {}
 
@@ -17293,6 +17304,9 @@ snapshots:
   '@types/tedious@4.0.14':
     dependencies:
       '@types/node': 20.16.5
+
+  '@types/trusted-types@2.0.7':
+    optional: true
 
   '@types/tsscmp@1.0.2': {}
 
@@ -18335,7 +18349,7 @@ snapshots:
 
   automation-events@7.0.9:
     dependencies:
-      '@babel/runtime': 7.25.6
+      '@babel/runtime': 7.26.10
       tslib: 2.8.1
 
   autoprefixer@9.8.8:
@@ -18495,7 +18509,7 @@ snapshots:
 
   babel-plugin-macros@2.8.0:
     dependencies:
-      '@babel/runtime': 7.25.6
+      '@babel/runtime': 7.26.10
       cosmiconfig: 6.0.0
       resolve: 1.22.10
 
@@ -18660,7 +18674,7 @@ snapshots:
 
   broadcast-channel@2.3.4:
     dependencies:
-      '@babel/runtime': 7.25.6
+      '@babel/runtime': 7.26.10
       detect-node: 2.1.0
       js-sha3: 0.8.0
       microseconds: 0.1.0
@@ -18670,7 +18684,7 @@ snapshots:
 
   broadcast-channel@3.7.0:
     dependencies:
-      '@babel/runtime': 7.25.6
+      '@babel/runtime': 7.26.10
       detect-node: 2.1.0
       js-sha3: 0.8.0
       microseconds: 0.2.0
@@ -18681,7 +18695,7 @@ snapshots:
 
   broker-factory@3.0.102:
     dependencies:
-      '@babel/runtime': 7.25.6
+      '@babel/runtime': 7.26.10
       fast-unique-numbers: 9.0.9
       tslib: 2.8.1
       worker-factory: 7.0.29
@@ -18901,11 +18915,11 @@ snapshots:
       - encoding
       - supports-color
 
-  canvg@3.0.10:
+  canvg@3.0.11:
     dependencies:
-      '@babel/runtime': 7.25.6
+      '@babel/runtime': 7.26.10
       '@types/raf': 3.4.3
-      core-js: 3.38.1
+      core-js: 3.41.0
       raf: 3.4.1
       regenerator-runtime: 0.13.11
       rgbcolor: 1.0.1
@@ -19170,7 +19184,7 @@ snapshots:
 
   compilerr@10.0.2:
     dependencies:
-      '@babel/runtime': 7.25.6
+      '@babel/runtime': 7.26.10
       dashify: 2.0.0
       indefinite-article: 0.0.2
       tslib: 2.8.1
@@ -19849,7 +19863,9 @@ snapshots:
     dependencies:
       webidl-conversions: 5.0.0
 
-  dompurify@2.5.6:
+  dompurify@3.2.4:
+    optionalDependencies:
+      '@types/trusted-types': 2.0.7
     optional: true
 
   domutils@1.7.0:
@@ -20904,27 +20920,27 @@ snapshots:
 
   extendable-media-recorder-wav-encoder-broker@7.0.106:
     dependencies:
-      '@babel/runtime': 7.25.6
+      '@babel/runtime': 7.26.10
       broker-factory: 3.0.102
       extendable-media-recorder-wav-encoder-worker: 8.0.103
       tslib: 2.8.1
 
   extendable-media-recorder-wav-encoder-worker@8.0.103:
     dependencies:
-      '@babel/runtime': 7.25.6
+      '@babel/runtime': 7.26.10
       tslib: 2.8.1
       worker-factory: 7.0.29
 
   extendable-media-recorder-wav-encoder@7.0.115:
     dependencies:
-      '@babel/runtime': 7.25.6
+      '@babel/runtime': 7.26.10
       extendable-media-recorder-wav-encoder-broker: 7.0.106
       extendable-media-recorder-wav-encoder-worker: 8.0.103
       tslib: 2.8.1
 
   extendable-media-recorder@6.6.10:
     dependencies:
-      '@babel/runtime': 7.25.6
+      '@babel/runtime': 7.26.10
       media-encoder-host: 8.1.0
       multi-buffer-data-view: 3.0.24
       recorder-audio-worklet: 5.1.39
@@ -20980,12 +20996,12 @@ snapshots:
 
   fast-unique-numbers@7.0.2:
     dependencies:
-      '@babel/runtime': 7.25.6
+      '@babel/runtime': 7.26.10
       tslib: 2.8.1
 
   fast-unique-numbers@9.0.9:
     dependencies:
-      '@babel/runtime': 7.25.6
+      '@babel/runtime': 7.26.10
       tslib: 2.8.1
 
   fast-uri@3.0.1: {}
@@ -21008,7 +21024,7 @@ snapshots:
     optionalDependencies:
       picomatch: 4.0.2
 
-  fflate@0.4.8: {}
+  fflate@0.8.2: {}
 
   figgy-pudding@3.5.2: {}
 
@@ -23538,16 +23554,16 @@ snapshots:
       ms: 2.1.3
       semver: 7.7.1
 
-  jspdf@2.5.1:
+  jspdf@3.0.1:
     dependencies:
-      '@babel/runtime': 7.25.6
+      '@babel/runtime': 7.26.10
       atob: 2.1.2
       btoa: 1.2.1
-      fflate: 0.4.8
+      fflate: 0.8.2
     optionalDependencies:
-      canvg: 3.0.10
-      core-js: 3.38.1
-      dompurify: 2.5.6
+      canvg: 3.0.11
+      core-js: 3.41.0
+      dompurify: 3.2.4
       html2canvas: 1.4.1
 
   jsprim@1.4.2:
@@ -24024,7 +24040,7 @@ snapshots:
 
   media-encoder-host-broker@7.1.0:
     dependencies:
-      '@babel/runtime': 7.25.6
+      '@babel/runtime': 7.26.10
       broker-factory: 3.0.102
       fast-unique-numbers: 9.0.9
       media-encoder-host-worker: 9.2.0
@@ -24032,14 +24048,14 @@ snapshots:
 
   media-encoder-host-worker@9.2.0:
     dependencies:
-      '@babel/runtime': 7.25.6
+      '@babel/runtime': 7.26.10
       extendable-media-recorder-wav-encoder-broker: 7.0.106
       tslib: 2.8.1
       worker-factory: 7.0.29
 
   media-encoder-host@8.1.0:
     dependencies:
-      '@babel/runtime': 7.25.6
+      '@babel/runtime': 7.26.10
       media-encoder-host-broker: 7.1.0
       media-encoder-host-worker: 9.2.0
       tslib: 2.8.1
@@ -24397,7 +24413,7 @@ snapshots:
 
   multi-buffer-data-view@3.0.24:
     dependencies:
-      '@babel/runtime': 7.25.6
+      '@babel/runtime': 7.26.10
       tslib: 2.8.1
 
   multicast-dns@7.2.5:
@@ -25769,7 +25785,7 @@ snapshots:
 
   rc-align@4.0.15(react-dom@17.0.2(react@17.0.2))(react@17.0.2):
     dependencies:
-      '@babel/runtime': 7.25.6
+      '@babel/runtime': 7.26.10
       classnames: 2.5.1
       dom-align: 1.12.4
       rc-util: 5.43.0(react-dom@17.0.2(react@17.0.2))(react@17.0.2)
@@ -25779,7 +25795,7 @@ snapshots:
 
   rc-align@4.0.15(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
-      '@babel/runtime': 7.25.6
+      '@babel/runtime': 7.26.10
       classnames: 2.5.1
       dom-align: 1.12.4
       rc-util: 5.43.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -26075,7 +26091,7 @@ snapshots:
 
   rc-overflow@1.3.2(react-dom@17.0.2(react@17.0.2))(react@17.0.2):
     dependencies:
-      '@babel/runtime': 7.25.6
+      '@babel/runtime': 7.26.10
       classnames: 2.5.1
       rc-resize-observer: 1.4.0(react-dom@17.0.2(react@17.0.2))(react@17.0.2)
       rc-util: 5.43.0(react-dom@17.0.2(react@17.0.2))(react@17.0.2)
@@ -26084,7 +26100,7 @@ snapshots:
 
   rc-overflow@1.3.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
-      '@babel/runtime': 7.25.6
+      '@babel/runtime': 7.26.10
       classnames: 2.5.1
       rc-resize-observer: 1.4.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       rc-util: 5.43.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -26445,7 +26461,7 @@ snapshots:
 
   rc-virtual-list@3.14.5(react-dom@17.0.2(react@17.0.2))(react@17.0.2):
     dependencies:
-      '@babel/runtime': 7.25.6
+      '@babel/runtime': 7.26.10
       classnames: 2.5.1
       rc-resize-observer: 1.4.0(react-dom@17.0.2(react@17.0.2))(react@17.0.2)
       rc-util: 5.43.0(react-dom@17.0.2(react@17.0.2))(react@17.0.2)
@@ -26454,7 +26470,7 @@ snapshots:
 
   rc-virtual-list@3.14.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
-      '@babel/runtime': 7.25.6
+      '@babel/runtime': 7.26.10
       classnames: 2.5.1
       rc-resize-observer: 1.4.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       rc-util: 5.43.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -26840,12 +26856,12 @@ snapshots:
 
   recorder-audio-worklet-processor@4.2.21:
     dependencies:
-      '@babel/runtime': 7.25.6
+      '@babel/runtime': 7.26.10
       tslib: 2.8.1
 
   recorder-audio-worklet@5.1.39:
     dependencies:
-      '@babel/runtime': 7.25.6
+      '@babel/runtime': 7.26.10
       broker-factory: 3.0.102
       fast-unique-numbers: 7.0.2
       recorder-audio-worklet-processor: 4.2.21
@@ -26920,7 +26936,7 @@ snapshots:
 
   regenerator-transform@0.15.2:
     dependencies:
-      '@babel/runtime': 7.25.6
+      '@babel/runtime': 7.26.10
 
   regexp.prototype.flags@1.5.2:
     dependencies:
@@ -27788,7 +27804,7 @@ snapshots:
 
   standardized-audio-context@25.3.77:
     dependencies:
-      '@babel/runtime': 7.25.6
+      '@babel/runtime': 7.26.10
       automation-events: 7.0.9
       tslib: 2.8.1
 
@@ -28018,7 +28034,7 @@ snapshots:
 
   subscribable-things@2.1.40:
     dependencies:
-      '@babel/runtime': 7.25.6
+      '@babel/runtime': 7.26.10
       rxjs-interop: 2.0.0
       tslib: 2.8.1
 
@@ -28876,7 +28892,7 @@ snapshots:
 
   unload@2.2.0:
     dependencies:
-      '@babel/runtime': 7.25.6
+      '@babel/runtime': 7.26.10
       detect-node: 2.1.0
 
   unpipe@1.0.0: {}
@@ -29331,14 +29347,14 @@ snapshots:
 
   worker-factory@6.0.76:
     dependencies:
-      '@babel/runtime': 7.25.6
+      '@babel/runtime': 7.26.10
       compilerr: 10.0.2
       fast-unique-numbers: 7.0.2
       tslib: 2.8.1
 
   worker-factory@7.0.29:
     dependencies:
-      '@babel/runtime': 7.25.6
+      '@babel/runtime': 7.26.10
       fast-unique-numbers: 9.0.9
       tslib: 2.8.1
 
