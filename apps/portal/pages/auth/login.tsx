@@ -12,6 +12,7 @@ import AppInput from 'components/controls/AppInput';
 import AppLink from 'components/controls/AppLink';
 import PasswordEye from 'components/pagesComponents/_signScreen/PasswordEye';
 import Checkbox from 'antd/lib/checkbox/Checkbox';
+import { CheckboxChangeEvent } from 'antd/lib/checkbox/Checkbox';
 import {
   loadingMessage,
   updateMessage,
@@ -30,10 +31,9 @@ const PanelLogin: React.FC = () => {
   const [password, setPassword] = useState(defaultInput);
   const [valid, setValid] = useState(false);
   const [passwordShown, setPasswordShown] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false); // Added state
+  const [rememberMe, setRememberMe] = useState(false);
 
   useEffect(() => {
-    // Load saved email from localStorage
     const savedEmail = localStorage.getItem('rememberedEmail');
     if (savedEmail) {
       setEmail({ value: savedEmail, errors: [], touched: true });
@@ -94,7 +94,8 @@ const PanelLogin: React.FC = () => {
     setPasswordShown(!passwordShown);
   };
 
-  const handleRememberMeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Updated the event handler to use CheckboxChangeEvent
+  const handleRememberMeChange = (e: CheckboxChangeEvent) => {
     setRememberMe(e.target.checked);
   };
 
@@ -109,6 +110,7 @@ const PanelLogin: React.FC = () => {
         localStorage.setItem('rememberedEmail', email.value);
       } else {
         localStorage.removeItem('rememberedEmail');
+        console.log('Email removed from localStorage');
       }
 
       if (router.query && router.query.type == 'slack') {
