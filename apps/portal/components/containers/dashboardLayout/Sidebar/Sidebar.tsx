@@ -128,7 +128,7 @@ const Sidebar: FC<IProps> = ({ isProfilePage, isWorkspaceSettingsPage }) => {
         addNewWorkspaceClicked={() => setShowCreateWorkspaceModal(true)}
       />
 
-      <div className={`${styles.sidebarContainer}`}>
+      <div className={styles.sidebarContainer}>
         <div className={`${styles.sidebarWrapper} tw-px-4`}>
           <div className={styles.logoWrapper}>
             <Logo

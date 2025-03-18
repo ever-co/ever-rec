@@ -11,9 +11,7 @@
 
   .contentOuterWrapper {
     width: 100%;
-    padding-right: 0.75rem;
-    padding-top: 0.75rem;
-    padding-bottom: 0.75rem;
+    padding: 0.75rem 0.75rem 0.75rem 24px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -23,12 +21,6 @@
       align-items: center;
       justify-content: flex-start;
       width: 100%;
-      padding-left: 24px;
-
-      &.active {
-        border-radius: 10px;
-        color: #5B4DBE;
-      }
     }
   }
 
@@ -40,16 +32,11 @@
 
   &:hover {
     background: $primary-violet10;
-    transition: background-color 0.2s ease-in;
     border-radius: 10px;
 
     .icon,
     .title {
       color: #5B4DBE;
-    }
-
-    &.active {
-      background: $primary-violet10;
     }
   }
 
