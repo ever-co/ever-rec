@@ -19,14 +19,30 @@
 
 .itemWrapper {
   position: relative;
-  height: 70px;
-  padding: 1rem;
+  margin-bottom: 0.3rem;
+  padding: 0.5rem;
   cursor: pointer;
   transition: background 0.1s ease-in-out;
+  border-radius: 0.5rem;
 
   &:hover,
   &.active {
     background: $primary-violet30;
+    border-radius: 0.5rem;
+  }
+}
+
+.addItemWrapper {
+  background: $primary-violet30;
+  margin-bottom: 0.3rem;
+  padding: 0.8rem;
+  cursor: pointer;
+  transition: background 0.1s ease-in-out;
+  border-radius: 50%;
+
+  &:hover {
+    color: #fff;
+    border-radius: 50%;
   }
 }
 
@@ -35,13 +51,7 @@
   height: 100%;
 
   span {
-    border-radius: 0.25rem;
-  }
-
-  img {
-    width: 100%;
-    height: 100%;
-    border-radius: 0.25rem;
+    border-radius: 0.5rem;
   }
 }
 
@@ -52,10 +62,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: $primary-violet40;
-  border: 1px solid $primary-violet20;
   transition: all 0.3s ease-in-out;
-  border-radius: 0.25rem;
+  border-radius: 0.5rem;
 }
 
 .defaultItemLetter {

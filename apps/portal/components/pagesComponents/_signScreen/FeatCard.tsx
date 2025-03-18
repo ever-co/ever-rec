@@ -93,20 +93,20 @@ const FeatCard: React.FC<IFeatureCard> = ({
 }) => {
   return (
     <div id={id} className="tw-flex tw-mt-30px">
-      <div className="tw-w-6/12 tw-flex tw-border-b tw-border-1px tw-border-solid tw-border-black ">
+      <div className="tw-w-6/12 tw-flex tw-border-b tw-border-1px tw-border-solid tw-border-[#2A292F] ">
         <div className="tw-flex tw-flex-col">
           <div className="tw-flex">
-            <AppSvg className="tw-mt-1" path={imgPath} size="22px" />
-            <div className="tw-flex tw-flex-col tw-ml-20px">
+            <AppSvg className="tw-mt-1" path={imgPath} size="30" />
+            <div className="tw-flex tw-flex-col tw-ml-4">
               <h4 className="tw-font-bold tw-text-xl">{title}</h4>
               <p className="tw-text-app-grey-darker">{date}</p>
             </div>
           </div>
-          <p className="tw-my-20px">{description}</p>
+          <p className="tw-my-4">{description}</p>
           <a href={extensionLink} target="_blank" rel="noopener noreferrer">
             <AppButton
-              twTextColor="tw-text-black"
-              className="tw-border-primary-purple tw-mb-20px tw-bg-white"
+              twTextColor="tw-text-black hover:!tw-text-primary-purple tw-font-extralight !tw-text-base  tw-transition-all tw-duration-300"
+              className="!tw-border-primary-purple tw-mb-6 tw-bg-white"
               onClick={() => void 0}
             >
               {buttonText}
