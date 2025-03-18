@@ -2,13 +2,12 @@
 
 .wrapper {
   position: relative;
-  background: #ffffff;
+  margin-bottom: 0.4rem;
   display: flex;
   align-items: center;
-  min-height: 48px;
-  margin-bottom: 0.75rem;
   transition: background-color 0.2s ease-in;
   cursor: pointer;
+  border-radius: 10px;
 
   .contentOuterWrapper {
     width: 100%;
@@ -27,14 +26,27 @@
       padding-left: 24px;
 
       &.active {
-        padding-left: 1rem;
+        border-radius: 10px;
+        color: #5B4DBE;
       }
     }
+  }
+
+  .icon,
+  .title {
+    color: #2A292F;
+    transition: color 0.2s ease-in;
   }
 
   &:hover {
     background: $primary-violet10;
     transition: background-color 0.2s ease-in;
+    border-radius: 10px;
+
+    .icon,
+    .title {
+      color: #5B4DBE;
+    }
 
     &.active {
       background: $primary-violet10;
@@ -43,22 +55,11 @@
 
   &.active {
     background: $primary-violet10;
+    border-radius: 10px;
 
-    .icon {
-      color: $primary-violet;
-    }
+    .icon,
     .title {
-      color: #000000;
-    }
-  }
-
-  .activeIndicator {
-    width: 6px;
-    min-height: 48px;
-    background: $primary-violet;
-
-    &.subItems {
-      margin-left: -8px;
+      color: #5B4DBE;
     }
   }
 
@@ -68,10 +69,5 @@
 
   .title {
     font-weight: 500;
-  }
-
-  .icon,
-  .title {
-    color: $grey-dark-20;
   }
 }
