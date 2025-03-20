@@ -63,7 +63,7 @@ const FavoritesPage: React.FC = () => {
       removeCookies();
       router.push(preRoutes.auth + panelRoutes.login);
     }
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     dispatch(PanelAC.showFolders(foldersType));
@@ -92,6 +92,7 @@ const FavoritesPage: React.FC = () => {
           (x) => x.id === folder.id,
         );
       }
+      return false;
     },
     [favoriteFolders],
   );
