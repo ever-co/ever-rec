@@ -63,7 +63,7 @@ const StarredPage: React.FC = () => {
       removeCookies();
       router.push(preRoutes.auth + panelRoutes.login);
     }
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     dispatch(PanelAC.showFolders(foldersType));
