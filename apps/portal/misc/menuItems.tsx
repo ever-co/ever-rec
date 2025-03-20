@@ -45,8 +45,8 @@ export const mainMenuItems: IMainMenuItem[] = [
   },
   {
     type: 'favFolders',
-    title: 'Starred',
-    route: preRoutes.media + panelRoutes.starred,
+    title: 'Favorites',
+    route: preRoutes.media + panelRoutes.favorites,
     icon: <AppSvg path="/sidebar/new/starred.svg" size="20px" />,
   },
   {

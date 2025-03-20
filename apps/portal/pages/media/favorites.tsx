@@ -24,7 +24,7 @@ import { ItemTypeEnum } from 'app/enums/itemTypeEnum';
 import useItemsFilter from 'hooks/useItemsFilter';
 import Image from 'next/image';
 
-const StarredPage: React.FC = () => {
+const FavoritesPage: React.FC = () => {
   const router = useRouter();
   const dispatch = useDispatch();
   const user: IUser = useSelector((state: RootStateOrAny) => state.auth.user);
@@ -76,7 +76,7 @@ const StarredPage: React.FC = () => {
           setLoading(true);
           await getExplorerData();
         } catch (error) {
-          console.error("Failed to load explorer data:", error);
+          console.error('Failed to load explorer data:', error);
           // Consider displaying an error message to the user
         } finally {
           setLoading(false);
@@ -162,4 +162,4 @@ const StarredPage: React.FC = () => {
   );
 };
 
-export default StarredPage;
+export default FavoritesPage;
