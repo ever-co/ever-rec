@@ -1,0 +1,97 @@
+{
+  "navigation": {
+    "myImages": "My Images",
+    "myVideos": "My Videos",
+    "sharedByMe": "Shared by me",
+    "starred": "Starred",
+    "integrations": "Integrations",
+    "bin": "Bin"
+  },
+  "page": {
+    "auth": {
+      "error": {
+        "title": "Your reset link has been used already or expired",
+        "message": "Please try again!",
+        "backToLogin": "Back to login",
+        "enterEmail": "Please enter an email",
+        "enterPassword": "Please enter an password",
+        "emailCorrect": "Email is incorrect",
+        "minimumLength": "Minimum eight characters and at least one number",
+        "passwordNotMatch": "Passwords do not match"
+      },
+      "common": {
+        "email": "Email Address",
+        "login": "Log in",
+        "existingAccount": "Already have an account?",
+        "createAccount": "Create an account",
+        "password": "Password",
+        "confirmPassword": "Confirm Password"
+      },
+      "login": {
+        "welcomeTitle": "Hello, Welcome!",
+        "welcomeSubtitle": "We are glad you are here!",
+        "welcomeDescription": "To use our cloud-based services designed for sharing and saving your screenshots, please sign in to continue.",
+        "rememberMe": "Remember me",
+        "forgotPassword": "Forgot Password?",
+        "signInWithEmail": "Sign in with email",
+        "createAccount": "Create an account",
+        "forgotPasswordLink": "I forget my password"
+      },
+      "resetPassword": {
+        "title": "Reset your password",
+        "sendEmail": "Send email",
+        "signInAs": "Sign in as {{name}}"
+      }
+    },
+    "register": {
+      "title": "Register",
+      "fields": {
+        "fullName": "Full name"
+      },
+      "terms": {
+        "agree": "Agree to ",
+        "terms": "Terms & Conditions",
+        "and": " and ",
+        "privacy": "Privacy Policy"
+      },
+      "continueOptions": {
+        "title": "Continue with",
+        "adminSignIn": "Sign in its Admin",
+        "playerSubmit": "Submit it by Player at ease"
+      }
+    },
+    "whatsNew": {
+      "sectionTitle": "What's New",
+      "features": {
+        "videoSave": {
+          "title": "See New Features",
+          "date": "May 15, 2022",
+          "description": "You can now save videos as off animations. Create funny memes to share with friends."
+        },
+        "chromeExtension": {
+          "title": "Add to Chrome",
+          "subtitle": "Save and Collaborate",
+          "date": "Dec 7, 2022",
+          "description": "Save the files to your preferred format and platform. Share with a single click."
+        },
+        "folderOrganization": {
+          "title": "Move to Folder",
+          "date": "May 15, 2022",
+          "description": "You can now organize your screenshot images into folders for easy access later."
+        },
+        "pinToolbar": {
+          "title": "Pin Toolbar",
+          "date": "Dec 7, 2022",
+          "description": "Dock our moveable toolbar on either side of the screen, or float it around any area of the screen."
+        },
+        "trimbox": {
+          "title": "Trimbox",
+          "date": "Dec 7, 2022",
+          "description": "Allows you to easily trim and cut your recording."
+        }
+      },
+      "ctaFindOutMore": "Find out more",
+      "ctaReadMore": "Read more"
+    }
+  }
+}

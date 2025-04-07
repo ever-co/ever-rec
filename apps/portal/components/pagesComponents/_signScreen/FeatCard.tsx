@@ -1,6 +1,7 @@
 import Image from 'next/legacy/image';
 import AppSvg from 'components/elements/AppSvg';
 import AppButton from 'components/controls/AppButton';
+import { useTranslation } from 'react-i18next';
 
 export interface IFeatureCard {
   pageTitle?: string;
@@ -13,70 +14,92 @@ export interface IFeatureCard {
   id?: string;
   priority?: boolean;
 }
+export const useFeatures = () => {
+  // Initialize the translation function
+  const { t } = useTranslation();
 
-export const features: IFeatureCard[] = [
-  {
-    pageTitle: 'Features',
-    imgPath: '/images/box.svg',
-    title: 'Pin Toolbar',
-    date: 'Dec 7, 2022',
-    description:
-      'Dock our moveable toolbar on either side of the screen, or float it around any area of the screen.',
-    rightImgPath: '/images/dock-tool.svg',
-    buttonText: 'Add to Chrome',
-  },
-  {
-    imgPath: '/images/browser.svg',
-    title: 'Save and Collaborate',
-    date: 'Dec 7, 2022',
-    description:
-      'Save the files to your preferred format and platform. Share with a single click.',
-    rightImgPath: '/images/collaborate.svg',
-    buttonText: 'Read more',
-  },
-  {
-    imgPath: '/images/lightning.svg',
-    title: 'Trimbox',
-    date: 'Dec 7, 2022',
-    description: 'Allows you to easily trim and cut your recording.',
-    rightImgPath: '/images/trim.svg',
-    buttonText: 'Find out more',
-    id: 'last-child',
-  },
-];
+  // Define the 'features' array using translation keys
+  const features: IFeatureCard[] = [
+    {
+      // Using the section title key for page title
+      pageTitle: t('page.whatsNew.sectionTitle'), // Mapped 'Features' to 'What's New' section title
+      imgPath: '/images/box.svg',
+      // Translating the title using the pinToolbar key
+      title: t('page.whatsNew.features.pinToolbar.title'),
+      date: 'Dec 7, 2022', // Date kept as is
+      // Translating the description using the pinToolbar key
+      description: t('page.whatsNew.features.pinToolbar.description'),
+      rightImgPath: '/images/dock-tool.svg',
+      // Translating button text using the chromeExtension title key (as 'Add to Chrome')
+      buttonText: t('page.whatsNew.features.chromeExtension.title'),
+    },
+    {
+      // Using the section title key for page title
+      pageTitle: t('page.whatsNew.sectionTitle'), // Mapped 'Features' to 'What's New' section title
+      imgPath: '/images/browser.svg',
+      // Translating the title using the chromeExtension subtitle key
+      title: t('page.whatsNew.features.chromeExtension.subtitle'), // Mapped 'Save and Collaborate'
+      date: 'Dec 7, 2022', // Date kept as is
+      // Translating the description using the chromeExtension key
+      description: t('page.whatsNew.features.chromeExtension.description'),
+      rightImgPath: '/images/collaborate.svg',
+      // Translating button text using the ctaReadMore key
+      buttonText: t('page.whatsNew.ctaReadMore'),
+    },
+    {
+      // Using the section title key for page title
+      pageTitle: t('page.whatsNew.sectionTitle'), // Mapped 'Features' to 'What's New' section title
+      imgPath: '/images/lightning.svg',
+      // Translating the title using the trimbox key
+      title: t('page.whatsNew.features.trimbox.title'),
+      date: 'Dec 7, 2022', // Date kept as is
+      // Translating the description using the trimbox key
+      description: t('page.whatsNew.features.trimbox.description'),
+      rightImgPath: '/images/trim.svg',
+      // Translating button text using the ctaFindOutMore key
+      buttonText: t('page.whatsNew.ctaFindOutMore'),
+      id: 'last-child',
+    },
+  ];
 
-export const newFeatures: IFeatureCard[] = [
-  {
-    pageTitle: "What's New",
-    imgPath: '/images/new-sticker.svg',
-    title: 'See New Features',
-    date: 'May 15, 2022',
-    description:
-      'You can now save videos as GIF animations. Create funny memes to share with friends.',
-    rightImgPath: '/images/GIF-light.svg',
-    buttonText: 'Add to Chrome',
-  },
-  {
-    imgPath: '/images/star-sticker.svg',
-    title: 'We Added New Tool Features',
-    date: 'May 15, 2022',
-    description:
-      'You can now easily add text to your images, change border colors, adjust text alignment, and more!',
-    rightImgPath: '/images/typetool.svg',
-    buttonText: 'Find out more',
-  },
-  {
-    imgPath: '/images/dark-light-sticker.svg',
-    title: 'Move to Folder',
-    date: 'May 15, 2022',
-    description:
-      'You can now organize your screenshot images into folders for easy access later. ',
-    rightImgPath: '/images/move_to-light.svg',
-    buttonText: 'Read more',
-    id: 'last-child',
-  },
-];
+  // Define the 'newFeatures' array using translation keys
+  const newFeatures: IFeatureCard[] = [
+    {
+      pageTitle: t('page.whatsNew.sectionTitle'), // Mapped "What's New"
+      imgPath: '/images/new-sticker.svg',
+      title: t('page.whatsNew.features.videoSave.title'),
+      date: 'May 15, 2022', // Date kept as is
+      description: t('page.whatsNew.features.videoSave.description'), // Description updated to match JSON
+      rightImgPath: '/images/GIF-light.svg',
+      buttonText: t('page.whatsNew.features.chromeExtension.title'),
+    },
+    {
+      pageTitle: '', // Mapped "What's New"
+      imgPath: '/images/star-sticker.svg',
+      title: t('page.whatsNew.features.newToolFeatures.title'),
+      date: 'May 15, 2022', // Date kept as is
+      description: t('page.whatsNew.features.newToolFeatures.description'), // Description updated to match JSON
+      rightImgPath: '/images/typetool.svg',
+      buttonText: t('page.whatsNew.ctaFindOutMore'),
+    },
+    {
+      pageTitle: '', // Mapped "What's New"
+      imgPath: '/images/dark-light-sticker.svg',
+      title: t('page.whatsNew.features.folderOrganization.title'),
+      date: 'May 15, 2022', // Date kept as is
+      description: t('page.whatsNew.features.folderOrganization.description'),
+      rightImgPath: '/images/move_to-light.svg',
+      buttonText: t('page.whatsNew.ctaReadMore'),
+      id: 'last-child',
+    },
+  ];
 
+  // Return the arrays of features
+  return {
+    features,
+    newFeatures,
+  };
+};
 // TODO: replace when available
 // const extensionLink = 'https://chrome.google.com/webstore/detail/rec-%E2%80%94-screen-captu/gneepehahiglangakfifnpdlppijdkck'
 const extensionLink = 'https://rec.so';

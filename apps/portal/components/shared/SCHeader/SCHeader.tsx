@@ -15,6 +15,8 @@ import PanelAC from 'app/store/panel/actions/PanelAC';
 import { signOut } from 'app/services/auth';
 import { Dispatch } from 'redux';
 import { infoMessage } from 'app/services/helpers/toastMessages';
+import { lanuages } from 'i18n/constants';
+import { useTranslation } from 'react-i18next';
 
 interface ISCHeaderProps {
   filterValue: string | null;
@@ -33,6 +35,10 @@ const SCHeader: FC<ISCHeaderProps> = ({
   onFilterChange,
   onInviteMembersButtonClick,
 }) => {
+  const { t, i18n } = useTranslation();
+  const toggleLanguage = (code) => {
+    i18n.changeLanguage(code);
+  };
   const clickedNotifications = useRef(false); // to be removed when implemented
   const clickedHelpCenter = useRef(false); // to be removed when implemented
   const router = useRouter();
@@ -58,6 +64,7 @@ const SCHeader: FC<ISCHeaderProps> = ({
     () => setShowCreateWorkspaceModal(true),
     () => signOutHandler(dispatch, router),
   );
+  const languagesMenu = languagesList((code) => toggleLanguage(code));
 
   const photoURL = userPhotoURL ?? '/sign/default-profile.svg';
 
@@ -66,6 +73,7 @@ const SCHeader: FC<ISCHeaderProps> = ({
       <div className={styles.search}>
         <AppSvg path="/new-design-v2/search.svg" />
 
+        {t('navigation.bin')}
         <input
           value={filterValue ?? undefined}
           type="text"
@@ -76,6 +84,19 @@ const SCHeader: FC<ISCHeaderProps> = ({
         />
       </div>
       <div className={styles.actions}>
+        <Dropdown
+          trigger={['click']}
+          placement="bottomRight"
+          overlay={languagesMenu}
+        >
+          <div
+            className={classNames(styles.actionButton, styles.profileButton)}
+          >
+            <p>Language</p>
+            <AppSvg path="/new-design-v2/down-caret.svg" size="20px" />
+          </div>
+        </Dropdown>
+
         <Tooltip title="Notifications" placement="bottom">
           <div
             className={styles.actionButton}
@@ -236,6 +257,28 @@ const renderMoreMenuJSX = (
           Sign out
         </span>
       </Menu.Item>
+    </Menu>
+  );
+};
+export const languagesList = (toggleLanguage: (code: string) => void) => {
+  return (
+    <Menu
+      style={{
+        height: '400px',
+        overflowY: 'scroll',
+      }}
+    >
+      {lanuages.map((lang) => (
+        <Menu.Item
+          key={lang.code}
+          onClick={() => toggleLanguage(lang.code)}
+          style={{
+            padding: '0.5rem 1.25rem',
+          }}
+        >
+          <span>{lang.text}</span>
+        </Menu.Item>
+      ))}
     </Menu>
   );
 };

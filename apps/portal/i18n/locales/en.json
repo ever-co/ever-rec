@@ -1,0 +1,313 @@
+{
+  "notFound": {
+    "videos": {
+      "heading": "No videos",
+      "description": "Start recording videos. Click the Record button in the extension’s popup menu."
+    },
+    "workspace": {
+      "heading": "No Workspace Found",
+      "description": "It looks like you don't have any workspaces yet. Click the button below to create one.",
+      "button": "Create workspace"
+    },
+    "trash": {
+      "heading": "No items",
+      "description": "You haven't sent any items to temporary storage for deletion yet."
+    },
+    "shared": {
+      "heading": "No shared items",
+      "description": "The items you have created and shared with others will be displayed here."
+    },
+    "videos": {
+      "heading": "No videos",
+      "description": "Start recording videos. Click the Record button in the extension’s popup menu."
+    }
+  },
+  "workspace": {
+    "newWorkspaceName": "New Workspace Name",
+    "description": "Collaboration made easy with a workspace to share images and videos instantly.",
+    "addWorkspace": "Add Workspace",
+    "enterAWorkspaceName": "Enter a workspace name",
+    "renameWorkspace": "Rename Workspace",
+    "nameYourWorkspaceDescription": "Name your workspace something that will represent its purpose",
+    "renamePlaceholder": "Enter a workspace name",
+    "confirm": "Confirm",
+    "dragAndDropImagesHereOr": "Drag & drop images here or",
+    "browseFile": "Browse file",
+    "uploadThumbnailDescription": "Upload a thumbnail to your workspace. Supports JPG or PNG format only."
+  },
+  "header": {
+    "searchFiles": "Search files...",
+    "help": "Help center",
+    "notifications": "Notifications",
+    "user": {
+      "addNewCompany": "Add new company",
+      "installChrome": "Install Chrome extension",
+      "signout": "Sign out"
+    }
+  },
+  "common": {
+    "save": "Save",
+    "workspace": "workspace",
+    "addWorkspace": "Add workspace",
+    "manageWorkspace": "Manage workspace",
+    "myImages": "My Images",
+    "myVideos": "My Videos",
+    "videos": "Videos",
+    "folders": "Folders",
+    "images": "Images",
+    "newFolder": "New Folder",
+    "newImageFile": "New image file",
+    "newVideoFile": "New video file",
+    "folderActions": {
+      "addToFavorites": "Add to favorites",
+      "changeFolderName": "Change folder name",
+      "deleteFolder": "Delete folder",
+      "changeFolderColor": "Change folder color"
+    },
+    "fileActions": {
+      "createTrelloCard": "Create Trello Card",
+      "createJiraIssue": "Create Jira Issue",
+      "shareOnSlack": "Share on Slack",
+      "shareOnWhatsApp": "Share on WhatsApp",
+      "moveToWorkspace": "Move To Workspace",
+      "download": "Download",
+      "shareLink": "Share Link",
+      "move": "Move",
+      "delete": "Delete"
+    },
+    "bulkActions": {
+      "selectAll": "Select all",
+      "download": "Download",
+      "move": "Move",
+      "delete": "Delete"
+    }
+  },
+  "navigation": {
+    "myImages": "My Images",
+    "myVideos": "My Videos",
+    "sharedByMe": "Shared by me",
+    "starred": "Starred",
+    "integrations": "Integrations",
+    "bin": "Bin"
+  },
+  "page": {
+    "image": {
+      "manage": "Manage",
+      "currentlySavedIn": "Currently saved in My Images",
+      "moveToFolder": "Move to folder",
+      "selectFolder": "Select folder",
+      "move": "Move",
+      "cancel": "Cancel",
+      "download": "Download",
+      "annotate": "Annotate",
+      "more": "More",
+      "downloadAsPDF": "Download as PDF",
+      "shareYourImage": "Share Your Image",
+      "copyToClipboard": "Copy to clipboard",
+      "generateShareableLink": "Generate Shareable Link",
+      "email": "Email",
+      "deleteImage": "Delete image",
+      "saveToCloud": "Save to Cloud",
+      "googleDrive": "Google Drive",
+      "dropbox": "Dropbox"
+    },
+
+    "video": {
+      "chaptersSection": {
+        "heading": "Chapters",
+        "description": "Here you can create and jump to different chapters of your video.",
+        "timestampLabel": "00:00",
+        "chapterNamePlaceholder": "Type your chapter name here",
+        "addChapterButton": "Add Chapter at 00:00"
+      },
+      "statsSection": {
+        "views": "No views",
+        "likes": "No likes"
+      },
+      "actionsSection": {
+        "editTitle": "Edit Title",
+        "download": "Download",
+        "share": "Share"
+      },
+      "commentsSection": {
+        "placeholder": "Add a comment..."
+      }
+    },
+    "trashed": {
+      "title": "Trash",
+      "recentlyDeleted": "Recently Deleted",
+      "actions": {
+        "deleteAll": "Delete All",
+        "restoreAll": "Restore All"
+      },
+      "dialog": {
+        "deleteAll": {
+          "message": "Do you want to delete all items forever?",
+          "cancel": "Cancel",
+          "deleteAll": "Delete All"
+        },
+        "restoreAll": {
+          "message": "Do you want to restore all items?",
+          "cancel": "Cancel",
+          "restoreAll": "Restore All"
+        }
+      }
+    },
+    "integrations": {
+      "pageTitle": "Integrations",
+      "googleDrive": {
+        "title": "Google Drive Integration",
+        "description": "You can connect your Google Drive account to save screenshots and videos captured by Rec .",
+        "buttonText": "Continue with Google Drive"
+      },
+      "dropbox": {
+        "title": "Dropbox Service",
+        "description": "You can connect your DropBox account to save screenshots captured by Rec .",
+        "buttonText": "Continue with DropBox"
+      },
+      "jira": {
+        "title": "Jira Service",
+        "description": "You can connect your Jira account to add new ticket and upload screenshots captured by Rec .",
+        "buttonText": "Continue with Jira"
+      },
+      "slack": {
+        "title": "Slack Integration",
+        "description": "You can connect your slack workspace account to share screenshots and videos captured by Rec",
+        "buttonText": "Connect with Slack"
+      },
+      "trello": {
+        "title": "Trello Service",
+        "description": "You can connect your Trello account to add new ticket and upload screenshots captured by Rec",
+        "buttonText": "Continue with Trello"
+      }
+    },
+    "profile": {
+      "title": "Profile",
+      "back": "Back",
+      "settings": {
+        "title": "Profile settings",
+        "name": "Name",
+        "email": "Email",
+        "password": "Password"
+      },
+      "recentFiles": {
+        "title": "Recent files",
+        "emptyState": "Recent files is coming soon..."
+      },
+      "account": {
+        "title": "Account",
+        "deleteAccount": "Delete account",
+        "signOut": "Sign out"
+      },
+      "nameModal": {
+        "name": "Name",
+        "currentName": "Current name:",
+        "dontChange": "Don't change",
+        "saveChanges": "Save changes"
+      },
+      "deleteAccountModal": {
+        "permanentlyDeleteAccount": "Permanently Delete Account",
+        "currentPassword": "Current password:",
+        "enterPassword": "Enter password",
+        "next": "Next",
+        "dontChange": "Don't change"
+      }
+    },
+    "auth": {
+      "error": {
+        "resetLinkExpired": "Your reset link has been used already or expired",
+        "pleaseTryAgain": "Please try again!",
+        "backToLogin": "Back to login",
+        "enterEmail": "Please enter an email",
+        "enterPassword": "Please enter an password",
+        "emailCorrect": "Email is incorrect",
+        "minimumLength": "Minimum eight characters and at least one number",
+        "passwordNotMatch": "Passwords do not match"
+      },
+      "common": {
+        "email": "Email Address",
+        "login": "Log in",
+        "googleRequire": "Please, sign in with your Google account to continue...",
+        "existingAccount": "Already have an account?",
+        "createAccount": "Create an account",
+        "password": "Password",
+        "confirmPassword": "Confirm Password"
+      },
+      "login": {
+        "welcomeTitle": "Hello, Welcome!",
+        "welcomeSubtitle": "We are glad you are here!",
+        "welcomeDescription": "To use our cloud-based services designed for sharing and saving your screenshots, please sign in to continue.",
+        "rememberMe": "Remember me",
+        "forgotPassword": "Forgot Password?",
+        "signInWithEmail": "Sign in with email",
+        "createAccount": "Create an account",
+        "forgotPasswordLink": "I forget my password"
+      },
+      "resetPassword": {
+        "title": "Reset your password",
+        "sendEmail": "Send email",
+        "signInAs": "Sign in as {{name}}"
+      },
+      "newPassword": {
+        "newPassword": "New Password *",
+        "newPasswordConfirm": "New Password Confirm *",
+        "setNewPassword": "Set New Password"
+      }
+    },
+    "register": {
+      "title": "Register",
+      "fields": {
+        "fullName": "Full name"
+      },
+      "terms": {
+        "agree": "Agree to ",
+        "terms": "Terms & Conditions",
+        "and": " and ",
+        "privacy": "Privacy Policy"
+      },
+      "continueOptions": {
+        "title": "Or Continue with",
+        "adminSignIn": "Sign in its Admin",
+        "playerSubmit": "Submit it by Player at ease"
+      }
+    },
+    "whatsNew": {
+      "sectionTitle": "What's New",
+      "features": {
+        "videoSave": {
+          "title": "See New Features",
+          "date": "May 15, 2022",
+          "description": "You can now save videos as off animations. Create funny memes to share with friends."
+        },
+        "newToolFeatures": {
+          "title": "We Added New Tool Features",
+          "date": "May 15, 2022",
+          "description": "ou can now easily add text to your images, change border colors, adjust text alignment, and more!"
+        },
+        "chromeExtension": {
+          "title": "Add to Chrome",
+          "subtitle": "Save and Collaborate",
+          "date": "Dec 7, 2022",
+          "description": "Save the files to your preferred format and platform. Share with a single click."
+        },
+        "folderOrganization": {
+          "title": "Move to Folder",
+          "date": "May 15, 2022",
+          "description": "You can now organize your screenshot images into folders for easy access later."
+        },
+        "pinToolbar": {
+          "title": "Pin Toolbar",
+          "date": "Dec 7, 2022",
+          "description": "Dock our moveable toolbar on either side of the screen, or float it around any area of the screen."
+        },
+        "trimbox": {
+          "title": "Trimbox",
+          "date": "Dec 7, 2022",
+          "description": "Allows you to easily trim and cut your recording."
+        }
+      },
+      "ctaFindOutMore": "Find out more",
+      "ctaReadMore": "Read more"
+    }
+  }
+}
