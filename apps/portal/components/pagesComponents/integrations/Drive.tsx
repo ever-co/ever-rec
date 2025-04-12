@@ -11,8 +11,11 @@ import { removeDriveUser } from 'app/services/google/user';
 import DisconnectServiceModal from 'components/shared/DisconnectServiceModal';
 import { errorMessage, infoMessage } from 'app/services/helpers/toastMessages';
 import styles from './IntegrationPage.module.scss';
+import { useTranslation } from 'react-i18next';
+import { useMenuItems } from 'misc/menuItems';
 
 const Drive: React.FC = () => {
+  const { t } = useTranslation();
   const driveUser: DriveUser | null = useSelector(
     (state: RootStateOrAny) => state.auth.driveUser,
   );
@@ -23,6 +26,7 @@ const Drive: React.FC = () => {
     (state: RootStateOrAny) => state.drive.workingFolder,
   );
   const router = useRouter();
+  const {settingsMenuItems} = useMenuItems()
   //const { driveLogin } = useGoogleDriveAuth({ pathname: `/settings/drive` });
   const { driveLogin } = useGoogleDriveAuth({
     pathname: router.query?.id ? `/image/${router.query?.id}` : '/media/images',
@@ -36,7 +40,7 @@ const Drive: React.FC = () => {
     await updateWorkingFolder(folder || null);
   };
 
-  const imagePath = activeImage(router);
+  const imagePath = activeImage(router,settingsMenuItems);
 
   const handleDriveSignOut = useCallback(async () => {
     setLoading(true);
@@ -61,7 +65,7 @@ const Drive: React.FC = () => {
             path="/settings/google-icon.svg"
             size="22px"
           />
-          Google Drive Integration
+          {t('page.integrations.googleDrive.title')}
         </div>
       </h1>
 
@@ -69,7 +73,9 @@ const Drive: React.FC = () => {
         <>
           <h2 className="tw-max-w-full tw-text-center">
             <div className="tw-flex tw-flex-col tw-gap-2 tw-justify-center">
-              <div className="tw-mr-2">Connected to: </div>
+              <div className="tw-mr-2">
+                {t('page.integrations.connectedTo')}
+              </div>
               <div className="tw-flex">
                 <span className="tw-text-primary-purple tw-font-bold">
                   {driveUser.email}
@@ -84,7 +90,7 @@ const Drive: React.FC = () => {
               onClick={() => setIsDisconnect(true)}
               full={true}
             >
-              Disconnect from Google Drive
+              {t('page.integrations.googleDrive.disconnectGoogleDrive')}
             </AppButton>
           </div>
           {/*{folders.length > 0 && (*/}
@@ -108,12 +114,11 @@ const Drive: React.FC = () => {
       ) : (
         <>
           <p className={styles.description}>
-            You can connect your Google Drive account to save screenshots and
-            videos captured by Rec.
+            {t('page.integrations.googleDrive.description')}
           </p>
           <div className="tw-w-90p">
             <AppButton onClick={async () => await driveLogin()} full={true}>
-              Continue with Google Drive
+              {t('page.integrations.googleDrive.buttonText')}
             </AppButton>
           </div>
         </>
@@ -126,10 +131,10 @@ const Drive: React.FC = () => {
           onCancel={() => setIsDisconnect(false)}
           onOk={handleDriveSignOut}
           loading={loading}
-          title={'Disconnect your Google account?'}
-          subTitle={
-            "Are you sure you want to disable Google drive integration? By disconnecting you won't be able to sync your screenshots."
-          }
+          title={t('page.integrations.googleDrive.disconnectErrorTitle')}
+          subTitle={t(
+            'page.integrations.googleDrive.disconnectErrorDescription',
+          )}
         />
       )}
     </div>

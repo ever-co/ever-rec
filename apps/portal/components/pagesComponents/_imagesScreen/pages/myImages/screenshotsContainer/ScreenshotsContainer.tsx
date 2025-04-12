@@ -49,6 +49,7 @@ import IEditorVideo from 'app/interfaces/IEditorVideo';
 import { WorkspaceItemType } from 'app/interfaces/ItemType';
 import useGetXXL from 'hooks/useGetXXL';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 const defaultShareItem = { id: null, type: null, provider: null };
 const defaultModalState = { state: false, screenshot: null };
@@ -79,6 +80,7 @@ const ScreenshotsContainer: React.FC<IScreenshotsContainerProps> = ({
 }) => {
   const dispatch = useDispatch();
   const router = useRouter();
+  const { t } = useTranslation();
   const scrollableDivRef = useRef<HTMLDivElement>(null);
   const user = useSelector((state: RootStateOrAny) => state.auth.user);
   const shareThirdPartyOptions = useSelector(
@@ -357,7 +359,9 @@ const ScreenshotsContainer: React.FC<IScreenshotsContainerProps> = ({
       <div className={styles.itemsContainer}>
         <div className={styles.itemsContainerHeadingContainer}>
           <div>
-            <h3 className={styles.headingContainerHeading}>Images</h3>
+            <h3 className={styles.headingContainerHeading}>
+              {t('common.images')}
+            </h3>
           </div>
         </div>
 

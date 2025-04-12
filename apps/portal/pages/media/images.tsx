@@ -43,8 +43,10 @@ import SCHeader from 'components/shared/SCHeader/SCHeader';
 import useItemOrder from 'hooks/useItemOrder';
 import { ItemTypeEnum } from 'app/enums/itemTypeEnum';
 import useItemsFilter from 'hooks/useItemsFilter';
+import { useTranslation } from 'react-i18next';
 
 const Images: React.FC = () => {
+  const { t } = useTranslation();
   const fileUploader = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const dispatch = useDispatch();
@@ -286,7 +288,7 @@ const Images: React.FC = () => {
           <div>
             {isRootFolder(user, explorerData) ? (
               <div className={styles.pageHeadingWrapper}>
-                <h1 className={styles.mainHeader}>My Images</h1>
+                <h1 className={styles.mainHeader}>{t('common.myImages')}</h1>
               </div>
             ) : (
               <FolderNavigationContainer
@@ -324,7 +326,7 @@ const Images: React.FC = () => {
           <>
             {folderData && (
               <div className={styles.foldersHeadingContainer}>
-                <h3 className={styles.heading}>Folders</h3>
+                <h3 className={styles.heading}>{t('common.folders')}</h3>
                 <SortingDropDown
                   sortByDate={handleFolderOrderByDate}
                   sortByName={handleFolderOrderByName}

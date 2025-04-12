@@ -60,6 +60,7 @@ import { workspaceVideoDelete } from 'misc/workspaceFunctions';
 import useGenerateShareLink from 'hooks/useGenerateShareLink';
 import VideoChapters from 'components/pagesComponents/_videoEditorScreen/chapters/VideoChapters/VideoChapters';
 import useVideoChapters from 'hooks/useVideoChapters';
+import { useTranslation } from 'react-i18next';
 
 const tabClassesTw =
   'tw-flex tw-justify-center tw-items-center tw-w-1/3 tw-h-50px tw-cursor-pointer tw-outline-none';
@@ -89,6 +90,7 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
   setLoaderState,
 }) => {
   const user = useAuthenticateUser();
+  const { t } = useTranslation();
   const router = useRouter();
   const dispatch = useDispatch();
   const [dropBoxImageId, setDropBoxImageId] = useState<string | null>('');
@@ -141,7 +143,7 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
     hiddenClass: styles.hoveredHidden,
     activeClass: styles.hoveredActive,
   });
-  const folderName = video?.dbData?.folderData?.name || 'My Videos';
+  const folderName = video?.dbData?.folderData?.name || t('common.myVideos');
   const currentlySavedIn = useMemo(
     () =>
       workspace
@@ -561,14 +563,16 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
                 <div>
                   <div className="tw-flex tw-items-center tw-justify-between tw-mb-2">
                     <div className="tw-font-semibold tw-text-sm tw-text-center">
-                      Shareable link:
+                      {t('page.image.shareableLink')}
                     </div>
                     <AppButton
                       onClick={removeSharedLink}
                       bgColor="tw-bg-red"
                       className="tw-pt-0 tw-pb-0 tw-pl-2 tw-pr-2"
                     >
-                      <span className="tw-text-xs tw-text-white">Remove</span>
+                      <span className="tw-text-xs tw-text-white">
+                        {t('page.image.remove')}
+                      </span>
                     </AppButton>
                   </div>
 
@@ -588,7 +592,7 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
                     ) : (
                       <>
                         <IoCopyOutline size={25} className="tw-mr-2" />
-                        Copy
+                        {t('page.image.copy')}
                       </>
                     )}
                   </AppButton>
@@ -596,7 +600,7 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
               ) : (
                 <div>
                   <div className="tw-font-semibold tw-text-sm tw-mb-2 tw-text-center">
-                    Share Your Video
+                    {t('page.image.shareYourVideo')}
                   </div>
                   <AppButton
                     onClick={generateShareableLink}
@@ -608,7 +612,7 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
                         <AppSpinnerLocal />
                       </div>
                     ) : (
-                      'Generate Shareable Link'
+                      t('page.image.generateShareableLink')
                     )}
                   </AppButton>
                 </div>
@@ -618,7 +622,7 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
             {!workspace && (
               <ImageActionsCard>
                 <div className="tw-font-semibold tw-text-sm tw-mb-2 tw-text-center">
-                  Save to Cloud
+                  {t('page.image.saveToCloud')}
                 </div>
                 <div className={styles.cloudProvidersWrapper}>
                   <div
@@ -647,7 +651,7 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
                         </div>
                         <div className={styles.providerText}>
                           <div className={styles.openVideoText}>
-                            Processing...
+                            {t('page.image.processing')}
                           </div>
                         </div>
                       </AppButton>
@@ -672,7 +676,7 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
                           <div className={styles.providerText}>
                             {driveVideoId && driveUser ? (
                               <div className={styles.openVideoText}>
-                                Open video
+                                {t('page.image.openVideo')}
                               </div>
                             ) : (
                               driveUser?.email || 'Google drive'
@@ -720,7 +724,7 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
                           </div>
                           <div className={styles.providerText}>
                             <div className={styles.openImageText}>
-                              Processing...
+                              {t('page.image.processing')}
                             </div>
                           </div>
                         </div>
@@ -731,7 +735,7 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
                           <AppSvg path="/images/dropbox-logo.svg" size="25px" />
                           <div className={styles.providerText}>
                             {dropBoxImageId
-                              ? 'Open Video'
+                              ? t('page.image.openVideo')
                               : user?.dropbox?.email || 'Dropbox'}
                           </div>
                         </div>

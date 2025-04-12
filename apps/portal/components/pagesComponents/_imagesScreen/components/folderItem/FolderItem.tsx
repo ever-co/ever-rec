@@ -35,6 +35,7 @@ import PermissionsModal from 'components/pagesComponents/_imagesScreen/component
 import { ItemTypeEnum } from 'app/enums/itemTypeEnum';
 import FolderHeader from './FolderHeader';
 import FolderInfo from './FolderInfo';
+import { useTranslation } from 'react-i18next';
 
 interface IFolderItemProps {
   folder: IDbFolderData | IWorkspaceDbFolder;
@@ -58,6 +59,7 @@ const FolderItem: React.FC<IFolderItemProps> = ({
   onClick,
 }) => {
   const dispatch = useDispatch();
+  const { t } = useTranslation();
   const user = useSelector((state: RootStateOrAny) => state.auth.user);
   const currentWorkspaceFolder = useSelector(
     (state: RootStateOrAny) => state.panel.currentWorkspaceFolder,
@@ -264,7 +266,7 @@ const FolderItem: React.FC<IFolderItemProps> = ({
           onClick={() => setShowPermissionModal(true)}
         >
           <span className="tw-text-base tw-font-semibold">
-            Edit permissions
+            {t('common.folderActions.editPermission')}
           </span>
         </Menu.Item>
       )}
@@ -281,7 +283,9 @@ const FolderItem: React.FC<IFolderItemProps> = ({
         onClick={(e) => addToFavs()}
       >
         <span className="tw-text-base tw-font-semibold">
-          {isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+          {isFavorite
+            ? t('common.folderActions.removeFavorites')
+            : t('common.folderActions.addToFavorites')}
         </span>
       </Menu.Item>
 
@@ -296,7 +300,7 @@ const FolderItem: React.FC<IFolderItemProps> = ({
           }}
         >
           <span className="tw-text-base tw-font-semibold">
-            Change folder name
+            {t('common.folderActions.changeFolderName')}
           </span>
         </Menu.Item>
       )}
@@ -312,7 +316,7 @@ const FolderItem: React.FC<IFolderItemProps> = ({
           onClick={() => setShowDeleteModal(true)}
         >
           <span className="tw-text-base tw-font-semibold tw-text-picker-red">
-            Delete folder
+            {t('common.folderActions.deleteFolder')}
           </span>
         </Menu.Item>
       )}
@@ -327,7 +331,7 @@ const FolderItem: React.FC<IFolderItemProps> = ({
           style={{ margin: 10 }}
         >
           <div className="tw-text-center tw-font-semibold">
-            Change folder color
+            {t('common.folderActions.changeFolderColor')}
           </div>
           <div className="tw-flex tw-w-full tw-justify-center tw-h-25px tw-items-center">
             {colorPalet.map((item, index) => (

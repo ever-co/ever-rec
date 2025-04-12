@@ -55,10 +55,12 @@ import InviteMembersModal from 'components/pagesComponents/_imagesScreen/pages/w
 import useItemOrder from 'hooks/useItemOrder';
 import { ItemTypeEnum } from 'app/enums/itemTypeEnum';
 import useItemsFilter from 'hooks/useItemsFilter';
+import { useTranslation } from 'react-i18next';
 
 const Workspace: FC = () => {
   const imageFileUploaderRef = useRef<HTMLInputElement>(null);
   const videoFileUploaderRef = useRef<HTMLInputElement>(null);
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const router = useRouter();
   const user = useAuthenticateUser();
@@ -433,7 +435,7 @@ const Workspace: FC = () => {
           <>
             {folderData && (
               <div className={styles.foldersHeadingContainer}>
-                <h3 className={styles.heading}>Folders</h3>
+                <h3 className={styles.heading}>{t('common.folders')}</h3>
                 <SortingDropDown
                   sortByDate={handleFolderOrderByDate}
                   sortByName={handleFolderOrderByName}

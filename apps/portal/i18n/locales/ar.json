@@ -1,46 +1,286 @@
 {
+  "notFound": {
+    "workspace": {
+      "heading": "لم يتم العثور على مساحة عمل",
+      "description": "يبدو أنه ليس لديك أي مساحات عمل حتى الآن. انقر على الزر أدناه لإنشاء واحدة.",
+      "button": "إنشاء مساحة عمل"
+    },
+    "trash": {
+      "heading": "لا توجد عناصر",
+      "description": "لم ترسل أي عناصر إلى التخزين المؤقت للحذف بعد."
+    },
+    "shared": {
+      "heading": "لا توجد عناصر مشتركة",
+      "description": "سيتم عرض العناصر التي قمت بإنشائها ومشاركتها مع الآخرين هنا."
+    },
+    "videos": {
+      "heading": "لا توجد مقاطع فيديو",
+      "description": "ابدأ بتسجيل مقاطع الفيديو. انقر على زر التسجيل في القائمة المنبثقة للامتداد."
+    }
+  },
+  "workspace": {
+    "inviteTeammates": "دعوة الزملاء",
+    "newWorkspaceName": "اسم مساحة العمل الجديدة",
+    "description": "تعاون سهل مع مساحة عمل لمشاركة الصور ومقاطع الفيديو على الفور.",
+    "addWorkspace": "إضافة مساحة عمل",
+    "enterAWorkspaceName": "أدخل اسم مساحة العمل",
+    "renameWorkspace": "إعادة تسمية مساحة العمل",
+    "nameYourWorkspaceDescription": "سمِّ مساحة العمل باسم يعكس هدفها",
+    "renamePlaceholder": "أدخل اسم مساحة العمل",
+    "confirm": "تأكيد",
+    "dragAndDropImagesHereOr": "اسحب وأفلت الصور هنا أو",
+    "browseFile": "تصفح الملف",
+    "uploadThumbnailDescription": "قم برفع صورة مصغرة لمساحة العمل. يدعم تنسيقات JPG أو PNG فقط."
+  },
+  "header": {
+    "searchFiles": "بحث عن الملفات...",
+    "help": "مركز المساعدة",
+    "notifications": "الإشعارات",
+    "notificationsSoon": "الإشعارات قريبًا!",
+    "user": {
+      "addNewCompany": "إضافة شركة جديدة",
+      "installChrome": "تثبيت ملحق Chrome",
+      "availableSoon": "سيصبح متاحًا في متجر Chrome قريبًا!",
+      "signout": "تسجيل الخروج"
+    }
+  },
+  "common": {
+    "save": "حفظ",
+    "workspace": "مساحة العمل",
+    "date": "التاريخ",
+    "sort": "ترتيب",
+    "name": "اسم",
+    "addWorkspace": "إضافة مساحة عمل",
+    "manageWorkspace": "إدارة مساحة العمل",
+    "myImages": "صوري",
+    "myVideos": "مقاطع الفيديوهات الخاصة بي",
+    "videos": "مقاطع الفيديو",
+    "folders": "المجلدات",
+    "images": "الصور",
+    "newFolder": "مجلد جديد",
+    "newImageFile": "ملف صورة جديد",
+    "newVideoFile": "ملف فيديو جديد",
+    "folderActions": {
+      "addToFavorites": "إضافة إلى المفضلة",
+      "removeFavorites": "حذف من المفضلة",
+      "changeFolderName": "تغيير اسم المجلد",
+      "deleteFolder": "حذف المجلد",
+      "changeFolderColor": "تغيير لون المجلد"
+    },
+    "fileActions": {
+      "createTrelloCard": "إنشاء بطاقة Trello",
+      "createJiraIssue": "إنشاء مشكلة في Jira",
+      "shareOnSlack": "مشاركة على Slack",
+      "shareOnWhatsApp": "مشاركة على WhatsApp",
+      "moveToWorkspace": "نقل إلى مساحة العمل",
+      "download": "تنزيل",
+      "shareLink": "مشاركة الرابط",
+      "move": "نقل",
+      "delete": "حذف"
+    },
+    "bulkActions": {
+      "selectAll": "تحديد الكل",
+      "download": "تنزيل",
+      "move": "نقل",
+      "delete": "حذف"
+    }
+  },
   "navigation": {
     "myImages": "صوري",
-    "myVideos": "مقاطع الفيديو الخاصة بي",
+    "myVideos": "مقاطع الفيديوهات الخاصة بي",
     "sharedByMe": "تمت مشاركتها بواسطتي",
-    "starred": "المميزة بنجمة",
+    "starred": "المفضلة",
     "integrations": "التكاملات",
-    "bin": "سلة المهملات"
+    "bin": "المهملات",
+    "back": "رجوع",
+    "profileSettings": "إعدادات الملف الشخصي",
+    "companyProfile": "ملف الشركة"
   },
   "page": {
+    "image": {
+      "manage": "إدارة",
+      "shareYourVideo": "شارك مقاطع الفيديوهات الخاصة بك",
+      "currentlySavedIn": "محفوظ حاليًا في صوري",
+      "moveToFolder": "نقل إلى مجلد",
+      "selectFolder": "اختر مجلدًا",
+      "move": "نقل",
+      "cancel": "إلغاء",
+      "download": "تنزيل",
+      "annotate": "إضافة تعليق",
+      "more": "المزيد",
+      "downloadAsPDF": "تنزيل كملف PDF",
+      "shareYourImage": "شارك صورتك",
+      "copyToClipboard": "نسخ إلى الحافظة",
+      "generateShareableLink": "إنشاء رابط قابل للمشاركة",
+      "email": "البريد الإلكتروني",
+      "deleteImage": "حذف الصورة",
+      "saveToCloud": "حفظ على السحابة",
+      "googleDrive": "Google Drive",
+      "dropbox": "Dropbox"
+    },
+    "video": {
+      "chaptersSection": {
+        "heading": "الفصول",
+        "description": "هنا يمكنك إنشاء والانتقال إلى فصول مختلفة من الفيديو.",
+        "timestampLabel": "00:00",
+        "chapterNamePlaceholder": "اكتب اسم الفصل هنا",
+        "addChapterButton": "إضافة فصل عند 00:00"
+      },
+      "statsSection": {
+        "views": "لا توجد مشاهدات",
+        "likes": "لا توجد إعجابات"
+      },
+      "actionsSection": {
+        "editTitle": "تعديل العنوان",
+        "download": "تنزيل",
+        "share": "مشاركة"
+      },
+      "commentsSection": {
+        "placeholder": "أضف تعليقًا..."
+      }
+    },
+    "trashed": {
+      "title": "المهملات",
+      "recentlyDeleted": "تم الحذف مؤخرًا",
+      "actions": {
+        "deleteAll": "حذف الكل",
+        "restoreAll": "استعادة الكل"
+      },
+      "dialog": {
+        "deleteAll": {
+          "message": "هل تريد حذف جميع العناصر إلى الأبد؟",
+          "cancel": "إلغاء",
+          "deleteAll": "حذف الكل"
+        },
+        "restoreAll": {
+          "message": "هل تريد استعادة جميع العناصر؟",
+          "cancel": "إلغاء",
+          "restoreAll": "استعادة الكل"
+        }
+      }
+    },
+    "integrations": {
+      "connectedTo": "متصل بـ:",
+      "pageTitle": "التكاملات",
+      "googleDrive": {
+        "title": "تكامل Google Drive",
+        "description": "يمكنك توصيل حساب Google Drive لحفظ لقطات الشاشة ومقاطع الفيديو التي تم التقاطها بواسطة Rec.",
+        "buttonText": "المتابعة مع Google Drive",
+        "disconnectGoogleDrive": "قطع الاتصال عن Google Drive",
+        "disconnectErrorTitle": "قطع الاتصال بحساب Google؟",
+        "disconnectErrorDescription": "هل أنت متأكد من رغبتك في تعطيل تكامل Google Drive؟ بقطع الاتصال لن تتمكن من مزامنة لقطات الشاشة."
+      },
+      "dropbox": {
+        "title": "خدمة Dropbox",
+        "description": "يمكنك توصيل حساب DropBox لحفظ لقطات الشاشة التي تم التقاطها بواسطة Rec.",
+        "buttonText": "المتابعة مع DropBox",
+        "disconnectDropbox": "قطع الاتصال عن Dropbox",
+        "disconnectErrorTitle": "قطع الاتصال بحساب Dropbox",
+        "disconnectErrorDescription": "هل أنت متأكد من رغبتك في تعطيل تكامل DropBox؟ بقطع الاتصال لن تتمكن من مزامنة لقطات الشاشة.",
+        "connectDropbox": "يمكنك توصيل حساب DropBox لحفظ لقطات الشاشة التي تم التقاطها بواسطة Rec."
+      },
+      "jira": {
+        "title": "خدمة Jira",
+        "description": "يمكنك توصيل حساب Jira لإضافة تذكرة جديدة ورفع لقطات الشاشة التي تم التقاطها بواسطة Rec.",
+        "buttonText": "المتابعة مع Jira",
+        "disconnectErrorTitle": "قطع الاتصال بحساب Jira",
+        "disconnectErrorDescription": "هل أنت متأكد من رغبتك في تعطيل تكامل Jira؟ بقطع الاتصال لن تتمكن من مزامنة لقطات الشاشة.",
+        "disconnectFromJira": "قطع الاتصال عن Jira"
+      },
+      "slack": {
+        "title": "تكامل Slack",
+        "description": "أنت متصل بنجاح بـ Slack، الآن يمكنك مشاركة لقطات الشاشة في مساحة العمل الخاصة بك.",
+        "buttonText": "الاتصال بـ Slack",
+        "signedWorkspace": "لقد سجلت الدخول باستخدام مساحة عمل Slack",
+        "slackWorkspace": "لقد سجلت الدخول باستخدام مساحة عمل Slack",
+        "disconnectSlack": "قطع الاتصال عن Slack",
+        "connectedSlack": "يمكنك توصيل حساب مساحة عمل Slack لمشاركة لقطات الشاشة ومقاطع الفيديو التي تم التقاطها بواسطة Rec",
+        "connectWithSlack": "الاتصال بـ Slack",
+        "disconnectErrorTitle": "قطع الاتصال بحساب Slack",
+        "disconnectErrorDescription": "هل أنت متأكد من رغبتك في تعطيل تكامل Slack؟ بقطع الاتصال لن تتمكن من مشاركة لقطات الشاشة ومقاطع الفيديو."
+      },
+      "trello": {
+        "title": "خدمة Trello",
+        "description": "يمكنك توصيل حساب Trello لإضافة تذكرة جديدة ورفع لقطات الشاشة التي تم التقاطها بواسطة Rec.",
+        "buttonText": "المتابعة مع Trello",
+        "disconnectTrello": "قطع الاتصال عن Trello",
+        "disconnectErrorTitle": "قطع الاتصال بحساب Trello",
+        "disconnectErrorDescription": "هل أنت متأكد من رغبتك في تعطيل تكامل Trello؟ بقطع الاتصال لن تتمكن من مزامنة لقطات الشاشة.",
+        "connectedDiscription": "يمكنك توصيل حساب Trello لإضافة تذكرة جديدة ورفع لقطات الشاشة التي تم التقاطها بواسطة Rec.",
+        "connectWithTrello": "الاتصال بـ Trello"
+      }
+    },
+    "profile": {
+      "title": "الملف الشخصي",
+      "back": "رجوع",
+      "settings": {
+        "title": "إعدادات الملف الشخصي",
+        "name": "الاسم",
+        "email": "البريد الإلكتروني",
+        "password": "كلمة المرور"
+      },
+      "recentFiles": {
+        "title": "الملفات الحديثة",
+        "emptyState": "الملفات الحديثة قريبًا..."
+      },
+      "account": {
+        "title": "الحساب",
+        "deleteAccount": "حذف الحساب",
+        "signOut": "تسجيل الخروج"
+      },
+      "nameModal": {
+        "name": "الاسم",
+        "currentName": "الاسم الحالي:",
+        "dontChange": "لا تغيير",
+        "saveChanges": "حفظ التغييرات"
+      },
+      "deleteAccountModal": {
+        "permanentlyDeleteAccount": "حذف الحساب بشكل دائم",
+        "currentPassword": "كلمة المرور الحالية:",
+        "enterPassword": "أدخل كلمة المرور",
+        "next": "التالي",
+        "dontChange": "لا تغيير"
+      }
+    },
     "auth": {
       "error": {
-        "title": "رابط إعادة التعيين الخاص بك تم استخدامه بالفعل أو انتهت صلاحيته",
-        "message": "يرجى المحاولة مرة أخرى!",
-        "backToLogin": "العودة إلى تسجيل الدخول",
+        "resetLinkExpired": "انتهت صلاحية رابط إعادة التعيين أو تم استخدامه بالفعل",
+        "pleaseTryAgain": "يرجى المحاولة مرة أخرى!",
+        "backToLogin": "العودة لتسجيل الدخول",
         "enterEmail": "يرجى إدخال البريد الإلكتروني",
         "enterPassword": "يرجى إدخال كلمة المرور",
         "emailCorrect": "البريد الإلكتروني غير صحيح",
-        "minimumLength": "ثمانية أحرف على الأقل ورقم واحد على الأقل",
+        "minimumLength": "الحد الأدنى ثمانية أحرف ورقم واحد على الأقل",
         "passwordNotMatch": "كلمات المرور غير متطابقة"
       },
       "common": {
         "email": "عنوان البريد الإلكتروني",
         "login": "تسجيل الدخول",
+        "googleRequire": "يرجى تسجيل الدخول باستخدام حساب Google للمتابعة...",
         "existingAccount": "هل لديك حساب بالفعل؟",
         "createAccount": "إنشاء حساب",
         "password": "كلمة المرور",
         "confirmPassword": "تأكيد كلمة المرور"
       },
       "login": {
-        "welcomeTitle": "أهلاً بك!",
+        "welcomeTitle": "مرحبًا، أهلاً بك!",
         "welcomeSubtitle": "يسعدنا وجودك هنا!",
         "welcomeDescription": "لاستخدام خدماتنا السحابية المصممة لمشاركة وحفظ لقطات الشاشة الخاصة بك، يرجى تسجيل الدخول للمتابعة.",
         "rememberMe": "تذكرني",
-        "forgotPassword": "هل نسيت كلمة المرور؟",
-        "signInWithEmail": "تسجيل الدخول بالبريد الإلكتروني",
+        "forgotPassword": "نسيت كلمة المرور؟",
+        "signInWithEmail": "تسجيل الدخول باستخدام البريد الإلكتروني",
         "createAccount": "إنشاء حساب",
         "forgotPasswordLink": "لقد نسيت كلمة المرور الخاصة بي"
       },
       "resetPassword": {
-        "title": "إعادة تعيين كلمة المرور الخاصة بك",
-        "sendEmail": "إرسال بريد إلكتروني",
-        "signInAs": "تسجيل الدخول باسم {{name}}"
+        "title": "إعادة تعيين كلمة المرور",
+        "sendEmail": "إرسال البريد الإلكتروني",
+        "signInAs": "تسجيل الدخول كـ {{name}}"
+      },
+      "newPassword": {
+        "newPassword": "كلمة المرور الجديدة *",
+        "newPasswordConfirm": "تأكيد كلمة المرور الجديدة *",
+        "setNewPassword": "تعيين كلمة مرور جديدة"
       }
     },
     "register": {
@@ -49,15 +289,15 @@
         "fullName": "الاسم الكامل"
       },
       "terms": {
-        "agree": "أوافق على ",
+        "agree": "الموافقة على ",
         "terms": "الشروط والأحكام",
         "and": " و ",
         "privacy": "سياسة الخصوصية"
       },
       "continueOptions": {
-        "title": "متابعة باستخدام",
+        "title": "أو المتابعة باستخدام",
         "adminSignIn": "تسجيل الدخول كمسؤول",
-        "playerSubmit": "إرسالها بواسطة اللاعب بسهولة"
+        "playerSubmit": "إرساله بواسطة اللاعب بسهولة"
       }
     },
     "whatsNew": {
@@ -66,33 +306,33 @@
         "videoSave": {
           "title": "شاهد الميزات الجديدة",
           "date": "15 مايو 2022",
-          "description": "يمكنك الآن حفظ مقاطع الفيديو كرسوم متحركة. قم بإنشاء ميمات مضحكة لمشاركتها مع الأصدقاء."
+          "description": "يمكنك الآن حفظ مقاطع الفيديو كرسوم متحركة. إنشاء ميمات مضحكة لمشاركتها مع الأصدقاء."
         },
         "newToolFeatures": {
-          "title": "لقد أضفنا ميزات جديدة للأداة",
-          "date": "May 15, 2022",
-          "description": "يمكنك الآن بسهولة إضافة نص إلى صورك، وتغيير ألوان الحدود، وضبط محاذاة النص، والمزيد!"
+          "title": "أضفنا ميزات أداة جديدة",
+          "date": "15 مايو 2022",
+          "description": "يمكنك الآن بسهولة إضافة نص إلى صورك، تغيير ألوان الحدود، ضبط محاذاة النص، والمزيد!"
         },
         "chromeExtension": {
           "title": "إضافة إلى Chrome",
-          "subtitle": "حفظ وتعاون",
+          "subtitle": "حفظ والتعاون",
           "date": "7 ديسمبر 2022",
-          "description": "احفظ الملفات بالتنسيق والنظام الأساسي المفضل لديك. شارك بنقرة واحدة."
+          "description": "احفظ الملفات بالتنسيق المفضل لديك والمنصة. شارك بنقرة واحدة."
         },
         "folderOrganization": {
           "title": "نقل إلى مجلد",
           "date": "15 مايو 2022",
-          "description": "يمكنك الآن تنظيم صور لقطات الشاشة الخاصة بك في مجلدات لسهولة الوصول إليها لاحقًا."
+          "description": "يمكنك الآن تنظيم صور لقطات الشاشة في مجلدات للوصول السهل لاحقًا."
         },
         "pinToolbar": {
           "title": "تثبيت شريط الأدوات",
           "date": "7 ديسمبر 2022",
-          "description": "قم بإرساء شريط الأدوات المتحرك الخاص بنا على جانبي الشاشة، أو اجعله يطفو حول أي منطقة من الشاشة."
+          "description": "ثبِّت شريط الأدوات المتحرك على أي جانب من الشاشة، أو حركه حول أي منطقة من الشاشة."
         },
         "trimbox": {
-          "title": "صندوق القص",
+          "title": "Trimbox",
           "date": "7 ديسمبر 2022",
-          "description": "يسمح لك بقص وتقطيع التسجيل الخاص بك بسهولة."
+          "description": "يسمح لك بقص وتسجيلك بسهولة."
         }
       },
       "ctaFindOutMore": "اكتشف المزيد",

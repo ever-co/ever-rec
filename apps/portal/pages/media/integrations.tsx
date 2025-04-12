@@ -7,12 +7,16 @@ import Slack from 'components/pagesComponents/integrations/Slack';
 import Trello from 'components/pagesComponents/integrations/Trello';
 import MediaIndex from 'pages/media/index';
 import styles from '../../pagesScss/media/Integrations.module.scss';
+import { useTranslation } from 'react-i18next';
 
 const Integrations = () => {
+  const { t } = useTranslation();
   return (
     <MediaIndex>
       <DashboardCard className={styles.mainWrapper}>
-        <div className={styles.mainHeader}>Integrations</div>
+        <div className={styles.mainHeader}>
+          {t('page.integrations.pageTitle')}
+        </div>
         <div className={classNames(styles.innerWrapper, 'scroll-div')}>
           <Drive />
           <Dropbox />

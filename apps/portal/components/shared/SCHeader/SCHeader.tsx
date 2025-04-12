@@ -63,6 +63,7 @@ const SCHeader: FC<ISCHeaderProps> = ({
     goToProfilePage,
     () => setShowCreateWorkspaceModal(true),
     () => signOutHandler(dispatch, router),
+    (str: any) => t(str),
   );
   const languagesMenu = languagesList((code) => toggleLanguage(code));
 
@@ -73,11 +74,10 @@ const SCHeader: FC<ISCHeaderProps> = ({
       <div className={styles.search}>
         <AppSvg path="/new-design-v2/search.svg" />
 
-        {t('navigation.bin')}
         <input
           value={filterValue ?? undefined}
           type="text"
-          placeholder="Search files..."
+          placeholder={t('header.searchFiles')}
           className={styles.appInput}
           onChange={onFilterChange}
           disabled={filterValue === null}
@@ -131,7 +131,7 @@ const SCHeader: FC<ISCHeaderProps> = ({
               className={styles.CTAButton}
               onClick={onInviteMembersButtonClick}
             >
-              Invite teammates
+              {t('workspace.inviteTeammates')}
             </button>
 
             {isWorkspaceAdmin && (
@@ -179,6 +179,7 @@ const renderMoreMenuJSX = (
   goToProfilePage: () => void,
   addNewCompany: () => void,
   signOut: () => void,
+  t: (key: string) => string,
 ) => {
   return (
     <Menu className={styles.profileMenu}>
@@ -204,7 +205,9 @@ const renderMoreMenuJSX = (
         }
         onClick={addNewCompany}
       >
-        <span className={styles.menuItemSpan}>Add new company</span>
+        <span className={styles.menuItemSpan}>
+          {t('header.user.addNewCompany')}
+        </span>
       </Menu.Item>
 
       <Menu.Item
@@ -217,9 +220,11 @@ const renderMoreMenuJSX = (
             color="#5b4dbe"
           />
         }
-        onClick={() => infoMessage('Available in Chrome Web Store soon!')}
+        onClick={() => infoMessage(t('header.user.availableSoon'))}
       >
-        <span className={styles.menuItemSpan}>Install Chrome extension</span>
+        <span className={styles.menuItemSpan}>
+          {t('header.user.installChrome')}
+        </span>
       </Menu.Item>
 
       <Menu.Item
@@ -232,9 +237,9 @@ const renderMoreMenuJSX = (
             color="#5b4dbe"
           />
         }
-        onClick={() => infoMessage('Notifications coming soon!')}
+        onClick={() => infoMessage(t('header.notificationsSoon'))}
       >
-        <span className={styles.menuItemSpan}>Notifications</span>
+        <span className={styles.menuItemSpan}>{t('header.notifications')}</span>
       </Menu.Item>
 
       <Menu.Item
@@ -249,12 +254,12 @@ const renderMoreMenuJSX = (
         }
         onClick={() => infoMessage('Help center coming soon!')}
       >
-        <span className={styles.menuItemSpan}>Help center</span>
+        <span className={styles.menuItemSpan}>{t('header.help')}</span>
       </Menu.Item>
 
       <Menu.Item key="signout" className={styles.menuItem} onClick={signOut}>
         <span className={styles.menuItemSpan} style={{ marginLeft: 0 }}>
-          Sign out
+          {t('header.user.signout')}
         </span>
       </Menu.Item>
     </Menu>

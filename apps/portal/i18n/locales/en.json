@@ -1,9 +1,5 @@
 {
   "notFound": {
-    "videos": {
-      "heading": "No videos",
-      "description": "Start recording videos. Click the Record button in the extension’s popup menu."
-    },
     "workspace": {
       "heading": "No Workspace Found",
       "description": "It looks like you don't have any workspaces yet. Click the button below to create one.",
@@ -23,6 +19,7 @@
     }
   },
   "workspace": {
+    "inviteTeammates": "Invite teammates",
     "newWorkspaceName": "New Workspace Name",
     "description": "Collaboration made easy with a workspace to share images and videos instantly.",
     "addWorkspace": "Add Workspace",
@@ -39,14 +36,22 @@
     "searchFiles": "Search files...",
     "help": "Help center",
     "notifications": "Notifications",
+    "notificationsSoon": "Notifications coming soon!",
     "user": {
       "addNewCompany": "Add new company",
       "installChrome": "Install Chrome extension",
+      "availableSoon": "Available in Chrome Web Store soon!",
       "signout": "Sign out"
     }
   },
   "common": {
     "save": "Save",
+    "sort": "Sort",
+    "date": "Date",
+    "name": "Name",
+    "newest": "Newest",
+    "oldest": "Oldest",
+    "donthaveFolder": "You don&apos;t have any folders!",
     "workspace": "workspace",
     "addWorkspace": "Add workspace",
     "manageWorkspace": "Manage workspace",
@@ -60,6 +65,8 @@
     "newVideoFile": "New video file",
     "folderActions": {
       "addToFavorites": "Add to favorites",
+      "removeFavorites": "Remove from favorites",
+      "editPermission": "Edit permissions",
       "changeFolderName": "Change folder name",
       "deleteFolder": "Delete folder",
       "changeFolderColor": "Change folder color"
@@ -71,15 +78,23 @@
       "shareOnWhatsApp": "Share on WhatsApp",
       "moveToWorkspace": "Move To Workspace",
       "download": "Download",
+      "restore": "Restore",
       "shareLink": "Share Link",
       "move": "Move",
+      "editPermission": "Edit Permissions",
       "delete": "Delete"
     },
     "bulkActions": {
       "selectAll": "Select all",
+      "selectNone": "Select None",
       "download": "Download",
+      "restore": "Restore",
       "move": "Move",
-      "delete": "Delete"
+      "delete": "Delete",
+      "restoreAll": "Do you want to restore these items?",
+      "restoreSingle": "Do you want to restore this item?",
+      "deleteAll": "Do you want to delete these items forever?",
+      "deleteSingle": "Do you want to delete this item forever?"
     }
   },
   "navigation": {
@@ -88,7 +103,10 @@
     "sharedByMe": "Shared by me",
     "starred": "Starred",
     "integrations": "Integrations",
-    "bin": "Bin"
+    "bin": "Bin",
+    "back": "Back",
+    "profileSettings": "Profile settings",
+    "companyProfile": "Company Profile"
   },
   "page": {
     "image": {
@@ -97,21 +115,29 @@
       "moveToFolder": "Move to folder",
       "selectFolder": "Select folder",
       "move": "Move",
+      "openVideo": "Open video",
       "cancel": "Cancel",
       "download": "Download",
       "annotate": "Annotate",
       "more": "More",
       "downloadAsPDF": "Download as PDF",
       "shareYourImage": "Share Your Image",
+      "shareYourVideo": "Share Your video:",
       "copyToClipboard": "Copy to clipboard",
       "generateShareableLink": "Generate Shareable Link",
+      "shareableLink": "Shareable link:",
+      "remove": "Remove",
+      "copy": "Copy",
+      "processing": "Processing...",
+      "openImage": "Open image",
+      "shareYourLink": "Share Your Image",
       "email": "Email",
       "deleteImage": "Delete image",
       "saveToCloud": "Save to Cloud",
       "googleDrive": "Google Drive",
-      "dropbox": "Dropbox"
+      "dropbox": "Dropbox",
+      "chooseFromComputer": "Choose from your computer"
     },
-
     "video": {
       "chaptersSection": {
         "heading": "Chapters",
@@ -154,31 +180,54 @@
       }
     },
     "integrations": {
+      "connectedTo": "Connected to:",
       "pageTitle": "Integrations",
       "googleDrive": {
         "title": "Google Drive Integration",
         "description": "You can connect your Google Drive account to save screenshots and videos captured by Rec .",
-        "buttonText": "Continue with Google Drive"
+        "buttonText": "Continue with Google Drive",
+        "disconnectGoogleDrive": "Disconnect from Google Drive",
+        "disconnectErrorTitle": "Disconnect your Google account?",
+        "disconnectErrorDescription": "Are you sure you want to disable Google drive integration? By disconnecting you won't be able to sync your screenshots."
       },
       "dropbox": {
         "title": "Dropbox Service",
         "description": "You can connect your DropBox account to save screenshots captured by Rec .",
-        "buttonText": "Continue with DropBox"
+        "buttonText": "Continue with DropBox",
+        "disconnectDropbox": "Disconnect from Dropbox",
+        "disconnectErrorTitle": "Disconnect from Dropbox account",
+        "disconnectErrorDescription": "Are you sure you want to disable DropBox integration? By disconnecting you won't be able to sync your screenshots.",
+        "connectDropbox": "You can connect your DropBox account to save screenshots captured by Rec."
       },
       "jira": {
         "title": "Jira Service",
         "description": "You can connect your Jira account to add new ticket and upload screenshots captured by Rec .",
-        "buttonText": "Continue with Jira"
+        "buttonText": "Continue with Jira",
+        "disconnectErrorTitle": "Disconnect from Jira account",
+        "disconnectErrorDescription": "Are you sure you want to disable Jira integration? By disconnecting you won't be able to sync your screenshots.",
+        "disconnectFromJira": "Disconnect from Jira"
       },
       "slack": {
         "title": "Slack Integration",
-        "description": "You can connect your slack workspace account to share screenshots and videos captured by Rec",
-        "buttonText": "Connect with Slack"
+        "description": "You are successfully connected to slack, Now you can share your screenshots to your workspace.",
+        "buttonText": "Connect with Slack",
+        "signedWorkspace": "You're signed in with slack workspace",
+        "slackWorkspace": "You&apos;re signed in with slack workspace",
+        "disconnectSlack": "Disconnect from Slack",
+        "connectedSlack": "You can connect your slack workspace account to share screenshots and videos captured by Rec",
+        "connectWithSlack": "Connect with Slack",
+        "disconnectErrorTitle": "Disconnect your Slack account",
+        "disconnectErrorDescription": "Are you sure you want to disable slack integration? By disconnecting you won't be able to share your screenshots and videos."
       },
       "trello": {
         "title": "Trello Service",
         "description": "You can connect your Trello account to add new ticket and upload screenshots captured by Rec",
-        "buttonText": "Continue with Trello"
+        "buttonText": "Continue with Trello",
+        "disconnectTrello": "Disconnect from Trello",
+        "disconnectErrorTitle": "Disconnect from Trello account",
+        "disconnectErrorDescription": "Are you sure you want to disable Trello integration? By disconnecting you won't be able to sync your screenshots.",
+        "connectedDiscription": "You can connect your Trello account to add new ticket and upload screenshots captured by Rec.",
+        "connectWithTrello": "Connect with Trello"
       }
     },
     "profile": {

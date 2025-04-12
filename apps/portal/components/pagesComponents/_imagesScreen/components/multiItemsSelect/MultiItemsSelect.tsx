@@ -35,6 +35,7 @@ import { decreaseFolderItems } from 'app/services/helpers/manageFolders';
 import TrashModal from '../../pages/trashed/components/TrashModal';
 import classNames from 'classnames';
 import styles from './MultiItemsSelect.module.scss';
+import { useTranslation } from 'react-i18next';
 
 interface IMultiItemsSelectProps {
   type: MixedItemType;
@@ -68,6 +69,7 @@ const MultiItemsSelect: React.FC<IMultiItemsSelectProps> = ({
   isTrash,
 }) => {
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
+  const { t } = useTranslation();
   const [showFolderModal, setShowFolderModal] = useState<boolean>(false);
   const [loader, setLoader] = useState<boolean>(false);
   const explorerDataImages: IExplorerData = useSelector(
@@ -360,7 +362,9 @@ const MultiItemsSelect: React.FC<IMultiItemsSelectProps> = ({
           outlined={false}
         >
           <div className="tw-text-gray-600 tw-leading-6 tw-font-normal tw-fontFamily-roboto">
-            {selected ? 'Select none' : 'Select all'}
+            {selected
+              ? t('common.bulkActions.selectNone')
+              : t('common.bulkActions.selectAll')}
           </div>
         </AppButton>
 
@@ -372,7 +376,7 @@ const MultiItemsSelect: React.FC<IMultiItemsSelectProps> = ({
             onClick={() => setRestoreModal(true)}
           >
             <div className="tw-text-gray-600 tw-leading-6 tw-font-normal tw-fontFamily-roboto">
-              Restore
+              {t('common.bulkActions.restore')}
             </div>
           </AppButton>
         ) : (
@@ -384,7 +388,7 @@ const MultiItemsSelect: React.FC<IMultiItemsSelectProps> = ({
               onClick={onDownloadHandler}
             >
               <div className="tw-text-gray-600 tw-leading-6 tw-font-normal tw-fontFamily-roboto">
-                Download
+                {t('common.bulkActions.download')}
               </div>
             </AppButton>
           </>
@@ -398,7 +402,9 @@ const MultiItemsSelect: React.FC<IMultiItemsSelectProps> = ({
             bgColor="tw-bg-white"
             onClick={() => setShowFolderModal(true)}
           >
-            <div className="tw-font-normal tw-text-black">Move</div>
+            <div className="tw-font-normal tw-text-black">
+              {t('common.bulkActions.move')}
+            </div>
           </AppButton>
         )}
 
@@ -411,7 +417,7 @@ const MultiItemsSelect: React.FC<IMultiItemsSelectProps> = ({
           }
         >
           <div className="tw-text-red tw-leading-6 tw-font-normal tw-fontFamily-roboto">
-            Delete
+            {t('common.bulkActions.delete')}
           </div>
         </AppButton>
       </div>
@@ -435,10 +441,10 @@ const MultiItemsSelect: React.FC<IMultiItemsSelectProps> = ({
         onOk={restoreAllItems}
         title={
           items.length > 1
-            ? 'Do you want to restore these items?'
-            : 'Do you want to restore this item?'
+            ? t('common.bulkActions.restoreAll')
+            : t('common.bulkActions.restoreSingle')
         }
-        confirmText="Restore"
+        confirmText={t('common.bulkActions.restore')}
       />
       <TrashModal
         visible={deleteModal}
@@ -446,10 +452,10 @@ const MultiItemsSelect: React.FC<IMultiItemsSelectProps> = ({
         onOk={deleteAllItems}
         title={
           items.length > 1
-            ? 'Do you want to delete these items forever?'
-            : 'Do you want to delete this item forever?'
+            ? t('common.bulkActions.deleteAll')
+            : t('common.bulkActions.deleteSingle')
         }
-        confirmText="Delete"
+        confirmText={t('common.bulkActions.delete')}
         confirmClass="tw-bg-red"
       />
       <AppSpinner show={loader} />
