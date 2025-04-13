@@ -138,12 +138,12 @@ const Sidebar: FC<SidebarProps> = ({ isProfilePage }) => {
       />
 
       <div className={styles.sidebarContainer}>
-        <div className={styles.sidebarWrapper}>
+        <div className={`${styles.sidebarWrapper} tw-px-4`}>
           <div className={styles.logoWrapper}>
             <Logo onClick={() => navigate(panelRoutes.images.path)} />
           </div>
 
-          <hr className={styles.lineSeparator} />
+          {/* <hr className={styles.lineSeparator} /> */}
 
           {(isProfilePage || isWorkspaceSettingsPage) && (
             <div className={styles.sidebarHeading}>
@@ -159,7 +159,7 @@ const Sidebar: FC<SidebarProps> = ({ isProfilePage }) => {
               />
             </div>
 
-            <div>{renderMenuItems()}</div>
+            <div className="tw-mt-24">{renderMenuItems()}</div>
           </div>
         </div>
 

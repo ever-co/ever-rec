@@ -1,20 +1,39 @@
 @import 'pagesScss/partials/_colors.scss';
 
+$primary-dark: #2A292F;
+$primary-accent: #5B4DBE;
+$border-radius: 10px;
+
+.listWrapper {
+  .title {
+    margin-left: 4rem;
+    color: #000000;
+    margin-bottom: 4px;
+    padding-top: 0.3rem;
+    padding-left:10px;
+    border-radius: $border-radius;
+    border:1px solid #00000008 ;
+    padding-bottom: 0.3rem;
+    transition: color 0.2s ease-in;
+  }
+  &:hover {
+    title {
+      color: #000000;
+    }
+  }
+}
 .wrapper {
   position: relative;
-  background: #ffffff;
+  margin-bottom: 0.4rem;
   display: flex;
   align-items: center;
-  min-height: 48px;
-  margin-bottom: 0.75rem;
   transition: background-color 0.2s ease-in;
   cursor: pointer;
+  border-radius: $border-radius;
 
   .contentOuterWrapper {
     width: 100%;
-    padding-right: 0.75rem;
-    padding-top: 0.75rem;
-    padding-bottom: 0.75rem;
+    padding: 0.75rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -27,14 +46,26 @@
       padding-left: 24px;
 
       &.active {
-        padding-left: 1rem;
+        border-radius: $border-radius;
+        color: $primary-accent;
       }
     }
+  }
+
+  .icon,
+  .title {
+    color: $primary-dark;
+    transition: color 0.2s ease-in;
   }
 
   &:hover {
     background: $primary-violet10;
     transition: background-color 0.2s ease-in;
+
+    .icon,
+    .title {
+      color: $primary-accent;
+    }
 
     &.active {
       background: $primary-violet10;
@@ -43,22 +74,11 @@
 
   &.active {
     background: $primary-violet10;
+    border-radius: $border-radius;
 
-    .icon {
-      color: $primary-violet;
-    }
+    .icon,
     .title {
-      color: #000000;
-    }
-  }
-
-  .activeIndicator {
-    width: 6px;
-    min-height: 48px;
-    background: $primary-violet;
-
-    &.subItems {
-      margin-left: -8px;
+      color: $primary-accent;
     }
   }
 
@@ -68,10 +88,5 @@
 
   .title {
     font-weight: 500;
-  }
-
-  .icon,
-  .title {
-    color: $grey-dark-20;
   }
 }

@@ -28,7 +28,7 @@ jobs:
               uses: docker/build-push-action@v5
               with:
                   context: .
-                  file: ./.deploy/portal/Dockerfile
+                  file: ./.deploy/api/Dockerfile
                   load: true
                   tags: |
                       ghcr.io/ever-co/ever-rec-api:latest

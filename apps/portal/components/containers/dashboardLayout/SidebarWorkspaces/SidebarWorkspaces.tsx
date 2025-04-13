@@ -69,7 +69,7 @@ const SidebarWorkspaces: FC<SidebarWorkspacesProps> = ({
   );
 
   return (
-    <div className={styles.sidebarWorkspaces}>
+    <div className={`${styles.sidebarWorkspaces} tw-py-10 tw-px-2`}>
       <div className={classNames(styles.workspaceItems, 'scroll-div')}>
         {workspaceItems}
         {!workspaceItems.length && (
@@ -140,7 +140,7 @@ const AddWorkspaceButton: FC<{ onClick: () => void }> = ({ onClick }) => (
         <AppSvg
           path="/common/add-workspace.svg"
           size="25px"
-          className={classNames(styles.itemWrapper, styles.addNewWorkspace)}
+          className={classNames(styles.addItemWrapper, styles.addNewWorkspace)}
           bgColor="black"
         />
       </div>

@@ -105,12 +105,12 @@ const Auth: React.FC<SignFlowComponent> = ({ children, componentType }) => {
                       ? 'Hello, Welcome!'
                       : 'Register'
                 }
-                className="tw-mb-8 tw-font-bold"
+                className="tw-mb-6 tw-font-bold"
               />
-              <p className="tw-mb-6 tw-text-sm">
+              <p className="tw-mb-6 !tw-text-sm !tw-font-extralight">
                 <b>{currentPathname ? `We are glad you are here!` : ''}</b>
               </p>
-              <p className="tw-mb-6 tw-text-sm">
+              <p className="tw-mb-16 !tw-text-sm !tw-font-extralight">
                 <b>
                   {currentPathname
                     ? 'To use our cloud-based services designed for sharing and saving your screenshots, please sign in to continue.'
@@ -136,7 +136,7 @@ const Auth: React.FC<SignFlowComponent> = ({ children, componentType }) => {
                           <React.Fragment key={`link_${index}`}>
                             {componentType !== link.name && (
                               <AppLink
-                                className="tw-text-primary-purple"
+                                className="tw-text-primary-purple !tw-text-sm"
                                 onClick={() =>
                                   router.push(
                                     `${preRoutes.auth}${link.route}${params}`,
