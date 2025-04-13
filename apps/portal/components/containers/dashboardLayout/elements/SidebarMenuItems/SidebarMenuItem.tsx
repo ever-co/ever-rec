@@ -1,6 +1,5 @@
 import React, { ReactElement, useCallback, useState } from 'react';
 import classNames from 'classnames';
-import CustomAccordion from './Favorite';
 import styles from './SidebarItemsStyles.module.scss';
 import { RootStateOrAny, useSelector } from 'react-redux';
 import { FolderTypeEnum } from 'app/enums/folderTypeEnum';
