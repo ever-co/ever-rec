@@ -1,5 +1,6 @@
 import React, { ReactElement, useCallback, useState } from 'react';
 import classNames from 'classnames';
+import { BiChevronUp } from 'react-icons/bi';
 import styles from './SidebarItemsStyles.module.scss';
 import { RootStateOrAny, useSelector } from 'react-redux';
 import { FolderTypeEnum } from 'app/enums/folderTypeEnum';
@@ -17,25 +18,8 @@ interface ISidebarMenuItemProps {
   className?: string;
   onClick?: () => void;
 }
-export function Chevron(props: any) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="1em"
-      height="1em"
-      viewBox="0 0 1024 1024"
-      {...props}
-    >
-      <path
-        fill="#000000"
-        d="m488.832 344.32l-339.84 356.672a32 32 0 0 0 0 44.16l.384.384a29.44 29.44 0 0 0 42.688 0l320-335.872l319.872 335.872a29.44 29.44 0 0 0 42.688 0l.384-.384a32 32 0 0 0 0-44.16L535.168 344.32a32 32 0 0 0-46.336 0"
-      ></path>
-    </svg>
-  );
-}
-
 const SidebarMenuItem: React.FC<ISidebarMenuItemProps> = React.forwardRef(
-  ({ icon, title, active, className = '', onClick }, ref) => {
+  ({ icon, title, active, className = '', onClick }) => {
     const explorerData: IExplorerData = useSelector(
       (state: RootStateOrAny) => state.panel.explorerData,
     );
@@ -46,7 +30,6 @@ const SidebarMenuItem: React.FC<ISidebarMenuItemProps> = React.forwardRef(
     const favoriteFolders: IFavoriteFolders = useSelector(
       (state: RootStateOrAny) => state.panel.favoriteFolders,
     );
-    const [loading, setLoading] = useState(false);
 
     const foldersType = FolderTypeEnum.imageFolders;
     const { folderData } = useFolderOrder(
@@ -108,9 +91,9 @@ const SidebarMenuItem: React.FC<ISidebarMenuItemProps> = React.forwardRef(
                     }}
                   >
                     {isOpen ? (
-                      <Chevron className="tw-w-4 tw-h-4 tw-text-gray-500 " />
+                      <BiChevronUp className="tw-w-6 tw-h-6 tw-text-gray-500 " />
                     ) : (
-                      <Chevron className="tw-w-4 tw-h-4 tw-text-gray-500 tw-rotate-180" />
+                      <BiChevronUp className="tw-w-6 tw-h-6 tw-text-gray-500 tw-rotate-180" />
                     )}
                   </div>
                 </div>
@@ -119,7 +102,10 @@ const SidebarMenuItem: React.FC<ISidebarMenuItemProps> = React.forwardRef(
             {isOpen && (
               <div className={`${styles.listWrapper} scroll-div`}>
                 {foldersList.map((v) => (
-                  <div className={styles.title}> {v}</div>
+                  <div key={v} className={styles.title}>
+                    {' '}
+                    {v}
+                  </div>
                 ))}
               </div>
             )}
