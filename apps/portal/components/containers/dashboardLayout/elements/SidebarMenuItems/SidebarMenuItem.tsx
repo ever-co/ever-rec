@@ -118,7 +118,7 @@ const SidebarMenuItem: React.FC<ISidebarMenuItemProps> = React.forwardRef(
               </div>
             </div>
             {isOpen && (
-              <div className={styles.listWrapper}>
+              <div className={`${styles.listWrapper} scroll-div`}>
                 {foldersList.map((v) => (
                   <div className={styles.title}> {v}</div>
                 ))}

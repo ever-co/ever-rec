@@ -5,6 +5,9 @@ $primary-accent: #5B4DBE;
 $border-radius: 10px;
 
 .listWrapper {
+  overflow-y: auto;
+  height:120px;
+
   .title {
     margin-left: 4rem;
     color: #000000;
