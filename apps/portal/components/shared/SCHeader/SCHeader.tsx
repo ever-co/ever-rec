@@ -72,7 +72,7 @@ const SCHeader: FC<ISCHeaderProps> = ({
           <AppSvg path="/new-design-v2/search.svg" />
 
           <input
-            value={filterValue ?? undefined}
+            value={filterValue ?? ''}
             type="text"
             placeholder="Search files..."
             className={styles.appInput}
