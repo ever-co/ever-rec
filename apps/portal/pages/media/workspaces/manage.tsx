@@ -29,6 +29,7 @@ import { preRoutes, panelRoutes } from 'components/_routes';
 import router from 'next/router';
 import AppButton from 'components/controls/AppButton';
 import { useCreateWorkspace } from 'hooks/useCreateWorkspaceHandler';
+import SCHeader from 'components/shared/SCHeader/SCHeader';
 
 export type LeaveDeleteActions = 'leave' | 'delete';
 
@@ -283,9 +284,11 @@ const ManageWorkspaces: React.FC = () => {
       />
       <MediaIndex>
         <DashboardCard className={styles.dashboardCard}>
-          <div className={styles.mainHeader}>
-            <span>Workspaces - Settings</span>
-          </div>
+          <SCHeader
+            text={'Workspaces'}
+            showSearch={false}
+            userPhotoURL={user?.photoURL}
+          />
           {workspaces?.length === 0 && (
             <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-h-full ">
               {/* Large Text */}
