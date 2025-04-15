@@ -10,6 +10,7 @@ import useFolderOrder from 'hooks/useFolderOrder';
 import IExplorerData from 'app/interfaces/IExplorerData';
 import { IDbFolderData } from 'app/interfaces/IEditorImage';
 import { parseCollectionToArray } from 'misc/_helper';
+import { FolderIcon } from 'components/pagesComponents/_imagesScreen/components/folderItem/FolderHeader';
 
 interface ISidebarMenuItemProps {
   icon: ReactElement;
@@ -50,7 +51,7 @@ const SidebarMenuItem: React.FC<ISidebarMenuItemProps> = React.forwardRef(
     );
 
     const foldersList = folderData
-      ? folderData.map((x) => (isFavorite(x) ? x.name : null)).filter((v) => v)
+      ? folderData.map((x) => (isFavorite(x) ? x : null)).filter((v) => v)
       : [];
     const [isOpen, setIsOpen] = useState(false);
 
@@ -103,8 +104,12 @@ const SidebarMenuItem: React.FC<ISidebarMenuItemProps> = React.forwardRef(
               <div className={`${styles.listWrapper} scroll-div`}>
                 {foldersList.map((v) => (
                   <div key={v} className={styles.title}>
-                    {' '}
-                    {v}
+                    <FolderIcon
+                      path="/common/folder-icon-v3.svg"
+                      bgColor={'#ffffff'}
+                      size="19px"
+                    />
+                    {v.name}
                   </div>
                 ))}
               </div>

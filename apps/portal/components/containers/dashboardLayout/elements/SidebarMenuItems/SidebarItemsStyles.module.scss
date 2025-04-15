@@ -9,13 +9,12 @@ $border-radius: 10px;
   height:120px;
 
   .title {
+    display:flex;
     margin-left: 4rem;
     color: #000000;
     margin-bottom: 4px;
     padding-top: 0.3rem;
     padding-left:10px;
-    border-radius: $border-radius;
-    border:1px solid #00000008 ;
     padding-bottom: 0.3rem;
     transition: color 0.2s ease-in;
   }
