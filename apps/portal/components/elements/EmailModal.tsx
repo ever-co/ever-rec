@@ -26,6 +26,7 @@ import { saveSegmentEvent } from 'app/services/general';
 import { RootStateOrAny, useSelector, useDispatch } from 'react-redux';
 import PanelAC from 'app/store/panel/actions/PanelAC';
 import { saveAs } from 'file-saver';
+import { useTranslation } from 'react-i18next';
 interface IEmailModalProps {
   visible: boolean;
   onCancel: () => void;
@@ -176,6 +177,7 @@ const EmailModal: React.FC<IEmailModalProps> = ({
     }
   }, [emailImageLink]);
 
+  const { t } = useTranslation();
   return (
     <Modal
       open={visible}
@@ -188,7 +190,7 @@ const EmailModal: React.FC<IEmailModalProps> = ({
             outlined
             className="tw-px-8 tw-mx-4 tw-pb-1 tw-pt-1"
           >
-            Cancel
+            {t('common.cancel')}
           </AppButton>
           <AppButton
             disabled={
@@ -197,7 +199,7 @@ const EmailModal: React.FC<IEmailModalProps> = ({
             onClick={fromEditor ? saveAndSend : onOkHandler}
             className="tw-px-8 tw-pb-1 tw-pt-1"
           >
-            Send Email
+            {t('common.sendEmail')}
           </AppButton>
         </div>
       }
@@ -246,7 +248,7 @@ const EmailModal: React.FC<IEmailModalProps> = ({
           checked={messagestatus}
           onChange={() => setMesagestatus(!messagestatus)}
         >
-          <span className="tw-text-black"> Add message</span>
+          <span className="tw-text-black">{t('common.addMessage')}</span>
         </Checkbox>
         {messagestatus ? (
           <TextArea
@@ -260,7 +262,7 @@ const EmailModal: React.FC<IEmailModalProps> = ({
               setMessage(e.target.value);
             }}
             defaultValue={message}
-            placeholder="Type your message here"
+            placeholder={t('common.typeMessage')}
             autoSize={{ minRows: 3, maxRows: 5 }}
           />
         ) : (

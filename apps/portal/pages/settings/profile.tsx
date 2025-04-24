@@ -33,10 +33,12 @@ import { useRouter } from 'next/router';
 import { errorHandler } from 'app/services/helpers/errors';
 import SCHeader from 'components/shared/SCHeader/SCHeader';
 import { BiLoaderAlt } from 'react-icons/bi';
+import { useTranslation } from 'react-i18next';
 
 const avaSize = 88;
 
 const Profile: React.FC = () => {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const router = useRouter();
   const user: IUser = useSelector((state: RootStateOrAny) => state.auth.user);
@@ -197,7 +199,7 @@ const Profile: React.FC = () => {
         <div className={styles.profileSettings}>
           <div className={styles.profileSettingsMain}>
             <div className={styles.profilePhoto}>
-              <h1>Profile</h1>
+              <h1>{t('page.profile.title')}</h1>
 
               <FileUploader onFileSelected={onFileSelectedHandler}>
                 {({ onFileSelectorOpen }) => (
@@ -225,7 +227,7 @@ const Profile: React.FC = () => {
                       clicked={onFileSelectorOpen}
                     />
 
-                    <span onClick={onFileSelectorOpen}>Edit</span>
+                    <span onClick={onFileSelectorOpen}>{t('common.edit')}</span>
                   </div>
                 )}
               </FileUploader>
@@ -233,20 +235,22 @@ const Profile: React.FC = () => {
 
             <div className={styles.profileDetails}>
               <ProfileDetail
-                title="Name"
+                title={t('common.name')}
                 value={user?.displayName}
                 clicked={() => setShowNameModal(true)}
               />
               <ProfileDetail
-                title="Email"
+                title={t('page.image.email')}
                 value={user?.email}
                 disabled={isGoogleAccount}
                 clicked={() => !isGoogleAccount && setShowEmailModal(true)}
               />
               <ProfileDetail
-                title="Password"
+                title={t('page.profile.settings.password')}
                 value={
-                  isGoogleAccount ? 'Logged in with Google account' : undefined
+                  isGoogleAccount
+                    ? t('page.profile.loggedInWithGoogle')
+                    : undefined
                 }
                 disabled={isGoogleAccount}
                 clicked={() => !isGoogleAccount && setShowPasswordModal(true)}
@@ -256,15 +260,15 @@ const Profile: React.FC = () => {
 
           <div className={styles.profileDeleteAccount}>
             <ProfileDetail
-              title="Account"
-              value="Delete account"
+              title={t('page.profile.account.title')}
+              value={t('page.setting.deleteAccount')}
               valueColor="red"
               clicked={() => setShowDeleteAccountModal(true)}
             />
           </div>
 
           <span className={styles.profileSignOut} onClick={signOutHandler}>
-            Sign out
+            {t('header.user.signout')}
           </span>
         </div>
 

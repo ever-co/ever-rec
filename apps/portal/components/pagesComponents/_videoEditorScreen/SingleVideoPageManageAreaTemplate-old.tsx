@@ -392,7 +392,7 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
         onClick={() => openDeleteModal(video)}
         key="menu_item_delete"
       >
-        <span className="tw-text-xs">Delete Video</span>
+        <span className="tw-text-xs">{t('unique.deleteVideo')}</span>
       </Menu.Item>
       <Menu.Item
         icon={<AppSvg size="18px" path="/common/collection.svg" />}
@@ -400,7 +400,10 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
         key="menu_item_chapters_enabled"
       >
         <span className="tw-text-xs">
-          {chaptersEnabled ? 'Disable' : 'Enable'} Chapters
+          {chaptersEnabled
+            ? t('page.video.actionsSection.disable')
+            : t('page.video.actionsSection.enable')}{' '}
+          {t('page.video.actionsSection.chapters')}
         </span>
       </Menu.Item>
     </Menu>
@@ -473,7 +476,7 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
               <div className={styles.iconContainer}>
                 <AppSvg path="/images/icon-Manage-light.svg" size="25px" />
               </div>
-              <div>Manage</div>
+              <div>{t('common.manage')}</div>
             </Tab>
             <Tab className={tabClassesTw}>
               <div className={styles.iconContainer}>
@@ -484,7 +487,7 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
                 />
               </div>
               <div className="tw-flex tw-gap-1">
-                <span>Chapters</span>
+                <span>{t('page.video.actionsSection.chapters')} </span>
                 {hasChanges && (
                   <AppSvg
                     path="/common/circle-solid.svg"
@@ -501,13 +504,13 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
               <div className={styles.iconContainer}>
                 <AppSvg path="/images/comments.svg" size="25px" />
               </div>
-              <div>Comments</div>
+              <div>{t('common.comments')}</div>
             </Tab>
           </TabList>
           <TabPanel>
             <ImageActionsCard className="tw-rounded-t-none">
               <div>
-                Currently saved in
+                {t('page.image.currentlySavedInOnly')}
                 <strong className="tw-ml-1.5">{currentlySavedIn}</strong>
               </div>
               <div
@@ -515,7 +518,7 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
                 onClick={() => setShowFolderModal(true)}
               >
                 <div className={styles.moveToFolderInner}>
-                  <div>Move to folder</div>
+                  <div>{t('page.image.moveToFolder')}</div>
                   <AppSvg
                     size="24px"
                     path="/images/right-arrow.svg"
@@ -527,7 +530,7 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
             <ImageActionsCard>
               <div className="tw-grid tw-gap-4 tw-grid-cols-3 tw-justify-items-center across-btns:tw-gap-1 across-btns:tw-grid-rows-1 across-btns:tw-place-items-center">
                 <ImageActionItem
-                  title="Download"
+                  title={t('common.download')}
                   onClick={localSave}
                   icon={IoMdDownload}
                   outerClassName={styles.containerVideoAction}
@@ -535,7 +538,7 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
                   iconColor="#5B4DBE"
                 />
                 <ImageActionItem
-                  title="Email"
+                  title={t('page.image.email')}
                   icon={BiMailSend}
                   onClick={() => openEmailModal(video)}
                   outerClassName={styles.containerVideoAction}
@@ -548,7 +551,7 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
                   placement="bottomLeft"
                 >
                   <ImageActionItem
-                    title="More"
+                    title={t('common.more')}
                     icon={FiMoreHorizontal}
                     outerClassName={styles.containerVideoAction}
                     circleClassName={styles.innerCircle}

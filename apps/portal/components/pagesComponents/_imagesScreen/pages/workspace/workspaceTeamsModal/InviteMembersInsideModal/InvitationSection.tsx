@@ -11,6 +11,7 @@ import AppSvg from 'components/elements/AppSvg';
 import WorkspaceInviteLink from './WorkspaceInviteLink';
 import { IInviteMembersInsideModalProps } from './InviteMembersInsideModal';
 import { sendWorkspaceInviteLink } from 'app/services/email';
+import { useTranslation } from 'react-i18next';
 
 interface IInvitationSectionProps
   extends IInviteMembersInsideModalProps,
@@ -78,10 +79,11 @@ const InvitationSection: FC<IInvitationSectionProps> = ({
 };
 
 const EmailInput = ({ emails, setEmails }) => {
+  const { t } = useTranslation();
   return (
     <ReactMultiEmail
       emails={emails}
-      placeholder="Add Email"
+      placeholder={t('workspace.addEmail')}
       style={emails.length ? { overflowY: 'scroll' } : undefined}
       className={classNames(
         styles.whiteParagraph,
@@ -129,6 +131,7 @@ interface ISendEmailProps {
 }
 
 const SendEmailButton: FC<ISendEmailProps> = ({ disabled, onEmailSend }) => {
+  const { t } = useTranslation();
   return (
     <AppButton
       onClick={onEmailSend}
@@ -144,7 +147,7 @@ const SendEmailButton: FC<ISendEmailProps> = ({ disabled, onEmailSend }) => {
         className="tw-mr-5px"
         bgColor="white"
       />
-      Send Email
+      {t('workspace.sendEmail')}
     </AppButton>
   );
 };

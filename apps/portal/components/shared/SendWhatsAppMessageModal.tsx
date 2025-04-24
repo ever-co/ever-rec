@@ -7,6 +7,7 @@ import AppInput from 'components/controls/AppInput';
 import { requiredRule } from 'app/rules';
 import IAppControl, { IAppControlData } from 'app/interfaces/IAppControl';
 import styles from './SendWhatsAppMessageModal.module.scss';
+import { useTranslation } from 'react-i18next';
 
 interface ISlackChannelModalProps {
   selectedItemId: string;
@@ -23,6 +24,7 @@ const SendWhatsAppMessageModal: React.FC<ISlackChannelModalProps> = ({
   forEditor,
   onSave,
 }) => {
+  const { t } = useTranslation();
   const initialControl = (): IAppControl => ({
     value: '',
     errors: [],
@@ -113,22 +115,22 @@ const SendWhatsAppMessageModal: React.FC<ISlackChannelModalProps> = ({
             outlined
             className={styles.btn}
           >
-            Cancel
+            {t('common.cancel')}
           </AppButton>
           <AppButton
             onClick={handleOnsubmit}
             className={styles.btnContainer}
             disabled={loading || !valid}
           >
-            Send
+            {t('common.send')}
           </AppButton>
         </div>
       }
     >
-      <h2 className={styles.title}>Share Message to WhatsApp</h2>
+      <h2 className={styles.title}>{t('modals.shareOnWhatsApp')}</h2>
       <AppInput
         type={'number'}
-        placeholder="Enter WhatsApp Number with country code"
+        placeholder={t('modals.enterWhatsApp')}
         value={phoneInput.value}
         errors={phoneInput.errors}
         onChange={oldPhoneChangeHandler}

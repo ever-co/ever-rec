@@ -14,6 +14,7 @@ import useShareWorkspaceInviteModal from 'hooks/useShareWorkspaceInviteModal';
 import MyTeamsInsideModal from './MyTeamsInsideModal/MyTeamsInsideModal';
 import InviteMembersInsideModal from './InviteMembersInsideModal/InviteMembersInsideModal';
 import { IUser } from 'app/interfaces/IUserData';
+import { useTranslation } from 'react-i18next';
 
 interface IProps {
   user: IUser;
@@ -39,6 +40,7 @@ const WorkspaceTeamsModal: FC<IProps> = ({
   onCancel,
 }) => {
   const router = useRouter();
+  const { t } = useTranslation();
   // const { link, copied, setLink, primaryButtonClickHandler } =
   //   useShareWorkspaceInviteModal({ workspace, visible });
 
@@ -78,10 +80,10 @@ const WorkspaceTeamsModal: FC<IProps> = ({
         <section className={styles.mainSection}>
           <TabList className={styles.tabList}>
             <Tab className={classNames('react-tabs__tab', styles.tab)}>
-              Workspace Members
+              {t('workspace.workspaceMembers')}
             </Tab>
             <Tab className={classNames('react-tabs__tab', styles.tab)}>
-              Teams
+              {t('workspace.teams')}
             </Tab>
             {/* <Tab className={classNames('react-tabs__tab', styles.tab)}>
               Invite Members

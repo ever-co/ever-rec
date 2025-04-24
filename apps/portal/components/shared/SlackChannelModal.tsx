@@ -6,6 +6,7 @@ import { RootStateOrAny, useSelector } from 'react-redux';
 import { getChannels, sendSlackPostMessage } from 'app/services/screenshots';
 import { errorMessage, infoMessage } from 'app/services/helpers/toastMessages';
 import AppSpinner from 'components/containers/appSpinner/AppSpinner';
+import { useTranslation } from 'react-i18next';
 
 interface ISlackChannelModalProps {
   selectedItemId: string;
@@ -24,6 +25,7 @@ const SlackChannelModal: React.FC<ISlackChannelModalProps> = ({
   forEditor,
   onSave,
 }) => {
+  const { t } = useTranslation();
   const [selectedChannel, setSelectedChannel] = useState('');
   const [errors, setErrors] = useState<null | string[]>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -89,23 +91,25 @@ const SlackChannelModal: React.FC<ISlackChannelModalProps> = ({
             outlined
             className="tw-px-8 tw-mx-4 tw-pb-1 tw-pt-1"
           >
-            Cancel
+            {t('common.cancel')}
           </AppButton>
           <AppButton
             onClick={handleOnsubmit}
             className="tw-px-8 tw-pb-1 tw-pt-1"
             disabled={loading}
           >
-            Send
+            {t('common.send')}
           </AppButton>
         </div>
       }
     >
-      <h2 className="tw-mb-6 tw-text-2xl tw-font-semibold">Send to slack</h2>
+      <h2 className="tw-mb-6 tw-text-2xl tw-font-semibold">
+        {t('modals.sendToSlack')}
+      </h2>
       <AppSpinner show={channelLoading} local={true} />
       <AppSelect
-        label="Pick a channel or conversation to share and preview the code you've created in your Slack workspace."
-        placeholder="Please select an option"
+        label={t('modals.selectChannel')}
+        placeholder={t('modals.selectAOption')}
         value={selectedChannel}
         errors={errors || undefined}
         onChange={(value) => {

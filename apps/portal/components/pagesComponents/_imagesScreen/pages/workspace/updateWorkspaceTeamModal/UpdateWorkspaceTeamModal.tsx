@@ -17,6 +17,7 @@ import PanelAC from 'app/store/panel/actions/PanelAC';
 import { deleteWorkspaceTeam } from 'app/services/workspaceTeams';
 import { IWorkspaceTeam } from 'app/interfaces/IWorkspaceTeams';
 import { updateWorkspaceTeamAPI } from 'app/services/api/workspaceTeams';
+import { useTranslation } from 'react-i18next';
 
 interface IProps {
   workspace: IWorkspace;
@@ -33,6 +34,7 @@ const UpdateWorkspaceTeamModal: React.FC<IProps> = ({
   visible,
   onCancel,
 }) => {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const teamNameRef = useRef<string>('');
   const iconUploadRef = useRef<HTMLInputElement | null>(null);
@@ -200,17 +202,17 @@ const UpdateWorkspaceTeamModal: React.FC<IProps> = ({
         }}
       />
       <h2 className="tw-text-2xl tw-font-bold tw-mb-10">
-        Update team settings
+        {t('modals.updateTeamSettings')}
       </h2>
       <div className={styles.row}>
-        <h4 className={styles.heading}>Update Team Name</h4>
+        <h4 className={styles.heading}>{t('modals.updateTeamName')}</h4>
         <div className={styles.changeTeamName}>
           <input
             value={teamName}
             onChange={onTeamNameChange}
             className={styles.input}
             type="text"
-            placeholder="Enter team name"
+            placeholder={t('modals.enterTeamName')}
           />
           <div className={styles.iconButtonsWrapper}>
             <AppButton
@@ -223,7 +225,7 @@ const UpdateWorkspaceTeamModal: React.FC<IProps> = ({
                   <AppSpinnerLocal />
                 </div>
               ) : (
-                'Update'
+                t('common.update')
               )}
             </AppButton>
             <AppButton
@@ -232,13 +234,13 @@ const UpdateWorkspaceTeamModal: React.FC<IProps> = ({
               outlined={true}
               className={styles.cancelButton}
             >
-              Reset
+              {t('common.reset')}
             </AppButton>
           </div>
         </div>
       </div>
       <div className={styles.row}>
-        <h4 className={styles.heading}>Update Team Icon</h4>
+        <h4 className={styles.heading}>{t('modals.updateTeamIcon')}</h4>
         <div className={styles.iconInnerWrapper}>
           <img
             ref={avatarImgRef}
@@ -258,7 +260,7 @@ const UpdateWorkspaceTeamModal: React.FC<IProps> = ({
                   <AppSpinnerLocal />
                 </div>
               ) : (
-                'Update'
+                t('common.update')
               )}
             </AppButton>
             <AppButton
@@ -267,16 +269,16 @@ const UpdateWorkspaceTeamModal: React.FC<IProps> = ({
               outlined={true}
               className={styles.cancelButton}
             >
-              Reset
+              {t('common.reset')}
             </AppButton>
           </div>
         </div>
         <p className={styles.supportsP}>
-          Supports .jpeg, .jpg, .png. Max size: 30KB
+          {t('page.image.uploadDescriptionWithLimit')}
         </p>
       </div>
       <div className={styles.row}>
-        <h4 className={styles.heading}>Update Team Thumbnail</h4>
+        <h4 className={styles.heading}>{t('modals.updateTeamThumbnail')}</h4>
         <div className={styles.iconInnerWrapper}>
           <img
             ref={thumbnailImgRef}
@@ -299,7 +301,7 @@ const UpdateWorkspaceTeamModal: React.FC<IProps> = ({
                   <AppSpinnerLocal />
                 </div>
               ) : (
-                'Update'
+                t('common.update')
               )}
             </AppButton>
 
@@ -309,21 +311,20 @@ const UpdateWorkspaceTeamModal: React.FC<IProps> = ({
               outlined={true}
               className={styles.cancelButton}
             >
-              Reset
+              {t('common.reset')}
             </AppButton>
           </div>
         </div>
-        <p className={styles.supportsP}>Supports .jpeg, .jpg, .png.</p>
+        <p className={styles.supportsP}>{t('page.image.uploadDescription')} </p>
       </div>
       {isAdmin && (
         <div
           className={classNames(styles.actionWrapper, styles.lastActionWrapper)}
         >
           <div>
-            <h4 className={styles.heading}>Delete Team</h4>
+            <h4 className={styles.heading}>{t('modals.deleteTeam')}</h4>
             <p className={styles.descriptionP}>
-              Delete Team and all its contents cannot be undone. Are you sure
-              you want to delete?
+              {t('modals.deleteTeamQuestion')}
             </p>
           </div>
           {!toDeleteTeam && (
@@ -331,7 +332,7 @@ const UpdateWorkspaceTeamModal: React.FC<IProps> = ({
               onClick={deleteTeamHandler}
               className={classNames(styles.dangerButton, styles.deleteTeamBtn)}
             >
-              Delete Team
+              {t('modals.deleteTeam')}
             </AppButton>
           )}
           {toDeleteTeam && (
@@ -352,6 +353,7 @@ const UpdateWorkspaceTeamModal: React.FC<IProps> = ({
 export default UpdateWorkspaceTeamModal;
 
 const DeleteConfirmButtons = ({ onConfirm, onCancel, loading }) => {
+  const { t } = useTranslation();
   return (
     <div className={styles.toDeleteTeam}>
       <AppButton
@@ -363,11 +365,11 @@ const DeleteConfirmButtons = ({ onConfirm, onCancel, loading }) => {
             <AppSpinnerLocal circleInnerColor="#d70015" />
           </div>
         ) : (
-          'Confirm'
+          t('common.confirm')
         )}
       </AppButton>
       <AppButton onClick={() => onCancel()} className="" outlined>
-        Cancel
+        {t('common.cancel')}
       </AppButton>
     </div>
   );

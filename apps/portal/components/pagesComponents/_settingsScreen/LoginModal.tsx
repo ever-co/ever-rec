@@ -11,6 +11,7 @@ import { errorHandler } from '../../../app/services/helpers/errors';
 import { IDataResponse } from 'app/interfaces/IApiResponse';
 import AppSvg from 'components/elements/AppSvg';
 import jwt_decode from 'jwt-decode';
+import { useTranslation } from 'react-i18next';
 
 export interface ILoginModalOkProps {
   email: string;
@@ -41,6 +42,7 @@ const LoginModal: React.FC<ILoginModalProps> = ({
   const [valid, setValid] = useState<boolean>(false);
   const [shouldHaveGoogleLogin, setShouldHaveGoogleLogin] = useState(false);
 
+  const { t } = useTranslation();
   const passwordChangeHandler = ({ value, errors }: IAppControlData) => {
     setPassword({
       value,
@@ -126,7 +128,7 @@ const LoginModal: React.FC<ILoginModalProps> = ({
                 disabled={!valid}
                 bgColor="tw-bg-danger"
               >
-                Delete account
+                {t('page.setting.deleteAccount')}
               </AppButton>
             ) : (
               <AppButton
@@ -134,7 +136,7 @@ const LoginModal: React.FC<ILoginModalProps> = ({
                 className="tw-px-10"
                 disabled={!valid}
               >
-                Confirm
+                {t('common.confirm')}
               </AppButton>
             ))}
           {shouldHaveGoogleLogin && (
@@ -148,22 +150,22 @@ const LoginModal: React.FC<ILoginModalProps> = ({
       <div className="tw-mb-30px">
         {!onDelete ? (
           <h2 className="tw-mb-8 tw-text-2xl tw-font-bold">
-            Re-enter credentials to continue
+            {t('page.setting.reEnterCredentials')}
           </h2>
         ) : !shouldHaveGoogleLogin ? (
           <h2 className="tw-mb-8 tw-text-2xl tw-font-bold">
-            Please enter your password before remove your account
+            {t('page.setting.passwordBeforeRemove')}
           </h2>
         ) : (
           <h2 className="tw-mb-8 tw-text-2xl tw-font-bold">
-            Please select account to be removed
+            {t('page.setting.accountToBeRemoved')}
           </h2>
         )}
       </div>
       {!shouldHaveGoogleLogin && (
         <div>
           <AppInput
-            placeholder="Enter password"
+            placeholder={t('page.profile.deleteAccountModal.enterPassword')}
             type="password"
             value={password.value}
             errors={password.errors}

@@ -16,6 +16,7 @@ import AppInput from 'components/controls/AppInput';
 import { ResStatusEnum } from 'app/interfaces/IApiResponse';
 import AppSpinnerLocal from 'components/containers/appSpinnerLocal/AppSpinnerLocal';
 import AppTextArea from 'components/controls/AppTextArea';
+import { useTranslation } from 'react-i18next';
 
 interface ICreateJiraTicketModalProps {
   selectedItem: any;
@@ -30,6 +31,7 @@ const CreateJiraTicketModal: React.FC<ICreateJiraTicketModalProps> = ({
   user,
   type = 'image',
 }) => {
+  const { t } = useTranslation();
   const [selectedProject, setSelectedProject] = useState<null | string>(null);
   const [selectedResource, setSelectedResource] = useState<null | string>(null);
   const [selectedIssueType, setSelectedIssueType] = useState(null);
@@ -164,27 +166,27 @@ const CreateJiraTicketModal: React.FC<ICreateJiraTicketModalProps> = ({
             outlined
             className="tw-px-8 tw-mx-4 tw-pb-1 tw-pt-1"
           >
-            Cancel
+            {t('common.cancel')}
           </AppButton>
           <AppButton
             onClick={handleOnsubmit}
             className="tw-px-8 tw-pb-1 tw-pt-1"
             disabled={loading}
           >
-            Create
+            {t('common.create')}
           </AppButton>
         </div>
       }
     >
       <h2 className="tw-mb-4 tw-text-2xl tw-font-semibold">
-        Create Jira issue with selected attachment
+        {t('modals.createJira')}
       </h2>
 
-      <label>Select resource: *</label>
+      <label>{t('modals.selectResource')}</label>
       <Select
         value={selectedResource}
         size="large"
-        placeholder="Please select an option"
+        placeholder={t('modals.selectAOption')}
         style={{ marginBottom: '1rem' }}
         className="tw-mb-8 tw-w-full tw-bg-white tw-rounded"
         notFoundContent={
@@ -215,11 +217,12 @@ const CreateJiraTicketModal: React.FC<ICreateJiraTicketModalProps> = ({
           ))}
       </Select>
 
-      <label>Select project: *</label>
+      <label>{t('modals.selectProject')}</label>
+
       <Select
         value={selectedProject}
         size="large"
-        placeholder="Please select an option"
+        placeholder={t('modals.selectAOption')}
         style={{ marginBottom: '1rem' }}
         className="tw-w-full tw-bg-white tw-rounded"
         onChange={(value: string) => {
@@ -240,11 +243,12 @@ const CreateJiraTicketModal: React.FC<ICreateJiraTicketModalProps> = ({
           ))}
       </Select>
 
-      <label>Select issue type: *</label>
+      <label>{t('modals.selectIssueType')}</label>
+
       <Select
         value={selectedIssueType}
         size="large"
-        placeholder="Please select an option"
+        placeholder={t('modals.selectAOption')}
         style={{ marginBottom: '1rem' }}
         className="tw-w-full tw-bg-white tw-rounded"
         onChange={(value) => {
@@ -266,7 +270,7 @@ const CreateJiraTicketModal: React.FC<ICreateJiraTicketModalProps> = ({
 
       <AppInput
         value={title}
-        placeholder="Title/Summary *"
+        placeholder={t('modals.titleSummary')}
         className="tw-mb-2 tw-w-full"
         inputClass="tw-bg-transparent tw-border-mid-grey tw-placeholder-black"
         onChange={(e) => setSelectedTitle(e.value)}
@@ -275,7 +279,7 @@ const CreateJiraTicketModal: React.FC<ICreateJiraTicketModalProps> = ({
       <AppTextArea
         value={description}
         canResize={false}
-        placeholder="Card description"
+        placeholder={t('modals.cardDescription')}
         className="tw-mt-6 tw-w-full"
         inputClass="scroll-div tw-outline-none tw-bg-transparent tw-border-mid-grey tw-placeholder-black"
         onChange={(e) => setSelectedDescription(e.value)}

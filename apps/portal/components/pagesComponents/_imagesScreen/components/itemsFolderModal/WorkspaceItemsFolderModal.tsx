@@ -19,6 +19,7 @@ import {
   loadingMessage,
   updateMessage,
 } from 'app/services/helpers/toastMessages';
+import { useTranslation } from 'react-i18next';
 
 interface IItemsFolderModalProps {
   items?: (IWorkspaceImage | IWorkspaceVideo)[];
@@ -45,6 +46,7 @@ const WorkspaceItemsFolderModal: React.FC<IItemsFolderModalProps> = ({
 }) => {
   const dispatch = useDispatch();
   const [valid, setValid] = useState(false);
+  const { t } = useTranslation();
   const [selectedFolder, setSelectedFolder] =
     useState<IWorkspaceDbFolder | null>(null);
   const [initialOpened, setInitialOpened] = useState(true);
@@ -120,7 +122,7 @@ const WorkspaceItemsFolderModal: React.FC<IItemsFolderModalProps> = ({
             className="tw-px-8 tw-pb-1 tw-pt-1"
             disabled={!valid}
           >
-            Move
+            {t('page.image.move')}
           </AppButton>
           <AppButton
             onClick={onCancel}
@@ -128,7 +130,7 @@ const WorkspaceItemsFolderModal: React.FC<IItemsFolderModalProps> = ({
             outlined
             className="tw-px-8 tw-mx-4 tw-pb-1 tw-pt-1"
           >
-            Cancel
+            {t('page.image.cancel')}
           </AppButton>
         </div>
       }

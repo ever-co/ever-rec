@@ -706,7 +706,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
                           </div>
                           <div className={styles.providerText}>
                             <div className={styles.openImageText}>
-                              Processing...
+                              {t('page.image.processing')}
                             </div>
                           </div>
                         </div>
@@ -717,7 +717,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
                           <AppSvg path="/images/dropbox-logo.svg" size="25px" />
                           <div className={styles.providerText}>
                             {dropBoxImageId
-                              ? 'Open image'
+                              ? t('page.image.openImage')
                               : user?.dropbox?.email || 'Dropbox'}
                           </div>
                         </div>

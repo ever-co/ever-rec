@@ -10,6 +10,7 @@ import {
 import AppButton2 from 'components/controls/AppButton2';
 import CommentElement, { IComment } from '../CommentElement/CommentElement';
 import { errorMessage, infoMessage } from 'app/services/helpers/toastMessages';
+import { useTranslation } from 'react-i18next';
 
 interface IProps {
   userId: string;
@@ -18,6 +19,7 @@ interface IProps {
 }
 
 const VideoComments: FC<IProps> = ({ userId, itemOwnerId, itemId }) => {
+  const { t } = useTranslation();
   const [showNotification, setShowNotification] = useState(true);
   const [comments, setComments] = useState<IComment[] | null>(null);
   const [editComments, setEditComments] = useState<any[]>([]);
@@ -157,18 +159,22 @@ const VideoComments: FC<IProps> = ({ userId, itemOwnerId, itemId }) => {
   });
   return (
     <div className={styles.comments}>
-      <h3>{commentsLength} Comments</h3>
+      <h3>
+        {commentsLength}
+
+        {t('common.comments')}
+      </h3>
 
       <div className={styles.inputWrapper}>
         <input
           type="text"
           value={userComment}
-          placeholder="Add a comment..."
+          placeholder={t('page.video.commentsSection.placeholder')}
           onChange={(e) => setUserComment(e.target.value)}
         />
 
         <AppButton2 onClick={addCommentHandler} disabled={addCommentDisabled}>
-          Comment
+          {t('common.comment')}
         </AppButton2>
       </div>
 

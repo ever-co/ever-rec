@@ -13,7 +13,7 @@ interface IProps {
 
 const Settings: FC<IProps> = ({ children }) => {
   const user = useAuthenticateUser();
-  const { settingsMenuItems } = userMenuItems();
+  const { settingsMenuItems } = useMenuItems();
   const headTitle = useHeadTitle(settingsMenuItems);
 
   useMonitorTokens();

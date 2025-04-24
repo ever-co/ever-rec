@@ -18,6 +18,7 @@ import { panelRoutes, preRoutes } from '../../../_routes';
 import { IMainMenuItem, useMenuItems } from 'misc/menuItems';
 import useClickOrKeyOutside from 'hooks/useClickOrKeyOutside';
 import { useCreateWorkspace } from 'hooks/useCreateWorkspaceHandler';
+import { useTranslation } from 'react-i18next';
 
 interface IProps {
   isProfilePage?: boolean;
@@ -25,6 +26,7 @@ interface IProps {
 }
 
 const Sidebar: FC<IProps> = ({ isProfilePage, isWorkspaceSettingsPage }) => {
+  const { t } = useTranslation();
   const router = useRouter();
   const dispatch = useDispatch();
   const favFoldersRef = useRef(null);
@@ -138,7 +140,11 @@ const Sidebar: FC<IProps> = ({ isProfilePage, isWorkspaceSettingsPage }) => {
 
           {(isProfilePage || isWorkspaceSettingsPage) && (
             <div className={styles.sidebarHeading}>
-              <h1>{isProfilePage ? 'Profile' : 'Administration'}</h1>
+              <h1>
+                {isProfilePage
+                  ? t('sidebar.profile')
+                  : t('sidebar.administration')}
+              </h1>
             </div>
           )}
 

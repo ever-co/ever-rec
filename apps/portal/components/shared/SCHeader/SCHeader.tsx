@@ -92,7 +92,9 @@ const SCHeader: FC<ISCHeaderProps> = ({
           <div
             className={classNames(styles.actionButton, styles.profileButton)}
           >
-            <p>Language</p>
+            <p>
+            {t('common.language')}
+            </p>
             <AppSvg path="/new-design-v2/down-caret.svg" size="20px" />
           </div>
         </Dropdown>

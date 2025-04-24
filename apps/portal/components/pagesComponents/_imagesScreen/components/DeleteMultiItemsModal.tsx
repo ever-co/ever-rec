@@ -2,6 +2,7 @@ import React from 'react';
 import { Modal } from 'antd';
 import AppButton from 'components/controls/AppButton';
 import { MixedItemType } from 'app/interfaces/ItemType';
+import { useTranslation } from 'react-i18next';
 interface IDelteMultiItemsModalProps {
   visible: boolean;
   onClose: () => void;
@@ -15,11 +16,11 @@ const DeleteMultiItemsModal: React.FC<IDelteMultiItemsModalProps> = ({
   visible,
   type,
 }) => {
-  let paragraph =
-    'Are you sure you want to move these files to the Trash folder?';
+  const { t } = useTranslation();
+  let paragraph = t('modals.moveToTrash');
 
   if (type === 'item') {
-    paragraph = 'Are you sure you want to delete these files permanently?';
+    paragraph = t('modals.deletePermanently');
   }
 
   return (
@@ -34,7 +35,7 @@ const DeleteMultiItemsModal: React.FC<IDelteMultiItemsModalProps> = ({
             outlined
             className="tw-px-8 tw-mx-4 tw-pb-1 tw-pt-1"
           >
-            Cancel
+            {t('common.cancel')}
           </AppButton>
           <AppButton
             onClick={onOkHandler}
@@ -42,12 +43,14 @@ const DeleteMultiItemsModal: React.FC<IDelteMultiItemsModalProps> = ({
             bgColor={type === 'item' ? 'tw-bg-danger' : undefined}
             twTextColor={type === 'item' ? 'tw-text-white' : undefined}
           >
-            Delete
+            {t('page.profile.deleteAccountModal.currentPassword')}
           </AppButton>
         </div>
       }
     >
-      <h2 className="tw-mb-6 tw-text-2xl tw-font-semibold">Delete {type}s</h2>
+      <h2 className="tw-mb-6 tw-text-2xl tw-font-semibold">
+        {t('common.delete')} {type}s
+      </h2>
       <p>{paragraph}</p>
     </Modal>
   );

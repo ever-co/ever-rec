@@ -10,6 +10,7 @@ import ColorElement from './ColorElement';
 import colorPalet from 'misc/colorPalet';
 import { IWorkspace } from 'app/interfaces/IWorkspace';
 import { ColorPicker } from './ColorPicker';
+import { useTranslation } from 'react-i18next';
 
 interface ICreateFolderModalProps {
   visible: boolean;
@@ -129,6 +130,7 @@ const CreateFolderModal: React.FC<ICreateFolderModalProps> = ({
     onClose();
   };
 
+  const { t } = useTranslation();
   return (
     <Modal
       open={visible}
@@ -141,21 +143,23 @@ const CreateFolderModal: React.FC<ICreateFolderModalProps> = ({
             outlined
             className="tw-px-8 tw-mx-4 tw-pb-1 tw-pt-1"
           >
-            Cancel
+            {t('common.cancel')}
           </AppButton>
           <AppButton
             onClick={onOkHandler}
             className="tw-px-8 tw-pb-1 tw-pt-1"
             disabled={!valid}
           >
-            Create
+            {t('modals.create')}
           </AppButton>
         </div>
       }
     >
-      <h2 className="tw-mb-6 tw-text-2xl tw-font-semibold">Create a folder</h2>
+      <h2 className="tw-mb-6 tw-text-2xl tw-font-semibold">
+        {t('modals.createAFolder')}
+      </h2>
       <AppInput
-        placeholder="Enter a folder name"
+        placeholder={t('modals.enterAFolderName')}
         value={folderName.value}
         errors={folderName.errors}
         onChange={folderNameChangeHandler}
@@ -164,14 +168,14 @@ const CreateFolderModal: React.FC<ICreateFolderModalProps> = ({
         maxLength={35}
       />
       <div className="tw-mt-4 tw-text-lg tw-ml-1">
-        Select folder{' '}
+        {t('modals.selectFolder')}{' '}
         <span className="tw-font-semibold" style={{ color: color }}>
-          color
+          {t('modals.color')}
         </span>
       </div>
       <div className="tw-flex tw-items-center tw-space-x-4"></div>
       <div className="tw-my-4 tw-flex tw-w-full tw-justify-center tw-h-25px tw-items-center">
-        <p className="tw-mt-1 tw-mr-1">Custom</p>{' '}
+        <p className="tw-mt-1 tw-mr-1">{t('modals.custom')}</p>{' '}
         <ColorPicker color={color} setColor={handleColor} />
         <p className="tw-h-7 tw-w-[1px] tw-mt-1 tw-bg-black tw-mx-2"></p>{' '}
         {colorPalet.map((item, index) => (

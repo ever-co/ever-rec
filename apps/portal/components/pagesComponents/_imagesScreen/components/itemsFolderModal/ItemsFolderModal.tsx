@@ -19,6 +19,7 @@ import {
   decreaseFolderItems,
   increaseFolderItems,
 } from 'app/services/helpers/manageFolders';
+import { useTranslation } from 'react-i18next';
 
 interface IItemsFolderModalProps {
   mainItem?: IEditorImage | IEditorVideo | null;
@@ -37,6 +38,7 @@ const ItemsFolderModal: React.FC<IItemsFolderModalProps> = ({
   type,
   loader,
 }) => {
+  const { t } = useTranslation();
   const explorerDataImages: IExplorerData = useSelector(
     (state: RootStateOrAny) => state.panel.explorerData,
   );
@@ -190,7 +192,7 @@ const ItemsFolderModal: React.FC<IItemsFolderModalProps> = ({
             className="tw-px-8 tw-pb-1 tw-pt-1"
             disabled={!valid}
           >
-            Move
+            {t('page.image.move')}
           </AppButton>
           <AppButton
             onClick={() => {
@@ -201,7 +203,7 @@ const ItemsFolderModal: React.FC<IItemsFolderModalProps> = ({
             outlined
             className="tw-px-8 tw-mx-4 tw-pb-1 tw-pt-1"
           >
-            Cancel
+            {t('page.image.cancel')}
           </AppButton>
         </div>
       }

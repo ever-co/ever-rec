@@ -4,6 +4,7 @@ import classNames from 'classnames';
 import { IWorkspaceUser } from 'app/interfaces/IWorkspace';
 import { IWorkspaceTeam } from 'app/interfaces/IWorkspaceTeams';
 import { sortByEmail } from './WorkspaceMembersModalMembersWrapper';
+import { useTranslation } from 'react-i18next';
 
 interface IProps {
   isWorkspace?: boolean;
@@ -41,7 +42,9 @@ const WorkspaceTeamMembers: FC<IProps> = ({
     });
   }
 
-  const memberString = teamMemberCount > 1 ? 'members' : 'member';
+  const { t } = useTranslation();
+  const memberString =
+    teamMemberCount > 1 ? t('workspace.members') : t('workspace.member');
 
   const clickHandler = () => {
     if (team) {

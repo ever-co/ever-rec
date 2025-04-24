@@ -6,6 +6,7 @@ import AppInput from 'components/controls/AppInput';
 import AppButton from 'components/controls/AppButton';
 import { RootStateOrAny, useSelector } from 'react-redux';
 import IExplorerData from 'app/interfaces/IExplorerData';
+import { useTranslation } from 'react-i18next';
 interface IEditFolderModalProps {
   visible: boolean;
   oldName: string;
@@ -25,6 +26,7 @@ const EditFolderModal: React.FC<IEditFolderModalProps> = ({
     touched: false,
   });
 
+  const { t } = useTranslation();
   const [folderName, setFolderName] = useState<IAppControl>(initialControl());
   const [valid, setValid] = useState<boolean>(false);
   const explorerData: IExplorerData = useSelector(
@@ -129,21 +131,23 @@ const EditFolderModal: React.FC<IEditFolderModalProps> = ({
             outlined
             className="tw-px-8 tw-mx-4 tw-pb-1 tw-pt-1"
           >
-            Cancel
+            {t('common.cancel')}
           </AppButton>
           <AppButton
             onClick={onOkHandler}
             className="tw-px-8 tw-pb-1 tw-pt-1"
             disabled={!valid}
           >
-            Change Name
+            {t('modals.changeName')}
           </AppButton>
         </div>
       }
     >
-      <h2 className="tw-mb-6 tw-text-2xl tw-font-semibold">Edit folder</h2>
+      <h2 className="tw-mb-6 tw-text-2xl tw-font-semibold">
+        {t('modals.editFolder')}
+      </h2>
       <AppInput
-        placeholder="Folder name"
+        placeholder={t('modals.folderName')}
         value={folderName.value}
         errors={folderName.errors}
         onChange={folderNameChangeHandler}

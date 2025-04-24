@@ -63,6 +63,7 @@ import RenameItemModal from 'components/shared/RenameItemModal';
 import { updateItemDataWorkspace } from 'app/services/workspace';
 import ItemsFolderModal from 'components/pagesComponents/_imagesScreen/components/itemsFolderModal/ItemsFolderModal';
 import WorkspaceItemsFolderModal from 'components/pagesComponents/_imagesScreen/components/itemsFolderModal/WorkspaceItemsFolderModal';
+import { useTranslation } from 'react-i18next';
 
 interface IProps {
   ip?: string;
@@ -77,6 +78,7 @@ const SingleVideoPage: FC<IProps> = ({
   isWorkspace = false,
   activeWorkspace,
 }) => {
+  const { t } = useTranslation();
   const addedUniqueView = useRef(false);
   const router = useRouter();
   const dispatch = useDispatch();
@@ -464,7 +466,7 @@ const SingleVideoPage: FC<IProps> = ({
           {!hideChapters && (
             <div className={styles.chapters}>
               <div className={styles.chaptersHeading}>
-                <span>Chapters</span>
+                <span>{t('page.video.chapters')}</span>
               </div>
 
               <VideoChapters
@@ -555,9 +557,9 @@ const SingleVideoPage: FC<IProps> = ({
       <RenameItemModal
         visible={showRenameModal}
         title={video?.dbData?.title || ''}
-        modalHeading="Edit title"
-        inputLabel="Current item title:"
-        inputPlaceholder="Edit a new item title"
+        modalHeading={t('page.video.actionsSection.editTitle')}
+        inputLabel={t('page.video.currentItemTitle')}
+        inputPlaceholder={t('page.video.editANewTitle')}
         onOk={(title) => updateTitle(title, video as any, isWorkspace)}
         onCancel={() => setShowRenameModal(false)}
       />
@@ -607,6 +609,7 @@ export default SingleVideoPage;
 
 const VideoNotFoundPage = () => {
   const router = useRouter();
+  const { t } = useTranslation();
 
   return (
     <AppContainer>
@@ -618,10 +621,10 @@ const VideoNotFoundPage = () => {
           <div className="tw-flex tw-justify-center">
             <div>
               <div className="tw-font-bold tw-text-3xl tw-text-center tw-mt-4">
-                Whoo...oops!
+                {t('page.video.oops')}
               </div>
               <div className="tw-text-lg tw-text-center tw-mt-2">
-                You don’t have the access to this item anymore.
+                {t('page.video.noAccess')}
               </div>
 
               <div>
@@ -631,7 +634,7 @@ const VideoNotFoundPage = () => {
                   }}
                   className="tw-m-auto tw-mt-5 tw-px-10 tw-py-4"
                 >
-                  Back to Portal
+                  {t('page.video.backToPortal')}
                 </AppButton>
               </div>
             </div>

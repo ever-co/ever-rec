@@ -7,6 +7,7 @@ import AppButton from 'components/controls/AppButton';
 import { MdOutlineAddToDrive } from 'react-icons/md';
 import AppSvg from '../../../elements/AppSvg';
 import { AiOutlineDropbox } from 'react-icons/ai';
+import { useTranslation } from 'react-i18next';
 
 interface IUploadToCloudModalProps {
   visible: boolean;
@@ -23,6 +24,7 @@ const UploadToCloudModal: React.FC<IUploadToCloudModalProps> = ({
   onOk,
   type = null,
 }) => {
+  const { t } = useTranslation();
   const initialControl = (): IAppControl => ({
     value: '',
     errors: [],
@@ -81,14 +83,14 @@ const UploadToCloudModal: React.FC<IUploadToCloudModalProps> = ({
             outlined
             className="tw-px-8 tw-mx-4 tw-pb-1 tw-pt-1"
           >
-            Cancel
+            {t('common.cancel')}
           </AppButton>
           <AppButton
             onClick={onOkHandler}
             className="tw-px-8 tw-pb-1 tw-pt-1"
             disabled={!valid}
           >
-            Save
+            {t('common.save')}
           </AppButton>
         </div>
       }
@@ -99,11 +101,12 @@ const UploadToCloudModal: React.FC<IUploadToCloudModalProps> = ({
           <AiOutlineDropbox size={30} className="tw-mr-2" />
         )}
         <h2 className="tw-text-2xl tw-font-semibold">
-          Save to {type ? type : 'Google drive'}
+          {t('page.image.saveTo')}
+          {type ? type : 'Google drive'}
         </h2>
       </div>
       <AppInput
-        placeholder="Name"
+        placeholder={t('common.name')}
         inputClass="tw-bg-transparent"
         value={name.value}
         errors={name.errors}
