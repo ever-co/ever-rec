@@ -92,9 +92,7 @@ const GoogleDriveTool: React.FC<IGoogleDriveProps> = ({
               size="30px"
               className={styles.iconWrapper}
             />
-            <h2 className={styles.title}>
-              Save to Google Drive
-            </h2>
+            <h2 className={styles.title}>Save to Google Drive</h2>
           </div>
           <AppInput
             placeholder="Name"

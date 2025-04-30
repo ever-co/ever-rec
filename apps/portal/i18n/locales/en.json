@@ -514,7 +514,7 @@
       "downloadAs": "Download Screenshot As",
       "alwaysGetLink": "Always get shareable links for screenshots uploaded to Google Drive",
       "saveEachFile": "Ask where to save each file before downloading",
-      "saveEachFileDescription": "Note: to use this feature, you need to Allow the extension to manage Downloads when permission request window pops up. And only when this option is turned on, can you specify default subfolder to save screenshots to your local disk. Defaults to the Downloads folder if you don\’t specify a subfolder.",
+      "saveEachFileDescription": "Note: to use this feature, you need to Allow the extension to manage Downloads when permission request window pops up. And only when this option is turned on, can you specify default subfolder to save screenshots to your local disk. Defaults to the Downloads folder if you don’t specify a subfolder.",
       "addDateAndUrl": "Add Date and URL at the top of a screenshot"
     }
   },
