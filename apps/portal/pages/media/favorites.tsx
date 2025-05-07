@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import AppSvg from 'components/elements/AppSvg';
 import classNames from 'classnames';
 import favStyles from '../../components/pagesComponents/_imagesScreen/components/folderItem/FolderItem.module.scss';
@@ -6,11 +6,8 @@ import IExplorerData from 'app/interfaces/IExplorerData';
 import { Menu } from 'antd';
 import AppSpinner from 'components/containers/appSpinner/AppSpinner';
 import DashboardCard from 'components/containers/dashboardLayout/elements/DashboardCard';
-import { RootStateOrAny, useDispatch, useSelector } from 'react-redux';
-import PanelAC from 'app/store/panel/actions/PanelAC';
+import { RootStateOrAny, useSelector } from 'react-redux';
 import { IDbFolderData } from 'app/interfaces/IEditorImage';
-import useFolderOrder from '../../hooks/useFolderOrder';
-import { FolderTypeEnum } from 'app/enums/folderTypeEnum';
 import { ItemOrderEnum } from 'app/enums/itemOrderEnum';
 import MediaIndex from './index';
 import { IUser } from 'app/interfaces/IUserData';
@@ -41,26 +38,10 @@ const FavoritesPage: React.FC = () => {
 
   const [isDropdownVisible, setIsDropdownVisible] = useState('');
 
-  const dispatch = useDispatch();
   const user: IUser = useSelector((state: RootStateOrAny) => state.auth.user);
-  const explorerDataLoaded: boolean = useSelector(
-    (state: RootStateOrAny) => state.panel.explorerDataLoaded,
-  );
   const explorerData: IExplorerData = useSelector(
     (state: RootStateOrAny) => state.panel.explorerData,
   );
-  const folderOrder: ItemOrderEnum = useSelector(
-    (state: RootStateOrAny) => state.panel.screenshotsFolderOrder,
-  );
-  const folderOrderVideos: ItemOrderEnum = useSelector(
-    (state: RootStateOrAny) => state.panel.videosFolderOrder,
-  );
-  const explorerDataVideos: IExplorerData = useSelector(
-    (state: RootStateOrAny) => state.panel.explorerDataVideos,
-  );
-
-  const foldersType = FolderTypeEnum.imageFolders;
-  const { folderData } = useFolderOrder(explorerData, folderOrder, foldersType);
 
   const itemOrder: ItemOrderEnum = useSelector(
     (state: RootStateOrAny) => state.panel.screenshotsItemOrder,

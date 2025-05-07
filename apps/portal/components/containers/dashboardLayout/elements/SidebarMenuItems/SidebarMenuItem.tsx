@@ -1,4 +1,4 @@
-import React, { ReactElement, useCallback, useEffect, useState } from 'react';
+import React, { ReactElement, useEffect, useState } from 'react';
 import classNames from 'classnames';
 import { BiChevronUp } from 'react-icons/bi';
 import styles from './SidebarItemsStyles.module.scss';

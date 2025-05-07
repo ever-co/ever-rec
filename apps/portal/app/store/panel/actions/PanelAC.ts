@@ -58,7 +58,6 @@ import {
   SET_WORKSPACE_ITEM_ORDER,
   SET_WORKSPACE_FOLDER_ORDER,
   SET_WORKSPACE_FETCHED,
-  CHANGE_FAVORITE_REFETCH,
 } from './actionTypes';
 import { ITrelloData } from 'app/interfaces/IIntegrationTypes';
 import { IWorkspace, IWorkspaceImage } from 'app/interfaces/IWorkspace';

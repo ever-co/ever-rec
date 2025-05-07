@@ -1,6 +1,5 @@
 import { IFavoriteFolders } from 'app/interfaces/Folders';
 import { IDbFolderData } from 'app/interfaces/IEditorVideo';
-import { IUser } from 'app/interfaces/IUserData';
 import { getFoldersImageAPI } from 'app/services/api/image';
 import {
   getVideoFavFoldersAPI,
@@ -29,12 +28,12 @@ const useFavoritesFolders = () => {
     const data2: any = await getVideoFavFoldersAPI();
 
     if (!data2.data.images && !data2.data.videos) return;
-    const imagesFav = data2.data.images
+    const imagesFav: any = data2.data.images
       ? Object.keys(data2.data.images).map((key) => {
           return { ...data2.data.images[key], uid: key };
         })
       : [];
-    const videosFav = data2.data.videos
+    const videosFav: any = data2.data.videos
       ? Object.keys(data2.data?.videos).map((key) => {
           return { ...data2.data.videos[key], uid: key };
         })
