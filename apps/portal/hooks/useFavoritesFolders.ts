@@ -28,16 +28,21 @@ const useFavoritesFolders = () => {
     const data2: any = await getVideoFavFoldersAPI();
 
     if (!data2.data.images && !data2.data.videos) return;
-    const imagesFav: any = data2.data.images
-      ? Object.keys(data2.data.images).map((key) => {
-          return { ...data2.data.images[key], uid: key };
-        })
-      : [];
-    const videosFav: any = data2.data.videos
-      ? Object.keys(data2.data?.videos).map((key) => {
-          return { ...data2.data.videos[key], uid: key };
-        })
-      : [];
+    const imagesFav =
+      data2?.data?.images && data2?.data2?.images
+        ? Object.keys(data2.data2.images).map((key) => ({
+            ...data2.data.images[key],
+            uid: key,
+          }))
+        : [];
+
+    const videosFav =
+      data2?.data?.videos && data2?.data2?.videos
+        ? Object.keys(data2.data2.videos).map((key) => ({
+            ...data2.data.videos[key],
+            uid: key,
+          }))
+        : [];
     const images = imageApi.data.filter((v) =>
       imagesFav.some((x) => x.id === v.id),
     );

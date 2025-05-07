@@ -124,6 +124,7 @@ const FavoritesPage: React.FC = () => {
                 <div className={styles.foldersFavourites} id="scrollableDiv">
                   {favoritesImages.map((folder: IDbFolderData) => (
                     <div
+                      key={folder.id}
                       className={classNames(
                         favStyles.mainWrapper,
                         isDropdownVisible == folder.id && favStyles.active,
