@@ -177,6 +177,7 @@ const FavoritesPage: React.FC = () => {
                     <>
                       {favoritesVideos.map((folder: IDbFolderData) => (
                         <div
+                          key={folder.id}
                           className={classNames(
                             favStyles.mainWrapper,
                             isDropdownVisible == folder.id && favStyles.active,
