@@ -142,6 +142,7 @@ const getExplorerData = async (
       getImageFavFoldersAPI(),
     ]);
 
+    console.log('folderResponse', folderId, foldersResponse);
     const currentFolder =
       currentFolderResponse &&
       currentFolderResponse.status &&

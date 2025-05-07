@@ -1,16 +1,9 @@
-import React, { ReactElement, useCallback, useState } from 'react';
+import React, { ReactElement, useCallback, useEffect, useState } from 'react';
 import classNames from 'classnames';
 import { BiChevronUp } from 'react-icons/bi';
 import styles from './SidebarItemsStyles.module.scss';
-import { RootStateOrAny, useSelector } from 'react-redux';
-import { FolderTypeEnum } from 'app/enums/folderTypeEnum';
-import { ItemOrderEnum } from 'app/enums/itemOrderEnum';
-import { IFavoriteFolders } from 'app/interfaces/Folders';
-import useFolderOrder from 'hooks/useFolderOrder';
-import IExplorerData from 'app/interfaces/IExplorerData';
-import { IDbFolderData } from 'app/interfaces/IEditorImage';
-import { parseCollectionToArray } from 'misc/_helper';
 import { FolderIcon } from 'components/pagesComponents/_imagesScreen/components/folderItem/FolderHeader';
+import useFavoritesFolders from 'hooks/useFavoritesFolders';
 
 interface ISidebarMenuItemProps {
   icon: ReactElement;
@@ -21,40 +14,15 @@ interface ISidebarMenuItemProps {
 }
 const SidebarMenuItem: React.FC<ISidebarMenuItemProps> = React.forwardRef(
   ({ icon, title, active, className = '', onClick }) => {
-    const explorerData: IExplorerData = useSelector(
-      (state: RootStateOrAny) => state.panel.explorerData,
-    );
+    const { favoritesImages, favoritesVideos } = useFavoritesFolders();
 
-    const folderOrder: ItemOrderEnum = useSelector(
-      (state: RootStateOrAny) => state.panel.screenshotsFolderOrder,
-    );
-    const favoriteFolders: IFavoriteFolders = useSelector(
-      (state: RootStateOrAny) => state.panel.favoriteFolders,
-    );
-
-    const foldersType = FolderTypeEnum.imageFolders;
-    const { folderData } = useFolderOrder(
-      explorerData,
-      folderOrder,
-      foldersType,
-    );
-    const isFavorite = useCallback(
-      (folder: IDbFolderData) => {
-        if (favoriteFolders?.images) {
-          return parseCollectionToArray(favoriteFolders.images).some(
-            (x) => x.id === folder.id,
-          );
-        }
-        return false;
-      },
-      [favoriteFolders],
-    );
-
-    const foldersList = folderData
-      ? folderData.map((x) => (isFavorite(x) ? x : null)).filter((v) => v)
-      : [];
     const [isOpen, setIsOpen] = useState(false);
 
+    useEffect(() => {
+      if (title == 'Favorites') {
+        //getFavFolders();
+      }
+    });
     const handleToggle = (e: React.MouseEvent) => {
       e.stopPropagation();
       setIsOpen(!isOpen);
@@ -81,8 +49,8 @@ const SidebarMenuItem: React.FC<ISidebarMenuItemProps> = React.forwardRef(
                   )}
                 >
                   <span onClick={onClick} className="tw-flex">
-                    <div className={styles.icon}>{icon}</div>
-                    <div className={styles.title}>{title}</div>
+                    <div className={classNames(styles.icon)}>{icon}</div>
+                    <div className={classNames(styles.title)}>{title}</div>
                   </span>
                   <div
                     className="tw-absolute tw-right-4 "
@@ -101,18 +69,50 @@ const SidebarMenuItem: React.FC<ISidebarMenuItemProps> = React.forwardRef(
               </div>
             </div>
             {isOpen && (
-              <div className={`${styles.listWrapper} scroll-div`}>
-                {foldersList.map((v) => (
-                  <div key={v} className={styles.title}>
-                    <FolderIcon
-                      path="/common/folder-icon-v3.svg"
-                      bgColor={'#ffffff'}
-                      size="19px"
-                    />
-                    {v.name}
-                  </div>
-                ))}
-              </div>
+              <>
+                {favoritesImages.length > 0 && (
+                  <>
+                    <h1 className="tw-ml-16 tw-font-bold tw-underline">
+                      Images
+                    </h1>
+                    <div className={`${styles.listWrapper} scroll-div`}>
+                      {favoritesImages.map((v) => (
+                        <div key={v.id} className={styles.title}>
+                          <FolderIcon
+                            path="/common/folder-icon-v3.svg"
+                            bgColor={v.color ? v.color : '#ffffff'}
+                            size="19px"
+                          />
+                          <p className="tw-w-[10rem] tw-truncate">{v.name}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
+                {favoritesVideos.length > 0 && (
+                  <>
+                    <h1 className="tw-ml-16 tw-font-bold tw-underline">
+                      Videos
+                    </h1>
+                    <div className={`${styles.listWrapper} scroll-div`}>
+                      {favoritesVideos.map((v) => (
+                        <div key={v.id} className={styles.title}>
+                          <FolderIcon
+                            path="/common/folder-icon-v3.svg"
+                            bgColor={v.color ? v.color : '#ffffff'}
+                            size="19px"
+                          />
+
+                          <p className="tw-w-[10rem] tw-truncate">{v.name}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
+                {favoritesVideos.length == 0 && favoritesImages.length == 0 && (
+                  <h1 className="tw-ml-16 tw-font-bold ">No Favorites</h1>
+                )}
+              </>
             )}
           </>
         ) : (

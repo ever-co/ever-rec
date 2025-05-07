@@ -43,6 +43,7 @@ import {
   SET_VIDEO_DURATION,
   CLEAR_VIDEO_DURATION,
 } from './actionTypes';
+import { CHANGE_FAVORITE_REFETCH } from 'app/store/panel/actions/actionTypes';
 
 export default class PanelAC {
   static setActiveRoute({ activeRoute }: { activeRoute: string }): ActionType {
@@ -272,5 +273,8 @@ export default class PanelAC {
       type: SET_EMAIL_IMAGE,
       payload: { emailImage, emailImageLink, itemPublicLink },
     };
+  }
+  static setFavoriteRefetch(count): ActionType {
+    return { type: CHANGE_FAVORITE_REFETCH, payload: count };
   }
 }
