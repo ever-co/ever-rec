@@ -30,6 +30,7 @@ import router from 'next/router';
 import AppButton from 'components/controls/AppButton';
 import { useCreateWorkspace } from 'hooks/useCreateWorkspaceHandler';
 import { useTranslation } from 'react-i18next';
+import SCHeader from 'components/shared/SCHeader/SCHeader';
 
 export type LeaveDeleteActions = 'leave' | 'delete';
 
@@ -285,9 +286,11 @@ const ManageWorkspaces: React.FC = () => {
       />
       <MediaIndex>
         <DashboardCard className={styles.dashboardCard}>
-          <div className={styles.mainHeader}>
-            <span>{t('workspace.workspacesSettings')}</span>
-          </div>
+          <SCHeader
+            text={t('workspace.workspacesSettings')}
+            showSearch={false}
+            userPhotoURL={user?.photoURL}
+          />
           {workspaces?.length === 0 && (
             <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-h-full ">
               {/* Large Text */}
