@@ -16,7 +16,9 @@ import { infoMessage } from '@/app/services/helpers/toastMessages';
 import { IWorkspace } from '@/app/interfaces/IWorkspace';
 
 interface ISCHeaderProps {
-  filterValue: string | null;
+  filterValue?: string | null;
+  showSearch?: boolean;
+  text?: string;
   userPhotoURL?: string | null;
   isWorkspace?: boolean;
   isWorkspaceAdmin?: boolean;
@@ -26,6 +28,8 @@ interface ISCHeaderProps {
 
 const SCHeader: FC<ISCHeaderProps> = ({
   filterValue,
+  text,
+  showSearch = true,
   userPhotoURL,
   isWorkspace = false,
   isWorkspaceAdmin = false,
@@ -64,18 +68,22 @@ const SCHeader: FC<ISCHeaderProps> = ({
 
   return (
     <div className={styles.appHeader}>
-      <div className={styles.search}>
-        <AppSvg path="images/new-design-v2/search.svg" />
+      {showSearch ? (
+        <div className={styles.search}>
+          <AppSvg path="/new-design-v2/search.svg" />
 
-        <input
-          value={filterValue ?? undefined}
-          type="text"
-          placeholder="Search files..."
-          className={styles.appInput}
-          onChange={onFilterChange}
-          disabled={filterValue === null}
-        />
-      </div>
+          <input
+            value={filterValue ?? ''}
+            type="text"
+            placeholder="Search files..."
+            className={styles.appInput}
+            onChange={onFilterChange}
+            disabled={filterValue === null}
+          />
+        </div>
+      ) : (
+        <div className="tw-text-3xl tw-font-bold">{text}</div>
+      )}
       <div className={styles.actions}>
         <Tooltip title="Notifications" placement="bottom">
           <div
@@ -140,7 +148,6 @@ const SCHeader: FC<ISCHeaderProps> = ({
           </div>
         </Dropdown>
       </div>
-
       {CreateWSModal}
     </div>
   );

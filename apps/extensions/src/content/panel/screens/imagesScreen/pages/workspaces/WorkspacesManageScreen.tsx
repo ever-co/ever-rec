@@ -28,6 +28,7 @@ import { panelRoutes } from '@/content/panel/router/panelRoutes';
 import { useNavigate } from 'react-router';
 import AppButton from '@/content/components/controls/appButton/AppButton';
 import { useCreateWorkspace } from '@/content/utilities/hooks/useCreateWorkspace';
+import SCHeader from '@/content/panel/shared/SCHeader/SCHeader';
 
 export type LeaveDeleteActions = 'leave' | 'delete';
 
@@ -253,7 +254,6 @@ const ManageWorkspaces = () => {
 
   return (
     <>
-      {CreateWSModal}
       <input
         type="file"
         id="file"
@@ -277,15 +277,11 @@ const ManageWorkspaces = () => {
         }}
       />
       <DashboardCard className={styles.dashboardCard}>
-        <div className={styles.mainHeader}>
-          <span>Workspaces - Settings</span>
-          {/* <AppButton
-            twPadding="tw-py-4 tw-px-6"
-            onClick={() => setShowCreateWorkspaceModal(true)}
-          >
-            Add Workspace
-          </AppButton> */}
-        </div>
+        <SCHeader
+          text={'Workspaces'}
+          showSearch={false}
+          userPhotoURL={user?.photoURL}
+        />
         {workspaces?.length === 0 && (
           <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-h-full ">
             {/* Large Text */}
