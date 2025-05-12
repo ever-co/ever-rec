@@ -33,7 +33,6 @@ import { IUser } from 'app/interfaces/IUserData';
 import { getCookies, removeCookies } from 'app/services/helpers/getCookies';
 import { panelRoutes, preRoutes } from 'components/_routes';
 import { useRouter } from 'next/router';
-import { increaseFolderItems } from 'app/services/helpers/manageFolders';
 import { IFavoriteFolders } from 'app/interfaces/Folders';
 import { parseCollectionToArray } from 'misc/_helper';
 import styles from 'pagesScss/media/Images.module.scss';
@@ -43,7 +42,7 @@ import SCHeader from 'components/shared/SCHeader/SCHeader';
 import useItemOrder from 'hooks/useItemOrder';
 import { ItemTypeEnum } from 'app/enums/itemTypeEnum';
 import useItemsFilter from 'hooks/useItemsFilter';
-import { Trans, useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 
 const Images: React.FC = () => {
   const { t } = useTranslation();
