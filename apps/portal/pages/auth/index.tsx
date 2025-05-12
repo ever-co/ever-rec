@@ -21,7 +21,6 @@ import { useTranslation } from 'react-i18next';
 import { languagesList } from 'components/shared/SCHeader/SCHeader';
 import AppSvg from 'components/elements/AppSvg';
 import { Dropdown } from 'antd';
-import classNames from 'classnames';
 
 type SignFlowName = 'login' | 'register' | 'resetPassword' | 'newResetPassword';
 

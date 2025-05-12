@@ -26,7 +26,6 @@ import UniqueViews from 'components/elements/UniqueViews';
 import useInitImageVideoItem from 'hooks/useInitImageVideoItem';
 import SingleImagePageManageAreaTemplate from '../../components/pagesComponents/_singleImageScreen/SingleImagePageManageAreaTemplate';
 import VideoComments from 'components/pagesComponents/_videoEditorScreen/comments/VideoComments/VideoComments';
-import { useTranslation } from 'react-i18next';
 
 export interface deletionModalIntF {
   state: boolean;
