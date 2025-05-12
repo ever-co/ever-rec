@@ -52,8 +52,7 @@ const VideoComments: FC<IProps> = ({ userId, itemOwnerId, itemId }) => {
   const addCommentHandler = async () => {
     if (!itemId || !userComment) return;
     if (!userId) {
-      showNotification &&
-        infoMessage('You need to be logged in to add a comment.');
+      showNotification && infoMessage(t('toasts.loginToComment'));
       setShowNotification(false);
       return;
     }
@@ -71,7 +70,7 @@ const VideoComments: FC<IProps> = ({ userId, itemOwnerId, itemId }) => {
 
     if (!response.data) {
       setAddCommentDisabled(false);
-      return errorMessage('Could not post your comment. Please try again.');
+      return errorMessage(t('toasts.loginToComment'));
     }
 
     if (comments && comments.length) {

@@ -54,7 +54,7 @@ const Trello: React.FC = () => {
     if (res.status != 'error') {
       setLoading(false);
       setIsDisconnect(false);
-      infoMessage('Successfully disconnected trello account');
+      infoMessage(t('toasts.trelloDisconnected'));
     } else {
       setLoading(false);
       errorMessage(res.message);

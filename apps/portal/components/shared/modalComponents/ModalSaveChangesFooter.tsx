@@ -19,10 +19,12 @@ const ModalSaveChangesFooter: FC<IProps> = ({
   close,
 }) => {
   const { t } = useTranslation();
+  const title =
+    buttonTitle == 'Save changes' ? t('common.saveChanges') : buttonTitle;
   return (
     <div className={styles.footerContainer}>
       <AppButtonSecond onClick={ok} disabled={!valid} danger={danger}>
-        {buttonTitle}
+        {title}
       </AppButtonSecond>
 
       <span className={styles.cancelLink} onClick={close}>

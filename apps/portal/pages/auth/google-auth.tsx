@@ -29,12 +29,12 @@ const GoogleAuth = () => {
         signOut(true);
         sendExternalMessage('reAuth', { success: true });
       } else {
-        errorHandler({ message: 'Accounts are not the same.' });
+        errorHandler({ message: t('toasts.accountsNotSame') });
       }
     } catch (e) {
       console.log(e);
       errorHandler({
-        message: 'Error while trying to process data, please try again later.',
+        message: t('toasts.couldNotProcess'),
       });
     }
   };

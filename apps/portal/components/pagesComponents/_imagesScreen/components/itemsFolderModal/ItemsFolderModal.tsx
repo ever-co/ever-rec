@@ -83,7 +83,9 @@ const ItemsFolderModal: React.FC<IItemsFolderModalProps> = ({
           dispatch(PanelAC.setEditorImage({ editorImage: image as any }));
         }
         await getExplorerData(explorerDataImages.currentFolder?.id);
-        infoMessage(`Image moved to ${selectedFolder?.name || 'My Images'}`);
+        infoMessage(
+          `${t('toasts.imageMovedTo')} ${selectedFolder?.name || t('common.myImages')}`,
+        );
       } else if (type == 'video') {
         if (mainItem) {
           if (explorerDataVideos.currentFolder) {
@@ -103,7 +105,9 @@ const ItemsFolderModal: React.FC<IItemsFolderModalProps> = ({
         }
         mainItem && (await updateVideoData(dbData as DbVideoData));
         await getExplorerDataVideo(explorerDataImages.currentFolder?.id);
-        infoMessage(`Video moved to ${selectedFolder?.name || 'My Videos'}`);
+        infoMessage(
+          `${t('toasts.videoMovedTo')} ${selectedFolder?.name || t('common.myVideos')}`,
+        );
       }
       loader && loader(false);
     }

@@ -1,5 +1,6 @@
 import classNames from 'classnames';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 export type AppSelectType = { value: string; errors?: string[] };
 
@@ -21,7 +22,6 @@ interface AppSelectProps {
 
 const AppSelect: React.FC<AppSelectProps> = ({
   label,
-  placeholder,
   onChange,
   errors,
   inputContainerClass,
@@ -32,6 +32,7 @@ const AppSelect: React.FC<AppSelectProps> = ({
   options,
   value,
 }) => {
+  const { t } = useTranslation();
   const renderErrors = () => {
     if (errors?.length) {
       return (
@@ -75,7 +76,7 @@ const AppSelect: React.FC<AppSelectProps> = ({
             inputClass,
           )}
         >
-          <option value={''}>Please select option</option>
+          <option value={''}>{t('unique.pleaseSelectOption')}</option>
           {options &&
             options.length > 0 &&
             options.map((item) => (

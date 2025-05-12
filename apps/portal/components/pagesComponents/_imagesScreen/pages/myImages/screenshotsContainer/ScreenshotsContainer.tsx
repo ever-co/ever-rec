@@ -149,7 +149,7 @@ const ScreenshotsContainer: React.FC<IScreenshotsContainerProps> = ({
 
     screenshot && (await moveRestoreTrash(screenshot));
     setLoaderState(false);
-    infoMessage('The image has been moved to the Trash');
+    infoMessage(t('toasts.imageMovedToTrash'));
   };
 
   const closeDeletionModalHandler = () => {
@@ -177,7 +177,7 @@ const ScreenshotsContainer: React.FC<IScreenshotsContainerProps> = ({
               `${process.env.NEXT_PUBLIC_WEBSITE_URL}/image/shared/${sharedLink}`,
             );
             copied();
-            successMessage('Copied');
+            successMessage(t('toasts.copied'));
           } catch (e) {
             console.log(e.message);
           }
@@ -271,7 +271,7 @@ const ScreenshotsContainer: React.FC<IScreenshotsContainerProps> = ({
 
   const download = async (screenshot: any) => {
     const downloaded = await localSave(screenshot);
-    if (downloaded) infoMessage('Image downloaded');
+    if (downloaded) infoMessage(t('toasts.imageDownloaded'));
   };
 
   const handleAction = async (
@@ -342,7 +342,7 @@ const ScreenshotsContainer: React.FC<IScreenshotsContainerProps> = ({
             }),
           );
         }
-        infoMessage(`Image added to: ${workspace.name}`);
+        infoMessage(`${t('toasts.imageAdded')}${workspace.name}`);
       }
     }
   };

@@ -56,7 +56,7 @@ import {
 } from '../../../app/interfaces/IWorkspace';
 import WorkspaceItemsFolderModal from '../_imagesScreen/components/itemsFolderModal/WorkspaceItemsFolderModal';
 import DeleteItemModal from 'components/shared/DeleteItemModal';
-import { workspaceVideoDelete } from 'misc/workspaceFunctions';
+import { useWorkspaceVideoDelete } from 'misc/workspaceFunctions';
 import useGenerateShareLink from 'hooks/useGenerateShareLink';
 import VideoChapters from 'components/pagesComponents/_videoEditorScreen/chapters/VideoChapters/VideoChapters';
 import useVideoChapters from 'hooks/useVideoChapters';
@@ -91,6 +91,7 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
 }) => {
   const user = useAuthenticateUser();
   const { t } = useTranslation();
+  const { workspaceVideoDelete } = useWorkspaceVideoDelete();
   const router = useRouter();
   const dispatch = useDispatch();
   const [dropBoxImageId, setDropBoxImageId] = useState<string | null>('');
@@ -209,7 +210,7 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
 
     video && (await moveRestoreVideoTrash(video));
 
-    infoMessage('The video has been moved to the trash');
+    infoMessage(t('toasts.videoMovedToTrash'));
   };
 
   const closeDeletionModalHandler = () => {
@@ -258,7 +259,7 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
         updateExplorerDataDrive(response.data);
         setDriveVideoId(null);
         setDriveOperationLoading(false);
-        successMessage('File deleted from drive');
+        successMessage(t('toasts.fileDeletedFromDrive'));
       }
     }
     if (showCloudDeleteFileModal == 'Dropbox') {
@@ -274,7 +275,7 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
       } else {
         setDropBoxImageId(null);
         setDropboxOperationLoading(false);
-        successMessage('File deleted from Dropbox');
+        successMessage(t('toasts.fileDeletedFromDropbox'));
       }
     }
   };
@@ -290,7 +291,7 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
           streamState.downloadStatus === PlaybackStatusEnum.READY;
         if (!canDownload) {
           setDriveOperationLoading(false);
-          infoMessage('You will be able to upload to drive shortly...');
+          infoMessage(t('toasts.uploading'));
           return;
         }
 
@@ -308,7 +309,7 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
       if (data) {
         updateExplorerDataDrive(data.drivesData);
         setDriveVideoId(data.fileId);
-        successMessage('Video uploaded successfully.');
+        successMessage(t('toasts.videoUploadedSuccess'));
         await saveSegmentEvent('Video uploaded to google drive', {
           title: video.dbData?.title,
         });
@@ -324,13 +325,11 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
       );
       if (response.status == 'success') {
         setDropBoxImageId(response.data);
-        successMessage('Video uploaded successfully.');
+        successMessage(t('toasts.videoUploadedSuccess'));
         setDropboxOperationLoading(false);
       } else {
         setDropboxOperationLoading(false);
-        errorMessage(
-          response.message || 'Something went wrong, Please try again later',
-        );
+        errorMessage(response.message || t('toasts.problemTryAgain'));
       }
       setLoaderState(false);
     }
@@ -359,12 +358,12 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
 
   const localSave = async () => {
     if (streamState?.downloadStatus === PlaybackStatusEnum.PREPARING)
-      return infoMessage('Your download will be ready shortly...');
+      return infoMessage(t('toasts.downloadReady'));
 
     const downloaded = await downloadVideo(video);
 
     if (downloaded) {
-      successMessage('Video downloaded!');
+      successMessage(t('toasts.videoDownloaded'));
       await saveSegmentEvent('Video Downloaded', {
         title: video.dbData?.title,
       });

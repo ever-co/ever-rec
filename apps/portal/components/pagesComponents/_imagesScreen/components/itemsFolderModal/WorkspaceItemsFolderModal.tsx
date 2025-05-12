@@ -70,7 +70,9 @@ const WorkspaceItemsFolderModal: React.FC<IItemsFolderModalProps> = ({
     const folderNameString = selectedFolder
       ? selectedFolder.name
       : `${activeWorkspace.name}`;
-    const toast = loadingMessage(`Moving items to ${folderNameString}...`);
+    const toast = loadingMessage(
+      `${t('toasts.movingItems')} ${folderNameString}...`,
+    );
 
     const itemIds = items?.map((x) => x.dbData?.id);
 
@@ -85,7 +87,7 @@ const WorkspaceItemsFolderModal: React.FC<IItemsFolderModalProps> = ({
     if (!data) {
       return updateMessage(
         toast,
-        response.message || 'Error while trying to move items.',
+        response.message || t('toasts.movingItemsError'),
         'error',
       );
     }
@@ -104,7 +106,11 @@ const WorkspaceItemsFolderModal: React.FC<IItemsFolderModalProps> = ({
     setSelectedState && setSelectedState({ state: false, items: [] });
     dispatch(PanelAC.setActiveWorkspace({ activeWorkspace: data }));
 
-    updateMessage(toast, `Items moved to ${folderNameString}.`, 'success');
+    updateMessage(
+      toast,
+      `${t('toasts.movingItemsError')} ${folderNameString}.`,
+      'success',
+    );
   };
 
   return (

@@ -122,13 +122,13 @@ const EmailModal: React.FC<IEmailModalProps> = ({
             title: item.dbData?.title,
           });
         }
-        infoMessage('Email sent successfully');
+        infoMessage(t('toasts.emailSent'));
         setEmailcollection({ emails: [] });
       } catch (err) {
         errorHandler(err);
       }
     } else {
-      warnMessage('Email field cannot be empty');
+      warnMessage(t('toasts.emailFieldEmpty'));
     }
   };
 
@@ -154,7 +154,7 @@ const EmailModal: React.FC<IEmailModalProps> = ({
           }),
         );
       }
-    } else errorMessage('Email filed cannot be empty');
+    } else errorMessage(t('toasts.emailFieldEmpty'));
   };
 
   useEffect(() => {
@@ -210,7 +210,7 @@ const EmailModal: React.FC<IEmailModalProps> = ({
 
       <ReactMultiEmail
         emails={emailcollection?.emails}
-        placeholder="Add Email"
+        placeholder={t('workspace.addEmail')}
         className="tw-border tw-border-solid tw-border-purple-active tw-rounded-5 tw-w-full "
         onChange={(_emails: string[]) => {
           setEmailcollection({ emails: _emails });

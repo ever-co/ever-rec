@@ -51,7 +51,7 @@ import DeleteCloudFileModal from '../../shared/DeleteCloudFileModal';
 import { IWorkspace, IWorkspaceImage } from 'app/interfaces/IWorkspace';
 import WorkspaceItemsFolderModal from '../_imagesScreen/components/itemsFolderModal/WorkspaceItemsFolderModal';
 import DeleteItemModal from 'components/shared/DeleteItemModal';
-import { workspaceImageDelete } from 'misc/workspaceFunctions';
+import { useWorkspaceImageDelete } from 'misc/workspaceFunctions';
 import useGenerateShareLink from 'hooks/useGenerateShareLink';
 import { useTranslation } from 'react-i18next';
 
@@ -74,6 +74,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
   workspace,
   setLoaderState,
 }) => {
+  const { workspaceImageDelete } = useWorkspaceImageDelete();
   const user = useAuthenticateUser();
   const { t } = useTranslation();
   const dispatch = useDispatch();
@@ -211,7 +212,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
       if (data && explorerData?.files) {
         updateExplorerDataDrive(data.drivesData);
         setDriveImageId(data.fileId);
-        successMessage('image uploaded successfully.');
+        successMessage(t('toasts.imageUploaded'));
         await saveSegmentEvent('Image uploaded to google drive', {
           title: image.dbData?.title,
         });
@@ -229,9 +230,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
         setDropBoxImageId(response.data);
         successMessage('Image uploaded successfully.');
       } else {
-        errorMessage(
-          response.message || 'Something went wrong, Please try again later',
-        );
+        errorMessage(response.message || t('toasts.somethingWentWrong'));
       }
       setDropboxOperationLoading(false);
     }
@@ -253,7 +252,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
         updateExplorerDataDrive(response.data);
         setDriveImageId(null);
         setDriveOperationLoading(false);
-        successMessage('File deleted from Google drive');
+        successMessage(t('toasts.fileDeletedFromDrive'));
       }
     }
     if (showCloudDeleteFileModal == 'Dropbox') {
@@ -269,7 +268,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
       } else {
         setDropBoxImageId(null);
         setDropboxOperationLoading(false);
-        successMessage('File deleted from Dropbox');
+        successMessage(t('toasts.fileDeletedFromDropbox'));
       }
     }
   };
@@ -358,7 +357,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
 
     screenshot && (await moveRestoreTrash(screenshot));
 
-    infoMessage('The image has been moved to the Trash');
+    infoMessage(t('toasts.imageMovedToTrash'));
   };
 
   const goToEdit = async () => {
@@ -378,7 +377,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
   const pdfSave = async () => {
     if (image) {
       const blob = await pdfFromImageUrl(image.url as string);
-      successMessage('Image downloaded!');
+      successMessage(t('toasts.imageDownloaded'));
       saveAs(blob, image.dbData?.title);
       await saveSegmentEvent('Image PDF Downloaded', {
         title: image.dbData?.title,
@@ -395,10 +394,10 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
         });
         try {
           item && window.navigator.clipboard.write([item]);
-          successMessage('Copied to clipboard');
+          successMessage(t('toasts.copiedToClipboard'));
           await saveSegmentEvent('Image Copied to clipboard');
         } catch (e) {
-          errorHandler({ message: 'Link not copied' });
+          errorHandler({ message: t('toasts.linkNotCopied') });
         }
       }
     } catch (e) {

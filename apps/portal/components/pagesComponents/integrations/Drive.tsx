@@ -26,7 +26,7 @@ const Drive: React.FC = () => {
     (state: RootStateOrAny) => state.drive.workingFolder,
   );
   const router = useRouter();
-  const {settingsMenuItems} = useMenuItems()
+  const { settingsMenuItems } = useMenuItems();
   //const { driveLogin } = useGoogleDriveAuth({ pathname: `/settings/drive` });
   const { driveLogin } = useGoogleDriveAuth({
     pathname: router.query?.id ? `/image/${router.query?.id}` : '/media/images',
@@ -40,7 +40,7 @@ const Drive: React.FC = () => {
     await updateWorkingFolder(folder || null);
   };
 
-  const imagePath = activeImage(router,settingsMenuItems);
+  const imagePath = activeImage(router, settingsMenuItems);
 
   const handleDriveSignOut = useCallback(async () => {
     setLoading(true);
@@ -49,7 +49,7 @@ const Drive: React.FC = () => {
       setLoading(false);
       setIsDisconnect(false);
       removeDriveUser();
-      infoMessage('Successfully disconnected Google drive account');
+      infoMessage(t('toasts.googleDriveDisconnected'));
     } catch (err) {
       setLoading(false);
       errorMessage(err);

@@ -30,7 +30,7 @@ const Jira: React.FC = () => {
     if (res.status != 'error') {
       setLoading(false);
       setIsDisconnect(false);
-      infoMessage('Successfully disconnected jira account');
+      infoMessage(t('toasts.jiraDisconnected'));
     } else {
       setLoading(false);
       errorMessage(res.message);

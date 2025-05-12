@@ -32,7 +32,7 @@ const Dropbox: React.FC = () => {
     if (res.status != 'error') {
       setLoading(false);
       setIsDisconnect(false);
-      infoMessage('Successfully disconnected dropbox account');
+      infoMessage(t('toasts.DropBoxDisconnected'));
     } else {
       setLoading(false);
       errorMessage(res.message);

@@ -105,7 +105,7 @@ const CreateJiraTicketModal: React.FC<ICreateJiraTicketModalProps> = ({
           selectedItem.item.dbData.streamData &&
           !selectedItem.item.dbData.streamData.downloadUrl
         ) {
-          infoMessage('You will be able to upload video shortly...');
+          infoMessage(t('toasts.uploadingVideo'));
           setLoading(false);
           return;
         }
@@ -128,7 +128,7 @@ const CreateJiraTicketModal: React.FC<ICreateJiraTicketModalProps> = ({
             if (selectedResourceData) {
               const jiraIssueLink = `${selectedResourceData.url}/browse/${res.data.key}`;
               await navigator.clipboard.writeText(jiraIssueLink);
-              successMessage('Jira issue link Copied to clipboard');
+              successMessage(t('toasts.jiraIssueLinkCopied'));
             }
           }
           onCancel();
@@ -141,7 +141,7 @@ const CreateJiraTicketModal: React.FC<ICreateJiraTicketModalProps> = ({
         setLoading(false);
       }
     } else {
-      errorMessage('Please select all options');
+      errorMessage(t('toasts.selectOptions'));
     }
   }, [
     selectedIssueType,

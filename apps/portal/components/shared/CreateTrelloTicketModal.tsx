@@ -64,7 +64,7 @@ const CreateTrelloTicketModal: React.FC<ICreateTrelloTicketModalProps> = ({
         selectedItem.item.dbData?.streamData &&
         selectedItem.item.dbData.streamData.downloadUrl == ''
       ) {
-        infoMessage('You will be able to upload video shortly...');
+        infoMessage(t('toasts.uploadingVideo'));
         return;
       }
 
@@ -81,7 +81,7 @@ const CreateTrelloTicketModal: React.FC<ICreateTrelloTicketModalProps> = ({
         infoMessage(res.message);
         if (res.data && res.data.url) {
           navigator.clipboard.writeText(res.data.url);
-          successMessage('Trello card link Copied to clipboard');
+          successMessage(t('toasts.uploadingVideo'));
         }
 
         onCancel();

@@ -25,7 +25,6 @@ import {
 import { FolderTypeEnum } from 'app/enums/folderTypeEnum';
 import MediaIndex from './index';
 import { IUser } from '../../app/interfaces/IUserData';
-import classNames from 'classnames';
 import styles from 'pagesScss/Shared.module.scss';
 import MultiItemsSelect from 'components/pagesComponents/_imagesScreen/components/multiItemsSelect/MultiItemsSelect';
 import SCHeader from 'components/shared/SCHeader/SCHeader';
@@ -80,28 +79,28 @@ const Trashed: React.FC = () => {
     setDeleteModal(false);
 
     if (trashImages.length === 0 && trashVideos.length === 0) {
-      return infoMessage('No items to delete...');
+      return infoMessage(t('toasts.noItemsToDelete'));
     }
 
     setLoading(true);
     await deleteAllVideos();
     await deleteAllScreenshots();
     setLoading(false);
-    successMessage('Items deleted successfully.');
+    successMessage(t('toasts.itemsDeleted'));
   };
 
   const restoreAllItems = async () => {
     setRestoreModal(false);
 
     if (trashImages.length === 0 && trashVideos.length === 0) {
-      return infoMessage('No items to restore...');
+      return infoMessage(t('toasts.noItemsToRestore'));
     }
 
     setLoading(true);
     await restoreAllVideos();
     await restoreAllScreenshots();
     setLoading(false);
-    successMessage('Items restored successfully.');
+    successMessage(t('toasts.itemsRestored'));
   };
 
   return (

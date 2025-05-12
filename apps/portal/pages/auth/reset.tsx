@@ -5,6 +5,7 @@ import AppButton from 'components/controls/AppButton';
 import AppInput from 'components/controls/AppInput';
 import React, { useEffect, useState } from 'react';
 import Auth from '.';
+import { useTranslation } from 'react-i18next';
 
 const PanelResetPassword: React.FC = () => {
   const initialControl = (): IAppControl => ({
@@ -13,12 +14,13 @@ const PanelResetPassword: React.FC = () => {
     touched: false,
   });
 
+  const { t } = useTranslation();
   const [email, setEmail] = useState<IAppControl>(initialControl());
   const [valid, setValid] = useState<boolean>(false);
 
   const emailRules: ((v: string) => boolean | string)[] = [
-    requiredRule('Please enter an email'),
-    emailRule('Email is incorrect'),
+    requiredRule(t('page.auth.error.enterEmail')),
+    emailRule(t('page.auth.error.emailCorrect')),
   ];
 
   useEffect(() => {
@@ -44,7 +46,7 @@ const PanelResetPassword: React.FC = () => {
     <Auth componentType={'resetPassword'}>
       <div>
         <AppInput
-          placeholder="Email Address"
+          placeholder={t('page.auth.common.email')}
           value={email.value}
           errors={email.errors}
           onChange={emailChangeHandler}
@@ -58,7 +60,7 @@ const PanelResetPassword: React.FC = () => {
           className="tw-mt-8"
           twPadding="tw-p-4"
         >
-          Send email
+          {t('page.auth.common.sendEmail')}
         </AppButton>
       </div>
     </Auth>

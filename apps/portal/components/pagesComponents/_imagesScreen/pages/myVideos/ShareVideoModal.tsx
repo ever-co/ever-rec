@@ -22,6 +22,7 @@ const ShareVideoModal: React.FC<IShareVideoModalProps> = ({
   copystate,
   copied,
 }) => {
+  const { t } = useTranslation();
   const editorVideo: IEditorVideo = useSelector(
     (state: RootStateOrAny) => state.panel.editorVideo,
   );
@@ -33,10 +34,9 @@ const ShareVideoModal: React.FC<IShareVideoModalProps> = ({
         : null;
     absSharedLink && (await navigator.clipboard.writeText(absSharedLink));
     copied();
-    successMessage('Copied');
+    successMessage(t('toasts.copied'));
   };
 
-  const { t } = useTranslation();
   return (
     <Modal
       open={visible}

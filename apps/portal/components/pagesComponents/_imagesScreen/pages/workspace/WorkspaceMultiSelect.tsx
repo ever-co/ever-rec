@@ -69,11 +69,11 @@ const WorkspaceMultiSelect: React.FC<Props> = ({
       }
     });
 
-    const toast = loadingMessage('Downloading items...'); // TODO: translation language
+    const toast = loadingMessage(t('toasts.downloadingItems')); // TODO: translation language
 
     await Promise.all(downloadPromises);
 
-    updateMessage(toast, 'Items downloaded.', 'success');
+    updateMessage(toast, t('toasts.itemsDownloaded'), 'success');
 
     setSelectState({ state: false, items: [] });
   };
@@ -102,7 +102,7 @@ const WorkspaceMultiSelect: React.FC<Props> = ({
       }
     });
 
-    const toast = loadingMessage(`Deleting Items...`);
+    const toast = loadingMessage(t('toasts.deletingItems'));
 
     await Promise.all(deletePromises);
 
@@ -124,7 +124,7 @@ const WorkspaceMultiSelect: React.FC<Props> = ({
       PanelAC.setActiveWorkspace({ activeWorkspace: newWorkspace }),
     );
 
-    updateMessage(toast, `Items deleted.`, 'success');
+    updateMessage(toast, t('toasts.itemsDeletedOnly'), 'success');
 
     // TODO change folder item count
     // const currentFolder =

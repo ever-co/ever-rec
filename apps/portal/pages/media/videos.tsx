@@ -149,7 +149,7 @@ const Videos: FC = () => {
 
       setLoading(false);
     } else {
-      infoMessage("Couldn't find selected files, please try again...");
+      infoMessage(t('toasts.couldNotFindSelectedFiles'));
     }
   };
 

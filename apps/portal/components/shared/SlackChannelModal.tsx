@@ -44,7 +44,7 @@ const SlackChannelModal: React.FC<ISlackChannelModalProps> = ({
         }
         const res = await sendSlackPostMessage(channelId, selectedItemId, type);
         if (res.status != 'error') {
-          infoMessage('Item sent successfully');
+          infoMessage(t('toasts.itemSentSuccess'));
           onCancel();
         } else {
           errorMessage(res.message);
@@ -60,7 +60,7 @@ const SlackChannelModal: React.FC<ISlackChannelModalProps> = ({
       setErrors(null);
       sendSlackScreenShot(selectedItemId, selectedChannel);
     } else {
-      setErrors(['Please select channel']);
+      setErrors([t('toasts.pleaseSelectChannel')]);
     }
   }, [selectedItemId, selectedChannel]);
 

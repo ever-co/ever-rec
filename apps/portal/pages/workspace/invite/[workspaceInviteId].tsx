@@ -72,9 +72,7 @@ const WorkspaceInvite: FC<any> = () => {
     if (data && data.hasAlreadyJoined) {
       router.push(`/media/workspace/${data.workspaceId}`);
     } else if (data) {
-      successMessage(
-        'Successfully joined workspace. Redirecting to new workspace...',
-      );
+      successMessage(t('toasts.joinedWorkspaceSuccess'));
 
       sendExternalMessage('setActiveWorkspace', data);
 

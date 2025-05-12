@@ -110,7 +110,9 @@ const VideoChapterContentInput: FC<IProps> = ({
     <Tooltip
       className="tw-p-0"
       placement="top"
-      title={<div className="tw-p-2">Please fill this field</div>}
+      title={
+        <div className="tw-p-2">{t('page.video.pleaseFillThisField')}</div>
+      }
       trigger=""
       open={tooltipVisible}
     >

@@ -273,11 +273,7 @@ const Workspace: FC = () => {
       : null;
 
     if (!newTeam) {
-      return updateMessage(
-        toast,
-        'Successfully left the Team, but could not update some data.',
-        'warning',
-      );
+      return updateMessage(toast, t('toasts.couldNotUpdate'), 'warning');
     }
 
     const leftMemberIndex = newTeam.members.findIndex(
@@ -289,7 +285,7 @@ const Workspace: FC = () => {
     newWorkspace.teams[newTeamIndex] = newTeam;
 
     dispatch(PanelAC.setActiveWorkspace({ activeWorkspace: newWorkspace }));
-    updateMessage(toast, 'Successfully left the Team ' + teamName, 'success');
+    updateMessage(toast, t('toasts.leftTeam') + teamName, 'success');
   };
 
   const leaveTeamHandler = async (
@@ -299,11 +295,11 @@ const Workspace: FC = () => {
   ) => {
     if (workspaceId === '' || !activeWorkspace) return;
 
-    const toast = loadingMessage('Leaving team...');
+    const toast = loadingMessage(t('toasts.leavingTeam'));
     const leftMemberId = await leaveWorkspaceTeam(workspaceId, teamId);
 
     if (!leftMemberId) {
-      return updateMessage(toast, 'Could not leave Team.', 'error');
+      return updateMessage(toast, t('toasts.couldNotLeave'), 'error');
     }
 
     removeMemberFromActiveWorkspaceTeams(teamId, teamName, leftMemberId, toast);
@@ -395,7 +391,7 @@ const Workspace: FC = () => {
               {!currentWorkspaceFolder ? (
                 <>
                   <h1 className={styles.mainHeader}>
-                    Library - {activeWorkspace?.name}
+                    {t('page.video.library')} - {activeWorkspace?.name}
                   </h1>
 
                   <WorkspaceTeamMembersWrapper

@@ -33,7 +33,7 @@ const Slack: React.FC<ISettingsPageProps> = () => {
     if (res.status != 'error') {
       setLoading(false);
       setIsDisconnect(false);
-      infoMessage('Successfully disconnected slack account');
+      infoMessage(t('toasts.slackDisconnected'));
     } else {
       setLoading(false);
       errorMessage(res.message);

@@ -50,7 +50,7 @@ import {
   IWorkspaceVideo,
 } from 'app/interfaces/IWorkspace';
 import { errorHandler } from 'app/services/helpers/errors';
-import { workspaceVideoDelete } from 'misc/workspaceFunctions';
+import { useWorkspaceVideoDelete } from 'misc/workspaceFunctions';
 import { IUserShort } from 'app/interfaces/IUserData';
 import AppContainer from 'components/containers/appContainer/AppContainer';
 import AppButton from 'components/controls/AppButton';
@@ -78,6 +78,7 @@ const SingleVideoPage: FC<IProps> = ({
   isWorkspace = false,
   activeWorkspace,
 }) => {
+  const { workspaceVideoDelete } = useWorkspaceVideoDelete();
   const { t } = useTranslation();
   const addedUniqueView = useRef(false);
   const router = useRouter();
@@ -303,7 +304,7 @@ const SingleVideoPage: FC<IProps> = ({
   ) => {
     if (!video || !video?.dbData) return;
 
-    const id = loadingMessage('Updating video title...');
+    const id = loadingMessage(t('toasts.updatingVideoTitle'));
 
     const updatedDbData = { ...video.dbData, title: newTitle };
 
@@ -319,7 +320,7 @@ const SingleVideoPage: FC<IProps> = ({
     }
 
     if (!data)
-      return updateMessage(id, 'Could not update the video title.', 'error');
+      return updateMessage(id, t('toasts.couldNotUpdateVideoTitle'), 'error');
 
     const newVideo = { ...video, dbData: data.dbData };
     setVideo(newVideo);
@@ -327,22 +328,21 @@ const SingleVideoPage: FC<IProps> = ({
     !isWorkspace &&
       dispatch(PanelAC.updateExplorerVideoData({ video: newVideo }));
 
-    updateMessage(id, 'Successfully updated the video title.', 'success');
+    updateMessage(id, t('toasts.videoTitleUpdatedSuccess'), 'success');
   };
 
   const localSave = async () => {
     if (!video) return;
     if (!user) {
-      showLogInNotification &&
-        infoMessage('Please log in to download this video.');
+      showLogInNotification && infoMessage(t('toasts.pleaseLoginToDownload'));
       setShowLogInNotification(false);
       return;
     }
 
     if (streamState?.downloadStatus === PlaybackStatusEnum.PREPARING)
-      return infoMessage('Your download will be ready shortly...');
+      return infoMessage(t('toasts.downloadReady'));
 
-    const id = loadingMessage('Downloading video...');
+    const id = loadingMessage(t('toasts.downloadingVideo'));
 
     setDownloadingVideo(true);
 
@@ -350,14 +350,14 @@ const SingleVideoPage: FC<IProps> = ({
 
     setDownloadingVideo(false);
 
-    if (downloaded) updateMessage(id, 'Video downloaded!', 'success');
-    else updateMessage(id, 'Video could not be downloaded!', 'error');
+    if (downloaded) updateMessage(id, t('toasts.videoDownloaded'), 'success');
+    else updateMessage(id, t('toasts.videoCouldNotBeDownloaded'), 'error');
   };
 
   const onItemLike = async () => {
     if (!video) return;
     if (!user) {
-      showLogInNotification && infoMessage('Please log in to like this video.');
+      showLogInNotification && infoMessage(t('toasts.pleaseLoginToLike'));
       setShowLogInNotification(false);
       return;
     }
@@ -384,12 +384,10 @@ const SingleVideoPage: FC<IProps> = ({
       const endPath = router.asPath;
       const generatedSharedLink = `${process.env.NEXT_PUBLIC_WEBSITE_URL}${endPath}`;
       await window.navigator.clipboard.writeText(generatedSharedLink);
-      infoMessage('Link copied.');
+      infoMessage(t('toasts.linkCopied'));
     } catch (e) {
       console.log(e);
-      errorMessage(
-        'Something went wrong copying the shared link. Please copy it manually from the browser URL.',
-      );
+      errorMessage(t('toasts.couldNotCopyLink'));
     }
   };
 
@@ -400,7 +398,7 @@ const SingleVideoPage: FC<IProps> = ({
     if (!video) return;
 
     setShowDeleteModal(false);
-    const id = loadingMessage('Moving video to trash...');
+    const id = loadingMessage(t('toasts.movingVideoToTrash'));
 
     if (workspace) {
       await workspaceVideoDelete(video, workspace);
@@ -409,11 +407,7 @@ const SingleVideoPage: FC<IProps> = ({
         preRoutes.media + panelRoutes.workspace + `/${workspace?.id}`,
       );
 
-      updateMessage(
-        id,
-        'Video deleted successfully. Redirecting to workspace...',
-        'success',
-      );
+      updateMessage(id, t('toasts.videoDeleted'), 'success');
 
       return;
     }
@@ -422,11 +416,7 @@ const SingleVideoPage: FC<IProps> = ({
 
     router.push(preRoutes.media + panelRoutes.videos);
 
-    updateMessage(
-      id,
-      'Video moved to trash successfully. Redirecting to My Videos...',
-      'success',
-    );
+    updateMessage(id, t('toasts.videoMovedToTrash'), 'success');
   };
 
   const videoDelete = async (video: IEditorVideo) => {

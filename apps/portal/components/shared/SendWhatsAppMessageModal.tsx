@@ -41,13 +41,13 @@ const SendWhatsAppMessageModal: React.FC<ISlackChannelModalProps> = ({
   useEffect(() => {
     if (phoneInput.value.length > 12) {
       setPhoneInput({
-        errors: ['WhatsApp Number can not contain more than 12 characters'],
+        errors: [t('toasts.whatsAppTooLong')],
         touched: true,
         value: phoneInput.value,
       });
     } else if (phoneInput.value.length < 1 && phoneInput.touched) {
       setPhoneInput({
-        errors: ['WhatsApp Number can not be empty'],
+        errors: [t('toasts.whatsAppEmpty')],
         touched: true,
         value: phoneInput.value,
       });
@@ -76,7 +76,7 @@ const SendWhatsAppMessageModal: React.FC<ISlackChannelModalProps> = ({
         }
         const res = await sendWhatsAppMessage(selectedItemId, phone, type);
         if (res && res.status != 'error') {
-          infoMessage('Item shared successfully');
+          infoMessage(t('toasts.itemSharedSuccess'));
           onCancel();
         } else {
           if (res && res.message) {

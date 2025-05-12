@@ -159,7 +159,7 @@ const VideosContainer: React.FC<IVideosContainerProps> = forwardRef(
       }
       video && (await moveRestoreVideoTrash(video));
       setLoaderState(false);
-      infoMessage('The video has been moved to the Trash');
+      infoMessage(t('toasts.videoMovedToTrash'));
     };
 
     const closeDeletionModalHandler = () => {
@@ -187,7 +187,7 @@ const VideosContainer: React.FC<IVideosContainerProps> = forwardRef(
                 `${process.env.NEXT_PUBLIC_WEBSITE_URL}/video/shared/${sharedLink}`,
               );
               copied();
-              successMessage('Copied');
+              successMessage(t('toasts.copied'));
             } catch (e) {
               console.log(e.message);
             }
@@ -282,7 +282,7 @@ const VideosContainer: React.FC<IVideosContainerProps> = forwardRef(
 
     const download = async (video: IEditorVideo) => {
       const downloaded = await downloadVideo(video);
-      if (downloaded) infoMessage('Video downloaded');
+      if (downloaded) infoMessage(t('toasts.videoDownloaded'));
     };
 
     const handleAction = async (
@@ -352,7 +352,7 @@ const VideosContainer: React.FC<IVideosContainerProps> = forwardRef(
             }),
           );
         }
-        infoMessage(`Video added to: ${workspace.name}`);
+        infoMessage(`${t('toasts.videoAdded')} ${workspace.name}`);
       }
     };
 

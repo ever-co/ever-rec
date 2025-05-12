@@ -88,7 +88,7 @@ const LoginModal: React.FC<ILoginModalProps> = ({
         console.log(error);
       }
     } else {
-      errorHandler({ message: 'Wrong credentials' });
+      errorHandler({ message: t('toasts.wrongCredentials') });
       onClose();
     }
   };
@@ -97,7 +97,7 @@ const LoginModal: React.FC<ILoginModalProps> = ({
     const decodedCreds = jwt_decode<any>(credentials.credential);
 
     if (decodedCreds?.email !== user?.email) {
-      errorHandler({ message: 'Accounts are not the same.' });
+      errorHandler({ message: t('toasts.accountsNotSame') });
       return;
     }
 

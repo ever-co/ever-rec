@@ -23,6 +23,7 @@ const CreateFolderModal: React.FC<ICreateFolderModalProps> = ({
   onCreateFolder,
   visible,
 }) => {
+  const { t } = useTranslation();
   const initialControl = (): IAppControl => ({
     value: '',
     errors: [],
@@ -64,19 +65,19 @@ const CreateFolderModal: React.FC<ICreateFolderModalProps> = ({
         window.location.pathname.includes('workspace'))
     ) {
       setFolderName({
-        errors: ['This folder already exists'],
+        errors: [t('toasts.folderExists')],
         touched: true,
         value: folderName.value,
       });
     } else if (folderName.value.length > 35) {
       setFolderName({
-        errors: ['Folder name can not contain more than 35 characters'],
+        errors: [t('toasts.folderNameTooLong')],
         touched: true,
         value: folderName.value,
       });
     } else if (folderName.value.length < 1 && folderName.touched) {
       setFolderName({
-        errors: ['Folder name can not be empty'],
+        errors: [t('toasts.folderNameEmpty')],
         touched: true,
         value: folderName.value,
       });
@@ -100,7 +101,7 @@ const CreateFolderModal: React.FC<ICreateFolderModalProps> = ({
   }, [folderName]);
 
   const folderNameRules: ((v: string) => boolean | string)[] = [
-    requiredRule('Please enter folder name'),
+    requiredRule(t('toasts.enterFolderName')),
   ];
 
   const onOkHandler = async (): Promise<void> => {
@@ -130,7 +131,6 @@ const CreateFolderModal: React.FC<ICreateFolderModalProps> = ({
     onClose();
   };
 
-  const { t } = useTranslation();
   return (
     <Modal
       open={visible}

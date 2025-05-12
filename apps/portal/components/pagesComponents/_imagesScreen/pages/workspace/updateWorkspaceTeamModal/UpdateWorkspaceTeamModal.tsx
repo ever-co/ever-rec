@@ -153,7 +153,9 @@ const UpdateWorkspaceTeamModal: React.FC<IProps> = ({
       }),
     );
 
-    infoMessage(`Team ${team.name} deleted successfully.`);
+    infoMessage(
+      `${t('workspace.team')} ${team.name} ${t('toasts.deletedSuccessfully')}`,
+    );
     onCancelHandler();
   };
 

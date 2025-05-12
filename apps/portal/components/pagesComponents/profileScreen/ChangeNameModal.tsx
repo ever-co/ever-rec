@@ -51,7 +51,7 @@ const ChangeNameModal: React.FC<IProps> = ({
     if (value.length > 32) {
       setNewName({
         value,
-        errors: ['Name can not contain more than 32 characters'],
+        errors: [t('toasts.nameTooLong')],
         touched: true,
       });
     } else

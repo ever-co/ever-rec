@@ -92,19 +92,17 @@ const SCHeader: FC<ISCHeaderProps> = ({
           <div
             className={classNames(styles.actionButton, styles.profileButton)}
           >
-            <p>
-            {t('common.language')}
-            </p>
+            <p>{t('common.language')}</p>
             <AppSvg path="/new-design-v2/down-caret.svg" size="20px" />
           </div>
         </Dropdown>
 
-        <Tooltip title="Notifications" placement="bottom">
+        <Tooltip title={t('header.notifications')} placement="bottom">
           <div
             className={styles.actionButton}
             onClick={() => {
               clickedNotifications.current === false &&
-                infoMessage('Notifications coming soon!');
+                infoMessage(t('header.notificationsSoon'));
 
               clickedNotifications.current = true;
             }}
@@ -113,12 +111,12 @@ const SCHeader: FC<ISCHeaderProps> = ({
           </div>
         </Tooltip>
 
-        <Tooltip title="Help center" placement="bottom">
+        <Tooltip title={t('header.help')} placement="bottom">
           <div
             className={styles.actionButton}
             onClick={() => {
               clickedHelpCenter.current === false &&
-                infoMessage('Help center coming soon!');
+                infoMessage(t('header.helpSoon'));
 
               clickedHelpCenter.current = true;
             }}
@@ -137,7 +135,7 @@ const SCHeader: FC<ISCHeaderProps> = ({
             </button>
 
             {isWorkspaceAdmin && (
-              <Tooltip title="Company settings" placement="bottom">
+              <Tooltip title={t('header.companySettings')} placement="bottom">
                 <div className={styles.actionButton} onClick={goToWorkspace}>
                   <AppSvg
                     path="/new-design-v2/settings-wheel.svg"
@@ -254,7 +252,7 @@ const renderMoreMenuJSX = (
             color="#5b4dbe"
           />
         }
-        onClick={() => infoMessage('Help center coming soon!')}
+        onClick={() => infoMessage(t('header.helpSoon'))}
       >
         <span className={styles.menuItemSpan}>{t('header.help')}</span>
       </Menu.Item>

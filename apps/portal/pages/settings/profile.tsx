@@ -89,24 +89,24 @@ const Profile: React.FC = () => {
 
   const changeName = async (newName: string) => {
     if (!newName) return;
-
-    const id = loadingMessage('Updating name...');
+    t('toasts.');
+    const id = loadingMessage(t('toasts.updatingName'));
     const data = await updateUserData({
       displayName: newName,
     });
 
     setShowNameModal(false);
 
-    if (!data) return updateMessage(id, 'Could not update the name.', 'error');
+    if (!data) return updateMessage(id, t('toasts.couldNotUpdate'), 'error');
 
     updateReduxUser(data);
-    updateMessage(id, 'Name updated successfully.', 'success');
+    updateMessage(id, t('toasts.nameUpdated'), 'success');
   };
 
   const changeEmail = async (newEmail: string) => {
     if (!newEmail) return;
 
-    const id = loadingMessage('Updating email...');
+    const id = loadingMessage(t('toasts.updatingEmail'));
     const response = await changeUserEmail(newEmail);
     const message = response.message;
     const email = response.data?.email;
@@ -114,7 +114,7 @@ const Profile: React.FC = () => {
     if (email) {
       dispatch(AuthAC.setUser({ user: { ...user, email } }));
       setShowEmailModal(false);
-      updateMessage(id, 'Email updated successfully.', 'success');
+      updateMessage(id, t('toasts.emailUpdated'), 'success');
     } else {
       updateMessage(id, message, 'error');
     }
@@ -123,7 +123,7 @@ const Profile: React.FC = () => {
   const changePassword = async (oldPassword: string, newPassword: string) => {
     if (!newPassword || !oldPassword) return;
 
-    const id = loadingMessage('Updating password...');
+    const id = loadingMessage(t('toasts.updatingPassword'));
     const response = await changeUserPassword(
       user.email,
       oldPassword,
@@ -133,13 +133,9 @@ const Profile: React.FC = () => {
     setShowPasswordModal(false);
 
     if (!response.data)
-      return updateMessage(
-        id,
-        'There was a problem updating your password.',
-        'error',
-      );
+      return updateMessage(id, t('toasts.couldNotUpdate'), 'error');
 
-    updateMessage(id, 'Password updated successfully.', 'success');
+    updateMessage(id, t('toasts.passwordUpdated'), 'success');
   };
 
   const loginToDeleteAccount = async (password: string) => {
@@ -150,7 +146,7 @@ const Profile: React.FC = () => {
       return;
     }
 
-    errorMessage('There was a problem with reauthentication.');
+    errorMessage(t('toasts.couldNotReauthenticate'));
     setShowDeleteAccountModal(false);
   };
 
@@ -166,16 +162,14 @@ const Profile: React.FC = () => {
     try {
       await deleteUser();
       await signOutHandler();
-      successMessage(
-        'Account deleted successfully. Create or login with another account.',
-      );
+      successMessage(t('toasts.accountDeleted'));
     } catch (error: any) {
       console.log('error', error);
       if (error.code === 'auth/user-mismatch') {
-        errorHandler({ message: 'Cannot delete different account.' });
+        errorHandler({ message: t('toasts.couldNotDeleteAccount') });
       } else {
         error.code !== 'auth/requires-recent-login' &&
-          errorHandler({ message: 'Error while trying to delete user?.' });
+          errorHandler({ message: t('toasts.errorDeletingUser') });
       }
     }
   };

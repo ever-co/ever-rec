@@ -30,6 +30,7 @@ const InvitationSection: FC<IInvitationSectionProps> = ({
   setEmails,
   primaryButtonClickHandler,
 }) => {
+  const { t } = useTranslation();
   const sendEmail = async (
     emails: string[],
     inviteLink: string,
@@ -40,8 +41,8 @@ const InvitationSection: FC<IInvitationSectionProps> = ({
     const linkComponents = inviteLink.split('/');
     const inviteId = linkComponents[linkComponents.length - 1];
 
-    const emailStr = emails.length > 1 ? 'emails' : 'email';
-    const id = loadingMessage(`Sending ${emailStr}`);
+    const emailStr = emails.length > 1 ? t('common.emails') : t('common.email');
+    const id = loadingMessage(`${t('toasts.sending')} ${emailStr}`);
     const data = await sendWorkspaceInviteLink(emails, inviteId, userName);
 
     setEmails([]);
@@ -49,7 +50,7 @@ const InvitationSection: FC<IInvitationSectionProps> = ({
     if (!data)
       return updateMessage(
         id,
-        `Could not send ${emailStr}. Please try again later.`,
+        t('toasts.couldNotSend') + emailStr + t('toasts.pleaseTryAgainLater'),
         'error',
       );
     updateMessage(id, data, 'success');

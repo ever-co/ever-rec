@@ -42,7 +42,7 @@ const ShareItemModal: React.FC<IShareItemModalProps> = ({
     await navigator.clipboard.writeText(shareLink);
 
     copied();
-    successMessage('Copied');
+    successMessage(t('toasts.copied'));
   };
 
   return (

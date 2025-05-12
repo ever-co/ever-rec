@@ -153,12 +153,16 @@ const MultiItemsSelect: React.FC<IMultiItemsSelectProps> = ({
     });
 
     const s = items.length > 1 ? 's' : '';
-    const toast = loadingMessage(`Downloading ${type}${s}...`);
+    const toast = loadingMessage(`${t('toasts.downloading')} ${type}${s}...`);
 
     await Promise.all(downloadPromises);
 
-    const typeUpper = type === 'video' ? 'Video' : 'Image';
-    updateMessage(toast, `${typeUpper}${s} downloaded.`, 'success');
+    const typeUpper = type === 'video' ? t('toasts.video') : t('toasts.image');
+    updateMessage(
+      toast,
+      `${typeUpper}${s} ${t('toasts.downloaded')}.`,
+      'success',
+    );
 
     resetSelected({ state: false, items: [] });
   };
@@ -166,7 +170,9 @@ const MultiItemsSelect: React.FC<IMultiItemsSelectProps> = ({
   const deleteItemsConfirm = async () => {
     closeAllModals();
     const s = items.length > 1 ? 's' : '';
-    const toast = loadingMessage(`Moving ${type}${s} to Trash...`);
+    const toast = loadingMessage(
+      `${t('toasts.moving')} ${type}${s} ${t('toasts.toTrash')}`,
+    );
 
     const deletePromises = items.map((item) => {
       if (type === 'image') return moveRestoreTrash(item, true, true);
@@ -193,7 +199,11 @@ const MultiItemsSelect: React.FC<IMultiItemsSelectProps> = ({
     resetSelected({ state: false, items: [] });
 
     const typeUpper = type === 'video' ? 'Video' : 'Image';
-    updateMessage(toast, `${typeUpper}${s} moved to Trash.`, 'success');
+    updateMessage(
+      toast,
+      `${typeUpper}${s} ${t('toasts.movedToTrash')}`,
+      'success',
+    );
   };
 
   const deleteScreenshotConfirm = async (image: IEditorImage | null) => {
@@ -209,13 +219,13 @@ const MultiItemsSelect: React.FC<IMultiItemsSelectProps> = ({
       setLoader(true);
       await deleteScreenshot(image);
     } catch (error) {
-      errorMessage('There was a problem, please try again');
+      errorMessage(t('toasts.problemTryAgain'));
       hasError = true;
     } finally {
       setLoader(false);
     }
     if (hasError) return;
-    infoMessage('Image deleted successfully');
+    infoMessage(t('toasts.imageDeleted'));
   };
 
   const deleteVideoConfirm = async (video: IEditorVideo | null) => {
@@ -231,7 +241,7 @@ const MultiItemsSelect: React.FC<IMultiItemsSelectProps> = ({
       setLoader(true);
       await deleteVideo(video);
     } catch (error) {
-      errorMessage('There was a problem, please try again');
+      errorMessage(t('toasts.problemTryAgain'));
       hasError = true;
     } finally {
       setLoader(false);
@@ -239,14 +249,25 @@ const MultiItemsSelect: React.FC<IMultiItemsSelectProps> = ({
 
     if (hasError) return;
 
-    infoMessage('Video deleted');
+    infoMessage(t('toasts.videoDeleted'));
   };
-
+  {
+    t('toasts.itemsDeleted');
+  }
+  {
+    t('toasts.noItemsToRestore');
+  }
+  {
+    t('toasts.itemsRestored');
+  }
+  {
+    t('toasts.itemRestored');
+  }
   const deleteAllItems = async () => {
     setDeleteModal(false);
 
     if ((screenshots?.length || 0) === 0 && (videos?.length || 0) === 0) {
-      return infoMessage('No items to delete...');
+      return infoMessage(t('toasts.noItemsToDelete'));
     }
 
     if ((screenshots?.length || 0) + (videos?.length || 0) === items.length) {
@@ -254,7 +275,7 @@ const MultiItemsSelect: React.FC<IMultiItemsSelectProps> = ({
       await deleteAllVideos();
       await deleteAllScreenshots();
       setLoader(false);
-      successMessage('Items deleted successfully.');
+      successMessage(t('toasts.itemsDeleted'));
     } else {
       items.map((item) => {
         if (
@@ -278,7 +299,7 @@ const MultiItemsSelect: React.FC<IMultiItemsSelectProps> = ({
     setRestoreModal(false);
 
     if (screenshots?.length === 0 && videos?.length === 0) {
-      return infoMessage('No items to restore...');
+      return infoMessage(t('toasts.noItemsToRestore'));
     }
 
     if ((screenshots?.length || 0) + (videos?.length || 0) === items.length) {
@@ -286,7 +307,7 @@ const MultiItemsSelect: React.FC<IMultiItemsSelectProps> = ({
       await restoreAllVideos();
       await restoreAllScreenshots();
       setLoader(false);
-      successMessage('Items restored successfully.');
+      successMessage(t('toasts.itemsRestored'));
     } else {
       items.map((item) => {
         if (
@@ -305,8 +326,8 @@ const MultiItemsSelect: React.FC<IMultiItemsSelectProps> = ({
         }
       });
       items.length > 1
-        ? successMessage(`Items restored successfully.`)
-        : successMessage(`Item restored successfully.`);
+        ? successMessage(t('toasts.itemsRestored'))
+        : successMessage(t('toasts.itemRestored'));
     }
   };
 
@@ -328,7 +349,7 @@ const MultiItemsSelect: React.FC<IMultiItemsSelectProps> = ({
         await moveRestoreTrash(screenOrVideo, false);
       }
     } catch (error) {
-      errorMessage('There was a problem with restoring');
+      errorMessage(t('toasts.problemRestoring'));
       hasError = true;
     } finally {
       setLoader(false);

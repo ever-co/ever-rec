@@ -14,7 +14,7 @@ import TopMenuBar from 'components/pagesComponents/_singleImageScreen/topMenuBar
 import AppContainer from 'components/containers/appContainer/AppContainer';
 import AppSpinner from 'components/containers/appSpinner/AppSpinner';
 import UserShortInfo from 'components/containers/dashboardLayout/elements/UserShortInfo/UserShortInfo';
-import { copySourceURL } from 'misc/singleItemFunctions';
+import { useCopySourceURL } from 'misc/singleItemFunctions';
 import UniqueViews from 'components/elements/UniqueViews';
 import ImageModal from 'components/pagesComponents/_singleImageScreen/imageModal/ImageModal';
 import SingleImagePageManageAreaTemplate from 'components/pagesComponents/_singleImageScreen/SingleImagePageManageAreaTemplate';
@@ -28,6 +28,7 @@ import VideoComments from 'components/pagesComponents/_videoEditorScreen/comment
 // TODO: Refactor that so some logic from the single image page can be abstracted.
 const WorkspaceSingleImage = () => {
   const router = useRouter();
+  const { copySourceURL } = useCopySourceURL();
   const user = useAuthenticateUser();
   const [image, setImage] = useState<IWorkspaceImage | null>(null);
   const activeWorkspace: IWorkspace | null = useSelector(

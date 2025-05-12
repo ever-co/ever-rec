@@ -82,7 +82,7 @@ const FolderItem: React.FC<IFolderItemProps> = ({
 
   const editFolder = async (name: string) => {
     closeFolderModal();
-    const id = loadingMessage('Renaming folder...');
+    const id = loadingMessage(t('toasts.renamingFolder'));
 
     let data: any = null;
     if (workspace && isWorkspaceFolder(folder)) {
@@ -98,17 +98,13 @@ const FolderItem: React.FC<IFolderItemProps> = ({
     }
 
     data
-      ? updateMessage(id, 'Folder renamed successfully.', 'success')
-      : updateMessage(
-          id,
-          'Folder there was a problem renaming your folder.',
-          'error',
-        );
+      ? updateMessage(id, t('toasts.renamingFolder'), 'success')
+      : updateMessage(id, t('toasts.folderRenameError'), 'error');
   };
 
   const deleteFolder = async (folder: IWorkspaceDbFolder | IDbFolderData) => {
     let hasError = false;
-    const toast = loadingMessage(`Deleting folder...`);
+    const toast = loadingMessage(t('toasts.deletingFolder'));
 
     try {
       setShowDeleteModal(false);
@@ -143,16 +139,12 @@ const FolderItem: React.FC<IFolderItemProps> = ({
     }
 
     if (hasError) {
-      return updateMessage(
-        toast,
-        'There was a problem deleting your folder. Please try again.',
-        'error',
-      );
+      return updateMessage(toast, t('toasts.folderDeleteError'), 'error');
     }
 
     const messageString = workspace
-      ? 'Folder deleted. Any items inside moved into root directory.'
-      : 'Folders deleted successfully. Any items inside were moved to trash.';
+      ? t('toasts.folderDeleted')
+      : t('toasts.folderDeletedWithItems');
     updateMessage(toast, messageString, 'success');
   };
 

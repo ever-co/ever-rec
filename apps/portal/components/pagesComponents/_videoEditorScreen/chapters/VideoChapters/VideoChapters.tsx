@@ -318,7 +318,7 @@ const ChapterHeading: FC<IChapterHeadingProps> = ({
           {videoTooShort && <VideoChapterCaveatPopover caveat="error" />}
         </h3>
       ) : (
-        <h3>{t('page.video.chapters')}</h3>
+        <h3>{t('page.video.chaptersDes')}</h3>
       )}
     </div>
   );
