@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import noImage from '../../../../../images/images/noimage.svg';
 import * as favStyles from '../imagesScreen/components/folderItem/FolderItem.module.scss';
 import IExplorerData from '@/app/interfaces/IExplorerData';
 import AppSpinner from '@/content/components/containers/appSpinner/AppSpinner';
 import DashboardCard from '@/content/panel/components/containers/dashboardLayout/elements/DashboardCard';
-import { RootStateOrAny, useDispatch, useSelector } from 'react-redux';
+import { RootStateOrAny, useSelector } from 'react-redux';
 import { IDbFolderData } from '@/app/interfaces/IEditorImage';
 import { IUser } from '@/app/interfaces/IUserData';
 import classNames from 'classnames';
@@ -231,7 +231,7 @@ const FavoritesPage: React.FC = () => {
         </DashboardCard>
       </section>
 
-      {/* <AppSpinner show={loader} /> */}
+      <AppSpinner show={loader} />
     </>
   );
 };

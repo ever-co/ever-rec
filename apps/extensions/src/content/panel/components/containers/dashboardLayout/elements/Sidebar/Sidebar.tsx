@@ -19,7 +19,6 @@ import {
   mainMenuItems,
   settingsMenuItems,
 } from '@/content/panel/misc/menuItems';
-import FavFoldersSidebarSection from '../FavFoldersSidebarSection/FavFoldersSidebarSection';
 import { getExplorerData } from '@/app/services/screenshots';
 import { getExplorerDataVideo } from '@/app/services/videos';
 import AppSpinner from '@/content/components/containers/appSpinner/AppSpinner';

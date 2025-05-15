@@ -1,4 +1,4 @@
-import React, { ReactElement, useEffect, useState } from 'react';
+import React, { ReactElement, useState } from 'react';
 import classNames from 'classnames';
 import * as styles from './SidebarItemsStyles.module.scss';
 import { FolderIcon } from '@/content/panel/screens/imagesScreen/components/folderItem/FolderHeader';
