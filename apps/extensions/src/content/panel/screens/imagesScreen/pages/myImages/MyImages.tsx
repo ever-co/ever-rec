@@ -214,7 +214,7 @@ const MyImages: FC = () => {
   ) => {
     if (event.target.value.length && event.target.files?.length) {
       //setUploadState(false);
-      setShowAddImageModal(false);
+      setShowAddImageModal(true);
       setLoading(true);
 
       const files = Array.from(event.target.files);

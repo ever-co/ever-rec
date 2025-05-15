@@ -90,8 +90,6 @@ const Sidebar: FC<SidebarProps> = ({ isProfilePage }) => {
   };
 
   const isActive = (item: IMainMenuItem) => {
-    if (item.type === 'favFolders') return false;
-
     return item.route.includes(location.pathname);
   };
 
@@ -119,9 +117,6 @@ const Sidebar: FC<SidebarProps> = ({ isProfilePage }) => {
       );
 
       // We don't need to wrap Starred in <Link> component as it open an absolute positioned UI
-      if (item.type === 'favFolders') {
-        return sidebarItem;
-      }
 
       return (
         <Link to={item.route} key={`menu_item${index}`}>
@@ -136,7 +131,6 @@ const Sidebar: FC<SidebarProps> = ({ isProfilePage }) => {
       <SidebarWorkspaces
         addNewWorkspaceClicked={() => setShowCreateWorkspaceModal(true)}
       />
-
       <div className={styles.sidebarContainer}>
         <div className={`${styles.sidebarWrapper} tw-px-4`}>
           <div className={styles.logoWrapper}>
@@ -151,7 +145,7 @@ const Sidebar: FC<SidebarProps> = ({ isProfilePage }) => {
             </div>
           )}
 
-          <div>
+          {/* <div>
             <div ref={favFoldersRef}>
               <FavFoldersSidebarSection
                 visible={favFoldersVisible}
@@ -159,8 +153,8 @@ const Sidebar: FC<SidebarProps> = ({ isProfilePage }) => {
               />
             </div>
 
-            <div className="tw-mt-24">{renderMenuItems()}</div>
-          </div>
+          </div> */}
+          <div className="tw-mt-24">{renderMenuItems()}</div>
         </div>
 
         {user && !isProfilePage && (
@@ -170,15 +164,12 @@ const Sidebar: FC<SidebarProps> = ({ isProfilePage }) => {
           </>
         )}
       </div>
-
       {CreateWSModal}
-
       <UploadWorkspaceImageModal
         onOk={() => void 0}
         onClose={() => setShowWorkspaceImageModal(false)}
         visible={showWorkspaceImageModal}
       />
-
       <AppSpinner show={loaderState} />
     </DashboardCard>
   );
