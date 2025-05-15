@@ -17,12 +17,6 @@ const SidebarMenuItem: React.FC<ISidebarMenuItemProps> = React.forwardRef(
     const { favoritesImages, favoritesVideos } = useFavoritesFolders();
 
     const [isOpen, setIsOpen] = useState(false);
-
-    useEffect(() => {
-      if (title == 'Favorites') {
-        //getFavFolders();
-      }
-    });
     const handleToggle = (e: React.MouseEvent) => {
       e.stopPropagation();
       setIsOpen(!isOpen);
