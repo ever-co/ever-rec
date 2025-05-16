@@ -27,7 +27,7 @@ const useFavoritesFolders = () => {
     const imageApi = await getFoldersImageAPI();
     const data: any = await getVideoFavFoldersAPI();
 
-    if (!data?.data?.images && !data?.data?.videos) {
+    if (!data.data.images && !data.data.videos) {
       setLoader(false);
     }
     const imagesFav = data.data.images
