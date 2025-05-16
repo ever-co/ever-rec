@@ -17,12 +17,15 @@ const SidebarMenuItem: React.FC<ISidebarMenuItemProps> = React.memo(
     const { favoritesImages, favoritesVideos } = useFavoritesFolders();
 
     const [isOpen, setIsOpen] = useState(false);
+<<<<<<< HEAD
 
     useEffect(() => {
       if (title === 'Favorites') {
         //getFavFolders();
       }
     });
+=======
+>>>>>>> 7e74c16a8257edb33a66e10e0c6e89211e7d9f2b
     const handleToggle = (e: React.MouseEvent) => {
       e.stopPropagation();
       setIsOpen(!isOpen);
