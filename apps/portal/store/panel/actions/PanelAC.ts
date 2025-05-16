@@ -274,7 +274,7 @@ export default class PanelAC {
       payload: { emailImage, emailImageLink, itemPublicLink },
     };
   }
-  static setFavoriteRefetch(count): ActionType {
+  static setFavoriteRefetch(count: number): ActionType {
     return { type: CHANGE_FAVORITE_REFETCH, payload: count };
   }
 }
