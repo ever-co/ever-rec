@@ -25,24 +25,24 @@ const useFavoritesFolders = () => {
   const getFavFolders = async () => {
     const videoApi = await getVideoFoldersAPI();
     const imageApi = await getFoldersImageAPI();
-    const data2: any = await getVideoFavFoldersAPI();
+    const data: any = await getVideoFavFoldersAPI();
 
-    if (!data2.data.images && !data2.data.videos) return;
-    const imagesFav =
-      data2.data.images && data2.data2.images
-        ? Object.keys(data2.data2.images).map((key) => ({
-            ...data2.data.images[key],
-            uid: key,
-          }))
-        : [];
+    if (!data?.data?.images && !data?.data?.videos) {
+      setLoader(false);
+    }
+    const imagesFav = data.data.images
+      ? Object.keys(data.data.images).map((key) => ({
+          ...data.data.images[key],
+          uid: key,
+        }))
+      : [];
 
-    const videosFav =
-      data2.data.videos && data2.data2.videos
-        ? Object.keys(data2.data2.videos).map((key) => ({
-            ...data2.data.videos[key],
-            uid: key,
-          }))
-        : [];
+    const videosFav = data.data.videos
+      ? Object.keys(data.data.videos).map((key) => ({
+          ...data.data.videos[key],
+          uid: key,
+        }))
+      : [];
     const images = imageApi.data.filter((v) =>
       imagesFav.some((x) => x.id === v.id),
     );
@@ -55,17 +55,17 @@ const useFavoritesFolders = () => {
   };
 
   const ifImagesDontExist =
-    favoritesImages.length == 0 && !favoriteFolders.images;
+    favoritesImages.length === 0 && !favoriteFolders.images;
   const ifVideosDontExist =
-    favoritesVideos.length == 0 && !favoriteFolders.videos;
+    favoritesVideos.length === 0 && !favoriteFolders.videos;
   const favImgLength = favoriteFolders.images
     ? Object.keys(favoriteFolders.images).length
     : 0;
   const favVidLength = favoriteFolders.videos
     ? Object.keys(favoriteFolders.videos).length
     : 0;
-  const ifImagesEqual = favoritesImages.length == favImgLength;
-  const ifVideosEqual = favoritesVideos.length == favVidLength;
+  const ifImagesEqual = favoritesImages.length === favImgLength;
+  const ifVideosEqual = favoritesVideos.length === favVidLength;
 
   useEffect(() => {
     if (ifImagesDontExist && ifVideosDontExist && refetchcount !== 0) return;
@@ -73,12 +73,8 @@ const useFavoritesFolders = () => {
     (async function () {
       try {
         await getFavFolders();
-        dispatch(PanelAC.setFavoriteRefetch(1));
-        console.log('data1');
       } catch (error) {
-        console.error('data1 Failed to load explorer data:', error);
-
-        dispatch(PanelAC.setFavoriteRefetch(1));
+        console.log(error);
       } finally {
         dispatch(PanelAC.setFavoriteRefetch(1));
       }

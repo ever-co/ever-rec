@@ -12,14 +12,14 @@ interface ISidebarMenuItemProps {
   className?: string;
   onClick?: () => void;
 }
-const SidebarMenuItem: React.FC<ISidebarMenuItemProps> = React.forwardRef(
+const SidebarMenuItem: React.FC<ISidebarMenuItemProps> = React.memo(
   ({ icon, title, active, className = '', onClick }) => {
     const { favoritesImages, favoritesVideos } = useFavoritesFolders();
 
     const [isOpen, setIsOpen] = useState(false);
 
     useEffect(() => {
-      if (title == 'Favorites') {
+      if (title === 'Favorites') {
         //getFavFolders();
       }
     });
@@ -27,6 +27,23 @@ const SidebarMenuItem: React.FC<ISidebarMenuItemProps> = React.forwardRef(
       e.stopPropagation();
       setIsOpen(!isOpen);
     };
+    const FavoriteSection = ({ title, items }) => (
+      <>
+        <h1 className="tw-ml-16 tw-font-bold tw-underline">{title}</h1>
+        <div className={`${styles.listWrapper} scroll-div`}>
+          {items.map((v) => (
+            <div key={v.id} className={styles.title}>
+              <FolderIcon
+                path="/common/folder-icon-v3.svg"
+                bgColor={v.color ? v.color : '#ffffff'}
+                size="19px"
+              />
+              <p className="tw-w-[10rem] tw-truncate">{v.name}</p>
+            </div>
+          ))}
+        </div>
+      </>
+    );
 
     return (
       <>
@@ -71,47 +88,15 @@ const SidebarMenuItem: React.FC<ISidebarMenuItemProps> = React.forwardRef(
             {isOpen && (
               <>
                 {favoritesImages.length > 0 && (
-                  <>
-                    <h1 className="tw-ml-16 tw-font-bold tw-underline">
-                      Images
-                    </h1>
-                    <div className={`${styles.listWrapper} scroll-div`}>
-                      {favoritesImages.map((v) => (
-                        <div key={v.id} className={styles.title}>
-                          <FolderIcon
-                            path="/common/folder-icon-v3.svg"
-                            bgColor={v.color ? v.color : '#ffffff'}
-                            size="19px"
-                          />
-                          <p className="tw-w-[10rem] tw-truncate">{v.name}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </>
+                  <FavoriteSection title="Images" items={favoritesImages} />
                 )}
                 {favoritesVideos.length > 0 && (
-                  <>
-                    <h1 className="tw-ml-16 tw-font-bold tw-underline">
-                      Videos
-                    </h1>
-                    <div className={`${styles.listWrapper} scroll-div`}>
-                      {favoritesVideos.map((v) => (
-                        <div key={v.id} className={styles.title}>
-                          <FolderIcon
-                            path="/common/folder-icon-v3.svg"
-                            bgColor={v.color ? v.color : '#ffffff'}
-                            size="19px"
-                          />
-
-                          <p className="tw-w-[10rem] tw-truncate">{v.name}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </>
+                  <FavoriteSection title="Videos" items={favoritesVideos} />
                 )}
-                {favoritesVideos.length == 0 && favoritesImages.length == 0 && (
-                  <h1 className="tw-ml-16 tw-font-bold ">No Favorites</h1>
-                )}
+                {favoritesVideos.length === 0 &&
+                  favoritesImages.length === 0 && (
+                    <h1 className="tw-ml-16 tw-font-bold ">No Favorites</h1>
+                  )}
               </>
             )}
           </>
@@ -123,6 +108,13 @@ const SidebarMenuItem: React.FC<ISidebarMenuItemProps> = React.forwardRef(
               className,
             )}
             onClick={onClick}
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                onClick?.();
+              }
+            }}
           >
             {active && <div className={styles.activeIndicator} />}
 

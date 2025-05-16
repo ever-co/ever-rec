@@ -24,6 +24,7 @@ import { addVideoFolderToFavsAPI } from 'app/services/api/video';
 import { addImageFolderToFavsAPI } from 'app/services/api/image';
 import FolderHeader from 'components/pagesComponents/_imagesScreen/components/folderItem/FolderHeader';
 import useFavoritesFolders from 'hooks/useFavoritesFolders';
+import useGetExplorerDataListener from 'hooks/useGetExplorerDataListener';
 
 const FavoritesPage: React.FC = () => {
   const router = useRouter();
@@ -53,7 +54,7 @@ const FavoritesPage: React.FC = () => {
   );
   const { filter, onFilterChange } = useItemsFilter(itemData);
 
-  // useGetExplorerDataListener(); // TODO fix
+  useGetExplorerDataListener();
 
   useEffect(() => {
     const { idToken, refreshToken } = getCookies();
@@ -127,18 +128,15 @@ const FavoritesPage: React.FC = () => {
                       key={folder.id}
                       className={classNames(
                         favStyles.mainWrapper,
-                        isDropdownVisible == folder.id && favStyles.active,
+                        isDropdownVisible === folder.id && favStyles.active,
                       )}
                       style={{ height: '58px' }}
-                      onClick={(e: any) => {
-                        if (e.target.localName === 'ul') return;
-                      }}
                     >
                       <FolderHeader
                         moreMenu={moreMenu('images', folder.id)}
                         isFavorite={true}
                         folder={folder}
-                        isDropdownVisible={isDropdownVisible == folder.id}
+                        isDropdownVisible={isDropdownVisible === folder.id}
                         onVisibleChange={(visibility) =>
                           setIsDropdownVisible(
                             visibility == true ? folder.id : '',
@@ -165,7 +163,7 @@ const FavoritesPage: React.FC = () => {
               </div>
             )}
 
-            <div className={styles.pageHeadingWrapper}></div>
+            <div className={styles.pageHeadingWrapper} />
             <div className="tw-bg-white tw-flex tw-flex-grow tw-flex-col">
               <div className={styles.foldersHeadingContainer}>
                 <h3 className={styles.heading}>Videos Folders</h3>
@@ -173,36 +171,28 @@ const FavoritesPage: React.FC = () => {
               {favoritesVideos.length ? (
                 <div className="tw-h-fit tw-overflow-y-auto">
                   <div className={styles.foldersFavourites} id="scrollableDiv">
-                    {/* THE START */}
-                    <>
-                      {favoritesVideos.map((folder: IDbFolderData) => (
-                        <div
-                          key={folder.id}
-                          className={classNames(
-                            favStyles.mainWrapper,
-                            isDropdownVisible == folder.id && favStyles.active,
-                          )}
-                          style={{ height: '58px' }}
-                          onClick={(e: any) => {
-                            if (e.target.localName === 'ul') return;
-                          }}
-                        >
-                          <FolderHeader
-                            moreMenu={moreMenu('videos', folder.id)}
-                            isFavorite={true}
-                            folder={folder}
-                            isDropdownVisible={isDropdownVisible == folder.id}
-                            onVisibleChange={(visibility) =>
-                              setIsDropdownVisible(
-                                visibility == true ? folder.id : '',
-                              )
-                            }
-                          />
-                        </div>
-                      ))}
-                    </>
-
-                    {/* THE END*/}
+                    {favoritesVideos.map((folder: IDbFolderData) => (
+                      <div
+                        key={folder.id}
+                        className={classNames(
+                          favStyles.mainWrapper,
+                          isDropdownVisible == folder.id && favStyles.active,
+                        )}
+                        style={{ height: '58px' }}
+                      >
+                        <FolderHeader
+                          moreMenu={moreMenu('videos', folder.id)}
+                          isFavorite={true}
+                          folder={folder}
+                          isDropdownVisible={isDropdownVisible == folder.id}
+                          onVisibleChange={(visibility) =>
+                            setIsDropdownVisible(
+                              visibility == true ? folder.id : '',
+                            )
+                          }
+                        />
+                      </div>
+                    ))}
                   </div>
                 </div>
               ) : (

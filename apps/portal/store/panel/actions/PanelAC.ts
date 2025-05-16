@@ -42,8 +42,8 @@ import {
   SET_WIN_ID,
   SET_VIDEO_DURATION,
   CLEAR_VIDEO_DURATION,
+  CHANGE_FAVORITE_REFETCH,
 } from './actionTypes';
-import { CHANGE_FAVORITE_REFETCH } from 'app/store/panel/actions/actionTypes';
 
 export default class PanelAC {
   static setActiveRoute({ activeRoute }: { activeRoute: string }): ActionType {
@@ -274,7 +274,7 @@ export default class PanelAC {
       payload: { emailImage, emailImageLink, itemPublicLink },
     };
   }
-  static setFavoriteRefetch(count): ActionType {
+  static setFavoriteRefetch(count: number): ActionType {
     return { type: CHANGE_FAVORITE_REFETCH, payload: count };
   }
 }
