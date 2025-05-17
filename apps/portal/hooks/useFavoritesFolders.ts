@@ -79,7 +79,7 @@ const useFavoritesFolders = () => {
         dispatch(PanelAC.setFavoriteRefetch(1));
       }
     })();
-  }, [favoriteFolders, refetchcount]);
+  }, [favoriteFolders, refetchcount, getFavFolders]);
   return {
     favoritesImages,
     favoritesVideos,

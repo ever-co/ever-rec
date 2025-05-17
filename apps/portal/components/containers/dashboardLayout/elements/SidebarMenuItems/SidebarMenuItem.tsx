@@ -41,7 +41,7 @@ const SidebarMenuItem: React.FC<ISidebarMenuItemProps> = React.memo(
 
     return (
       <>
-        {title == 'Favorites' ? (
+        {title === 'Favorites' ? (
           <>
             <div
               className={classNames(
@@ -59,11 +59,20 @@ const SidebarMenuItem: React.FC<ISidebarMenuItemProps> = React.memo(
                     active && styles.active,
                   )}
                 >
-                  <span onClick={onClick} className="tw-flex">
+                  <button
+                    type="button"
+                    onClick={onClick}
+                    className="tw-flex tw-bg-transparent"
+                  >
                     <div className={classNames(styles.icon)}>{icon}</div>
                     <div className={classNames(styles.title)}>{title}</div>
-                  </span>
-                  <div
+                  </button>
+                  <button
+                    type="button"
+                    aria-label={
+                      isOpen ? 'Collapse favorites' : 'Expand favorites'
+                    }
+                    aria-expanded={isOpen}
                     className="tw-absolute tw-right-4 "
                     onClick={(e) => {
                       e.preventDefault();
@@ -75,7 +84,7 @@ const SidebarMenuItem: React.FC<ISidebarMenuItemProps> = React.memo(
                     ) : (
                       <BiChevronUp className="tw-w-6 tw-h-6 tw-text-gray-500 tw-rotate-180" />
                     )}
-                  </div>
+                  </button>
                 </div>
               </div>
             </div>
@@ -95,20 +104,13 @@ const SidebarMenuItem: React.FC<ISidebarMenuItemProps> = React.memo(
             )}
           </>
         ) : (
-          <div
+          <button
             className={classNames(
               styles.wrapper,
               active && styles.active,
               className,
             )}
             onClick={onClick}
-            tabIndex={0}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                onClick?.();
-              }
-            }}
           >
             {active && <div className={styles.activeIndicator} />}
 
@@ -123,7 +125,7 @@ const SidebarMenuItem: React.FC<ISidebarMenuItemProps> = React.memo(
                 <div className={styles.title}>{title}</div>
               </div>
             </div>
-          </div>
+          </button>
         )}
       </>
     );

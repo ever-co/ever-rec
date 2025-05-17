@@ -6,16 +6,16 @@ $border-radius: 10px;
 
 .listWrapper {
   overflow-y: auto;
-  max-height:120px;
+  max-height: 120px;
   height: auto;
 
   .title {
-    display:flex;
+    display: flex;
     margin-left: 4rem;
     color: #000000;
     margin-bottom: 4px;
     padding-top: 0.3rem;
-    padding-left:10px;
+    padding-left: 10px;
     padding-bottom: 0.3rem;
     transition: color 0.2s ease-in;
   }

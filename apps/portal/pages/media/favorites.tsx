@@ -157,7 +157,7 @@ const FavoritesPage: React.FC = () => {
                     alt="no-image"
                   />
                   <h1 className="tw-text-xl tw-font-bold tw-text-center">
-                    No Favourites Images Folders found
+                    No Favourite Images Folders found
                   </h1>
                 </div>
               </div>
@@ -205,7 +205,7 @@ const FavoritesPage: React.FC = () => {
                       alt="no-image"
                     />
                     <h1 className="tw-text-xl tw-font-bold tw-text-center">
-                      No Favorites Videos Folders found
+                      No Favorite Videos Folders found
                     </h1>
                   </div>
                 </div>
