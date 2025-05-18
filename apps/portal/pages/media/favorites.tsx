@@ -79,15 +79,21 @@ const FavoritesPage: React.FC = () => {
         icon={<AppSvg path={'/common/star.svg'} size="18px" />}
         key="menu_item_add_to_favs"
         onClick={async () => {
-          if (value === 'videos') {
-            await addVideoFolderToFavsAPI(folderId);
-            setFavoritesVideos((prev) => prev.filter((x) => x.id !== folderId));
-            refetch();
-          } else {
-            await addImageFolderToFavsAPI(folderId);
-            setFavoritesImages((prev) => prev.filter((x) => x.id !== folderId));
-            refetch();
+          try {
+            if (value === 'videos') {
+              await addVideoFolderToFavsAPI(folderId);
+              setFavoritesVideos((prev) => prev.filter((x) => x.id !== folderId));
+              refetch();
+            } else {
+              await addImageFolderToFavsAPI(folderId);
+              setFavoritesImages((prev) => prev.filter((x) => x.id !== folderId));
+              refetch();
+            }
+          } catch (error) {
+            console.error('Failed to remove folder from favorites:', error);
+            // Consider adding user notification here
           }
+        }}
         }}
         //onClick={(e) => addToFavs()}
       >
