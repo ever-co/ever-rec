@@ -82,18 +82,20 @@ const FavoritesPage: React.FC = () => {
           try {
             if (value === 'videos') {
               await addVideoFolderToFavsAPI(folderId);
-              setFavoritesVideos((prev) => prev.filter((x) => x.id !== folderId));
+              setFavoritesVideos((prev) =>
+                prev.filter((x) => x.id !== folderId),
+              );
               refetch();
             } else {
               await addImageFolderToFavsAPI(folderId);
-              setFavoritesImages((prev) => prev.filter((x) => x.id !== folderId));
+              setFavoritesImages((prev) =>
+                prev.filter((x) => x.id !== folderId),
+              );
               refetch();
             }
           } catch (error) {
             console.error('Failed to remove folder from favorites:', error);
-            // Consider adding user notification here
           }
-        }}
         }}
         //onClick={(e) => addToFavs()}
       >
