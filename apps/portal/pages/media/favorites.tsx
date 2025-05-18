@@ -139,7 +139,7 @@ const FavoritesPage: React.FC = () => {
                         isDropdownVisible={isDropdownVisible === folder.id}
                         onVisibleChange={(visibility) =>
                           setIsDropdownVisible(
-                            visibility == true ? folder.id : '',
+                            visibility === true ? folder.id : '',
                           )
                         }
                       />
@@ -176,7 +176,7 @@ const FavoritesPage: React.FC = () => {
                         key={folder.id}
                         className={classNames(
                           favStyles.mainWrapper,
-                          isDropdownVisible == folder.id && favStyles.active,
+                          isDropdownVisible === folder.id && favStyles.active,
                         )}
                         style={{ height: '58px' }}
                       >
@@ -187,7 +187,7 @@ const FavoritesPage: React.FC = () => {
                           isDropdownVisible={isDropdownVisible == folder.id}
                           onVisibleChange={(visibility) =>
                             setIsDropdownVisible(
-                              visibility == true ? folder.id : '',
+                              visibility === true ? folder.id : '',
                             )
                           }
                         />
