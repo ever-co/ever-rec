@@ -342,7 +342,7 @@ const ScreenshotsContainer: React.FC<IScreenshotsContainerProps> = ({
             }),
           );
         }
-        infoMessage(`${t('toasts.imageAdded')}${workspace.name}`);
+        infoMessage(t('toasts.imageAdded', { workspaceName: workspace.name }));
       }
     }
   };

@@ -441,7 +441,7 @@
         "disconnectTrello": "Verbindung zu Trello trennen",
         "disconnectErrorTitle": "Verbindung zum Trello-Konto trennen",
         "disconnectErrorDescription": "Sind Sie sicher, dass Sie die Trello-Integration deaktivieren möchten? Durch das Trennen können Sie Ihre Screenshots nicht mehr synchronisieren.",
-        "connectedDiscription": "Sie können Ihr Trello-Konto verbinden, um neue Tickets hinzuzufügen und von Rec aufgenommene Screenshots hochzuladen.",
+        "connectedDescription": "Sie können Ihr Trello-Konto verbinden, um neue Tickets hinzuzufügen und von Rec aufgenommene Screenshots hochzuladen.",
         "connectWithTrello": "Mit Trello verbinden"
       }
     },

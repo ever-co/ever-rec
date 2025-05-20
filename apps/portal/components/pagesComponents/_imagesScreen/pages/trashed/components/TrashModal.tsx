@@ -22,7 +22,8 @@ const TrashModal: React.FC<ITrashModalProps> = ({
   onCancel,
 }) => {
   const { t } = useTranslation();
-  const textConfirm = confirmText || t('common.confirm');
+  const textConfirm =
+    confirmText == 'Confirm' ? t('common.confirm') : confirmText;
   return (
     <Modal
       open={visible}

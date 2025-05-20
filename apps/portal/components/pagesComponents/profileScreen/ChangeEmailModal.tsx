@@ -9,11 +9,6 @@ import useEnterKeyPress from 'hooks/useEnterKeyPress';
 import useChangeModalForm from 'hooks/useChangeModalForm';
 import { useTranslation } from 'react-i18next';
 
-const newEmailRules: ((v: string) => boolean | string)[] = [
-  requiredRule('Please enter an email'),
-  emailRule('Please enter a correct email address'),
-];
-
 interface ICreateFolderModalProps {
   email: string;
   visible: boolean;
@@ -28,6 +23,10 @@ const ChangeEmailModal: React.FC<ICreateFolderModalProps> = ({
   onOk,
 }) => {
   const { t } = useTranslation();
+  const newEmailRules: ((v: string) => boolean | string)[] = [
+    requiredRule(t('page.auth.error.enterEmail')),
+    emailRule(t('page.auth.error.emailIncorrect')),
+  ];
   const {
     fieldState: newEmail,
     setFieldState: setNewEmail,

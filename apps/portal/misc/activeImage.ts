@@ -1,8 +1,9 @@
 import { preRoutes } from 'components/_routes';
 import { ISettingsMenuItem } from './menuItems';
+import { NextRouter } from 'next/router';
 
 const activeImage = (
-  router: any,
+  router: NextRouter,
   settingsMenuItems: ISettingsMenuItem[],
 ): string => {
   const currentItem: ISettingsMenuItem | undefined = settingsMenuItems.find(

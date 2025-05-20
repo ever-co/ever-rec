@@ -441,7 +441,7 @@
         "disconnectTrello": "Disconnetti da Trello",
         "disconnectErrorTitle": "Disconnettere dall'account Trello",
         "disconnectErrorDescription": "Sei sicuro di voler disabilitare l'integrazione con Trello? Disconnettendoti non potrai sincronizzare i tuoi screenshot.",
-        "connectedDiscription": "Puoi connettere il tuo account Trello per aggiungere nuovi ticket e caricare screenshot catturati da Rec.",
+        "connectedDescription": "Puoi connettere il tuo account Trello per aggiungere nuovi ticket e caricare screenshot catturati da Rec.",
         "connectWithTrello": "Connetti con Trello"
       }
     },

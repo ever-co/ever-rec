@@ -89,7 +89,6 @@ const Profile: React.FC = () => {
 
   const changeName = async (newName: string) => {
     if (!newName) return;
-    t('toasts.');
     const id = loadingMessage(t('toasts.updatingName'));
     const data = await updateUserData({
       displayName: newName,
@@ -97,7 +96,8 @@ const Profile: React.FC = () => {
 
     setShowNameModal(false);
 
-    if (!data) return updateMessage(id, t('toasts.couldNotUpdate'), 'error');
+    if (!data)
+      return updateMessage(id, t('toasts.couldNotUpdateTheName'), 'error');
 
     updateReduxUser(data);
     updateMessage(id, t('toasts.nameUpdated'), 'success');

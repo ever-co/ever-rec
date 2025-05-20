@@ -60,7 +60,7 @@ import { useWorkspaceVideoDelete } from 'misc/workspaceFunctions';
 import useGenerateShareLink from 'hooks/useGenerateShareLink';
 import VideoChapters from 'components/pagesComponents/_videoEditorScreen/chapters/VideoChapters/VideoChapters';
 import useVideoChapters from 'hooks/useVideoChapters';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 const tabClassesTw =
   'tw-flex tw-justify-center tw-items-center tw-w-1/3 tw-h-50px tw-cursor-pointer tw-outline-none';
@@ -399,10 +399,11 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
         key="menu_item_chapters_enabled"
       >
         <span className="tw-text-xs">
-          {chaptersEnabled
-            ? t('page.video.actionsSection.disable')
-            : t('page.video.actionsSection.enable')}{' '}
-          {t('page.video.actionsSection.chapters')}
+          {t('page.video.actionsSection.chaptersToggle', {
+            action: chaptersEnabled
+              ? t('page.video.actionsSection.disable')
+              : t('page.video.actionsSection.enable'),
+          })}
         </span>
       </Menu.Item>
     </Menu>
@@ -509,8 +510,13 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
           <TabPanel>
             <ImageActionsCard className="tw-rounded-t-none">
               <div>
-                {t('page.image.currentlySavedInOnly')}
-                <strong className="tw-ml-1.5">{currentlySavedIn}</strong>
+                <Trans
+                  values={{ currentlySavedIn: currentlySavedIn }}
+                  i18nKey="page.image.currentlySavedInOnly"
+                  components={{
+                    strong: <strong></strong>,
+                  }}
+                />
               </div>
               <div
                 className={styles.moveToFolder}

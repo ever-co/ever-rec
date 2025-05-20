@@ -441,7 +441,7 @@
         "disconnectTrello": "התנתק מ-Trello",
         "disconnectErrorTitle": "התנתק מחשבון Trello",
         "disconnectErrorDescription": "האם אתה בטוח שברצונך להשבית את אינטגרציית Trello? על ידי התנתקות לא תוכל לסנכרן את צילומי המסך שלך.",
-        "connectedDiscription": "תוכל לחבר את חשבון Trello שלך כדי להוסיף כרטיס חדש ולהעלות צילומי מסך שצולמו על ידי Rec.",
+        "connectedDescription": "תוכל לחבר את חשבון Trello שלך כדי להוסיף כרטיס חדש ולהעלות צילומי מסך שצולמו על ידי Rec.",
         "connectWithTrello": "התחבר עם Trello"
       }
     },

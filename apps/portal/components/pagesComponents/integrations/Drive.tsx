@@ -4,7 +4,7 @@ import { driveSignOut, DriveUser } from 'app/services/google/auth';
 import AppButton from 'components/controls/AppButton';
 import AppSvg from 'components/elements/AppSvg';
 import { DriveFile, updateWorkingFolder } from 'app/services/google/drive';
-import activeImage from 'misc/activeImage';
+//import activeImage from 'misc/activeImage';
 import { useRouter } from 'next/router';
 import useGoogleDriveAuth from 'hooks/useGoogleDriveAuth';
 import { removeDriveUser } from 'app/services/google/user';
@@ -12,7 +12,7 @@ import DisconnectServiceModal from 'components/shared/DisconnectServiceModal';
 import { errorMessage, infoMessage } from 'app/services/helpers/toastMessages';
 import styles from './IntegrationPage.module.scss';
 import { useTranslation } from 'react-i18next';
-import { useMenuItems } from 'misc/menuItems';
+//import { useMenuItems } from 'misc/menuItems';
 
 const Drive: React.FC = () => {
   const { t } = useTranslation();
@@ -22,11 +22,11 @@ const Drive: React.FC = () => {
   const folders: DriveFile[] | null = useSelector(
     (state: RootStateOrAny) => state.drive.folders,
   );
-  const workingFolder: DriveFile | null = useSelector(
-    (state: RootStateOrAny) => state.drive.workingFolder,
-  );
+  //const workingFolder: DriveFile | null = useSelector(
+  //  (state: RootStateOrAny) => state.drive.workingFolder,
+  //);
   const router = useRouter();
-  const { settingsMenuItems } = useMenuItems();
+  //const { settingsMenuItems } = useMenuItems();
   //const { driveLogin } = useGoogleDriveAuth({ pathname: `/settings/drive` });
   const { driveLogin } = useGoogleDriveAuth({
     pathname: router.query?.id ? `/image/${router.query?.id}` : '/media/images',
@@ -40,7 +40,7 @@ const Drive: React.FC = () => {
     await updateWorkingFolder(folder || null);
   };
 
-  const imagePath = activeImage(router, settingsMenuItems);
+  //const imagePath = activeImage(router, settingsMenuItems);
 
   const handleDriveSignOut = useCallback(async () => {
     setLoading(true);

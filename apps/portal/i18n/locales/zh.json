@@ -441,7 +441,7 @@
         "disconnectTrello": "断开 Trello 连接",
         "disconnectErrorTitle": "断开 Trello 帐户连接",
         "disconnectErrorDescription": "您确定要禁用 Trello 集成吗？断开连接后，您将无法同步您的截图。",
-        "connectedDiscription": "您可以连接您的 Trello 帐户以添加新工单并上传 Rec 捕获的截图。",
+        "connectedDescription": "您可以连接您的 Trello 帐户以添加新工单并上传 Rec 捕获的截图。",
         "connectWithTrello": "连接 Trello"
       }
     },

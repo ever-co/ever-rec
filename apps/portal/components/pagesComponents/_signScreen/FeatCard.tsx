@@ -21,42 +21,30 @@ export const useFeatures = () => {
   // Define the 'features' array using translation keys
   const features: IFeatureCard[] = [
     {
-      // Using the section title key for page title
-      pageTitle: t('page.whatsNew.sectionTitle'), // Mapped 'Features' to 'What's New' section title
+      pageTitle: t('page.whatsNew.sectionTitle'),
       imgPath: '/images/box.svg',
-      // Translating the title using the pinToolbar key
       title: t('page.whatsNew.features.pinToolbar.title'),
-      date: 'Dec 7, 2022', // Date kept as is
-      // Translating the description using the pinToolbar key
+      date: 'Dec 7, 2022',
       description: t('page.whatsNew.features.pinToolbar.description'),
       rightImgPath: '/images/dock-tool.svg',
-      // Translating button text using the chromeExtension title key (as 'Add to Chrome')
       buttonText: t('page.whatsNew.features.chromeExtension.title'),
     },
     {
-      // Using the section title key for page title
-      pageTitle: t('page.whatsNew.sectionTitle'), // Mapped 'Features' to 'What's New' section title
+      pageTitle: t('page.whatsNew.sectionTitle'),
       imgPath: '/images/browser.svg',
-      // Translating the title using the chromeExtension subtitle key
-      title: t('page.whatsNew.features.chromeExtension.subtitle'), // Mapped 'Save and Collaborate'
-      date: 'Dec 7, 2022', // Date kept as is
-      // Translating the description using the chromeExtension key
+      title: t('page.whatsNew.features.chromeExtension.subtitle'),
+      date: 'Dec 7, 2022',
       description: t('page.whatsNew.features.chromeExtension.description'),
       rightImgPath: '/images/collaborate.svg',
-      // Translating button text using the ctaReadMore key
       buttonText: t('page.whatsNew.ctaReadMore'),
     },
     {
-      // Using the section title key for page title
-      pageTitle: t('page.whatsNew.sectionTitle'), // Mapped 'Features' to 'What's New' section title
+      pageTitle: t('page.whatsNew.sectionTitle'),
       imgPath: '/images/lightning.svg',
-      // Translating the title using the trimbox key
       title: t('page.whatsNew.features.trimbox.title'),
-      date: 'Dec 7, 2022', // Date kept as is
-      // Translating the description using the trimbox key
+      date: 'Dec 7, 2022',
       description: t('page.whatsNew.features.trimbox.description'),
       rightImgPath: '/images/trim.svg',
-      // Translating button text using the ctaFindOutMore key
       buttonText: t('page.whatsNew.ctaFindOutMore'),
       id: 'last-child',
     },

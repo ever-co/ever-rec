@@ -9,10 +9,6 @@ import useEnterKeyPress from 'hooks/useEnterKeyPress';
 import useChangeModalForm from 'hooks/useChangeModalForm';
 import { useTranslation } from 'react-i18next';
 
-const displayNameRules: ((v: string) => boolean | string)[] = [
-  requiredRule('Please enter a name'),
-];
-
 interface IProps {
   name: string;
   visible: boolean;
@@ -27,6 +23,9 @@ const ChangeNameModal: React.FC<IProps> = ({
   onOk,
 }) => {
   const { t } = useTranslation();
+  const displayNameRules: ((v: string) => boolean | string)[] = [
+    requiredRule(t('page.auth.error.enterName')),
+  ];
   const {
     fieldState: newName,
     setFieldState: setNewName,

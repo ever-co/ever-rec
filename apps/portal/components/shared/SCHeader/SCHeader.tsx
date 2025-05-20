@@ -15,7 +15,7 @@ import PanelAC from 'app/store/panel/actions/PanelAC';
 import { signOut } from 'app/services/auth';
 import { Dispatch } from 'redux';
 import { infoMessage } from 'app/services/helpers/toastMessages';
-import { lanuages } from 'i18n/constants';
+import { languages } from 'i18n/constants';
 import { useTranslation } from 'react-i18next';
 
 interface ISCHeaderProps {
@@ -40,7 +40,7 @@ const SCHeader: FC<ISCHeaderProps> = ({
   onInviteMembersButtonClick,
 }) => {
   const { t, i18n } = useTranslation();
-  const toggleLanguage = (code) => {
+  const toggleLanguage = (code: string) => {
     i18n.changeLanguage(code);
   };
   const clickedNotifications = useRef(false); // to be removed when implemented
@@ -75,7 +75,6 @@ const SCHeader: FC<ISCHeaderProps> = ({
 
   return (
     <div className={styles.appHeader}>
-
       {showSearch ? (
         <div className={styles.search}>
           <AppSvg path="/new-design-v2/search.svg" />
@@ -282,7 +281,7 @@ export const languagesList = (toggleLanguage: (code: string) => void) => {
         overflowY: 'scroll',
       }}
     >
-      {lanuages.map((lang) => (
+      {languages.map((lang) => (
         <Menu.Item
           key={lang.code}
           onClick={() => toggleLanguage(lang.code)}

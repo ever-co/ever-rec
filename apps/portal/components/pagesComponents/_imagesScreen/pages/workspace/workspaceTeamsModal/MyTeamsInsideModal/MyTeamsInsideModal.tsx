@@ -4,7 +4,7 @@ import styles from './MyTeamsInsideModal.module.scss';
 import classNames from 'classnames';
 import { IWorkspaceTeam } from 'app/interfaces/IWorkspaceTeams';
 import WorkspaceTeamsEmpty from 'components/pagesComponents/_workspacesScreen/WorkspaceTeamsEmpty';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 interface IMyTeamsProps {
   userId: string;
@@ -58,9 +58,10 @@ const MyTeamsInsideModal: FC<IMyTeamsProps> = ({
                 </div>
 
                 <div className={styles.members}>
-                  {team?.members.length}
-
-                  {t('workspace.members')}
+                  <Trans
+                    i18nKey="workspace.membersWithLength"
+                    values={{ length: team?.members.length }}
+                  />
                 </div>
               </div>
 

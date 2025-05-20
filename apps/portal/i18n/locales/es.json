@@ -441,7 +441,7 @@
         "disconnectTrello": "Desconectar de Trello",
         "disconnectErrorTitle": "Desconectar de la cuenta de Trello",
         "disconnectErrorDescription": "¿Estás seguro de que quieres desactivar la integración con Trello? Al desconectarte, no podrás sincronizar tus capturas de pantalla.",
-        "connectedDiscription": "Puedes conectar tu cuenta de Trello para añadir nuevos tickets y subir capturas de pantalla capturadas por Rec.",
+        "connectedDescription": "Puedes conectar tu cuenta de Trello para añadir nuevos tickets y subir capturas de pantalla capturadas por Rec.",
         "connectWithTrello": "Conectar con Trello"
       }
     },

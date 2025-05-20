@@ -441,7 +441,7 @@
         "disconnectTrello": "Rozłącz z Trello",
         "disconnectErrorTitle": "Rozłączyć konto Trello",
         "disconnectErrorDescription": "Czy na pewno chcesz wyłączyć integrację z Trello? Rozłączenie uniemożliwi synchronizację zrzutów ekranu.",
-        "connectedDiscription": "Możesz połączyć swoje konto Trello, aby dodawać nowe zgłoszenia i przesyłać zrzuty ekranu przechwycone przez Rec.",
+        "connectedDescription": "Możesz połączyć swoje konto Trello, aby dodawać nowe zgłoszenia i przesyłać zrzuty ekranu przechwycone przez Rec.",
         "connectWithTrello": "Połącz z Trello"
       }
     },

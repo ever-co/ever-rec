@@ -138,7 +138,7 @@ const AddWorkspaceButton: FC<{ onClick: () => void }> = ({ onClick }) => {
   const { t } = useTranslation();
   return (
     <div onClick={onClick}>
-      <Tooltip title={t('common.manageWorkspace')} placement="right">
+      <Tooltip title={t('common.addWorkspace')} placement="right">
         <div>
           <AppSvg
             path="/common/add-workspace.svg"

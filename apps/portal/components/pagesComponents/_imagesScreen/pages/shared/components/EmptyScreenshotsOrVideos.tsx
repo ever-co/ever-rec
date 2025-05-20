@@ -11,7 +11,7 @@ const EmptyScreenshotsOrVideos: FC<IProps> = ({ emptyType }) => {
   const { t } = useTranslation();
   let heading = t('shared.noSharedItems');
   let type = 'a video or screenshot';
-  let typeTranslated = t('shared.videoOrTranslationVideo');
+  let typeTranslated = t('shared.videoOrTranslation');
   let taking = '';
   let imagePath = '/images/emptyItems/noshared.svg';
 

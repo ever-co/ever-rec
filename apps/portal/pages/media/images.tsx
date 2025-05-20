@@ -42,7 +42,7 @@ import SCHeader from 'components/shared/SCHeader/SCHeader';
 import useItemOrder from 'hooks/useItemOrder';
 import { ItemTypeEnum } from 'app/enums/itemTypeEnum';
 import useItemsFilter from 'hooks/useItemsFilter';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 const Images: React.FC = () => {
   const { t } = useTranslation();

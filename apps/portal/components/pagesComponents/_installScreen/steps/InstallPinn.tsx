@@ -9,7 +9,11 @@ const InstallPinn: React.FC<IStepProps> = ({ nextStep }) => {
   return (
     <div className="tw-w-full">
       <div className="tw-w-96">
-        <AppHeader part1="Pin" part2="Extention" className="tw-mb-8" />
+        <AppHeader
+          part1={t('common.pin')}
+          part2={t('common.extension')}
+          className="tw-mb-8"
+        />
         <div>
           <p>{t('page.install.remainPinned')}</p>
 

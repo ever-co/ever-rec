@@ -46,6 +46,7 @@ const EmailModal: React.FC<IEmailModalProps> = ({
   fromEditor,
 }) => {
   const dispatch = useDispatch();
+  const { t } = useTranslation();
   const [messagestatus, setMesagestatus] = useState<boolean>(false);
   const [message, setMessage] = useState<string>('');
   const [emailcollection, setEmailcollection] = useState<{
@@ -177,7 +178,6 @@ const EmailModal: React.FC<IEmailModalProps> = ({
     }
   }, [emailImageLink]);
 
-  const { t } = useTranslation();
   return (
     <Modal
       open={visible}

@@ -88,7 +88,7 @@ const Auth: React.FC<SignFlowComponent> = ({ children, componentType }) => {
       }
     }
   };
-  const toggleLanguage = (code) => {
+  const toggleLanguage = (code: string) => {
     i18n.changeLanguage(code);
   };
 
@@ -106,7 +106,7 @@ const Auth: React.FC<SignFlowComponent> = ({ children, componentType }) => {
           overlay={languagesMenu}
         >
           <div className=" tw-px-4 tw-py-2 tw-flex tw-cursor-pointer tw-border tw-rounded-md tw-border-[#5b4dbe]/20">
-            <p>Language</p>
+            <p>{t('common.language')}</p>
             <AppSvg path="/new-design-v2/down-caret.svg" size="20px" />
           </div>
         </Dropdown>

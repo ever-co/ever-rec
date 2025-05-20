@@ -1,4 +1,4 @@
-export const lanuages = [
+export const languages: { text: string; code: string }[] = [
   { text: 'English', code: 'en' },
   { text: 'Bulgarian', code: 'bg' },
   { text: 'Hebrew', code: 'he' },

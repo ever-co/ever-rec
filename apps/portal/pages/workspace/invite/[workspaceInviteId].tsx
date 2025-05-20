@@ -14,7 +14,7 @@ import AppSvg from 'components/elements/AppSvg';
 import { sendExternalMessage } from 'misc/_helper';
 import AppSpinner from 'components/containers/appSpinner/AppSpinner';
 import { panelRoutes, preRoutes } from 'components/_routes';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 const maxVisibleMembers = 6;
 
@@ -211,7 +211,10 @@ const WorkspaceMemberNames: FC<any> = ({ workspaceMembers }) => {
 
   return (
     <p className="tw-text-center tw-max-w-400px">
-      {memberNamesAndOthers + t('workspace.others')}
+      <Trans
+        i18nKey="workspace.others"
+        values={{ members: memberNamesAndOthers }}
+      />
     </p>
   );
 };

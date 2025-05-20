@@ -60,7 +60,11 @@ const Preferences: React.FC = () => {
             />
             {t('navigation.back')}
           </div>
-          <AppHeader part1="Saving" part2="Preferences" className="tw-mb-10" />
+          <AppHeader
+            part1={t('page.preference.saving')}
+            part2={t('page.preference.preferences')}
+            className="tw-mb-10"
+          />
           <PreferencePartition hasUpperDivider={false}>
             <div className="tw-flex tw-justify-between">
               <div className="tw-font-semibold">

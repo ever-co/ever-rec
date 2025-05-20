@@ -101,7 +101,7 @@ const Trello: React.FC = () => {
       ) : (
         <>
           <p className={styles.description}>
-            {t('page.integrations.trello.connectedDiscription')}
+            {t('page.integrations.trello.connectedDescription')}
           </p>
           <div className="tw-w-90p">
             <AppButton onClick={connectToAccount} full={true}>

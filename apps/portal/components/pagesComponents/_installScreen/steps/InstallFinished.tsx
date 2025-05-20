@@ -27,7 +27,11 @@ const InstallFinished: React.FC<IStepProps> = () => {
   return (
     <div className="tw-w-full">
       <div className="tw-w-96">
-        <AppHeader part1="Setup" part2="Finished!" className="tw-mb-8" />
+        <AppHeader
+          part1={t('common.setup')}
+          part2={t('common.finished')}
+          className="tw-mb-8"
+        />
         <div>
           <p>{t('page.install.completedGuide')}</p>
           <p>{t('page.install.clickRightSideExtension')}</p>

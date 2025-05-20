@@ -441,7 +441,7 @@
         "disconnectTrello": "Verbinding met Trello verbreken",
         "disconnectErrorTitle": "Verbinding met Trello-account verbreken",
         "disconnectErrorDescription": "Weet u zeker dat u de Trello-integratie wilt uitschakelen? Door de verbinding te verbreken, kunt u uw screenshots niet synchroniseren.",
-        "connectedDiscription": "U kunt uw Trello-account verbinden om nieuwe tickets toe te voegen en screenshots te uploaden die door Rec zijn vastgelegd.",
+        "connectedDescription": "U kunt uw Trello-account verbinden om nieuwe tickets toe te voegen en screenshots te uploaden die door Rec zijn vastgelegd.",
         "connectWithTrello": "Verbinden met Trello"
       }
     },

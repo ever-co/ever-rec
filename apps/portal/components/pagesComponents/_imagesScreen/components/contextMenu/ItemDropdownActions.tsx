@@ -158,7 +158,7 @@ const ItemDropdownActions: FC<IItemDropdownActionsProps> = ({
           className="tw-mr-3"
         />
       ),
-      label: t('common.fileActions.shareOnWhatsApp'),
+      label: t('common.fileActions.shareOnSlack'),
     };
 
     menuItems.splice(0, 0, slackShareAction);

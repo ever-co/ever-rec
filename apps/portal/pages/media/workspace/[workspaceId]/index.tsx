@@ -273,7 +273,11 @@ const Workspace: FC = () => {
       : null;
 
     if (!newTeam) {
-      return updateMessage(toast, t('toasts.couldNotUpdate'), 'warning');
+      return updateMessage(
+        toast,
+        t('toasts.leftTheTeamAndCouldNotUpdate'),
+        'warning',
+      );
     }
 
     const leftMemberIndex = newTeam.members.findIndex(
@@ -285,7 +289,8 @@ const Workspace: FC = () => {
     newWorkspace.teams[newTeamIndex] = newTeam;
 
     dispatch(PanelAC.setActiveWorkspace({ activeWorkspace: newWorkspace }));
-    updateMessage(toast, t('toasts.leftTeam') + teamName, 'success');
+    updateMessage(toast, t('toasts.leftTeam', { teamName }), 'success');
+    //t('toasts.leftTeam') + teamName
   };
 
   const leaveTeamHandler = async (

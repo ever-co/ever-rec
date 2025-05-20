@@ -251,18 +251,6 @@ const MultiItemsSelect: React.FC<IMultiItemsSelectProps> = ({
 
     infoMessage(t('toasts.videoDeleted'));
   };
-  {
-    t('toasts.itemsDeleted');
-  }
-  {
-    t('toasts.noItemsToRestore');
-  }
-  {
-    t('toasts.itemsRestored');
-  }
-  {
-    t('toasts.itemRestored');
-  }
   const deleteAllItems = async () => {
     setDeleteModal(false);
 

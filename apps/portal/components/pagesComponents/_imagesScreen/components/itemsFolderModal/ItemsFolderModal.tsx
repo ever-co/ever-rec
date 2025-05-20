@@ -104,7 +104,7 @@ const ItemsFolderModal: React.FC<IItemsFolderModalProps> = ({
           dispatch(PanelAC.setEditorVideo({ editorVideo: video as any }));
         }
         mainItem && (await updateVideoData(dbData as DbVideoData));
-        await getExplorerDataVideo(explorerDataImages.currentFolder?.id);
+        await getExplorerDataVideo(explorerDataVideos.currentFolder?.id);
         infoMessage(
           `${t('toasts.videoMovedTo')} ${selectedFolder?.name || t('common.myVideos')}`,
         );
@@ -130,7 +130,7 @@ const ItemsFolderModal: React.FC<IItemsFolderModalProps> = ({
               await getExplorerData(explorerDataImages.currentFolder?.id);
             } else if (type == 'video') {
               item && (await updateVideoData(dbData));
-              await getExplorerDataVideo(explorerDataImages.currentFolder?.id);
+              await getExplorerDataVideo(explorerDataVideos.currentFolder?.id);
             }
             if (items.length == index + 1) {
               loader(false);

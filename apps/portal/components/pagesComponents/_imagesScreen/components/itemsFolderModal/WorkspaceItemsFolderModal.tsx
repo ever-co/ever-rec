@@ -108,7 +108,7 @@ const WorkspaceItemsFolderModal: React.FC<IItemsFolderModalProps> = ({
 
     updateMessage(
       toast,
-      `${t('toasts.movingItemsError')} ${folderNameString}.`,
+      `${t('toasts.itemsMovedTo')} ${folderNameString}.`,
       'success',
     );
   };

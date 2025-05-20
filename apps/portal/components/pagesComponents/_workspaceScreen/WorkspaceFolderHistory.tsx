@@ -78,7 +78,6 @@ const WorkspaceFolderHistory: FC<IFoldersProps> = ({
             className="tw-font-semibold tw-cursor-pointer"
             onClick={() => switchFolder(undefined)}
           >
-            Library
             {t('page.video.library')}
           </h1>
           <AppSvg

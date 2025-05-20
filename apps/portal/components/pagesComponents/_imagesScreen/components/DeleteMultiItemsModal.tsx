@@ -2,7 +2,7 @@ import React from 'react';
 import { Modal } from 'antd';
 import AppButton from 'components/controls/AppButton';
 import { MixedItemType } from 'app/interfaces/ItemType';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 interface IDelteMultiItemsModalProps {
   visible: boolean;
   onClose: () => void;
@@ -43,13 +43,13 @@ const DeleteMultiItemsModal: React.FC<IDelteMultiItemsModalProps> = ({
             bgColor={type === 'item' ? 'tw-bg-danger' : undefined}
             twTextColor={type === 'item' ? 'tw-text-white' : undefined}
           >
-            {t('page.profile.deleteAccountModal.currentPassword')}
+            {t('common.delete')}
           </AppButton>
         </div>
       }
     >
       <h2 className="tw-mb-6 tw-text-2xl tw-font-semibold">
-        {t('common.delete')} {type}s
+        <Trans values={{ type: type }} count={2} i18nKey="modals.deleteType" />
       </h2>
       <p>{paragraph}</p>
     </Modal>

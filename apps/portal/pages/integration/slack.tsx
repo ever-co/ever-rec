@@ -40,7 +40,11 @@ const PanelSlackIntegration: React.FC = () => {
           <LogoWrapper />
           <div className="tw-w-full">
             <div className="tw-w-26rem">
-              <AppHeader part1="Hello," part2="Welcome!" className="tw-mb-8" />
+              <AppHeader
+                part1={t('page.integrations.hello')}
+                part2={t('page.integrations.welcome')}
+                className="tw-mb-8"
+              />
               <p className="tw-mb-6">{t('page.integrations.gladYouHere')}</p>
               <p className="tw-mb-8">{t('page.integrations.installSlack')}</p>
               <Layout>

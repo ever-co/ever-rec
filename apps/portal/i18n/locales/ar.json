@@ -441,7 +441,7 @@
         "disconnectTrello": "قطع الاتصال بـ Trello",
         "disconnectErrorTitle": "قطع الاتصال بحساب Trello",
         "disconnectErrorDescription": "هل أنت متأكد أنك تريد تعطيل تكامل Trello؟ عن طريق قطع الاتصال، لن تتمكن من مزامنة لقطات الشاشة الخاصة بك.",
-        "connectedDiscription": "يمكنك ربط حساب Trello الخاص بك لإضافة تذكرة جديدة وتحميل لقطات الشاشة التي تم التقاطها بواسطة Rec.",
+        "connectedDescription": "يمكنك ربط حساب Trello الخاص بك لإضافة تذكرة جديدة وتحميل لقطات الشاشة التي تم التقاطها بواسطة Rec.",
         "connectWithTrello": "الاتصال بـ Trello"
       }
     },

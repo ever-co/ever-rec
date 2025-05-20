@@ -407,7 +407,7 @@ const SingleVideoPage: FC<IProps> = ({
         preRoutes.media + panelRoutes.workspace + `/${workspace?.id}`,
       );
 
-      updateMessage(id, t('toasts.videoDeleted'), 'success');
+      updateMessage(id, t('toasts.videoDeletedAndRedirect'), 'success');
 
       return;
     }
@@ -416,7 +416,7 @@ const SingleVideoPage: FC<IProps> = ({
 
     router.push(preRoutes.media + panelRoutes.videos);
 
-    updateMessage(id, t('toasts.videoMovedToTrash'), 'success');
+    updateMessage(id, t('toasts.videoMovedToTrashAndRedirecting'), 'success');
   };
 
   const videoDelete = async (video: IEditorVideo) => {

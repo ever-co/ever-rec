@@ -60,7 +60,9 @@ const SortingDropDown: React.FC<SortingDropDown> = ({
           </div>
         }
       >
-        <span>Date - {sortingTypeString}</span>
+        <span>
+          {t('common.date')}- {sortingTypeString}
+        </span>
       </Menu.Item>
       <Menu.Item
         className={classNames(styles.itemsStyle)}
@@ -78,7 +80,7 @@ const SortingDropDown: React.FC<SortingDropDown> = ({
           </div>
         }
       >
-        <span>Name</span>
+        <span>{t('common.name')}</span>
       </Menu.Item>
     </Menu>
   );

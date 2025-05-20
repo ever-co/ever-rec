@@ -70,7 +70,7 @@ const WarningCaveat = () => {
   const { t } = useTranslation();
   return (
     <div className={s.Caveats}>
-      <p>{t('page.video.chaptersdisableddiscription')} </p>
+      <p>{t('page.video.chaptersDisabledDescription')} </p>
     </div>
   );
 };
@@ -80,7 +80,7 @@ const ErrorCaveat = () => {
   return (
     <div className={s.Caveats}>
       <p>
-        {t('page.video.chapterscriteriadescription')} {CHAPTER_MIN_VIDEO_LENGTH}
+        {t('page.video.chaptersCriteriaDescription')} {CHAPTER_MIN_VIDEO_LENGTH}
         {t('page.video.secondslong')} .
       </p>
     </div>
