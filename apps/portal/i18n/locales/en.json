@@ -355,8 +355,7 @@
       "seconds": "seconds",
       "addchapterdescription": "to add a new chapter move the video progress bar and click on the add chapter button.",
       "chaptersDisabledDescription": "your setting for showing chapters is disabled. your chapters will not show if you share this video. to enable it, please go to more options in manage tab.",
-      "chaptersCriteriaDescription": "your video does not meet chapters criteria because it is too short. minimum required video length is",
-      "secondslong": "seconds long.",
+      "chaptersCriteriaDescription": "your video does not meet chapters criteria because it is too short. minimum required video length is {{length}} seconds long.",
       "statsSection": {
         "views": "No views",
         "likes": "No likes"
@@ -720,8 +719,7 @@
     "teamUpdated": "Team updated!",
     "deletedSuccessfully": "deleted successfully.",
     "sending": "Sending",
-    "couldNotSend": "Could not send",
-    "pleaseTryAgainLater": ". Please try again later.",
+    "couldNotSend": "Could not send {{emailStr}}. Please try again later.",
     "downloadingItems": "Downloading items...",
     "itemsDownloaded": "Items downloaded.",
     "deletingItems": "Deleting items...",

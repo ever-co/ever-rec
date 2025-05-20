@@ -80,8 +80,9 @@ const ErrorCaveat = () => {
   return (
     <div className={s.Caveats}>
       <p>
-        {t('page.video.chaptersCriteriaDescription')} {CHAPTER_MIN_VIDEO_LENGTH}
-        {t('page.video.secondslong')} .
+        {t('page.video.chaptersCriteriaDescription', {
+          length: CHAPTER_MIN_VIDEO_LENGTH,
+        })}
       </p>
     </div>
   );

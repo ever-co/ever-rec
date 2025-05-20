@@ -50,7 +50,7 @@ const InvitationSection: FC<IInvitationSectionProps> = ({
     if (!data)
       return updateMessage(
         id,
-        t('toasts.couldNotSend') + emailStr + t('toasts.pleaseTryAgainLater'),
+        t('toasts.couldNotSend', { emailStr: emailStr }),
         'error',
       );
     updateMessage(id, data, 'success');
