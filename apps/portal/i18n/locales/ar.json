@@ -104,7 +104,7 @@
     "createTeam": "إنشاء فريق",
     "leaveTeam": "مغادرة الفريق",
     "noTeams": "لا توجد فرق لمساحة العمل هذه...",
-    "inviteteammatesdescription": "أنشئ فريقاً وأضف أعضاء إليه.",
+    "inviteTeammatesDescription": "أنشئ فريقاً وأضف أعضاء إليه.",
     "teamOwner": "مالك الفريق",
     "newWorkspaceName": "اسم مساحة العمل الجديدة",
     "linkToWorkspace": "مشاركة الرابط مع الفريق",

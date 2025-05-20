@@ -104,7 +104,7 @@
     "createTeam": "Create Team",
     "leaveTeam": "Leave team",
     "noTeams": "There are no teams for this workspace...",
-    "inviteteammatesdescription": "Create a team and add members to it.",
+    "inviteTeammatesDescription": "Create a team and add members to it.",
     "teamOwner": "Team Owner",
     "newWorkspaceName": "New Workspace Name",
     "linkToWorkspace": "Share link with the team",
@@ -789,6 +789,3 @@
     "joinedWorkspaceSuccess": "Successfully joined workspace. Redirecting to new workspace..."
   }
 }
-create the exact same json for nl.json
-properties name should be same and values should be translated how can i do that
-

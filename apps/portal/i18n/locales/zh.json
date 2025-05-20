@@ -104,7 +104,7 @@
     "createTeam": "创建团队",
     "leaveTeam": "离开团队",
     "noTeams": "此工作区没有团队...",
-    "inviteteammatesdescription": "创建一个团队并向其中添加成员。",
+    "inviteTeammatesDescription": "创建一个团队并向其中添加成员。",
     "teamOwner": "团队所有者",
     "newWorkspaceName": "新工作区名称",
     "linkToWorkspace": "与团队分享链接",

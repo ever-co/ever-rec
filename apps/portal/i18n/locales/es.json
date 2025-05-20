@@ -104,7 +104,7 @@
     "createTeam": "Crear Equipo",
     "leaveTeam": "Abandonar equipo",
     "noTeams": "No hay equipos para este espacio de trabajo...",
-    "inviteteammatesdescription": "Crea un equipo y añádele miembros.",
+    "inviteTeammatesDescription": "Crea un equipo y añádele miembros.",
     "teamOwner": "Propietario del Equipo",
     "newWorkspaceName": "Nuevo Nombre del Espacio de Trabajo",
     "linkToWorkspace": "Compartir enlace con el equipo",

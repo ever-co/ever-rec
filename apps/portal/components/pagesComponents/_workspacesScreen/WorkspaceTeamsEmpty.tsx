@@ -32,7 +32,7 @@ const WorkspaceTeamsEmpty: FC<IProps> = ({
       {isWorkspaceAdmin && (
         <>
           <p className={styles.noMembersDescription}>
-            {t('workspace.inviteteammatesdescription')}
+            {t('workspace.inviteTeammatesDescription')}
           </p>
 
           <div className={styles.addTeamWrapper}>

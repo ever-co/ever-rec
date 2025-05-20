@@ -104,7 +104,7 @@
     "createTeam": "Създай екип",
     "leaveTeam": "Напусни екипа",
     "noTeams": "Няма екипи за това работно пространство...",
-    "inviteteammatesdescription": "Създайте екип и добавете членове към него.",
+    "inviteTeammatesDescription": "Създайте екип и добавете членове към него.",
     "teamOwner": "Собственик на екипа",
     "newWorkspaceName": "Ново име на работното пространство",
     "linkToWorkspace": "Сподели линк с екипа",

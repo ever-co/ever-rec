@@ -104,7 +104,7 @@
     "createTeam": "Créer une Équipe",
     "leaveTeam": "Quitter l'équipe",
     "noTeams": "Il n'y a pas d'équipes pour cet espace de travail...",
-    "inviteteammatesdescription": "Créez une équipe et ajoutez-y des membres.",
+    "inviteTeammatesDescription": "Créez une équipe et ajoutez-y des membres.",
     "teamOwner": "Propriétaire de l'Équipe",
     "newWorkspaceName": "Nouveau Nom de l'Espace de Travail",
     "linkToWorkspace": "Partager le lien avec l'équipe",
