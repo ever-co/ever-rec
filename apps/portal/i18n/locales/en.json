@@ -171,7 +171,7 @@
     "pin": "Pin",
     "extension": "Extension",
     "finished": "Finished!",
-    "setup": "Extention",
+    "setup": "Setup",
     "send": "Send",
     "email": "email",
     "emails": "emails",
@@ -405,7 +405,7 @@
       "pageTitle": "Integrations",
       "googleDrive": {
         "title": "Google Drive Integration",
-        "description": "You can connect your Google Drive account to save screenshots and videos captured by Rec .",
+        "description": "You can connect your Google Drive account to save screenshots and videos captured by Rec.",
         "buttonText": "Continue with Google Drive",
         "disconnectGoogleDrive": "Disconnect from Google Drive",
         "disconnectErrorTitle": "Disconnect your Google account?",
@@ -789,3 +789,6 @@
     "joinedWorkspaceSuccess": "Successfully joined workspace. Redirecting to new workspace..."
   }
 }
+create the exact same json for nl.json
+properties name should be same and values should be translated how can i do that
+

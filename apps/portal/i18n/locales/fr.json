@@ -7,13 +7,13 @@
       "creatingCompany": "Création de l'entreprise...",
       "companyCreated": "Entreprise créée avec succès.",
       "shareLinkCopied": "Impossible de copier le lien de partage...",
-      "noShareableLink": "Il n'y a pas de lien partageable pour cet élément",
+      "noShareableLink": "Il n'y a pas de lien partageable pour cet élément.",
       "emptyItemTitle": "Le titre de l'élément ne peut pas être vide.",
       "inviteLinkError": "Impossible de créer le lien d'invitation à l'espace de travail.",
-      "copyError": "Impossible de copier.",
-      "add3Chapters": "Veuillez ajouter au moins 3 chapitres",
+      "copyError": "La copie a échoué.",
+      "add3Chapters": "Veuillez ajouter au moins 3 chapitres.",
       "chaptersSaved": "Chapitres enregistrés avec succès.",
-      "noSourceURL": "Cette image n'a pas d'URL source",
+      "noSourceURL": "Cette image n'a pas d'URL source.",
       "problemDeletingVideo": "Un problème est survenu lors de la suppression de votre vidéo...",
       "imageDeleted": "L'image a été supprimée avec succès !",
       "problemDeletingImage": "Un problème est survenu lors de la suppression de votre image..."
@@ -26,7 +26,7 @@
     "prev": "< Précédent",
     "next": "Suivant >",
     "posting": "Publication...",
-    "comment": "Commenter",
+    "comment": "Commentaire",
     "leaveYourComments": "Laissez vos commentaires",
     "loginToComment": "Connectez-vous pour commenter"
   },
@@ -48,7 +48,7 @@
     "sharedWithOthers": "Les éléments que vous avez créés et partagés avec d'autres ",
     "willBeDisplayed": "seront affichés ici.",
     "extensionMenu": "dans le menu contextuel de l'extension.",
-    "videoOrScreenShot": "Commencez à {{taking}}. Cliquez sur le bouton <1>{{type}}</1>"
+    "videoOrScreenShot": "Commencez {{taking}}. Cliquez sur le bouton <1>{{type}}</1>"
   },
   "unique": {
     "pleaseSelectOption": "Veuillez sélectionner une option",
@@ -56,7 +56,7 @@
     "imageFolders": "Dossiers d'images",
     "videoFolders": "Dossiers de vidéos",
     "myItems": "Mes Éléments",
-    "deleteVideo": "Supprimer la vidéo",
+    "deleteVideo": "Supprimer la Vidéo",
     "empty": "C'est vide ici...",
     "emptyItemMessage": "Ajoutez des éléments dans <1>{{workspaceName}}</1> en les ajoutant depuis le bouton Ajouter Image/Vidéo ou depuis le menu contextuel de vos images/vidéos."
   },
@@ -66,7 +66,7 @@
   },
   "notFound": {
     "workspace": {
-      "heading": "Aucun espace de travail trouvé",
+      "heading": "Aucun Espace de Travail Trouvé",
       "description": "Il semble que vous n'ayez pas encore d'espaces de travail. Cliquez sur le bouton ci-dessous pour en créer un.",
       "button": "Créer un espace de travail"
     },
@@ -88,14 +88,13 @@
     "createWorkspace": "Créer un Espace de Travail",
     "teamsOverview": "Aperçu des Équipes",
     "joined": "ont également rejoint cet espace de travail.",
-    "others": "et d'autres ont également rejoint cet espace de travail.",
-    "dragAndDropImagesHereOr": "Glissez-déposez des images ici ou",
-    "useAsLogo": "Utilisez cette image comme logo ou",
+    "others": "{{members}} et d'autres ont également rejoint cet espace de travail.",
+    "useAsLogo": "Utiliser cette image comme logo ou",
     "upload": "Télécharger",
     "aNewImage": "une nouvelle image.",
     "previousImageOrLogo": "image ou logo précédent.",
     "dropFiles": "Déposez les fichiers ici ...",
-    "logoDescription": "Téléchargez un logo ou un avatar pour votre espace de travail. Format JPG ou PNG uniquement. La taille maximale du fichier est de 30 Ko",
+    "logoDescription": "Téléchargez un logo ou un avatar pour votre espace de travail. Format JPG ou PNG uniquement. La taille maximale du fichier est de 30 Ko.",
     "invitedToJoin": "vous a invité à rejoindre",
     "workspaceMembers": "Membres de l'Espace de Travail",
     "teamMembers": "Membres de l'Équipe",
@@ -104,23 +103,24 @@
     "manageTeams": "Gérer les Équipes",
     "createTeam": "Créer une Équipe",
     "leaveTeam": "Quitter l'équipe",
-    "noTeams": "Il n'y a aucune équipe pour cet espace de travail...",
+    "noTeams": "Il n'y a pas d'équipes pour cet espace de travail...",
     "inviteteammatesdescription": "Créez une équipe et ajoutez-y des membres.",
     "teamOwner": "Propriétaire de l'Équipe",
     "newWorkspaceName": "Nouveau Nom de l'Espace de Travail",
     "linkToWorkspace": "Partager le lien avec l'équipe",
-    "description": "La collaboration facilitée avec un espace de travail pour partager instantanément des images et des vidéos.",
+    "description": "Collaboration facilitée avec un espace de travail pour partager instantanément des images et des vidéos.",
     "addWorkspace": "Ajouter un Espace de Travail",
     "enterAWorkspaceName": "Entrez un nom pour l'espace de travail",
     "renameWorkspace": "Renommer l'Espace de Travail",
-    "nameYourWorkspaceDescription": "Donnez à votre espace de travail un nom qui représente son objectif",
+    "nameYourWorkspaceDescription": "Donnez à votre espace de travail un nom qui représentera son objectif.",
     "renamePlaceholder": "Entrez un nom pour l'espace de travail",
     "confirm": "Confirmer",
+    "dragAndDropImagesHereOr": "Glissez-déposez des images ici ou",
     "browseFile": "Parcourir les fichiers",
-    "uploadThumbnailDescription": "Téléchargez une miniature pour votre espace de travail. Supporte uniquement le format JPG ou PNG.",
+    "uploadThumbnailDescription": "Téléchargez une miniature pour votre espace de travail. Prend en charge uniquement le format JPG ou PNG.",
     "sendEmail": "Envoyer un E-mail",
     "addEmail": "Ajouter un E-mail",
-    "joinNow": "Rejoindre maintenant",
+    "joinNow": "Rejoindre Maintenant",
     "workspace": "espace de travail",
     "workspaceInviteExpired": "L'invitation à l'espace de travail a expiré.",
     "member": "membre",
@@ -130,8 +130,8 @@
     "changeOrganizationName": "Changer le nom de l'organisation",
     "changeOrganizationNameDescription": "Changer le nom de l'organisation",
     "enterOrganizationName": "Entrez le nom de l'organisation",
-    "creatingTeam": "Création de l'Équipe...",
-    "couldNotCreateTeam": "Impossible de créer une Équipe dans l'espace de travail...",
+    "creatingTeam": "Création d'une Équipe...",
+    "couldNotCreateTeam": "Impossible de créer une Équipe d'espace de travail...",
     "teamCreated": "Équipe créée !",
     "couldNotLeaveTeam": "Impossible de quitter l'équipe",
     "leftWorkspace": "Vous avez quitté l'espace de travail avec succès.",
@@ -142,9 +142,9 @@
     "noWorkspacesDescription": "Il semble que vous n'ayez pas encore d'espaces de travail. Cliquez sur le bouton ci-dessous pour en créer un.",
     "changeWorkspaceAvatar": "Changer l'avatar de l'espace de travail",
     "changeWorkspaceThumbnail": "Changer la miniature de l'espace de travail",
-    "renameWorkspace": "Renommer l'espace de travail",
     "copyInviteLink": "Copier le lien d'invitation",
     "members": "membre(s)",
+    "membersWithLength": "{{length}} membre(s)",
     "leaveWorkspace": "Quitter l'espace de travail",
     "deleteWorkspace": "Supprimer l'espace de travail"
   },
@@ -168,6 +168,10 @@
     "edit": "Modifier",
     "goBack": "Retour",
     "no": "non",
+    "pin": "Épingler",
+    "extension": "Extension",
+    "finished": "Terminé !",
+    "setup": "Configuration",
     "send": "Envoyer",
     "email": "e-mail",
     "emails": "e-mails",
@@ -177,7 +181,7 @@
     "more": "Plus",
     "download": "Télécharger",
     "manage": "Gérer",
-    "comment": "Commenter",
+    "comment": "Commentaire",
     "comments": "Commentaires",
     "saveChanges": "Enregistrer les modifications",
     "at": "À",
@@ -202,8 +206,8 @@
     "sort": "Trier",
     "date": "Date",
     "name": "Nom",
-    "newest": "Le plus récent",
-    "oldest": "Le plus ancien",
+    "newest": "Les plus récents",
+    "oldest": "Les plus anciens",
     "donthaveFolder": "Vous n'avez aucun dossier !",
     "workspace": "espace de travail",
     "addWorkspace": "Ajouter un espace de travail",
@@ -253,18 +257,18 @@
   "navigation": {
     "myImages": "Mes Images",
     "myVideos": "Mes Vidéos",
-    "sharedByMe": "Partagé par moi",
+    "sharedByMe": "Partagés par moi",
     "starred": "Favoris",
     "integrations": "Intégrations",
     "bin": "Corbeille",
     "back": "Retour",
     "profileSettings": "Paramètres du profil",
-    "companyProfile": "Profil de l'Entreprise"
+    "companyProfile": "Profil de l'entreprise"
   },
   "page": {
     "install": {
       "completedGuide": "Vous avez terminé ce guide !",
-      "clickRightSideExtension": "Cliquez sur l'icône de l'extension sur le côté droit de la barre d'adresse pour commencer à utiliser cet outil.",
+      "clickRightSideExtension": "Cliquez sur l'icône de l'extension à droite de la barre d'adresse pour commencer à utiliser cet outil.",
       "belowScreenShotButton": "Ou cliquez sur le bouton ci-dessous pour faire une capture d'écran dès maintenant !",
       "screenshot": "Capture d'écran",
       "remainPinned": "Pour faciliter l'accès à l'extension, veuillez la laisser épinglée en suivant les étapes ci-dessous.",
@@ -272,18 +276,18 @@
       "clickRec": "Dans le menu déroulant, trouvez Rec",
       "clickPin": "Cliquez sur l'icône de la punaise jusqu'à ce qu'elle devienne bleue",
       "pinned": "Épinglé",
-      "pinnedDescription": "Merci d'avoir ajouté notre extension ! Pour profiter au maximum de ce service, il est fortement recommandé de rester connecté ! Gardez les captures d'écran synchronisées sur tous les appareils. Accédez-y et partagez-les n'importe où, n'importe quand.",
+      "pinnedDescription": "Merci d'avoir ajouté notre extension ! Pour tirer le meilleur parti de ce service, il est fortement recommandé de rester connecté ! Gardez les captures d'écran synchronisées sur tous les appareils. Accédez-y et partagez-les n'importe où, n'importe quand.",
       "downloadSlash": "Téléchargements/",
       "egRec": "ex: Rec"
     },
     "image": {
       "view": "vue",
-      "uploadDescriptionWithLimit": "Supporte .jpeg, .jpg, .png. Taille max : 30Ko",
-      "uploadDescription": "Supporte .jpeg, .jpg, .png.",
+      "uploadDescriptionWithLimit": "Prend en charge .jpeg, .jpg, .png. Taille max : 30 Ko",
+      "uploadDescription": "Prend en charge .jpeg, .jpg, .png.",
       "dragDropImagesHereOr": "Glissez-déposez des images ici ou",
-      "uploadThumbnailDescription": "Téléchargez un logo ou un avatar pour votre espace de travail. Supporte uniquement le format JPG ou PNG.",
+      "uploadThumbnailDescription": "Téléchargez un logo ou un avatar pour votre espace de travail. Prend en charge uniquement le format JPG ou PNG.",
       "maxFileSize": "La taille maximale du fichier est de 30 Ko",
-      "uploadThumbnailWorkspace": "Téléchargez une miniature pour votre espace de travail. Supporte uniquement le format JPG ou PNG.",
+      "uploadThumbnailWorkspace": "Téléchargez une miniature pour votre espace de travail. Prend en charge uniquement le format JPG ou PNG.",
       "views": "vues",
       "unique": "uniques",
       "uploadImages": "Télécharger des Images",
@@ -293,7 +297,7 @@
       "manage": "Gérer",
       "goto": "Aller à",
       "currentlySavedIn": "Actuellement enregistré dans Mes Images",
-      "currentlySavedInOnly": "Actuellement enregistré dans",
+      "currentlySavedInOnly": "Actuellement enregistré dans <strong>{{currentlySavedIn}}</strong>",
       "moveToFolder": "Déplacer vers le dossier",
       "selectFolder": "Sélectionner un dossier",
       "move": "Déplacer",
@@ -322,18 +326,18 @@
       "chooseFromComputer": "Choisir depuis votre ordinateur"
     },
     "video": {
-      "likes": "j'aime",
+      "likes": "J'aime",
       "library": "Bibliothèque",
-      "currentItemTitle": "Titre de l'élément actuel :",
+      "currentItemTitle": "Titre actuel de l'élément :",
       "editANewTitle": "Modifier un nouveau titre d'élément",
-      "oops": "Oups... oops !",
+      "oops": "Oups... !",
       "noAccess": "Vous n'avez plus accès à cet élément.",
       "backToPortal": "Retour au Portail",
-      "chaptersDes": "Ici, vous pouvez vérifier et accéder aux différents chapitres de cette vidéo.",
+      "chaptersDes": "Ici, vous pouvez consulter et accéder aux différents chapitres de cette vidéo.",
       "editBrackets": "(modifié)",
       "addChapter": "Ajouter un Chapitre ",
       "chapterContentPlaceholder": "Tapez le contenu de votre chapitre ici",
-      "chapterIsFirst": "(ex. Introduction)",
+      "chapterIsFirst": "(par ex. Introduction)",
       "chaptersSection": {
         "heading": "Chapitres",
         "description": "Ici, vous pouvez créer et accéder aux différents chapitres de votre vidéo.",
@@ -349,13 +353,12 @@
       "chapters": "chapitres",
       "minimumlengthof": "la durée minimale d'un chapitre est de ",
       "seconds": "secondes",
-      "addchapterdescription": "pour ajouter un nouveau chapitre, déplacez la barre de progression de la vidéo et cliquez sur le bouton Ajouter un chapitre.",
-      "chaptersdisableddiscription": "votre paramètre d'affichage des chapitres est désactivé. Vos chapitres ne s'afficheront pas si vous partagez cette vidéo. Pour l'activer, veuillez aller dans Plus d'options dans l'onglet Gérer.",
-      "chapterscriteriadescription": "votre vidéo ne répond pas aux critères des chapitres car elle est trop courte. La durée minimale requise de la vidéo est de",
-      "secondslong": "secondes.",
+      "addchapterdescription": "pour ajouter un nouveau chapitre, déplacez la barre de progression de la vidéo et cliquez sur le bouton d'ajout de chapitre.",
+      "chaptersDisabledDescription": "votre paramètre d'affichage des chapitres est désactivé. Vos chapitres ne s'afficheront pas si vous partagez cette vidéo. Pour l'activer, veuillez aller dans plus d'options dans l'onglet Gérer.",
+      "chaptersCriteriaDescription": "votre vidéo ne répond pas aux critères des chapitres car elle est trop courte. La durée minimale requise de la vidéo est de {{length}} secondes.",
       "statsSection": {
         "views": "Aucune vue",
-        "likes": "Aucun j'aime"
+        "likes": "Aucun 'J'aime'"
       },
       "actionsSection": {
         "editTitle": "Modifier le Titre",
@@ -364,6 +367,7 @@
         "enable": "Activer",
         "disable": "Désactiver",
         "chapters": "Chapitres",
+        "chaptersToggle": "{{action}} les Chapitres",
         "changeFolder": "Changer de Dossier",
         "deleteVideo": "Supprimer la Vidéo"
       },
@@ -392,8 +396,10 @@
       }
     },
     "integrations": {
-      "gladYouHere": "Nous sommes ravis que vous soyez ici !",
-      "installSlack": "Installez l'application Slack dans votre espace de travail. Une fois l'application Rec installée dans votre espace de travail Slack, vous pouvez envoyer les captures d'écran et les vidéos à un canal ou à un utilisateur Slack.",
+      "gladYouHere": "Nous sommes heureux que vous soyez ici !",
+      "hello": "Bonjour,",
+      "welcome": "Bienvenue !",
+      "installSlack": "Installez l'application Slack sur votre espace de travail. Une fois l'application Rec installée sur votre espace de travail Slack, vous pouvez envoyer les captures d'écran et les vidéos à un canal ou un utilisateur Slack.",
       "connectWithSlack": "Se connecter avec Slack",
       "connectedTo": "Connecté à :",
       "pageTitle": "Intégrations",
@@ -407,53 +413,53 @@
       },
       "dropbox": {
         "title": "Service Dropbox",
-        "description": "Vous pouvez connecter votre compte DropBox pour enregistrer les captures d'écran capturées par Rec.",
-        "buttonText": "Continuer avec DropBox",
+        "description": "Vous pouvez connecter votre compte Dropbox pour enregistrer les captures d'écran capturées par Rec.",
+        "buttonText": "Continuer avec Dropbox",
         "disconnectDropbox": "Se déconnecter de Dropbox",
-        "disconnectErrorTitle": "Se déconnecter du compte Dropbox",
-        "disconnectErrorDescription": "Êtes-vous sûr de vouloir désactiver l'intégration DropBox ? En vous déconnectant, vous ne pourrez plus synchroniser vos captures d'écran.",
-        "connectDropbox": "Vous pouvez connecter votre compte DropBox pour enregistrer les captures d'écran capturées par Rec."
+        "disconnectErrorTitle": "Se déconnecter du compte Dropbox ?",
+        "disconnectErrorDescription": "Êtes-vous sûr de vouloir désactiver l'intégration Dropbox ? En vous déconnectant, vous ne pourrez plus synchroniser vos captures d'écran.",
+        "connectDropbox": "Vous pouvez connecter votre compte Dropbox pour enregistrer les captures d'écran capturées par Rec."
       },
       "jira": {
         "title": "Service Jira",
-        "description": "Vous pouvez connecter votre compte Jira pour ajouter un nouveau ticket et télécharger les captures d'écran capturées par Rec.",
+        "description": "Vous pouvez connecter votre compte Jira pour ajouter de nouveaux tickets et télécharger les captures d'écran capturées par Rec.",
         "buttonText": "Continuer avec Jira",
-        "disconnectErrorTitle": "Se déconnecter du compte Jira",
+        "disconnectErrorTitle": "Se déconnecter du compte Jira ?",
         "disconnectErrorDescription": "Êtes-vous sûr de vouloir désactiver l'intégration Jira ? En vous déconnectant, vous ne pourrez plus synchroniser vos captures d'écran.",
         "disconnectFromJira": "Se déconnecter de Jira"
       },
       "slack": {
         "title": "Intégration Slack",
-        "description": "Vous êtes connecté avec succès à Slack, vous pouvez maintenant partager vos captures d'écran dans votre espace de travail.",
+        "description": "Vous êtes connecté avec succès à Slack. Vous pouvez maintenant partager vos captures d'écran sur votre espace de travail.",
         "buttonText": "Se connecter avec Slack",
         "signedWorkspace": "Vous êtes connecté avec l'espace de travail Slack",
         "slackWorkspace": "Vous êtes connecté avec l'espace de travail Slack",
         "disconnectSlack": "Se déconnecter de Slack",
         "connectedSlack": "Vous pouvez connecter votre compte d'espace de travail Slack pour partager les captures d'écran et les vidéos capturées par Rec",
         "connectWithSlack": "Se connecter avec Slack",
-        "disconnectErrorTitle": "Déconnecter votre compte Slack",
+        "disconnectErrorTitle": "Déconnecter votre compte Slack ?",
         "disconnectErrorDescription": "Êtes-vous sûr de vouloir désactiver l'intégration Slack ? En vous déconnectant, vous ne pourrez plus partager vos captures d'écran et vidéos."
       },
       "trello": {
         "title": "Service Trello",
-        "description": "Vous pouvez connecter votre compte Trello pour ajouter un nouveau ticket et télécharger les captures d'écran capturées par Rec",
+        "description": "Vous pouvez connecter votre compte Trello pour ajouter de nouveaux tickets et télécharger les captures d'écran capturées par Rec.",
         "buttonText": "Continuer avec Trello",
         "disconnectTrello": "Se déconnecter de Trello",
-        "disconnectErrorTitle": "Se déconnecter du compte Trello",
+        "disconnectErrorTitle": "Se déconnecter du compte Trello ?",
         "disconnectErrorDescription": "Êtes-vous sûr de vouloir désactiver l'intégration Trello ? En vous déconnectant, vous ne pourrez plus synchroniser vos captures d'écran.",
-        "connectedDescription": "Vous pouvez connecter votre compte Trello pour ajouter un nouveau ticket et télécharger les captures d'écran capturées par Rec.",
+        "connectedDescription": "Vous pouvez connecter votre compte Trello pour ajouter de nouveaux tickets et télécharger les captures d'écran capturées par Rec.",
         "connectWithTrello": "Se connecter avec Trello"
       }
     },
     "profile": {
       "title": "Profil",
-      "loggedInWithGoogle": "Connecté avec le compte Google",
+      "loggedInWithGoogle": "Connecté avec un compte Google",
       "currentEmail": "Adresse e-mail actuelle :",
-      "newEmail": "Entrer une nouvelle adresse e-mail",
-      "newPassword": "Entrer un nouveau mot de passe",
+      "newEmail": "Entrez une nouvelle adresse e-mail",
+      "newPassword": "Entrez un nouveau mot de passe",
       "passwordValidation": "Doit contenir au moins huit caractères et un chiffre.",
-      "newName": "Entrer un nouveau nom",
-      "emailAddress": "Adresse e-mail",
+      "newName": "Entrez un nouveau nom",
+      "emailAddress": "Adresse E-mail",
       "back": "Retour",
       "settings": {
         "title": "Paramètres du profil",
@@ -477,40 +483,44 @@
         "saveChanges": "Enregistrer les modifications"
       },
       "deleteAccountModal": {
-        "message": "Êtes-vous sûr de vouloir supprimer votre compte Rec ? La suppression de votre compte <1>{{email}}</1> supprimera toutes vos données associées telles que vos images, vidéos, dossiers et espaces créatifs, y compris le contenu que vous avez partagé avec d'autres. Vous ne pouvez pas annuler cette opération.",
-        "privacy": "Pour plus d'informations sur la manière dont nous traitons vos données, veuillez consulter notre Politique de confidentialité.",
+        "message": "Êtes-vous sûr de vouloir supprimer votre compte Rec ? La suppression de votre compte <1>{{email}}</1> entraînera la suppression de toutes vos données associées telles que vos images, vidéos, dossiers et espaces créatifs, y compris le contenu que vous avez partagé avec d'autres. Vous ne pouvez pas annuler cette opération.",
+        "privacy": "Pour plus d'informations sur la manière dont nous traitons vos données, veuillez consulter notre Politique de Confidentialité.",
         "confirm": "Pour confirmer, veuillez taper ''supprimer mon compte'' ci-dessous.",
-        "permanentlyDeleteAccount": "Supprimer le Compte Définitivement",
+        "permanentlyDeleteAccount": "Supprimer Définitivement le Compte",
         "currentPassword": "Mot de passe actuel :",
-        "enterPassword": "Entrer le mot de passe",
+        "enterPassword": "Entrez le mot de passe",
         "next": "Suivant",
         "dontChange": "Ne pas changer"
       }
     },
     "auth": {
       "error": {
-        "resetLinkExpired": "Votre lien de réinitialisation a déjà été utilisé ou a expiré",
+        "resetLinkExpired": "Votre lien de réinitialisation a déjà été utilisé ou a expiré.",
         "pleaseTryAgain": "Veuillez réessayer !",
         "backToLogin": "Retour à la connexion",
-        "enterEmail": "Veuillez entrer une adresse e-mail",
-        "enterPassword": "Veuillez entrer un mot de passe",
-        "emailCorrect": "L'adresse e-mail est incorrecte",
-        "minimumLength": "Minimum huit caractères et au moins un chiffre",
-        "passwordNotMatch": "Les mots de passe ne correspondent pas"
+        "enterEmail": "Veuillez entrer une adresse e-mail.",
+        "emailIncorrect": "Veuillez entrer une adresse e-mail correcte.",
+        "enterName": "Veuillez entrer un nom.",
+        "enterPassword": "Veuillez entrer un mot de passe.",
+        "emailCorrect": "L'adresse e-mail est incorrecte.",
+        "minimumLength": "Au moins huit caractères et au moins un chiffre.",
+        "passwordNotMatch": "Les mots de passe ne correspondent pas."
       },
       "common": {
-        "email": "Adresse e-mail",
+        "sign": "Se ",
+        "in": "Connecter",
+        "email": "Adresse E-mail",
         "login": "Se connecter",
-        "sendEmail": "Envoyer l'e-mail",
+        "sendEmail": "Envoyer un e-mail",
         "googleRequire": "Veuillez vous connecter avec votre compte Google pour continuer...",
         "existingAccount": "Vous avez déjà un compte ?",
         "createAccount": "Créer un compte",
         "password": "Mot de passe",
-        "confirmPassword": "Confirmer le mot de passe"
+        "confirmPassword": "Confirmer le Mot de Passe"
       },
       "login": {
         "welcomeTitle": "Bonjour, Bienvenue !",
-        "welcomeSubtitle": "Nous sommes ravis que vous soyez ici !",
+        "welcomeSubtitle": "Nous sommes heureux que vous soyez ici !",
         "welcomeDescription": "Pour utiliser nos services basés sur le cloud conçus pour partager et enregistrer vos captures d'écran, veuillez vous connecter pour continuer.",
         "rememberMe": "Se souvenir de moi",
         "forgotPassword": "Mot de passe oublié ?",
@@ -520,14 +530,14 @@
       },
       "resetPassword": {
         "title": "Réinitialisez votre mot de passe",
-        "sendEmail": "Envoyer l'e-mail",
+        "sendEmail": "Envoyer un e-mail",
         "signInAs": "Se connecter en tant que <1>{{name}}</1> nouveau monde <2>{{email}}</2>"
       },
       "newPassword": {
-        "newPassword": "Nouveau mot de passe *",
-        "newPasswordColon": "Nouveau mot de passe :",
-        "newPasswordConfirm": "Confirmer le nouveau mot de passe *",
-        "setNewPassword": "Définir un nouveau mot de passe"
+        "newPassword": "Nouveau Mot de Passe *",
+        "newPasswordColon": "Nouveau Mot de Passe :",
+        "newPasswordConfirm": "Confirmer le Nouveau Mot de Passe *",
+        "setNewPassword": "Définir un Nouveau Mot de Passe"
       }
     },
     "register": {
@@ -536,15 +546,15 @@
         "fullName": "Nom complet"
       },
       "terms": {
-        "agree": "Accepter les ",
-        "terms": "Termes & Conditions",
+        "agree": "J'accepte les ",
+        "terms": "Conditions Générales d'Utilisation",
         "and": " et la ",
-        "privacy": "Politique de confidentialité"
+        "privacy": "Politique de Confidentialité"
       },
       "continueOptions": {
-        "title": "Ou continuer avec",
-        "adminSignIn": "Se connecter en tant qu'administrateur",
-        "playerSubmit": "Soumettez-le facilement via Player"
+        "title": "Ou Continuer avec",
+        "adminSignIn": "Se connecter en tant qu'Admin",
+        "playerSubmit": "Soumettez-le facilement par Player"
       }
     },
     "whatsNew": {
@@ -556,7 +566,7 @@
           "description": "Vous pouvez maintenant enregistrer des vidéos sous forme d'animations. Créez des mèmes amusants à partager avec vos amis."
         },
         "newToolFeatures": {
-          "title": "Nous avons Ajouté de Nouvelles Fonctionnalités d'Outil",
+          "title": "Nous Avons Ajouté de Nouvelles Fonctionnalités à l'Outil",
           "date": "15 mai 2022",
           "description": "Vous pouvez maintenant facilement ajouter du texte à vos images, changer les couleurs des bordures, ajuster l'alignement du texte, et plus encore !"
         },
@@ -564,22 +574,22 @@
           "title": "Ajouter à Chrome",
           "subtitle": "Enregistrer et Collaborer",
           "date": "7 déc. 2022",
-          "description": "Enregistrez les fichiers dans votre format et plateforme préférés. Partagez en un seul clic."
+          "description": "Enregistrez les fichiers dans votre format et sur votre plateforme préférés. Partagez en un seul clic."
         },
         "folderOrganization": {
-          "title": "Déplacer vers le Dossier",
+          "title": "Déplacer vers un Dossier",
           "date": "15 mai 2022",
-          "description": "Vous pouvez maintenant organiser vos images de capture d'écran dans des dossiers pour un accès facile ultérieurement."
+          "description": "Vous pouvez maintenant organiser vos captures d'écran dans des dossiers pour un accès facile ultérieurement."
         },
         "pinToolbar": {
-          "title": "Épingler la Barre d'outils",
+          "title": "Épingler la Barre d'Outils",
           "date": "7 déc. 2022",
-          "description": "Ancrez notre barre d'outils mobile sur l'un ou l'autre côté de l'écran, ou laissez-la flotter dans n'importe quelle zone de l'écran."
+          "description": "Ancrez notre barre d'outils mobile de chaque côté de l'écran, ou laissez-la flotter sur n'importe quelle zone de l'écran."
         },
         "trimbox": {
-          "title": "Boîte de Découpe",
+          "title": "Boîte de Découpage",
           "date": "7 déc. 2022",
-          "description": "Vous permet de découper et couper facilement votre enregistrement."
+          "description": "Vous permet de découper et de couper facilement votre enregistrement."
         }
       },
       "ctaFindOutMore": "En savoir plus",
@@ -592,10 +602,12 @@
       "reEnterCredentials": "Entrez à nouveau les informations d'identification pour continuer"
     },
     "preference": {
-      "downloadAs": "Télécharger la Capture d'écran En tant que",
+      "saving": "Enregistrement",
+      "preferences": "Préférences",
+      "downloadAs": "Télécharger la Capture d'Écran Sous",
       "alwaysGetLink": "Toujours obtenir des liens partageables pour les captures d'écran téléchargées sur Google Drive",
-      "saveEachFile": "Demander où enregistrer chaque fichier avant de télécharger",
-      "saveEachFileDescription": "Remarque : pour utiliser cette fonctionnalité, vous devez Autoriser l'extension à gérer les Téléchargements lorsque la fenêtre de demande d'autorisation apparaît. Et seulement lorsque cette option est activée, vous pouvez spécifier un sous-dossier par défaut pour enregistrer les captures d'écran sur votre disque local. Par défaut, le dossier Téléchargements est utilisé si vous ne spécifiez pas de sous-dossier.",
+      "saveEachFile": "Demander où enregistrer chaque fichier avant de le télécharger",
+      "saveEachFileDescription": "Remarque : pour utiliser cette fonctionnalité, vous devez Autoriser l'extension à gérer les Téléchargements lorsque la fenêtre de demande d'autorisation apparaît. Et ce n'est que lorsque cette option est activée que vous pouvez spécifier un sous-dossier par défaut pour enregistrer les captures d'écran sur votre disque local. Par défaut, le dossier Téléchargements sera utilisé si vous ne spécifiez pas de sous-dossier.",
       "addDateAndUrl": "Ajouter la Date et l'URL en haut d'une capture d'écran"
     }
   },
@@ -654,7 +666,10 @@
     "shareOnWhatsApp": "Partager le Message sur WhatsApp",
     "enterWhatsApp": "Entrez le Numéro WhatsApp avec l'indicatif du pays",
     "sendToSlack": "Envoyer à Slack",
-    "selectChannel": "Choisissez un canal ou une conversation pour partager et prévisualiser le code que vous avez créé dans votre espace de travail Slack."
+    "selectChannel": "Choisissez un canal ou une conversation pour partager et prévisualiser le code que vous avez créé dans votre espace de travail Slack.",
+    "deleteType": "Supprimer {{count, plural, one{le {{type}}} other{les {{type}}s}}}",
+    "deleteType_one": "Supprimer le {{type}}",
+    "deleteType_other": "Supprimer les {{type}}s"
   },
   "toasts": {
     "removeFromFavorites": "Suppression du dossier des favoris...",
@@ -676,10 +691,10 @@
     "downloading": "Téléchargement",
     "video": "Vidéo",
     "image": "Image",
-    "downloaded": "téléchargé",
+    "downloaded": "téléchargé(e)",
     "moving": "Déplacement",
     "toTrash": "vers la Corbeille...",
-    "movedToTrash": "déplacé vers la Corbeille.",
+    "movedToTrash": "déplacé(e) vers la Corbeille.",
     "problemTryAgain": "Un problème est survenu, veuillez réessayer",
     "imageDeleted": "Image supprimée avec succès",
     "videoDeleted": "Vidéo supprimée",
@@ -695,28 +710,25 @@
     "folderNameEmpty": "Le nom du dossier ne peut pas être vide",
     "enterFolderName": "Veuillez entrer un nom de dossier",
     "imageDownloaded": "Image téléchargée",
-    "imageAdded": "Image ajoutée à : ",
+    "imageAdded": "Image ajoutée à : {{workspaceName}}",
     "copied": "Copié",
     "videoMovedToTrash": "La vidéo a été déplacée vers la Corbeille",
-    "videoDownloaded": "Vidéo téléchargée",
     "videoAdded": "Vidéo ajoutée à :",
     "imageMovedToTrash": "L'Image a été déplacée vers la Corbeille",
     "fileToLarge": "Fichier trop volumineux.",
     "teamUpdated": "Équipe mise à jour !",
-    "deletedSuccessfully": "supprimé avec succès.",
-    "sending": "Envoi",
-    "couldNotSend": "Impossible d'envoyer",
-    "pleaseTryAgainLater": ". Veuillez réessayer plus tard.",
+    "deletedSuccessfully": "supprimé(e) avec succès.",
+    "sending": "Envoi en cours",
+    "couldNotSend": "Impossible d'envoyer {{emailStr}}. Veuillez réessayer plus tard.",
     "downloadingItems": "Téléchargement des éléments...",
     "itemsDownloaded": "Éléments téléchargés.",
     "deletingItems": "Suppression des éléments...",
     "wrongCredentials": "Identifiants incorrects",
-    "accountsNotSame": "Les comptes ne sont pas identiques.",
     "couldNotLog": "Erreur lors de la tentative de connexion avec Google, veuillez réessayer plus tard.",
     "imageUploaded": "image téléchargée avec succès.",
     "imageUploadedToDrive": "Image téléchargée sur Google Drive",
     "imageUploadedSuccessfully": "Image téléchargée avec succès.",
-    "somethingWentWrong": "Quelque chose s'est mal passé, veuillez réessayer plus tard",
+    "somethingWentWrong": "Quelque chose s'est mal passé. Veuillez réessayer plus tard",
     "fileDeletedFromDrive": "Fichier supprimé de Google Drive",
     "fileDeletedFromDropbox": "Fichier supprimé de Dropbox",
     "copiedToClipboard": "Copié dans le presse-papiers",
@@ -734,7 +746,7 @@
     "nameTooLong": "Le nom ne peut pas contenir plus de 32 caractères",
     "uploadingVideo": "Vous pourrez bientôt télécharger une vidéo...",
     "jiraIssueLinkCopied": "Lien du ticket Jira copié dans le presse-papiers",
-    "trelloIssueLinkCopied": "Lien du ticket Trello copié dans le presse-papiers",
+    "trelloIssueLinkCopied": "Lien de la carte Trello copié dans le presse-papiers",
     "selectOptions": "Veuillez sélectionner toutes les options",
     "whatsAppTooLong": "Le numéro WhatsApp ne peut pas contenir plus de 12 caractères",
     "whatsAppEmpty": "Le numéro WhatsApp ne peut pas être vide",
@@ -742,15 +754,15 @@
     "itemSentSuccess": "Élément envoyé avec succès",
     "pleaseSelectChannel": "Veuillez sélectionner un canal",
     "accountsNotSame": "Les comptes ne sont pas identiques.",
-    "couldNotProcess": "Erreur lors de la tentative de traitement des données, veuillez réessayer plus tard.",
+    "couldNotProcess": "Erreur lors du traitement des données, veuillez réessayer plus tard.",
     "organizationNameChanged": "Nom de l'organisation modifié avec succès.",
-    "couldNotUpdate": "Vous avez quitté l'Équipe avec succès, mais certaines données n'ont pas pu être mises à jour.",
-    "leftTeam": "Vous avez quitté l'Équipe avec succès ",
-    "leavingTeam": "Quitter l'équipe...",
+    "leftTheTeamAndCouldNotUpdate": "Vous avez quitté l'Équipe avec succès, mais certaines données n'ont pas pu être mises à jour.",
+    "leftTeam": "Vous avez quitté l'Équipe {{teamName}} avec succès.",
+    "leavingTeam": "Départ de l'équipe...",
     "couldNotLeave": "Impossible de quitter l'Équipe.",
     "couldNotFindSelectedFiles": "Impossible de trouver les fichiers sélectionnés, veuillez réessayer...",
     "updatingName": "Mise à jour du nom...",
-    "couldNotUpdate": "Impossible de mettre à jour le nom.",
+    "couldNotUpdateTheName": "Impossible de mettre à jour le nom.",
     "nameUpdated": "Nom mis à jour avec succès",
     "updatingEmail": "Mise à jour de l'e-mail...",
     "emailUpdated": "E-mail mis à jour avec succès.",
@@ -772,8 +784,8 @@
     "linkCopied": "Lien copié",
     "couldNotCopyLink": "Une erreur s'est produite lors de la copie du lien partagé. Veuillez le copier manuellement depuis l'URL du navigateur.",
     "movingVideoToTrash": "Déplacement de la vidéo vers la corbeille...",
-    "videoDeleted": "Vidéo supprimée avec succès. Redirection vers l'espace de travail...",
-    "videoMovedToTrash": "Vidéo déplacée vers la corbeille avec succès. Redirection vers Mes Vidéos...",
+    "videoDeletedAndRedirect": "Vidéo supprimée avec succès. Redirection vers l'espace de travail...",
+    "videoMovedToTrashAndRedirecting": "Vidéo déplacée vers la corbeille avec succès. Redirection vers Mes Vidéos...",
     "joinedWorkspaceSuccess": "Vous avez rejoint l'espace de travail avec succès. Redirection vers le nouvel espace de travail..."
   }
 }

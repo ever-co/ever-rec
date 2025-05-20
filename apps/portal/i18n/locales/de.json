@@ -145,6 +145,7 @@
     "renameWorkspace": "Arbeitsbereich umbenennen",
     "copyInviteLink": "Einladungslink kopieren",
     "members": "Mitglied(er)",
+    "membersWithLength": "{{length}} member(s)",
     "leaveWorkspace": "Arbeitsbereich verlassen",
     "deleteWorkspace": "Arbeitsbereich löschen"
   },
@@ -167,6 +168,9 @@
     "teamPermissions": "Teamberechtigungen",
     "edit": "Bearbeiten",
     "goBack": "Zurück",
+    "pin": "Pin",
+    "extension": "Extension",
+    "finished": "Finished!",
     "no": "nein",
     "send": "Senden",
     "email": "E-Mail",
@@ -364,6 +368,7 @@
         "enable": "Aktivieren",
         "disable": "Deaktivieren",
         "chapters": "Kapitel",
+        "chaptersToggle": "{{action}} Chapters",
         "changeFolder": "Ordner ändern",
         "deleteVideo": "Video löschen"
       },
@@ -393,6 +398,8 @@
     },
     "integrations": {
       "gladYouHere": "Wir freuen uns, dass Sie hier sind!",
+      "hello": "Hello,",
+      "welcome": "Welcome!",
       "installSlack": "Installieren Sie die Slack-App in Ihrem Arbeitsbereich. Sobald die Rec-App in Ihrem Slack-Arbeitsbereich installiert ist, können Sie Screenshots und Videos an einen Slack-Kanal oder Benutzer senden.",
       "connectWithSlack": "Mit Slack verbinden",
       "connectedTo": "Verbunden mit:",
@@ -493,12 +500,16 @@
         "pleaseTryAgain": "Bitte versuchen Sie es erneut!",
         "backToLogin": "Zurück zum Login",
         "enterEmail": "Bitte geben Sie eine E-Mail-Adresse ein.",
+        "emailIncorrect": "Please enter a correct email address",
+        "enterName": "Please enter an name",
         "enterPassword": "Bitte geben Sie ein Passwort ein.",
         "emailCorrect": "E-Mail ist falsch.",
         "minimumLength": "Mindestens acht Zeichen und mindestens eine Zahl.",
         "passwordNotMatch": "Passwörter stimmen nicht überein."
       },
       "common": {
+        "sign": "Sign",
+        "in": "In",
         "email": "E-Mail-Adresse",
         "login": "Anmelden",
         "sendEmail": "E-Mail senden",
@@ -592,6 +603,8 @@
       "reEnterCredentials": "Geben Sie Ihre Anmeldeinformationen erneut ein, um fortzufahren"
     },
     "preference": {
+      "saving": "Saving",
+      "preferences": "Preferences",
       "downloadAs": "Screenshot herunterladen als",
       "alwaysGetLink": "Immer Freigabe-Links für Screenshots erhalten, die auf Google Drive hochgeladen wurden",
       "saveEachFile": "Vor dem Herunterladen fragen, wo jede Datei gespeichert werden soll",
@@ -654,7 +667,10 @@
     "shareOnWhatsApp": "Nachricht auf WhatsApp teilen",
     "enterWhatsApp": "Geben Sie die WhatsApp-Nummer mit Ländercode ein",
     "sendToSlack": "An Slack senden",
-    "selectChannel": "Wählen Sie einen Kanal oder eine Konversation aus, um den von Ihnen erstellten Code in Ihrem Slack-Arbeitsbereich zu teilen und anzuzeigen."
+    "selectChannel": "Wählen Sie einen Kanal oder eine Konversation aus, um den von Ihnen erstellten Code in Ihrem Slack-Arbeitsbereich zu teilen und anzuzeigen.",
+    "deleteType": "Delete {{type}} {{count, plural, one{} other{s}}}",
+    "deleteType_one": "Delete {{type}}",
+    "deleteType_other": "Delete {{type}}s"
   },
   "toasts": {
     "removeFromFavorites": "Ordner wird aus Favoriten entfernt...",
