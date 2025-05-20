@@ -60,7 +60,7 @@ const MyTeamsInsideModal: FC<IMyTeamsProps> = ({
                 <div className={styles.members}>
                   <Trans
                     i18nKey="workspace.membersWithLength"
-                    values={{ length: team?.members.length }}
+                    values={{ length: team.members.length }}
                   />
                 </div>
               </div>
