@@ -1,4 +1,9 @@
-export const languages: { text: string; code: string }[] = [
+export interface Language {
+  text: string;
+  code: string;
+}
+
+export const languages: Language[] = [
   { text: 'English', code: 'en' },
   { text: 'Bulgarian', code: 'bg' },
   { text: 'Hebrew', code: 'he' },
