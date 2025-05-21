@@ -32,7 +32,7 @@ const Dropbox: React.FC = () => {
     if (res.status != 'error') {
       setLoading(false);
       setIsDisconnect(false);
-      infoMessage(t('toasts.DropBoxDisconnected'));
+      infoMessage(t('toasts.dropBoxDisconnected'));
     } else {
       setLoading(false);
       errorMessage(res.message);
