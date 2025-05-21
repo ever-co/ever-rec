@@ -380,7 +380,6 @@ const FolderItem: React.FC<IFolderItemProps> = ({
         onClick={(e: any) => {
           // stopping onClick if the user clicks just a little bit outside a button inside the dropdown
           if (e.target.localName === 'ul') return;
-
           onClick();
         }}
       >

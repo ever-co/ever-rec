@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 
 import noImage from '../../../../../images/images/noimage.svg';
 import * as favStyles from '../imagesScreen/components/folderItem/FolderItem.module.scss';
@@ -51,42 +51,137 @@ const FavoritesPage: React.FC = () => {
   );
   const { filter, onFilterChange } = useItemsFilter(itemData);
 
-  // useGetExplorerDataListener(); // TODO fix
-
-  const moreMenu = (value: 'images' | 'videos', folderId: string) => (
-    <Menu
-      className={classNames(favStyles.gradientBackground)}
-      style={{ padding: 5 }}
-      onClick={(e) => {
-        e.domEvent.stopPropagation();
-        setIsDropdownVisible('');
-      }}
-    >
-      <Menu.Item
-        style={{ margin: 10 }}
-        className="tw-bg-white tw-rounded-xl"
-        icon={<AppSvg path={'/common/star.svg'} size="18px" />}
-        key="menu_item_add_to_favs"
-        onClick={async () => {
-          if (value == 'videos') {
-            await addVideoFolderToFavsAPI(folderId);
-            setFavoritesVideos((prev) => prev.filter((x) => x.id !== folderId));
-            refetch();
-          } else {
-            await addImageFolderToFavsAPI(folderId);
-            setFavoritesImages((prev) => prev.filter((x) => x.id !== folderId));
-            refetch();
-          }
+  const moreMenu = useCallback(
+    (value: 'images' | 'videos', folderId: string) => (
+      <Menu
+        className={classNames(favStyles.gradientBackground)}
+        style={{ padding: 5 }}
+        onClick={(e) => {
+          e.domEvent.stopPropagation();
+          setIsDropdownVisible('');
         }}
-        //onClick={(e) => addToFavs()}
       >
-        <span className="tw-text-base tw-font-semibold">
-          Remove from favorites
-        </span>
-      </Menu.Item>
-    </Menu>
+        <Menu.Item
+          style={{ margin: 10 }}
+          className="tw-bg-white tw-rounded-xl"
+          icon={<AppSvg path={'/common/star.svg'} size="18px" />}
+          key="menu_item_add_to_favs"
+          onClick={async () => {
+            if (value === 'videos') {
+              await addVideoFolderToFavsAPI(folderId);
+              setFavoritesVideos((prev) =>
+                prev.filter((x) => x.id !== folderId),
+              );
+              refetch();
+            } else {
+              await addImageFolderToFavsAPI(folderId);
+              setFavoritesImages((prev) =>
+                prev.filter((x) => x.id !== folderId),
+              );
+              refetch();
+            }
+          }}
+          //onClick={(e) => addToFavs()}
+        >
+          <span className="tw-text-base tw-font-semibold">
+            Remove from favorites
+          </span>
+        </Menu.Item>
+      </Menu>
+    ),
+    [refetch, setFavoritesImages, setFavoritesVideos],
   );
+  type FoldersSectionProps = {
+    title: string;
+    folders: IDbFolderData[];
+    folderType: 'images' | 'videos';
+    moreMenuFn: (type: 'images' | 'videos', id: string) => React.ReactNode;
+    isDropdownVisible: string;
+    setIsDropdownVisible: (id: string) => void;
+  };
 
+  const FoldersSection: React.FC<FoldersSectionProps> = ({
+    title,
+    folders,
+    folderType,
+    moreMenuFn,
+    isDropdownVisible,
+    setIsDropdownVisible,
+  }) => (
+    <>
+      <div className={styles.foldersHeadingContainer}>
+        <h3 className={styles.heading}>{title}</h3>
+      </div>
+      {folders.length ? (
+        <div className="tw-h-fit tw-flex tw-overflow-y-auto">
+          <div
+            className={styles.foldersFavourites}
+            style={{
+              display: 'flex',
+              gap: '20px',
+              marginLeft: '28px',
+              flexWrap: 'wrap',
+            }}
+            id="scrollableDiv"
+          >
+            {folders.map((folder: IDbFolderData) => (
+              <div
+                key={folder.id}
+                className={classNames(
+                  favStyles.mainWrapper,
+                  isDropdownVisible === folder.id && favStyles.active,
+                )}
+                style={{ height: '58px' }}
+                onClick={(e: React.MouseEvent<HTMLDivElement>) => {
+                  if (
+                    e.target instanceof HTMLElement &&
+                    e.target.localName === 'ul'
+                  )
+                    return;
+                }}
+                onKeyDown={(e: React.KeyboardEvent) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    if (
+                      e.target instanceof HTMLElement &&
+                      e.target.localName !== 'ul'
+                    ) {
+                      e.preventDefault();
+                    }
+                  }
+                }}
+                role="button"
+                tabIndex={0}
+              >
+                <FolderHeader
+                  moreMenu={moreMenuFn(folderType, folder.id)}
+                  isFavorite={true}
+                  folder={folder}
+                  isDropdownVisible={isDropdownVisible === folder.id}
+                  onVisibleChange={(visibility) =>
+                    setIsDropdownVisible(visibility === true ? folder.id : '')
+                  }
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div className="tw-h-[calc(50vh-206px)] tw-flex tw-justify-center tw-items-center ">
+          <div className="tw-flex tw-flex-col tw-items-center">
+            <img
+              src={noImage}
+              style={{ width: '100px', height: '100px' }}
+              alt={`No favorite ${folderType} folders`}
+            />
+            <h1 className="tw-text-xl tw-font-bold tw-text-center">
+              No Favorites {folderType === 'images' ? 'Images' : 'Videos'}{' '}
+              Folders found
+            </h1>
+          </div>
+        </div>
+      )}
+    </>
+  );
   return (
     <>
       <section
@@ -106,126 +201,24 @@ const FavoritesPage: React.FC = () => {
             </div>
           </div>
           <>
-            <div className={styles.foldersHeadingContainer}>
-              <h3 className={styles.heading}>Images Folders</h3>
-            </div>
-            {favoritesImages.length ? (
-              <div className="tw-h-fit tw-flex tw-overflow-y-auto">
-                <div
-                  className={styles.foldersFavourites}
-                  style={{
-                    display: 'flex',
-                    gap: '20px',
-                    marginLeft: '28px',
-                    flexWrap: 'wrap',
-                  }}
-                  id="scrollableDiv"
-                >
-                  {favoritesImages.map((folder: IDbFolderData) => (
-                    <div
-                      key={folder.id}
-                      className={classNames(
-                        favStyles.mainWrapper,
-                        isDropdownVisible == folder.id && favStyles.active,
-                      )}
-                      style={{ height: '58px' }}
-                      onClick={(e: any) => {
-                        if (e.target.localName === 'ul') return;
-                      }}
-                    >
-                      <FolderHeader
-                        moreMenu={moreMenu('images', folder.id)}
-                        isFavorite={true}
-                        folder={folder}
-                        isDropdownVisible={isDropdownVisible == folder.id}
-                        onVisibleChange={(visibility) =>
-                          setIsDropdownVisible(
-                            visibility == true ? folder.id : '',
-                          )
-                        }
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <div className="tw-h-[calc(50vh-206px)] tw-flex tw-justify-center tw-items-center ">
-                <div className="tw-flex tw-flex-col tw-items-center">
-                  <img
-                    src={noImage}
-                    style={{ width: '100px', height: '100px' }}
-                    alt="no-image"
-                  />
-                  <h1 className="tw-text-xl tw-font-bold tw-text-center">
-                    No Favourites Images Folders found
-                  </h1>
-                </div>
-              </div>
-            )}
-            <div className={styles.pageHeadingWrapper}></div>
+            <FoldersSection
+              title="Images Folders"
+              folders={favoritesImages}
+              folderType="images"
+              moreMenuFn={moreMenu}
+              isDropdownVisible={isDropdownVisible}
+              setIsDropdownVisible={(id) => setIsDropdownVisible(id)}
+            />
+            <div className={styles.pageHeadingWrapper} />
             <div className="tw-bg-white tw-flex tw-flex-grow tw-flex-col">
-              <div className={styles.foldersHeadingContainer}>
-                <h3 className={styles.heading}>Videos Folders</h3>
-              </div>
-              {favoritesVideos.length ? (
-                <div className="tw-h-fit tw-overflow-y-auto">
-                  <div
-                    className={classNames(styles.foldersFavourites, 'tw-flex')}
-                    style={{
-                      display: 'flex',
-                      gap: '20px',
-                      marginLeft: '28px',
-                      flexWrap: 'wrap',
-                    }}
-                    id="scrollableDiv"
-                  >
-                    {/* THE START */}
-                    <>
-                      {favoritesVideos.map((folder: IDbFolderData) => (
-                        <div
-                          key={folder.id}
-                          className={classNames(
-                            favStyles.mainWrapper,
-                            isDropdownVisible == folder.id && favStyles.active,
-                          )}
-                          style={{ height: '58px' }}
-                          onClick={(e: any) => {
-                            if (e.target.localName === 'ul') return;
-                          }}
-                        >
-                          <FolderHeader
-                            moreMenu={moreMenu('videos', folder.id)}
-                            isFavorite={true}
-                            folder={folder}
-                            isDropdownVisible={isDropdownVisible == folder.id}
-                            onVisibleChange={(visibility) =>
-                              setIsDropdownVisible(
-                                visibility == true ? folder.id : '',
-                              )
-                            }
-                          />
-                        </div>
-                      ))}
-                    </>
-
-                    {/* THE END*/}
-                  </div>
-                </div>
-              ) : (
-                <div className="tw-h-[calc(50vh-206px)] tw-flex tw-justify-center tw-items-center ">
-                  <div className="tw-flex tw-flex-col tw-items-center">
-                    <img
-                      src={noImage}
-                      width={100}
-                      height={100}
-                      alt="no-image"
-                    />
-                    <h1 className="tw-text-xl tw-font-bold tw-text-center">
-                      No Favorites Videos Folders found
-                    </h1>
-                  </div>
-                </div>
-              )}
+              <FoldersSection
+                title="Videos Folders"
+                folders={favoritesVideos}
+                folderType="videos"
+                moreMenuFn={moreMenu}
+                isDropdownVisible={isDropdownVisible}
+                setIsDropdownVisible={(id) => setIsDropdownVisible(id)}
+              />
             </div>
           </>
         </DashboardCard>

@@ -73,7 +73,7 @@ export default class PanelAC {
     return { type: CHANGE_ACTIVE_ROUTE, payload: activeRoute };
   }
 
-  static setFavoriteRefetch(count): ActionType {
+  static setFavoriteRefetch(count: number): ActionType {
     return { type: CHANGE_FAVORITE_REFETCH, payload: count };
   }
 

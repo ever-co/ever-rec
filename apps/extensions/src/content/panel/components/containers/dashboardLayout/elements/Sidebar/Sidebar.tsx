@@ -144,15 +144,6 @@ const Sidebar: FC<SidebarProps> = ({ isProfilePage }) => {
             </div>
           )}
 
-          {/* <div>
-            <div ref={favFoldersRef}>
-              <FavFoldersSidebarSection
-                visible={favFoldersVisible}
-                setVisible={setFavFoldersVisible}
-              />
-            </div>
-
-          </div> */}
           <div className="tw-mt-24">{renderMenuItems()}</div>
         </div>
 

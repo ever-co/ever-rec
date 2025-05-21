@@ -28,7 +28,7 @@ const SidebarMenuItem: React.FC<ISidebarMenuItemProps> = ({
   };
   return (
     <>
-      {title == 'Favorites' ? (
+      {title === 'Favorites' ? (
         <>
           <div
             className={classNames(
@@ -46,25 +46,26 @@ const SidebarMenuItem: React.FC<ISidebarMenuItemProps> = ({
                   active && styles.active,
                 )}
               >
-                <span onClick={onClick} className="tw-flex">
+                <button onClick={onClick} className="tw-flex">
                   <div className={classNames(styles.icon)}>{icon}</div>
                   <div className={classNames(styles.title)}>{title}</div>
-                </span>
+                </button>
                 <div
                   className="tw-absolute tw-right-4 "
                   onClick={(e) => {
                     e.preventDefault();
+                    e.stopPropagation();
                     handleToggle(e);
                   }}
                 >
                   {isOpen ? (
                     <AppSvg
-                      className="tw-w-6 tw-h-6 tw-text-gray-500 tw-rotate-180"
+                      className="tw-w-6 tw-h-6 tw-text-gray-500"
                       path="images/panel/common/Chevron_up.svg"
                     />
                   ) : (
                     <AppSvg
-                      className="tw-w-6 tw-h-6 tw-text-gray-500 tw-rotate-180"
+                      className="tw-w-6 tw-h-6 tw-text-gray-500"
                       path="images/panel/common/Chevron_down.svg"
                     />
                   )}
@@ -109,7 +110,7 @@ const SidebarMenuItem: React.FC<ISidebarMenuItemProps> = ({
                   </div>
                 </>
               )}
-              {favoritesVideos.length == 0 && favoritesImages.length == 0 && (
+              {favoritesVideos.length === 0 && favoritesImages.length === 0 && (
                 <h1 className="tw-ml-16 tw-font-bold ">No Favorites</h1>
               )}
             </>

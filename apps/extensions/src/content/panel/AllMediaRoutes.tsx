@@ -13,7 +13,7 @@ import IntegrationsScreen from './screens/IntegrationsScreen/IntegrationsScreen'
 import WorkspaceTeams from './screens/imagesScreen/pages/workspaces/WorkspacesTeams';
 import useLoggedInNotification from '@/content/utilities/hooks/useLoggedInNotification';
 import WorkspaceSettings from './screens/imagesScreen/pages/workspace/WorkspaceSettingsScreen';
-import FavoritesPage from './screens/favoriteScreen/Favorites';
+import FavoritesPage from '@/content/panel/screens/favoriteScreen/Favorites';
 
 const AllMediaRoutes: FC = () => {
   useLoggedInNotification();
@@ -37,7 +37,7 @@ const AllMediaRoutes: FC = () => {
           <Route
             path={panelRoutes.favorites.nestedPath}
             element={<FavoritesPage />}
-          ></Route>
+          />
           <Route
             path={panelRoutes.imagesTrashed.nestedPath}
             element={<TrashedImagesVideos />}
