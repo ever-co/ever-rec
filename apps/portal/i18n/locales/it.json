@@ -6,7 +6,7 @@
       "chaptersVisibilityChanged": "Visibilità dei capitoli modificata con successo.",
       "creatingCompany": "Creazione azienda in corso...",
       "companyCreated": "Azienda creata con successo.",
-      "shareLinkCopied": "Impossibile copiare il link di condivisione...",
+      "shareLinkCopyError": "Impossibile copiare il link di condivisione...",
       "noShareableLink": "Non c'è un link condivisibile per questo elemento.",
       "emptyItemTitle": "Il titolo dell'elemento non può essere vuoto.",
       "inviteLinkError": "Impossibile creare il link d'invito all'area di lavoro.",

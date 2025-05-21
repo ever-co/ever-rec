@@ -6,7 +6,7 @@
       "chaptersVisibilityChanged": "Chapters visibility changed successfully.",
       "creatingCompany": "Creating company...",
       "companyCreated": "Company created successfully.",
-      "shareLinkCopied": "Could not copy the share link...",
+      "shareLinkCopyError": "Could not copy the share link...",
       "noShareableLink": "There is no shareable link for this item",
       "emptyItemTitle": "Item title can't be empty.",
       "inviteLinkError": "Could not create workspace invite link.",

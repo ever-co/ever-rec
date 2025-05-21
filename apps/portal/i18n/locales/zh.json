@@ -6,7 +6,7 @@
       "chaptersVisibilityChanged": "章节可见性已成功更改。",
       "creatingCompany": "正在创建公司...",
       "companyCreated": "公司已成功创建。",
-      "shareLinkCopied": "无法复制分享链接...",
+      "shareLinkCopyError": "无法复制分享链接...",
       "noShareableLink": "此项目没有可分享的链接。",
       "emptyItemTitle": "项目标题不能为空。",
       "inviteLinkError": "无法创建工作区邀请链接。",

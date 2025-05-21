@@ -6,7 +6,7 @@
       "chaptersVisibilityChanged": "Sichtbarkeit der Kapitel erfolgreich geändert.",
       "creatingCompany": "Unternehmen wird erstellt...",
       "companyCreated": "Unternehmen erfolgreich erstellt.",
-      "shareLinkCopied": "Der Freigabe-Link konnte nicht kopiert werden...",
+      "shareLinkCopyError": "Der Freigabe-Link konnte nicht kopiert werden...",
       "noShareableLink": "Für dieses Element gibt es keinen Link zum Teilen.",
       "emptyItemTitle": "Elementtitel darf nicht leer sein.",
       "inviteLinkError": "Einladungslink für den Arbeitsbereich konnte nicht erstellt werden.",

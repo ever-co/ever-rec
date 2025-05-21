@@ -50,7 +50,7 @@ const useGenerateShareLink = (
       successMessage(t('toasts.copied'));
       return true;
     } catch (e) {
-      errorHandler({ message: t('hooks.toasts.shareLinkCopied') });
+      errorHandler({ message: t('hooks.toasts.shareLinkCopyError') });
       return false;
     }
   };
@@ -85,7 +85,7 @@ const useGenerateShareLink = (
 
       successMessage(t('toasts.copied'));
     } catch (e) {
-      errorHandler({ message: t('hooks.toasts.shareLinkCopied') });
+      errorHandler({ message: t('hooks.toasts.shareLinkCopyError') });
       console.log(e);
     }
   };

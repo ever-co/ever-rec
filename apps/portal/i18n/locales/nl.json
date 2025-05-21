@@ -6,7 +6,7 @@
       "chaptersVisibilityChanged": "Zichtbaarheid van hoofdstukken succesvol gewijzigd.",
       "creatingCompany": "Bedrijf aanmaken...",
       "companyCreated": "Bedrijf succesvol aangemaakt.",
-      "shareLinkCopied": "Kon de deellink niet kopiëren...",
+      "shareLinkCopyError": "Kon de deellink niet kopiëren...",
       "noShareableLink": "Er is geen deelbare link voor dit item.",
       "emptyItemTitle": "Itemtitel mag niet leeg zijn.",
       "inviteLinkError": "Kon geen uitnodigingslink voor de werkruimte maken.",

@@ -6,7 +6,7 @@
       "chaptersVisibilityChanged": "Widoczność rozdziałów zmieniona pomyślnie.",
       "creatingCompany": "Tworzenie firmy...",
       "companyCreated": "Firma utworzona pomyślnie.",
-      "shareLinkCopied": "Nie udało się skopiować linku udostępniania...",
+      "shareLinkCopyError": "Nie udało się skopiować linku udostępniania...",
       "noShareableLink": "Brak linku do udostępniania dla tego elementu.",
       "emptyItemTitle": "Tytuł elementu nie może być pusty.",
       "inviteLinkError": "Nie udało się utworzyć linku zaproszenia do przestrzeni roboczej.",

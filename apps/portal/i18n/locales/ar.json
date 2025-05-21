@@ -6,7 +6,7 @@
       "chaptersVisibilityChanged": "تم تغيير إعدادات ظهور الفصول بنجاح.",
       "creatingCompany": "جارٍ إنشاء الشركة...",
       "companyCreated": "تم إنشاء الشركة بنجاح.",
-      "shareLinkCopied": "تعذر نسخ رابط المشاركة...",
+      "shareLinkCopyError": "تعذر نسخ رابط المشاركة...",
       "noShareableLink": "لا يوجد رابط قابل للمشاركة لهذا العنصر",
       "emptyItemTitle": "عنوان العنصر لا يمكن أن يكون فارغاً.",
       "inviteLinkError": "تعذر إنشاء رابط دعوة مساحة العمل.",

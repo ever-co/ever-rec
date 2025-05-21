@@ -6,7 +6,7 @@
       "chaptersVisibilityChanged": "נראות הפרקים שונתה בהצלחה.",
       "creatingCompany": "יוצר חברה...",
       "companyCreated": "החברה נוצרה בהצלחה.",
-      "shareLinkCopied": "לא ניתן היה להעתיק את קישור השיתוף...",
+      "shareLinkCopyError": "לא ניתן היה להעתיק את קישור השיתוף...",
       "noShareableLink": "אין קישור שיתוף לפריט זה.",
       "emptyItemTitle": "כותרת הפריט אינה יכולה להיות ריקה.",
       "inviteLinkError": "לא ניתן היה ליצור קישור הזמנה לסביבת העבודה.",
