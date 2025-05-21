@@ -115,8 +115,6 @@ const Sidebar: FC<SidebarProps> = ({ isProfilePage }) => {
         />
       );
 
-      // We don't need to wrap Starred in <Link> component as it open an absolute positioned UI
-
       return (
         <Link to={item.route} key={`menu_item${index}`}>
           {sidebarItem}

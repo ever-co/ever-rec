@@ -125,14 +125,14 @@ const FavoritesPage: React.FC = () => {
             id="scrollableDiv"
           >
             {folders.map((folder: IDbFolderData) => (
-              <div
+              <button
                 key={folder.id}
                 className={classNames(
                   favStyles.mainWrapper,
                   isDropdownVisible === folder.id && favStyles.active,
                 )}
                 style={{ height: '58px' }}
-                onClick={(e: React.MouseEvent<HTMLDivElement>) => {
+                onClick={(e: React.MouseEvent) => {
                   if (
                     e.target instanceof HTMLElement &&
                     e.target.localName === 'ul'
@@ -149,7 +149,7 @@ const FavoritesPage: React.FC = () => {
                     }
                   }
                 }}
-                role="button"
+                type="button"
                 tabIndex={0}
               >
                 <FolderHeader
@@ -161,7 +161,7 @@ const FavoritesPage: React.FC = () => {
                     setIsDropdownVisible(visibility === true ? folder.id : '')
                   }
                 />
-              </div>
+              </button>
             ))}
           </div>
         </div>

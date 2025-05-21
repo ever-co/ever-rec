@@ -8,7 +8,15 @@ import {
 import PanelAC from '@/app/store/panel/actions/PanelAC';
 import { useEffect, useState } from 'react';
 import { RootStateOrAny, useSelector, useDispatch } from 'react-redux';
-const useFavoritesFolders = () => {
+
+const useFavoritesFolders = (): {
+  favoritesImages: IDbFolderData[];
+  favoritesVideos: IDbFolderData[];
+  setFavoritesImages: React.Dispatch<React.SetStateAction<IDbFolderData[]>>;
+  setFavoritesVideos: React.Dispatch<React.SetStateAction<IDbFolderData[]>>;
+  loader: boolean;
+  refetch: () => void;
+} => {
   const [favoritesImages, setFavoritesImages] = useState<IDbFolderData[]>([]);
   const [favoritesVideos, setFavoritesVideos] = useState<IDbFolderData[]>([]);
   const [loader, setLoader] = useState(true);
