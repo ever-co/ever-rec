@@ -49,7 +49,9 @@ const LeaveWorkspaceModal: React.FC<IProps> = ({
     >
       <h2 className="tw-mb-6 tw-text-xl tw-font-bold">
         <Trans
-          values={{ action: action === 'leave' ? 'leave' : 'delete' }}
+          values={{
+            action: action === 'leave' ? t('common.leave') : t('common.delete'),
+          }}
           i18nKey="modals.confirmModalDelete"
         />
       </h2>

@@ -620,7 +620,7 @@
     "copyLink": "复制链接",
     "shareLink": "分享链接",
     "linkToItem": "项目链接",
-    "linkTo": "链接到",
+    "linkTo": "链接到 {{linkTo}}:",
     "linkToVideo": "视频链接",
     "enterAFolderName": "输入文件夹名称",
     "createATeam": "创建团队",

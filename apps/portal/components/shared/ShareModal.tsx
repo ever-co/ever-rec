@@ -40,9 +40,7 @@ const ShareModal: FC<IShareModalProps> = ({
       <h2 className="tw-mb-3 tw-text-2xl tw-font-semibold">
         {t('modals.shareLink')}
       </h2>
-      <label>
-        {t('modals.linkTo')} {linkTo}:
-      </label>
+      <label>{t('modals.linkTo', { linkTo: linkTo })}</label>
       <p className="tw-border-black tw-border-b tw-py-5px tw-px-2px tw-mt-5px">
         {link}
       </p>

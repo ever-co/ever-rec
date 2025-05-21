@@ -620,7 +620,7 @@
     "copyLink": "Link kopiëren",
     "shareLink": "Link delen",
     "linkToItem": "Link naar item",
-    "linkTo": "Link naar",
+    "linkTo": "Link naar {{linkTo}}:",
     "linkToVideo": "Link naar video",
     "enterAFolderName": "Voer een mapnaam in",
     "createATeam": "Een team aanmaken",

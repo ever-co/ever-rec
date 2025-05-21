@@ -620,7 +620,7 @@
     "copyLink": "העתק קישור",
     "shareLink": "שתף קישור",
     "linkToItem": "קישור לפריט",
-    "linkTo": "קישור ל",
+    "linkTo": "קישור אל {{linkTo}}:",
     "linkToVideo": "קישור לסרטון",
     "enterAFolderName": "הזן שם תיקייה",
     "createATeam": "צור צוות",

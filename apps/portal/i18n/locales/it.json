@@ -620,7 +620,7 @@
     "copyLink": "Copia link",
     "shareLink": "Condividi link",
     "linkToItem": "Link all'elemento",
-    "linkTo": "Link a",
+    "linkTo": "Link a {{linkTo}}:",
     "linkToVideo": "Link al video",
     "enterAFolderName": "Inserisci un nome per la cartella",
     "createATeam": "Crea un team",
