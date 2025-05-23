@@ -254,6 +254,7 @@ const ManageWorkspaces = () => {
 
   return (
     <>
+      {CreateWSModal}
       <input
         type="file"
         id="file"

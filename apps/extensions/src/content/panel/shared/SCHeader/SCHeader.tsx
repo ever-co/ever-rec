@@ -70,7 +70,7 @@ const SCHeader: FC<ISCHeaderProps> = ({
     <div className={styles.appHeader}>
       {showSearch ? (
         <div className={styles.search}>
-          <AppSvg path="/new-design-v2/search.svg" />
+          <AppSvg path="images/new-design-v2/search.svg" />
 
           <input
             value={filterValue ?? ''}

@@ -15,10 +15,10 @@ const IntegrationsScreen = () => {
   return (
     <DashboardCard className={styles.mainWrapper}>
       <SCHeader
-        text={'Integrations'}
+        text="Integrations"
         userPhotoURL={user?.photoURL}
         showSearch={false}
-      />{' '}
+      />
       <div className={classNames(styles.innerWrapper, 'scroll-div')}>
         <DrivePage />
         <DropboxPage />
