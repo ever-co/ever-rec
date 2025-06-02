@@ -24,8 +24,9 @@ const GetScreenshotUrlModal: React.FC<IGetScreenshotUrlModalProps> = ({
       open={visible}
       onCancel={onClose}
       onOk={onOkHandler}
-      okText="Copy"
-      cancelText="Close"
+      okText={t('page.image.copy')}
+      cancelText={t('common.cancel')}
+
     >
       {url}
     </Modal>
