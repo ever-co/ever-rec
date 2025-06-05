@@ -50,7 +50,7 @@ const useGenerateShareLink = (
       successMessage(t('toasts.copied'));
       return true;
     } catch (e) {
-      errorHandler({ message: t('hooks.toasts.shareLinkCopyError') });
+      errorHandler(t('hooks.toasts.shareLinkCopyError'));
       return false;
     }
   };
