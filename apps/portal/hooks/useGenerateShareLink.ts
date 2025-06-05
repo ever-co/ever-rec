@@ -85,7 +85,7 @@ const useGenerateShareLink = (
 
       successMessage(t('toasts.copied'));
     } catch (e) {
-      errorHandler({ message: t('hooks.toasts.shareLinkCopyError') });
+      errorHandler(t('hooks.toasts.shareLinkCopyError'));
       console.log(e);
     }
   };
