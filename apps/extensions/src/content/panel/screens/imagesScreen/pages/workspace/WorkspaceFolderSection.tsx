@@ -8,6 +8,7 @@ import {
   IWorkspace,
 } from '@/app/interfaces/IWorkspace';
 import Folder from '../../components/folderItem/Folder';
+import { useTranslation } from 'react-i18next';
 
 const sortFolders = (a: IWorkspaceDbFolder, b: IWorkspaceDbFolder) => {
   if (a.name < b.name) {
@@ -36,6 +37,7 @@ const WorkspaceFolderSection: React.FC<IFolderSectionProps> = ({
   initialOpened,
   setSelectedFolder,
 }) => {
+  const { t } = useTranslation();
   let folderSection: JSX.Element;
   const [highlightedRef, setHighlightedRef] =
     useState<React.Ref<HTMLDivElement>>(null);
@@ -74,7 +76,10 @@ const WorkspaceFolderSection: React.FC<IFolderSectionProps> = ({
   if (folders?.length > 0) {
     folderSection = (
       <>
-        <h2 className="tw-mb-6 tw-text-2xl tw-font-semibold">Select folder</h2>
+        <h2 className="tw-mb-6 tw-text-2xl tw-font-semibold">
+          {' '}
+          {t('modals.selectFolder')}
+        </h2>
         <Folder
           folder={null}
           leftMargin={0}
@@ -90,7 +95,7 @@ const WorkspaceFolderSection: React.FC<IFolderSectionProps> = ({
     folderSection = (
       <>
         <h3 className="tw-mb-6 tw-text-2xl tw-font-semibold">
-          You don&apos;t have any folders!
+          {t('common.donthaveFolder')}{' '}
         </h3>
       </>
     );

@@ -4,6 +4,7 @@ import classNames from 'classnames';
 import AppButton from '@/content/components/controls/appButton/AppButton';
 import AppSvg from '@/content/components/elements/AppSvg';
 import * as styles from './InviteMembersInsideModal.module.scss';
+import { useTranslation } from 'react-i18next';
 
 type Props = Omit<IInviteMembersInsideModalProps, 'userName'>;
 
@@ -12,6 +13,7 @@ const WorkspaceInviteLink: FC<Props> = ({
   copied,
   primaryButtonClickHandler,
 }) => {
+  const { t } = useTranslation();
   return (
     <div className={styles.workspaceInviteWrapper}>
       {link && <p className={styles.whiteParagraph}>{link}</p>}
@@ -34,7 +36,7 @@ const WorkspaceInviteLink: FC<Props> = ({
           size="20px"
           className="tw-mr-5px"
         />
-        {link ? 'Copy Link' : 'Create Workspace Invite'}
+        {link ? t('modals.copyLink') : t('workspace.createWorkspaceInvite')}
       </AppButton>
     </div>
   );

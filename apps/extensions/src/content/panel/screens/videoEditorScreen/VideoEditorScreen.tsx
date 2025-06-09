@@ -49,7 +49,7 @@ import DeleteItemModal from '../imagesScreen/pages/shared/DeleteItemModal';
 import ShareItemModal from './shareItemModal/ShareItemModal';
 import { getFolderByIdAPI } from '@/app/services/api/video';
 import { decreaseFolderItems } from '@/app/services/helpers/manageFolders';
-import { workspaceVideoDelete } from '@/content/utilities/misc/workspaceFunctions';
+import { useWorkspaceVideoDelete } from '@/content/utilities/misc/workspaceFunctions';
 import useVideoChapters from '../../hooks/useVideoChapters';
 import { ILike } from '@/app/interfaces/IEditorImage';
 import { appDateFormat } from '@/app/utilities/common';
@@ -60,6 +60,7 @@ import { updateItemDataWorkspace } from '@/app/services/workspace';
 import RenameItemModal from '../../shared/RenameItemModal';
 import ItemsFolderModal from '../imagesScreen/components/itemsFolderModal/ItemsFolderModal';
 import WorkspaceItemsFolderModal from '../imagesScreen/pages/workspace/WorkspaceItemsFolderModal';
+import { useTranslation } from 'react-i18next';
 
 interface IProps {
   isWorkspace?: boolean;
@@ -67,8 +68,10 @@ interface IProps {
 }
 
 const VideoEditorScreen: FC<IProps> = ({ isWorkspace = false, workspace }) => {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { workspaceVideoDelete } = useWorkspaceVideoDelete();
   const [searchParams, setSearchParams] = useSearchParams();
   const user: IUser = useSelector((state: RootStateOrAny) => state.auth.user);
   const [video, setVideo] = useState<IEditorVideo | IWorkspaceVideo | null>(
@@ -247,7 +250,7 @@ const VideoEditorScreen: FC<IProps> = ({ isWorkspace = false, workspace }) => {
   ) => {
     if (!video || !video?.dbData) return;
 
-    const id = loadingMessage('Updating video title...');
+    const id = loadingMessage(t('toasts.updatingVideoTitle'));
 
     const updatedDbData = { ...video.dbData, title: newTitle };
 
@@ -263,7 +266,7 @@ const VideoEditorScreen: FC<IProps> = ({ isWorkspace = false, workspace }) => {
     }
 
     if (!data)
-      return updateMessage(id, 'Could not update the video title.', 'error');
+      return updateMessage(id, t('toasts.couldNotUpdateVideoTitle'), 'error');
 
     const newVideo = { ...video, dbData: data.dbData };
     setVideo(newVideo);
@@ -271,7 +274,7 @@ const VideoEditorScreen: FC<IProps> = ({ isWorkspace = false, workspace }) => {
     !isWorkspace &&
       dispatch(PanelAC.updateExplorerVideoData({ video: newVideo }));
 
-    updateMessage(id, 'Successfully updated the video title.', 'success');
+    updateMessage(id, t('toasts.videoTitleUpdatedSuccess'), 'success');
   };
 
   const onItemLike = async () => {
@@ -291,9 +294,9 @@ const VideoEditorScreen: FC<IProps> = ({ isWorkspace = false, workspace }) => {
     if (!video) return;
 
     if (streamState?.downloadStatus === PlaybackStatusEnum.PREPARING)
-      return infoMessage('Your download will be ready shortly...');
+      return infoMessage(t('toasts.downloadReady'));
 
-    const id = loadingMessage('Downloading video...');
+    const id = loadingMessage(t('toasts.downloadingVideo'));
 
     setDownloadingVideo(true);
 
@@ -301,8 +304,8 @@ const VideoEditorScreen: FC<IProps> = ({ isWorkspace = false, workspace }) => {
 
     setDownloadingVideo(false);
 
-    if (downloaded) updateMessage(id, 'Video downloaded!', 'success');
-    else updateMessage(id, 'Video could not be downloaded!', 'error');
+    if (downloaded) updateMessage(id, t('toasts.videoDownloaded'), 'success');
+    else updateMessage(id, t('toasts.videoCouldNotBeDownloaded'), 'error');
   };
 
   const deleteVideoConfirm = async (
@@ -312,18 +315,14 @@ const VideoEditorScreen: FC<IProps> = ({ isWorkspace = false, workspace }) => {
     if (!video) return;
 
     setShowDeleteModal(false);
-    const id = loadingMessage('Moving video to trash...');
+    const id = loadingMessage(t('toasts.movingVideoToTrash'));
 
     if (workspace) {
       await workspaceVideoDelete(video, workspace);
 
       navigate(`${panelRoutes.workspace.path}?id=${workspace.id}`);
 
-      updateMessage(
-        id,
-        'Video deleted successfully. Redirecting to workspace...',
-        'success',
-      );
+      updateMessage(id, t('toasts.videoDeletedAndRedirect'), 'success');
 
       return;
     }
@@ -332,11 +331,7 @@ const VideoEditorScreen: FC<IProps> = ({ isWorkspace = false, workspace }) => {
 
     navigate(panelRoutes.videos.path);
 
-    updateMessage(
-      id,
-      'Video moved to trash successfully. Redirecting to My Videos...',
-      'success',
-    );
+    updateMessage(id, t('toasts.videoMovedToTrashAndRedirecting'), 'success');
   };
 
   const videoDelete = async (video: IEditorVideo) => {
@@ -388,7 +383,7 @@ const VideoEditorScreen: FC<IProps> = ({ isWorkspace = false, workspace }) => {
                     styles.chaptersHeading,
                   )}
                 >
-                  <span>Chapters</span>
+                  <span>{t('page.video.chapters')}</span>
                   {/* </div> */}
                 </Tab>
                 {blob && (
@@ -531,9 +526,9 @@ const VideoEditorScreen: FC<IProps> = ({ isWorkspace = false, workspace }) => {
       <RenameItemModal
         visible={showRenameModal}
         title={video?.dbData?.title || ''}
-        modalHeading="Edit title"
-        inputLabel="Current item title:"
-        inputPlaceholder="Edit a new item title"
+        modalHeading={t('page.video.actionsSection.editTitle')}
+        inputLabel={t('page.video.currentItemTitle')}
+        inputPlaceholder={t('page.video.editANewTitle')}
         onOk={(title) => updateTitle(title, video, isWorkspace)}
         onCancel={() => setShowRenameModal(false)}
       />

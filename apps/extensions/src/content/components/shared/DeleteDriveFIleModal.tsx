@@ -3,6 +3,7 @@ import { Modal } from 'antd';
 import classNames from 'classnames';
 import AppSvg from '../elements/AppSvg';
 import AppButton from '../controls/appButton/AppButton';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
   visible: boolean;
@@ -11,6 +12,7 @@ interface Props {
 }
 
 const DeleteDriveFileModal: React.FC<Props> = ({ onOk, onCancel, visible }) => {
+  const { t } = useTranslation();
   return (
     <Modal
       open={visible}
@@ -30,7 +32,7 @@ const DeleteDriveFileModal: React.FC<Props> = ({ onOk, onCancel, visible }) => {
             className="tw-px-8 tw-pb-1 tw-pt-1 tw-border tw-border-danger tw-border-solid tw-text-white"
             // disabled={!valid}
           >
-            Delete
+            {t('common.delete')}
           </AppButton>
           <AppButton
             onClick={onCancel}
@@ -38,13 +40,13 @@ const DeleteDriveFileModal: React.FC<Props> = ({ onOk, onCancel, visible }) => {
             outlined
             className="tw-px-8 tw-mx-4 tw-pb-1 tw-pt-1"
           >
-            Cancel
+            {t('common.cancel')}
           </AppButton>
         </div>
       }
     >
       <h2 className="tw-mb-6 tw-text-xl tw-font-bold">
-        Are you sure you want to delete this file from Google Drive?
+        {t('modals.deleteGoogleFile')}
       </h2>
     </Modal>
   );

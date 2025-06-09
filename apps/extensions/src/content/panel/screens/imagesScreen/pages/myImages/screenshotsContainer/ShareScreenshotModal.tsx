@@ -6,6 +6,7 @@ import { successMessage } from '@/app/services/helpers/toastMessages';
 import { RootStateOrAny, useSelector } from 'react-redux';
 import AppSvg from '@/content/components/elements/AppSvg';
 import { ItemType } from '@/app/interfaces/ItemTypes';
+import { useTranslation } from 'react-i18next';
 
 interface IShareItemModalProps {
   visible: boolean;
@@ -26,6 +27,7 @@ const ShareItemModal: React.FC<IShareItemModalProps> = ({
   copied,
   onCancel,
 }) => {
+  const { t } = useTranslation();
   const editorImage: IEditorImage = useSelector(
     (state: RootStateOrAny) => state.panel.editorImage,
   );
@@ -40,7 +42,7 @@ const ShareItemModal: React.FC<IShareItemModalProps> = ({
     await navigator.clipboard.writeText(shareLink);
 
     copied();
-    successMessage('Copied');
+    successMessage(t('toasts.copied'));
   };
 
   return (
@@ -63,13 +65,15 @@ const ShareItemModal: React.FC<IShareItemModalProps> = ({
                 className="tw-mr-5px"
               />
             )}
-            Copy Link
+            {t('modals.copyLink')}
           </AppButton>
         </div>
       }
     >
-      <h2 className="tw-mb-3 tw-text-2xl tw-font-semibold">Share link</h2>
-      <label>Link to item</label>
+      <h2 className="tw-mb-3 tw-text-2xl tw-font-semibold">
+        {t('modals.shareLink')}
+      </h2>
+      <label>{t('modals.linkToItem')}</label>
       <p className="tw-border-black tw-border-b tw-py-5px tw-px-2px tw-mt-5px">
         {shareLink}
       </p>

@@ -1,6 +1,7 @@
 import { FC, useRef, useState, useEffect } from 'react';
 import * as styles from './CommentInput.module.scss';
 import { IComment } from '../CommentElement/CommentElement';
+import { useTranslation } from 'react-i18next';
 
 interface ICommentInputProps {
   comment: IComment;
@@ -13,6 +14,7 @@ const CommentInput: FC<ICommentInputProps> = ({
   handleSave,
   handleCancel,
 }) => {
+  const {t} = useTranslation()
   const ref = useRef<HTMLInputElement>(null);
   const disabled = useRef(false);
   const initialValue = useRef(comment.content);
@@ -45,7 +47,7 @@ const CommentInput: FC<ICommentInputProps> = ({
       />
 
       <div className={styles.commentEditButtons}>
-        <button onClick={() => handleCancel(comment.id)}>Cancel</button>
+        <button onClick={() => handleCancel(comment.id)}>{t('common.cancel')}</button>
         <button
           className={styles.saveButton}
           disabled={initialValue.current === inputValue || inputValue === ''}
@@ -54,7 +56,7 @@ const CommentInput: FC<ICommentInputProps> = ({
             disabled.current = true;
           }}
         >
-          Save
+          {t('common.save')}
         </button>
       </div>
     </div>

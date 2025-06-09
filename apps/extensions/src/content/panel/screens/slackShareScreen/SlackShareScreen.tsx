@@ -9,6 +9,7 @@ import {
 import AppButton from '@/content/components/controls/appButton/AppButton';
 import AppSpinner from '@/content/components/containers/appSpinner/AppSpinner';
 import AppSelect from '@/content/components/controls/appSelect/AppSelect';
+import { useTranslation } from 'react-i18next';
 
 interface ISlackShareScreenProps {
   selectedItemId: string;
@@ -27,6 +28,7 @@ const SlackShareScreen: React.FC<ISlackShareScreenProps> = ({
   forEditor,
   onSave,
 }) => {
+  const {t} = useTranslation()
   const [selectedChannel, setSelectedChannel] = useState(null);
   const [error, setError] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -48,7 +50,7 @@ const SlackShareScreen: React.FC<ISlackShareScreenProps> = ({
         }
         const res = await sendSlackPostMessage(channelId, selectedItemId, type);
         if (res.status != 'error') {
-          infoMessage('Item sent successfully');
+          infoMessage(t('toasts.itemSentSuccess'));
           onCancel();
         } else {
           errorMessage(res.message);
@@ -64,7 +66,7 @@ const SlackShareScreen: React.FC<ISlackShareScreenProps> = ({
       setError(null);
       sendSlackScreenShot(selectedItemId, selectedChannel);
     } else {
-      setError(['Please select channel']);
+      setError([t('toasts.pleaseSelectChannel')]);
     }
   }, [selectedItemId, selectedChannel]);
 
@@ -95,23 +97,23 @@ const SlackShareScreen: React.FC<ISlackShareScreenProps> = ({
             outlined
             className="tw-px-8 tw-mx-4 tw-pb-1 tw-pt-1"
           >
-            Cancel
+          {t('common.cancel')}
           </AppButton>
           <AppButton
             onClick={handleOnsubmit}
             className="tw-px-8 tw-pb-1 tw-pt-1"
             disabled={loading}
           >
-            Send
+          {t('common.send')}
           </AppButton>
         </div>
       }
     >
-      <h2 className="tw-mb-6 tw-text-2xl tw-font-semibold">Send to slack</h2>
+      <h2 className="tw-mb-6 tw-text-2xl tw-font-semibold">{t('modals.sendToSlack')}</h2>
       <AppSpinner show={channelLoading} local={true} />
       <AppSelect
-        label="Pick a channel or conversation to share and preview the code you've created in your Slack workspace."
-        placeholder="Please select an option"
+        label={t('modals.selectChannel')}
+        placeholder={t('modals.selectAOption')}
         value={selectedChannel}
         errors={error}
         onChange={(value: any) => {

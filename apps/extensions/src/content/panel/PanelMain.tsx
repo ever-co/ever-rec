@@ -33,10 +33,10 @@ import NoAccessScreen from '@/content/panel/screens/NoAccessScreen';
 
 const PanelMain: React.FC = () => {
   const user: IUser = useSelector((state: RootStateOrAny) => state.auth.user);
+
   const loaderState: boolean = useSelector(
     (state: RootStateOrAny) => state.panel.loaderState,
   );
-
   useEffect(() => {
     if (user) return;
 

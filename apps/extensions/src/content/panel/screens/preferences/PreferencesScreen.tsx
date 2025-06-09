@@ -14,10 +14,11 @@ import { useNavigate } from 'react-router';
 import { panelRoutes } from '../../router/panelRoutes';
 import PreferencePartition from './PreferencePartition';
 import SavePathInput from './SavePathInput';
-
+import { useTranslation } from 'react-i18next';
 
 const PreferencesScreen: React.FC = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const [preferences, setPreferencesState] = useState<IPreferences>({
     imageExt: 'png',
@@ -53,8 +54,8 @@ const PreferencesScreen: React.FC = () => {
   const navigateToMainScreen = async () => {
     await browser.tabs.update({
       url: panelRoutes.images.path,
-    })
-  }
+    });
+  };
 
   return (
     <div className="tw-inline-grid tw-grid-cols-7 tw-p-4 tw-min-h-screen tw-w-screen tw-gap-36">
@@ -69,12 +70,18 @@ const PreferencesScreen: React.FC = () => {
               size={18 + 'px'}
               className="tw-mr-2"
             />
-            Back
+            {t('navigation.back')}
           </div>
-          <AppHeader part1="Saving" part2="Preferences" className="tw-mb-10" />
+          <AppHeader
+            part1={t('page.preference.saving')}
+            part2={t('page.preference.preferences')}
+            className="tw-mb-10"
+          />
           <PreferencePartition hasUpperDivider={false}>
             <div className="tw-flex tw-justify-between">
-              <div className="tw-font-semibold">Download Screenshot As</div>
+              <div className="tw-font-semibold">
+                {t('page.preference.downloadAs')}
+              </div>
               <div className="tw-flex">
                 <Radio.Group
                   onChange={(e) => updatePreference('imageExt', e.target.value)}
@@ -93,7 +100,7 @@ const PreferencesScreen: React.FC = () => {
           <PreferencePartition>
             <div className="tw-flex tw-justify-between tw-items-center">
               <div className="tw-font-semibold tw-mr-2">
-              Always get shareable links for screenshots, videos and GIFs [uploaded to Google Drive.]
+                {t('page.preference.alwaysGetLink')}
               </div>
               <AppSwitch
                 checked={preferences.showSharedGDriveLink}
@@ -108,7 +115,7 @@ const PreferencesScreen: React.FC = () => {
             <div>
               <div className="tw-flex tw-justify-between tw-items-center">
                 <div className="tw-font-semibold tw-mr-2">
-                  Ask where to save each file before downloading
+                  {t('page.preference.saveEachFile')}
                 </div>
                 <AppSwitch
                   checked={preferences.defaultSave}
@@ -118,7 +125,7 @@ const PreferencesScreen: React.FC = () => {
                 ></AppSwitch>
               </div>
               <div className="tw-my-5">
-              Note: to use this feature, you need to allow the extension to manage Downloads when the permission request window pops up. Only when this option is turned on can you choose where to save your files before downloading them. It automatically defaults to the Downloads folder on your local disk if this option is disabled. 
+                {t('page.preference.saveEachFileDescription')}
               </div>
               <SavePathInput
                 value={preferences.defaultSavePath}
@@ -130,7 +137,7 @@ const PreferencesScreen: React.FC = () => {
           <PreferencePartition>
             <div className="tw-flex tw-justify-between tw-items-center">
               <div className="tw-font-semibold tw-mr-2">
-              Add Date and URL at the top of your screenshots and videos
+                {t('page.preference.addDateAndUrl')}
               </div>
               <AppSwitch
                 checked={preferences.addInfoOnTop}

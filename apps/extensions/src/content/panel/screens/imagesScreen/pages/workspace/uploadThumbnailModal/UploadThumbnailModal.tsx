@@ -4,6 +4,7 @@ import { Modal } from 'antd';
 import classNames from 'classnames';
 //@ts-ignore
 import * as styles from './UploadThumbnailModal.module.scss';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
   visible: boolean;
@@ -20,6 +21,7 @@ const UploadThumbnailModal: React.FC<Props> = ({
   onDrop,
   enableDropping,
 }) => {
+  const { t } = useTranslation();
   return (
     <Modal
       open={visible}
@@ -39,7 +41,7 @@ const UploadThumbnailModal: React.FC<Props> = ({
         >
           <AppSvg path="images/panel/common/images-icon.svg" />
           <p className={classNames(styles.heading, 'tw-mt-6 tw-mb-4')}>
-            Drag & drop images here or
+            {t('page.image.dragDropImagesHereOr')}
           </p>
           <div className={styles.buttonWrapper}>
             <AppButton
@@ -48,13 +50,12 @@ const UploadThumbnailModal: React.FC<Props> = ({
               twPadding="tw-px-14"
               full={true}
             >
-              Browse file
+              {t('workspace.browseFile')}
             </AppButton>
           </div>
           <div className={styles.descWrapper}>
             <p className={styles.desc}>
-              Upload a thumbnail to your workspace. Supports JPG or PNG format
-              only.
+              {t('page.image.uploadThumbnailWorkspace')}
             </p>
           </div>
         </div>

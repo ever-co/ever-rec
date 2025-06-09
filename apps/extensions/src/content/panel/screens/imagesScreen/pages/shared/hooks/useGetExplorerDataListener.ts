@@ -4,8 +4,10 @@ import { getExplorerData } from '@/app/services/screenshots';
 import { getExplorerDataVideo } from '@/app/services/videos';
 import { useEffect } from 'react';
 import { ItemTypeEnum } from '../enums/itemTypeEnum';
+import { useTranslation } from 'react-i18next';
 
 export const useGetExplorerDataListener = () => {
+  const { t } = useTranslation();
   useEffect(() => {
     const runtimeListener = (message: IAppMessage) => {
       if (message.action === AppMessagesEnum.getExplorerData) {
@@ -19,7 +21,7 @@ export const useGetExplorerDataListener = () => {
       }
 
       if (message.action === AppMessagesEnum.videoUploaded) {
-        successMessage('Video saved!');
+        successMessage(t('ext.videoSaved'));
       }
 
       return true;

@@ -5,6 +5,7 @@ import * as styles from '../VideoEditorScreen.module.scss';
 
 import { PlaybackStatusEnum } from '@/app/enums/StreamingServicesEnums';
 import { IAppMessage, AppMessagesEnum } from '@/app/messagess';
+import { useTranslation } from 'react-i18next';
 
 interface IStreamLoadingInfoProps {
   streamState: any;
@@ -15,6 +16,7 @@ const StreamLoadingInfo: FC<IStreamLoadingInfoProps> = ({
   streamState,
   uploadStatus,
 }) => {
+  const {t} = useTranslation()
   const [isPreparing, setIsPreparing] = useState<boolean | null>(null);
   const [isUploading, setIsUploading] = useState<boolean | null>(true);
   const [uploadPercentage, setUploadPercentage] = useState<number>(0);
@@ -50,9 +52,9 @@ const StreamLoadingInfo: FC<IStreamLoadingInfoProps> = ({
     };
   }, []);
 
-  let infoMessage = 'Your stream is getting ready...';
-  if (isPreparing) infoMessage = 'Your stream is getting ready...';
-  if (isUploading) infoMessage = 'Uploading your video';
+  let infoMessage =t('ext.streamReady') ;
+  if (isPreparing) infoMessage = t('ext.streamReady');
+  if (isUploading) infoMessage =t('ext.uploading');
 
   if (!isUploading && !isPreparing) return null;
 

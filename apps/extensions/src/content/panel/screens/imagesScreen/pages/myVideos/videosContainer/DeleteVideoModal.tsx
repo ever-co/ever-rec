@@ -2,6 +2,7 @@ import React from 'react';
 import { Modal } from 'antd';
 import AppButton from '@/content/components/controls/appButton/AppButton';
 import IEditorVideo from '@/app/interfaces/IEditorVideo';
+import { useTranslation } from 'react-i18next';
 
 interface IDeleteVideoModalProps {
   visible: boolean;
@@ -16,6 +17,7 @@ const DeleteVideoModal: React.FC<IDeleteVideoModalProps> = ({
   visible,
   video,
 }) => {
+  const { t } = useTranslation();
   const onOkHandler = () => {
     onOk(video);
   };
@@ -32,20 +34,20 @@ const DeleteVideoModal: React.FC<IDeleteVideoModalProps> = ({
             outlined
             className="tw-px-8 tw-mx-4 tw-pb-1 tw-pt-1"
           >
-            Cancel
+            {t('common.cancel')}
           </AppButton>
           <AppButton
             onClick={onOkHandler}
             className="tw-px-8 tw-pb-1 tw-pt-1"
             // disabled={!valid}
           >
-            Delete Video
+            {t('unique.deleteVideo')}
           </AppButton>
         </div>
       }
     >
       <h2 className="tw-mb-6 tw-text-2xl tw-font-semibold">
-        Do you want to delete this video?
+        {t('modals.deleteVideoInfo')}
       </h2>
     </Modal>
   );

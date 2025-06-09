@@ -10,6 +10,7 @@ import AppSvg from '@/content/components/elements/AppSvg';
 import { panelRoutes } from '@/content/panel/router/panelRoutes';
 import { useNavigate } from 'react-router';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 interface SidebarWorkspacesProps {
   addNewWorkspaceClicked: () => void;
@@ -132,31 +133,40 @@ const SidebarWorkspacesDefaultItem: FC<SidebarWorkspacesDefaultItemProps> = ({
   );
 };
 
-const AddWorkspaceButton: FC<{ onClick: () => void }> = ({ onClick }) => (
-  <div onClick={onClick}>
-    <Tooltip title="Add workspace" placement="right">
-      <div>
-        <AppSvg
-          path="images/panel/common/add-workspace.svg"
-          size="25px"
-          className={classNames(styles.addItemWrapper, styles.addNewWorkspace)}
-          bgColor="black"
-        />
-      </div>
-    </Tooltip>
-  </div>
-);
+const AddWorkspaceButton: FC<{ onClick: () => void }> = ({ onClick }) => {
+  const { t } = useTranslation();
+  return (
+    <div onClick={onClick}>
+      <Tooltip title={t('common.addWorkspace')} placement="right">
+        <div>
+          <AppSvg
+            path="images/panel/common/add-workspace.svg"
+            size="25px"
+            className={classNames(
+              styles.addItemWrapper,
+              styles.addNewWorkspace,
+            )}
+            bgColor="black"
+          />
+        </div>
+      </Tooltip>
+    </div>
+  );
+};
 
-const ManageWorkspacesButton: FC = () => (
-  <Link to={panelRoutes.manageWorkspace.path}>
-    <Tooltip title="Manage workspaces" placement="right">
-      <div>
-        <AppSvg
-          className={classNames(styles.itemWrapper, styles.addNewWorkspace)}
-          path="images/panel/common/icon-Manage-light.svg"
-          size="20px"
-        />
-      </div>
-    </Tooltip>
-  </Link>
-);
+const ManageWorkspacesButton: FC = () => {
+  const { t } = useTranslation();
+  return (
+    <Link to={panelRoutes.manageWorkspace.path}>
+      <Tooltip title={t('common.manageWorkspace')} placement="right">
+        <div>
+          <AppSvg
+            className={classNames(styles.itemWrapper, styles.addNewWorkspace)}
+            path="images/panel/common/icon-Manage-light.svg"
+            size="20px"
+          />
+        </div>
+      </Tooltip>
+    </Link>
+  );
+};

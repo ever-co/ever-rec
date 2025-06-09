@@ -6,6 +6,7 @@ import CommentInput from '../CommentInput/CommentInput';
 import { RootStateOrAny, useSelector } from 'react-redux';
 import { IUser } from '@/app/interfaces/IUserData';
 import AppSvg from '@/content/components/elements/AppSvg';
+import { useTranslation } from 'react-i18next';
 
 export type IComment = {
   id: string;
@@ -36,6 +37,7 @@ const CommentElement: FC<IProps> = ({
   commentEditHandler,
   deleteCommentHandler,
 }) => {
+  const {t} = useTranslation()
   const user: IUser = useSelector((state: RootStateOrAny) => state.auth.user);
 
   const authorName = comment?.user?.name;
@@ -55,7 +57,7 @@ const CommentElement: FC<IProps> = ({
               path="images/new-design-v2/comment-more-options/edit.svg"
               size="20px"
             />
-            <span>Edit</span>
+            <span>{t('common.edit')}</span>
           </div>
         </Menu.Item>
 
@@ -68,7 +70,7 @@ const CommentElement: FC<IProps> = ({
               path="images/new-design-v2/comment-more-options/delete-bin.svg"
               size="20px"
             />
-            <span>Delete</span>
+            <span>{t('common.delete')}</span>
           </div>
         </Menu.Item>
       </Menu>
@@ -94,7 +96,7 @@ const CommentElement: FC<IProps> = ({
           <div>
             <span className={styles.dotSeparator}>●</span>
             <span>{dateElapsed}</span>
-            {isEdited && <span>(edited)</span>}
+            {isEdited && <span>{t('page.video.editBrackets')}</span>}
           </div>
         </div>
 

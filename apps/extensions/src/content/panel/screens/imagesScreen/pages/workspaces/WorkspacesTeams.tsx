@@ -29,6 +29,7 @@ import {
   IWorkspaceTeam,
 } from '@/app/interfaces/IWorkspaceTeams';
 import WorkspaceMembersModalWrapper from './WorkspaceMembersModalWrapper';
+import { useTranslation } from 'react-i18next';
 
 interface IWorkspaceMembersState {
   teamId: string;
@@ -44,6 +45,7 @@ export interface IWorkspaceMembersModal {
 }
 
 const WorkspaceTeams: FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const user = useSelector((state: RootStateOrAny) => state.auth.user);
@@ -109,12 +111,12 @@ const WorkspaceTeams: FC = () => {
     if (name === '' || !activeWorkspace) return;
     setShowCreateTeamModal(false);
 
-    const id = loadingMessage('Creating a Team...');
+    const id = loadingMessage(t('workspace.creatingTeam'));
     const teamsData = await createWorkspaceTeam(activeWorkspace.id, name);
     await getTeamsMembers(activeWorkspace.id);
 
     if (!teamsData) {
-      return updateMessage(id, 'Could not create a workspace Team...', 'error');
+      return updateMessage(id, t('workspace.couldNotCreateTeam'), 'error');
     }
 
     dispatch(
@@ -123,7 +125,7 @@ const WorkspaceTeams: FC = () => {
       }),
     );
 
-    updateMessage(id, 'Team created!', 'success');
+    updateMessage(id, t('workspace.teamCreated'), 'success');
   };
 
   const membersClickHandler = async (
@@ -199,7 +201,7 @@ const WorkspaceTeams: FC = () => {
     const newTeams = [...teams];
     const index = newTeams.findIndex((t) => t.id === teamId);
     if (index === -1) {
-      return updateMessage(toast, 'Could not leave team', 'error');
+      return updateMessage(toast, t('workspace.couldNotLeaveTeam'), 'error');
     }
 
     const targetTeamMembers = newTeams[index].members.filter(
@@ -214,16 +216,16 @@ const WorkspaceTeams: FC = () => {
   const leaveTeamHandler = async (teamId: string, teamName: string) => {
     if (!activeWorkspace) return;
 
-    const toast = loadingMessage('Leaving team...');
+    const toast = loadingMessage(t('toasts.leavingTeam'));
     const leftMemberId = await leaveWorkspaceTeam(activeWorkspace.id, teamId);
     if (!leftMemberId) {
-      return updateMessage(toast, 'Could not leave team', 'error');
+      return updateMessage(toast, t('workspace.couldNotLeaveTeam'), 'error');
     }
 
     removeMemberFromMembersMap(teamId, leftMemberId);
     removeMemberFromTeams(teamId, leftMemberId, toast);
 
-    updateMessage(toast, 'Successfully left the Team ' + teamName, 'success');
+    updateMessage(toast, t('toasts.leftTeam') + teamName, 'success');
   };
 
   return (
@@ -238,7 +240,7 @@ const WorkspaceTeams: FC = () => {
                 size="30px"
               />
             </a>
-            {activeWorkspace?.name} - Teams Overview
+            {activeWorkspace?.name} - {t('workspace.teamsOverview')}
           </div>
           {isWorkspaceAdmin && (
             <div>
@@ -249,7 +251,7 @@ const WorkspaceTeams: FC = () => {
                 className="tw-whitspace-nowrap tw-mr-3 tw-w-150px"
                 full={true}
               >
-                Create Team
+                {t('workspace.createTeam')}
               </AppButton>
             </div>
           )}
@@ -292,7 +294,7 @@ const WorkspaceTeams: FC = () => {
                         <div
                           className={classNames(styles.subItem, styles.danger)}
                           onClick={() => leaveTeamHandler(team.id, team.name)}
-                          title="Leave team"
+                          title={t('workspace.leaveTeam')}
                         >
                           <AppSvg
                             path="/images/panel/common/leave.svg"

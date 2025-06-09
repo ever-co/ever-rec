@@ -5,7 +5,7 @@ import { IWorkspaceImage } from '@/app/interfaces/IWorkspace';
 import UniqueViews from '@/content/panel/components/UniqueViews/UniqueViews';
 import { getWorkspaceImageAPI } from '@/app/services/api/workspace';
 import { ResStatusEnum } from '@/app/interfaces/IDataResponse';
-import { copySourceURL } from '@/content/utilities/scripts/singleItemFunctions';
+import { useCopySourceURL } from '@/content/utilities/scripts/singleItemFunctions';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import UserShortInfo from '@/content/panel/components/containers/dashboardLayout/elements/UserShortInfo';
 import TopMenuBar from '@/content/panel/screens/singleImageScreen/topMenuBar/TopMenuBar';
@@ -24,8 +24,11 @@ import { updateItemDataWorkspace } from '@/app/services/workspace';
 import useWorkspaceItemsPermission from '../../hooks/useWorkspaceItemsPermission';
 import VideoComments from '../videoEditorScreen/comments/VideoComments/VideoComments';
 import { IUserShort } from '@/app/interfaces/IUserData';
+import { useTranslation } from 'react-i18next';
 
 const WorkspaceSingleImageScreen = () => {
+  const { t } = useTranslation();
+  const { copySourceURL } = useCopySourceURL();
   const user = useSelector((state: RootStateOrAny) => state.auth.user);
   const [searchParams] = useSearchParams();
   const [loaderState, setLoaderState] = useState<boolean>(false);
@@ -185,15 +188,15 @@ tw-items-center tw-justify-center tw-bg-blue-grey tw-h-500px"
                               size={'20px'}
                             />
                             <div className="tw-text-app-grey-darker tw-text-sm ">
-                              Source URL
+                              {t('ext.sourceURL')}
                             </div>
                           </div>
                         </div>
 
                         <div className="tw-font-sm tw-flex tw-flex-wrap tw-justify-end tw-mt-4 tw-items-center">
                           <div className="tw-text-app-grey-darker tw-mr-2 tw-whitespace-nowrap">{`${
-                            image?.dbData?.likes?.length || 'No'
-                          } likes`}</div>
+                            image?.dbData?.likes?.length || t('common.no')
+                          } ${t('page.video.likes')}`}</div>
                           <div className="tw-mr-2">&bull;</div>
                           <UniqueViews
                             item={image}

@@ -14,6 +14,8 @@ import { sendRuntimeMessage } from '@/content/utilities/scripts/sendRuntimeMessa
 import { removeStorageItems } from '@/app/services/localStorage';
 import { infoMessage } from '@/app/services/helpers/toastMessages';
 import { IWorkspace } from '@/app/interfaces/IWorkspace';
+import { languages } from '../../../../../i18n/constants';
+import { useTranslation } from 'react-i18next';
 
 interface ISCHeaderProps {
   filterValue: string | null;
@@ -32,6 +34,11 @@ const SCHeader: FC<ISCHeaderProps> = ({
   onFilterChange,
   onInviteMembersButtonClick,
 }) => {
+  const { t, i18n, ...rest } = useTranslation();
+  const toggleLanguage = (code: string) => {
+    i18n.changeLanguage(code);
+    // set ns1 as default namespace
+  };
   const photoURL = userPhotoURL ?? '/images/panel/sign/default-profile.svg';
   const clickedNotifications = useRef(false); // to be removed when implemented
   const clickedHelpCenter = useRef(false); // to be removed when implemented
@@ -60,7 +67,9 @@ const SCHeader: FC<ISCHeaderProps> = ({
     goToProfilePage,
     () => setShowCreateWorkspaceModal(true),
     signOutHandler,
+    (str: any) => t(str),
   );
+  const languagesMenu = languagesList((code) => toggleLanguage(code));
 
   return (
     <div className={styles.appHeader}>
@@ -70,19 +79,31 @@ const SCHeader: FC<ISCHeaderProps> = ({
         <input
           value={filterValue ?? undefined}
           type="text"
-          placeholder="Search files..."
+          placeholder={t('header.searchFiles')}
           className={styles.appInput}
           onChange={onFilterChange}
           disabled={filterValue === null}
         />
       </div>
       <div className={styles.actions}>
-        <Tooltip title="Notifications" placement="bottom">
+        <Dropdown
+          trigger={['click']}
+          placement="bottomRight"
+          overlay={languagesMenu}
+        >
+          <div
+            className={classNames(styles.actionButton, styles.profileButton)}
+          >
+            <p>{t('common.language')}</p>
+            <AppSvg path="/new-design-v2/down-caret.svg" size="20px" />
+          </div>
+        </Dropdown>
+        <Tooltip title={t('header.notifications')} placement="bottom">
           <div
             className={styles.actionButton}
             onClick={() => {
               clickedNotifications.current === false &&
-                infoMessage('Notifications coming soon!');
+                infoMessage(t('header.notificationsSoon'));
 
               clickedNotifications.current = true;
             }}
@@ -90,13 +111,12 @@ const SCHeader: FC<ISCHeaderProps> = ({
             <AppSvg path="images/new-design-v2/notifications.svg" size="20px" />
           </div>
         </Tooltip>
-
-        <Tooltip title="Help center" placement="bottom">
+        <Tooltip title={t('header.help')} placement="bottom">
           <div
             className={styles.actionButton}
             onClick={() => {
               clickedHelpCenter.current === false &&
-                infoMessage('Help center coming soon!');
+                infoMessage(t('header.helpSoon'));
 
               clickedHelpCenter.current = true;
             }}
@@ -104,18 +124,17 @@ const SCHeader: FC<ISCHeaderProps> = ({
             <AppSvg path="images/new-design-v2/question-mark.svg" size="20px" />
           </div>
         </Tooltip>
-
         {isWorkspace && (
           <>
             <button
               className={styles.CTAButton}
               onClick={onInviteMembersButtonClick}
             >
-              Invite teammates
+              {t('workspace.inviteTeammates')}
             </button>
 
             {isWorkspaceAdmin && (
-              <Tooltip title="Company settings" placement="bottom">
+              <Tooltip title={t('header.companySettings')} placement="bottom">
                 <div className={styles.actionButton} onClick={goToWorkspace}>
                   <AppSvg
                     path="images/new-design-v2/settings-wheel.svg"
@@ -126,7 +145,6 @@ const SCHeader: FC<ISCHeaderProps> = ({
             )}
           </>
         )}
-
         <Dropdown
           trigger={['click']}
           placement="bottomRight"
@@ -153,6 +171,7 @@ const renderMoreMenuJSX = (
   goToProfilePage: () => void,
   addNewCompany: () => void,
   signOut: () => void,
+  t: (key: string) => string,
 ) => {
   return (
     <Menu className={styles.profileMenu}>
@@ -182,7 +201,9 @@ const renderMoreMenuJSX = (
         }
         onClick={addNewCompany}
       >
-        <span className={styles.menuItemSpan}>Add new company</span>
+        <span className={styles.menuItemSpan}>
+          {t('header.user.addNewCompany')}
+        </span>
       </Menu.Item>
 
       <Menu.Item
@@ -195,9 +216,11 @@ const renderMoreMenuJSX = (
             color="#5b4dbe"
           />
         }
-        onClick={() => infoMessage('Available in Chrome Web Store soon!')}
+        onClick={() => infoMessage(t('header.user.availableSoon'))}
       >
-        <span className={styles.menuItemSpan}>Install Chrome extension</span>
+        <span className={styles.menuItemSpan}>
+          {t('header.user.installChrome')}
+        </span>
       </Menu.Item>
 
       <Menu.Item
@@ -210,9 +233,9 @@ const renderMoreMenuJSX = (
             color="#5b4dbe"
           />
         }
-        onClick={() => infoMessage('Notifications coming soon!')}
+        onClick={() => infoMessage(t('header.notificationsSoon'))}
       >
-        <span className={styles.menuItemSpan}>Notifications</span>
+        <span className={styles.menuItemSpan}>{t('header.notifications')}</span>
       </Menu.Item>
 
       <Menu.Item
@@ -225,16 +248,39 @@ const renderMoreMenuJSX = (
             color="#5b4dbe"
           />
         }
-        onClick={() => infoMessage('Help center coming soon!')}
+        onClick={() => infoMessage(t('header.helpSoon'))}
       >
-        <span className={styles.menuItemSpan}>Help center</span>
+        <span className={styles.menuItemSpan}>{t('header.help')}</span>
       </Menu.Item>
 
       <Menu.Item key="signout" className={styles.menuItem} onClick={signOut}>
         <span className={styles.menuItemSpan} style={{ marginLeft: 0 }}>
-          Sign out
+          {t('header.user.signout')}
         </span>
       </Menu.Item>
+    </Menu>
+  );
+};
+
+export const languagesList = (toggleLanguage: (code: string) => void) => {
+  return (
+    <Menu
+      style={{
+        height: '400px',
+        overflowY: 'scroll',
+      }}
+    >
+      {languages.map((lang) => (
+        <Menu.Item
+          key={lang.code}
+          onClick={() => toggleLanguage(lang.code)}
+          style={{
+            padding: '0.5rem 1.25rem',
+          }}
+        >
+          <span>{lang.text}</span>
+        </Menu.Item>
+      ))}
     </Menu>
   );
 };

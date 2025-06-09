@@ -10,6 +10,7 @@ import {
   getShareLinkWorkspace,
   deleteShareLinkWorkspace,
 } from '@/app/services/workspace';
+import { useTranslation } from 'react-i18next';
 
 const useGenerateShareLink = (
   item: any,
@@ -17,6 +18,7 @@ const useGenerateShareLink = (
   workspaceId: string,
   updateItemState: (item: any) => void,
 ) => {
+  const { t } = useTranslation();
   const [sharedLink, setSharedLink] = useState<string | null>(null);
 
   const itemTypeString = useMemo(
@@ -45,9 +47,9 @@ const useGenerateShareLink = (
       saveSegmentEvent(`${itemType} Shareable link copied`, {
         link: sharedLink,
       });
-      successMessage('Copied');
+      successMessage(t('toasts.copied'));
     } catch (e) {
-      errorHandler({ message: 'Could not copy the share link...' });
+      errorHandler({ message: t('hooks.toasts.shareLinkCopyError') });
     }
   };
 
@@ -81,17 +83,16 @@ const useGenerateShareLink = (
         `${process.env.WEBSITE_URL}/${itemTypeString}/shared/${sharedLink}${sharedParam}`,
       );
 
-      successMessage('Copied');
+      successMessage(t('toasts.copied'));
     } catch (e) {
-      errorHandler('Could not copy the shareable link...');
+      errorHandler(t('hooks.toasts.shareLinkCopyError'));
       console.log(e);
     }
   };
 
   const deleteShareLink = async () => {
     const linkId = item?.sharedLink;
-    if (!linkId)
-      return errorHandler('There is no shareable link for this item');
+    if (!linkId) return errorHandler(t('hooks.toasts.noShareableLink'));
 
     workspaceId
       ? await deleteShareLinkWorkspace(workspaceId, linkId)

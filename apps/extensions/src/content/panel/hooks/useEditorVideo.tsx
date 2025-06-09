@@ -7,6 +7,7 @@ import mainIcon from '@/content/assests/svg/tools-panel/Videos.svg';
 import playIcon from '@/content/assests/svg/tools-panel/video-play-btn.svg';
 import { successMessage } from '@/app/services/helpers/toastMessages';
 import { ICommandTypes } from '@/app/types/types';
+import { useTranslation } from 'react-i18next';
 
 export type EditorVideoRenderProps = {
   stopVideo: () => void;
@@ -22,6 +23,7 @@ export type EditorVideoRenderProps = {
 type RecoringStatus = 'resume' | 'stop' | 'pause';
 
 const useEditorVideo = (): EditorVideoRenderProps => {
+  const { t } = useTranslation();
   const [recordingStatus, setRecordingStatus] = useState<RecoringStatus | null>(
     null,
   );
@@ -128,7 +130,7 @@ const useEditorVideo = (): EditorVideoRenderProps => {
       }
 
       if (message.action === AppMessagesEnum.videoUploaded) {
-        successMessage('Video uploaded successfully.');
+        successMessage(t('toasts.videoUploadedSuccess'));
       }
 
       return true;

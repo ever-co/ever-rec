@@ -17,8 +17,10 @@ import useFolderOrder from '../../pages/shared/hooks/useFolderOrder';
 import { FolderTypeEnum } from '../../pages/shared/enums/folderTypeEnum';
 import { ItemOrderEnum } from '../../pages/shared/enums/itemOrderEnum';
 import AppSvg from '@/content/components/elements/AppSvg';
+import { useTranslation } from 'react-i18next';
 
 const FoldersSidebarExplorer: React.FC = () => {
+  const { t } = useTranslation();
   const explorerData: IExplorerData = useSelector(
     (state: RootStateOrAny) => state.panel.explorerData,
   );
@@ -107,7 +109,9 @@ const FoldersSidebarExplorer: React.FC = () => {
             <HorizontalDivider className="tw-my-5 tw-opacity-50" />
             <div>
               <div className="tw-flex tw-justify-between tw-items-center">
-                <h3 className="tw-font-semibold tw-pl-3">Image folders</h3>
+                <h3 className="tw-font-semibold tw-pl-3">
+                  {t('unique.imageFolders')}
+                </h3>
                 <div onClick={openModal}>
                   <AppSvg
                     path="images/panel/common/add_new.svg"
@@ -141,7 +145,10 @@ const FoldersSidebarExplorer: React.FC = () => {
             <HorizontalDivider className="tw-my-5 tw-opacity-50" />
             <div>
               <div className="tw-flex tw-justify-between tw-items-center">
-                <h3 className="tw-font-semibold tw-pl-3">Video folders</h3>
+                <h3 className="tw-font-semibold tw-pl-3">
+                  {' '}
+                  {t('unique.videoFolders')}
+                </h3>
                 <div onClick={openModal}>
                   <AppSvg
                     path="images/panel/common/add_new.svg"

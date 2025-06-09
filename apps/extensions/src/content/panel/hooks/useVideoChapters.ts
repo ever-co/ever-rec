@@ -22,6 +22,7 @@ import {
 import { CHAPTER_MIN_CHAPTERS } from '@/content/utilities/misc/appConstConfig';
 import { ascendTimestampSecondsSort } from '@/content/utilities/misc/videoChaptersHelperFunctions';
 import { IVideoChaptersProps } from '../screens/videoEditorScreen/chapters/VideoChapters/VideoChapters';
+import { useTranslation } from 'react-i18next';
 
 export type IChapter = {
   id: string;
@@ -54,6 +55,7 @@ const useVideoChapters = ({
   video,
   workspaceId,
 }: IArguments): IUseVideoChapterProps => {
+  const { t } = useTranslation();
   const [chapters, setChapters] = useState(initialChapters);
   const [chaptersInitial, setChaptersInitial] = useState(initialChapters);
   const [chapterActive, setActiveChapter] = useState<IChapter | null>(null);
@@ -159,9 +161,7 @@ const useVideoChapters = ({
   const saveChanges = useCallback(
     async (showNotification = true) => {
       if (chapters.length < CHAPTER_MIN_CHAPTERS)
-        return (
-          showNotification && infoMessage('Please add at least 3 chapters')
-        );
+        return showNotification && infoMessage(t('hooks.toasts.add3Chapters'));
 
       const invalidChapterIds = chapters
         .filter((chapter) => chapter.content === '')
@@ -188,7 +188,7 @@ const useVideoChapters = ({
       setChaptersInitial(data);
       setIsSaving(false);
 
-      showNotification && successMessage('Chapters saved successfully.');
+      showNotification && successMessage(t('hooks.toasts.chaptersSaved'));
       createMarkersEvent(data);
     },
     [chapters, video?.dbData?.id, workspaceId],

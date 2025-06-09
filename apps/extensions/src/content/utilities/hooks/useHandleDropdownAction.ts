@@ -10,11 +10,12 @@ import { successMessage } from '@/app/services/helpers/toastMessages';
 import { downloadVideo } from '@/app/services/videos';
 import { localSave } from '@/app/utilities/images';
 import {
-  workspaceImageDelete,
-  workspaceVideoDelete,
+  useWorkspaceImageDelete,
+  useWorkspaceVideoDelete,
 } from '../misc/workspaceFunctions';
 import { getShareLinkWorkspace } from '@/app/services/workspace';
 import { errorHandler } from '@/app/services/helpers/errors';
+import { useTranslation } from 'react-i18next';
 
 interface IDropdownState {
   item: WorkspaceItemType | null;
@@ -41,6 +42,9 @@ export const useHandleDropdownAction = (
     itemType: ItemType,
   ) => void,
 ) => {
+  const { t } = useTranslation();
+  const { workspaceVideoDelete } = useWorkspaceVideoDelete();
+  const { workspaceImageDelete } = useWorkspaceImageDelete();
   const [copyState, setCopyState] = useState(false);
   const [dropdown, setDropdownVisible] = useState<IDropdownState>({
     item: null,
@@ -166,11 +170,11 @@ export const useHandleDropdownAction = (
         `${process.env.WEBSITE_URL}/${itemType}/shared/${sharedLink}?ws=1`,
       );
       copied();
-      successMessage('Copied');
+      successMessage(t('toasts.copied'));
 
       return updatedItem;
     } catch (error) {
-      errorHandler('Could not copy the shareable link...');
+      errorHandler(t('extensionExtras.couldNotCopyLink'));
       console.log(error);
       return null;
     }
@@ -189,12 +193,12 @@ export const useHandleDropdownAction = (
   const download = async (item: WorkspaceItemType, itemType: ItemType) => {
     if (itemType === 'image') {
       const downloaded = await localSave(item);
-      if (downloaded) successMessage('Image downloaded');
+      if (downloaded) successMessage(t('toasts.imageDownloaded'));
       return;
     }
 
     const downloaded = await downloadVideo(item);
-    if (downloaded) successMessage('Video downloaded');
+    if (downloaded) successMessage(t('toasts.videoDownloaded'));
   };
 
   const permissionsHandler = (item: WorkspaceItemType, itemType: ItemType) => {

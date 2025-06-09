@@ -44,8 +44,10 @@ import useItemOrder from '../shared/hooks/useItemOrder';
 import { ItemTypeEnum } from '../shared/enums/itemTypeEnum';
 import useItemsFilter from '@/content/panel/hooks/useItemsFilter';
 import SCHeader from '@/content/panel/shared/SCHeader/SCHeader';
+import { useTranslation } from 'react-i18next';
 
 const MyImages: FC = () => {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const user: IUser = useSelector((state: RootStateOrAny) => state.auth.user);
   const explorerDataLoaded: boolean = useSelector(
@@ -279,7 +281,7 @@ const MyImages: FC = () => {
         <div>
           {isRootFolder(user, explorerData) ? (
             <div className={styles.pageHeadingWrapper}>
-              <h1 className={styles.mainHeader}>My Images</h1>
+              <h1 className={styles.mainHeader}>{t('common.myImages')}</h1>
             </div>
           ) : (
             <FolderNavigationContainer
@@ -318,7 +320,7 @@ const MyImages: FC = () => {
         <>
           {folderData && (
             <div className={styles.foldersHeadingContainer}>
-              <h3 className={styles.heading}>Folders</h3>
+              <h3 className={styles.heading}>{t('common.folders')}</h3>
               <SortingDropDown
                 sortByDate={handleFolderOrderByDate}
                 sortByName={handleFolderOrderByName}

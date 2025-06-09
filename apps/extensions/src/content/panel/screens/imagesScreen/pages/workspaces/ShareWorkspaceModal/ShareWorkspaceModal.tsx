@@ -7,8 +7,8 @@ import PanelAC from '@/app/store/panel/actions/PanelAC';
 import AppButton from '@/content/components/controls/appButton/AppButton';
 import AppSvg from '@/content/components/elements/AppSvg';
 import { IWorkspace } from '@/app/interfaces/IWorkspace';
-import { createWorkspaceInviteLink } from '@/app/services/workspace';
 import useShareWorkspaceInviteModal from '@/content/panel/hooks/useShareWorkspaceInviteModal';
+import { useTranslation } from 'react-i18next';
 
 interface IShareWorkspaceModalProps {
   visible: boolean;
@@ -21,6 +21,7 @@ const ShareWorkspaceModal: React.FC<IShareWorkspaceModalProps> = ({
   workspace,
   onCancel,
 }) => {
+  const {t} = useTranslation()
   const { link, setLink, copied, setCopied, primaryButtonClickHandler } =
     useShareWorkspaceInviteModal({ workspace, visible });
 
@@ -52,17 +53,17 @@ const ShareWorkspaceModal: React.FC<IShareWorkspaceModalProps> = ({
               size={'24px'}
               className="tw-mr-5px"
             />
-            {link ? 'Copy Link' : 'Create Workspace Invite'}
+            {link ? t('modals.copyLink') : t('workspace.createWorkspaceInvite')}
           </AppButton>
         </div>
       }
     >
       <h2 className="tw-mb-3 tw-text-2xl tw-font-semibold">
-        Share link with the team
+        {t('modals.shareLinkTeam')}
       </h2>
       {!!link && (
         <>
-          <label>Link to workspace</label>
+          <label>{t('workspace.linkToWorkspace')}</label>
           <p className="tw-border-black tw-border-b tw-py-5px tw-px-2px tw-mt-5px">
             {link}
           </p>
