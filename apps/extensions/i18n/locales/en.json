@@ -28,7 +28,6 @@
     "continueWithGoogle": "Continue with Google",
     "fileTypeNotSupported": "This file type is not supported.",
     "notAFile": "Your clipboard item is not a file.",
-
     "uploadFromLocalDrive": "Upload images from your local drive to annotate",
     "or": "with one of the following methods:",
     "dragAndDropUpload": "Drag and drop an image file into this field",
@@ -42,15 +41,27 @@
     "end": "End:",
     "apply": "Apply",
     "trimVideo": "Trim Video",
-    "": "",
-    "": "",
-    "": "",
-    "": "",
-    "": "",
-    "": "",
-    "": "",
-    "": "",
-    "": ""
+    "alternativeAction": "you can click the <0></0> icon in the address bar then select <1>Always allow</1> to grant access.",
+    "accessBlocked": "This page access is blocked. To give access click on <0></0> icon. See the instructions below!",
+    "selectArea": "Select area",
+    "capture": "Capture",
+    "encodingGIF": "Encoding GIF Animation",
+    "fullPage": "Full Page Capturing",
+    "scroll": "Please <b>do not scroll</b> for the best possible result.",
+    "GIFanimation": "Your <b>GIF animation</b> is currently encoding...",
+    "signIn": "Sign In",
+    "signOut": "Sign Out",
+    "logout": "Logout",
+    "recordingPaused": "Recording is paused...",
+    "loggedInSuccess": "You logged in successfully.",
+    "errors": {
+      "LoginWithGoogle": "Login with Google to use this Feature:",
+      "thereWasAnError": "There was an error.",
+      "invalidEmailOrPassword": "Invalid email or password! Please enter again.",
+      "userEmailExists": "User with this email already exists",
+      "invalidloginOrPassword": "Invalid login or password. Please try again",
+      "userNotFound": "User not found"
+    }
   },
   "hooks": {
     "toasts": {

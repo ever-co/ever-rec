@@ -11,7 +11,7 @@ const EmptyWorkspaceItems: FC<IProps> = ({ workspaceName }) => {
   const { t } = useTranslation();
   let element: string | ReactNode = 'this organization';
   if (workspaceName) {
-    element = <b>{workspaceName}</b>;
+    element = `"${workspaceName}"`;
   }
 
   return (

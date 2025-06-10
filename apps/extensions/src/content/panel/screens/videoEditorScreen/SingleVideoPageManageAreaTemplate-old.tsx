@@ -24,7 +24,7 @@ import useGetExplorerDataListener from '@/content/panel/screens/imagesScreen/pag
 import PanelAC from '@/app/store/panel/actions/PanelAC';
 import { PlaybackStatusEnum } from '@/app/enums/StreamingServicesEnums';
 import { dropboxFileUpload, saveSegmentEvent } from '@/app/services/general';
-import { errorHandler } from '@/app/services/helpers/errors';
+import { useErrorHandler } from '@/app/services/helpers/errors';
 import { IDriveDbData } from '@/app/interfaces/IDriveDbData';
 import browser from '@/app/utilities/browser';
 import { deleteDriveItem, driveUploadFile } from '@/app/services/google/drive';
@@ -82,9 +82,10 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
   updateChaptersEnabled,
   setLoaderState,
 }) => {
+  const { errorHandler } = useErrorHandler();
   const { t } = useTranslation();
   const dispatch = useDispatch();
-  const { workspaceVideoDelete } = useWorkspaceVideoDelete()
+  const { workspaceVideoDelete } = useWorkspaceVideoDelete();
   const navigate = useNavigate();
   const driveUser: DriveUser | null = useSelector(
     (state: RootStateOrAny) => state.auth.driveUser,

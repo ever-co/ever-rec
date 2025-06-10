@@ -9,7 +9,7 @@ import { useCopySourceURL } from '@/content/utilities/scripts/singleItemFunction
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import UserShortInfo from '@/content/panel/components/containers/dashboardLayout/elements/UserShortInfo';
 import TopMenuBar from '@/content/panel/screens/singleImageScreen/topMenuBar/TopMenuBar';
-import { errorHandler } from '@/app/services/helpers/errors';
+import { useErrorHandler } from '@/app/services/helpers/errors';
 import AppContainer from '@/content/components/containers/appContainer/AppContainer';
 import ItemsFolderModal from '@/content/panel/screens/imagesScreen/components/itemsFolderModal/ItemsFolderModal';
 import { useSearchParams } from 'react-router-dom';
@@ -27,6 +27,7 @@ import { IUserShort } from '@/app/interfaces/IUserData';
 import { useTranslation } from 'react-i18next';
 
 const WorkspaceSingleImageScreen = () => {
+  const { errorHandler } = useErrorHandler();
   const { t } = useTranslation();
   const { copySourceURL } = useCopySourceURL();
   const user = useSelector((state: RootStateOrAny) => state.auth.user);

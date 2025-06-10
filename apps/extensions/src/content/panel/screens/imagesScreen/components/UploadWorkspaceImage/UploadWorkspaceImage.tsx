@@ -9,7 +9,7 @@ import {
 } from 'react';
 import { RootStateOrAny, useSelector } from 'react-redux';
 import { useDropzone } from 'react-dropzone';
-import { errorHandler } from '@/app/services/helpers/errors';
+import { useErrorHandler } from '@/app/services/helpers/errors';
 import { Modal } from 'antd';
 import AppSvg from '@/content/components/elements/AppSvg';
 import classNames from 'classnames';
@@ -27,6 +27,7 @@ const UploadWorkspaceImageModal: React.FC<Props> = ({
   onOk,
 }) => {
   const { t } = useTranslation();
+  const { errorHandler } = useErrorHandler();
   const [file, setFile] = useState<File | null>(null);
   const activeWorkspace = useSelector(
     (state: RootStateOrAny) => state.panel.activeWorkspace,

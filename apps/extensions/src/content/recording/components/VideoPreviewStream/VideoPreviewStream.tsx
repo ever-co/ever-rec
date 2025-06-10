@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import classNames from 'classnames';
 import { StatusMessages } from 'react-media-recorder';
+import { useTranslation } from 'react-i18next';
 
 interface IVideoPreviewProps {
   previewStream: MediaStream;
@@ -15,6 +16,7 @@ const VideoPreviewStream: React.FC<IVideoPreviewProps> = ({
   isCameraOnly,
   countdown,
 }) => {
+  const { t } = useTranslation();
   const vRef = useRef<HTMLVideoElement | null>(null);
   const [videoTrack, setVideoTrack] = useState<MediaStreamTrack | null>(null);
 
@@ -32,7 +34,9 @@ const VideoPreviewStream: React.FC<IVideoPreviewProps> = ({
   return (
     <div className="video-preview-wrapper">
       {isPaused && (
-        <span className="recording-paused-overlay">Recording is paused...</span>
+        <span className="recording-paused-overlay">
+          {t('ext.recordingPaused')}
+        </span>
       )}
       {countdown ? (
         <span className="recording-paused-overlay tw-text-center tw-text-2xl">

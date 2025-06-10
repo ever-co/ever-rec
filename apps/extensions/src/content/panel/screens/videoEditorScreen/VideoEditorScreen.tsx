@@ -55,7 +55,7 @@ import { ILike } from '@/app/interfaces/IEditorImage';
 import { appDateFormat } from '@/app/utilities/common';
 import { ResStatusEnum } from '@/app/interfaces/IDataResponse';
 import { getWorkspaceVideoAPI } from '@/app/services/api/workspace';
-import { errorHandler } from '@/app/services/helpers/errors';
+import { useErrorHandler } from '@/app/services/helpers/errors';
 import { updateItemDataWorkspace } from '@/app/services/workspace';
 import RenameItemModal from '../../shared/RenameItemModal';
 import ItemsFolderModal from '../imagesScreen/components/itemsFolderModal/ItemsFolderModal';
@@ -68,6 +68,7 @@ interface IProps {
 }
 
 const VideoEditorScreen: FC<IProps> = ({ isWorkspace = false, workspace }) => {
+  const { errorHandler } = useErrorHandler();
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -393,7 +394,7 @@ const VideoEditorScreen: FC<IProps> = ({ isWorkspace = false, workspace }) => {
                       styles.chaptersHeading,
                     )}
                   >
-                    Trim Video
+                    {t('ext.trimVideo')}
                   </Tab>
                 )}
               </TabList>

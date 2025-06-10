@@ -1,7 +1,7 @@
 import { appLogger } from '@/app/AppLogger';
 import IPreferences, { ImageExtention } from '@/app/interfaces/IPreferences';
 import { getPreferences, setPreferences } from '@/app/services/auth';
-import { errorHandler } from '@/app/services/helpers/errors';
+import { useErrorHandler } from '@/app/services/helpers/errors';
 import browser from '@/app/utilities/browser';
 import { imagesPath } from '@/app/utilities/common';
 import AppHeader from '@/content/components/elements/AppHeader';
@@ -19,7 +19,7 @@ import { useTranslation } from 'react-i18next';
 const PreferencesScreen: React.FC = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
-
+  const { errorHandler } = useErrorHandler();
   const [preferences, setPreferencesState] = useState<IPreferences>({
     imageExt: 'png',
     showSharedGDriveLink: false,

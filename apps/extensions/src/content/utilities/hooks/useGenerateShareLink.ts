@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { ItemType } from '@/app/interfaces/ItemTypes';
 import { deleteShareLinkAPI } from '@/app/services/api/imageandvideo';
 import { saveSegmentEvent } from '@/app/services/general';
-import { errorHandler } from '@/app/services/helpers/errors';
+import { useErrorHandler } from '@/app/services/helpers/errors';
 import { successMessage } from '@/app/services/helpers/toastMessages';
 import { getShareLink } from '@/app/services/screenshots';
 import { getShareLinkVideo } from '@/app/services/videos';
@@ -18,6 +18,7 @@ const useGenerateShareLink = (
   workspaceId: string,
   updateItemState: (item: any) => void,
 ) => {
+  const { errorHandler } = useErrorHandler();
   const { t } = useTranslation();
   const [sharedLink, setSharedLink] = useState<string | null>(null);
 

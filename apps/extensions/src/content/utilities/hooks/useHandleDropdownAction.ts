@@ -14,7 +14,7 @@ import {
   useWorkspaceVideoDelete,
 } from '../misc/workspaceFunctions';
 import { getShareLinkWorkspace } from '@/app/services/workspace';
-import { errorHandler } from '@/app/services/helpers/errors';
+import { useErrorHandler } from '@/app/services/helpers/errors';
 import { useTranslation } from 'react-i18next';
 
 interface IDropdownState {
@@ -42,6 +42,7 @@ export const useHandleDropdownAction = (
     itemType: ItemType,
   ) => void,
 ) => {
+  const { errorHandler } = useErrorHandler();
   const { t } = useTranslation();
   const { workspaceVideoDelete } = useWorkspaceVideoDelete();
   const { workspaceImageDelete } = useWorkspaceImageDelete();
@@ -174,7 +175,7 @@ export const useHandleDropdownAction = (
 
       return updatedItem;
     } catch (error) {
-      errorHandler(t('extensionExtras.couldNotCopyLink'));
+      errorHandler(t('ext.couldNotCopyLink'));
       console.log(error);
       return null;
     }

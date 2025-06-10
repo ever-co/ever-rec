@@ -6,6 +6,7 @@ import classNames from 'classnames';
 import './select-area.scss';
 import Logo from '@/content/components/elements/Logo';
 import { successMessage } from '@/app/services/helpers/toastMessages';
+import { useTranslation } from 'react-i18next';
 
 export type CaptureAreaActionType = 'save' | 'copy' | 'download';
 
@@ -30,6 +31,7 @@ const SelectArea: React.FC<ISelectedAreaProps> = ({
   changeAreaState,
   captureAreaHandler,
 }) => {
+  const { t } = useTranslation();
   const sideBoxMargin = 15 * window.devicePixelRatio;
   const info = useRef<HTMLDivElement | null>(null);
   const area = useRef<HTMLDivElement | null>(null);
@@ -239,7 +241,7 @@ const SelectArea: React.FC<ISelectedAreaProps> = ({
       {invisible ? (
         <div className="tw-bg-opacity-60 tw-flex tw-items-center tw-justify-center tw-w-full tw-h-full tw-bg-black tw-bg-opacity-40">
           <h2 className="tw-text-white tw-text-center tw-font-normal tw-text-2xl tw-font-sans">
-            Select area
+            {t('ext.selectArea')}
           </h2>
         </div>
       ) : (
@@ -273,8 +275,7 @@ const SelectArea: React.FC<ISelectedAreaProps> = ({
                   className="tw-text-xs tw-m-2px"
                   onClick={() => successMessage('Copied to clipboard')}
                 >
-                  {' '}
-                  Copy
+                  {t('page.image.copy')}
                 </div>
               </AppButton>
 
@@ -283,7 +284,7 @@ const SelectArea: React.FC<ISelectedAreaProps> = ({
                 className="tw-pl-1 tw-pr-1 tw-pt-1px tw-pb-1px tw-mb-2 tw-rounded-2xl"
                 onClick={() => captureHandler('save')}
               >
-                <div className="tw-text-xs tw-m-2px"> Capture</div>
+                <div className="tw-text-xs tw-m-2px">{t('ext.capture')}</div>
               </AppButton>
 
               <AppButton
@@ -293,7 +294,9 @@ const SelectArea: React.FC<ISelectedAreaProps> = ({
                 bgColor="tw-bg-app-grey-darker"
                 onClick={closeHandler}
               >
-                <div className="tw-text-xs tw-m-2px">Cancel</div>
+                <div className="tw-text-xs tw-m-2px">
+                {t('common.cancel')}
+                </div>
               </AppButton>
             </div>
           </div>

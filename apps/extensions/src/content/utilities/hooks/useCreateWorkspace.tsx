@@ -34,11 +34,7 @@ export const useCreateWorkspace = (shouldRouteToNewWorkspace = false) => {
       const newWorkspace = response.data;
 
       if (!newWorkspace)
-        return updateMessage(
-          id,
-          t('extensionExtras.couldNotCreateCompany'),
-          'error',
-        );
+        return updateMessage(id, t('ext.couldNotCreateCompany'), 'error');
 
       dispatch(PanelAC.setActiveWorkspace({ activeWorkspace: response.data }));
       dispatch(

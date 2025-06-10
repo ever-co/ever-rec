@@ -10,7 +10,7 @@ import React, {
   useState,
 } from 'react';
 import { IComment } from '@/app/interfaces/IComments';
-import { errorHandler } from '@/app/services/helpers/errors';
+import { useErrorHandler } from '@/app/services/helpers/errors';
 import { infoMessage } from '@/app/services/helpers/toastMessages';
 import {
   addComment,
@@ -80,6 +80,7 @@ const useEnableComments = ({
   isPublic,
   user,
 }: props): EnableComments => {
+  const { errorHandler } = useErrorHandler();
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const [searchParams, setSearchParams] = useSearchParams();

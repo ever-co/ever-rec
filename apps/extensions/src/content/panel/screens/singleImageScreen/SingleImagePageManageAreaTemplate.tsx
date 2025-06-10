@@ -15,7 +15,7 @@ import { IAppMessage } from '@/app/messagess';
 import { IDriveDbData } from '@/app/interfaces/IDriveDbData';
 import { deleteDriveItem, driveUploadFile } from '@/app/services/google/drive';
 import { ResStatusEnum } from '@/app/interfaces/IDataResponse';
-import { errorHandler } from '@/app/services/helpers/errors';
+import { useErrorHandler } from '@/app/services/helpers/errors';
 import {
   errorMessage,
   infoMessage,
@@ -48,7 +48,7 @@ import ItemsFolderModal from '../imagesScreen/components/itemsFolderModal/ItemsF
 import DeleteCloudFileModal from '@/content/components/shared/DeleteCloudFileModal';
 import WorkspaceItemsFolderModal from '../imagesScreen/pages/workspace/WorkspaceItemsFolderModal';
 import DeleteItemModal from '../imagesScreen/pages/shared/DeleteItemModal';
-import { workspaceImageDelete } from '@/content/utilities/misc/workspaceFunctions';
+import { useWorkspaceImageDelete } from '@/content/utilities/misc/workspaceFunctions';
 import useGenerateShareLink from '@/content/utilities/hooks/useGenerateShareLink';
 import { pdfFromImageUrl } from '@/app/utilities/pdfFromImageUrl';
 import { useTranslation } from 'react-i18next';
@@ -88,7 +88,9 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
   setLoaderState,
   workspace,
 }) => {
-  const {t} = useTranslation()
+  const { errorHandler } = useErrorHandler()
+  const { t } = useTranslation();
+  const { workspaceImageDelete } = useWorkspaceImageDelete();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [showFolderModal, setShowFolderModal] = useState(false);
@@ -275,9 +277,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
         setDropBoxImageId(response.data);
         successMessage(t('toasts.imageUploaded'));
       } else {
-        errorMessage(
-          response.message || t('toasts.somethingWentWrong'),
-        );
+        errorMessage(response.message || t('toasts.somethingWentWrong'));
       }
       setDropboxOperationLoading(false);
     }
@@ -391,7 +391,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
         });
         try {
           item && navigator.clipboard.write([item as any]);
-          successMessage(('toasts.copiedToClipboard'));
+          successMessage('toasts.copiedToClipboard');
           saveSegmentEvent(t('ext.imageCopied'));
         } catch (e) {
           errorHandler({ message: t('toasts.linkNotCopied') });
@@ -519,7 +519,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
           <TabPanel>
             <ImageActionsCard className="tw-rounded-t-none">
               <div>
-               {t('page.image.currentlySavedIn')}
+                {t('page.image.currentlySavedIn')}
                 <strong className="tw-ml-1.5">{currentlySavedIn}</strong>
               </div>
               <div
@@ -539,8 +539,8 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
             <ImageActionsCard>
               <div className="tw-grid tw-gap-4 tw-grid-cols-3 tw-justify-items-center across-btns:tw-gap-1 across-btns:tw-grid-rows-1 across-btns:tw-place-items-center">
                 <ImageActionItem
-                 title={t('page.image.download')}
-                 icon={IoMdDownload}
+                  title={t('page.image.download')}
+                  icon={IoMdDownload}
                   onClick={localSaveFunction}
                   outerClassName={styles.containerImageAction}
                   circleClassName={styles.innerCircle}
@@ -576,14 +576,16 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
                 <div>
                   <div className="tw-flex tw-items-center tw-justify-between tw-mb-2">
                     <div className="tw-font-semibold tw-text-sm tw-text-center">
-                     {t('page.image.shareableLink')}
+                      {t('page.image.shareableLink')}
                     </div>
                     <AppButton
                       onClick={removeSharedLink}
                       bgColor="tw-bg-red"
                       className="tw-pt-0 tw-pb-0 tw-pl-2 tw-pr-2"
                     >
-                      <span className="tw-text-xs tw-text-white">{t('page.image.remove')}</span>
+                      <span className="tw-text-xs tw-text-white">
+                        {t('page.image.remove')}
+                      </span>
                     </AppButton>
                   </div>
 
@@ -607,7 +609,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
                           size={'25px'}
                           className="tw-mr-2"
                         />
-                       {t('page.image.copy')}
+                        {t('page.image.copy')}
                       </>
                     )}
                   </AppButton>
@@ -615,7 +617,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
               ) : (
                 <div>
                   <div className="tw-font-semibold tw-text-sm tw-mb-2 tw-text-center">
-                   {t('page.image.shareYourImage')}
+                    {t('page.image.shareYourImage')}
                   </div>
                   <AppButton
                     onClick={generateShareableLink}
@@ -627,7 +629,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
                         <AppSpinnerLocal />
                       </div>
                     ) : (
-                    t('page.image.generateShareableLink')
+                      t('page.image.generateShareableLink')
                     )}
                   </AppButton>
                 </div>
@@ -666,7 +668,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
                         </div>
                         <div className={styles.providerText}>
                           <div className={styles.openImageText}>
-                           {t('page.image.processing')}
+                            {t('page.image.processing')}
                           </div>
                         </div>
                       </AppButton>
@@ -742,7 +744,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
                           </div>
                           <div className={styles.providerText}>
                             <div className={styles.openImageText}>
-                             {t('page.image.processing')}
+                              {t('page.image.processing')}
                             </div>
                           </div>
                         </div>

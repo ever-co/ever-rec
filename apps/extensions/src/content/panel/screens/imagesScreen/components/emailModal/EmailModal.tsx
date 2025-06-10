@@ -20,7 +20,7 @@ import {
   getTemplateRefName,
   setTemplateRefName,
 } from '@/app/services/videos';
-import { errorHandler } from '@/app/services/helpers/errors';
+import { useErrorHandler } from '@/app/services/helpers/errors';
 import AppSvg from '@/content/components/elements/AppSvg';
 import { RootStateOrAny, useSelector, useDispatch } from 'react-redux';
 import PanelAC from '@/app/store/panel/actions/PanelAC';
@@ -47,6 +47,8 @@ const EmailModal: React.FC<IEmailModalProps> = ({
 }) => {
   const dispatch = useDispatch();
   const { t } = useTranslation();
+  const { errorHandler } = useErrorHandler();
+
   const [messagestatus, setMesagestatus] = useState<boolean>(false);
   const [message, setMessage] = useState<string>('');
   const [emailcollection, setEmailcollection] = useState<{
