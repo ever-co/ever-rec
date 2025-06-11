@@ -21,7 +21,7 @@ const ShareWorkspaceModal: React.FC<IShareWorkspaceModalProps> = ({
   workspace,
   onCancel,
 }) => {
-  const {t} = useTranslation()
+  const { t } = useTranslation();
   const { link, setLink, copied, setCopied, primaryButtonClickHandler } =
     useShareWorkspaceInviteModal({ workspace, visible });
 

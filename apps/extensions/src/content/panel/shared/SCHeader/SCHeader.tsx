@@ -34,7 +34,7 @@ const SCHeader: FC<ISCHeaderProps> = ({
   onFilterChange,
   onInviteMembersButtonClick,
 }) => {
-  const { t, i18n, ...rest } = useTranslation();
+  const { t, i18n } = useTranslation();
   const toggleLanguage = (code: string) => {
     i18n.changeLanguage(code);
     // set ns1 as default namespace

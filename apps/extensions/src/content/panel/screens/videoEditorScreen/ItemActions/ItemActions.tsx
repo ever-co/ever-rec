@@ -265,7 +265,7 @@ const renderMoreMenuJSX = (
           key="menu_item_chapters_enabled"
         >
           <span>
-            {chaptersEnabled ? translations.enable : translations.disable}{' '}
+            {chaptersEnabled ? translations.disable : translations.enable}{' '}
             {translations.chapters}
           </span>
         </Menu.Item>

@@ -57,10 +57,41 @@
     "errors": {
       "LoginWithGoogle": "Log in met Google om deze functie te gebruiken:",
       "thereWasAnError": "Er is een fout opgetreden.",
-      "invalidEmailOrPassword": "Ongeldige e-mail of wachtwoord! Voer opnieuw in.",
+      "invalidEmailOrPassword": "Ongeldig e-mailadres of wachtwoord! Voer opnieuw in.",
       "userEmailExists": "Er bestaat al een gebruiker met dit e-mailadres",
       "invalidloginOrPassword": "Ongeldige gebruikersnaam of wachtwoord. Probeer het opnieuw",
-      "userNotFound": "Gebruiker niet gevonden"
+      "userNotFound": "Gebruiker niet gevonden",
+      "browserRestrictions": "Deze actie is niet beschikbaar op deze pagina vanwege beperkingen in de browser."
+    },
+    "capture": {
+      "allowStore": "Hiermee kunt u afbeeldingen opslaan, organiseren, beheren en distribueren.",
+      "changeUsernameProfile": "Wijzig uw gebruikersnaam en profielafbeelding.",
+      "filesFolderShared": "Bestanden en mappen die u met anderen hebt gedeeld.",
+      "connectThirdParty": "Maak verbinding met uw favoriete tools van derden.",
+      "capture": "Vastleggen",
+      "record": "Opnemen",
+      "grantAccess": "Toegang verlenen",
+      "streamingProvides": "Streaming biedt een betere kijkervaring door de kwaliteit dynamisch aan te passen aan de verbindingssnelheid van de kijker en zal aanvankelijk langer duren om voor te bereiden",
+      "startRecordingUnmuted": "Start opnemen zonder dempen",
+      "startRecordingMuted": "Start opnemen met dempen",
+      "activeTab": "Actief tabblad",
+      "desktop": "Bureaublad",
+      "cameraOnly": "Alleen camera",
+      "advanceOptions": "Geavanceerde opties",
+      "seconds3": "3 seconden",
+      "seconds5": "5 seconden",
+      "seconds10": "10 seconden",
+      "countdown": "aftellen",
+      "saveAsVideoStream": "Opslaan als videostream",
+      "stopRecording": "Stop opnemen",
+      "startRecording": "Start opnemen",
+      "disabled": "Uitgeschakeld",
+      "visiblePart": "Zichtbaar deel",
+      "fullPage": "Volledige pagina",
+      "selectedArea": "Geselecteerd gebied",
+      "visiblePartAfterDelay": "Zichtbaar deel na vertraging",
+      "entireScreen": "Volledig scherm of app-venster",
+      "uploadAndAnnotate": "Afbeelding uploaden en annoteren"
     }
   },
   "hooks": {

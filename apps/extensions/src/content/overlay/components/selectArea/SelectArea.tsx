@@ -284,7 +284,9 @@ const SelectArea: React.FC<ISelectedAreaProps> = ({
                 className="tw-pl-1 tw-pr-1 tw-pt-1px tw-pb-1px tw-mb-2 tw-rounded-2xl"
                 onClick={() => captureHandler('save')}
               >
-                <div className="tw-text-xs tw-m-2px">{t('ext.capture')}</div>
+                <div className="tw-text-xs tw-m-2px">
+                  {t('ext.capture.capture')}
+                </div>
               </AppButton>
 
               <AppButton
@@ -294,9 +296,7 @@ const SelectArea: React.FC<ISelectedAreaProps> = ({
                 bgColor="tw-bg-app-grey-darker"
                 onClick={closeHandler}
               >
-                <div className="tw-text-xs tw-m-2px">
-                {t('common.cancel')}
-                </div>
+                <div className="tw-text-xs tw-m-2px">{t('common.cancel')}</div>
               </AppButton>
             </div>
           </div>

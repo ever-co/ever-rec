@@ -57,10 +57,41 @@
     "errors": {
       "LoginWithGoogle": "Connectez-vous avec Google pour utiliser cette fonctionnalité :",
       "thereWasAnError": "Une erreur est survenue.",
-      "invalidEmailOrPassword": "E-mail ou mot de passe invalide ! Veuillez entrer à nouveau.",
+      "invalidEmailOrPassword": "E-mail ou mot de passe invalide ! Veuillez réessayer.",
       "userEmailExists": "Un utilisateur avec cet e-mail existe déjà",
       "invalidloginOrPassword": "Identifiant ou mot de passe invalide. Veuillez réessayer",
-      "userNotFound": "Utilisateur non trouvé"
+      "userNotFound": "Utilisateur non trouvé",
+      "browserRestrictions": "Cette action n'est pas disponible sur cette page en raison des restrictions du navigateur."
+    },
+    "capture": {
+      "allowStore": "Vous permet de stocker, organiser, gérer et distribuer des images.",
+      "changeUsernameProfile": "Modifiez votre nom d'utilisateur et votre image de profil.",
+      "filesFolderShared": "Fichiers et dossiers que vous avez partagés avec d'autres.",
+      "connectThirdParty": "Connectez-vous à vos outils tiers préférés.",
+      "capture": "Capturer",
+      "record": "Enregistrer",
+      "grantAccess": "Accorder l'accès",
+      "streamingProvides": "Le streaming offre une meilleure expérience de visionnage en ajustant dynamiquement la qualité en fonction de la vitesse de connexion du spectateur et prendra plus de temps à préparer initialement",
+      "startRecordingUnmuted": "Commencer l'enregistrement sans sourdine",
+      "startRecordingMuted": "Commencer l'enregistrement en sourdine",
+      "activeTab": "Onglet actif",
+      "desktop": "Bureau",
+      "cameraOnly": "Caméra uniquement",
+      "advanceOptions": "Options avancées",
+      "seconds3": "3 secondes",
+      "seconds5": "5 secondes",
+      "seconds10": "10 secondes",
+      "countdown": "compte à rebours",
+      "saveAsVideoStream": "Enregistrer en tant que flux vidéo",
+      "stopRecording": "Arrêter l'enregistrement",
+      "startRecording": "Commencer l'enregistrement",
+      "disabled": "Désactivé",
+      "visiblePart": "Partie visible",
+      "fullPage": "Page entière",
+      "selectedArea": "Zone sélectionnée",
+      "visiblePartAfterDelay": "Partie visible après délai",
+      "entireScreen": "Écran entier ou fenêtre d'application",
+      "uploadAndAnnotate": "Télécharger et annoter une image"
     }
   },
   "hooks": {

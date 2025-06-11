@@ -67,7 +67,7 @@ i18n
   .init({
     resources,
     debug: true,
-    lng: 'en',
+     //lng: 'ar',
     defaultNS: 'ns1',
     interpolation: {
       escapeValue: false, // React already safes from XSS

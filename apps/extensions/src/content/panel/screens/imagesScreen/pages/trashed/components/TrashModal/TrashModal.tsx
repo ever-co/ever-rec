@@ -23,7 +23,7 @@ const TrashModal: React.FC<ITrashModalProps> = ({
 }) => {
   const { t } = useTranslation();
   const textConfirm =
-    confirmText == 'Confirm' ? t('common.confirm') : confirmText;
+    confirmText === 'Confirm' ? t('common.confirm') : confirmText;
 
   return (
     <Modal

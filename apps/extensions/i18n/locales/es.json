@@ -57,10 +57,41 @@
     "errors": {
       "LoginWithGoogle": "Inicia sesión con Google para usar esta función:",
       "thereWasAnError": "Hubo un error.",
-      "invalidEmailOrPassword": "¡Correo electrónico o contraseña inválidos! Por favor, ingrese nuevamente.",
+      "invalidEmailOrPassword": "¡Correo electrónico o contraseña inválidos! Por favor, ingrésalos nuevamente.",
       "userEmailExists": "Ya existe un usuario con este correo electrónico",
       "invalidloginOrPassword": "Usuario o contraseña inválidos. Por favor, inténtalo de nuevo",
-      "userNotFound": "Usuario no encontrado"
+      "userNotFound": "Usuario no encontrado",
+      "browserRestrictions": "Esta acción no está disponible en esta página debido a restricciones del navegador."
+    },
+    "capture": {
+      "allowStore": "Te permite almacenar, organizar, gestionar y distribuir imágenes.",
+      "changeUsernameProfile": "Cambia tu nombre de usuario e imagen de perfil.",
+      "filesFolderShared": "Archivos y carpetas que has compartido con otros.",
+      "connectThirdParty": "Conéctate a tus herramientas de terceros favoritas.",
+      "capture": "Capturar",
+      "record": "Grabar",
+      "grantAccess": "Conceder acceso",
+      "streamingProvides": "El streaming proporciona una mejor experiencia de visualización al ajustar dinámicamente el nivel de calidad según la velocidad de conexión del espectador y tardará más en prepararse inicialmente",
+      "startRecordingUnmuted": "Comenzar grabación sin silenciar",
+      "startRecordingMuted": "Comenzar grabación silenciada",
+      "activeTab": "Pestaña activa",
+      "desktop": "Escritorio",
+      "cameraOnly": "Solo cámara",
+      "advanceOptions": "Opciones avanzadas",
+      "seconds3": "3 segundos",
+      "seconds5": "5 segundos",
+      "seconds10": "10 segundos",
+      "countdown": "cuenta regresiva",
+      "saveAsVideoStream": "Guardar como transmisión de video",
+      "stopRecording": "Detener grabación",
+      "startRecording": "Comenzar grabación",
+      "disabled": "Desactivado",
+      "visiblePart": "Parte visible",
+      "fullPage": "Página completa",
+      "selectedArea": "Área seleccionada",
+      "visiblePartAfterDelay": "Parte visible después de retraso",
+      "entireScreen": "Pantalla completa o ventana de aplicación",
+      "uploadAndAnnotate": "Subir y anotar imagen"
     }
   },
   "hooks": {

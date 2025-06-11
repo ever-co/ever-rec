@@ -18,7 +18,7 @@ const ItemTitleAuthor: FC<IItemTitleAuthorProps> = ({
   const { t } = useTranslation();
   return (
     <div className={styles.itemAuthor}>
-      <h3>{title ||t('page.profile.title')}</h3>
+      <h3>{title || t('page.profile.title')}</h3>
 
       <div className={styles.itemAuthorDetails}>
         <img

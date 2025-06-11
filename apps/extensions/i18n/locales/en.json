@@ -60,8 +60,46 @@
       "invalidEmailOrPassword": "Invalid email or password! Please enter again.",
       "userEmailExists": "User with this email already exists",
       "invalidloginOrPassword": "Invalid login or password. Please try again",
-      "userNotFound": "User not found"
-    }
+      "userNotFound": "User not found",
+      "browserRestrictions": "This action is not available on this page due to browser restrictions."
+    },
+    "capture": {
+      "allowStore": "Allows you to store, organize, manage, and distribute images.",
+      "changeUsernameProfile": "Change your username and profile image.",
+      "filesFolderShared": "Files and folders you have shared with others.",
+      "connectThirdParty": "Connect to your favorite third-party tools.",
+      "capture": "Capture",
+      "record": "Record",
+      "grantAccess": "Grant Access",
+      "streamingProvides": "Streaming provides a better viewing experience by dynamically adjusting the quality level to the viewer's connection speed and will take longer to prepare initially",
+      "startRecordingUnmuted": "Start recording unmuted",
+      "startRecordingMuted": "Start recording muted",
+      "activeTab": "Active Tab",
+      "desktop": "Desktop",
+      "cameraOnly": "Camera Only",
+      "advanceOptions": "Advanced options",
+      "seconds3": "3 seconds",
+      "seconds5": "5 seconds",
+      "seconds10": "10 seconds",
+      "countdown": "countdown",
+      "saveAsVideoStream": "Save as a video stream",
+      "stopRecording": "Stop Recording",
+      "startRecording": "Start Recording",
+      "disabled": "Disabled",
+
+      "visiblePart": "Visible Part",
+      "fullPage": "Full Page",
+      "selectedArea": "Selected Area",
+      "visiblePartAfterDelay": "Visible Part after Delay",
+      "entireScreen": "Entire Screen or App Window",
+      "uploadAndAnnotate": "Upload and Annotate Image",
+      "": "",
+      "": "",
+      "": "",
+      "": "",
+      "": ""
+    },
+    "": ""
   },
   "hooks": {
     "toasts": {

@@ -49,13 +49,13 @@ const DeleteScreenshotModal: React.FC<IDeleteScreenshotModalProps> = ({
             }}
             // disabled={!valid}
           >
-           {t('modals.deleteScreenshotSingle')}
-           </AppButton>
+            {t('modals.deleteScreenshotSingle')}
+          </AppButton>
         </div>
       }
     >
       <h2 className="tw-mb-6 tw-text-2xl tw-font-semibold">
-      {t('modals.deleteScreenshot')}
+        {t('modals.deleteScreenshot')}
       </h2>
     </Modal>
   );
