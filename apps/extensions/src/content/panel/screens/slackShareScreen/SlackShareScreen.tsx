@@ -28,7 +28,7 @@ const SlackShareScreen: React.FC<ISlackShareScreenProps> = ({
   forEditor,
   onSave,
 }) => {
-  const {t} = useTranslation()
+  const { t } = useTranslation();
   const [selectedChannel, setSelectedChannel] = useState(null);
   const [error, setError] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -97,19 +97,21 @@ const SlackShareScreen: React.FC<ISlackShareScreenProps> = ({
             outlined
             className="tw-px-8 tw-mx-4 tw-pb-1 tw-pt-1"
           >
-          {t('common.cancel')}
+            {t('common.cancel')}
           </AppButton>
           <AppButton
             onClick={handleOnsubmit}
             className="tw-px-8 tw-pb-1 tw-pt-1"
             disabled={loading}
           >
-          {t('common.send')}
+            {t('common.send')}
           </AppButton>
         </div>
       }
     >
-      <h2 className="tw-mb-6 tw-text-2xl tw-font-semibold">{t('modals.sendToSlack')}</h2>
+      <h2 className="tw-mb-6 tw-text-2xl tw-font-semibold">
+        {t('modals.sendToSlack')}
+      </h2>
       <AppSpinner show={channelLoading} local={true} />
       <AppSelect
         label={t('modals.selectChannel')}

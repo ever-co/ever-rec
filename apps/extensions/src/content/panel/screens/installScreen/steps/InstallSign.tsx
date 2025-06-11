@@ -6,9 +6,8 @@ import { IStepProps } from './steps';
 import { IUser } from '@/app/interfaces/IUserData';
 import { useTranslation } from 'react-i18next';
 
-
 const InstallSign: React.FC<IStepProps> = ({ nextStep }) => {
-  const {t} = useTranslation()
+  const { t } = useTranslation();
   const user: IUser = useSelector((state: RootStateOrAny) => state.auth.user);
 
   useEffect(() => {
@@ -18,7 +17,7 @@ const InstallSign: React.FC<IStepProps> = ({ nextStep }) => {
   return (
     <div className="tw-w-full">
       <div className="tw-w-96">
-       <AppHeader
+        <AppHeader
           part1={t('page.auth.common.sign')}
           part2={t('page.auth.common.in')}
           className="tw-mb-8"

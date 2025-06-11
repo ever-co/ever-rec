@@ -37,7 +37,7 @@ const CommentElement: FC<IProps> = ({
   commentEditHandler,
   deleteCommentHandler,
 }) => {
-  const {t} = useTranslation()
+  const { t } = useTranslation();
   const user: IUser = useSelector((state: RootStateOrAny) => state.auth.user);
 
   const authorName = comment?.user?.name;

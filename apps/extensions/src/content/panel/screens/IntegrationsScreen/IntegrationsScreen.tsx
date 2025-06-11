@@ -10,18 +10,10 @@ import { useTranslation } from 'react-i18next';
 
 const IntegrationsScreen = () => {
   const { t } = useTranslation();
-  const getLang = () => {
-    return localStorage.getItem('lang') || 'en';
-  };
-
-  const setLang = (lang: string) => {
-    localStorage.setItem('lang', lang);
-  };
   return (
     <DashboardCard className={styles.mainWrapper}>
       <div className={styles.mainHeader}>
-        data {JSON.stringify(getLang())}
-        <button onClick={() => setLang('ar')}>setLang</button>
+        {t('page.integrations.pageTitle')}
       </div>
       <div className={classNames(styles.innerWrapper, 'scroll-div')}>
         <DrivePage />

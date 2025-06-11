@@ -146,7 +146,6 @@ const FoldersSidebarExplorer: React.FC = () => {
             <div>
               <div className="tw-flex tw-justify-between tw-items-center">
                 <h3 className="tw-font-semibold tw-pl-3">
-                  {' '}
                   {t('unique.videoFolders')}
                 </h3>
                 <div onClick={openModal}>

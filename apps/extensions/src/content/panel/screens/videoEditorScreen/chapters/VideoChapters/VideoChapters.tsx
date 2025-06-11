@@ -216,8 +216,8 @@ const VideoChapters: FC<IVideoChaptersProps> = ({
       {isHorizontalUI && (
         <>
           <h3 style={{ fontWeight: 'bold' }}>
-          {t('page.video.chaptersSection.heading')}
-          Chapters</h3>
+            {t('page.video.chaptersSection.heading')}
+          </h3>
 
           <ChapterHeading
             isHorizontalUI={isHorizontalUI}

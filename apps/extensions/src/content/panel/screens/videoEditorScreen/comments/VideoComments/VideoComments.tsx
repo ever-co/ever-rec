@@ -22,7 +22,7 @@ interface IProps {
 }
 
 const VideoComments: FC<IProps> = ({ userId, itemOwnerId, itemId }) => {
-  const {t} = useTranslation()
+  const { t } = useTranslation();
   const [showNotification, setShowNotification] = useState(true);
   const [comments, setComments] = useState<IComment[] | null>(null);
   const [editComments, setEditComments] = useState<
@@ -57,8 +57,7 @@ const VideoComments: FC<IProps> = ({ userId, itemOwnerId, itemId }) => {
   const addCommentHandler = async () => {
     if (!itemId || !userComment) return;
     if (!userId) {
-      showNotification &&
-        infoMessage(t('toasts.loginToComment'));
+      showNotification && infoMessage(t('toasts.loginToComment'));
       setShowNotification(false);
       return;
     }
@@ -166,7 +165,9 @@ const VideoComments: FC<IProps> = ({ userId, itemOwnerId, itemId }) => {
   });
   return (
     <div className={styles.comments}>
-      <h3>{commentsLength} {t('common.comments')}</h3>
+      <h3>
+        {commentsLength} {t('common.comments')}
+      </h3>
 
       <div className={styles.inputWrapper}>
         <input
@@ -177,7 +178,7 @@ const VideoComments: FC<IProps> = ({ userId, itemOwnerId, itemId }) => {
         />
 
         <AppButton2 onClick={addCommentHandler} disabled={addCommentDisabled}>
-         {t('common.comment')}
+          {t('common.comment')}
         </AppButton2>
       </div>
 

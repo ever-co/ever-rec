@@ -40,7 +40,7 @@ const WorkspaceMultiSelect: React.FC<Props> = ({
   show,
   setSelectState,
 }) => {
-  const {t} = useTranslation()
+  const { t } = useTranslation();
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [showFolderModal, setShowFolderModal] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
@@ -152,8 +152,7 @@ const WorkspaceMultiSelect: React.FC<Props> = ({
           <div className="tw-text-gray-600 tw-leading-6 tw-font-normal tw-fontFamily-roboto">
             {areAllSelected
               ? t('common.bulkActions.selectNone')
-              : t('common.bulkActions.selectAll')
-            }
+              : t('common.bulkActions.selectAll')}
           </div>
         </AppButton>
 
@@ -175,7 +174,9 @@ const WorkspaceMultiSelect: React.FC<Props> = ({
           className="multi-button tw-mx-5px"
           bgColor="tw-bg-white"
         >
-          <div className="tw-font-normal tw-text-black">{t('page.image.move')}</div>
+          <div className="tw-font-normal tw-text-black">
+            {t('page.image.move')}
+          </div>
         </AppButton>
 
         <AppButton

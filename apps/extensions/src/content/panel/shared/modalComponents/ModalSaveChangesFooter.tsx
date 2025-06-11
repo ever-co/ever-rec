@@ -20,7 +20,7 @@ const ModalSaveChangesFooter: FC<IProps> = ({
 }) => {
   const { t } = useTranslation();
   const title =
-    buttonTitle == 'Save changes' ? t('common.saveChanges') : buttonTitle;
+    buttonTitle === 'Save changes' ? t('common.saveChanges') : buttonTitle;
 
   return (
     <div className={styles.footerContainer}>

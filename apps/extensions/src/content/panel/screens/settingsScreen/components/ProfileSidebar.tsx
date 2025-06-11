@@ -5,7 +5,7 @@ import AppSvg from '@/content/components/elements/AppSvg';
 import { useTranslation } from 'react-i18next';
 
 const ProfileSidebar: FC = () => {
-  const {t} = useTranslation()
+  const { t } = useTranslation();
   return (
     <div className={styles.profileSidebar}>
       {/* <div className={classNames(styles.profileSidebarSection, 'scroll-div')}>
@@ -19,7 +19,7 @@ const ProfileSidebar: FC = () => {
         <h1>{t('page.profile.recentFiles.title')}</h1>
         <span className={styles.profileSidebarNotFoundSpan}>
           {/* No files added recently. */}
-         {t('page.profile.recentFiles.emptyState')}
+          {t('page.profile.recentFiles.emptyState')}
         </span>
       </div>
     </div>

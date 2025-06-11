@@ -41,13 +41,11 @@ export const InviteMembersInsideModal: FC<IInviteMembersInsideModalProps> = ({
 };
 
 const IllustrationWrapper = () => {
-  const {t} = useTranslation()
+  const { t } = useTranslation();
   return (
     <div className={styles.illustrationWrapper}>
       <AppSvg path="/images/images/noimage.svg" className="tw-w-max" />
-      <p>
-      {t('workspace.invitingCoworkers')}
-      </p>
+      <p>{t('workspace.invitingCoworkers')}</p>
     </div>
   );
 };

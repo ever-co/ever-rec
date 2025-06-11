@@ -21,7 +21,7 @@ interface Props {
 }
 
 const VideoChooser: React.FC<Props> = ({ visible, onOk, onCancel, actual }) => {
-  const {t} = useTranslation()
+  const { t } = useTranslation();
   const explorerData: IExplorerData = useSelector(
     (state: RootStateOrAny) => state.panel.explorerData,
   );

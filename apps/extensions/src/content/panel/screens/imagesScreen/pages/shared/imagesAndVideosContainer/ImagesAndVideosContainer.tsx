@@ -73,7 +73,7 @@ const ImagesAndVideosContainer: React.FC<IImagesAndVideosProps> = ({
   selectedItems,
   setSelectedItems,
 }) => {
-  const {t} = useTranslation()
+  const { t } = useTranslation();
   const defaultShareItem = { id: null, type: null, provider: null };
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -175,7 +175,7 @@ const ImagesAndVideosContainer: React.FC<IImagesAndVideosProps> = ({
 
     if (hasError) return;
 
-    if (isTrash) infoMessage(t('toasts.videoDownloaded'));
+    if (isTrash) infoMessage(t('toasts.videoDeleted'));
     else infoMessage(t('toasts.videoMovedToTrash'));
   };
 

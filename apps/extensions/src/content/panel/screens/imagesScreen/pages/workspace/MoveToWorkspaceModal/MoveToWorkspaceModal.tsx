@@ -20,7 +20,7 @@ const MoveToWorkspaceModal: React.FC<Props> = ({
   onCancel,
   workspaces,
 }) => {
-  const {t} = useTranslation()
+  const { t } = useTranslation();
   const [selectedWorkspace, setSelectedWorkspace] = useState<IWorkspace | null>(
     null,
   );

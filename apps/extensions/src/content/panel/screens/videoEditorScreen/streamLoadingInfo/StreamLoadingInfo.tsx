@@ -16,7 +16,7 @@ const StreamLoadingInfo: FC<IStreamLoadingInfoProps> = ({
   streamState,
   uploadStatus,
 }) => {
-  const {t} = useTranslation()
+  const { t } = useTranslation();
   const [isPreparing, setIsPreparing] = useState<boolean | null>(null);
   const [isUploading, setIsUploading] = useState<boolean | null>(true);
   const [uploadPercentage, setUploadPercentage] = useState<number>(0);
@@ -52,9 +52,9 @@ const StreamLoadingInfo: FC<IStreamLoadingInfoProps> = ({
     };
   }, []);
 
-  let infoMessage =t('ext.streamReady') ;
+  let infoMessage = t('ext.streamReady');
   if (isPreparing) infoMessage = t('ext.streamReady');
-  if (isUploading) infoMessage =t('ext.uploading');
+  if (isUploading) infoMessage = t('ext.uploading');
 
   if (!isUploading && !isPreparing) return null;
 

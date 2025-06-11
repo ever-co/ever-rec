@@ -322,9 +322,7 @@ const UpdateWorkspaceTeamModal: React.FC<IProps> = ({
             </AppButton>
           </div>
         </div>
-        <p className={styles.supportsP}>
-          {t('page.image.uploadDescription')}
-        </p>
+        <p className={styles.supportsP}>{t('page.image.uploadDescription')}</p>
       </div>
       {isAdmin && (
         <div
@@ -372,7 +370,7 @@ const DeleteConfirmButtons: React.FC<DeleteConfirmButtonsProps> = ({
   onCancel,
   loading,
 }) => {
-  const {t} = useTranslation()
+  const { t } = useTranslation();
   return (
     <div className={styles.toDeleteTeam}>
       <AppButton

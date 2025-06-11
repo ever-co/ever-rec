@@ -40,7 +40,7 @@ const WorkspaceMembersModal: FC<IProps> = ({
   onTeamMemberRemove,
   onClose,
 }) => {
-  const {t} = useTranslation()
+  const { t } = useTranslation();
   const [selectedTabIndex, setTabIndex] = useState(0);
 
   useEffect(() => {
@@ -78,10 +78,10 @@ const WorkspaceMembersModal: FC<IProps> = ({
         <section className={styles.mainSection}>
           <TabList className={styles.tabList}>
             <Tab className={classNames('react-tabs__tab', styles.tab)}>
-             {t('workspace.teamMembers')}
+              {t('workspace.teamMembers')}
             </Tab>
             <Tab className={classNames('react-tabs__tab', styles.tab)}>
-             {t('workspace.workspaceMembers')}
+              {t('workspace.workspaceMembers')}
             </Tab>
           </TabList>
           <TabPanel>

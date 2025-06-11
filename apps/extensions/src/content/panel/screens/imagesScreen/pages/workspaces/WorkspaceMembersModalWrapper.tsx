@@ -50,7 +50,7 @@ const WorkspaceMembersModalWrapper: FC<IProps> = ({
   addMemberToMembersMap,
   removeMemberFromMembersMap,
 }) => {
-  const {t} = useTranslation()
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const [membersLoadingIds, setMemberLoadingIds] = useState<IMemberLoadingIds>(
     {},
