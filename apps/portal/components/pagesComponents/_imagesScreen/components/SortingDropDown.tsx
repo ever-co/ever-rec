@@ -33,9 +33,9 @@ const SortingDropDown: React.FC<SortingDropDown> = ({
     }
   };
 
-  let sortingTypeString = t('common.newest');
+  let sortingTypeString = "newest";
   if (sortingType === ItemOrderEnum.dateOldest) {
-    sortingTypeString = t('common.oldest');
+    sortingTypeString = "oldest";
   }
 
   const menu = (
