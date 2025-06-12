@@ -448,7 +448,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
   const handleLocalSave = async (item) => {
     await localSave(item);
     await saveSegmentEvent('Image Downloaded', item);
-    successMessage('Image downloaded');
+    successMessage(t('toasts.imageDownloaded'));
   };
 
   const generateShareableLink = async () => {

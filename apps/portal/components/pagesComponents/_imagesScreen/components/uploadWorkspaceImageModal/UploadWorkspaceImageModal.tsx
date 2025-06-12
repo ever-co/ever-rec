@@ -40,7 +40,7 @@ const UploadWorkspaceImageModal: React.FC<Props> = ({
   useEffect(() => {
     if (acceptedFiles.length > 0) {
       if (acceptedFiles[0].size > 30000) {
-        errorHandler({ message: 'File too big' });
+        errorHandler({ message: t('extras.fileTooBig') });
       } else {
         setFile(acceptedFiles[0]);
       }
@@ -56,7 +56,7 @@ const UploadWorkspaceImageModal: React.FC<Props> = ({
   const handleFileUploadButton = (e: ChangeEvent<HTMLInputElement>) => {
     const uploadedFile = e.target?.files ? e.target.files[0] : null;
     if (uploadedFile && uploadedFile.size > 30000) {
-      errorHandler({ message: 'Image too big.' });
+      errorHandler({ message: t('extras.imageTooBig') });
     } else {
       setFile(uploadedFile);
     }

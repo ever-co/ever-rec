@@ -35,7 +35,7 @@ const SendWhatsAppMessageModal: React.FC<ISlackChannelModalProps> = ({
   const [loading, setLoading] = useState<boolean>(false);
 
   const newPhoneRules: ((v: string) => boolean | string)[] = [
-    requiredRule('Please enter an WhatsApp Number'),
+    requiredRule(t('extras.enterWhatsAppNumber')),
   ];
 
   useEffect(() => {

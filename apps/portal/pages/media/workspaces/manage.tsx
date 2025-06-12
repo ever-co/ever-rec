@@ -18,10 +18,7 @@ import LeaveDeleteWorkspaceModal from 'components/pagesComponents/_workspacesScr
 import RenameWorkspaceModal from 'components/pagesComponents/_workspacesScreen/RenameWorkspaceModal';
 import { errorMessage, infoMessage } from 'app/services/helpers/toastMessages';
 import UploadIconModal from 'components/pagesComponents/_imagesScreen/pages/workspace/uploadIconModal/UploadIconModal';
-import {
-  updateWorkspaceAvatar,
-  updateWorkspaceThumbnail,
-} from 'app/services/workspace';
+import { useUpdateWorkspace } from 'app/services/workspace';
 import Image from 'next/legacy/image';
 import AppSvg from 'components/elements/AppSvg';
 import UploadThumbnailModal from 'components/pagesComponents/_imagesScreen/pages/workspace/uploadThumbnailModal/UploadThumbnailModa';
@@ -53,6 +50,8 @@ const initialModalState = {
 const ManageWorkspaces: React.FC = () => {
   const iconUploadRef = useRef<HTMLInputElement>(null);
   const { t } = useTranslation();
+  const { updateWorkspaceAvatar, updateWorkspaceThumbnail } =
+    useUpdateWorkspace();
   const thumbnailUploadRef = useRef<HTMLInputElement>(null);
   const dispatch = useDispatch();
   const user = useSelector((state: RootStateOrAny) => state.auth.user);

@@ -348,10 +348,10 @@ const useEnableComments = ({
         setAllCommentsNumber(data.commentsLength);
         setLocalLoaderState(false);
         resetEditState();
-        infoMessage('Comment deleted.');
+        infoMessage(t('hooks.toasts.commentDeleted'));
         setDeleteBoolean(true);
       } else {
-        errorHandler('No item data');
+        errorHandler(t('hooks.noItemData'));
       }
     } catch (e) {
       errorHandler(e);
@@ -415,11 +415,11 @@ const useEnableComments = ({
 
           handleCommentsLengthInState(updatedComments);
         } else {
-          return errorHandler({ message: 'Comment cannot be empty' });
+          return errorHandler({ message: t('hooks.commentEmpty') });
         }
 
         setLocalLoaderState(false);
-        editedMessage && infoMessage('Comment edited.');
+        editedMessage && infoMessage(t('hooks.commentEdited'));
         resetEditState();
 
         if (updatedComments.message) {
@@ -615,7 +615,7 @@ sm:tw-mr-13px lg:tw-mr-5px xl:tw-mr-13px"
               />
               <div className="tw-flex tw-justify-between tw-items-end">
                 <div className="tw-flex">
-                  <Tooltip placement="topLeft" title="Emoji">
+                  <Tooltip placement="topLeft" title={t('extras.emoji')}>
                     {emojiContainer}
                   </Tooltip>
                   {/* <img

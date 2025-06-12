@@ -205,7 +205,7 @@ const EmailModal: React.FC<IEmailModalProps> = ({
       }
     >
       <h2 className="tw-text-2xl tw-font-semibold tw-mb-2">
-        Send {itemType} to
+        {t('extras.sendItemTo', { itemType: itemType })}
       </h2>
 
       <ReactMultiEmail

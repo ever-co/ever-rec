@@ -50,7 +50,7 @@ const UploadToCloudModal: React.FC<IUploadToCloudModalProps> = ({
   }, [name]);
 
   const nameRules: ((v: string) => boolean | string)[] = [
-    requiredRule('Please enter file name'),
+    requiredRule(t('extras.enterFileName')),
   ];
 
   const onOkHandler = async (): Promise<void> => {

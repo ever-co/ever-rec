@@ -101,7 +101,7 @@ const EditFolderModal: React.FC<IEditFolderModalProps> = ({
 
   const folderNameRules: ((v: string) => boolean | string)[] = [
     requiredRule(t('toasts.enterFolderName')),
-    sameRule(oldName, 'This is current folder name'),
+    sameRule(oldName, t('extras.currentFolderName')),
   ];
 
   const onOkHandler = async (): Promise<void> => {
