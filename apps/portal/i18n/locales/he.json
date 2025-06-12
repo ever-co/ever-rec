@@ -1,4 +1,16 @@
 {
+  "extras": {
+    "enterFileName": "אנא הזן את שם הקובץ",
+    "enterWhatsAppNumber": "אנא הזן מספר WhatsApp",
+    "sourceURL": "כתובת מקור",
+    "imageTooBig": "התמונה גדולה מדי",
+    "fileTooBig": "הקובץ גדול מדי",
+    "currentFolderName": "זהו שם התיקייה הנוכחית",
+    "sendItemTo": "שלח {{itemType}} אל",
+    "avatarUpdated": "התמונה עודכנה בהצלחה!",
+    "thumbnailUpdated": "התמונה הממוזערת עודכנה בהצלחה!",
+    "fileTypeNotSupported": "סוג קובץ זה אינו נתמך."
+  },
   "hooks": {
     "toasts": {
       "commentsUnavailable": "מצטערים, התגובות אינן זמינות כרגע...",

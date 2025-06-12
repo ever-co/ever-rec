@@ -1,4 +1,16 @@
 {
+  "extras": {
+    "enterFileName": "请输入文件名",
+    "enterWhatsAppNumber": "请输入 WhatsApp 号码",
+    "sourceURL": "来源网址",
+    "imageTooBig": "图片太大",
+    "fileTooBig": "文件太大",
+    "currentFolderName": "这是当前文件夹名称",
+    "sendItemTo": "发送 {{itemType}} 到",
+    "avatarUpdated": "头像更新成功！",
+    "thumbnailUpdated": "缩略图更新成功！",
+    "fileTypeNotSupported": "不支持此文件类型。"
+  },
   "hooks": {
     "toasts": {
       "commentsUnavailable": "抱歉，评论功能当前不可用...",

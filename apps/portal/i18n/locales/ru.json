@@ -1,4 +1,16 @@
 {
+  "extras": {
+    "enterFileName": "Пожалуйста, введите имя файла",
+    "enterWhatsAppNumber": "Пожалуйста, введите номер WhatsApp",
+    "sourceURL": "Исходный URL",
+    "imageTooBig": "Изображение слишком большое",
+    "fileTooBig": "Файл слишком большой",
+    "currentFolderName": "Это текущее имя папки",
+    "sendItemTo": "Отправить {{itemType}} на",
+    "avatarUpdated": "Аватар успешно обновлен!",
+    "thumbnailUpdated": "Миниатюра успешно обновлена!",
+    "fileTypeNotSupported": "Этот тип файла не поддерживается."
+  },
   "hooks": {
     "toasts": {
       "commentsUnavailable": "Извините, комментарии в настоящее время недоступны...",

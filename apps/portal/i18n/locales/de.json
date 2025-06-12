@@ -1,4 +1,16 @@
 {
+  "extras": {
+    "enterFileName": "Bitte Dateinamen eingeben",
+    "enterWhatsAppNumber": "Bitte WhatsApp-Nummer eingeben",
+    "sourceURL": "Quell-URL",
+    "imageTooBig": "Bild ist zu groß",
+    "fileTooBig": "Datei ist zu groß",
+    "currentFolderName": "Dies ist der aktuelle Ordnername",
+    "sendItemTo": "Sende {{itemType}} an",
+    "avatarUpdated": "Avatar erfolgreich aktualisiert!",
+    "thumbnailUpdated": "Miniaturansicht erfolgreich aktualisiert!",
+    "fileTypeNotSupported": "Dieser Dateityp wird nicht unterstützt."
+  },
   "hooks": {
     "toasts": {
       "commentsUnavailable": "Entschuldigung, Kommentare sind derzeit nicht verfügbar...",

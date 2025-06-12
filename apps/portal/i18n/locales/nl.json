@@ -1,4 +1,16 @@
 {
+  "extras": {
+    "enterFileName": "Voer de bestandsnaam in",
+    "enterWhatsAppNumber": "Voer een WhatsApp-nummer in",
+    "sourceURL": "Bron-URL",
+    "imageTooBig": "Afbeelding is te groot",
+    "fileTooBig": "Bestand is te groot",
+    "currentFolderName": "Dit is de huidige mapnaam",
+    "sendItemTo": "Verstuur {{itemType}} naar",
+    "avatarUpdated": "Avatar succesvol bijgewerkt!",
+    "thumbnailUpdated": "Miniatuur succesvol bijgewerkt!",
+    "fileTypeNotSupported": "Dit bestandstype wordt niet ondersteund."
+  },
   "hooks": {
     "toasts": {
       "commentsUnavailable": "Sorry, reacties zijn momenteel niet beschikbaar...",

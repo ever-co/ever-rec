@@ -1,4 +1,16 @@
 {
+  "extras": {
+    "enterFileName": "الرجاء إدخال اسم الملف",
+    "enterWhatsAppNumber": "الرجاء إدخال رقم واتساب",
+    "sourceURL": "رابط المصدر",
+    "imageTooBig": "الصورة كبيرة جدًا",
+    "fileTooBig": "الملف كبير جدًا",
+    "currentFolderName": "هذا هو اسم المجلد الحالي",
+    "sendItemTo": "إرسال {{itemType}} إلى",
+    "avatarUpdated": "تم تحديث الصورة الشخصية بنجاح!",
+    "thumbnailUpdated": "تم تحديث الصورة المصغرة بنجاح!",
+    "fileTypeNotSupported": "نوع الملف هذا غير مدعوم."
+  },
   "hooks": {
     "toasts": {
       "commentsUnavailable": "عذراً، التعليقات غير متاحة حالياً...",
