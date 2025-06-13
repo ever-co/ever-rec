@@ -411,7 +411,9 @@ const ManageWorkspaces: React.FC = () => {
 
                       <div
                         className={styles.membersCountWrapper}
-                        title={`${workspace.members.length} ${t('workspace.members')}`}
+                        title={t('workspace.membersWithLength', {
+                          length: workspace.members.length,
+                        })}
                       >
                         <AppSvg
                           path="/common/teams-icon.svg"

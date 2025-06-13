@@ -280,7 +280,6 @@ export const useUpdateWorkspace = () => {
     } else {
       errorMessage(t('extras.fileTypeNotSupported'));
       return null;
-      return null;
     }
   };
   return {
