@@ -23,7 +23,6 @@
     "@react-oauth/google": "^0.12.1",
     "antd": "^4.21.3",
     "axios": "^0.26.0",
-    "canvas": "^2.11.2",
     "canvg": "^4.0.3",
     "classnames": "^2.5.1",
     "clsx": "^2.1.1",

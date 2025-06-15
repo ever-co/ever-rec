@@ -7,8 +7,10 @@ import { AppMessagesEnum } from '@/app/messagess';
 import { useCallback } from 'react';
 import { RootStateOrAny, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 const NoAccessScreen = () => {
+  const { t } = useTranslation();
   const user = useSelector((state: RootStateOrAny) => state.auth.user);
   const navigate = useNavigate();
   const updateTab = useCallback(async () => {
@@ -37,10 +39,10 @@ const NoAccessScreen = () => {
           <div className="tw-flex tw-justify-center">
             <div>
               <div className="tw-font-bold tw-text-3xl tw-text-center tw-mt-4">
-                Whoo...oops!
+                {t('page.video.oops')}
               </div>
               <div className="tw-text-lg tw-text-center tw-mt-2">
-                You don’t have the access to this item anymore.
+                {t('page.video.noAccess')}
               </div>
 
               <div>
@@ -50,7 +52,7 @@ const NoAccessScreen = () => {
                   }}
                   className="tw-m-auto tw-mt-5 tw-px-10 tw-py-4"
                 >
-                  Back to Rec
+                  {t('page.video.backToPortal')}
                 </AppButton>
               </div>
             </div>

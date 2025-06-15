@@ -12,10 +12,13 @@ import { IAppMessage } from '@/app/messagess';
 import { panelRoutes } from '../router/panelRoutes';
 import { successMessage } from '@/app/services/helpers/toastMessages';
 import { ResStatusEnum } from '@/app/interfaces/IDataResponse';
-import { errorHandler } from '@/app/services/helpers/errors';
+import { useErrorHandler } from '@/app/services/helpers/errors';
 import { IUser } from '@/app/interfaces/IUserData';
+import { useTranslation } from 'react-i18next';
 
 const useFetchWorkspacesData = () => {
+  const { errorHandler } = useErrorHandler();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [searchParams] = useSearchParams();
@@ -104,7 +107,7 @@ const useFetchWorkspacesData = () => {
 
         if (workspaceId) {
           navigate(`${panelRoutes.workspace.path}?id=${workspaceId}`);
-          successMessage('Successfully joined workspace!');
+          successMessage(t('ext.joinedWorkspace'));
         }
       }
     } catch (e) {

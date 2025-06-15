@@ -10,6 +10,7 @@ import { sendWhatsAppMessage } from '@/app/services/screenshots';
 import AppButton from '@/content/components/controls/appButton/AppButton';
 import AppInput from '@/content/components/controls/appInput/AppInput';
 import * as styles from './SendWhatsAppMessageScreen.module.scss';
+import { useTranslation } from 'react-i18next';
 
 interface ISendWhatsAppMessageScreenProps {
   selectedItemId: string;
@@ -26,6 +27,7 @@ const SendWhatsAppMessageScreen: React.FC<ISendWhatsAppMessageScreenProps> = ({
   forEditor,
   onSave,
 }) => {
+  const { t } = useTranslation();
   const initialControl = (): IAppControl => ({
     value: '',
     errors: [],
@@ -36,19 +38,19 @@ const SendWhatsAppMessageScreen: React.FC<ISendWhatsAppMessageScreenProps> = ({
   const [loading, setLoading] = useState<boolean>(false);
 
   const newPhoneRules: ((v: string) => boolean | string)[] = [
-    requiredRule('Please enter an WhatsApp Number'),
+    requiredRule(t('ext.enterWhatsAppNumber')),
   ];
 
   useEffect(() => {
     if (phoneInput.value.length > 12) {
       setPhoneInput({
-        errors: ['WhatsApp Number can not contain more than 12 characters'],
+        errors: [t('toasts.whatsAppTooLong')],
         touched: true,
         value: phoneInput.value,
       });
     } else if (phoneInput.value.length < 1 && phoneInput.touched) {
       setPhoneInput({
-        errors: ['WhatsApp Number can not be empty'],
+        errors: [t('toasts.whatsAppEmpty')],
         touched: true,
         value: phoneInput.value,
       });
@@ -77,7 +79,7 @@ const SendWhatsAppMessageScreen: React.FC<ISendWhatsAppMessageScreenProps> = ({
         }
         const res = await sendWhatsAppMessage(selectedItemId, phone, type);
         if (res && res.status != 'error') {
-          infoMessage('Item shared successfully');
+          infoMessage(t('toasts.itemSharedSuccess'));
           onCancel();
         } else {
           errorMessage(res.message);
@@ -115,7 +117,7 @@ const SendWhatsAppMessageScreen: React.FC<ISendWhatsAppMessageScreenProps> = ({
             className={styles.btn}
             twPadding={styles.btnPadding}
           >
-            Cancel
+            {t('common.cancel')}
           </AppButton>
           <AppButton
             onClick={handleOnsubmit}
@@ -123,15 +125,15 @@ const SendWhatsAppMessageScreen: React.FC<ISendWhatsAppMessageScreenProps> = ({
             disabled={loading || !valid}
             twPadding={styles.btnPadding}
           >
-            Send
+            {t('common.send')}
           </AppButton>
         </div>
       }
     >
-      <h2 className={styles.title}>Share Message to WhatsApp</h2>
+      <h2 className={styles.title}>{t('modals.shareOnWhatsApp')}</h2>
       <AppInput
         type={'number'}
-        placeholder="Enter WhatsApp Number with country code"
+        placeholder={t('modals.enterWhatsApp')}
         value={phoneInput.value}
         errors={phoneInput.errors}
         onChange={oldPhoneChangeHandler}

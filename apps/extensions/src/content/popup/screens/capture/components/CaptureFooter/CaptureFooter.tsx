@@ -3,6 +3,7 @@ import { FC, ReactElement } from 'react';
 import { panelRoutes } from '@/content/panel/router/panelRoutes';
 import CaptureFooterMenuItem from './CaptureFooterMenuItem/CaptureFooterMenuItem';
 import AppSvg from '@/content/components/elements/AppSvg';
+import { useTranslation } from 'react-i18next';
 
 export interface ICaptureFooterItem {
   title: string;
@@ -13,6 +14,7 @@ export interface ICaptureFooterItem {
 }
 
 const CaptureFooter: FC = () => {
+  const { t } = useTranslation();
   const clickVideoHandler = () => {
     browser.tabs.create({
       url: panelRoutes.videos.path,
@@ -66,7 +68,7 @@ const CaptureFooter: FC = () => {
 
   const captureFooterMenu: ICaptureFooterItem[] = [
     {
-      title: 'Images',
+      title: t('common.images'),
       icon: (
         <AppSvg
           path="images/popup/navigation/myimages.svg"
@@ -75,12 +77,11 @@ const CaptureFooter: FC = () => {
         />
       ),
       handler: clickImagesHandler,
-      description:
-        'Allows you to store, organize, manage, and distribute images.',
+      description: t('ext.capture.allowStore'),
       placement: 'topRight',
     },
     {
-      title: 'Videos',
+      title: t('common.videos'),
       icon: (
         <AppSvg
           path="images/popup/navigation/videoss.svg"
@@ -89,12 +90,11 @@ const CaptureFooter: FC = () => {
         />
       ),
       handler: clickVideoHandler,
-      description:
-        'Allows you to store, organize, manage, and distribute videos.',
+      description: t('ext.capture.allowStore'),
       placement: 'topLeft',
     },
     {
-      title: 'Integrations',
+      title: t('navigation.integrations'),
       icon: (
         <AppSvg
           path="images/popup/navigation/preferences.svg"
@@ -103,11 +103,11 @@ const CaptureFooter: FC = () => {
         />
       ),
       handler: clickIntegrationsHandler,
-      description: 'Connect to your favorite third-party tools.',
+      description: t('ext.capture.connectThirdParty'),
       placement: 'top',
     },
     {
-      title: 'Shared',
+      title: t('shared.shared'),
       icon: (
         <AppSvg
           path="images/popup/navigation/shared.svg"
@@ -116,11 +116,11 @@ const CaptureFooter: FC = () => {
         />
       ),
       handler: clickSharedHandler,
-      description: 'Files and folders you have shared with others.',
+      description: t('ext.capture.filesFolderShared'),
       placement: 'topLeft',
     },
     {
-      title: 'Profile',
+      title: t('sidebar.profile'),
       icon: (
         <AppSvg
           path="images/popup/navigation/profile.svg"
@@ -129,7 +129,7 @@ const CaptureFooter: FC = () => {
         />
       ),
       handler: clickProfileHandler,
-      description: 'Change your username and profile image.',
+      description: t('ext.capture.changeUsernameProfile'),
       placement: 'topRight',
     },
   ];

@@ -4,6 +4,7 @@ import * as styles from '../sortingDropDown/sortingDropDown.module.scss';
 import { Menu, Dropdown, Button } from 'antd';
 import { IWorkspaceTeam } from '@/app/interfaces/IWorkspaceTeams';
 import AppSvg from '@/content/components/elements/AppSvg';
+import { useTranslation } from 'react-i18next';
 
 interface IProps {
   filterTeamId: string | null;
@@ -23,6 +24,7 @@ export const FilterDropdown: FC<IProps> = ({
     clicked(event.key);
   };
 
+  const { t } = useTranslation();
   const menuElements = teams.map((team) => {
     return (
       <Menu.Item
@@ -51,7 +53,7 @@ export const FilterDropdown: FC<IProps> = ({
         key="fake-item"
         className={classNames(styles.itemsStyle, styles.fakeItem)}
       >
-        <span>Filer by Team:</span>
+        <span>{t('common.filterByTeam')}</span>
       </Menu.Item>
       <Menu.Item
         className={classNames(styles.itemsStyle)}
@@ -65,7 +67,7 @@ export const FilterDropdown: FC<IProps> = ({
           </div>
         }
       >
-        <span>No filter</span>
+        <span>{t('common.noFilter')}</span>
       </Menu.Item>
 
       {menuElements}

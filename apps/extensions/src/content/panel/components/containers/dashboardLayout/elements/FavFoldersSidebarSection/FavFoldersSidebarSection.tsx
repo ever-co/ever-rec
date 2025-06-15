@@ -25,6 +25,7 @@ import PanelAC from '@/app/store/panel/actions/PanelAC';
 import { ItemTypeEnum } from '@/content/panel/screens/imagesScreen/pages/shared/enums/itemTypeEnum';
 import Queue from 'queue-promise';
 import { Tooltip } from 'antd';
+import { useTranslation } from 'react-i18next';
 
 const queue = new Queue({
   concurrent: 1,
@@ -41,6 +42,7 @@ interface Props {
 }
 
 const FavFoldersSidebarSection = ({ visible, setVisible }: Props) => {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const favoriteFolders: IFavoriteFolders = useSelector(
@@ -138,7 +140,7 @@ const FavFoldersSidebarSection = ({ visible, setVisible }: Props) => {
     event.stopPropagation();
 
     queue.enqueue(async () => {
-      const toast = loadingMessage('Removing folder from favorites...');
+      const toast = loadingMessage(t('toasts.removeFromFavorites'));
 
       let response = null;
       switch (itemType) {
@@ -163,7 +165,7 @@ const FavFoldersSidebarSection = ({ visible, setVisible }: Props) => {
       if (data) {
         dispatch(PanelAC.setFavoriteFolders({ folders: data }));
         clearToasts();
-        updateMessage(toast, 'Folder removed successfully.', 'success');
+        updateMessage(toast, t('toasts.folderRemoved'), 'success');
       }
     });
   };
@@ -182,7 +184,7 @@ const FavFoldersSidebarSection = ({ visible, setVisible }: Props) => {
             size="25px"
             className={styles.goBackSvg}
           />
-          <div className={styles.goBack}>Go back</div>
+          <div className={styles.goBack}>{t('common.goBack')}</div>
         </div>
         <div className={styles.foldersOuterWrapper}>
           <div className={styles.innerWrapper}>

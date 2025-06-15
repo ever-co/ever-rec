@@ -28,6 +28,7 @@ import { panelRoutes } from '@/content/panel/router/panelRoutes';
 import { useNavigate } from 'react-router';
 import AppButton from '@/content/components/controls/appButton/AppButton';
 import { useCreateWorkspace } from '@/content/utilities/hooks/useCreateWorkspace';
+import { useTranslation } from 'react-i18next';
 
 export type LeaveDeleteActions = 'leave' | 'delete';
 
@@ -48,6 +49,7 @@ const initialModalState = {
 };
 
 const ManageWorkspaces = () => {
+  const { t } = useTranslation();
   const thumbnailUploadRef = useRef<HTMLInputElement>(null);
   const iconUploadRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
@@ -102,8 +104,8 @@ const ManageWorkspaces = () => {
         }
 
         showLeaveDeleteModal.action === 'leave'
-          ? infoMessage('Successfully left the workspace.')
-          : infoMessage('Workspace deleted successfully.');
+          ? infoMessage(t('workspace.leftWorkspace'))
+          : infoMessage(t('workspace.workspaceDeleted'));
       }
 
       setLoading(false);
@@ -144,7 +146,7 @@ const ManageWorkspaces = () => {
             }),
           );
         }
-        infoMessage('Workspace name changed successfully.');
+        infoMessage(t('workspace.workspaceNameChanged'));
       }
       setLoading(false);
     }
@@ -161,7 +163,7 @@ const ManageWorkspaces = () => {
 
   const uploadIconAndUpdateState = async (file: File) => {
     if (file.size > 30000) {
-      errorMessage('File exceeds maximum size of 30 KB');
+      errorMessage(t('workspace.fileExceedsMaxSize'));
       return;
     }
     const workspace = { ...showIconModal.workspace };
@@ -279,7 +281,9 @@ const ManageWorkspaces = () => {
       <DashboardCard className={styles.dashboardCard}>
         <div className={styles.mainHeader}>
           <span>Workspaces - Settings</span>
-          {/* <AppButton
+          {/*
+           //TODO: need to change header translation
+            <AppButton
             twPadding="tw-py-4 tw-px-6"
             onClick={() => setShowCreateWorkspaceModal(true)}
           >
@@ -290,13 +294,12 @@ const ManageWorkspaces = () => {
           <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-h-full ">
             {/* Large Text */}
             <h1 className="tw-text-6xl tw-font-bold tw-text-gray-800 tw-mb-4">
-              No Workspace Found
+              {t('notFound.workspace.heading')}
             </h1>
 
             {/* Description */}
             <p className="tw-text-lg tw-text-gray-600 tw-mb-8">
-              It looks like you don't have any workspaces yet. Click the button
-              below to create one.
+              {t('workspace.noWorkspacesDescription')}
             </p>
 
             {/* Create Workspace Button */}
@@ -305,7 +308,7 @@ const ManageWorkspaces = () => {
               onClick={() => setShowCreateWorkspaceModal(true)}
               className={styles.createWorkspaceButton}
             >
-              Create workspace
+              {t('workspace.createWorkspace')}
             </AppButton>
           </div>
         )}
@@ -333,7 +336,7 @@ const ManageWorkspaces = () => {
                       onClick={() =>
                         setShowIconModal({ state: true, workspace })
                       }
-                      title="Change workspace avatar"
+                      title={t('workspace.changeWorkspaceAvatar')}
                     >
                       <AppSvg
                         path="/images/panel/common/workspace-icon.svg"
@@ -346,7 +349,7 @@ const ManageWorkspaces = () => {
                       onClick={() =>
                         setShowThumbnailModal({ state: true, workspace })
                       }
-                      title="Change workspace thumbnail"
+                      title={t('workspace.changeWorkspaceThumbnail')}
                     >
                       <AppSvg
                         path="/images/panel/common/images-icon.svg"
@@ -359,7 +362,7 @@ const ManageWorkspaces = () => {
                       onClick={() =>
                         setShowRenameModal({ state: true, workspace })
                       }
-                      title="Rename workspace"
+                      title={t('workspace.renameWorkspace')}
                     >
                       <AppSvg
                         path="/images/panel/common/edit-pencil-black.svg"
@@ -372,7 +375,7 @@ const ManageWorkspaces = () => {
                       onClick={() =>
                         setShowShareModal({ state: true, workspace })
                       }
-                      title="Copy invite link"
+                      title={t('workspace.copyInviteLink')}
                     >
                       <AppSvg
                         path="/images/panel/common/copy_black.svg"
@@ -390,7 +393,10 @@ const ManageWorkspaces = () => {
                       }
                     />
 
-                    <div className={styles.subItem} title="Teams">
+                    <div
+                      className={styles.subItem}
+                      title={t('workspace.teams')}
+                    >
                       <div onClick={() => goToWorkspaceTeams(workspace)}>
                         <AppSvg
                           path="/images/panel/common/team-icon.svg"
@@ -402,7 +408,9 @@ const ManageWorkspaces = () => {
 
                     <div
                       className={styles.membersCountWrapper}
-                      title={`${workspace.members.length} member(s)`}
+                      title={`${workspace.members.length} ${t(
+                        'workspace.members',
+                      )}`}
                     >
                       <AppSvg
                         path="/images/panel/common/team-profile.svg"
@@ -424,8 +432,8 @@ const ManageWorkspaces = () => {
                       }
                       title={
                         workspace?.admin !== user?.id
-                          ? 'Leave workspace'
-                          : 'Delete workspace'
+                          ? t('workspace.leaveWorkspace')
+                          : t('workspace.deleteWorkspace')
                       }
                     >
                       <AppSvg
