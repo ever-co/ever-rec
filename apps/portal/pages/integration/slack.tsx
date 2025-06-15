@@ -9,8 +9,10 @@ import { errorMessage } from 'app/services/helpers/toastMessages';
 import AppButton from 'components/controls/AppButton';
 import { useRouter } from 'next/router';
 import AppHeader from 'components/elements/AppHeader';
+import { useTranslation } from 'react-i18next';
 
 const PanelSlackIntegration: React.FC = () => {
+  const { t } = useTranslation();
   const user = useAuthenticateUser();
   const router = useRouter();
 
@@ -38,19 +40,19 @@ const PanelSlackIntegration: React.FC = () => {
           <LogoWrapper />
           <div className="tw-w-full">
             <div className="tw-w-26rem">
-              <AppHeader part1="Hello," part2="Welcome!" className="tw-mb-8" />
-              <p className="tw-mb-6">We are glad you are here!</p>
-              <p className="tw-mb-8">
-                Install the slack app to your workspace once Rec app installed
-                to your slack workspace you can send send the screenshots and
-                video to slack channel or user.
-              </p>
+              <AppHeader
+                part1={t('page.integrations.hello')}
+                part2={t('page.integrations.welcome')}
+                className="tw-mb-8"
+              />
+              <p className="tw-mb-6">{t('page.integrations.gladYouHere')}</p>
+              <p className="tw-mb-8">{t('page.integrations.installSlack')}</p>
               <Layout>
                 <div className="">
                   <div className="tw-text-center tw-my-7 tw-flex tw-justify-center">
                     <div className="lg:tw-w-300px mx-xl:tw-w-full">
                       <AppButton onClick={connectToAccount} full={true}>
-                        Connect with Slack
+                        {t('page.integrations.connectWithSlack')}
                       </AppButton>
                     </div>
                   </div>

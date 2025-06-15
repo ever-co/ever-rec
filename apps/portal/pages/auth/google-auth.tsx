@@ -9,12 +9,14 @@ import useGoogleDriveAuth from '../../hooks/useGoogleDriveAuth';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import AppSvg from '../../components/elements/AppSvg';
+import { useTranslation } from 'react-i18next';
 
 type loginTypes = 'google' | 'drive';
 
 const GoogleAuth = () => {
   const { driveLogin } = useGoogleDriveAuth({ pathname: undefined });
   const router = useRouter();
+  const { t } = useTranslation();
   const [loginType, setLoginType] = useState<loginTypes>('google');
 
   const googleLogin = (credentials: CredentialResponse) => {
@@ -27,12 +29,12 @@ const GoogleAuth = () => {
         signOut(true);
         sendExternalMessage('reAuth', { success: true });
       } else {
-        errorHandler({ message: 'Accounts are not the same.' });
+        errorHandler({ message: t('toasts.accountsNotSame') });
       }
     } catch (e) {
       console.log(e);
       errorHandler({
-        message: 'Error while trying to process data, please try again later.',
+        message: t('toasts.couldNotProcess'),
       });
     }
   };
@@ -47,7 +49,7 @@ const GoogleAuth = () => {
     <div className="tw-flex tw-items-center tw-justify-center tw-bg-dark-grey tw-w-full tw-h-100vh">
       <div className="tw-border-solid tw-border-black tw-border tw-bg-white tw-w-500px tw-h-350px tw-p-10px tw-flex tw-flex-col tw-justify-around tw-items-center">
         <h2 className="tw-text-2xl  tw-text-center">
-          Please, sign in with your Google account to continue...
+          {t('page.auth.common.googleRequire')}
         </h2>
         <div className="tw-flex tw-justify-center tw-w-full">
           {loginType === 'google' ? (

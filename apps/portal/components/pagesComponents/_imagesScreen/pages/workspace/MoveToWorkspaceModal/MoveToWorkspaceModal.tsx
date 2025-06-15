@@ -5,6 +5,7 @@ import { Modal } from 'antd';
 import { IWorkspace } from 'app/interfaces/IWorkspace';
 import styles from './MoveToWorkspaceModal.module.scss';
 import classNames from 'classnames';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
   visible: boolean;
@@ -22,6 +23,7 @@ const MoveToWorkspaceModal: React.FC<Props> = ({
     null,
   );
 
+  const { t } = useTranslation();
   return (
     <Modal
       open={visible}
@@ -39,7 +41,7 @@ const MoveToWorkspaceModal: React.FC<Props> = ({
             className="tw-px-8 tw-pb-1 tw-pt-1"
             disabled={!selectedWorkspace}
           >
-            Add
+            {t('common.add')}
           </AppButton>
           <AppButton
             onClick={() => {
@@ -50,7 +52,7 @@ const MoveToWorkspaceModal: React.FC<Props> = ({
             outlined
             className="tw-px-8 tw-mx-4 tw-pb-1 tw-pt-1"
           >
-            Cancel
+            {t('common.cancel')}
           </AppButton>
         </div>
       }

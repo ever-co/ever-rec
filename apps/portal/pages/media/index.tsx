@@ -5,7 +5,7 @@ import useHeadTitle from 'hooks/useHeadTitle';
 import useMonitorTokens from 'hooks/useMonitorTokens';
 import DashboardLayout from '../../components/containers/dashboardLayout/DashboardLayout';
 import AppSpinner from 'components/containers/appSpinner/AppSpinner';
-import { mainMenuItems } from 'misc/menuItems';
+import { useMenuItems } from 'misc/menuItems';
 
 interface IProps {
   children: ReactNode;
@@ -17,6 +17,8 @@ const MediaIndex: FC<IProps> = ({
   isWorkspaceSettingsPage = false,
 }) => {
   const user = useAuthenticateUser();
+
+  const { mainMenuItems } = useMenuItems();
   const headTitle = useHeadTitle(mainMenuItems);
 
   useMonitorTokens();

@@ -12,6 +12,7 @@ import { GetServerSideProps, GetServerSidePropsContext } from 'next';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
 import Auth from '.';
+import { useTranslation } from 'react-i18next';
 
 export const getServerSideProps: GetServerSideProps = async (
   context: GetServerSidePropsContext,
@@ -47,8 +48,9 @@ const PanelNewPassword: React.FC<IPanelNewPasswordProps> = ({ veryfied }) => {
     useState<IAppControl>(initialControl());
   const [valid, setValid] = useState<boolean>(false);
 
+  const { t } = useTranslation();
   const passwordRules: ((v: string) => boolean | string)[] = [
-    passwordPatternRule('Minimum eight characters and at least one number'),
+    passwordPatternRule(t('page.auth.error.minimumLength')),
   ];
 
   useEffect(() => {
@@ -66,7 +68,10 @@ const PanelNewPassword: React.FC<IPanelNewPasswordProps> = ({ veryfied }) => {
   const passwordChangeHandler = async ({ value, errors }: AppInputType) => {
     setPasswordConfirm({
       ...passwordConfirm,
-      errors: value !== passwordConfirm.value ? ['Passwords do not match'] : [],
+      errors:
+        value !== passwordConfirm.value
+          ? [t('page.auth.error.passwordNotMatch')]
+          : [],
     });
     setPassword({
       value,
@@ -76,13 +81,13 @@ const PanelNewPassword: React.FC<IPanelNewPasswordProps> = ({ veryfied }) => {
   };
 
   useEffect(() => {
-    if (!veryfied)
-      infoMessage('You reset link has already been used or expired!');
+    if (!veryfied) infoMessage('');
   }, [veryfied]);
 
   const passwordConfirmChangeHandler = ({ value }: AppInputType) => {
     const errArr: string[] = [];
-    value !== password.value && errArr.push('Passwords do not match');
+    value !== password.value &&
+      errArr.push(t('page.auth.error.passwordNotMatch'));
     setPasswordConfirm({
       value,
       errors: errArr,
@@ -110,7 +115,7 @@ const PanelNewPassword: React.FC<IPanelNewPasswordProps> = ({ veryfied }) => {
       {veryfied ? (
         <div>
           <AppInput
-            placeholder="New Password *"
+            placeholder={t('page.auth.newPassword.newPassword')}
             type="password"
             rules={passwordRules}
             errors={password.errors}
@@ -120,7 +125,7 @@ const PanelNewPassword: React.FC<IPanelNewPasswordProps> = ({ veryfied }) => {
           />
 
           <AppInput
-            placeholder="Password New Confirm *"
+            placeholder={t('page.auth.newPassword.newPasswordConfirm')}
             type="password"
             errors={passwordConfirm.errors}
             value={passwordConfirm.value}
@@ -135,14 +140,15 @@ const PanelNewPassword: React.FC<IPanelNewPasswordProps> = ({ veryfied }) => {
             className="tw-mt-8"
             twPadding="tw-p-4"
           >
-            Set new password
+            {t('page.auth.newPassword.setNewPassword')}
           </AppButton>
         </div>
       ) : (
         <div>
           <p className="tw-mb-6 tw-text-sm">
-            Your reset link has been used already or expired.
-            <br /> Please try again!
+            {t('page.auth.error.resetLinkExpired')}
+            <br />
+            {t('page.auth.error.pleaseTryAgain')}
           </p>
 
           <AppButton
@@ -153,7 +159,7 @@ const PanelNewPassword: React.FC<IPanelNewPasswordProps> = ({ veryfied }) => {
             className="tw-mt-8"
             twPadding="tw-p-4"
           >
-            Back to login
+            {t('page.auth.error.backToLogin')}
           </AppButton>
         </div>
       )}

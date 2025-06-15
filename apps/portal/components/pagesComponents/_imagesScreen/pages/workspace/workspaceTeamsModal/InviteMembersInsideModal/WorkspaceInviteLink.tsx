@@ -2,8 +2,10 @@ import styles from './InviteMembersInsideModal.module.scss';
 import classNames from 'classnames';
 import AppButton from 'components/controls/AppButton';
 import AppSvg from 'components/elements/AppSvg';
+import { useTranslation } from 'react-i18next';
 
 const WorkspaceInviteLink = ({ link, copied, primaryButtonClickHandler }) => {
+  const { t } = useTranslation();
   return (
     <div className={styles.workspaceInviteWrapper}>
       {link && <p className={styles.whiteParagraph}>{link}</p>}
@@ -22,7 +24,7 @@ const WorkspaceInviteLink = ({ link, copied, primaryButtonClickHandler }) => {
           size="20px"
           className="tw-mr-5px"
         />
-        {link ? 'Copy Link' : 'Create Workspace Invite'}
+        {link ? t('modals.copyLink') : t('workspace.createWorkspaceInvite')}
       </AppButton>
     </div>
   );

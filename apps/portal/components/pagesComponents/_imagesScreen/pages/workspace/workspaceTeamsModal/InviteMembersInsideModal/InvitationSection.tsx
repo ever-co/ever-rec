@@ -11,6 +11,7 @@ import AppSvg from 'components/elements/AppSvg';
 import WorkspaceInviteLink from './WorkspaceInviteLink';
 import { IInviteMembersInsideModalProps } from './InviteMembersInsideModal';
 import { sendWorkspaceInviteLink } from 'app/services/email';
+import { useTranslation } from 'react-i18next';
 
 interface IInvitationSectionProps
   extends IInviteMembersInsideModalProps,
@@ -29,6 +30,7 @@ const InvitationSection: FC<IInvitationSectionProps> = ({
   setEmails,
   primaryButtonClickHandler,
 }) => {
+  const { t } = useTranslation();
   const sendEmail = async (
     emails: string[],
     inviteLink: string,
@@ -39,8 +41,8 @@ const InvitationSection: FC<IInvitationSectionProps> = ({
     const linkComponents = inviteLink.split('/');
     const inviteId = linkComponents[linkComponents.length - 1];
 
-    const emailStr = emails.length > 1 ? 'emails' : 'email';
-    const id = loadingMessage(`Sending ${emailStr}`);
+    const emailStr = emails.length > 1 ? t('common.emails') : t('common.email');
+    const id = loadingMessage(`${t('toasts.sending')} ${emailStr}`);
     const data = await sendWorkspaceInviteLink(emails, inviteId, userName);
 
     setEmails([]);
@@ -48,7 +50,7 @@ const InvitationSection: FC<IInvitationSectionProps> = ({
     if (!data)
       return updateMessage(
         id,
-        `Could not send ${emailStr}. Please try again later.`,
+        t('toasts.couldNotSend', { emailStr: emailStr }),
         'error',
       );
     updateMessage(id, data, 'success');
@@ -78,10 +80,11 @@ const InvitationSection: FC<IInvitationSectionProps> = ({
 };
 
 const EmailInput = ({ emails, setEmails }) => {
+  const { t } = useTranslation();
   return (
     <ReactMultiEmail
       emails={emails}
-      placeholder="Add Email"
+      placeholder={t('workspace.addEmail')}
       style={emails.length ? { overflowY: 'scroll' } : undefined}
       className={classNames(
         styles.whiteParagraph,
@@ -129,6 +132,7 @@ interface ISendEmailProps {
 }
 
 const SendEmailButton: FC<ISendEmailProps> = ({ disabled, onEmailSend }) => {
+  const { t } = useTranslation();
   return (
     <AppButton
       onClick={onEmailSend}
@@ -144,7 +148,7 @@ const SendEmailButton: FC<ISendEmailProps> = ({ disabled, onEmailSend }) => {
         className="tw-mr-5px"
         bgColor="white"
       />
-      Send Email
+      {t('workspace.sendEmail')}
     </AppButton>
   );
 };
