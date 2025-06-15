@@ -6,6 +6,7 @@ import TextArea from 'antd/lib/input/TextArea';
 import { Tooltip } from 'antd';
 import { VideoCustomEventsEnum } from '@/content/utilities/misc/customEvents';
 import { windowEventListenerHandler } from '@/content/utilities/misc/windowEventListenerHandler';
+import { useTranslation } from 'react-i18next';
 
 const s = styles;
 
@@ -24,6 +25,7 @@ const VideoChapterContentInput: FC<IProps> = ({
   isFirst = false,
   chapterContentUpdated,
 }) => {
+  const { t } = useTranslation();
   const ref = useRef<HTMLTextAreaElement>(null);
   const [title, setTitle] = useState(content);
   const [isDirty, setIsDirty] = useState(false);
@@ -107,7 +109,9 @@ const VideoChapterContentInput: FC<IProps> = ({
     <Tooltip
       className="tw-p-0"
       placement="top"
-      title={<div className="tw-p-2">Please fill this field</div>}
+      title={
+        <div className="tw-p-2">{t('page.video.pleaseFillThisField')}</div>
+      }
       trigger=""
       open={tooltipVisible}
     >
@@ -116,8 +120,8 @@ const VideoChapterContentInput: FC<IProps> = ({
           'ant-input-transparent tw-mb-0 tw-bg-transparent tw-resize-none tw-w-full tw-overflow-hidden tw-p-2',
           s.ContentInput,
         )}
-        placeholder={`Type your chapter content here ${
-          isFirst ? '(e.g.Introduction)' : ''
+        placeholder={`${t('page.video.chapterContentPlaceholder')} ${
+          isFirst ? t('page.video.chapterIsFirst') : ''
         }`}
         ref={ref}
         value={title}

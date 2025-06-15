@@ -14,6 +14,7 @@ import { useDispatch } from 'react-redux';
 import { IWorkspace } from 'app/interfaces/IWorkspace';
 import WorkspaceMembersModal from './WorkspaceMembersModal';
 import { IWorkspaceMembersModal } from 'pages/media/workspaces/teams/[workspaceId]';
+import { useTranslation } from 'react-i18next';
 
 const queue = new Queue({
   concurrent: 1,
@@ -114,6 +115,7 @@ const WorkspaceMembersModalWrapper: FC<IProps> = ({
     });
   };
 
+  const { t } = useTranslation();
   const addOrRemoveTeamMember = async (
     teamId: string,
     memberId: string,
@@ -141,7 +143,7 @@ const WorkspaceMembersModalWrapper: FC<IProps> = ({
       }
 
       if (!newTeamsData) {
-        errorMessage('There was a problem... Please try again.');
+        errorMessage(t('toasts.thereProblem'));
         removeMemberFromLoadingState(teamId, memberId);
         return;
       }

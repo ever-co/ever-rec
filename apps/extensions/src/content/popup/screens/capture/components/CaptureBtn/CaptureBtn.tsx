@@ -2,6 +2,7 @@ import React, { ReactElement } from 'react';
 import classNames from 'classnames';
 import { Tooltip } from 'antd';
 import { TooltipPlacement } from 'antd/lib/tooltip';
+import { useTranslation } from 'react-i18next';
 
 interface ICaptureBtn {
   title: string;
@@ -20,6 +21,7 @@ const CaptureBtn: React.FC<ICaptureBtn> = ({
   disabledTooltipPlacement = 'bottom',
   onClick,
 }) => {
+  const { t } = useTranslation();
   const clickHandler = () => {
     !disabled && onClick();
   };
@@ -27,10 +29,7 @@ const CaptureBtn: React.FC<ICaptureBtn> = ({
   return (
     <Tooltip
       placement={disabledTooltipPlacement}
-      title={
-        disabled &&
-        'This action is not available on this page due to browser restrictions.'
-      }
+      title={disabled && t('ext.errors.browserRestrictions')}
     >
       <div
         className={classNames(

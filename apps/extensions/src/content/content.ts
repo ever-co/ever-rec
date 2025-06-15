@@ -12,7 +12,7 @@ import { sendRuntimeMessage } from './utilities/scripts/sendRuntimeMessage';
 import { injectOverlay } from './overlay/overlay';
 import { ProgressTypeEnum } from './popup/utilities/interfaces/IProgressIndicatorData';
 import sendProgressMessage from './utilities/scripts/sendProgressMessagePort';
-
+import '../../i18n/config';
 import './overlay/overlay';
 
 injectOverlay();

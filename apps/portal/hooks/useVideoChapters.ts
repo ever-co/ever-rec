@@ -23,6 +23,7 @@ import {
 import IEditorVideo from 'app/interfaces/IEditorVideo';
 import { IWorkspaceVideo } from 'app/interfaces/IWorkspace';
 import { IChapter } from 'app/interfaces/IChapter';
+import { useTranslation } from 'react-i18next';
 
 export const initialChapters: IChapter[] = [
   {
@@ -53,6 +54,7 @@ const useVideoChapters = ({
   prefetchedChapters = [],
 }: IArguments): IUseVideoChapterProps => {
   const [chapters, setChapters] = useState(initialChapters);
+  const { t } = useTranslation();
   const [chaptersInitial, setChaptersInitial] = useState(initialChapters);
   const [chapterActive, setActiveChapter] = useState<IChapter | null>(null);
   const [hasChanges, setHasChanges] = useState(false);
@@ -176,9 +178,7 @@ const useVideoChapters = ({
   const saveChanges = useCallback(
     async (showNotification = true) => {
       if (chapters.length < CHAPTER_MIN_CHAPTERS)
-        return (
-          showNotification && infoMessage('Please add at least 3 chapters')
-        );
+        return showNotification && infoMessage(t('hooks.toasts.add3Chapters'));
 
       const invalidChapterIds = chapters
         .filter((chapter) => chapter.content === '')
@@ -205,7 +205,7 @@ const useVideoChapters = ({
       setChaptersInitial(data);
       setIsSaving(false);
 
-      showNotification && successMessage('Chapters saved successfully.');
+      showNotification && successMessage(t('hooks.toasts.chaptersSaved'));
       createMarkersEvent(data);
     },
     [chapters, video?.dbData?.id, workspaceId],

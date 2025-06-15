@@ -20,7 +20,7 @@ import { BsPencil } from 'react-icons/bs';
 import { IoLinkOutline } from 'react-icons/io5';
 import { useRouter } from 'next/router';
 import useAuthenticateUser from 'hooks/useAuthenticateUser';
-import { copySourceURL } from 'misc/singleItemFunctions';
+import { useCopySourceURL } from 'misc/singleItemFunctions';
 import styles from '../../pagesScss/image/Image.module.scss';
 import UniqueViews from 'components/elements/UniqueViews';
 import useInitImageVideoItem from 'hooks/useInitImageVideoItem';
@@ -39,6 +39,7 @@ export interface emailModalIntF {
 
 const Image: React.FC = () => {
   const router = useRouter();
+  const { copySourceURL } = useCopySourceURL();
   const user = useAuthenticateUser();
   const dispatch = useDispatch();
   const image: IEditorImage = useSelector(

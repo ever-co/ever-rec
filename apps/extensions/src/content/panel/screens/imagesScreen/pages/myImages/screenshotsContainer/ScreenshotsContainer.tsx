@@ -48,6 +48,7 @@ import VideoItem from '../../myVideos/VideoItem/VideoItem';
 import IEditorVideo from '@/app/interfaces/IEditorVideo';
 import { WorkspaceItemType } from '@/app/interfaces/ItemTypes';
 import useGetXXL from '@/content/utilities/hooks/useGetXXL';
+import { useTranslation } from 'react-i18next';
 
 const defaultShareItem = { id: null, type: null, provider: null };
 const defaultModalState = { state: false, screenshot: null };
@@ -76,6 +77,7 @@ const ScreenshotsContainer: React.FC<IScreenshotsContainerProps> = ({
   handleItemOrderByDate,
   handleItemOrderByName,
 }) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const scrollableDivRef = useRef<HTMLDivElement>(null);
@@ -153,7 +155,7 @@ const ScreenshotsContainer: React.FC<IScreenshotsContainerProps> = ({
     }
     screenshot && (await moveRestoreTrash(screenshot));
     setLoaderState(false);
-    infoMessage('The image has been moved to the Trash');
+    infoMessage(t('toasts.imageMovedToTrash'));
   };
 
   const closeDeletionModalHandler = () => {
@@ -180,7 +182,7 @@ const ScreenshotsContainer: React.FC<IScreenshotsContainerProps> = ({
             `${process.env.WEBSITE_URL}/image/shared/${sharedLink}`,
           );
           copied();
-          successMessage('Copied');
+          successMessage(t('toasts.copied'));
         }
       }
     }
@@ -279,7 +281,7 @@ const ScreenshotsContainer: React.FC<IScreenshotsContainerProps> = ({
 
   const download = async (screenshot: any) => {
     const downloaded = await localSave(screenshot);
-    if (downloaded) infoMessage('Image downloaded');
+    if (downloaded) infoMessage(t('toasts.imageDownloaded'));
   };
 
   const handleAction = async (
@@ -348,7 +350,7 @@ const ScreenshotsContainer: React.FC<IScreenshotsContainerProps> = ({
             }),
           );
         }
-        infoMessage(`Image added to: ${workspace.name}`);
+        infoMessage(t('toasts.imageAdded', { workspaceName: workspace.name })); // This is only a type issue but it's working just fine.
       }
     }
   };
@@ -365,7 +367,9 @@ const ScreenshotsContainer: React.FC<IScreenshotsContainerProps> = ({
       <div className={styles.itemsContainer}>
         <div className={styles.itemsContainerHeadingContainer}>
           <div>
-            <h3 className={styles.headingContainerHeading}>Images</h3>
+            <h3 className={styles.headingContainerHeading}>
+              {t('common.images')}
+            </h3>
           </div>
         </div>
 

@@ -4,6 +4,7 @@ import styles from './MyTeamsInsideModal.module.scss';
 import classNames from 'classnames';
 import { IWorkspaceTeam } from 'app/interfaces/IWorkspaceTeams';
 import WorkspaceTeamsEmpty from 'components/pagesComponents/_workspacesScreen/WorkspaceTeamsEmpty';
+import { Trans, useTranslation } from 'react-i18next';
 
 interface IMyTeamsProps {
   userId: string;
@@ -22,6 +23,7 @@ const MyTeamsInsideModal: FC<IMyTeamsProps> = ({
   onManageTeamsEmpty,
   onLeave,
 }) => {
+  const { t } = useTranslation();
   if (!teams.length) {
     return (
       <WorkspaceTeamsEmpty
@@ -56,13 +58,18 @@ const MyTeamsInsideModal: FC<IMyTeamsProps> = ({
                 </div>
 
                 <div className={styles.members}>
-                  {team?.members.length} members
+                  <Trans
+                    i18nKey="workspace.membersWithLength"
+                    values={{ length: team.members.length }}
+                  />
                 </div>
               </div>
 
               <div className={styles.actionsWrapper}>
                 <div className={styles.goAction} onClick={() => onManage()}>
-                  {isWorkspaceAdmin ? 'Manage' : 'Go to'}
+                  {isWorkspaceAdmin
+                    ? t('page.image.manage')
+                    : t('page.image.goto')}
                 </div>
 
                 {!isWorkspaceAdmin && isInTeam && (
@@ -70,7 +77,7 @@ const MyTeamsInsideModal: FC<IMyTeamsProps> = ({
                     className={styles.leaveAction}
                     onClick={() => onLeave(team.id, team.name)}
                   >
-                    Leave
+                    {t('common.leave')}
                   </div>
                 )}
               </div>

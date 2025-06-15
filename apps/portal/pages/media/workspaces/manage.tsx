@@ -18,10 +18,7 @@ import LeaveDeleteWorkspaceModal from 'components/pagesComponents/_workspacesScr
 import RenameWorkspaceModal from 'components/pagesComponents/_workspacesScreen/RenameWorkspaceModal';
 import { errorMessage, infoMessage } from 'app/services/helpers/toastMessages';
 import UploadIconModal from 'components/pagesComponents/_imagesScreen/pages/workspace/uploadIconModal/UploadIconModal';
-import {
-  updateWorkspaceAvatar,
-  updateWorkspaceThumbnail,
-} from 'app/services/workspace';
+import { useUpdateWorkspace } from 'app/services/workspace';
 import Image from 'next/legacy/image';
 import AppSvg from 'components/elements/AppSvg';
 import UploadThumbnailModal from 'components/pagesComponents/_imagesScreen/pages/workspace/uploadThumbnailModal/UploadThumbnailModa';
@@ -29,6 +26,7 @@ import { preRoutes, panelRoutes } from 'components/_routes';
 import router from 'next/router';
 import AppButton from 'components/controls/AppButton';
 import { useCreateWorkspace } from 'hooks/useCreateWorkspaceHandler';
+import { useTranslation } from 'react-i18next';
 import SCHeader from 'components/shared/SCHeader/SCHeader';
 
 export type LeaveDeleteActions = 'leave' | 'delete';
@@ -51,6 +49,9 @@ const initialModalState = {
 
 const ManageWorkspaces: React.FC = () => {
   const iconUploadRef = useRef<HTMLInputElement>(null);
+  const { t } = useTranslation();
+  const { updateWorkspaceAvatar, updateWorkspaceThumbnail } =
+    useUpdateWorkspace();
   const thumbnailUploadRef = useRef<HTMLInputElement>(null);
   const dispatch = useDispatch();
   const user = useSelector((state: RootStateOrAny) => state.auth.user);
@@ -107,8 +108,8 @@ const ManageWorkspaces: React.FC = () => {
         }
 
         showLeaveDeleteModal.action === 'leave'
-          ? infoMessage('Successfully left the workspace.')
-          : infoMessage('Workspace deleted successfully.');
+          ? infoMessage(t('workspace.leftWorkspace'))
+          : infoMessage(t('workspace.workspaceDeleted'));
       }
 
       setLoading(false);
@@ -147,7 +148,7 @@ const ManageWorkspaces: React.FC = () => {
             }),
           );
         }
-        infoMessage('Workspace name changed successfully');
+        infoMessage(t('workspace.workspaceNameChanged'));
       }
       setLoading(false);
     }
@@ -164,7 +165,7 @@ const ManageWorkspaces: React.FC = () => {
 
   const uploadIconAndUpdateState = async (file: File) => {
     if (file.size > 30000) {
-      errorMessage('File exceeds maximum size of 30 KB');
+      errorMessage(t('workspace.fileExceedsMaxSize'));
       return;
     }
     const workspace = { ...showIconModal.workspace };
@@ -285,7 +286,7 @@ const ManageWorkspaces: React.FC = () => {
       <MediaIndex>
         <DashboardCard className={styles.dashboardCard}>
           <SCHeader
-            text={'Workspaces'}
+            text={t('workspace.workspacesSettings')}
             showSearch={false}
             userPhotoURL={user?.photoURL}
           />
@@ -293,13 +294,12 @@ const ManageWorkspaces: React.FC = () => {
             <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-h-full ">
               {/* Large Text */}
               <h1 className="tw-text-6xl tw-font-bold tw-text-gray-800 tw-mb-4">
-                No Workspace Found
+                {t('notFound.workspace.heading')}
               </h1>
 
               {/* Description */}
               <p className="tw-text-lg tw-text-gray-600 tw-mb-8">
-                It looks like you {"don't"} have any workspaces yet. Click the
-                button below to create one.
+                {t('workspace.noWorkspacesDescription')}
               </p>
 
               {/* Create Workspace Button */}
@@ -308,7 +308,7 @@ const ManageWorkspaces: React.FC = () => {
                 onClick={() => setShowCreateWorkspaceModal(true)}
                 className={styles.createWorkspaceButton}
               >
-                Create workspace
+                {t('workspace.createWorkspace')}
               </AppButton>
             </div>
           )}
@@ -334,7 +334,7 @@ const ManageWorkspaces: React.FC = () => {
                         onClick={() =>
                           setShowIconModal({ state: true, workspace })
                         }
-                        title="Change workspace avatar"
+                        title={t('workspace.changeWorkspaceAvatar')}
                       >
                         <AppSvg
                           path="/common/workspace-icon.svg"
@@ -348,7 +348,7 @@ const ManageWorkspaces: React.FC = () => {
                         onClick={() =>
                           setShowThumbnailModal({ state: true, workspace })
                         }
-                        title="Change workspace thumbnail"
+                        title={t('workspace.changeWorkspaceThumbnail')}
                       >
                         <AppSvg
                           path="/common/images-icon.svg"
@@ -362,7 +362,7 @@ const ManageWorkspaces: React.FC = () => {
                         onClick={() =>
                           setShowRenameModal({ state: true, workspace })
                         }
-                        title="Rename workspace"
+                        title={t('workspace.renameWorkspace')}
                       >
                         <AppSvg
                           path="/common/edit-pencil-black.svg"
@@ -376,7 +376,7 @@ const ManageWorkspaces: React.FC = () => {
                         onClick={() =>
                           setShowShareModal({ state: true, workspace })
                         }
-                        title="Copy invite link"
+                        title={t('workspace.copyInviteLink')}
                       >
                         <AppSvg
                           path="/common/copy_black.svg"
@@ -395,7 +395,10 @@ const ManageWorkspaces: React.FC = () => {
                         }
                       />
 
-                      <div className={styles.subItem} title="Teams">
+                      <div
+                        className={styles.subItem}
+                        title={t('workspace.teams')}
+                      >
                         <div onClick={() => goToWorkspaceTeams(workspace)}>
                           <AppSvg
                             path="/common/team-icon.svg"
@@ -408,7 +411,9 @@ const ManageWorkspaces: React.FC = () => {
 
                       <div
                         className={styles.membersCountWrapper}
-                        title={`${workspace.members.length} member(s)`}
+                        title={t('workspace.membersWithLength', {
+                          length: workspace.members.length,
+                        })}
                       >
                         <AppSvg
                           path="/common/teams-icon.svg"
@@ -431,8 +436,8 @@ const ManageWorkspaces: React.FC = () => {
                         }
                         title={
                           workspace?.admin !== user?.id
-                            ? 'Leave workspace'
-                            : 'Delete workspace'
+                            ? t('workspace.leaveWorkspace')
+                            : t('workspace.deleteWorkspace')
                         }
                       >
                         <AppSvg

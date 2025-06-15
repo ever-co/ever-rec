@@ -6,6 +6,7 @@ import CaptureRecordBtn from './components/CaptureRecordBtn/CaptureRecordBtn';
 import AppSwitchNew from '@/content/components/controls/AppSwitchNew/AppSwitchNew';
 import GrantBtn from './components/GrantBtn/GrantBtn';
 import AppSvg from '@/content/components/elements/AppSvg';
+import { useTranslation } from 'react-i18next';
 
 const { Option } = Select;
 
@@ -70,14 +71,14 @@ const CaptureRecordPanel: FC<ICaptureRecordPanelProps> = ({
   changeFlip,
   handleGif,
 }) => {
+  const { t } = useTranslation();
   const [advancedOptions, setAdvancedOptions] = useState<boolean>(false);
 
-  const streamTooltipTitle =
-    "Streaming provides a better viewing experience by dynamically adjusting the quality level to the viewer's connection speed and will take longer to prepare initially";
+  const streamTooltipTitle = t('ext.capture.streamingProvides');
 
-  let microphoneTooltip = 'Start recording unmuted';
+  let microphoneTooltip = t('ext.capture.startRecordingUnmuted');
   if (microphoneMuted) {
-    microphoneTooltip = 'Start recording muted';
+    microphoneTooltip = t('ext.capture.startRecordingMuted');
   }
 
   return (
@@ -85,7 +86,7 @@ const CaptureRecordPanel: FC<ICaptureRecordPanelProps> = ({
       <div>
         <div className="tw-px-3 tw-pt-2 tw-flex tw-justify-between tw-bg-white dark:tw-bg-section-black">
           <CaptureRecordBtn
-            title="Active Tab"
+            title={t('ext.capture.activeTab')}
             icon={
               <AppSvg
                 path="images/popup/capture/Tab_inactive.svg"
@@ -99,7 +100,7 @@ const CaptureRecordPanel: FC<ICaptureRecordPanelProps> = ({
             disabled={!allowVideoRecording}
           />
           <CaptureRecordBtn
-            title="Desktop"
+            title={t('ext.capture.desktop')}
             icon={
               <AppSvg
                 path="images/popup/capture/capture-visible-part.svg"
@@ -113,7 +114,7 @@ const CaptureRecordPanel: FC<ICaptureRecordPanelProps> = ({
             disabled={!allowVideoRecording}
           />
           <CaptureRecordBtn
-            title="Camera Only"
+            title={t('ext.capture.cameraOnly')}
             icon={
               <AppSvg
                 path="images/popup/capture/Camera-only.svg"
@@ -152,7 +153,7 @@ const CaptureRecordPanel: FC<ICaptureRecordPanelProps> = ({
               className="panel-select tw-text-xl tw-text-semibold tw-w-full dark:!tw-text-white dark:!tw-border-primary-light-purple"
             >
               <Option value="disabled" selected={cameraState == 'disabled'}>
-                Disabled
+                {t('ext.capture.disabled')}
               </Option>
               {videoDevices &&
                 videoDevices.map((device: any) => (
@@ -192,7 +193,7 @@ const CaptureRecordPanel: FC<ICaptureRecordPanelProps> = ({
               className="panel-select dark:panel-select-dark tw-text-xl tw-text-semibold tw-w-full dark:!tw-text-white dark:!tw-border-primary-light-purple"
             >
               <Option value="disabled" selected={micState == 'disabled'}>
-                Disabled
+                {t('ext.capture.disabled')}
               </Option>
               {audioDevices &&
                 audioDevices.map((device: any) => (
@@ -218,7 +219,7 @@ const CaptureRecordPanel: FC<ICaptureRecordPanelProps> = ({
           full
         >
           <div className="tw-relative tw-w-full tw-text-center">
-            Advanced options
+            {t('ext.capture.advanceOptions')}
             <AppSvg
               path="images/popup/capture/Chevron_close.svg"
               size="20px"
@@ -253,12 +254,12 @@ const CaptureRecordPanel: FC<ICaptureRecordPanelProps> = ({
                   className="panel-select dark:panel-select-dark tw-text-xl tw-text-semibold tw-w-32 dark:!tw-text-white dark:!tw-border-primary-light-purple"
                 >
                   <Option value="3" selected={countState == '3'}>
-                    3 seconds
+                    {t('ext.capture.seconds3')}
                   </Option>
-                  <Option value="5">5 seconds</Option>
-                  <Option value="10">10 seconds</Option>
+                  <Option value="5">{t('ext.capture.seconds5')}</Option>
+                  <Option value="10">{t('ext.capture.seconds10')}</Option>
                 </Select>
-                <span className="tw-ml-2">countdown</span>
+                <span className="tw-ml-2">{t('ext.capture.countdown')}</span>
               </div>
               <AppSwitchNew
                 handleSwitch={changeCountdown}
@@ -267,7 +268,9 @@ const CaptureRecordPanel: FC<ICaptureRecordPanelProps> = ({
             </div>
             <div className="tw-flex tw-justify-between tw-items-center">
               <div className="tw-flex tw-items-center">
-                <span className="tw-ml-2">Save as a video stream</span>
+                <span className="tw-ml-2">
+                  {t('ext.capture.saveAsVideoStream')}
+                </span>
                 <Tooltip
                   className="tw-cursor-pointer"
                   placement="top"
@@ -310,7 +313,9 @@ const CaptureRecordPanel: FC<ICaptureRecordPanelProps> = ({
           videoStart
         }
       >
-        {videoStart ? 'Stop Recording' : 'Start Recording'}
+        {videoStart
+          ? t('ext.capture.stopRecording')
+          : t('ext.capture.startRecording')}
       </AppButton>
     </>
   );

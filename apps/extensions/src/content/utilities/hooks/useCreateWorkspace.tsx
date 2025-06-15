@@ -11,8 +11,10 @@ import PanelAC from '@/app/store/panel/actions/PanelAC';
 import CreateNewWorkspaceModal from '@/content/panel/screens/imagesScreen/components/CreateNewWorkspaceModal/CreateNewWorkspaceModal';
 import { useNavigate } from 'react-router';
 import { panelRoutes } from '@/content/panel/router/panelRoutes';
+import { useTranslation } from 'react-i18next';
 
 export const useCreateWorkspace = (shouldRouteToNewWorkspace = false) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const workspaces: IWorkspace[] | null = useSelector(
@@ -22,7 +24,7 @@ export const useCreateWorkspace = (shouldRouteToNewWorkspace = false) => {
     useState(false);
 
   const createWorkspaceHandler = async (name: string) => {
-    const id = loadingMessage('Creating company...');
+    const id = loadingMessage(t('hooks.toasts.creatingCompany'));
     const response = await createNewWorkspaceAPI(name);
 
     if (response.status === ResStatusEnum.error) {
@@ -32,7 +34,7 @@ export const useCreateWorkspace = (shouldRouteToNewWorkspace = false) => {
       const newWorkspace = response.data;
 
       if (!newWorkspace)
-        return updateMessage(id, 'Could not create a new company.', 'error');
+        return updateMessage(id, t('ext.couldNotCreateCompany'), 'error');
 
       dispatch(PanelAC.setActiveWorkspace({ activeWorkspace: response.data }));
       dispatch(
@@ -48,7 +50,7 @@ export const useCreateWorkspace = (shouldRouteToNewWorkspace = false) => {
     }
 
     setShowCreateWorkspaceModal(false);
-    updateMessage(id, 'Company created successfully.', 'success');
+    updateMessage(id, t('hooks.toasts.companyCreated'), 'success');
   };
 
   const Modal = (

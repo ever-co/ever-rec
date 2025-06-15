@@ -2,8 +2,10 @@ import { FC } from 'react';
 import * as styles from './ProfileSidebar.module.scss';
 import classNames from 'classnames';
 import AppSvg from '@/content/components/elements/AppSvg';
+import { useTranslation } from 'react-i18next';
 
 const ProfileSidebar: FC = () => {
+  const { t } = useTranslation();
   return (
     <div className={styles.profileSidebar}>
       {/* <div className={classNames(styles.profileSidebarSection, 'scroll-div')}>
@@ -14,10 +16,10 @@ const ProfileSidebar: FC = () => {
       </div> */}
 
       <div className={classNames(styles.profileSidebarSection, 'scroll-div')}>
-        <h1>Recent files</h1>
+        <h1>{t('page.profile.recentFiles.title')}</h1>
         <span className={styles.profileSidebarNotFoundSpan}>
           {/* No files added recently. */}
-          Recent files coming soon...
+          {t('page.profile.recentFiles.emptyState')}
         </span>
       </div>
     </div>

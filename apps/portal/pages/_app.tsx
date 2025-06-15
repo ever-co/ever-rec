@@ -14,6 +14,7 @@ import '../styles/antd.scss';
 import '../styles/items.scss';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import Index from './_index';
+import '../i18n/config';
 
 export type NextApplicationPage<P = any, IP = P> = NextPage<P, IP> & {
   requireAuth?: boolean;

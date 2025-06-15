@@ -22,6 +22,7 @@ import {
   deleteWorkspaceImage,
   deleteWorkspaceVideo,
 } from 'app/services/workspace';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
   workspace: IWorkspace;
@@ -42,6 +43,7 @@ const WorkspaceMultiSelect: React.FC<Props> = ({
 }) => {
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [showFolderModal, setShowFolderModal] = useState<boolean>(false);
+  const { t } = useTranslation();
   const [loading, setLoading] = useState<boolean>(false);
   const areAllSelected = selectedItems.length === allItems.length;
 
@@ -67,11 +69,11 @@ const WorkspaceMultiSelect: React.FC<Props> = ({
       }
     });
 
-    const toast = loadingMessage('Downloading items...');
+    const toast = loadingMessage(t('toasts.downloadingItems')); // TODO: translation language
 
     await Promise.all(downloadPromises);
 
-    updateMessage(toast, 'Items downloaded.', 'success');
+    updateMessage(toast, t('toasts.itemsDownloaded'), 'success');
 
     setSelectState({ state: false, items: [] });
   };
@@ -100,7 +102,7 @@ const WorkspaceMultiSelect: React.FC<Props> = ({
       }
     });
 
-    const toast = loadingMessage(`Deleting Items...`);
+    const toast = loadingMessage(t('toasts.deletingItems'));
 
     await Promise.all(deletePromises);
 
@@ -122,7 +124,7 @@ const WorkspaceMultiSelect: React.FC<Props> = ({
       PanelAC.setActiveWorkspace({ activeWorkspace: newWorkspace }),
     );
 
-    updateMessage(toast, `Items deleted.`, 'success');
+    updateMessage(toast, t('toasts.itemsDeletedOnly'), 'success');
 
     // TODO change folder item count
     // const currentFolder =
@@ -153,7 +155,9 @@ const WorkspaceMultiSelect: React.FC<Props> = ({
           outlined={false}
         >
           <div className="tw-text-gray-600 tw-leading-6 tw-font-normal tw-fontFamily-roboto">
-            {areAllSelected ? 'Select none' : 'Select all'}
+            {areAllSelected
+              ? t('common.bulkActions.selectNone')
+              : t('common.bulkActions.selectAll')}
           </div>
         </AppButton>
 
@@ -164,7 +168,7 @@ const WorkspaceMultiSelect: React.FC<Props> = ({
           outlined={false}
         >
           <div className="tw-text-gray-600 tw-leading-6 tw-font-normal tw-fontFamily-roboto">
-            Download
+            {t('page.image.download')}
           </div>
         </AppButton>
       </div>
@@ -175,7 +179,9 @@ const WorkspaceMultiSelect: React.FC<Props> = ({
           className="multi-button tw-mx-5px"
           bgColor="tw-bg-white"
         >
-          <div className="tw-font-normal tw-text-black">Move</div>
+          <div className="tw-font-normal tw-text-black">
+            {t('page.image.move')}
+          </div>
         </AppButton>
 
         <AppButton
@@ -185,7 +191,7 @@ const WorkspaceMultiSelect: React.FC<Props> = ({
           outlined={false}
         >
           <div className="tw-text-red tw-leading-6 tw-font-normal tw-fontFamily-roboto">
-            Delete
+            {t('common.delete')}
           </div>
         </AppButton>
       </div>

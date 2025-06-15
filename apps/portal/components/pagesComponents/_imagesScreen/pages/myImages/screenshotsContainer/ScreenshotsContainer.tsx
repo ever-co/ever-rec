@@ -49,6 +49,7 @@ import IEditorVideo from 'app/interfaces/IEditorVideo';
 import { WorkspaceItemType } from 'app/interfaces/ItemType';
 import useGetXXL from 'hooks/useGetXXL';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 const defaultShareItem = { id: null, type: null, provider: null };
 const defaultModalState = { state: false, screenshot: null };
@@ -79,6 +80,7 @@ const ScreenshotsContainer: React.FC<IScreenshotsContainerProps> = ({
 }) => {
   const dispatch = useDispatch();
   const router = useRouter();
+  const { t } = useTranslation();
   const scrollableDivRef = useRef<HTMLDivElement>(null);
   const user = useSelector((state: RootStateOrAny) => state.auth.user);
   const shareThirdPartyOptions = useSelector(
@@ -147,7 +149,7 @@ const ScreenshotsContainer: React.FC<IScreenshotsContainerProps> = ({
 
     screenshot && (await moveRestoreTrash(screenshot));
     setLoaderState(false);
-    infoMessage('The image has been moved to the Trash');
+    infoMessage(t('toasts.imageMovedToTrash'));
   };
 
   const closeDeletionModalHandler = () => {
@@ -175,7 +177,7 @@ const ScreenshotsContainer: React.FC<IScreenshotsContainerProps> = ({
               `${process.env.NEXT_PUBLIC_WEBSITE_URL}/image/shared/${sharedLink}`,
             );
             copied();
-            successMessage('Copied');
+            successMessage(t('toasts.copied'));
           } catch (e) {
             console.log(e.message);
           }
@@ -269,7 +271,7 @@ const ScreenshotsContainer: React.FC<IScreenshotsContainerProps> = ({
 
   const download = async (screenshot: any) => {
     const downloaded = await localSave(screenshot);
-    if (downloaded) infoMessage('Image downloaded');
+    if (downloaded) infoMessage(t('toasts.imageDownloaded'));
   };
 
   const handleAction = async (
@@ -340,7 +342,7 @@ const ScreenshotsContainer: React.FC<IScreenshotsContainerProps> = ({
             }),
           );
         }
-        infoMessage(`Image added to: ${workspace.name}`);
+        infoMessage(t('toasts.imageAdded', { workspaceName: workspace.name }));
       }
     }
   };
@@ -357,7 +359,9 @@ const ScreenshotsContainer: React.FC<IScreenshotsContainerProps> = ({
       <div className={styles.itemsContainer}>
         <div className={styles.itemsContainerHeadingContainer}>
           <div>
-            <h3 className={styles.headingContainerHeading}>Images</h3>
+            <h3 className={styles.headingContainerHeading}>
+              {t('common.images')}
+            </h3>
           </div>
         </div>
 

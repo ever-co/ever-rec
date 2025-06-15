@@ -5,6 +5,7 @@ import { requiredRule } from '@/app/rules';
 import AppInput from '@/content/components/controls/appInput/AppInput';
 import AppButton from '@/content/components/controls/appButton/AppButton';
 import AppSvg from '@/content/components/elements/AppSvg';
+import { useTranslation } from 'react-i18next';
 
 interface IUploadToCloudModalProps {
   type?: string;
@@ -21,6 +22,7 @@ const UploadToCloudModal: React.FC<IUploadToCloudModalProps> = ({
   onOk,
   type,
 }) => {
+  const { t } = useTranslation();
   const initialControl = (): IAppControl => ({
     value: '',
     errors: [],
@@ -46,7 +48,7 @@ const UploadToCloudModal: React.FC<IUploadToCloudModalProps> = ({
   }, [name]);
 
   const nameRules: ((v: string) => boolean | string)[] = [
-    requiredRule('Please enter file name'),
+    requiredRule(t('ext.enterFileName')),
   ];
 
   const onOkHandler = async (): Promise<void> => {
@@ -83,7 +85,7 @@ const UploadToCloudModal: React.FC<IUploadToCloudModalProps> = ({
             className="tw-mx-4 tw-pb-1 tw-pt-1"
             twPadding="tw-px-8"
           >
-            Cancel
+            {t('common.cancel')}
           </AppButton>
           <AppButton
             onClick={onOkHandler}
@@ -91,7 +93,7 @@ const UploadToCloudModal: React.FC<IUploadToCloudModalProps> = ({
             disabled={!valid}
             twPadding="tw-px-8"
           >
-            Save
+            {t('common.save')}
           </AppButton>
         </div>
       }
@@ -110,12 +112,12 @@ const UploadToCloudModal: React.FC<IUploadToCloudModalProps> = ({
           />
         )}
         <h2 className="tw-text-2xl tw-font-semibold">
-          Save to {type ? type : 'Google drive'}
+          {t('page.image.saveTo')} {type ? type : 'Google drive'}
         </h2>
       </div>
       <AppInput
         inputClass="tw-bg-transparent"
-        placeholder="Name"
+        placeholder={t('common.name')}
         value={name.value}
         errors={name.errors}
         onChange={nameChangeHandler}

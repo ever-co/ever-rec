@@ -7,10 +7,7 @@ import AppInput from '@/content/components/controls/appInput/AppInput';
 import ModalSaveChangesFooter from '@/content/panel/shared/modalComponents/ModalSaveChangesFooter';
 import useEnterKeyPress from '@/content/utilities/hooks/useEnterKeyPress';
 import useChangeModalForm from '@/content/utilities/hooks/useChangeModalForm';
-
-const displayNameRules: ((v: string) => boolean | string)[] = [
-  requiredRule('Please enter a name'),
-];
+import { useTranslation } from 'react-i18next';
 
 interface IProps {
   name: string;
@@ -25,6 +22,7 @@ const ChangeNameModal: React.FC<IProps> = ({
   onClose,
   onOk,
 }) => {
+  const { t } = useTranslation();
   const {
     fieldState: newName,
     setFieldState: setNewName,
@@ -33,6 +31,10 @@ const ChangeNameModal: React.FC<IProps> = ({
     onCancelHandler,
     onOkHandler,
   } = useChangeModalForm(name, onOk, onClose);
+
+  const displayNameRules: ((v: string) => boolean | string)[] = [
+    requiredRule(t('page.auth.error.enterName')),
+  ];
 
   useEnterKeyPress(onOkHandler);
 
@@ -49,7 +51,7 @@ const ChangeNameModal: React.FC<IProps> = ({
     if (value.length > 32) {
       setNewName({
         value,
-        errors: ['Name can not contain more than 32 characters'],
+        errors: [t('toasts.nameTooLong')],
         touched: true,
       });
     } else
@@ -73,11 +75,11 @@ const ChangeNameModal: React.FC<IProps> = ({
         />
       }
     >
-      <h2 className={styles.modalHeader}>Name</h2>
+      <h2 className={styles.modalHeader}>{t('common.name')}</h2>
 
-      <label>Current name:</label>
+      <label>{t('page.profile.nameModal.currentName')}</label>
       <AppInput
-        placeholder="Enter new name"
+        placeholder={t('page.profile.newName')}
         value={newName.value}
         errors={newName.errors}
         rules={displayNameRules}

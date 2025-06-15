@@ -3,6 +3,7 @@ import * as styles from './LibraryActions.module.scss';
 import classNames from 'classnames';
 import AppButton2 from '@/content/components/controls/AppButton2/AppButton2';
 import AppSvg from '@/content/components/elements/AppSvg';
+import { useTranslation } from 'react-i18next';
 
 const LibraryActions: FC<any> = ({
   showAddFolderButton = true,
@@ -12,6 +13,7 @@ const LibraryActions: FC<any> = ({
   clickAddImageHandler,
   clickAddVideoHandler,
 }) => {
+  const { t } = useTranslation();
   return (
     <div className={classNames(styles.libraryActions)}>
       {showAddFolderButton && (
@@ -25,7 +27,7 @@ const LibraryActions: FC<any> = ({
               path="images/new-design-v2/add-new-folder.svg"
               size="16px"
             />
-            <span>New folder</span>
+            <span>{t('common.newFolder')}</span>
           </div>
 
           <AppSvg path="images/new-design-v2/plus.svg" />
@@ -43,7 +45,7 @@ const LibraryActions: FC<any> = ({
               path="images/new-design-v2/add-video-file.svg"
               size="19px"
             />
-            <span>New image file</span>
+            <span>{t('common.newImageFile')}</span>
           </div>
 
           <AppSvg path="images/new-design-v2/plus.svg" />
@@ -61,7 +63,7 @@ const LibraryActions: FC<any> = ({
               path="images/new-design-v2/add-video-file.svg"
               size="19px"
             />
-            <span>New video file</span>
+            <span>{t('common.newVideoFile')}</span>
           </div>
 
           <AppSvg path="images/new-design-v2/plus.svg" />

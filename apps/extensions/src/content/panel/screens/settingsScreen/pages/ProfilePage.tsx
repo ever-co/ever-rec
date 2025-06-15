@@ -15,6 +15,7 @@ import ISettingsPageProps from '../interface/ISettingsPage';
 import {
   errorMessage,
   loadingMessage,
+  successMessage,
   updateMessage,
 } from '@/app/services/helpers/toastMessages';
 import { IUser } from '@/app/interfaces/IUserData';
@@ -34,10 +35,12 @@ import { sendRuntimeMessage } from '@/content/utilities/scripts/sendRuntimeMessa
 import { AppMessagesEnum } from '@/app/messagess';
 import DeleteAccountModal from '../components/DeleteAccountModal';
 import SCHeader from '@/content/panel/shared/SCHeader/SCHeader';
+import { useTranslation } from 'react-i18next';
 
 const avaSize = 88;
 
 const ProfilePage: React.FC<ISettingsPageProps> = () => {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const user: IUser = useSelector((state: RootStateOrAny) => state.auth.user);
   const [isGoogleAccount, setIsGoogleAccount] = useState(false);
@@ -75,7 +78,7 @@ const ProfilePage: React.FC<ISettingsPageProps> = () => {
   const changeName = async (newName: string) => {
     if (!newName) return;
 
-    const id = loadingMessage('Updating name...');
+    const id = loadingMessage(t('toasts.updatingName'));
     const data = await updateUserData({
       displayName: newName,
     });
@@ -83,11 +86,7 @@ const ProfilePage: React.FC<ISettingsPageProps> = () => {
     setShowNameModal(false);
 
     if (!data?.displayName)
-      return updateMessage(
-        id,
-        'There was a problem updating the name.',
-        'error',
-      );
+      return updateMessage(id, t('toasts.couldNotUpdateTheName'), 'error');
 
     dispatch(
       AuthAC.setUser({
@@ -95,13 +94,13 @@ const ProfilePage: React.FC<ISettingsPageProps> = () => {
       }),
     );
     setStorageItems({ displayName: data.displayName }); // portal sends externalMessage "updateUserData", here we have to set it.
-    updateMessage(id, 'Name updated successfully.', 'success');
+    updateMessage(id, t('toasts.nameUpdated'), 'success');
   };
 
   const changeEmail = async (newEmail: string) => {
     if (!newEmail) return;
 
-    const id = loadingMessage('Updating user email...');
+    const id = loadingMessage(t('toasts.updatingEmail'));
     const response = await changeUserEmail(newEmail);
     const message = response.message;
     const email = response.data?.email;
@@ -109,7 +108,7 @@ const ProfilePage: React.FC<ISettingsPageProps> = () => {
     if (email) {
       dispatch(AuthAC.setUser({ user: { ...user, email } }));
       setShowEmailModal(false);
-      updateMessage(id, message, 'success');
+      updateMessage(id, t('toasts.emailUpdated'), 'success');
     } else {
       updateMessage(id, message, 'error');
     }
@@ -118,7 +117,7 @@ const ProfilePage: React.FC<ISettingsPageProps> = () => {
   const changePassword = async (oldPassword: string, newPassword: string) => {
     if (!newPassword || !oldPassword) return;
 
-    const id = loadingMessage('Updating password...');
+    const id = loadingMessage(t('toasts.updatingPassword'));
     const response = await changeUserPassword(
       user.email,
       oldPassword,
@@ -128,13 +127,9 @@ const ProfilePage: React.FC<ISettingsPageProps> = () => {
     setShowPasswordModal(false);
 
     if (!response.data)
-      return updateMessage(
-        id,
-        'There was a problem updating your password.',
-        'error',
-      );
+      return updateMessage(id, t('toasts.couldNotUpdate'), 'error');
 
-    updateMessage(id, 'Password updated successfully.', 'success');
+    updateMessage(id, t('toasts.passwordUpdated'), 'success');
   };
 
   const loginToDeleteAccount = async (password: string) => {
@@ -145,7 +140,7 @@ const ProfilePage: React.FC<ISettingsPageProps> = () => {
       return;
     }
 
-    errorMessage('There was a problem with reauthentication.');
+    errorMessage(t('toasts.couldNotReauthenticate'));
     setShowDeleteAccountModal(false);
   };
 
@@ -162,13 +157,14 @@ const ProfilePage: React.FC<ISettingsPageProps> = () => {
       dispatch(PanelAC.setLoaderState(true));
       await deleteUser();
       await signOutHandler();
+      successMessage(t('toasts.accountDeleted'));
     } catch (error: any) {
       console.log('error', error);
       if (error.code === 'auth/user-mismatch') {
-        errorHandler({ message: 'Cannot delete different account.' });
+        errorHandler({ message: t('toasts.couldNotDeleteAccount') });
       } else {
         error.code !== 'auth/requires-recent-login' &&
-          errorHandler({ message: 'Error while trying to delete user?.' });
+          errorHandler({ message: t('toasts.errorDeletingUser') });
       }
     } finally {
       dispatch(PanelAC.setLoaderState(false));
@@ -202,7 +198,7 @@ const ProfilePage: React.FC<ISettingsPageProps> = () => {
         <div className={styles.profileSettings}>
           <div className={styles.profileSettingsMain}>
             <div className={styles.profilePhoto}>
-              <h1>Profile</h1>
+              <h1>{t('page.profile.title')}</h1>
 
               <FileUploader onFileSelected={onFileSelectedHandler}>
                 {({ onFileSelectorOpen }) => (
@@ -213,7 +209,7 @@ const ProfilePage: React.FC<ISettingsPageProps> = () => {
                       clicked={onFileSelectorOpen}
                     />
 
-                    <span onClick={onFileSelectorOpen}>Edit</span>
+                    <span onClick={onFileSelectorOpen}>{t('common.edit')}</span>
                   </div>
                 )}
               </FileUploader>
@@ -221,20 +217,22 @@ const ProfilePage: React.FC<ISettingsPageProps> = () => {
 
             <div className={styles.profileDetails}>
               <ProfileDetail
-                title="Name"
+                title={t('common.name')}
                 value={user?.displayName}
                 clicked={() => setShowNameModal(true)}
               />
               <ProfileDetail
-                title="Email"
+                title={t('page.image.email')}
                 value={user?.email}
                 disabled={isGoogleAccount}
                 clicked={() => !isGoogleAccount && setShowEmailModal(true)}
               />
               <ProfileDetail
-                title="Password"
+                title={t('page.profile.settings.password')}
                 value={
-                  isGoogleAccount ? 'Logged in with Google account' : undefined
+                  isGoogleAccount
+                    ? t('page.profile.loggedInWithGoogle')
+                    : undefined
                 }
                 disabled={isGoogleAccount}
                 clicked={() => !isGoogleAccount && setShowPasswordModal(true)}
@@ -244,15 +242,15 @@ const ProfilePage: React.FC<ISettingsPageProps> = () => {
 
           <div className={styles.profileDeleteAccount}>
             <ProfileDetail
-              title="Account"
-              value="Delete account"
+              title={t('page.profile.account.title')}
+              value={t('page.setting.deleteAccount')}
               valueColor="red"
               clicked={() => setShowDeleteAccountModal(true)}
             />
           </div>
 
           <span className={styles.profileSignOut} onClick={signOutHandler}>
-            Sign out
+            {t('header.user.signout')}
           </span>
         </div>
 

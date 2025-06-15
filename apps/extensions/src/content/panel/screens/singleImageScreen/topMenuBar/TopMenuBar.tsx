@@ -8,6 +8,7 @@ import { panelRoutes, RouteName } from '@/content/panel/router/panelRoutes';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import AppSvg from '@/content/components/elements/AppSvg';
 import { IUser } from '@/app/interfaces/IUserData';
+import { useTranslation } from 'react-i18next';
 
 interface ITopMenuBarProps {
   user: IUser;
@@ -20,6 +21,7 @@ const TopMenuBar: FC<ITopMenuBarProps> = ({
   fromPage = 'image',
   blockBack = false,
 }) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
@@ -70,7 +72,7 @@ const TopMenuBar: FC<ITopMenuBarProps> = ({
             size="20px"
             className="tw-mr-2"
           />
-          Back
+          {t('navigation.back')}
         </div>
         <UserShortInfo
           user={user}

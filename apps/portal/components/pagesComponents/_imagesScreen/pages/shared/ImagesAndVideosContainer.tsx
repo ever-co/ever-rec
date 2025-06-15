@@ -53,6 +53,7 @@ import { IWorkspaceImage, IWorkspaceVideo } from 'app/interfaces/IWorkspace';
 import styles from '../myImages/screenshotsContainer/ScreenshotsContainer.module.scss';
 import useWindowDimensions from 'hooks/useWindowDimensions';
 import useGetXXL from 'hooks/useGetXXL';
+import { useTranslation } from 'react-i18next';
 
 interface IImagesAndVideosProps {
   videos: IEditorVideo[];
@@ -74,6 +75,7 @@ const ImagesAndVideosContainer: React.FC<IImagesAndVideosProps> = ({
   selectedItems,
   setSelectedItems,
 }) => {
+  const { t } = useTranslation();
   const defaultShareItem = { id: null, type: null, provider: null };
   const dispatch = useDispatch();
   const router = useRouter();
@@ -114,7 +116,7 @@ const ImagesAndVideosContainer: React.FC<IImagesAndVideosProps> = ({
         await moveRestoreTrash(screenOrVideo, false);
       }
     } catch (error) {
-      errorMessage('There was a problem with restoring');
+      errorMessage(t('toasts.problemRestoring'));
       hasError = true;
     } finally {
       setLoaderState(false);
@@ -156,7 +158,7 @@ const ImagesAndVideosContainer: React.FC<IImagesAndVideosProps> = ({
         await moveRestoreVideoTrash(video);
       }
     } catch (error) {
-      errorMessage('There was a problem, please try again');
+      errorMessage(t('toasts.problemTryAgain'));
       hasError = true;
     } finally {
       setLoaderState(false);
@@ -164,8 +166,8 @@ const ImagesAndVideosContainer: React.FC<IImagesAndVideosProps> = ({
 
     if (hasError) return;
 
-    if (isTrash) infoMessage('Video deleted');
-    else infoMessage('The video has been moved to the Trash');
+    if (isTrash) infoMessage(t('toasts.videoDownloaded'));
+    else infoMessage(t('toasts.videoMovedToTrash'));
   };
 
   const deleteScreenshotConfirm = async (image: IEditorImage | null) => {
@@ -185,7 +187,7 @@ const ImagesAndVideosContainer: React.FC<IImagesAndVideosProps> = ({
         await moveRestoreTrash(image);
       }
     } catch (error) {
-      errorMessage('There was a problem, please try again');
+      errorMessage(t('toasts.problemTryAgain'));
       hasError = true;
     } finally {
       setLoaderState(false);
@@ -193,8 +195,8 @@ const ImagesAndVideosContainer: React.FC<IImagesAndVideosProps> = ({
 
     if (hasError) return;
 
-    if (isTrash) infoMessage('Image deleted successfully');
-    else infoMessage('The Image has been moved to the Trash');
+    if (isTrash) infoMessage(t('toasts.imageDeleted'));
+    else infoMessage(t('toasts.imageMovedToTrash'));
   };
 
   const selectVideoHandler = (video: IEditorVideo) => {
@@ -248,7 +250,7 @@ const ImagesAndVideosContainer: React.FC<IImagesAndVideosProps> = ({
             `${process.env.NEXT_PUBLIC_WEBSITE_URL}/video/shared/${sharedLink}`,
           );
           copied();
-          successMessage('Copied');
+          successMessage(t('toasts.copied'));
         }
       }
     }
@@ -270,7 +272,7 @@ const ImagesAndVideosContainer: React.FC<IImagesAndVideosProps> = ({
             `${process.env.NEXT_PUBLIC_WEBSITE_URL}/image/shared/${sharedLink}`,
           );
           copied();
-          successMessage('Copied');
+          successMessage(t('toasts.copied'));
         }
       }
     }
@@ -335,7 +337,7 @@ const ImagesAndVideosContainer: React.FC<IImagesAndVideosProps> = ({
 
   const handleScreenshotSave = async (screenshot: IEditorImage) => {
     const downloaded = await localSave(screenshot);
-    if (downloaded) infoMessage('Image downloaded');
+    if (downloaded) infoMessage(t('toasts.imageDownloaded'));
   };
 
   const shareAtlassianTicketHandler = useCallback(
@@ -392,7 +394,7 @@ const ImagesAndVideosContainer: React.FC<IImagesAndVideosProps> = ({
 
   const handleDownloadVideo = async (video: IEditorVideo) => {
     const downloaded = await downloadVideo(video);
-    if (downloaded) infoMessage('Video downloaded');
+    if (downloaded) infoMessage(t('toasts.videoDownloaded'));
   };
 
   const handleActionVideo = (video: IEditorVideo, action: ItemActionsEnum) => {

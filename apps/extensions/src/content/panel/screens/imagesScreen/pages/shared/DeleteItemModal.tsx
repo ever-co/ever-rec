@@ -3,6 +3,7 @@ import AppButton from '@/content/components/controls/appButton/AppButton';
 import { Modal } from 'antd';
 import { ItemType } from '@/app/interfaces/ItemTypes';
 import AppSvg from '@/content/components/elements/AppSvg';
+import { useTranslation } from 'react-i18next';
 
 interface IDeleteItemModalProps {
   visible: boolean;
@@ -19,6 +20,7 @@ const DeleteItemModal: React.FC<IDeleteItemModalProps> = ({
   onOk,
   onCancel,
 }) => {
+  const { t } = useTranslation();
   const onOkHandler = () => {
     onOk(item, itemType);
   };
@@ -42,7 +44,7 @@ const DeleteItemModal: React.FC<IDeleteItemModalProps> = ({
             className="tw-mx-4 tw-pb-1 tw-pt-1"
             twPadding="tw-px-8"
           >
-            Cancel
+            {t('common.cancel')}
           </AppButton>
           <AppButton
             onClick={onOkHandler}
@@ -51,13 +53,13 @@ const DeleteItemModal: React.FC<IDeleteItemModalProps> = ({
             twTextColor="tw-text-white"
             twPadding="tw-px-8"
           >
-            Delete item
+            {t('modals.deleteItem')}
           </AppButton>
         </div>
       }
     >
       <h2 className="tw-text-2xl tw-font-semibold">
-        Do you want to delete this item?
+        {t('modals.deleteItemConfirmation')}
       </h2>
     </Modal>
   );

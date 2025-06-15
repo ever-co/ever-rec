@@ -49,10 +49,12 @@ import SCHeader from 'components/shared/SCHeader/SCHeader';
 import { ItemTypeEnum } from 'app/enums/itemTypeEnum';
 import useItemOrder from 'hooks/useItemOrder';
 import useItemsFilter from 'hooks/useItemsFilter';
+import { useTranslation } from 'react-i18next';
 
 const Videos: FC = () => {
   const fileUploader = useRef<HTMLInputElement>(null);
   const dispatch = useDispatch();
+  const { t } = useTranslation();
   const user: IUser = useSelector((state: RootStateOrAny) => state.auth.user);
   const explorerDataVideosLoaded: boolean = useSelector(
     (state: RootStateOrAny) => state.panel.explorerDataVideosLoaded,
@@ -147,7 +149,7 @@ const Videos: FC = () => {
 
       setLoading(false);
     } else {
-      infoMessage("Couldn't find selected files, please try again...");
+      infoMessage(t('toasts.couldNotFindSelectedFiles'));
     }
   };
 
@@ -232,7 +234,7 @@ const Videos: FC = () => {
         <DashboardCard className={styles.foldersDashboardCard}>
           {isRootFolder(user, explorerDataVideos) ? (
             <div className={styles.pageHeadingWrapper}>
-              <h1 className={styles.mainHeader}>My Videos</h1>
+              <h1 className={styles.mainHeader}>{t('common.myVideos')}</h1>
             </div>
           ) : (
             <FolderNavigationContainer
@@ -268,7 +270,7 @@ const Videos: FC = () => {
           <>
             {folderData && (
               <div className={styles.foldersHeadingContainer}>
-                <h3 className={styles.heading}>Folders</h3>
+                <h3 className={styles.heading}>{t('common.folders')}</h3>
                 <SortingDropDown
                   sortByDate={handleFolderOrderByDate}
                   sortByName={handleFolderOrderByName}
