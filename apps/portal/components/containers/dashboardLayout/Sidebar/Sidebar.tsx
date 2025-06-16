@@ -97,9 +97,9 @@ const Sidebar: FC<IProps> = ({ isProfilePage, isWorkspaceSettingsPage }) => {
     }
 
     return menuItems.map((item: any, index: number) => {
-      const handleItemClick = () => {
+      const handleItemClick = useCallback(() => {
         sidebarItemClicked(item);
-      };
+      }, [item]);
       const sidebarItem = (
         <SidebarMenuItem
           key={`menu_item${index}`}
