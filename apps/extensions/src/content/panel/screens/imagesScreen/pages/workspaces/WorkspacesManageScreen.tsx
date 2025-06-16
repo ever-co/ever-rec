@@ -281,7 +281,7 @@ const ManageWorkspaces = () => {
       />
       <DashboardCard className={styles.dashboardCard}>
         <SCHeader
-          text={'Workspaces'}
+          text={t('workspace.workspacesSettings')}
           showSearch={false}
           userPhotoURL={user?.photoURL}
         />

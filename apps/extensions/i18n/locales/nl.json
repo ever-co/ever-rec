@@ -43,7 +43,6 @@
     "trimVideo": "Video bijsnijden",
     "accessBlocked": "Toegang tot deze pagina is geblokkeerd. Om toegang te verlenen, klikt u op het <0></0>-pictogram in de adresbalk. Zie de instructies hieronder.",
     "selectArea": "Selecteer gebied",
-    "capture": "Vastleggen",
     "encodingGIF": "GIF-animatie wordt gecodeerd...",
     "fullPage": "Volledige pagina wordt vastgelegd...",
     "scroll": "Gelieve <b>niet te scrollen</b> voor het best mogelijke resultaat.",
@@ -62,6 +61,7 @@
       "browserRestrictions": "Deze actie is niet beschikbaar op deze pagina vanwege browserbeperkingen."
     },
     "capture": {
+      "capture": "Vastleggen",
       "allowStore": "Hiermee kunt u afbeeldingen opslaan, organiseren, beheren en distribueren.",
       "changeUsernameProfile": "Wijzig uw gebruikersnaam en profielafbeelding.",
       "filesFolderShared": "Bestanden en mappen die u met anderen heeft gedeeld.",

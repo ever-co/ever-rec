@@ -80,12 +80,10 @@ const SCHeader: FC<ISCHeaderProps> = ({
       {showSearch ? (
         <div className={styles.search}>
           <AppSvg path="images/new-design-v2/search.svg" />
-
-<<<<<<< HEAD
           <input
             value={filterValue ?? ''}
             type="text"
-            placeholder="Search files..."
+            placeholder={t('header.searchFiles')}
             className={styles.appInput}
             onChange={onFilterChange}
             disabled={filterValue === null}
@@ -94,17 +92,6 @@ const SCHeader: FC<ISCHeaderProps> = ({
       ) : (
         <div className="tw-text-3xl tw-font-bold">{text}</div>
       )}
-=======
-        <input
-          value={filterValue ?? undefined}
-          type="text"
-          placeholder={t('header.searchFiles')}
-          className={styles.appInput}
-          onChange={onFilterChange}
-          disabled={filterValue === null}
-        />
-      </div>
->>>>>>> c478e16abe15a7cf0ca83f35af2c3c76e2ba6c1c
       <div className={styles.actions}>
         <Dropdown
           trigger={['click']}

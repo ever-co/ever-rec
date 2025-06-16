@@ -43,7 +43,6 @@
     "trimVideo": "Przytnij film",
     "accessBlocked": "Dostęp do tej strony jest zablokowany. Aby udzielić dostępu, kliknij ikonę <0></0> w pasku adresu. Zobacz instrukcje poniżej.",
     "selectArea": "Zaznacz obszar",
-    "capture": "Zrób",
     "encodingGIF": "Kodowanie animacji GIF...",
     "fullPage": "Przechwytywanie całej strony...",
     "scroll": "Proszę <b>nie przewijać</b>, aby uzyskać jak najlepszy wynik.",
@@ -62,6 +61,7 @@
       "browserRestrictions": "Ta akcja nie jest dostępna на tej stronie z powodu ograniczeń przeglądarki."
     },
     "capture": {
+      "capture": "Zrób",
       "allowStore": "Umożliwia przechowywanie, organizowanie, zarządzanie i dystrybucję obrazów.",
       "changeUsernameProfile": "Zmień swoją nazwę użytkownika i zdjęcie profilowe.",
       "filesFolderShared": "Pliki i foldery, które udostępniłeś innym.",
