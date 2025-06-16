@@ -18,7 +18,9 @@ import { languages } from '../../../../../i18n/constants';
 import { useTranslation } from 'react-i18next';
 
 interface ISCHeaderProps {
-  filterValue: string | null;
+  filterValue?: string | null;
+  showSearch?: boolean;
+  text?: string;
   userPhotoURL?: string | null;
   isWorkspace?: boolean;
   isWorkspaceAdmin?: boolean;
@@ -28,6 +30,8 @@ interface ISCHeaderProps {
 
 const SCHeader: FC<ISCHeaderProps> = ({
   filterValue,
+  text,
+  showSearch = true,
   userPhotoURL,
   isWorkspace = false,
   isWorkspaceAdmin = false,
@@ -73,18 +77,21 @@ const SCHeader: FC<ISCHeaderProps> = ({
 
   return (
     <div className={styles.appHeader}>
-      <div className={styles.search}>
-        <AppSvg path="images/new-design-v2/search.svg" />
-
-        <input
-          value={filterValue ?? undefined}
-          type="text"
-          placeholder={t('header.searchFiles')}
-          className={styles.appInput}
-          onChange={onFilterChange}
-          disabled={filterValue === null}
-        />
-      </div>
+      {showSearch ? (
+        <div className={styles.search}>
+          <AppSvg path="images/new-design-v2/search.svg" />
+          <input
+            value={filterValue ?? ''}
+            type="text"
+            placeholder={t('header.searchFiles')}
+            className={styles.appInput}
+            onChange={onFilterChange}
+            disabled={filterValue === null}
+          />
+        </div>
+      ) : (
+        <div className="tw-text-3xl tw-font-bold">{text}</div>
+      )}
       <div className={styles.actions}>
         <Dropdown
           trigger={['click']}
@@ -158,7 +165,6 @@ const SCHeader: FC<ISCHeaderProps> = ({
           </div>
         </Dropdown>
       </div>
-
       {CreateWSModal}
     </div>
   );

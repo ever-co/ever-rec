@@ -43,7 +43,6 @@
     "trimVideo": "裁剪视频",
     "accessBlocked": "访问此页面被阻止。要授予访问权限，请点击地址栏中的<0></0>图标。请参阅以下说明。",
     "selectArea": "选择区域",
-    "capture": "截取",
     "encodingGIF": "正在编码GIF动画...",
     "fullPage": "正在截取整个页面...",
     "scroll": "为获得最佳效果，请<b>不要滚动</b>页面。",
@@ -62,6 +61,7 @@
       "browserRestrictions": "由于浏览器限制，此操作在此页面上不可用。"
     },
     "capture": {
+      "capture": "截取",
       "allowStore": "允许您存储、组织、管理和分发图片。",
       "changeUsernameProfile": "更改您的用户名和个人资料图片。",
       "filesFolderShared": "您与他人分享的文件和文件夹。",

@@ -43,7 +43,6 @@
     "trimVideo": "Video zuschneiden",
     "accessBlocked": "Der Zugriff auf diese Seite ist blockiert. Um den Zugriff zu gewähren, klicken Sie auf das <0></0>-Symbol in der Adressleiste. Siehe Anweisungen unten.",
     "selectArea": "Bereich auswählen",
-    "capture": "Aufnehmen",
     "encodingGIF": "GIF-Animation wird kodiert...",
     "fullPage": "Ganze Seite wird aufgenommen...",
     "scroll": "Bitte <b>scrollen Sie nicht</b>, um das bestmögliche Ergebnis zu erzielen.",
@@ -62,6 +61,7 @@
       "browserRestrictions": "Diese Aktion ist aufgrund von Browser-Einschränkungen auf dieser Seite nicht verfügbar."
     },
     "capture": {
+      "capture": "Aufnehmen",
       "allowStore": "Ermöglicht das Speichern, Organisieren, Verwalten und Verteilen von Bildern.",
       "changeUsernameProfile": "Ändern Sie Ihren Benutzernamen und Ihr Profilbild.",
       "filesFolderShared": "Dateien und Ordner, die Sie mit anderen geteilt haben.",

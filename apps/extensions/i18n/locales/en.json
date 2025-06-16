@@ -43,7 +43,6 @@
     "trimVideo": "Trim Video",
     "accessBlocked": "Access to this page is blocked. To grant access, click the <0></0> icon in the address bar. See instructions below.",
     "selectArea": "Select Area",
-    "capture": "Capture",
     "encodingGIF": "Encoding GIF animation...",
     "fullPage": "Capturing full page...",
     "scroll": "Please <b>do not scroll</b> for the best possible result.",
@@ -62,6 +61,7 @@
       "browserRestrictions": "This action is not available on this page due to browser restrictions."
     },
     "capture": {
+      "capture": "Capture",
       "allowStore": "Allows you to store, organize, manage, and distribute images.",
       "changeUsernameProfile": "Change your username and profile image.",
       "filesFolderShared": "Files and folders you have shared with others.",

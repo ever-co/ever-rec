@@ -28,6 +28,7 @@ import { panelRoutes } from '@/content/panel/router/panelRoutes';
 import { useNavigate } from 'react-router';
 import AppButton from '@/content/components/controls/appButton/AppButton';
 import { useCreateWorkspace } from '@/content/utilities/hooks/useCreateWorkspace';
+import SCHeader from '@/content/panel/shared/SCHeader/SCHeader';
 import { useTranslation } from 'react-i18next';
 
 export type LeaveDeleteActions = 'leave' | 'delete';
@@ -279,17 +280,11 @@ const ManageWorkspaces = () => {
         }}
       />
       <DashboardCard className={styles.dashboardCard}>
-        <div className={styles.mainHeader}>
-          <span>Workspaces - Settings</span>
-          {/*
-           //TODO: need to change header translation
-            <AppButton
-            twPadding="tw-py-4 tw-px-6"
-            onClick={() => setShowCreateWorkspaceModal(true)}
-          >
-            Add Workspace
-          </AppButton> */}
-        </div>
+        <SCHeader
+          text={t('workspace.workspacesSettings')}
+          showSearch={false}
+          userPhotoURL={user?.photoURL}
+        />
         {workspaces?.length === 0 && (
           <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-h-full ">
             {/* Large Text */}
