@@ -97,9 +97,9 @@ const Sidebar: FC<IProps> = ({ isProfilePage, isWorkspaceSettingsPage }) => {
     }
 
     return menuItems.map((item: any, index: number) => {
-      const handleItemClick = useCallback(() => {
+      const handleItemClick = () => {
         sidebarItemClicked(item);
-      }, [item]);
+      };
       const sidebarItem = (
         <SidebarMenuItem
           key={`menu_item${index}`}
@@ -109,11 +109,6 @@ const Sidebar: FC<IProps> = ({ isProfilePage, isWorkspaceSettingsPage }) => {
           onClick={handleItemClick}
         />
       );
-
-      // We don't need to wrap "Favorite Folders" in <Link> component
-      //if (item.type === 'favFolders') {
-      //  return sidebarItem;
-      //}
 
       return (
         <Link href={item.route} key={`menu_item${index}`}>
