@@ -4,9 +4,10 @@ import { RootStateOrAny, useSelector } from 'react-redux';
 import SignFlow from '../../signScreen/signFlow/SignFlow';
 import { IStepProps } from './steps';
 import { IUser } from '@/app/interfaces/IUserData';
-
+import { useTranslation } from 'react-i18next';
 
 const InstallSign: React.FC<IStepProps> = ({ nextStep }) => {
+  const { t } = useTranslation();
   const user: IUser = useSelector((state: RootStateOrAny) => state.auth.user);
 
   useEffect(() => {
@@ -16,13 +17,12 @@ const InstallSign: React.FC<IStepProps> = ({ nextStep }) => {
   return (
     <div className="tw-w-full">
       <div className="tw-w-96">
-        <AppHeader part1="Sign" part2="In" className="tw-mb-8" />
-        <p>
-          Thanks for adding our extension! To get the most out of this
-          service,&nbsp; staying signed-in is strongly recommended! Keep
-          screenshots synced across devices.&nbsp; Access and share them
-          anywhere, anytime.
-        </p>
+        <AppHeader
+          part1={t('page.auth.common.sign')}
+          part2={t('page.auth.common.in')}
+          className="tw-mb-8"
+        />
+        <p>{t('page.install.pinnedDescription')}</p>
         <SignFlow />
       </div>
     </div>

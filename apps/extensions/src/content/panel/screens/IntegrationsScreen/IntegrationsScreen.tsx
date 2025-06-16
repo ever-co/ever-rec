@@ -9,13 +9,15 @@ import TrelloPage from '../imagesScreen/pages/integrations/TrelloPage';
 import { RootStateOrAny, useSelector } from 'react-redux';
 import { IUser } from '@/app/interfaces/IUserData';
 import SCHeader from '../../shared/SCHeader/SCHeader';
+import { useTranslation } from 'react-i18next';
 
 const IntegrationsScreen = () => {
+  const { t } = useTranslation();
   const user: IUser = useSelector((state: RootStateOrAny) => state.auth.user);
   return (
     <DashboardCard className={styles.mainWrapper}>
       <SCHeader
-        text="Integrations"
+        text={t('navigation.integrations')}
         userPhotoURL={user?.photoURL}
         showSearch={false}
       />

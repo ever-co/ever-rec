@@ -7,6 +7,7 @@ import AppInput from '@/content/components/controls/appInput/AppInput';
 import ModalSaveChangesFooter from '@/content/panel/shared/modalComponents/ModalSaveChangesFooter';
 import PasswordEye from './PasswordEye';
 import useEnterKeyPress from '@/content/utilities/hooks/useEnterKeyPress';
+import { useTranslation } from 'react-i18next';
 
 const passwordRule = passwordPatternRule(
   'Must have at least eight characters and one number',
@@ -19,6 +20,7 @@ interface IProps {
 }
 
 const ChangePasswordModal: React.FC<IProps> = ({ visible, onClose, onOk }) => {
+  const { t } = useTranslation();
   const [valid, setValid] = useState(false);
   const [passwordShown, setPasswordShown] = useState(false);
   const [passwordState, setPasswordState] = useState<IAppControl>({
@@ -106,13 +108,13 @@ const ChangePasswordModal: React.FC<IProps> = ({ visible, onClose, onOk }) => {
         />
       }
     >
-      <h2 className={styles.modalHeader}>Password</h2>
+      <h2 className={styles.modalHeader}>{t('page.auth.common.password')}</h2>
 
       <div className={styles.inputField}>
-        <label>Current password:</label>
+        <label>{t('page.profile.deleteAccountModal.currentPassword')}</label>
         <div className={styles.inputFieldCombined}>
           <AppInput
-            placeholder="Enter password"
+            placeholder={t('page.profile.deleteAccountModal.enterPassword')}
             type={passwordShown ? 'text' : 'password'}
             value={passwordState.value}
             errors={passwordState.errors}
@@ -127,10 +129,10 @@ const ChangePasswordModal: React.FC<IProps> = ({ visible, onClose, onOk }) => {
       </div>
 
       <div className={styles.inputField}>
-        <label>New password:</label>
+        <label>{t('page.auth.newPassword.newPasswordColon')}</label>
         <div className={styles.inputFieldCombined}>
           <AppInput
-            placeholder="Enter new password"
+            placeholder={t('page.profile.newPassword')}
             type={passwordShown ? 'text' : 'password'}
             value={newPasswordState.value}
             errors={newPasswordState.errors}
@@ -142,7 +144,7 @@ const ChangePasswordModal: React.FC<IProps> = ({ visible, onClose, onOk }) => {
             togglePassword={togglePasswordShown}
           />
         </div>
-        <span>Must have at least eight characters and one number.</span>
+        <span>{t('page.profile.passwordValidation')}</span>
       </div>
     </Modal>
   );

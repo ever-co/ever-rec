@@ -14,10 +14,12 @@ import AppSvg from 'components/elements/AppSvg';
 import { sendExternalMessage } from 'misc/_helper';
 import AppSpinner from 'components/containers/appSpinner/AppSpinner';
 import { panelRoutes, preRoutes } from 'components/_routes';
+import { Trans, useTranslation } from 'react-i18next';
 
 const maxVisibleMembers = 6;
 
 const WorkspaceInvite: FC<any> = () => {
+  const { t } = useTranslation();
   const user = useAuthenticateUser();
   const router = useRouter();
   const [workspaceInviteId, setWorkspaceInviteId] = useState<string | null>(
@@ -70,9 +72,7 @@ const WorkspaceInvite: FC<any> = () => {
     if (data && data.hasAlreadyJoined) {
       router.push(`/media/workspace/${data.workspaceId}`);
     } else if (data) {
-      successMessage(
-        'Successfully joined workspace. Redirecting to new workspace...',
-      );
+      successMessage(t('toasts.joinedWorkspaceSuccess'));
 
       sendExternalMessage('setActiveWorkspace', data);
 
@@ -95,11 +95,14 @@ const WorkspaceInvite: FC<any> = () => {
         {workspaceInviter && workspaceName && (
           <div className="tw-flex tw-flex-col tw-items-center">
             <h1 className="tw-font-semibold tw-text-3xl tw-tracking-wide tw-text-center">
-              {workspaceInviter} has invited you to join
+              {workspaceInviter} {t('workspace.invitedToJoin')}
             </h1>
             <h1 className="tw-font-extrabold tw-text-3xl tw-tracking-wide tw-text-center">
-              {'workspace '}
-              <span className="tw-text-primary-purple">{workspaceName}</span> on
+              {t('workspace.workspace')}
+              <span className="tw-text-primary-purple">
+                {workspaceName}
+              </span>{' '}
+              {t('common.no')}
               Rec.
             </h1>
             <p className="tw-pt-6 tw-pb-2 tw-text-2xl tw-text-primary-purple tw-font-extrabold">
@@ -110,7 +113,7 @@ const WorkspaceInvite: FC<any> = () => {
               twPadding="tw-px-32 tw-py-3"
               onClick={joinWorkspaceHandler}
             >
-              Join Now
+              {t('workspace.joinNow')}
             </AppButton>
             {workspaceMembers.length > 1 && (
               <div className="tw-pt-4">
@@ -122,7 +125,7 @@ const WorkspaceInvite: FC<any> = () => {
         {error && (
           <div className="tw-flex tw-flex-col tw-items-center">
             <h1 className="tw-font-semibold tw-text-3xl tw-tracking-wide tw-text-center">
-              The workspace invite has expired.
+              {t('workspace.workspaceInviteExpired')}
             </h1>
           </div>
         )}
@@ -184,11 +187,12 @@ const WorkspaceMembers: FC<any> = ({ workspaceMembers }) => {
 };
 
 const WorkspaceMemberNames: FC<any> = ({ workspaceMembers }) => {
+  const { t } = useTranslation();
   const membersLength = workspaceMembers.length;
 
   const memberNamesAndLastMember =
     workspaceMembers.slice(0, workspaceMembers.length - 1).join(', ') +
-    ' and ' +
+    ` ${t('page.register.terms.and')} ` +
     workspaceMembers.slice(-1)[0];
 
   const memberNamesAndOthers =
@@ -200,14 +204,17 @@ const WorkspaceMemberNames: FC<any> = ({ workspaceMembers }) => {
     return (
       <p className="tw-text-center tw-max-w-400px">
         {memberNamesAndLastMember + ' '}
-        have also joined this workspace.
+        {t('workspace.joined')}
       </p>
     );
   }
 
   return (
     <p className="tw-text-center tw-max-w-400px">
-      {memberNamesAndOthers + ' and others have also joined this workspace.'}
+      <Trans
+        i18nKey="workspace.others"
+        values={{ members: memberNamesAndOthers }}
+      />
     </p>
   );
 };

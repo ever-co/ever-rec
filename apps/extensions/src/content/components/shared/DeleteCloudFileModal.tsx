@@ -3,6 +3,7 @@ import { Modal } from 'antd';
 import classNames from 'classnames';
 import AppButton from '../controls/appButton/AppButton';
 import AppSvg from '../elements/AppSvg';
+import { Trans, useTranslation } from 'react-i18next';
 
 interface Props {
   visible: boolean;
@@ -17,6 +18,7 @@ const DeleteCloudFileModal: React.FC<Props> = ({
   visible,
   type = 'Google Drive',
 }) => {
+  const { t } = useTranslation();
   return (
     <Modal
       open={visible}
@@ -32,7 +34,7 @@ const DeleteCloudFileModal: React.FC<Props> = ({
             className="tw-px-8 tw-pb-1 tw-pt-1 tw-bg-danger tw-border tw-border-danger tw-border-solid"
             // disabled={!valid}
           >
-            Delete
+            {t('common.delete')}
           </AppButton>
           <AppButton
             onClick={onCancel}
@@ -40,13 +42,13 @@ const DeleteCloudFileModal: React.FC<Props> = ({
             outlined
             className="tw-px-8 tw-mx-4 tw-pb-1 tw-pt-1"
           >
-            Cancel
+            {t('common.cancel')}
           </AppButton>
         </div>
       }
     >
       <h2 className="tw-mb-6 tw-text-xl tw-font-bold">
-        {`Are you sure you want to delete this file from ${type}?`}
+        <Trans values={{ type: type }} i18nKey="modals.deleteFile" />
       </h2>
     </Modal>
   );

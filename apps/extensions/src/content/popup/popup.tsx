@@ -9,10 +9,9 @@ import store from '@/app/store/popup';
 import './utilities/messagesHandler';
 import useTheme from '../utilities/hooks/useTheme';
 import '@/app/utilities/initiateSentryReact';
-
+import '../../../i18n/config';
 const App: React.FC = () => {
   useTheme();
-
   return (
     <Provider store={store}>
       <Main />

@@ -19,6 +19,7 @@ import {
   loadingMessage,
   updateMessage,
 } from 'app/services/helpers/toastMessages';
+import { useTranslation } from 'react-i18next';
 
 interface IItemsFolderModalProps {
   items?: (IWorkspaceImage | IWorkspaceVideo)[];
@@ -45,6 +46,7 @@ const WorkspaceItemsFolderModal: React.FC<IItemsFolderModalProps> = ({
 }) => {
   const dispatch = useDispatch();
   const [valid, setValid] = useState(false);
+  const { t } = useTranslation();
   const [selectedFolder, setSelectedFolder] =
     useState<IWorkspaceDbFolder | null>(null);
   const [initialOpened, setInitialOpened] = useState(true);
@@ -68,7 +70,9 @@ const WorkspaceItemsFolderModal: React.FC<IItemsFolderModalProps> = ({
     const folderNameString = selectedFolder
       ? selectedFolder.name
       : `${activeWorkspace.name}`;
-    const toast = loadingMessage(`Moving items to ${folderNameString}...`);
+    const toast = loadingMessage(
+      `${t('toasts.movingItems')} ${folderNameString}...`,
+    );
 
     const itemIds = items?.map((x) => x.dbData?.id);
 
@@ -83,7 +87,7 @@ const WorkspaceItemsFolderModal: React.FC<IItemsFolderModalProps> = ({
     if (!data) {
       return updateMessage(
         toast,
-        response.message || 'Error while trying to move items.',
+        response.message || t('toasts.movingItemsError'),
         'error',
       );
     }
@@ -102,7 +106,11 @@ const WorkspaceItemsFolderModal: React.FC<IItemsFolderModalProps> = ({
     setSelectedState && setSelectedState({ state: false, items: [] });
     dispatch(PanelAC.setActiveWorkspace({ activeWorkspace: data }));
 
-    updateMessage(toast, `Items moved to ${folderNameString}.`, 'success');
+    updateMessage(
+      toast,
+      `${t('toasts.itemsMovedTo')} ${folderNameString}.`,
+      'success',
+    );
   };
 
   return (
@@ -120,7 +128,7 @@ const WorkspaceItemsFolderModal: React.FC<IItemsFolderModalProps> = ({
             className="tw-px-8 tw-pb-1 tw-pt-1"
             disabled={!valid}
           >
-            Move
+            {t('page.image.move')}
           </AppButton>
           <AppButton
             onClick={onCancel}
@@ -128,7 +136,7 @@ const WorkspaceItemsFolderModal: React.FC<IItemsFolderModalProps> = ({
             outlined
             className="tw-px-8 tw-mx-4 tw-pb-1 tw-pt-1"
           >
-            Cancel
+            {t('page.image.cancel')}
           </AppButton>
         </div>
       }

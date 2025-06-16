@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Nouislider from 'nouislider-react';
 import 'nouislider/dist/nouislider.css';
 import EditorButton from '../editorButton/EditorButton';
+import { useTranslation } from 'react-i18next';
 
 const NouisliderReact = Nouislider as any;
 
@@ -22,6 +23,7 @@ const VideoSlider: React.FC<IVideoSlider> = ({
   resetVideo,
   uploadBlocked = false,
 }) => {
+  const { t } = useTranslation();
   const seconds = blobs.length;
   const [ref, setRef] = useState<any>(null);
   const [stringLength, setStringLength] = useState<string>(timestamp(seconds));
@@ -64,16 +66,16 @@ const VideoSlider: React.FC<IVideoSlider> = ({
   return (
     <div className="tw-text-center">
       <p className="tw-font-bold tw-text-[16px] tw-leading-none tw-text-primary-purple">
-        Edit your recording
+        {t('ext.editRecording')}
       </p>
       <p className="tw-text-grey-light tw-text-sm tw-m-[-10px] tw-text-[14px]">
-        Add the finishing touches to your video.
+        {t('ext.finishingTouchesVideo')}
       </p>
       <div>
         <div className="tw-flex tw-justify-between tw-mb-4 tw-mt-8">
           <div className="">
             <label htmlFor="tstart" className="tw-font-bold tw-text-[16px]">
-              Start:
+              {t('ext.start')}
             </label>
             <input
               name="tstart"
@@ -87,7 +89,7 @@ const VideoSlider: React.FC<IVideoSlider> = ({
               htmlFor="tend"
               className="tw-text-primary-purple tw-font-bold tw-text-[16px]"
             >
-              End:
+              {t('ext.end')}
             </label>
             <input
               name="tend"
@@ -114,7 +116,7 @@ const VideoSlider: React.FC<IVideoSlider> = ({
         />
         <div className="tw-flex tw-justify-evenly tw-mt-6">
           <EditorButton
-            title="Apply"
+            title={t('ext.apply')}
             color="tw-bg-primary-purple"
             textcolor="tw-text-white"
             onClick={trim}
@@ -122,13 +124,13 @@ const VideoSlider: React.FC<IVideoSlider> = ({
             lowerOpacity
           />
           <EditorButton
-            title="Cancel"
+            title={t('common.cancel')}
             color="tw-bg-blue-grey"
             textcolor="tw-text-black"
             onClick={cancel}
           />
           <EditorButton
-            title="Reset"
+            title={t('common.reset')}
             color="tw-bg-blue-grey"
             textcolor="tw-text-black"
             onClick={reset}

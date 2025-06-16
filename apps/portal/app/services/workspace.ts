@@ -32,6 +32,7 @@ import { iDataResponseParser } from './helpers/iDataResponseParser';
 import { ItemType } from 'app/interfaces/ItemType';
 import { errorHandler } from './helpers/errors';
 import IEditorImage from 'app/interfaces/IEditorImage';
+import { useTranslation } from 'react-i18next';
 
 // Start of Workspace Invite
 export const createWorkspaceInviteLink = async (
@@ -241,40 +242,48 @@ export const deleteShareLinkWorkspace = async (
 };
 // End of share link
 
-export const updateWorkspaceAvatar = async (
-  file: File,
-  workspaceId: string,
-): Promise<string | null> => {
-  const filename: { name: string; ext: string } = splitFilename(file.name);
+export const useUpdateWorkspace = () => {
+  const { t } = useTranslation();
 
-  if (filename.ext && ['jpg', 'jpeg', 'png'].includes(filename.ext)) {
-    const res = await updateWorkspaceAvatarAPI(workspaceId, file);
+  const updateWorkspaceAvatar = async (
+    file: File,
+    workspaceId: string,
+  ): Promise<string | null> => {
+    const filename: { name: string; ext: string } = splitFilename(file.name);
 
-    const data = iDataResponseParser<typeof res.data>(res);
-    data && successMessage('Avatar updated successfully!');
+    if (filename.ext && ['jpg', 'jpeg', 'png'].includes(filename.ext)) {
+      const res = await updateWorkspaceAvatarAPI(workspaceId, file);
 
-    return data;
-  } else {
-    errorMessage('This file type is not supported.');
-    return null;
-  }
-};
+      const data = iDataResponseParser<typeof res.data>(res);
+      data && successMessage(t('extras.avatarUpdated'));
 
-export const updateWorkspaceThumbnail = async (
-  file: File,
-  workspaceId: string,
-): Promise<string | null> => {
-  const filename: { name: string; ext: string } = splitFilename(file.name);
+      return data;
+    } else {
+      errorMessage(t('extras.fileTypeNotSupported'));
+      return null;
+    }
+  };
 
-  if (filename.ext && ['jpg', 'jpeg', 'png'].includes(filename.ext)) {
-    const res = await updateWorkspaceThumbnailAPI(workspaceId, file);
+  const updateWorkspaceThumbnail = async (
+    file: File,
+    workspaceId: string,
+  ): Promise<string | null> => {
+    const filename: { name: string; ext: string } = splitFilename(file.name);
 
-    const data = iDataResponseParser<typeof res.data>(res);
-    data && successMessage('Thumbnail updated successfully!');
+    if (filename.ext && ['jpg', 'jpeg', 'png'].includes(filename.ext)) {
+      const res = await updateWorkspaceThumbnailAPI(workspaceId, file);
 
-    return data;
-  } else {
-    errorMessage('This file type is not supported.');
-    return null;
-  }
+      const data = iDataResponseParser<typeof res.data>(res);
+      data && successMessage(t('extras.thumbnailUpdated'));
+
+      return data;
+    } else {
+      errorMessage(t('extras.fileTypeNotSupported'));
+      return null;
+    }
+  };
+  return {
+    updateWorkspaceAvatar,
+    updateWorkspaceThumbnail,
+  };
 };

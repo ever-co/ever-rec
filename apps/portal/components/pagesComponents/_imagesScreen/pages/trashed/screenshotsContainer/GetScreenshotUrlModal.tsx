@@ -1,5 +1,6 @@
 import React from 'react';
 import { Modal } from 'antd';
+import { useTranslation } from 'react-i18next';
 
 interface IGetScreenshotUrlModalProps {
   visible: boolean;
@@ -16,14 +17,15 @@ const GetScreenshotUrlModal: React.FC<IGetScreenshotUrlModalProps> = ({
     await navigator.clipboard.writeText(url);
   };
 
+  const { t } = useTranslation();
   return (
     <Modal
-      title="Screenshot URL"
+      title={t('modals.screenShotUrl')}
       open={visible}
       onCancel={onClose}
       onOk={onOkHandler}
-      okText="Copy"
-      cancelText="Close"
+      okText={t('page.image.copy')}
+      cancelText={t('common.cancel')}
     >
       {url}
     </Modal>

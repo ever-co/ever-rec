@@ -2,6 +2,7 @@ import React from 'react';
 import { Modal } from 'antd';
 import AppButton from '@/content/components/controls/appButton/AppButton';
 import classNames from 'classnames';
+import { useTranslation } from 'react-i18next';
 
 interface ITrashModalProps {
   visible: boolean;
@@ -20,6 +21,10 @@ const TrashModal: React.FC<ITrashModalProps> = ({
   onOk,
   onCancel,
 }) => {
+  const { t } = useTranslation();
+  const textConfirm =
+    confirmText === 'Confirm' ? t('common.confirm') : confirmText;
+
   return (
     <Modal
       open={visible}
@@ -32,13 +37,13 @@ const TrashModal: React.FC<ITrashModalProps> = ({
             outlined
             className="tw-px-8 tw-mx-4 tw-pb-1 tw-pt-1"
           >
-            Cancel
+            {t('page.image.cancel')}
           </AppButton>
           <AppButton
             onClick={onOk}
             className={classNames('tw-px-8 tw-pb-1 tw-pt-1', confirmClass)}
           >
-            {confirmText}
+            {textConfirm}
           </AppButton>
         </div>
       }

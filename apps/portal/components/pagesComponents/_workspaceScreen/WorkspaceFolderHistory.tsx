@@ -2,6 +2,7 @@ import { FC, useEffect, useState } from 'react';
 import AppSvg from 'components/elements/AppSvg';
 import { IWorkspaceDbFolder } from 'app/interfaces/IWorkspace';
 import { useRouter } from 'next/router';
+import { useTranslation } from 'react-i18next';
 
 interface IFoldersProps {
   folders: IWorkspaceDbFolder[];
@@ -12,6 +13,7 @@ const WorkspaceFolderHistory: FC<IFoldersProps> = ({
   folders,
   currentWorkspaceFolder,
 }) => {
+  const { t } = useTranslation();
   const router = useRouter();
   const [navigationFolders, setNavigationFolders] = useState<
     IWorkspaceDbFolder[] | null
@@ -76,7 +78,7 @@ const WorkspaceFolderHistory: FC<IFoldersProps> = ({
             className="tw-font-semibold tw-cursor-pointer"
             onClick={() => switchFolder(undefined)}
           >
-            Library
+            {t('page.video.library')}
           </h1>
           <AppSvg
             path="/common/Chevron_right.svg"

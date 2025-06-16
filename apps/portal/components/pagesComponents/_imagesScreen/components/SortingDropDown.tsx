@@ -4,6 +4,7 @@ import { ItemOrderEnum } from 'app/enums/itemOrderEnum';
 import AppSvg from 'components/elements/AppSvg';
 import styles from './SortingDropDown.module.scss';
 import classNames from 'classnames';
+import { useTranslation } from 'react-i18next';
 
 enum SortEnum {
   date = 'date',
@@ -21,6 +22,7 @@ const SortingDropDown: React.FC<SortingDropDown> = ({
   sortingType,
   sortByName,
 }) => {
+  const { t } = useTranslation();
   const handleMenuClick = (event) => {
     const key: SortEnum = event.key;
 
@@ -58,7 +60,12 @@ const SortingDropDown: React.FC<SortingDropDown> = ({
           </div>
         }
       >
-        <span>Date - {sortingTypeString}</span>
+        <span>
+          {t('common.date')} -{' '}
+          {sortingTypeString == 'newest'
+            ? t('common.newest')
+            : t('common.oldest')}
+        </span>
       </Menu.Item>
       <Menu.Item
         className={classNames(styles.itemsStyle)}
@@ -76,7 +83,7 @@ const SortingDropDown: React.FC<SortingDropDown> = ({
           </div>
         }
       >
-        <span>Name</span>
+        <span>{t('common.name')}</span>
       </Menu.Item>
     </Menu>
   );
@@ -84,7 +91,7 @@ const SortingDropDown: React.FC<SortingDropDown> = ({
   return (
     <Dropdown trigger={['click']} overlay={menu} placement="bottom">
       <div className={styles.sortText}>
-        <span>Sort:</span>
+        <span>{t('common.sort')}:</span>
         <span>{sortingType}</span>
         <AppSvg path="/new-design-v2/down-caret.svg" />
       </div>

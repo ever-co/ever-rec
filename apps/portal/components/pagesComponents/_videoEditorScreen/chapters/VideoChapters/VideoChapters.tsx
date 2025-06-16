@@ -22,6 +22,7 @@ import {
 } from 'misc/appConstConfig';
 import AppSpinnerLocal from 'components/containers/appSpinnerLocal/AppSpinnerLocal';
 import { IChapter } from 'app/interfaces/IChapter';
+import { useTranslation } from 'react-i18next';
 
 const s = styles;
 
@@ -58,6 +59,7 @@ const VideoChapters: FC<IVideoChaptersProps> = ({
   saveChanges,
   setHasChangesHandler,
 }) => {
+  const { t } = useTranslation();
   const firstRender = useFirstRender();
   const [addChapterDisabled, setAddDisabled] = useState(true);
   const [videoTooShort, setVideoTooShort] = useState(false);
@@ -261,7 +263,8 @@ const VideoChapters: FC<IVideoChaptersProps> = ({
               addChapterDisabled && s.ChapterButtonDisabled,
             )}
           >
-            Add Chapter {videoTime && `at ${videoTime.timestamp}`}
+            {t('page.video.addChapter')}
+            {videoTime && `${t('common.at')} ${videoTime.timestamp}`}
           </button>
 
           {hasChanges &&
@@ -273,7 +276,7 @@ const VideoChapters: FC<IVideoChaptersProps> = ({
               </button>
             ) : (
               <button onClick={() => saveChanges()} className={s.ChapterButton}>
-                Save changes
+                {t('common.saveChanges')}
               </button>
             ))}
         </div>
@@ -297,6 +300,7 @@ const ChapterHeading: FC<IChapterHeadingProps> = ({
   chaptersEnabled,
   videoTooShort,
 }) => {
+  const { t } = useTranslation();
   return (
     <div
       className={classNames(
@@ -306,7 +310,7 @@ const ChapterHeading: FC<IChapterHeadingProps> = ({
     >
       {!isPublic ? (
         <h3>
-          Here you can create and jump to different chapters of your video.
+          {t('page.video.chaptersSection.description')}
           <VideoChapterCaveatPopover />
           {!chaptersEnabled && !videoTooShort && (
             <VideoChapterCaveatPopover caveat="warning" />
@@ -314,9 +318,7 @@ const ChapterHeading: FC<IChapterHeadingProps> = ({
           {videoTooShort && <VideoChapterCaveatPopover caveat="error" />}
         </h3>
       ) : (
-        <h3>
-          Here you can check and jump to different chapters of this video.
-        </h3>
+        <h3>{t('page.video.chaptersDes')}</h3>
       )}
     </div>
   );

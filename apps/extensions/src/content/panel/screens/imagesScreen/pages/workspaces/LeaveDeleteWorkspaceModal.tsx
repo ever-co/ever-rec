@@ -3,6 +3,7 @@ import AppSvg from '@/content/components/elements/AppSvg';
 import { Modal } from 'antd';
 import classNames from 'classnames';
 import { LeaveDeleteActions } from './WorkspacesManageScreen';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
   visible: boolean;
@@ -16,6 +17,7 @@ const LeaveDeleteWorkspaceModal: React.FC<Props> = ({
   visible,
   action,
 }) => {
+  const { t } = useTranslation();
   return (
     <Modal
       open={visible}
@@ -34,7 +36,7 @@ const LeaveDeleteWorkspaceModal: React.FC<Props> = ({
             className="tw-px-8 tw-text-white tw-pb-1 tw-pt-1 tw-border tw-border-danger tw-border-solid"
             bgColor="tw-bg-danger"
           >
-            Confirm
+            {t('common.confirm')}
           </AppButton>
           <AppButton
             onClick={onCancel}
@@ -42,7 +44,7 @@ const LeaveDeleteWorkspaceModal: React.FC<Props> = ({
             outlined
             className="tw-px-8 tw-mx-4 tw-pb-1 tw-pt-1"
           >
-            Cancel
+            {t('common.cancel')}
           </AppButton>
         </div>
       }

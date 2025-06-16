@@ -4,14 +4,16 @@ import ToolBtn from '../../ToolBtn';
 import { ReactMultiEmail } from 'react-multi-email';
 import AppButton from '@/content/components/controls/appButton/AppButton';
 import { Checkbox, Input } from 'antd';
-import { errorMessage, loadingMessage } from '@/app/services/helpers/toastMessages';
+import {
+  errorMessage,
+  loadingMessage,
+} from '@/app/services/helpers/toastMessages';
 import { errorHandler } from '@/app/services/helpers/errors';
 import PanelAC from '@/app/store/panel/actions/PanelAC';
 import { RootStateOrAny, useDispatch, useSelector } from 'react-redux';
 import { sendItem } from '@/app/services/imageandvideo';
 import IconBtn from '../../components/IconBtn';
 import closeIcon from '@/content/assests/svg/tools-panel/close.svg';
-
 
 const { TextArea } = Input;
 interface IEmailToolProps {

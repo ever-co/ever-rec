@@ -4,6 +4,7 @@ import * as styles from './WorkspaceTeamMembers.module.scss';
 import { IWorkspaceUser } from '@/app/interfaces/IWorkspace';
 import { IWorkspaceTeam } from '@/app/interfaces/IWorkspaceTeams';
 import { sortByEmail } from './WorkspaceMembersModalMembersWrapper';
+import { useTranslation } from 'react-i18next';
 
 interface IProps {
   isWorkspace?: boolean;
@@ -24,6 +25,7 @@ const WorkspaceTeamMembers: FC<IProps> = ({
   teamMemberCount,
   onMembersClick,
 }) => {
+  const { t } = useTranslation();
   let numberOfPhotos = 3;
   if (isWorkspace) numberOfPhotos = 5;
 
@@ -56,7 +58,8 @@ const WorkspaceTeamMembers: FC<IProps> = ({
     onMembersClick();
   };
 
-  const memberString = teamMemberCount > 1 ? 'members' : 'member';
+  const memberString =
+    teamMemberCount > 1 ? t('workspace.members') : t('workspace.member');
 
   return (
     <div

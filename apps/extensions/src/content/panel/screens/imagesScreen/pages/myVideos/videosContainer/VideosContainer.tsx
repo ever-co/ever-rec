@@ -48,6 +48,7 @@ import ItemsNotFound from '../../shared/components/ItemsNotFound';
 import IEditorImage from '@/app/interfaces/IEditorImage';
 import { WorkspaceItemType } from '@/app/interfaces/ItemTypes';
 import useGetXXL from '@/content/utilities/hooks/useGetXXL';
+import { useTranslation } from 'react-i18next';
 
 interface IVideosContainerProps {
   foldersCount: number;
@@ -68,6 +69,7 @@ const VideosContainer: FC<IVideosContainerProps> = ({
   handleItemOrderByDate,
   handleItemOrderByName,
 }) => {
+  const { t } = useTranslation();
   const defaultShareItem = { id: null, type: null, provider: null };
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -156,7 +158,7 @@ const VideosContainer: FC<IVideosContainerProps> = ({
     }
     video && (await moveRestoreVideoTrash(video));
     setLoaderState(false);
-    infoMessage('The video has been moved to the Trash');
+    infoMessage(t('toasts.videoMovedToTrash'));
   };
 
   const closeDeletionModalHandler = () => {
@@ -183,7 +185,7 @@ const VideosContainer: FC<IVideosContainerProps> = ({
             `${process.env.WEBSITE_URL}/video/shared/${sharedLink}`,
           );
           copied();
-          successMessage('Copied');
+          successMessage(t('toasts.copied'));
         }
       }
     }
@@ -262,7 +264,7 @@ const VideosContainer: FC<IVideosContainerProps> = ({
 
   const download = async (video: IEditorVideo) => {
     const downloaded = await downloadVideo(video);
-    if (downloaded) infoMessage('Video downloaded');
+    if (downloaded) infoMessage(t('toasts.videoDownloaded'));
   };
 
   const shareAtlassianTicketHandler = useCallback(
@@ -347,7 +349,7 @@ const VideosContainer: FC<IVideosContainerProps> = ({
           }),
         );
       }
-      infoMessage(`Video added to: ${workspace.name}`);
+      infoMessage(`${t('toasts.videoAdded')} ${workspace.name}`);
     }
   };
 
@@ -363,7 +365,9 @@ const VideosContainer: FC<IVideosContainerProps> = ({
       <div className={styles.itemsContainer}>
         <div className={styles.itemsContainerHeadingContainer}>
           <div>
-            <h3 className={styles.headingContainerHeading}>Videos</h3>
+            <h3 className={styles.headingContainerHeading}>
+              {t('common.videos')}
+            </h3>
           </div>
         </div>
 

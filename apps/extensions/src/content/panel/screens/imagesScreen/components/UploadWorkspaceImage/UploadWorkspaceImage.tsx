@@ -9,11 +9,12 @@ import {
 } from 'react';
 import { RootStateOrAny, useSelector } from 'react-redux';
 import { useDropzone } from 'react-dropzone';
-import { errorHandler } from '@/app/services/helpers/errors';
+import { useErrorHandler } from '@/app/services/helpers/errors';
 import { Modal } from 'antd';
 import AppSvg from '@/content/components/elements/AppSvg';
 import classNames from 'classnames';
 import AppButton from '@/content/components/controls/appButton/AppButton';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
   visible: boolean;
@@ -25,6 +26,8 @@ const UploadWorkspaceImageModal: React.FC<Props> = ({
   onClose,
   onOk,
 }) => {
+  const { t } = useTranslation();
+  const { errorHandler } = useErrorHandler();
   const [file, setFile] = useState<File | null>(null);
   const activeWorkspace = useSelector(
     (state: RootStateOrAny) => state.panel.activeWorkspace,
@@ -39,7 +42,7 @@ const UploadWorkspaceImageModal: React.FC<Props> = ({
   useEffect(() => {
     if (acceptedFiles.length > 0) {
       if (acceptedFiles[0].size > 30000) {
-        errorHandler({ message: 'File too big' });
+        errorHandler({ message: t('ext.fileTooBig') });
       } else {
         setFile(acceptedFiles[0]);
       }
@@ -56,7 +59,7 @@ const UploadWorkspaceImageModal: React.FC<Props> = ({
     if (e.target.files) {
       const uploadedFile = e.target.files[0];
       if (uploadedFile.size > 30000) {
-        errorHandler({ message: 'Image too big.' });
+        errorHandler({ message: t('ext.imageTooBig') });
       } else {
         setFile(uploadedFile);
       }
@@ -93,19 +96,22 @@ const UploadWorkspaceImageModal: React.FC<Props> = ({
           </div>
           <div className={styles.marginDiv}>
             <h5 className={styles.headingUploaded}>
-              Use this image as your logo or{' '}
-              <span className={styles.actionSpan}>Upload</span> a new image.
+              {t('workspace.useAsLogo')}{' '}
+              <span className={styles.actionSpan}>{t('workspace.upload')}</span>
+              {t('workspace.aNewImage')}
             </h5>
           </div>
           <div className={styles.marginDiv}>
             <AppButton onClick={() => console.log('TODO: save')} full={true}>
-              Save
+              {t('common.save')}
             </AppButton>
           </div>
           <div className={styles.marginDiv}>
             <h5 className={styles.headingUploaded}>
-              <span className={styles.actionSpan}>Restore</span> previous image
-              or logo.
+              <span className={styles.actionSpan}>
+                {t('common.fileActions.restore')}
+              </span>{' '}
+              {t('workspace.previousImageOrLogo')}{' '}
             </h5>
           </div>
         </div>
@@ -117,7 +123,7 @@ const UploadWorkspaceImageModal: React.FC<Props> = ({
             {isDragActive ? (
               <div className={styles.preUploadWrapper}>
                 <h1 className={styles.dropFilesHere}>
-                  Drop the files here ...
+                  {t('workspace.dropFiles')}
                 </h1>
               </div>
             ) : (
@@ -133,20 +139,19 @@ const UploadWorkspaceImageModal: React.FC<Props> = ({
                   className={styles.imageSVG}
                 />
                 <h3 className={styles.dragNDrop}>
-                  Drag 'n' drop images here or
+                  {t('workspace.dragAndDropImagesHereOr')}
                 </h3>
                 <AppButton
                   onClick={handleClick}
                   full={true}
                   className={styles.appButton}
                 >
-                  <div>Browse file</div>
+                  <div>{t('workspace.browseFile')}</div>
                 </AppButton>
               </div>
             )}
             <div className={styles.footerDiv}>
-              Upload a logo or avatar to your workspace. JPG or PNG format only.
-              The maximum file size is 30 KB
+              {t('workspace.logoDescription')}{' '}
             </div>
           </div>
         </div>
