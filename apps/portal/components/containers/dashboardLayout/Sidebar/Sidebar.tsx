@@ -14,14 +14,10 @@ import PanelAC from '../../../../app/store/panel/actions/PanelAC';
 import { getExplorerData } from 'app/services/screenshots';
 import { getExplorerDataVideo } from 'app/services/videos';
 import { panelRoutes, preRoutes } from '../../../_routes';
-import {
-  IMainMenuItem,
-  getWorkspaceSettingsMenuItems,
-  mainMenuItems,
-  settingsMenuItems,
-} from 'misc/menuItems';
+import { IMainMenuItem, useMenuItems } from 'misc/menuItems';
 import useClickOrKeyOutside from 'hooks/useClickOrKeyOutside';
 import { useCreateWorkspace } from 'hooks/useCreateWorkspaceHandler';
+import { useTranslation } from 'react-i18next';
 
 interface IProps {
   isProfilePage?: boolean;
@@ -29,9 +25,12 @@ interface IProps {
 }
 
 const Sidebar: FC<IProps> = ({ isProfilePage, isWorkspaceSettingsPage }) => {
+  const { t } = useTranslation();
   const router = useRouter();
   const dispatch = useDispatch();
   const favFoldersRef = useRef(null);
+  const { mainMenuItems, getWorkspaceSettingsMenuItems, settingsMenuItems } =
+    useMenuItems();
   const explorerData = useSelector(
     (state: RootStateOrAny) => state.panel.explorerData,
   );
@@ -143,7 +142,11 @@ const Sidebar: FC<IProps> = ({ isProfilePage, isWorkspaceSettingsPage }) => {
 
           {(isProfilePage || isWorkspaceSettingsPage) && (
             <div className={styles.sidebarHeading}>
-              <h1>{isProfilePage ? 'Profile' : 'Administration'}</h1>
+              <h1>
+                {isProfilePage
+                  ? t('sidebar.profile')
+                  : t('sidebar.administration')}
+              </h1>
             </div>
           )}
 

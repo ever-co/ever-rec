@@ -6,6 +6,7 @@ import { ItemActionsEnum } from 'app/enums/itemActionsEnum';
 import { defaultAvailableActions } from './containerDropdownActions';
 import { IWorkspace } from 'app/interfaces/IWorkspace';
 import { RootStateOrAny, useSelector } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 
 export interface IDropdownAvailableActions {
   hasMove: boolean;
@@ -35,6 +36,7 @@ const ItemDropdownActions: FC<IItemDropdownActionsProps> = ({
 }) => {
   const user = useSelector((state: RootStateOrAny) => state.auth.user);
 
+  const { t } = useTranslation();
   const handleItemClick = async (event: any) => {
     const key: ItemActionsEnum = event.key;
     onAction(key, event.domEvent);
@@ -46,7 +48,7 @@ const ItemDropdownActions: FC<IItemDropdownActionsProps> = ({
       icon: (
         <AppSvg path="/item/download.svg" size="22px" className="tw-mr-3" />
       ),
-      label: 'Download',
+      label: t('common.fileActions.download'),
     },
   ];
 
@@ -60,7 +62,8 @@ const ItemDropdownActions: FC<IItemDropdownActionsProps> = ({
           className="tw-mr-3"
         />
       ),
-      label: 'Edit Permissions',
+      //label: 'Edit Permissions',
+      label: t('common.fileActions.editPermission'),
     };
 
     menuItems.splice(0, 0, editPermissionsAction);
@@ -70,7 +73,7 @@ const ItemDropdownActions: FC<IItemDropdownActionsProps> = ({
     const shareAction = {
       key: ItemActionsEnum.share,
       icon: <AppSvg path="/common/share.svg" size="22px" className="tw-mr-3" />,
-      label: 'Share Link',
+      label: t('common.fileActions.shareLink'),
     };
 
     menuItems.splice(1, 0, shareAction);
@@ -80,7 +83,7 @@ const ItemDropdownActions: FC<IItemDropdownActionsProps> = ({
     const deleteAction = {
       key: ItemActionsEnum.delete,
       icon: <AppSvg path="/item/delete.svg" size="22px" className="tw-mr-3" />,
-      label: 'Delete',
+      label: t('common.fileActions.delete'),
     };
 
     menuItems.splice(menuItems.length, 0, deleteAction);
@@ -92,7 +95,7 @@ const ItemDropdownActions: FC<IItemDropdownActionsProps> = ({
       icon: (
         <AppSvg path="/images/restore.svg" size="20px" className="tw-mr-3" />
       ),
-      label: 'Restore',
+      label: t('common.fileActions.restore'),
     };
 
     menuItems.splice(1, 0, restoreAction);
@@ -108,7 +111,7 @@ const ItemDropdownActions: FC<IItemDropdownActionsProps> = ({
           className="tw-mr-3"
         />
       ),
-      label: 'Move',
+      label: t('common.fileActions.move'),
     };
 
     // Second to last
@@ -121,7 +124,7 @@ const ItemDropdownActions: FC<IItemDropdownActionsProps> = ({
       icon: (
         <AppSvg path="/common/forward.svg" size="22px" className="tw-mr-3" />
       ),
-      label: 'Move To Workspace',
+      label: t('common.fileActions.moveToWorkspace'),
     };
 
     menuItems.splice(0, 0, moveToWorkspace);
@@ -138,7 +141,7 @@ const ItemDropdownActions: FC<IItemDropdownActionsProps> = ({
           className="tw-mr-3"
         />
       ),
-      label: 'Share on WhatsApp',
+      label: t('common.fileActions.shareOnWhatsApp'),
     };
 
     menuItems.splice(0, 0, slackWhatsAppAction);
@@ -155,7 +158,7 @@ const ItemDropdownActions: FC<IItemDropdownActionsProps> = ({
           className="tw-mr-3"
         />
       ),
-      label: 'Share on Slack',
+      label: t('common.fileActions.shareOnSlack'),
     };
 
     menuItems.splice(0, 0, slackShareAction);
@@ -172,7 +175,7 @@ const ItemDropdownActions: FC<IItemDropdownActionsProps> = ({
           className="tw-mr-3"
         />
       ),
-      label: 'Create Jira Issue',
+      label: t('common.fileActions.createJiraIssue'),
     };
 
     menuItems.splice(0, 0, jiraShareAction);
@@ -189,7 +192,7 @@ const ItemDropdownActions: FC<IItemDropdownActionsProps> = ({
           className="tw-mr-3"
         />
       ),
-      label: 'Create Trello Card',
+      label: t('common.fileActions.createTrelloCard'),
     };
 
     menuItems.splice(0, 0, trelloShareAction);

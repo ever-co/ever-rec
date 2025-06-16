@@ -13,8 +13,10 @@ import { DriveUser } from 'app/services/google/auth';
 import useGoogleDriveAuth from 'hooks/useGoogleDriveAuth';
 import { useRouter } from 'next/router';
 import { panelRoutes, preRoutes } from 'components/_routes';
+import { useTranslation } from 'react-i18next';
 
 const SaveToCloudModal = ({ user, visible, item, onCancel }) => {
+  const { t } = useTranslation();
   const router = useRouter();
   const driveUser: DriveUser | null = useSelector(
     (state: RootStateOrAny) => state.auth.driveUser,
@@ -93,7 +95,7 @@ const SaveToCloudModal = ({ user, visible, item, onCancel }) => {
       onCancel={onCancel}
     >
       <div className="tw-font-semibold tw-text-sm tw-mb-2 tw-text-center">
-        Save to Cloud
+        {t('page.image.saveToCloud')}
       </div>
       <div className={styles.cloudProvidersWrapper}>
         <div
@@ -121,7 +123,9 @@ const SaveToCloudModal = ({ user, visible, item, onCancel }) => {
                 </div>
               </div>
               <div className={styles.providerText}>
-                <div className={styles.openVideoText}>Processing...</div>
+                <div className={styles.openVideoText}>
+                  {t('page.image.processing')}
+                </div>
               </div>
             </AppButton>
           ) : (
@@ -139,7 +143,9 @@ const SaveToCloudModal = ({ user, visible, item, onCancel }) => {
                 <AppSvg path="/images/google-drive-logo.svg" size="25px" />
                 <div className={styles.providerText}>
                   {driveVideoId && driveUser ? (
-                    <div className={styles.openVideoText}>Open video</div>
+                    <div className={styles.openVideoText}>
+                      {t('page.image.openVideo')}
+                    </div>
                   ) : (
                     driveUser?.email || 'Google drive'
                   )}
@@ -185,7 +191,9 @@ const SaveToCloudModal = ({ user, visible, item, onCancel }) => {
                   <AppSpinnerLocal circleInnerColor="#5b4dbe" />
                 </div>
                 <div className={styles.providerText}>
-                  <div className={styles.openImageText}>Processing...</div>
+                  <div className={styles.openImageText}>
+                    {t('page.image.processing')}
+                  </div>
                 </div>
               </div>
             ) : (
@@ -193,7 +201,7 @@ const SaveToCloudModal = ({ user, visible, item, onCancel }) => {
                 <AppSvg path="/images/dropbox-logo.svg" size="25px" />
                 <div className={styles.providerText}>
                   {dropBoxImageId
-                    ? 'Open Video'
+                    ? t('page.image.openVideo')
                     : user?.dropbox?.email || 'Dropbox'}
                 </div>
               </div>

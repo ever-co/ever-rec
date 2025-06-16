@@ -3,6 +3,7 @@ import classNames from 'classnames';
 import styles from 'pagesScss/workspaces/WorkspaceTeamsEmpty.module.scss';
 import AppButton from 'components/controls/AppButton';
 import AppSvg from 'components/elements/AppSvg';
+import { useTranslation } from 'react-i18next';
 
 interface IProps {
   inModal?: boolean;
@@ -17,6 +18,7 @@ const WorkspaceTeamsEmpty: FC<IProps> = ({
   onManageTeamsEmpty,
   onCreateTeam,
 }) => {
+  const { t } = useTranslation();
   return (
     <section
       className={classNames(
@@ -25,12 +27,12 @@ const WorkspaceTeamsEmpty: FC<IProps> = ({
       )}
     >
       <AppSvg path="/common/team.svg" />
-      <h2>There are no teams for this workspace...</h2>
+      <h2>{t('workspace.noTeams')}</h2>
 
       {isWorkspaceAdmin && (
         <>
           <p className={styles.noMembersDescription}>
-            Create a team and add members to it.
+            {t('workspace.inviteTeammatesDescription')}
           </p>
 
           <div className={styles.addTeamWrapper}>
@@ -41,7 +43,7 @@ const WorkspaceTeamsEmpty: FC<IProps> = ({
               className={styles.addTeamBtn}
               full
             >
-              Create Team
+              {t('workspace.createTeam')}
             </AppButton>
           </div>
         </>
@@ -55,7 +57,7 @@ const WorkspaceTeamsEmpty: FC<IProps> = ({
           className={styles.addTeamBtn}
           full
         >
-          Manage Teams
+          {t('workspace.manageTeams')}
         </AppButton>
       )}
     </section>

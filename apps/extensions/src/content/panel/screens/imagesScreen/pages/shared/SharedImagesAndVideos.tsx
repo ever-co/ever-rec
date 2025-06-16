@@ -13,8 +13,10 @@ import { IUser } from '@/app/interfaces/IUserData';
 import * as styles from '@/content/panel/styles/Shared.module.scss';
 import classNames from 'classnames';
 import SCHeader from '@/content/panel/shared/SCHeader/SCHeader';
+import { useTranslation } from 'react-i18next';
 
 const SharedImages: React.FC = () => {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const user: IUser = useSelector((state: RootStateOrAny) => state.auth.user);
   const sharedImages: IEditorImage[] = useSelector(
@@ -58,12 +60,14 @@ const SharedImages: React.FC = () => {
 
         <DashboardCard>
           <div className={styles.pageHeadingWrapper}>
-            <h1 className={styles.mainHeader}>Shared</h1>
+            <h1 className={styles.mainHeader}>{t('shared.shared')}</h1>
           </div>
         </DashboardCard>
 
         <DashboardCard style={{ minHeight: '100vh' }}>
-          <h3 className={styles.pageMainSectionWrapper}>Videos and Images</h3>
+          <h3 className={styles.pageMainSectionWrapper}>
+            {t('shared.videosAndImages')}
+          </h3>
 
           <ImagesAndVideosContainer
             isShared

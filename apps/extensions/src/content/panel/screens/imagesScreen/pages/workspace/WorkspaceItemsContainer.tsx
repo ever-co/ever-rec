@@ -38,6 +38,7 @@ import { getItemsToMapByReference } from '@/content/panel/hooks/useItemsFilter';
 import ItemsNotFound from '../shared/components/ItemsNotFound';
 import IEditorImage from '@/app/interfaces/IEditorImage';
 import useGetXXL from '@/content/utilities/hooks/useGetXXL';
+import { useTranslation } from 'react-i18next';
 
 type WorkspaceItemsType<T = IWorkspaceImage | IWorkspaceVideo> = T[];
 
@@ -74,6 +75,7 @@ const WorkspaceItemsContainer: FC<Props> = ({
   canViewItem,
   onTeamFilter,
 }) => {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const firstRender = useFirstRender();
@@ -196,7 +198,7 @@ const WorkspaceItemsContainer: FC<Props> = ({
     <>
       <div className={styles.itemsContainer}>
         <div className={styles.itemsContainerHeadingContainer}>
-          <h3 className={styles.headingContainerHeading}>Items</h3>
+          <h3 className={styles.headingContainerHeading}>{t('ext.items')}</h3>
 
           <FilterDropdown
             filterTeamId={filterTeamId}

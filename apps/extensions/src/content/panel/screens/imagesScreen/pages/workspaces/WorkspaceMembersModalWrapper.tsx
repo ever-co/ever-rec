@@ -14,6 +14,7 @@ import { useDispatch } from 'react-redux';
 import WorkspaceMembersModal from './WorkspaceMembersModal';
 import { IWorkspaceMembersModal } from './WorkspacesTeams';
 import Queue from 'queue-promise';
+import { useTranslation } from 'react-i18next';
 
 const queue = new Queue({
   concurrent: 1,
@@ -49,6 +50,7 @@ const WorkspaceMembersModalWrapper: FC<IProps> = ({
   addMemberToMembersMap,
   removeMemberFromMembersMap,
 }) => {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const [membersLoadingIds, setMemberLoadingIds] = useState<IMemberLoadingIds>(
     {},
@@ -141,7 +143,7 @@ const WorkspaceMembersModalWrapper: FC<IProps> = ({
       }
 
       if (!newTeamsData) {
-        errorMessage('There was a problem... Please try again.');
+        errorMessage(t('toasts.thereProblem'));
         removeMemberFromLoadingState(teamId, memberId);
         return;
       }

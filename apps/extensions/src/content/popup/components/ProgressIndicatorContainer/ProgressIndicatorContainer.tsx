@@ -4,6 +4,7 @@ import {
   ProgressTypeEnum,
 } from '../../utilities/interfaces/IProgressIndicatorData';
 import ProgressIndicator from './ProgressIndicator/ProgressIndicator';
+import { Trans, useTranslation } from 'react-i18next';
 
 interface IProgressIndicatorContainerProps {
   progressData: IProgressIndicatorData;
@@ -12,21 +13,32 @@ interface IProgressIndicatorContainerProps {
 const ProgressIndicatorContainer: FC<IProgressIndicatorContainerProps> = ({
   progressData,
 }) => {
+  const { t } = useTranslation();
   let title: string;
   let description: JSX.Element;
 
   if (progressData.progressType === ProgressTypeEnum.GIF) {
-    title = 'Encoding GIF Animation';
+    title = t('ext.encodingGIF');
     description = (
       <span>
-        Your <b>GIF animation</b> is currently encoding...
+        <Trans
+          i18nKey="ext.GIFanimation"
+          components={{
+            b: <b />,
+          }}
+        />
       </span>
     );
   } else {
-    title = 'Full Page Capturing';
+    title = t('ext.fullPage');
     description = (
       <span>
-        Please <b>do not scroll</b> for the best possible result.
+        <Trans
+          i18nKey="ext.scroll"
+          components={{
+            b: <b />,
+          }}
+        />
       </span>
     );
   }

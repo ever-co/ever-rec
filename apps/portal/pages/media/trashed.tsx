@@ -25,12 +25,13 @@ import {
 import { FolderTypeEnum } from 'app/enums/folderTypeEnum';
 import MediaIndex from './index';
 import { IUser } from '../../app/interfaces/IUserData';
-import classNames from 'classnames';
 import styles from 'pagesScss/Shared.module.scss';
 import MultiItemsSelect from 'components/pagesComponents/_imagesScreen/components/multiItemsSelect/MultiItemsSelect';
 import SCHeader from 'components/shared/SCHeader/SCHeader';
+import { useTranslation } from 'react-i18next';
 
 const Trashed: React.FC = () => {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const user: IUser = useSelector((state: RootStateOrAny) => state.auth.user);
   const trashImages: IEditorImage[] = useSelector(
@@ -78,28 +79,28 @@ const Trashed: React.FC = () => {
     setDeleteModal(false);
 
     if (trashImages.length === 0 && trashVideos.length === 0) {
-      return infoMessage('No items to delete...');
+      return infoMessage(t('toasts.noItemsToDelete'));
     }
 
     setLoading(true);
     await deleteAllVideos();
     await deleteAllScreenshots();
     setLoading(false);
-    successMessage('Items deleted successfully.');
+    successMessage(t('toasts.itemsDeleted'));
   };
 
   const restoreAllItems = async () => {
     setRestoreModal(false);
 
     if (trashImages.length === 0 && trashVideos.length === 0) {
-      return infoMessage('No items to restore...');
+      return infoMessage(t('toasts.noItemsToRestore'));
     }
 
     setLoading(true);
     await restoreAllVideos();
     await restoreAllScreenshots();
     setLoading(false);
-    successMessage('Items restored successfully.');
+    successMessage(t('toasts.itemsRestored'));
   };
 
   return (
@@ -109,7 +110,7 @@ const Trashed: React.FC = () => {
 
         <DashboardCard className={styles.trashedHeadingContainer}>
           <div className={styles.pageHeadingWrapper}>
-            <h1 className={styles.mainHeader}>Trash</h1>
+            <h1 className={styles.mainHeader}>{t('page.trashed.title')}</h1>
           </div>
         </DashboardCard>
 
@@ -121,7 +122,9 @@ const Trashed: React.FC = () => {
               // trashedItemsHeaderContainer
             >
               <div className={styles.trashedHeaderContainer}>
-                <h2 className={styles.recentlyDeleted}>Recently Deleted</h2>
+                <h2 className={styles.recentlyDeleted}>
+                  {t('page.trashed.recentlyDeleted')}
+                </h2>
               </div>
 
               <MultiItemsSelect
@@ -154,7 +157,7 @@ const Trashed: React.FC = () => {
                       twPadding="tw-py-3 tw-px-7"
                       onClick={() => setDeleteModal(true)}
                     >
-                      Delete All
+                      {t('common.bulkActions.deleteAll')}
                     </AppButton>
                   </div>
                   <div
@@ -166,7 +169,7 @@ const Trashed: React.FC = () => {
                       twPadding="tw-py-3 tw-px-6"
                       onClick={() => setRestoreModal(true)}
                     >
-                      Restore All
+                      {t('common.bulkActions.restoreAll')}
                     </AppButton>
                   </div>
                 </div>
@@ -201,16 +204,16 @@ const Trashed: React.FC = () => {
         visible={restoreModal}
         onCancel={() => setRestoreModal(false)}
         onOk={restoreAllItems}
-        title={'Do you want to restore all items?'}
-        confirmText="Restore All"
+        title={t('page.trashed.dialog.restoreAll.message')}
+        confirmText={t('common.bulkActions.restoreAll')}
       />
 
       <TrashModal
         visible={deleteModal}
         onCancel={() => setDeleteModal(false)}
         onOk={deleteAllItems}
-        title={'Do you want to delete all items forever?'}
-        confirmText="Delete All"
+        title={t('page.trashed.dialog.deleteAll.message')}
+        confirmText={t('common.bulkActions.deleteAll')}
         confirmClass="tw-bg-red"
       />
 

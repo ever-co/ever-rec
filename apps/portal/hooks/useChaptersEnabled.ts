@@ -4,11 +4,13 @@ import { enableChapters } from 'app/services/videosChapters';
 import IEditorVideo from 'app/interfaces/IEditorVideo';
 import { successMessage } from 'app/services/helpers/toastMessages';
 import { removeMarkersEvent, createMarkersEvent } from 'misc/customEvents';
+import { useTranslation } from 'react-i18next';
 
 const useChaptersEnabled = (
   video: IEditorVideo | IWorkspaceVideo | null,
   workspaceId = '',
 ) => {
+  const { t } = useTranslation();
   const [chaptersEnabled, setChaptersEnabled] = useState(true);
 
   useEffect(() => {
@@ -35,7 +37,7 @@ const useChaptersEnabled = (
     }
 
     setChaptersEnabled(newSetting);
-    successMessage('Chapters visibility changed successfully.');
+    successMessage(t('hooks.toasts.chaptersVisibilityChanged'));
   };
 
   return { chaptersEnabled, updateChaptersEnabled };

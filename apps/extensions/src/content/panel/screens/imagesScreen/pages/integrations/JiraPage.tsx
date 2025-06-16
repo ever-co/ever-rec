@@ -11,8 +11,10 @@ import DisconnectServiceModal from '@/content/components/shared/DisconnectServic
 import { useCallback, useState } from 'react';
 import { RootStateOrAny, useSelector } from 'react-redux';
 import ISettingsPageProps from '@/content/panel/screens/settingsScreen/interface/ISettingsPage';
+import { useTranslation } from 'react-i18next';
 
 const JiraPage: React.FC<ISettingsPageProps> = () => {
+  const { t } = useTranslation();
   const user = useSelector((state: RootStateOrAny) => state.auth.user);
   const [isDisconnect, setIsDisconnect] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -32,7 +34,7 @@ const JiraPage: React.FC<ISettingsPageProps> = () => {
     if (res.status != 'error') {
       setLoading(false);
       setIsDisconnect(false);
-      infoMessage('Successfully disconnected from Jira account.');
+      infoMessage(t('toasts.jiraDisconnected'));
     } else {
       setLoading(false);
       errorMessage(res.message);
@@ -48,7 +50,7 @@ const JiraPage: React.FC<ISettingsPageProps> = () => {
             path="/images/logo/jira-logo.svg"
             size="22px"
           />
-          Jira Service
+          {t('page.integrations.jira.title')}
         </div>
       </h1>
 
@@ -59,7 +61,9 @@ const JiraPage: React.FC<ISettingsPageProps> = () => {
         <>
           <h2 className="tw-max-w-full tw-text-center">
             <div className="tw-flex tw-flex-col tw-gap-2 tw-justify-center">
-              <div className="tw-mr-2">Connected to: </div>
+              <div className="tw-mr-2">
+                {t('page.integrations.connectedTo')}
+              </div>
               <div className="tw-flex">
                 <span className="tw-text-primary-purple tw-font-bold">
                   {user.jira.email}
@@ -74,19 +78,18 @@ const JiraPage: React.FC<ISettingsPageProps> = () => {
               onClick={() => setIsDisconnect(true)}
               full={true}
             >
-              Disconnect from Jira
+              {t('page.integrations.jira.disconnectFromJira')}
             </AppButton>
           </div>
         </>
       ) : (
         <>
           <p className={styles.description}>
-            You can connect your Jira account to add new ticket and upload
-            screenshots captured by Rec.
+            {t('page.integrations.jira.description')}
           </p>
           <div className="tw-w-90p">
             <AppButton onClick={connectToAccount} full={true}>
-              Continue with Jira
+              {t('page.integrations.jira.buttonText')}
             </AppButton>
           </div>
         </>
@@ -96,10 +99,8 @@ const JiraPage: React.FC<ISettingsPageProps> = () => {
           onCancel={() => setIsDisconnect(false)}
           onOk={disconnectJiraAccount}
           loading={loading}
-          title={'Disconnect your Jira account?'}
-          subTitle={
-            "Are you sure you want to disable Jira integration? By disconnecting you won't be able to share your screenshots and videos."
-          }
+          title={t('page.integrations.jira.disconnectErrorTitle')}
+          subTitle={t('page.integrations.jira.disconnectErrorDescription')}
         />
       )}
     </div>

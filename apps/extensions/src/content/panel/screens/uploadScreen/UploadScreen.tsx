@@ -18,10 +18,12 @@ import IEditorImage from '@/app/interfaces/IEditorImage';
 import { warnMessage } from '@/app/services/helpers/toastMessages';
 import * as styles from './UploadScreen.module.scss';
 import classNames from 'classnames';
+import { useTranslation } from 'react-i18next';
 
 const fileType = ['image/png', 'image/jpeg', 'image/jpg'];
 
 const UploadScreen: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const fileUploader = useRef<HTMLInputElement>(null);
   const editorImage: IEditorImage = useSelector(
@@ -63,7 +65,7 @@ const UploadScreen: React.FC = () => {
       const file = event.target.files[0];
       if (file && fileTitle) {
         if (!fileType.includes(file?.type)) {
-          return warnMessage('This file type is not supported.');
+          return warnMessage(t('ext.fileTypeNotSupported'));
         }
 
         sendBase64ImageToEditor(file, fileTitle);
@@ -76,7 +78,7 @@ const UploadScreen: React.FC = () => {
     const fileTitle = e?.dataTransfer.files[0].name;
     if (file && fileTitle) {
       if (!fileType.includes(file?.type)) {
-        return warnMessage(`This file type is not supported.`);
+        return warnMessage(t('ext.fileTypeNotSupported'));
       }
 
       sendBase64ImageToEditor(file, fileTitle);
@@ -86,13 +88,13 @@ const UploadScreen: React.FC = () => {
   const onPaste = async (e: ClipboardEvent<HTMLDivElement> | undefined) => {
     const clipboardData = e?.clipboardData.items[0];
     if (clipboardData?.kind != 'file') {
-      return warnMessage(`Your clipboard item is not a file.`);
+      return warnMessage(t('ext.notAFile'));
     }
 
     const file = clipboardData.getAsFile();
     if (file) {
       if (!fileType.includes(file?.type)) {
-        return warnMessage(`This file type is not supported.`);
+        return warnMessage(t('ext.fileTypeNotSupported'));
       }
 
       sendBase64ImageToEditor(file, 'Rec');
@@ -145,14 +147,14 @@ const UploadScreen: React.FC = () => {
           </div>
           <div className="tw-m-auto tw-text-center tw-pt-16 ">
             <p className="tw-text-primary-purple tw-font-roboto-bold tw-text-3xl">
-              Upload images from your local drive to annotate
+              {t('ext.uploadFromLocalDrive')}
               <br />
-              with one of the following methods:
+              {t('ext.or')}
             </p>
             <ul className="tw-list-disc tw-w-96 tw-m-auto tw-text-left tw-font-medium tw-text-black tw-text-xl ">
-              <li>Drag and drop an image file into this field</li>
-              <li>Click to select an image from local disk</li>
-              <li>Paste an image from your clipboard (PNG or JPG)</li>
+              <li>{t('ext.dragAndDropUpload')}</li>
+              <li>{t('ext.clickToSelectUpload')}</li>
+              <li>{t('ext.pasteImageUpload')}</li>
             </ul>
           </div>
         </div>

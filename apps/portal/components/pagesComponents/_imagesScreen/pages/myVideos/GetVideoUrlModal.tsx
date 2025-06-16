@@ -1,5 +1,6 @@
 import React from 'react';
 import { Modal } from 'antd';
+import { useTranslation } from 'react-i18next';
 
 interface IGetVideoUrlModalProps {
   visible: boolean;
@@ -16,14 +17,15 @@ const GetVideoUrlModal: React.FC<IGetVideoUrlModalProps> = ({
     await navigator.clipboard.writeText(url);
   };
 
+  const { t } = useTranslation();
   return (
     <Modal
-      title="Video URL"
+      title={t('modals.videoUrl')}
       open={visible}
       onCancel={onClose}
       onOk={onOkHandler}
-      okText="Copy"
-      cancelText="Close"
+      okText={t('page.image.copy')}
+      cancelText={t('common.close')}
     >
       {url}
     </Modal>
