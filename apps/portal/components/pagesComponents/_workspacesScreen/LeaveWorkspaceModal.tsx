@@ -3,6 +3,7 @@ import { Modal } from 'antd';
 import AppSvg from '../../elements/AppSvg';
 import AppButton from '../../controls/AppButton';
 import { LeaveDeleteActions } from '../../../pages/media/workspaces/manage';
+import { Trans, useTranslation } from 'react-i18next';
 
 interface IProps {
   visible: boolean;
@@ -17,6 +18,7 @@ const LeaveWorkspaceModal: React.FC<IProps> = ({
   onOk,
   onCancel,
 }) => {
+  const { t } = useTranslation();
   return (
     <Modal
       open={visible}
@@ -32,7 +34,7 @@ const LeaveWorkspaceModal: React.FC<IProps> = ({
             className="tw-px-8 tw-text-white tw-pb-1 tw-pt-1 tw-border tw-border-danger tw-border-solid"
             bgColor="tw-bg-danger"
           >
-            Confirm
+            {t('common.confirm')}
           </AppButton>
           <AppButton
             onClick={onCancel}
@@ -40,16 +42,20 @@ const LeaveWorkspaceModal: React.FC<IProps> = ({
             outlined
             className="tw-px-8 tw-mx-4 tw-pb-1 tw-pt-1"
           >
-            Cancel
+            {t('common.cancel')}
           </AppButton>
         </div>
       }
     >
       <h2 className="tw-mb-6 tw-text-xl tw-font-bold">
-        Are you sure you want to {action === 'leave' ? 'leave' : 'delete'} this
-        workspace?
+        <Trans
+          values={{
+            action: action === 'leave' ? t('common.leave') : t('common.delete'),
+          }}
+          i18nKey="modals.confirmModalDelete"
+        />
       </h2>
-      <p>This action cannot be undone.</p>
+      <p>{t('modals.lastWarning')}</p>
     </Modal>
   );
 };

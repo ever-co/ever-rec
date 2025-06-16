@@ -10,6 +10,7 @@ import { UniqueView } from '@/app/interfaces/IUniqueView';
 import UniqueImage from './UniqueImage/UniqueImage';
 import { getItemUniqueViews } from '@/app/services/imageandvideo';
 import { ItemType } from '@/app/interfaces/ItemTypes';
+import { useTranslation } from 'react-i18next';
 
 interface IUniqueViewsProps {
   item: IEditorImage | IEditorVideo | null;
@@ -32,6 +33,7 @@ const UniqueViews: React.FC<IUniqueViewsProps> = ({
   isPublic = false,
   hasBorderStyle = true,
 }) => {
+  const { t } = useTranslation();
   const shouldFetch = useRef(true);
   const [uniqueViews, setUniqueViews] = useState<UniqueView[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -64,9 +66,10 @@ const UniqueViews: React.FC<IUniqueViewsProps> = ({
     views = (item?.dbData && item.dbData.views) || 0;
   }
 
-  const viewString = views == 1 ? 'view' : 'views';
+  const viewString = views == 1 ? t('page.image.view') : t('page.image.views');
   const uniqueLength = uniqueViews.length;
-  const uniqueString = uniqueViews.length === 1 ? 'view' : 'views';
+  const uniqueString =
+    uniqueViews.length === 1 ? t('page.image.view') : t('page.image.views');
 
   return isOwner ? (
     <Popover
@@ -80,10 +83,14 @@ const UniqueViews: React.FC<IUniqueViewsProps> = ({
         ) : (
           <div className={classNames(`${styles.bgColor}`, 'tw-p-5')}>
             <div className="tw-text-sm tw-font-bold tw-text-left tw-mb-2">
-              Viewer Insights
+              {t('page.image.viewInsights')}
             </div>
             <div className="tw-text-sm tw-text-center tw-mb-2 tw-bg-white tw-p-2 tw-rounded-lg">
-              {`${views} unique ${viewString} | ${uniqueLength} user ${uniqueString}`}
+              {`${views} ${t(
+                'page.image.unique',
+              )} ${viewString} | ${uniqueLength} ${t(
+                'page.image.user',
+              )} ${uniqueString}`}
             </div>
             {uniqueViews.length != 0 && (
               <div
@@ -135,7 +142,7 @@ const UniqueViews: React.FC<IUniqueViewsProps> = ({
 
         <span className="tw-whitespace-nowrap">
           {`
-          ${views || 'No'}
+          ${views || t('page.image.no')}
           ${viewString}
           `}
         </span>
@@ -146,7 +153,7 @@ const UniqueViews: React.FC<IUniqueViewsProps> = ({
       className={classNames(styles.border, styles.noViews, styles.noPointer)}
     >
       <span>{icon}</span>
-      {`${views || 'No'} ${viewString}`}
+      {`${views || t('page.image.no')} ${viewString}`}
     </div>
   );
 };

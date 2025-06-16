@@ -23,8 +23,10 @@ import {
   addVideoFolderToFavsAPI,
 } from '@/app/services/api/image';
 import FolderHeader from '../imagesScreen/components/folderItem/FolderHeader';
+import { useTranslation } from 'react-i18next';
 
 const FavoritesPage: React.FC = () => {
+  const { t } = useTranslation();
   const {
     favoritesVideos,
     favoritesImages,
@@ -84,7 +86,7 @@ const FavoritesPage: React.FC = () => {
           //onClick={(e) => addToFavs()}
         >
           <span className="tw-text-base tw-font-semibold">
-            Remove from favorites
+            {t('common.folderActions.removeFavorites')}
           </span>
         </Menu.Item>
       </Menu>
@@ -174,8 +176,9 @@ const FavoritesPage: React.FC = () => {
               alt={`No favorite ${folderType} folders`}
             />
             <h1 className="tw-text-xl tw-font-bold tw-text-center">
-              No Favorites {folderType === 'images' ? 'Images' : 'Videos'}{' '}
-              Folders found
+              {t('ext.noFavoriteFolders', {
+                folderType: folderType === 'images' ? 'Images' : 'Videos',
+              })}
             </h1>
           </div>
         </div>
@@ -197,12 +200,14 @@ const FavoritesPage: React.FC = () => {
         <DashboardCard className={styles.foldersDashboardCard}>
           <div>
             <div className={styles.pageHeadingWrapper}>
-              <h1 className={styles.favoriteHeading}>Favorites</h1>
+              <h1 className={styles.favoriteHeading}>
+                {t('navigation.favorites')}
+              </h1>
             </div>
           </div>
           <>
             <FoldersSection
-              title="Images Folders"
+              title={t('ext.imagesFolders')}
               folders={favoritesImages}
               folderType="images"
               moreMenuFn={moreMenu}
@@ -212,7 +217,7 @@ const FavoritesPage: React.FC = () => {
             <div className={styles.pageHeadingWrapper} />
             <div className="tw-bg-white tw-flex tw-flex-grow tw-flex-col">
               <FoldersSection
-                title="Videos Folders"
+                title={t('ext.videosFolders')}
                 folders={favoritesVideos}
                 folderType="videos"
                 moreMenuFn={moreMenu}

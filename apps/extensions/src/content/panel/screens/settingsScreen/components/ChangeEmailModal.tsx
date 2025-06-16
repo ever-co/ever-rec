@@ -7,11 +7,7 @@ import AppInput from '@/content/components/controls/appInput/AppInput';
 import ModalSaveChangesFooter from '@/content/panel/shared/modalComponents/ModalSaveChangesFooter';
 import useEnterKeyPress from '@/content/utilities/hooks/useEnterKeyPress';
 import useChangeModalForm from '@/content/utilities/hooks/useChangeModalForm';
-
-const newEmailRules: ((v: string) => boolean | string)[] = [
-  requiredRule('Please enter email'),
-  emailRule('Please enter a correct email address'),
-];
+import { useTranslation } from 'react-i18next';
 
 interface ICreateFolderModalProps {
   visible: boolean;
@@ -26,6 +22,7 @@ const ChangeEmailModal: React.FC<ICreateFolderModalProps> = ({
   onClose,
   onOk,
 }) => {
+  const { t } = useTranslation();
   const {
     fieldState: newEmail,
     setFieldState: setNewEmail,
@@ -34,6 +31,10 @@ const ChangeEmailModal: React.FC<ICreateFolderModalProps> = ({
     onCancelHandler,
     onOkHandler,
   } = useChangeModalForm(email, onOk, onClose);
+  const newEmailRules: ((v: string) => boolean | string)[] = [
+    requiredRule(t('page.auth.error.enterEmail')),
+    emailRule(t('page.auth.error.emailIncorrect')),
+  ];
 
   useEnterKeyPress(onOkHandler);
 
@@ -68,11 +69,11 @@ const ChangeEmailModal: React.FC<ICreateFolderModalProps> = ({
         />
       }
     >
-      <h2 className={styles.modalHeader}>Email Address</h2>
+      <h2 className={styles.modalHeader}>{t('page.profile.emailAddress')}</h2>
 
-      <label>Current email address:</label>
+      <label>{t('page.profile.currentEmail')}</label>
       <AppInput
-        placeholder="Enter new email"
+        placeholder={t('page.profile.newEmail')}
         value={newEmail.value}
         errors={newEmail.errors}
         onChange={onEmailChange}

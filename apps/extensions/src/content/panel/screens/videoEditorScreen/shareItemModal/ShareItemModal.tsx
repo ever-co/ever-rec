@@ -8,6 +8,7 @@ import AppSpinnerLocal from '@/content/components/containers/appSpinnerLocal/App
 import AppButton from '@/content/components/controls/appButton/AppButton';
 import AppSvg from '@/content/components/elements/AppSvg';
 import useGenerateShareLink from '@/content/utilities/hooks/useGenerateShareLink';
+import { useTranslation } from 'react-i18next';
 
 interface IProps {
   visible: boolean;
@@ -22,6 +23,7 @@ const ShareItemModal: FC<IProps> = ({
   workspaceId,
   onCancel,
 }) => {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const {
     sharedLink,
@@ -74,7 +76,7 @@ const ShareItemModal: FC<IProps> = ({
         <div className="tw-pb-4">
           <div className="tw-flex tw-items-center tw-justify-between tw-mb-2">
             <h3 className="tw-font-semibold tw-text-lg tw-mb-2">
-              Shareable link:
+              {t('page.image.shareableLink')}
             </h3>
 
             <AppButton
@@ -82,7 +84,10 @@ const ShareItemModal: FC<IProps> = ({
               className="tw-pt-0 tw-pb-0 tw-pl-2 tw-pr-2"
               onClick={removeSharedLink}
             >
-              <span className="tw-text-xs tw-text-white">Remove</span>
+              <span className="tw-text-xs tw-text-white">
+                {' '}
+                {t('page.image.remove')}
+              </span>
             </AppButton>
           </div>
 
@@ -108,7 +113,7 @@ const ShareItemModal: FC<IProps> = ({
                   size="24px"
                   className="tw-mr-5px"
                 />
-                <span>Copy</span>
+                <span>{t('page.image.copy')}</span>
               </>
             )}
           </AppButton>
@@ -116,7 +121,7 @@ const ShareItemModal: FC<IProps> = ({
       ) : (
         <div className="tw-pb-4">
           <h3 className="tw-font-semibold tw-text-lg tw-mb-2">
-            Share your video:
+            {t('page.image.shareYourVideo')}
           </h3>
 
           <AppButton
@@ -129,7 +134,7 @@ const ShareItemModal: FC<IProps> = ({
                 <AppSpinnerLocal />
               </div>
             ) : (
-              <span>Generate Shareable Link</span>
+              <span>{t('page.image.generateShareableLink')}</span>
             )}
           </AppButton>
         </div>

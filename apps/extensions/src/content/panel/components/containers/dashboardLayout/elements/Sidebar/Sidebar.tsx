@@ -13,12 +13,17 @@ import UserShortInfo from '../UserShortInfo';
 import * as styles from './Sidebar.module.scss';
 import PanelAC from '@/app/store/panel/actions/PanelAC';
 import UploadWorkspaceImageModal from '@/content/panel/screens/imagesScreen/components/UploadWorkspaceImage/UploadWorkspaceImage';
+<<<<<<< HEAD
 import {
   IMainMenuItem,
   getWorkspaceSettingsMenuItems,
   mainMenuItems,
   settingsMenuItems,
 } from '@/content/panel/misc/menuItems';
+=======
+import { IMainMenuItem, useMenuItems } from '@/content/panel/misc/menuItems';
+import FavFoldersSidebarSection from '../FavFoldersSidebarSection/FavFoldersSidebarSection';
+>>>>>>> c478e16abe15a7cf0ca83f35af2c3c76e2ba6c1c
 import { getExplorerData } from '@/app/services/screenshots';
 import { getExplorerDataVideo } from '@/app/services/videos';
 import AppSpinner from '@/content/components/containers/appSpinner/AppSpinner';
@@ -26,17 +31,21 @@ import SidebarWorkspaces from '../SidebarWorkspaces/SidebarWorkspaces';
 import { Link } from 'react-router-dom';
 import useClickOrKeyOutside from '@/content/utilities/hooks/useClickOrKeyOutside';
 import { useCreateWorkspace } from '@/content/utilities/hooks/useCreateWorkspace';
+import { useTranslation } from 'react-i18next';
 
 interface SidebarProps {
   isProfilePage?: boolean;
 }
 
 const Sidebar: FC<SidebarProps> = ({ isProfilePage }) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
   const favFoldersRef = useRef<any>(null);
   const user: IUser = useSelector((state: RootStateOrAny) => state.auth.user);
+  const { mainMenuItems, getWorkspaceSettingsMenuItems, settingsMenuItems } =
+    useMenuItems();
   const explorerData = useSelector(
     (state: RootStateOrAny) => state.panel.explorerData,
   );
@@ -138,7 +147,11 @@ const Sidebar: FC<SidebarProps> = ({ isProfilePage }) => {
 
           {(isProfilePage || isWorkspaceSettingsPage) && (
             <div className={styles.sidebarHeading}>
-              <h1>{isProfilePage ? 'Profile' : 'Administration'}</h1>
+              <h1>
+                {isProfilePage
+                  ? t('sidebar.profile')
+                  : t('sidebar.administration')}
+              </h1>{' '}
             </div>
           )}
 

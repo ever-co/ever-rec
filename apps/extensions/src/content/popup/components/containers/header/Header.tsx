@@ -9,6 +9,7 @@ import Logo from '@/content/components/elements/Logo';
 import UserShortInfoPopup from '../../UserShortInfoPopup';
 import AppSvg from '@/content/components/elements/AppSvg';
 import MenuItem from './MenuItem';
+import { useTranslation } from 'react-i18next';
 
 export interface IMenuItem {
   title: string;
@@ -21,6 +22,7 @@ export interface IMenuItem {
 }
 
 const Header: React.FC = () => {
+  const { t } = useTranslation();
   const currentUser: IUser = useSelector(
     (state: RootStateOrAny) => state.auth.user,
   );
@@ -41,7 +43,7 @@ const Header: React.FC = () => {
 
   const menu: IMenuItem[] = [
     {
-      title: 'Sign In',
+      title: t('ext.signIn'),
       showTitle: true,
       icon: (
         <AppSvg
@@ -55,7 +57,7 @@ const Header: React.FC = () => {
       handler: signInHandler,
     },
     {
-      title: 'Sign Out',
+      title: t('ext.signOut'),
       icon: (
         <AppSvg
           path="images/panel/sign/logout.svg"

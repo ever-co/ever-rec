@@ -17,6 +17,7 @@ import {
   loadingMessage,
   updateMessage,
 } from 'app/services/helpers/toastMessages';
+import { useTranslation } from 'react-i18next';
 
 const defaultInput: IAppControl = {
   value: '',
@@ -26,6 +27,7 @@ const defaultInput: IAppControl = {
 
 const PanelLogin: React.FC = () => {
   const router = useRouter();
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const [email, setEmail] = useState(defaultInput);
   const [password, setPassword] = useState(defaultInput);
@@ -42,12 +44,12 @@ const PanelLogin: React.FC = () => {
   }, []);
 
   const emailRules: ((v: string) => boolean | string)[] = [
-    requiredRule('Please enter an email'),
-    emailRule('Email is incorrect'),
+    requiredRule(t('page.auth.error.enterEmail')),
+    emailRule(t('page.auth.error.emailCorrect')),
   ];
 
   const passwordRules: ((v: string) => boolean | string)[] = [
-    requiredRule('Please enter a password'),
+    requiredRule(t('page.auth.error.enterPassword')),
   ];
 
   useEffect(() => {
@@ -130,7 +132,7 @@ const PanelLogin: React.FC = () => {
       <div>
         <AppInput
           value={email.value}
-          placeholder="Email Address"
+          placeholder={t('page.auth.common.email')}
           inputClass="tw-placeholder-mid-grey"
           errors={email.errors}
           rules={emailRules}
@@ -142,7 +144,7 @@ const PanelLogin: React.FC = () => {
           <AppInput
             value={password.value}
             type={passwordShown ? 'text' : 'password'}
-            placeholder="Password"
+            placeholder={t('page.auth.common.password')}
             className="tw-w-full tw-mt-2"
             inputClass="tw-placeholder-mid-grey tw-border-b-0 tw-mt-4"
             errors={password.errors}
@@ -160,13 +162,13 @@ const PanelLogin: React.FC = () => {
         <div className="tw-flex tw-justify-between tw-items-center tw-mt-8">
           <div className="tw-flex tw-gap-2 !tw-text-sm">
             <Checkbox checked={rememberMe} onChange={handleRememberMeChange} />
-            <p>Remember me</p>
+            <p> {t('page.auth.login.rememberMe')}</p>
           </div>
           <AppLink
             className="tw-text-overlay-black !tw-font-extralight !tw-text-sm"
             onClick={() => router.push(`/auth/reset`)}
           >
-            Forgot Password?
+            {t('page.auth.login.forgotPassword')}
           </AppLink>
         </div>
 
@@ -177,7 +179,7 @@ const PanelLogin: React.FC = () => {
           twPadding="tw-p-4"
           onClick={submitHandler}
         >
-          Sign in with email
+          {t('page.auth.login.signInWithEmail')}
         </AppButton>
       </div>
     </Auth>

@@ -1,6 +1,6 @@
+import { useTranslation } from 'react-i18next';
 import CaptureTabBtn from './CaptureTabBtn/CaptureTabBtn';
 import AppSvg from '@/content/components/elements/AppSvg';
-
 
 interface ICaptureTabsProps {
   isCaptureTab: boolean;
@@ -11,6 +11,7 @@ const CaptureTabs: React.FC<ICaptureTabsProps> = ({
   isCaptureTab,
   setIsCaptureTab,
 }) => {
+  const { t } = useTranslation();
   return (
     <div className="tw-flex tw-h-12">
       <CaptureTabBtn
@@ -24,7 +25,7 @@ const CaptureTabs: React.FC<ICaptureTabsProps> = ({
             }
           />
         }
-        title="Capture"
+        title={t('ext.capture.capture')}
         borderTopLeft
         tabClicked={() => setIsCaptureTab(true)}
       />
@@ -39,7 +40,7 @@ const CaptureTabs: React.FC<ICaptureTabsProps> = ({
             }
           />
         }
-        title="Record"
+        title={t('ext.capture.record')}
         borderTopRight
         tabClicked={() => setIsCaptureTab(false)}
       />

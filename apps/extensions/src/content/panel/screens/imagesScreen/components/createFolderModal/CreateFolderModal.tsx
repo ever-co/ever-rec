@@ -10,6 +10,7 @@ import colorPalet from './colorPalet';
 import ColorElement from '../ColorElement/ColorElement';
 import { IWorkspace } from '@/app/interfaces/IWorkspace';
 import { ColorPicker } from '../ColorElement/ColorPicker';
+import { useTranslation } from 'react-i18next';
 
 interface ICreateFolderModalProps {
   visible: boolean;
@@ -22,6 +23,7 @@ const CreateFolderModal: React.FC<ICreateFolderModalProps> = ({
   onCreateFolder,
   visible,
 }) => {
+  const { t } = useTranslation();
   const initialControl = (): IAppControl => ({
     value: '',
     errors: [],
@@ -65,19 +67,19 @@ const CreateFolderModal: React.FC<ICreateFolderModalProps> = ({
         window.location.pathname.includes('workspace'))
     ) {
       setFolderName({
-        errors: ['This folder already exists'],
+        errors: [t('toasts.folderExists')],
         touched: true,
         value: folderName.value,
       });
     } else if (folderName.value.length > 35) {
       setFolderName({
-        errors: ['Folder name can not contain more than 35 characters'],
+        errors: [t('toasts.folderNameTooLong')],
         touched: true,
         value: folderName.value,
       });
     } else if (folderName.value.length < 1 && folderName.touched) {
       setFolderName({
-        errors: ['Folder name can not be empty'],
+        errors: [t('toasts.folderNameEmpty')],
         touched: true,
         value: folderName.value,
       });
@@ -101,7 +103,7 @@ const CreateFolderModal: React.FC<ICreateFolderModalProps> = ({
   }, [folderName]);
 
   const folderNameRules: ((v: string) => boolean | string)[] = [
-    requiredRule('Please enter folder name'),
+    requiredRule(t('toasts.enterFolderName')),
   ];
 
   const onOkHandler = async (): Promise<void> => {
@@ -144,7 +146,7 @@ const CreateFolderModal: React.FC<ICreateFolderModalProps> = ({
             className="tw-mx-4 tw-pb-1 tw-pt-1"
             twPadding="tw-px-8"
           >
-            Cancel
+            {t('common.cancel')}
           </AppButton>
           <AppButton
             onClick={onOkHandler}
@@ -152,14 +154,16 @@ const CreateFolderModal: React.FC<ICreateFolderModalProps> = ({
             twPadding="tw-px-8"
             disabled={!valid}
           >
-            Create
+            {t('modals.create')}
           </AppButton>
         </div>
       }
     >
-      <h2 className="tw-mb-6 tw-text-2xl tw-font-semibold">Create a folder</h2>
+      <h2 className="tw-mb-6 tw-text-2xl tw-font-semibold">
+        {t('modals.createAFolder')}
+      </h2>
       <AppInput
-        placeholder="Enter a folder name"
+        placeholder={t('modals.enterAFolderName')}
         value={folderName.value}
         errors={folderName.errors}
         onChange={folderNameChangeHandler}
@@ -167,14 +171,14 @@ const CreateFolderModal: React.FC<ICreateFolderModalProps> = ({
         maxLength={35}
       />
       <div className="tw-mt-2 tw-text-lg tw-ml-1">
-        Select folder{' '}
+        {t('modals.selectFolder')}{' '}
         <span className="tw-font-semibold" style={{ color: color }}>
-          color
+          {t('modals.color')}
         </span>
       </div>
       <div className="tw-flex tw-items-center tw-space-x-4"></div>
       <div className="tw-my-4 tw-flex tw-w-full tw-justify-center tw-h-25px tw-items-center">
-        <p className="tw-mt-2 tw-mr-1">Custom</p>{' '}
+        <p className="tw-mt-2 tw-mr-1">{t('modals.custom')}</p>{' '}
         <ColorPicker color={color} setColor={handleColor} />
         <p className="tw-h-7 tw-w-[1px] tw-mt-1 tw-bg-black tw-mx-2"></p>{' '}
         {colorPalet.map((item, index) => (

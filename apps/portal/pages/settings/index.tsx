@@ -5,7 +5,7 @@ import DashboardLayout from '../../components/containers/dashboardLayout/Dashboa
 import AppSpinner from 'components/containers/appSpinner/AppSpinner';
 import useHeadTitle from 'hooks/useHeadTitle';
 import useMonitorTokens from 'hooks/useMonitorTokens';
-import { settingsMenuItems } from 'misc/menuItems';
+import { useMenuItems } from 'misc/menuItems';
 
 interface IProps {
   children: ReactNode;
@@ -13,6 +13,7 @@ interface IProps {
 
 const Settings: FC<IProps> = ({ children }) => {
   const user = useAuthenticateUser();
+  const { settingsMenuItems } = useMenuItems();
   const headTitle = useHeadTitle(settingsMenuItems);
 
   useMonitorTokens();

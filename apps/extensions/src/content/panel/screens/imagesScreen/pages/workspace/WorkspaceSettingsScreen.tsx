@@ -12,8 +12,10 @@ import ProfileDetail from '../../../settingsScreen/components/ProfileDetail';
 import { useSearchParams } from 'react-router-dom';
 import { IUser } from '@/app/interfaces/IUserData';
 import { useNavigate } from 'react-router';
+import { useTranslation } from 'react-i18next';
 
 const WorkspaceSettings = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const user: IUser | null = useSelector(
@@ -70,7 +72,7 @@ const WorkspaceSettings = () => {
       );
     }
 
-    infoMessage('Organization name changed successfully.');
+    infoMessage(t('toasts.organizationNameChanged'));
   };
 
   return (
@@ -91,15 +93,15 @@ const WorkspaceSettings = () => {
             </>
           )}
 
-          <span>Company Profile</span>
+          <span>{t('navigation.companyProfile')}</span>
         </h1>
       </div>
 
       <div className={styles.settingsWrapper}>
         <div className={styles.setting}>
-          <h1>Organization name</h1>
+          <h1>{t('workspace.organizationName')}</h1>
           <ProfileDetail
-            title="Change the name of the organization"
+            title={t('workspace.changeOrganizationName')}
             value={activeWorkspace?.name}
             clicked={() => setShowRenameModal(true)}
           />
@@ -118,9 +120,9 @@ const WorkspaceSettings = () => {
       <RenameItemModal
         visible={showRenameModal}
         title={activeWorkspace?.name || ''}
-        modalHeading="Change organization name"
-        inputLabel="Organization name"
-        inputPlaceholder="Enter organization name"
+        modalHeading={t('workspace.changeOrganizationName')}
+        inputLabel={t('workspace.organizationName')}
+        inputPlaceholder={t('workspace.enterOrganizationName')}
         onOk={(title) => renameSubmitHandler(title)}
         onCancel={() => setShowRenameModal(false)}
       />

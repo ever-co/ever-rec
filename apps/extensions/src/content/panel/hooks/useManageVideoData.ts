@@ -15,6 +15,7 @@ import { successMessage } from '@/app/services/helpers/toastMessages';
 import useStreamState from '@/content/utilities/hooks/useStreamState';
 import { PlaybackStatusEnum } from '@/app/enums/StreamingServicesEnums';
 import { videoDurationConverter } from '@/app/services/helpers/videoDuration';
+import { useTranslation } from 'react-i18next';
 
 const mimeType = {
   type: 'video/mp4',
@@ -24,6 +25,7 @@ const useManageVideoData = (
   editorVideo: IEditorVideo | null,
   workspaceId = '',
 ) => {
+  const { t } = useTranslation();
   const blobUrls: string[] | null = useSelector(
     (state: RootStateOrAny) => state.panel.blobUrls,
   );
@@ -119,7 +121,7 @@ const useManageVideoData = (
         videoDurationFormated,
         editorVideo.dbData.id,
       );
-      result && successMessage('Video trimmed! Stream is getting ready...');
+      result && successMessage(t('ext.videoTrimmed'));
 
       handleUploadStatus(PlaybackStatusEnum.READY);
     } else {
@@ -161,8 +163,7 @@ const useManageVideoData = (
         videoDurationFormated,
         editorVideo.dbData.id,
       );
-      result &&
-        successMessage('Video reset to original! Stream is getting ready...');
+      result && successMessage(t('ext.videoReset'));
 
       handleUploadStatus(PlaybackStatusEnum.READY);
     } else {

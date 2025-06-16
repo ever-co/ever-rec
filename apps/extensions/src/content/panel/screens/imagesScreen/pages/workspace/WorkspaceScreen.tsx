@@ -53,8 +53,10 @@ import { ItemTypeEnum } from '../shared/enums/itemTypeEnum';
 import useItemOrder from '../shared/hooks/useItemOrder';
 import SCHeader from '@/content/panel/shared/SCHeader/SCHeader';
 import InviteMembersModal from './InviteMembersModal/InviteMembersModal';
+import { useTranslation } from 'react-i18next';
 
 const Workspace: FC = () => {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const imageFileUploaderRef = useRef<HTMLInputElement>(null);
   const videoFileUploaderRef = useRef<HTMLInputElement>(null);
@@ -280,7 +282,7 @@ const Workspace: FC = () => {
     if (!newTeam) {
       return updateMessage(
         toast,
-        'Successfully left the Team, but could not update some data.',
+        t('toasts.leftTheTeamAndCouldNotUpdate'),
         'warning',
       );
     }
@@ -294,7 +296,7 @@ const Workspace: FC = () => {
     newWorkspace.teams[newTeamIndex] = newTeam;
 
     dispatch(PanelAC.setActiveWorkspace({ activeWorkspace: newWorkspace }));
-    updateMessage(toast, 'Successfully left the Team ' + teamName, 'success');
+    updateMessage(toast, t('toasts.leftTeam', { teamName }), 'success');
   };
 
   const leaveTeamHandler = async (
@@ -304,11 +306,11 @@ const Workspace: FC = () => {
   ) => {
     if (workspaceId === '' || !activeWorkspace) return;
 
-    const toast = loadingMessage('Leaving team...');
+    const toast = loadingMessage(t('toasts.leavingTeam'));
     const leftMemberId = await leaveWorkspaceTeam(workspaceId, teamId);
 
     if (!leftMemberId) {
-      return updateMessage(toast, 'Could not leave Team.', 'error');
+      return updateMessage(toast, t('toasts.couldNotLeave'), 'error');
     }
 
     removeMemberFromActiveWorkspaceTeams(teamId, teamName, leftMemberId, toast);
@@ -399,7 +401,7 @@ const Workspace: FC = () => {
               {!currentWorkspaceFolder ? (
                 <>
                   <h1 className={styles.mainHeader}>
-                    Library - {activeWorkspace?.name}
+                    {t('page.video.library')} - {activeWorkspace?.name}
                   </h1>
 
                   <WorkspaceTeamMembersWrapper
@@ -439,7 +441,7 @@ const Workspace: FC = () => {
           <>
             {folderData && (
               <div className={styles.foldersHeadingContainer}>
-                <h3 className={styles.mainHeader}>Folders</h3>
+                <h3 className={styles.mainHeader}>{t('common.folders')}</h3>
                 <SortingDropDown
                   sortByDate={handleFolderOrderByDate}
                   sortByName={handleFolderOrderByName}

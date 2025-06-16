@@ -5,6 +5,7 @@ import AppSvg from '@/content/components/elements/AppSvg';
 //@ts-ignore
 import * as styles from './sortingDropDown.module.scss';
 import classNames from 'classnames';
+import { useTranslation } from 'react-i18next';
 
 interface SortingDropDown {
   sortByDate: () => void;
@@ -17,6 +18,7 @@ const SortingDropDown: React.FC<SortingDropDown> = ({
   sortingType,
   sortByName,
 }) => {
+  const { t } = useTranslation();
   let sortingTypeString = 'newest';
   if (sortingType === ItemOrderEnum.dateOldest) {
     sortingTypeString = 'oldest';
@@ -44,7 +46,7 @@ const SortingDropDown: React.FC<SortingDropDown> = ({
           </div>
         }
       >
-        Date - {sortingTypeString}
+        {t('common.date')} - {sortingTypeString}
       </Menu.Item>
       <Menu.Item
         className={classNames(styles.itemsStyle)}
@@ -65,7 +67,7 @@ const SortingDropDown: React.FC<SortingDropDown> = ({
           </div>
         }
       >
-        Name
+        {t('common.name')}
       </Menu.Item>
     </Menu>
   );
@@ -87,7 +89,7 @@ const SortingDropDown: React.FC<SortingDropDown> = ({
         size="large"
       ></Button> */}
       <div className={styles.sortText}>
-        <span>Sort:</span>
+        <span>{t('common.sort')}:</span>
         <span>{sortingType}</span>
         <AppSvg path="images/new-design-v2/down-caret.svg" />
       </div>

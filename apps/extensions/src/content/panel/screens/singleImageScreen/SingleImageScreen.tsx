@@ -19,7 +19,7 @@ import classNames from 'classnames';
 import ImageModal from './imageModal/ImageModal';
 import AppSvg from '@/content/components/elements/AppSvg';
 import { IUser } from '@/app/interfaces/IUserData';
-import { copySourceURL } from '@/content/utilities/scripts/singleItemFunctions';
+import { useCopySourceURL } from '@/content/utilities/scripts/singleItemFunctions';
 //@ts-ignore
 import * as styles from './SingleImageScreen.module.scss';
 import UniqueViews from '../../components/UniqueViews/UniqueViews';
@@ -29,6 +29,7 @@ import useWorkspaceItemsPermission from '../../hooks/useWorkspaceItemsPermission
 import VideoComments from '../videoEditorScreen/comments/VideoComments/VideoComments';
 
 const SingleImageScreen: React.FC = () => {
+  const { copySourceURL } = useCopySourceURL();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();

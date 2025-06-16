@@ -13,8 +13,10 @@ import AppSvg from '@/content/components/elements/AppSvg';
 import DisconnectServiceModal from '@/content/components/shared/DisconnectServiceModal';
 import { panelRoutes } from '@/content/panel/router/panelRoutes';
 import ISettingsPageProps from '@/content/panel/screens/settingsScreen/interface/ISettingsPage';
+import { useTranslation } from 'react-i18next';
 
 const TrelloPage: React.FC<ISettingsPageProps> = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const user = useSelector((state: RootStateOrAny) => state.auth.user);
   const [isDisconnect, setIsDisconnect] = useState(false);
@@ -51,7 +53,7 @@ const TrelloPage: React.FC<ISettingsPageProps> = () => {
     if (res.status != 'error') {
       setLoading(false);
       setIsDisconnect(false);
-      infoMessage('Successfully disconnected trello account');
+      infoMessage(t('toasts.trelloDisconnected'));
     } else {
       setLoading(false);
       errorMessage(res.message);
@@ -67,7 +69,7 @@ const TrelloPage: React.FC<ISettingsPageProps> = () => {
             className="tw-mr-2"
             path="/images/logo/trello-logo.svg"
           />
-          Trello Service
+          {t('page.integrations.trello.title')}
         </div>
       </h1>
 
@@ -78,7 +80,9 @@ const TrelloPage: React.FC<ISettingsPageProps> = () => {
         <>
           <h2 className="tw-max-w-full tw-text-center">
             <div className="tw-flex tw-flex-col tw-gap-2 tw-justify-center">
-              <div className="tw-mr-2">Connected to: </div>
+              <div className="tw-mr-2">
+                {t('page.integrations.connectedTo')}
+              </div>
               <div className="tw-flex">
                 <span className="tw-text-primary-purple tw-font-bold">
                   {user.trello.email}
@@ -93,19 +97,18 @@ const TrelloPage: React.FC<ISettingsPageProps> = () => {
               className={styles.disconnectBtn}
               onClick={() => setIsDisconnect(true)}
             >
-              Disconnect from Trello
+              {t('page.integrations.trello.disconnectTrello')}
             </AppButton>
           </div>
         </>
       ) : (
         <>
           <p className={styles.description}>
-            You can connect your Trello account to add new ticket and upload
-            screenshots captured by Rec.
+            {t('page.integrations.trello.connectedDescription')}
           </p>
           <div className="tw-w-90p">
             <AppButton onClick={connectToAccount} full={true}>
-              Continue with Trello
+              {t('page.integrations.trello.connectWithTrello')}
             </AppButton>
           </div>
         </>
@@ -116,10 +119,8 @@ const TrelloPage: React.FC<ISettingsPageProps> = () => {
           onCancel={() => setIsDisconnect(false)}
           onOk={disconnectTrelloAccount}
           loading={loading}
-          title={'Disconnect your Trello account?'}
-          subTitle={
-            "Are you sure you want to disable Trello integration? By disconnecting you won't be able to share your screenshots and videos."
-          }
+          title={t('page.integrations.trello.disconnectErrorTitle')}
+          subTitle={t('page.integrations.trello.disconnectErrorDescription')}
         />
       )}
     </div>

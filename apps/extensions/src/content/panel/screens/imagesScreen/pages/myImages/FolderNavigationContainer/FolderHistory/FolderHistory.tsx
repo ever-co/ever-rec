@@ -1,6 +1,7 @@
 import React, { FC } from 'react';
 import { IDbFolderData } from '@/app/interfaces/IEditorImage';
 import AppSvg from '@/content/components/elements/AppSvg';
+import { useTranslation } from 'react-i18next';
 
 interface IFoldersProps {
   folders: IDbFolderData[];
@@ -13,6 +14,7 @@ const FolderHistory: FC<IFoldersProps> = ({
   goToMainFolder,
   goToFolder,
 }) => {
+  const { t } = useTranslation();
   if (folders.length === 0) return null;
 
   const folderElements = folders.map((folder, index, { length }) => {
@@ -43,7 +45,7 @@ const FolderHistory: FC<IFoldersProps> = ({
         className="tw-font-semibold tw-text-app-grey-darker tw-cursor-pointer"
         onClick={goToMainFolder}
       >
-        My Items
+        {t('unique.myItems')}
       </h1>
       <AppSvg
         path="images/panel/common/Chevron_right.svg"

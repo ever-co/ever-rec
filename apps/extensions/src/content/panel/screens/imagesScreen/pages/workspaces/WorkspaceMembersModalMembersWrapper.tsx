@@ -5,6 +5,7 @@ import AppButton from '@/content/components/controls/appButton/AppButton';
 import classNames from 'classnames';
 import * as styles from './WorkspaceMembersModalMembersWrapper.module.scss';
 import { IMemberLoadingIds } from './WorkspaceMembersModalWrapper';
+import { useTranslation } from 'react-i18next';
 
 export const sortByEmail = (a: IWorkspaceUser, b: IWorkspaceUser) => {
   if (!a.email || !b.email) return 0;
@@ -107,6 +108,7 @@ const MemberRow: FC<IMemberRow> = ({
   onAdd,
   onRemove,
 }) => {
+  const { t } = useTranslation();
   return (
     <div
       key={member.id}
@@ -132,7 +134,7 @@ const MemberRow: FC<IMemberRow> = ({
               <AppSpinnerLocal />
             </div>
           ) : (
-            'Add'
+            t('common.add')
           )}
         </AppButton>
       )}
@@ -152,14 +154,14 @@ const MemberRow: FC<IMemberRow> = ({
               />
             </div>
           ) : (
-            'Remove'
+            t('common.remove')
           )}
         </AppButton>
       )}
 
       {isTeamAdmin && (
         <div>
-          <i>Team Owner</i>
+          <i>{t('workspace.teamOwner')}</i>
         </div>
       )}
     </div>

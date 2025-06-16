@@ -2,6 +2,7 @@ import { FC } from 'react';
 import CaptureBtn from './components/CaptureBtn/CaptureBtn';
 import CaptureHorizontalBtn from './components/CaptureHorizontalBtn/CaptureHorizontalBtn';
 import AppSvg from '@/content/components/elements/AppSvg';
+import { useTranslation } from 'react-i18next';
 
 interface ICaptureScreenshotPanelProps {
   allowFullPage: boolean;
@@ -26,11 +27,12 @@ const CaptureScreenshotPanel: FC<ICaptureScreenshotPanelProps> = ({
   screenOrWindow,
   existingImage,
 }) => {
+  const { t } = useTranslation();
   return (
     <div className="tw-block tw-p-3 tw-pt-2 tw-bg-white tw-rounded-b-lg">
       <div className="tw-flex tw-justify-between">
         <CaptureBtn
-          title="Visible Part"
+          title={t('ext.capture.visiblePart')}
           color="tw-bg-white dark:tw-bg-section-black"
           icon={
             <AppSvg
@@ -43,7 +45,7 @@ const CaptureScreenshotPanel: FC<ICaptureScreenshotPanelProps> = ({
         />
         <CaptureBtn
           disabled={!allowFullPage}
-          title="Full Page"
+          title={t('ext.capture.fullPage')}
           color="tw-bg-white dark:tw-bg-section-black"
           icon={
             <AppSvg
@@ -57,7 +59,7 @@ const CaptureScreenshotPanel: FC<ICaptureScreenshotPanelProps> = ({
         <CaptureBtn
           disabled={!allowSelection}
           disabledTooltipPlacement="bottomLeft"
-          title="Selected Area"
+          title={t('ext.capture.selectedArea')}
           color="tw-bg-white dark:tw-bg-section-black"
           icon={
             <AppSvg
@@ -71,7 +73,7 @@ const CaptureScreenshotPanel: FC<ICaptureScreenshotPanelProps> = ({
       </div>
       <div className="tw-flex tw-flex-col tw-mt-3 tw-gap-y-3">
         <CaptureHorizontalBtn
-          title="Visible Part after Delay"
+          title={t('ext.capture.visiblePartAfterDelay')}
           color="tw-bg-blue-grey dark:tw-bg-panel-black"
           icon={
             <AppSvg
@@ -84,7 +86,7 @@ const CaptureScreenshotPanel: FC<ICaptureScreenshotPanelProps> = ({
         />
         <CaptureHorizontalBtn
           disabled={!allowEntireScreenOrAppWindow}
-          title="Entire Screen or App Window"
+          title={t('ext.capture.entireScreen')}
           color="tw-bg-blue-grey dark:tw-bg-panel-black"
           icon={
             <AppSvg
@@ -97,7 +99,7 @@ const CaptureScreenshotPanel: FC<ICaptureScreenshotPanelProps> = ({
         />
         <CaptureHorizontalBtn
           color="tw-bg-blue-grey dark:tw-bg-panel-black"
-          title="Upload and Annotate Image"
+          title={t('ext.capture.uploadAndAnnotate')}
           icon={
             <AppSvg
               path="images/popup/capture/existed-image.svg"

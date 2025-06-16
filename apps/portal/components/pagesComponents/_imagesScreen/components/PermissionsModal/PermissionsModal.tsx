@@ -19,6 +19,7 @@ import InviteMembersInsideModal from '../../pages/workspace/workspaceTeamsModal/
 import WorkspaceTeamsEmpty from 'components/pagesComponents/_workspacesScreen/WorkspaceTeamsEmpty';
 import { panelRoutes, preRoutes } from 'components/_routes';
 import { useRouter } from 'next/router';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
   visible: boolean;
@@ -72,6 +73,7 @@ const PermissionsModal: React.FC<Props> = ({
     );
   };
 
+  const { t } = useTranslation();
   return (
     <Modal
       open={visible}
@@ -98,10 +100,10 @@ const PermissionsModal: React.FC<Props> = ({
         <section className={styles.mainSection}>
           <TabList className={styles.tabList}>
             <Tab className={classNames('react-tabs__tab', styles.tab)}>
-              Member Permissions
+              {t('common.memberPermissions')}
             </Tab>
             <Tab className={classNames('react-tabs__tab', styles.tab)}>
-              Team Permissions
+              {t('common.teamPermissions')}
             </Tab>
           </TabList>
 
@@ -115,8 +117,12 @@ const PermissionsModal: React.FC<Props> = ({
                   )}
                 >
                   <div className={styles.checkboxesWrapper}>
-                    <div className={styles.checkboxWrapper}>Edit</div>
-                    <div className={styles.checkboxWrapper}>View</div>
+                    <div className={styles.checkboxWrapper}>
+                      {t('common.edit')}
+                    </div>
+                    <div className={styles.checkboxWrapper}>
+                      {t('common.view')}
+                    </div>
                   </div>
                 </div>
                 {members.map((x, i) => {
@@ -176,8 +182,12 @@ const PermissionsModal: React.FC<Props> = ({
                   )}
                 >
                   <div className={styles.checkboxesWrapper}>
-                    <div className={styles.checkboxWrapper}>Edit</div>
-                    <div className={styles.checkboxWrapper}>View</div>
+                    <div className={styles.checkboxWrapper}>
+                      {t('common.edit')}
+                    </div>
+                    <div className={styles.checkboxWrapper}>
+                      {t('common.view')}
+                    </div>
                   </div>
                 </div>
                 {teams?.map((x, i) => {
