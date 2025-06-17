@@ -1,5 +1,8 @@
 {
   "ext": {
+    "imagesFolders": "Папки с изображения",
+    "videosFolders": "Папки с видеоклипове",
+    "noFavoriteFolders": "Няма намерени любими {{folderType}} папки",
     "imageDownloadAsPDF": "Изтегляне на изображение като PDF",
     "imageCopied": "Изображението е копирано в клипборда.",
     "enterFileName": "Моля, въведете име на файл.",
@@ -351,6 +354,7 @@
     "myVideos": "Моите видеа",
     "sharedByMe": "Споделени от мен",
     "starred": "С звезда",
+    "favorites": "Любими",
     "integrations": "Интеграции",
     "bin": "Кошче",
     "back": "Назад",

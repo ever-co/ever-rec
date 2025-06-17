@@ -12,6 +12,7 @@ import { ItemTypeEnum } from '@/content/panel/screens/imagesScreen/pages/shared/
 import {
   CHANGE_ACTIVE_ROUTE,
   CLEAR_EDITOR_IMG,
+  CHANGE_FAVORITE_REFETCH,
   CLEAR_EDITOR_VIDEO,
   CLEAR_UNSAVED_BASE64,
   CLEAR_VIDEO_BLOBURLS,
@@ -70,6 +71,10 @@ export default class PanelAC {
     activeRoute: PanelRoute;
   }): ActionType {
     return { type: CHANGE_ACTIVE_ROUTE, payload: activeRoute };
+  }
+
+  static setFavoriteRefetch(count: number): ActionType {
+    return { type: CHANGE_FAVORITE_REFETCH, payload: count };
   }
 
   static setEditorImage({

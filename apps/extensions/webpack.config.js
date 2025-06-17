@@ -196,6 +196,11 @@ const config = {
         },
         {
           from: './src/content/panel/entryPoints/index.html',
+          to: 'media/favorites.html',
+          transform: transformHtml,
+        },
+        {
+          from: './src/content/panel/entryPoints/index.html',
           to: 'media/trashed.html',
           transform: transformHtml,
         },

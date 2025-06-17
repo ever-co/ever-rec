@@ -14,7 +14,6 @@ import * as styles from './Sidebar.module.scss';
 import PanelAC from '@/app/store/panel/actions/PanelAC';
 import UploadWorkspaceImageModal from '@/content/panel/screens/imagesScreen/components/UploadWorkspaceImage/UploadWorkspaceImage';
 import { IMainMenuItem, useMenuItems } from '@/content/panel/misc/menuItems';
-import FavFoldersSidebarSection from '../FavFoldersSidebarSection/FavFoldersSidebarSection';
 import { getExplorerData } from '@/app/services/screenshots';
 import { getExplorerDataVideo } from '@/app/services/videos';
 import AppSpinner from '@/content/components/containers/appSpinner/AppSpinner';
@@ -89,8 +88,6 @@ const Sidebar: FC<SidebarProps> = ({ isProfilePage }) => {
   };
 
   const isActive = (item: IMainMenuItem) => {
-    if (item.type === 'favFolders') return false;
-
     return item.route.includes(location.pathname);
   };
 
@@ -117,11 +114,6 @@ const Sidebar: FC<SidebarProps> = ({ isProfilePage }) => {
         />
       );
 
-      // We don't need to wrap Starred in <Link> component as it open an absolute positioned UI
-      if (item.type === 'favFolders') {
-        return sidebarItem;
-      }
-
       return (
         <Link to={item.route} key={`menu_item${index}`}>
           {sidebarItem}
@@ -135,7 +127,6 @@ const Sidebar: FC<SidebarProps> = ({ isProfilePage }) => {
       <SidebarWorkspaces
         addNewWorkspaceClicked={() => setShowCreateWorkspaceModal(true)}
       />
-
       <div className={styles.sidebarContainer}>
         <div className={`${styles.sidebarWrapper} tw-px-4`}>
           <div className={styles.logoWrapper}>
@@ -154,16 +145,7 @@ const Sidebar: FC<SidebarProps> = ({ isProfilePage }) => {
             </div>
           )}
 
-          <div>
-            <div ref={favFoldersRef}>
-              <FavFoldersSidebarSection
-                visible={favFoldersVisible}
-                setVisible={setFavFoldersVisible}
-              />
-            </div>
-
-            <div className="tw-mt-24">{renderMenuItems()}</div>
-          </div>
+          <div className="tw-mt-24">{renderMenuItems()}</div>
         </div>
 
         {user && !isProfilePage && (
@@ -173,15 +155,12 @@ const Sidebar: FC<SidebarProps> = ({ isProfilePage }) => {
           </>
         )}
       </div>
-
       {CreateWSModal}
-
       <UploadWorkspaceImageModal
         onOk={() => void 0}
         onClose={() => setShowWorkspaceImageModal(false)}
         visible={showWorkspaceImageModal}
       />
-
       <AppSpinner show={loaderState} />
     </DashboardCard>
   );

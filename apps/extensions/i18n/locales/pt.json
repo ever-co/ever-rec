@@ -1,5 +1,8 @@
 {
   "ext": {
+    "imagesFolders": "Pastas de imagens",
+    "videosFolders": "Pastas de vídeos",
+    "noFavoriteFolders": "Nenhuma pasta {{folderType}} favorita encontrada",
     "imageDownloadAsPDF": "Baixar Imagem como PDF",
     "imageCopied": "Imagem copiada para a área de transferência.",
     "enterFileName": "Por favor, insira um nome de arquivo.",
@@ -351,6 +354,7 @@
     "myVideos": "Meus vídeos",
     "sharedByMe": "Compartilhado por mim",
     "starred": "Com estrela",
+    "favorites": "Favoritos",
     "integrations": "Integrações",
     "bin": "Lixeira",
     "back": "Voltar",

@@ -1,5 +1,8 @@
 {
   "ext": {
+    "imagesFolders": "תיקיות תמונות",
+    "videosFolders": "תיקיות סרטונים",
+    "noFavoriteFolders": "לא נמצאו תיקיות {{folderType}} מועדפות",
     "imageDownloadAsPDF": "הורד תמונה כ-PDF",
     "imageCopied": "התמונה הועתקה ללוח.",
     "enterFileName": "נא להזין שם קובץ.",
@@ -351,6 +354,7 @@
     "myVideos": "הסרטונים שלי",
     "sharedByMe": "שותף על ידי",
     "starred": "מסומנים בכוכב",
+    "favorites": "מועדפים",
     "integrations": "אינטגרציות",
     "bin": "אשפה",
     "back": "חזור",

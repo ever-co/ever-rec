@@ -42,8 +42,8 @@ export const useMenuItems = () => {
     },
     {
       type: 'favFolders',
-      title: t('navigation.starred'),
-      route: '',
+      title: t('navigation.favorites'),
+      route: panelRoutes.favorites.path,
       icon: <AppSvg path="images/panel/sidebar/new/starred.svg" size="20px" />,
     },
     {
@@ -61,7 +61,6 @@ export const useMenuItems = () => {
       icon: <AppSvg path="images/panel/sidebar/new/bin.svg" size="18px" />,
     },
   ];
-
   const settingsMenuItems: IMainMenuItem[] = [
     {
       type: 'back',

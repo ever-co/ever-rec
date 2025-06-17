@@ -1,5 +1,8 @@
 {
   "ext": {
+    "imagesFolders": "Afbeeldingenmappen",
+    "videosFolders": "Videomappen",
+    "noFavoriteFolders": "Geen favoriete {{folderType}}-mappen gevonden",
     "imageDownloadAsPDF": "Afbeelding downloaden als PDF",
     "imageCopied": "Afbeelding gekopieerd naar klembord.",
     "enterFileName": "Voer een bestandsnaam in.",
@@ -351,6 +354,7 @@
     "myVideos": "Mijn video's",
     "sharedByMe": "Gedeeld door mij",
     "starred": "Met ster",
+    "favorites": "Favorieten",
     "integrations": "Integraties",
     "bin": "Prullenbak",
     "back": "Terug",

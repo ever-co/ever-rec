@@ -1,5 +1,8 @@
 {
   "ext": {
+    "imagesFolders": "مجلدات الصور",
+    "videosFolders": "مجلدات الفيديوهات",
+    "noFavoriteFolders": "لا توجد مجلدات {{folderType}} مفضلة",
     "imageDownloadAsPDF": "تنزيل الصورة بصيغة PDF",
     "imageCopied": "تم نسخ الصورة إلى الحافظة.",
     "enterFileName": "الرجاء إدخال اسم الملف.",
@@ -351,6 +354,7 @@
     "myVideos": "فيديوهاتي",
     "sharedByMe": "تمت مشاركتها بواسطتي",
     "starred": "المميزة بنجمة",
+    "favorites": "المفضلة",
     "integrations": "التكاملات",
     "bin": "سلة المهملات",
     "back": "رجوع",

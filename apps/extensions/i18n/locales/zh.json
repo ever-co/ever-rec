@@ -1,5 +1,8 @@
 {
   "ext": {
+    "imagesFolders": "图片文件夹",
+    "videosFolders": "视频文件夹",
+    "noFavoriteFolders": "未找到收藏的{{folderType}}文件夹",
     "imageDownloadAsPDF": "将图片下载为PDF",
     "imageCopied": "图片已复制到剪贴板。",
     "enterFileName": "请输入文件名。",
@@ -351,6 +354,7 @@
     "myVideos": "我的视频",
     "sharedByMe": "我分享的",
     "starred": "已加星标",
+    "favorites": "收藏夹",
     "integrations": "集成",
     "bin": "回收站",
     "back": "返回",

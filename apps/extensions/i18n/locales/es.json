@@ -1,5 +1,8 @@
 {
   "ext": {
+    "imagesFolders": "Carpetas de imágenes",
+    "videosFolders": "Carpetas de vídeos",
+    "noFavoriteFolders": "No se encontraron carpetas {{folderType}} favoritas",
     "imageDownloadAsPDF": "Descargar imagen como PDF",
     "imageCopied": "Imagen copiada al portapapeles.",
     "enterFileName": "Por favor, introduzca un nombre de archivo.",
@@ -351,6 +354,7 @@
     "myVideos": "Mis vídeos",
     "sharedByMe": "Compartido por mí",
     "starred": "Destacados",
+    "favorites": "Favoritos",
     "integrations": "Integraciones",
     "bin": "Papelera",
     "back": "Atrás",
