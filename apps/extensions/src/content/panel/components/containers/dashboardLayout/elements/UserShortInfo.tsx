@@ -6,6 +6,7 @@ import { panelRoutes } from '@/content/panel/router/panelRoutes';
 import { IUser, IUserShort } from '@/app/interfaces/IUserData';
 import { useNavigate } from 'react-router';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 interface IUserShortInfoProps {
   user: IUser | IUserShort | null;
@@ -26,6 +27,8 @@ const UserShortInfo: FC<IUserShortInfoProps> = ({
   publicPage,
   disableGoToProfile = false,
 }) => {
+  const { t } = useTranslation();
+
   const navigate = useNavigate();
 
   const goToProfile = () => {
@@ -77,13 +80,13 @@ const UserShortInfo: FC<IUserShortInfoProps> = ({
         <div className="tw-flex tw-flex-col tw-w-200px tw-relative tw-text-ellipsis tw-overflow-hidden">
           <Link
             to={panelRoutes.profile.path}
-            title={user?.displayName || 'User'}
+            title={user?.displayName || t('common.user')}
             className={classNames(fullNameClasses, styles.userName)}
             style={{
               pointerEvents: disableGoToProfile ? 'none' : 'auto',
             }}
           >
-            {user?.displayName || 'User'}
+            {user?.displayName || t('common.user')}
           </Link>
 
           <div className={classNames(styles.emailStyle, emailClasses)}>

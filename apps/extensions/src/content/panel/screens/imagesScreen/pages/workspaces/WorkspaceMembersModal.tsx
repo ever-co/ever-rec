@@ -9,6 +9,7 @@ import * as styles from './WorkspaceMembersModal.module.scss';
 import { IWorkspaceUser } from '@/app/interfaces/IWorkspace';
 import WorkspaceMembersModalMembersWrapper from './WorkspaceMembersModalMembersWrapper';
 import { IMemberLoadingIds } from './WorkspaceMembersModalWrapper';
+import { useTranslation } from 'react-i18next';
 
 interface IProps {
   isWorkspaceAdmin: boolean;
@@ -39,6 +40,7 @@ const WorkspaceMembersModal: FC<IProps> = ({
   onTeamMemberRemove,
   onClose,
 }) => {
+  const { t } = useTranslation();
   const [selectedTabIndex, setTabIndex] = useState(0);
 
   useEffect(() => {
@@ -76,10 +78,10 @@ const WorkspaceMembersModal: FC<IProps> = ({
         <section className={styles.mainSection}>
           <TabList className={styles.tabList}>
             <Tab className={classNames('react-tabs__tab', styles.tab)}>
-              Team Members
+              {t('workspace.teamMembers')}
             </Tab>
             <Tab className={classNames('react-tabs__tab', styles.tab)}>
-              Workspace Members
+              {t('workspace.workspaceMembers')}
             </Tab>
           </TabList>
           <TabPanel>

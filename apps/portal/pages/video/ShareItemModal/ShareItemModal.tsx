@@ -9,6 +9,7 @@ import { useDispatch } from 'react-redux';
 import { Modal } from 'antd';
 import AppSvg from 'components/elements/AppSvg';
 import IEditorVideo from 'app/interfaces/IEditorVideo';
+import { useTranslation } from 'react-i18next';
 
 interface IProps {
   visible: boolean;
@@ -24,6 +25,7 @@ const ShareItemModal: FC<IProps> = ({
   onCancel,
 }) => {
   const dispatch = useDispatch();
+  const { t } = useTranslation();
   const {
     sharedLink,
     copyLinkHandler,
@@ -72,7 +74,7 @@ const ShareItemModal: FC<IProps> = ({
         <div className="tw-pb-4">
           <div className="tw-flex tw-items-center tw-justify-between tw-mb-2">
             <h3 className="tw-font-semibold tw-text-lg tw-mb-2">
-              Shareable link:
+              {t('page.image.shareableLink')}
             </h3>
 
             <AppButton
@@ -80,7 +82,9 @@ const ShareItemModal: FC<IProps> = ({
               className="tw-pt-0 tw-pb-0 tw-pl-2 tw-pr-2"
               onClick={removeSharedLink}
             >
-              <span className="tw-text-xs tw-text-white">Remove</span>
+              <span className="tw-text-xs tw-text-white">
+                {t('page.image.remove')}
+              </span>
             </AppButton>
           </div>
 
@@ -102,7 +106,7 @@ const ShareItemModal: FC<IProps> = ({
             ) : (
               <>
                 <IoCopyOutline size={25} className="tw-mr-2" />
-                Copy
+                {t('page.image.copy')}
               </>
             )}
           </AppButton>
@@ -110,7 +114,7 @@ const ShareItemModal: FC<IProps> = ({
       ) : (
         <div className="tw-pb-4">
           <h3 className="tw-font-semibold tw-text-lg tw-mb-2">
-            Share your video:
+            {t('page.image.shareYourVideo')}
           </h3>
 
           <AppButton
@@ -123,7 +127,7 @@ const ShareItemModal: FC<IProps> = ({
                 <AppSpinnerLocal />
               </div>
             ) : (
-              <span>Generate Shareable Link</span>
+              <span>{t('page.image.generateShareableLink')}</span>
             )}
           </AppButton>
         </div>

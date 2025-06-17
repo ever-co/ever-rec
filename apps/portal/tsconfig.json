@@ -22,6 +22,9 @@
     "baseUrl": ".",
     "skipLibCheck": true,
     "module": "esnext",
+    "paths": {
+      "@i18n/*": ["i18n/*"]
+    },
     "moduleResolution": "node",
     "plugins": [
       {

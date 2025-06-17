@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 
 async function getBothSources() {
   try {
@@ -28,6 +29,7 @@ async function getSources(constraint: MediaStreamConstraints) {
 }
 
 const GrantAccess: React.FC = () => {
+  const { t } = useTranslation();
   useEffect(() => {
     getBothSources();
   }, []);
@@ -40,17 +42,24 @@ const GrantAccess: React.FC = () => {
       />
       <div>
         <p className="tw-text-center tw-font-roboto tw-font-medium tw-mt-16">
-          If you don’t see a popup window or accidentally click the
-          <b> Block button</b>,<br />
-          you can click the
-          <span className="tw-bg-camera-icon tw-w-5 tw-h-5 tw-inline-block tw-align-middle tw-bg-no-repeat tw-mx-2"></span>
-          icon in the address bar then select <b>Always allow</b> to grant
-          access.
+          <Trans
+            i18nKey="ext.page.access.popupMissed"
+            components={{ 1: <b /> }}
+          />
           <br />
-          See instructions below.
+          <Trans
+            i18nKey="ext.page.access.alternativeAction"
+            components={{
+              0: (
+                <span className="tw-bg-camera-icon tw-w-5 tw-h-5 tw-inline-block tw-align-middle tw-bg-no-repeat tw-mx-2" />
+              ),
+              1: <b />,
+            }}
+          />
           <br />
-          You can refresh this tab to see whether the access is successfully
-          granted.
+          {t('ext.page.access.seeInstructions')}
+          <br />
+          {t('ext.page.access.refreshCheck')}
         </p>
         <img
           className="tw-m-auto"

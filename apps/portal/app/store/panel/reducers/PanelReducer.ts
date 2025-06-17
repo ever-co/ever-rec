@@ -5,6 +5,7 @@ import { ItemOrderEnum } from 'app/enums/itemOrderEnum';
 import {
   CHANGE_ACTIVE_ROUTE,
   CLEAR_EDITOR_IMG,
+  CHANGE_FAVORITE_REFETCH,
   CLEAR_EDITOR_VIDEO,
   CLEAR_UNSAVED_BASE64,
   CLEAR_VIDEO_BLOBURLS,
@@ -131,6 +132,7 @@ const initState = {
   workspaceFolderOrder: ItemOrderEnum.dateOldest,
   workspaceItemOrder: ItemOrderEnum.dateNewest,
   favoriteFolders: { images: [], videos: [], workspaces: {} },
+  refetchFavorites: 0,
   whiteboards: [],
 };
 
@@ -153,6 +155,8 @@ const updateExplorerFolder = (
 
 export default function PanelReducer(state = initState, action: ActionType) {
   switch (action.type) {
+    case CHANGE_FAVORITE_REFETCH:
+      return { ...state, refetchFavorites: action.payload };
     case CHANGE_ACTIVE_ROUTE:
       return { ...state, activeRoute: action.payload };
     case SET_EDITOR_IMG:

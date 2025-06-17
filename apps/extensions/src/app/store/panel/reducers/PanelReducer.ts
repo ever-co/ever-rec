@@ -6,6 +6,7 @@ import { panelRoute } from '@/content/panel/panelRouter/routes';
 import { ItemOrderEnum } from '@/content/panel/screens/imagesScreen/pages/shared/enums/itemOrderEnum';
 import {
   CHANGE_ACTIVE_ROUTE,
+  CHANGE_FAVORITE_REFETCH,
   CLEAR_EDITOR_IMG,
   CLEAR_EDITOR_VIDEO,
   CLEAR_UNSAVED_BASE64,
@@ -132,6 +133,7 @@ const initState = {
   workspaceFolderOrder: ItemOrderEnum.dateOldest,
   workspaceItemOrder: ItemOrderEnum.dateNewest,
   favoriteFolders: { images: [], videos: [], workspaces: {} },
+  refetchFavorites: 0,
 };
 
 const updateExplorerFolder = (
@@ -153,6 +155,8 @@ const updateExplorerFolder = (
 
 export default function PanelReducer(state = initState, action: ActionType) {
   switch (action.type) {
+    case CHANGE_FAVORITE_REFETCH:
+      return { ...state, refetchFavorites: action.payload };
     case CHANGE_ACTIVE_ROUTE:
       return { ...state, activeRoute: action.payload };
     case SET_EDITOR_IMG:

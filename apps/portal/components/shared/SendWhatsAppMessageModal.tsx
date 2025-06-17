@@ -7,6 +7,7 @@ import AppInput from 'components/controls/AppInput';
 import { requiredRule } from 'app/rules';
 import IAppControl, { IAppControlData } from 'app/interfaces/IAppControl';
 import styles from './SendWhatsAppMessageModal.module.scss';
+import { useTranslation } from 'react-i18next';
 
 interface ISlackChannelModalProps {
   selectedItemId: string;
@@ -23,6 +24,7 @@ const SendWhatsAppMessageModal: React.FC<ISlackChannelModalProps> = ({
   forEditor,
   onSave,
 }) => {
+  const { t } = useTranslation();
   const initialControl = (): IAppControl => ({
     value: '',
     errors: [],
@@ -33,19 +35,19 @@ const SendWhatsAppMessageModal: React.FC<ISlackChannelModalProps> = ({
   const [loading, setLoading] = useState<boolean>(false);
 
   const newPhoneRules: ((v: string) => boolean | string)[] = [
-    requiredRule('Please enter an WhatsApp Number'),
+    requiredRule(t('extras.enterWhatsAppNumber')),
   ];
 
   useEffect(() => {
     if (phoneInput.value.length > 12) {
       setPhoneInput({
-        errors: ['WhatsApp Number can not contain more than 12 characters'],
+        errors: [t('toasts.whatsAppTooLong')],
         touched: true,
         value: phoneInput.value,
       });
     } else if (phoneInput.value.length < 1 && phoneInput.touched) {
       setPhoneInput({
-        errors: ['WhatsApp Number can not be empty'],
+        errors: [t('toasts.whatsAppEmpty')],
         touched: true,
         value: phoneInput.value,
       });
@@ -74,7 +76,7 @@ const SendWhatsAppMessageModal: React.FC<ISlackChannelModalProps> = ({
         }
         const res = await sendWhatsAppMessage(selectedItemId, phone, type);
         if (res && res.status != 'error') {
-          infoMessage('Item shared successfully');
+          infoMessage(t('toasts.itemSharedSuccess'));
           onCancel();
         } else {
           if (res && res.message) {
@@ -113,22 +115,22 @@ const SendWhatsAppMessageModal: React.FC<ISlackChannelModalProps> = ({
             outlined
             className={styles.btn}
           >
-            Cancel
+            {t('common.cancel')}
           </AppButton>
           <AppButton
             onClick={handleOnsubmit}
             className={styles.btnContainer}
             disabled={loading || !valid}
           >
-            Send
+            {t('common.send')}
           </AppButton>
         </div>
       }
     >
-      <h2 className={styles.title}>Share Message to WhatsApp</h2>
+      <h2 className={styles.title}>{t('modals.shareOnWhatsApp')}</h2>
       <AppInput
         type={'number'}
-        placeholder="Enter WhatsApp Number with country code"
+        placeholder={t('modals.enterWhatsApp')}
         value={phoneInput.value}
         errors={phoneInput.errors}
         onChange={oldPhoneChangeHandler}

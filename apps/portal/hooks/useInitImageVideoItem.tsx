@@ -6,6 +6,7 @@ import TextArea from 'antd/lib/input/TextArea';
 import classNames from 'classnames';
 import moment from 'moment';
 import { appDateFormat } from 'app/utilities/common';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
   updateTitle: (title: string) => void;
@@ -21,6 +22,7 @@ const useInitImageVideoItem = ({
   canEditTitle,
 }: Props) => {
   const titleRef = useRef<HTMLTextAreaElement>(null);
+  const { t } = useTranslation();
   const [initialTitle, setInitialTitle] = useState<string>();
   const [created, setCreated] = useState<string>('');
   const [newTitle, setNewTitle] = useState<string>('');
@@ -60,7 +62,7 @@ const useInitImageVideoItem = ({
     } else if (newTitle == '') {
       initialTitle && setNewTitle(initialTitle);
       setTitle(initialTitle || '');
-      infoMessage("Item title can't be empty.");
+      infoMessage(t('hooks.toasts.emptyItemTitle'));
     }
   };
 

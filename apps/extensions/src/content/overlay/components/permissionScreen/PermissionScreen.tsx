@@ -2,6 +2,7 @@ import React from 'react';
 import '@/content/content';
 import './permission-screen.scss';
 import browser from '@/app/utilities/browser';
+import { Trans } from 'react-i18next';
 
 interface IPermissionScreenProps {
   blocked: boolean;
@@ -31,16 +32,21 @@ const PermissionScreen: React.FC<IPermissionScreenProps> = ({
         <div className="gif-container">
           <div className="blocked-text">
             <p>
-              This page access is blocked. To give access click on
-              <span className="span-block">
-                <img
-                  className="camera-block"
-                  src={browser.runtime.getURL(
-                    './images/contentImages/camera-block.svg',
-                  )}
-                />
-              </span>
-              icon. See the instructions below!
+              <Trans
+                i18nKey="ext.accessBlocked"
+                components={{
+                  0: (
+                    <span className="span-block">
+                      <img
+                        className="camera-block"
+                        src={browser.runtime.getURL(
+                          './images/contentImages/camera-block.svg',
+                        )}
+                      />
+                    </span>
+                  ),
+                }}
+              />
             </p>
           </div>
           <img

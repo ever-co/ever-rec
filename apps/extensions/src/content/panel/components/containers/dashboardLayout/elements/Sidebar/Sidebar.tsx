@@ -13,13 +13,7 @@ import UserShortInfo from '../UserShortInfo';
 import * as styles from './Sidebar.module.scss';
 import PanelAC from '@/app/store/panel/actions/PanelAC';
 import UploadWorkspaceImageModal from '@/content/panel/screens/imagesScreen/components/UploadWorkspaceImage/UploadWorkspaceImage';
-import {
-  IMainMenuItem,
-  getWorkspaceSettingsMenuItems,
-  mainMenuItems,
-  settingsMenuItems,
-} from '@/content/panel/misc/menuItems';
-import FavFoldersSidebarSection from '../FavFoldersSidebarSection/FavFoldersSidebarSection';
+import { IMainMenuItem, useMenuItems } from '@/content/panel/misc/menuItems';
 import { getExplorerData } from '@/app/services/screenshots';
 import { getExplorerDataVideo } from '@/app/services/videos';
 import AppSpinner from '@/content/components/containers/appSpinner/AppSpinner';
@@ -27,17 +21,21 @@ import SidebarWorkspaces from '../SidebarWorkspaces/SidebarWorkspaces';
 import { Link } from 'react-router-dom';
 import useClickOrKeyOutside from '@/content/utilities/hooks/useClickOrKeyOutside';
 import { useCreateWorkspace } from '@/content/utilities/hooks/useCreateWorkspace';
+import { useTranslation } from 'react-i18next';
 
 interface SidebarProps {
   isProfilePage?: boolean;
 }
 
 const Sidebar: FC<SidebarProps> = ({ isProfilePage }) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
   const favFoldersRef = useRef<any>(null);
   const user: IUser = useSelector((state: RootStateOrAny) => state.auth.user);
+  const { mainMenuItems, getWorkspaceSettingsMenuItems, settingsMenuItems } =
+    useMenuItems();
   const explorerData = useSelector(
     (state: RootStateOrAny) => state.panel.explorerData,
   );
@@ -90,8 +88,6 @@ const Sidebar: FC<SidebarProps> = ({ isProfilePage }) => {
   };
 
   const isActive = (item: IMainMenuItem) => {
-    if (item.type === 'favFolders') return false;
-
     return item.route.includes(location.pathname);
   };
 
@@ -118,11 +114,6 @@ const Sidebar: FC<SidebarProps> = ({ isProfilePage }) => {
         />
       );
 
-      // We don't need to wrap Starred in <Link> component as it open an absolute positioned UI
-      if (item.type === 'favFolders') {
-        return sidebarItem;
-      }
-
       return (
         <Link to={item.route} key={`menu_item${index}`}>
           {sidebarItem}
@@ -136,7 +127,6 @@ const Sidebar: FC<SidebarProps> = ({ isProfilePage }) => {
       <SidebarWorkspaces
         addNewWorkspaceClicked={() => setShowCreateWorkspaceModal(true)}
       />
-
       <div className={styles.sidebarContainer}>
         <div className={`${styles.sidebarWrapper} tw-px-4`}>
           <div className={styles.logoWrapper}>
@@ -147,20 +137,15 @@ const Sidebar: FC<SidebarProps> = ({ isProfilePage }) => {
 
           {(isProfilePage || isWorkspaceSettingsPage) && (
             <div className={styles.sidebarHeading}>
-              <h1>{isProfilePage ? 'Profile' : 'Administration'}</h1>
+              <h1>
+                {isProfilePage
+                  ? t('sidebar.profile')
+                  : t('sidebar.administration')}
+              </h1>{' '}
             </div>
           )}
 
-          <div>
-            <div ref={favFoldersRef}>
-              <FavFoldersSidebarSection
-                visible={favFoldersVisible}
-                setVisible={setFavFoldersVisible}
-              />
-            </div>
-
-            <div className="tw-mt-24">{renderMenuItems()}</div>
-          </div>
+          <div className="tw-mt-24">{renderMenuItems()}</div>
         </div>
 
         {user && !isProfilePage && (
@@ -170,15 +155,12 @@ const Sidebar: FC<SidebarProps> = ({ isProfilePage }) => {
           </>
         )}
       </div>
-
       {CreateWSModal}
-
       <UploadWorkspaceImageModal
         onOk={() => void 0}
         onClose={() => setShowWorkspaceImageModal(false)}
         visible={showWorkspaceImageModal}
       />
-
       <AppSpinner show={loaderState} />
     </DashboardCard>
   );

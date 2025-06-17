@@ -1,7 +1,11 @@
 import { preRoutes } from 'components/_routes';
-import { ISettingsMenuItem, settingsMenuItems } from './menuItems';
+import { ISettingsMenuItem } from './menuItems';
+import { NextRouter } from 'next/router';
 
-const activeImage = (router): string => {
+const activeImage = (
+  router: NextRouter,
+  settingsMenuItems: ISettingsMenuItem[],
+): string => {
   const currentItem: ISettingsMenuItem | undefined = settingsMenuItems.find(
     (item) => preRoutes.settings + item.route === router.pathname,
   );

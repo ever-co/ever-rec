@@ -1,6 +1,7 @@
 import React from 'react';
 import { Modal } from 'antd';
 import AppButton from 'components/controls/AppButton';
+import { useTranslation } from 'react-i18next';
 
 interface IDeleteScreenshotModalProps {
   visible: boolean;
@@ -15,6 +16,7 @@ const DeleteCommentModal: React.FC<IDeleteScreenshotModalProps> = ({
   visible,
   commentId,
 }) => {
+  const { t } = useTranslation();
   const onOkHandler = () => {
     onOk(commentId);
   };
@@ -31,7 +33,7 @@ const DeleteCommentModal: React.FC<IDeleteScreenshotModalProps> = ({
             bgColor="tw-bg-white"
             // disabled={!valid}
           >
-            Delete
+            {t('common.delete')}
           </AppButton>
           <AppButton
             onClick={onCancel}
@@ -39,13 +41,13 @@ const DeleteCommentModal: React.FC<IDeleteScreenshotModalProps> = ({
             outlined
             className="tw-px-8 tw-mx-4 tw-pb-1 tw-pt-1"
           >
-            Cancel
+            {t('common.cancel')}
           </AppButton>
         </div>
       }
     >
       <h2 className="tw-mb-6 tw-text-xl tw-font-bold">
-        Are you sure you want to delete this comment?
+        {t('modals.deleteComment')}
       </h2>
     </Modal>
   );

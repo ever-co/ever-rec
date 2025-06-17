@@ -1,6 +1,7 @@
 import { FC } from 'react';
 import styles from './ModalSaveChangesFooter.module.scss';
 import AppButtonSecond from 'components/controls/AppButtonSecond';
+import { useTranslation } from 'react-i18next';
 
 interface IProps {
   valid: boolean;
@@ -17,14 +18,17 @@ const ModalSaveChangesFooter: FC<IProps> = ({
   ok,
   close,
 }) => {
+  const { t } = useTranslation();
+  const title =
+    buttonTitle == 'Save changes' ? t('common.saveChanges') : buttonTitle;
   return (
     <div className={styles.footerContainer}>
       <AppButtonSecond onClick={ok} disabled={!valid} danger={danger}>
-        {buttonTitle}
+        {title}
       </AppButtonSecond>
 
       <span className={styles.cancelLink} onClick={close}>
-        Don&apos;t change
+        {t('page.profile.nameModal.dontChange')}
       </span>
     </div>
   );

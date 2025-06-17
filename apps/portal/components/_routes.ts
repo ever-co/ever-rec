@@ -22,6 +22,7 @@ export const panelRoutes = {
   profile: '/profile',
   edit: '/edit',
   shared: '/shared',
+  favorites: '/favorites',
   trashed: '/trashed',
   account: '/settings/account',
   password: '/settings/password',

@@ -8,21 +8,16 @@ import Logo from '../../../elements/Logo';
 import SidebarMenuItem from '../elements/SidebarMenuItems/SidebarMenuItem';
 import DashboardCard from '../elements/DashboardCard';
 import SidebarWorkspaces from '../SidebarWorkspaces/SidebarWorkspaces';
-import FavFoldersSidebarSection from 'components/elements/FavFoldersSidebarSection/FavFoldersSidebarSection';
 import AppSpinner from 'components/containers/appSpinner/AppSpinner';
 import UploadWorkspaceImageModal from 'components/pagesComponents/_imagesScreen/components/uploadWorkspaceImageModal/UploadWorkspaceImageModal';
 import PanelAC from '../../../../app/store/panel/actions/PanelAC';
 import { getExplorerData } from 'app/services/screenshots';
 import { getExplorerDataVideo } from 'app/services/videos';
 import { panelRoutes, preRoutes } from '../../../_routes';
-import {
-  IMainMenuItem,
-  getWorkspaceSettingsMenuItems,
-  mainMenuItems,
-  settingsMenuItems,
-} from 'misc/menuItems';
+import { IMainMenuItem, useMenuItems } from 'misc/menuItems';
 import useClickOrKeyOutside from 'hooks/useClickOrKeyOutside';
 import { useCreateWorkspace } from 'hooks/useCreateWorkspaceHandler';
+import { useTranslation } from 'react-i18next';
 
 interface IProps {
   isProfilePage?: boolean;
@@ -30,9 +25,12 @@ interface IProps {
 }
 
 const Sidebar: FC<IProps> = ({ isProfilePage, isWorkspaceSettingsPage }) => {
+  const { t } = useTranslation();
   const router = useRouter();
   const dispatch = useDispatch();
   const favFoldersRef = useRef(null);
+  const { mainMenuItems, getWorkspaceSettingsMenuItems, settingsMenuItems } =
+    useMenuItems();
   const explorerData = useSelector(
     (state: RootStateOrAny) => state.panel.explorerData,
   );
@@ -81,7 +79,7 @@ const Sidebar: FC<IProps> = ({ isProfilePage, isWorkspaceSettingsPage }) => {
   };
 
   const isActive = (item: IMainMenuItem) => {
-    if (item.type === 'favFolders' || item.type === 'back') return false;
+    if (item.type === 'back') return false;
 
     return router.asPath.includes(item.route);
   };
@@ -99,20 +97,18 @@ const Sidebar: FC<IProps> = ({ isProfilePage, isWorkspaceSettingsPage }) => {
     }
 
     return menuItems.map((item: any, index: number) => {
+      const handleItemClick = useCallback(() => {
+        sidebarItemClicked(item);
+      }, [item]);
       const sidebarItem = (
         <SidebarMenuItem
           key={`menu_item${index}`}
           icon={item.icon}
           title={item.title}
           active={isActive(item)}
-          onClick={() => sidebarItemClicked(item)}
+          onClick={handleItemClick}
         />
       );
-
-      // We don't need to wrap "Favorite Folders" in <Link> component
-      if (item.type === 'favFolders') {
-        return sidebarItem;
-      }
 
       return (
         <Link href={item.route} key={`menu_item${index}`}>
@@ -141,17 +137,21 @@ const Sidebar: FC<IProps> = ({ isProfilePage, isWorkspaceSettingsPage }) => {
 
           {(isProfilePage || isWorkspaceSettingsPage) && (
             <div className={styles.sidebarHeading}>
-              <h1>{isProfilePage ? 'Profile' : 'Administration'}</h1>
+              <h1>
+                {isProfilePage
+                  ? t('sidebar.profile')
+                  : t('sidebar.administration')}
+              </h1>
             </div>
           )}
 
           <div>
-            <div ref={favFoldersRef}>
+            {/* <div ref={favFoldersRef}>
               <FavFoldersSidebarSection
                 visible={showFavoriteFolders}
                 setVisible={setShowFavoriteFolders}
               />
-            </div>
+            </div>*/}
 
             {/* <WhiteboardsButton
               isActive={isActive}

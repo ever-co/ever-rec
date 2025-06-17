@@ -6,6 +6,7 @@ import AppInput from 'components/controls/AppInput';
 import AppButton from 'components/controls/AppButton';
 import { RootStateOrAny, useSelector } from 'react-redux';
 import IExplorerData from 'app/interfaces/IExplorerData';
+import { useTranslation } from 'react-i18next';
 interface IEditFolderModalProps {
   visible: boolean;
   oldName: string;
@@ -25,6 +26,7 @@ const EditFolderModal: React.FC<IEditFolderModalProps> = ({
     touched: false,
   });
 
+  const { t } = useTranslation();
   const [folderName, setFolderName] = useState<IAppControl>(initialControl());
   const [valid, setValid] = useState<boolean>(false);
   const explorerData: IExplorerData = useSelector(
@@ -54,19 +56,19 @@ const EditFolderModal: React.FC<IEditFolderModalProps> = ({
         window.location.pathname === '/my-images-videos/my-video.html')
     ) {
       setFolderName({
-        errors: ['This folder already exists'],
+        errors: [t('toasts.folderExists')],
         touched: true,
         value: folderName.value,
       });
     } else if (folderName.value?.length > 35) {
       setFolderName({
-        errors: ['Folder name can not contain more than 35 characters'],
+        errors: [t('toasts.folderNameTooLong')],
         touched: true,
         value: folderName.value,
       });
     } else if (folderName.value?.length < 1 && folderName.touched) {
       setFolderName({
-        errors: ['Folder name can not be empty'],
+        errors: [t('toasts.folderNameEmpty')],
         touched: true,
         value: folderName.value,
       });
@@ -98,8 +100,8 @@ const EditFolderModal: React.FC<IEditFolderModalProps> = ({
   }, [folderName]);
 
   const folderNameRules: ((v: string) => boolean | string)[] = [
-    requiredRule('Please enter folder name'),
-    sameRule(oldName, 'This is current folder name'),
+    requiredRule(t('toasts.enterFolderName')),
+    sameRule(oldName, t('extras.currentFolderName')),
   ];
 
   const onOkHandler = async (): Promise<void> => {
@@ -129,21 +131,23 @@ const EditFolderModal: React.FC<IEditFolderModalProps> = ({
             outlined
             className="tw-px-8 tw-mx-4 tw-pb-1 tw-pt-1"
           >
-            Cancel
+            {t('common.cancel')}
           </AppButton>
           <AppButton
             onClick={onOkHandler}
             className="tw-px-8 tw-pb-1 tw-pt-1"
             disabled={!valid}
           >
-            Change Name
+            {t('modals.changeName')}
           </AppButton>
         </div>
       }
     >
-      <h2 className="tw-mb-6 tw-text-2xl tw-font-semibold">Edit folder</h2>
+      <h2 className="tw-mb-6 tw-text-2xl tw-font-semibold">
+        {t('modals.editFolder')}
+      </h2>
       <AppInput
-        placeholder="Folder name"
+        placeholder={t('modals.folderName')}
         value={folderName.value}
         errors={folderName.errors}
         onChange={folderNameChangeHandler}

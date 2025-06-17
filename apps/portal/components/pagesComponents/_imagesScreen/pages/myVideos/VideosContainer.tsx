@@ -48,6 +48,7 @@ import ItemsNotFound from '../shared/components/ItemsNotFound';
 import IEditorImage from 'app/interfaces/IEditorImage';
 import { WorkspaceItemType } from 'app/interfaces/ItemType';
 import useGetXXL from 'hooks/useGetXXL';
+import { useTranslation } from 'react-i18next';
 
 const defaultShareItem = { id: null, type: null, provider: null };
 
@@ -77,6 +78,7 @@ const VideosContainer: React.FC<IVideosContainerProps> = forwardRef(
     const scrollableDivRef = useRef<HTMLDivElement>(null);
     const dispatch = useDispatch();
     const router = useRouter();
+    const { t } = useTranslation();
     const firstRender = useFirstRender();
     const user = useSelector((state: RootStateOrAny) => state.auth.user);
     const shareThirdPartyOptions = useSelector(
@@ -157,7 +159,7 @@ const VideosContainer: React.FC<IVideosContainerProps> = forwardRef(
       }
       video && (await moveRestoreVideoTrash(video));
       setLoaderState(false);
-      infoMessage('The video has been moved to the Trash');
+      infoMessage(t('toasts.videoMovedToTrash'));
     };
 
     const closeDeletionModalHandler = () => {
@@ -185,7 +187,7 @@ const VideosContainer: React.FC<IVideosContainerProps> = forwardRef(
                 `${process.env.NEXT_PUBLIC_WEBSITE_URL}/video/shared/${sharedLink}`,
               );
               copied();
-              successMessage('Copied');
+              successMessage(t('toasts.copied'));
             } catch (e) {
               console.log(e.message);
             }
@@ -280,7 +282,7 @@ const VideosContainer: React.FC<IVideosContainerProps> = forwardRef(
 
     const download = async (video: IEditorVideo) => {
       const downloaded = await downloadVideo(video);
-      if (downloaded) infoMessage('Video downloaded');
+      if (downloaded) infoMessage(t('toasts.videoDownloaded'));
     };
 
     const handleAction = async (
@@ -350,7 +352,7 @@ const VideosContainer: React.FC<IVideosContainerProps> = forwardRef(
             }),
           );
         }
-        infoMessage(`Video added to: ${workspace.name}`);
+        infoMessage(`${t('toasts.videoAdded')} ${workspace.name}`);
       }
     };
 
@@ -366,7 +368,9 @@ const VideosContainer: React.FC<IVideosContainerProps> = forwardRef(
         <div className={styles.itemsContainer}>
           <div className={styles.itemsContainerHeadingContainer}>
             <div>
-              <h3 className={styles.headingContainerHeading}>Videos</h3>
+              <h3 className={styles.headingContainerHeading}>
+                {t('common.videos')}
+              </h3>
             </div>
             {/* <AppInput
               value={filter}
@@ -385,7 +389,6 @@ const VideosContainer: React.FC<IVideosContainerProps> = forwardRef(
             videos={videos}
             addSelected={setSelectedItems}
           />
-
           <SortingDropDown
             sortByDate={handleItemOrderByDate}
             sortByName={handleItemOrderByName}

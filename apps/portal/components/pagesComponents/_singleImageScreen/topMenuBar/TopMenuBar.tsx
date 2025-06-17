@@ -6,6 +6,7 @@ import { panelRoutes, preRoutes } from 'components/_routes';
 import { BiArrowBack } from 'react-icons/bi';
 import { useRouter } from 'next/router';
 import { IUser } from '../../../../app/interfaces/IUserData';
+import { useTranslation } from 'react-i18next';
 
 interface ITopMenuBarProps {
   user: IUser;
@@ -19,6 +20,8 @@ const TopMenuBar: React.FC<ITopMenuBarProps> = ({
   customParameter = '',
 }) => {
   const router = useRouter();
+
+  const { t } = useTranslation();
 
   const goToPage = () => {
     const { fromPage: fromPageQuery } = router.query;
@@ -70,7 +73,7 @@ const TopMenuBar: React.FC<ITopMenuBarProps> = ({
           }
         >
           <BiArrowBack size={20} className="tw-mr-2" />
-          {user ? 'Back' : 'Login'}
+          {user ? t('navigation.back') : t('common.login')}
         </div>
         <UserShortInfo user={user} hideInfo avaSize={50} publicPage={false} />
       </div>

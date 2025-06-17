@@ -5,10 +5,11 @@ import { Route, Routes, useLocation } from 'react-router';
 import ProfilePage from './pages/ProfilePage';
 import browser from '@/app/utilities/browser';
 import useLoggedInNotification from '@/content/utilities/hooks/useLoggedInNotification';
-import { settingsMenuItems } from '../../misc/menuItems';
+import { useMenuItems } from '../../misc/menuItems';
 
 const SettingsScreen: React.FC = () => {
   const { pathname } = useLocation();
+  const { settingsMenuItems } = useMenuItems();
 
   useLoggedInNotification();
 

@@ -35,6 +35,7 @@ import { RootStateOrAny, useSelector } from 'react-redux';
 import { decreaseFolderItems } from '@/app/services/helpers/manageFolders';
 import TrashModal from '../../pages/trashed/components/TrashModal/TrashModal';
 import classNames from 'classnames';
+import { useTranslation } from 'react-i18next';
 
 interface IMultiItemsSelectProps {
   type: MixedItemType;
@@ -66,6 +67,7 @@ const MultiItemsSelect: React.FC<IMultiItemsSelectProps> = ({
   videos,
   isTrash,
 }) => {
+  const { t } = useTranslation();
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [showFolderModal, setShowFolderModal] = useState<boolean>(false);
   const [loader, setLoader] = useState<boolean>(false);
@@ -144,21 +146,25 @@ const MultiItemsSelect: React.FC<IMultiItemsSelectProps> = ({
     });
 
     const s = items.length > 1 ? 's' : '';
-    const toast = loadingMessage(`Downloading ${type}${s}...`);
+    const toast = loadingMessage(`${t('toasts.downloading')} ${type}${s}...`);
 
     await Promise.all(downloadPromises);
 
     const typeUpper = type === 'video' ? 'Video' : 'Image';
-    updateMessage(toast, `${typeUpper}${s} downloaded.`, 'success');
-
+    updateMessage(
+      toast,
+      `${typeUpper}${s} ${t('toasts.downloaded')}.`,
+      'success',
+    );
     resetSelected({ state: false, items: [] });
   };
 
   const deleteItemsConfirm = async () => {
     closeAllModals();
     const s = items.length > 1 ? 's' : '';
-    const toast = loadingMessage(`Moving ${type}${s} to Trash...`);
-
+    const toast = loadingMessage(
+      `${t('toasts.moving')} ${type}${s} ${t('toasts.toTrash')}`,
+    );
     const deletePromises = items.map((item) => {
       if (type === 'image') return moveRestoreTrash(item, true, true);
       else if (type === 'video') return moveRestoreVideoTrash(item, true, true);
@@ -184,7 +190,11 @@ const MultiItemsSelect: React.FC<IMultiItemsSelectProps> = ({
     resetSelected({ state: false, items: [] });
 
     const typeUpper = type === 'video' ? 'Video' : 'Image';
-    updateMessage(toast, `${typeUpper}${s} moved to Trash.`, 'success');
+    updateMessage(
+      toast,
+      `${typeUpper}${s} ${t('toasts.movedToTrash')}`,
+      'success',
+    );
   };
 
   const selectAllHandler = () => {
@@ -204,13 +214,13 @@ const MultiItemsSelect: React.FC<IMultiItemsSelectProps> = ({
       setLoader(true);
       await deleteScreenshot(image);
     } catch (error) {
-      errorMessage('There was a problem, please try again');
+      errorMessage(t('toasts.problemTryAgain'));
       hasError = true;
     } finally {
       setLoader(false);
     }
     if (hasError) return;
-    infoMessage('Image deleted successfully');
+    infoMessage(t('toasts.imageDeleted'));
   };
 
   const deleteVideoConfirm = async (video: IEditorVideo | null) => {
@@ -226,7 +236,7 @@ const MultiItemsSelect: React.FC<IMultiItemsSelectProps> = ({
       setLoader(true);
       await deleteVideo(video);
     } catch (error) {
-      errorMessage('There was a problem, please try again');
+      errorMessage(t('toasts.problemTryAgain'));
       hasError = true;
     } finally {
       setLoader(false);
@@ -234,14 +244,14 @@ const MultiItemsSelect: React.FC<IMultiItemsSelectProps> = ({
 
     if (hasError) return;
 
-    infoMessage('Video deleted');
+    infoMessage(t('toasts.videoDeleted'));
   };
 
   const deleteAllItems = async () => {
     setDeleteModal(false);
 
     if (!screenshots && !videos) {
-      return infoMessage('No items to delete...');
+      return infoMessage(t('toasts.noItemsToDelete'));
     }
 
     if (screenshots !== undefined && videos !== undefined) {
@@ -250,7 +260,7 @@ const MultiItemsSelect: React.FC<IMultiItemsSelectProps> = ({
         await deleteAllVideos();
         await deleteAllScreenshots();
         setLoader(false);
-        successMessage('Items deleted successfully.');
+        successMessage(t('toasts.itemsDeleted'));
       } else {
         items.map((item) => {
           if (
@@ -275,7 +285,7 @@ const MultiItemsSelect: React.FC<IMultiItemsSelectProps> = ({
     setRestoreModal(false);
 
     if (!screenshots && !videos) {
-      return infoMessage('No items to restore...');
+      return infoMessage(t('toasts.noItemsToRestore'));
     }
 
     if (screenshots !== undefined && videos !== undefined) {
@@ -284,7 +294,7 @@ const MultiItemsSelect: React.FC<IMultiItemsSelectProps> = ({
         await restoreAllVideos();
         await restoreAllScreenshots();
         setLoader(false);
-        successMessage('Items restored successfully.');
+        successMessage(t('toasts.itemsRestored'));
       } else {
         items.map((item) => {
           if (
@@ -303,8 +313,8 @@ const MultiItemsSelect: React.FC<IMultiItemsSelectProps> = ({
           }
         });
         items.length > 1
-          ? successMessage(`Items restored successfully.`)
-          : successMessage(`Item restored successfully.`);
+          ? successMessage(t('toasts.itemsRestored'))
+          : successMessage(t('toasts.itemRestored'));
       }
     }
   };
@@ -327,7 +337,7 @@ const MultiItemsSelect: React.FC<IMultiItemsSelectProps> = ({
         await moveRestoreTrash(screenOrVideo, false);
       }
     } catch (error) {
-      errorMessage('There was a problem with restoring');
+      errorMessage(t('toasts.problemRestoring'));
       hasError = true;
     } finally {
       setLoader(false);
@@ -361,7 +371,9 @@ const MultiItemsSelect: React.FC<IMultiItemsSelectProps> = ({
           outlined={false}
         >
           <div className="tw-text-gray-600 tw-leading-6 tw-font-normal tw-fontFamily-roboto">
-            {selected ? 'Select none' : 'Select all'}
+            {selected
+              ? t('common.bulkActions.selectNone')
+              : t('common.bulkActions.selectAll')}{' '}
           </div>
         </AppButton>
 
@@ -373,7 +385,7 @@ const MultiItemsSelect: React.FC<IMultiItemsSelectProps> = ({
             outlined={false}
           >
             <div className="tw-text-gray-600 tw-leading-6 tw-font-normal tw-fontFamily-roboto">
-              Restore
+              {t('common.bulkActions.restore')}
             </div>
           </AppButton>
         ) : (
@@ -385,7 +397,7 @@ const MultiItemsSelect: React.FC<IMultiItemsSelectProps> = ({
               outlined={false}
             >
               <div className="tw-text-gray-600 tw-leading-6 tw-font-normal tw-fontFamily-roboto">
-                Download
+                {t('common.bulkActions.download')}
               </div>
             </AppButton>
           </>
@@ -400,7 +412,7 @@ const MultiItemsSelect: React.FC<IMultiItemsSelectProps> = ({
             bgColor="tw-bg-white"
           >
             <div className="tw-text-gray-600 tw-leading-6 tw-font-normal tw-fontFamily-roboto">
-              Move
+              {t('common.bulkActions.move')}
             </div>
           </AppButton>
         )}
@@ -414,7 +426,7 @@ const MultiItemsSelect: React.FC<IMultiItemsSelectProps> = ({
           }
         >
           <div className="tw-text-red tw-leading-6 tw-font-normal tw-fontFamily-roboto">
-            Delete
+            {t('common.bulkActions.delete')}
           </div>
         </AppButton>
       </div>
@@ -439,21 +451,21 @@ const MultiItemsSelect: React.FC<IMultiItemsSelectProps> = ({
         onOk={restoreAllItems}
         title={
           items.length > 1
-            ? 'Do you want to restore these items?'
-            : 'Do you want to restore this item?'
+           ? t('common.bulkActions.restoreAll')
+            : t('common.bulkActions.restoreSingle')
         }
-        confirmText="Restore"
-      />
+        confirmText={t('common.bulkActions.restore')}
+        />
       <TrashModal
         visible={deleteModal}
         onCancel={() => setDeleteModal(false)}
         onOk={deleteAllItems}
         title={
           items.length > 1
-            ? 'Do you want to delete these items forever?'
-            : 'Do you want to delete this item forever?'
+            ? t('common.bulkActions.deleteAll')
+            : t('common.bulkActions.deleteSingle')
         }
-        confirmText="Delete"
+        confirmText={t('common.bulkActions.delete')}
         confirmClass="tw-bg-red"
       />
       <AppSpinner show={loader} />

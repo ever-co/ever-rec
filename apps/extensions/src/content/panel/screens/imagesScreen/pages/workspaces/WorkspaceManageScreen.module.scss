@@ -1,5 +1,5 @@
 @import '@/content/utilities/partials/_mixins.scss';
-
+@import '../../../../../utilities/partials/_colors.scss';
 @mixin backgroundTransition {
   transition: background-color 0.2s ease-in;
 
@@ -13,10 +13,11 @@
   height: 100%;
 
   .mainHeader {
+    background-color: $primary-violet10;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 25px 30px 35px;
+    padding: 0.1rem 2rem;
     font-size: 30px;
     font-weight: bolder;
     font-family: 'Roboto', sans-serif;
@@ -26,7 +27,7 @@
   }
 
   .teamHeader {
-    padding: 20px 40px 34px;
+    padding: 1rem 2rem;
     display: flex;
     align-items: center;
     justify-content: space-between;

@@ -2,6 +2,7 @@ import React from 'react';
 import { Modal } from 'antd';
 import IEditorImage from '@/app/interfaces/IEditorImage';
 import AppButton from '@/content/components/controls/appButton/AppButton';
+import { useTranslation } from 'react-i18next';
 
 interface IDeleteScreenshotModalProps {
   visible: boolean;
@@ -16,6 +17,7 @@ const DeleteScreenshotModal: React.FC<IDeleteScreenshotModalProps> = ({
   visible,
   screenshot,
 }) => {
+  const { t } = useTranslation();
   const onOkHandler = () => {
     onOk(screenshot);
   };
@@ -36,7 +38,7 @@ const DeleteScreenshotModal: React.FC<IDeleteScreenshotModalProps> = ({
               paddingRight: '2rem',
             }}
           >
-            Cancel
+            {t('common.cancel')}
           </AppButton>
           <AppButton
             onClick={onOkHandler}
@@ -47,13 +49,13 @@ const DeleteScreenshotModal: React.FC<IDeleteScreenshotModalProps> = ({
             }}
             // disabled={!valid}
           >
-            Delete Screenshot
+            {t('modals.deleteScreenshotSingle')}
           </AppButton>
         </div>
       }
     >
       <h2 className="tw-mb-6 tw-text-2xl tw-font-semibold">
-        Do you want to delete this screenshot?
+        {t('modals.deleteScreenshot')}
       </h2>
     </Modal>
   );

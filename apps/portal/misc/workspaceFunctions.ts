@@ -12,54 +12,71 @@ import {
 import PanelAC from 'app/store/panel/actions/PanelAC';
 import store from 'app/store/panel';
 import IEditorVideo from 'app/interfaces/IEditorVideo';
+import { useTranslation } from 'react-i18next';
 
-export const workspaceImageDelete = async (
-  item: IWorkspaceImage | IEditorImage,
-  workspace: IWorkspace,
-) => {
-  const id = item?.dbData?.id;
-  const refName = item?.dbData?.refName;
-  const parentId = item?.dbData?.parentId;
-  if (!id || !refName) {
-    return infoMessage('There was a problem trying to delete your image...');
-  }
+export const useWorkspaceImageDelete = () => {
+  const { t } = useTranslation();
+  const workspaceImageDelete = async (
+    item: IWorkspaceImage | IEditorImage,
+    workspace: IWorkspace,
+  ) => {
+    const id = item?.dbData?.id;
+    const refName = item?.dbData?.refName;
+    const parentId = item?.dbData?.parentId;
+    if (!id || !refName) {
+      return infoMessage(t('hooks.toasts.problemDeletingImage'));
+    }
 
-  await deleteWorkspaceImage(workspace.id, id, refName, parentId || false);
+    await deleteWorkspaceImage(workspace.id, id, refName, parentId || false);
 
-  const newScreenshots = (workspace?.screenshots || []).filter(
-    (screenshot) => screenshot.dbData.id !== id,
-  );
-  const newWorkspace: IWorkspace = {
-    ...workspace,
-    screenshots: newScreenshots,
+    const newScreenshots = (workspace?.screenshots || []).filter(
+      (screenshot) => screenshot.dbData.id !== id,
+    );
+    const newWorkspace: IWorkspace = {
+      ...workspace,
+      screenshots: newScreenshots,
+    };
+
+    store.dispatch(
+      PanelAC.setActiveWorkspace({ activeWorkspace: newWorkspace }),
+    );
+
+    infoMessage(t('hooks.toasts.imageDeleted'));
   };
 
-  store.dispatch(PanelAC.setActiveWorkspace({ activeWorkspace: newWorkspace }));
-
-  infoMessage('The image has been deleted successfully!');
+  return {
+    workspaceImageDelete,
+  };
 };
+export const useWorkspaceVideoDelete = () => {
+  const { t } = useTranslation();
+  const workspaceVideoDelete = async (
+    item: IWorkspaceVideo | IEditorVideo,
+    workspace: IWorkspace,
+  ) => {
+    const id = item?.dbData?.id;
+    const refName = item?.dbData?.refName;
+    if (!id || !refName) {
+      return infoMessage(t('hooks.toasts.problemDeletingVideo'));
+    }
 
-export const workspaceVideoDelete = async (
-  item: IWorkspaceVideo | IEditorVideo,
-  workspace: IWorkspace,
-) => {
-  const id = item?.dbData?.id;
-  const refName = item?.dbData?.refName;
-  if (!id || !refName) {
-    return infoMessage('There was a problem trying to delete your video...');
-  }
+    await deleteWorkspaceVideo(workspace.id, id, refName);
 
-  await deleteWorkspaceVideo(workspace.id, id, refName);
+    const newVideos = (workspace?.videos || []).filter(
+      (video) => video.dbData.id !== id,
+    );
+    const newWorkspace = {
+      ...workspace,
+      videos: newVideos,
+    };
 
-  const newVideos = (workspace?.videos || []).filter(
-    (video) => video.dbData.id !== id,
-  );
-  const newWorkspace = {
-    ...workspace,
-    videos: newVideos,
+    store.dispatch(
+      PanelAC.setActiveWorkspace({ activeWorkspace: newWorkspace }),
+    );
+    // infoMessage('The video has been deleted successfully!');
+    return true;
   };
-
-  store.dispatch(PanelAC.setActiveWorkspace({ activeWorkspace: newWorkspace }));
-  // infoMessage('The video has been deleted successfully!');
-  return true;
+  return {
+    workspaceVideoDelete,
+  };
 };

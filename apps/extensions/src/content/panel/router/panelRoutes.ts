@@ -1,5 +1,6 @@
 export type RouteName =
   | 'index'
+  | 'favorites'
   | 'install'
   | 'grant'
   | 'mediaRoutes'
@@ -62,6 +63,10 @@ export const panelRoutes: Record<RouteName, IPanelRoute> = {
   imagesShared: {
     path: `/media/shared.html`,
     nestedPath: 'shared.html',
+  },
+  favorites: {
+    path: `/media/favorites.html`,
+    nestedPath: 'favorites.html',
   },
   imagesTrashed: {
     path: `/media/trashed.html`,

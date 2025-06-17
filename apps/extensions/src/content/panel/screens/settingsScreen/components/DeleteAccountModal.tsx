@@ -9,6 +9,7 @@ import AppInput, {
 import ModalSaveChangesFooter from '@/content/panel/shared/modalComponents/ModalSaveChangesFooter';
 import useEnterKeyPress from '@/content/utilities/hooks/useEnterKeyPress';
 import PasswordEye from './PasswordEye';
+import { Trans, useTranslation } from 'react-i18next';
 
 interface IProps {
   email: string;
@@ -27,6 +28,7 @@ const DeleteAccountModal: React.FC<IProps> = ({
   onDeleteAccount,
   onClose,
 }) => {
+  const { t } = useTranslation();
   // First UI step state
   const [passwordValid, setPasswordValid] = useState(false);
   const [passwordShown, setPasswordShown] = useState(false);
@@ -105,14 +107,20 @@ const DeleteAccountModal: React.FC<IProps> = ({
       footer={
         <ModalSaveChangesFooter
           valid={!loggedIn ? passwordValid : deleteValid}
-          buttonTitle={!loggedIn ? 'Next' : 'Permanently delete account'}
+          buttonTitle={
+            !loggedIn
+              ? t('page.profile.deleteAccountModal.next')
+              : t('page.profile.deleteAccountModal.permanentlyDeleteAccount')
+          }
           danger={loggedIn}
           ok={onOkHandler}
           close={onCancelHandler}
         />
       }
     >
-      <h2 className={styles.modalHeader}>Permanently Delete Account</h2>
+      <h2 className={styles.modalHeader}>
+        {t('page.profile.deleteAccountModal.permanentlyDeleteAccount')}
+      </h2>
 
       {!loggedIn ? (
         <EnterCurrentPassword
@@ -148,12 +156,13 @@ const EnterCurrentPassword: FC<IEnterCurrentPasswordProps> = ({
   togglePassword,
   onPasswordChange,
 }) => {
+  const { t } = useTranslation();
   return (
     <div className={styles.inputField}>
-      <label>Current password:</label>
+      <label>{t('page.profile.deleteAccountModal.currentPassword')}</label>
       <div className={styles.inputFieldCombined}>
         <AppInput
-          placeholder="Enter password"
+          placeholder={t('page.profile.deleteAccountModal.enterPassword')}
           type={passwordShown ? 'text' : 'password'}
           value={passwordState.value}
           errors={passwordState.errors}
@@ -181,21 +190,22 @@ const PermanentlyDeleteAccount: FC<IPermanentlyDeleteAccountProps> = ({
   deleteInputValue,
   onDeleteInputChange,
 }) => {
+  const { t } = useTranslation();
   return (
     <div className={styles.permanentlyDeleteAccount}>
       <p>
-        Are you sure you want to delete your Rec account? Deleting your
-        <b> {email}</b> account will delete all your associated data such as
-        your images, videos, folders, and creative spaces, including content you
-        have shared with others. You cannot undo this operation.
+        <Trans
+          values={{ email: email }}
+          i18nKey="page.profile.deleteAccountModal.message"
+          components={{
+            1: <b></b>,
+          }}
+        />{' '}
       </p>
 
-      <p>
-        For more information about how we treat your data, please see our
-        Privacy Policy.
-      </p>
+      <p>{t('page.profile.deleteAccountModal.privacy')} </p>
 
-      <p>To confirm, please type &quot;delete my account&quot; below.</p>
+      <p>{t('page.profile.deleteAccountModal.confirm')}</p>
 
       <AppInput
         placeholder=""
