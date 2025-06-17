@@ -14,7 +14,6 @@ import * as styles from './Sidebar.module.scss';
 import PanelAC from '@/app/store/panel/actions/PanelAC';
 import UploadWorkspaceImageModal from '@/content/panel/screens/imagesScreen/components/UploadWorkspaceImage/UploadWorkspaceImage';
 import { IMainMenuItem, useMenuItems } from '@/content/panel/misc/menuItems';
-import FavFoldersSidebarSection from '../FavFoldersSidebarSection/FavFoldersSidebarSection';
 import { getExplorerData } from '@/app/services/screenshots';
 import { getExplorerDataVideo } from '@/app/services/videos';
 import AppSpinner from '@/content/components/containers/appSpinner/AppSpinner';
