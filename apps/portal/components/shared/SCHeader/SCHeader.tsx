@@ -15,7 +15,7 @@ import PanelAC from 'app/store/panel/actions/PanelAC';
 import { signOut } from 'app/services/auth';
 import { Dispatch } from 'redux';
 import { infoMessage } from 'app/services/helpers/toastMessages';
-import { languages } from '../../../i18n/constants';
+import { languages } from '@i18n/constants';
 
 import { useTranslation } from 'react-i18next';
 
