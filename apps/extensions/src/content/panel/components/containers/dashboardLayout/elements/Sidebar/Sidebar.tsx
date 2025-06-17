@@ -13,17 +13,8 @@ import UserShortInfo from '../UserShortInfo';
 import * as styles from './Sidebar.module.scss';
 import PanelAC from '@/app/store/panel/actions/PanelAC';
 import UploadWorkspaceImageModal from '@/content/panel/screens/imagesScreen/components/UploadWorkspaceImage/UploadWorkspaceImage';
-<<<<<<< HEAD
-import {
-  IMainMenuItem,
-  getWorkspaceSettingsMenuItems,
-  mainMenuItems,
-  settingsMenuItems,
-} from '@/content/panel/misc/menuItems';
-=======
 import { IMainMenuItem, useMenuItems } from '@/content/panel/misc/menuItems';
 import FavFoldersSidebarSection from '../FavFoldersSidebarSection/FavFoldersSidebarSection';
->>>>>>> c478e16abe15a7cf0ca83f35af2c3c76e2ba6c1c
 import { getExplorerData } from '@/app/services/screenshots';
 import { getExplorerDataVideo } from '@/app/services/videos';
 import AppSpinner from '@/content/components/containers/appSpinner/AppSpinner';
