@@ -1,7 +1,7 @@
 {
   "ext": {
     "imagesFolders": "Carpetas de imágenes",
-    "videosFolders": "Carpetas de videos",
+    "videosFolders": "Carpetas de vídeos",
     "noFavoriteFolders": "No se encontraron carpetas {{folderType}} favoritas",
     "imageDownloadAsPDF": "Descargar imagen como PDF",
     "imageCopied": "Imagen copiada al portapapeles.",
