@@ -1,4 +1,4 @@
-import { FC, useCallback, useMemo, useRef, useState } from 'react';
+import { FC, useCallback, useRef, useState } from 'react';
 import styles from './Sidebar.module.scss';
 import { useRouter } from 'next/router';
 import { RootStateOrAny, useDispatch, useSelector } from 'react-redux';
@@ -87,20 +87,19 @@ const Sidebar: FC<IProps> = ({ isProfilePage, isWorkspaceSettingsPage }) => {
     (item: any) => {
       sidebarItemClicked(item);
     },
-    [sidebarItemClicked, router], // Dependency array
+    [router], // Dependency array
   );
 
   let menuItems;
+
   if (isWorkspaceSettingsPage) {
     const { workspaceId } = router.query;
     menuItems = getWorkspaceSettingsMenuItems(workspaceId as string);
-  }
-
-  if (isProfilePage) {
+  } else if (isProfilePage) {
     menuItems = [...settingsMenuItems];
+  } else {
+    menuItems = [...mainMenuItems];
   }
-  menuItems = [...mainMenuItems];
-
   const createClickHandler = useCallback(
     (item: any) => () => handleItemClick(item),
     [handleItemClick],
