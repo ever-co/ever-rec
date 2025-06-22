@@ -1,4 +1,4 @@
-import { FC, useCallback, useRef, useState } from 'react';
+import { FC, useCallback, useMemo, useRef, useState } from 'react';
 import styles from './Sidebar.module.scss';
 import { useRouter } from 'next/router';
 import { RootStateOrAny, useDispatch, useSelector } from 'react-redux';
@@ -87,43 +87,24 @@ const Sidebar: FC<IProps> = ({ isProfilePage, isWorkspaceSettingsPage }) => {
     (item: any) => {
       sidebarItemClicked(item);
     },
-    [sidebarItemClicked], // Dependency array
+    [sidebarItemClicked, router], // Dependency array
   );
 
-  const renderMenuItems = () => {
-    let menuItems: any[] = [];
+  let menuItems;
+  if (isWorkspaceSettingsPage) {
+    const { workspaceId } = router.query;
+    menuItems = getWorkspaceSettingsMenuItems(workspaceId as string);
+  }
 
-    if (isWorkspaceSettingsPage) {
-      const { workspaceId } = router.query;
-      menuItems = getWorkspaceSettingsMenuItems(workspaceId as string);
-    } else if (isProfilePage) {
-      menuItems = [...settingsMenuItems];
-    } else {
-      menuItems = [...mainMenuItems];
-    }
+  if (isProfilePage) {
+    menuItems = [...settingsMenuItems];
+  }
+  menuItems = [...mainMenuItems];
 
-    return menuItems.map((item: any, index: number) => {
-      const handle = () => {
-        handleItemClick(item);
-      };
-      const sidebarItem = (
-        <SidebarMenuItem
-          key={`menu_item${index}`}
-          icon={item.icon}
-          title={item.title}
-          active={isActive(item)}
-          onClick={handle}
-        />
-      );
-
-      return (
-        <Link href={item.route} key={`menu_item${index}`}>
-          {sidebarItem}
-        </Link>
-      );
-    });
-  };
-
+  const createClickHandler = useCallback(
+    (item: any) => () => handleItemClick(item),
+    [handleItemClick],
+  );
   return (
     <DashboardCard className={classNames(styles.dashboardCard)}>
       <SidebarWorkspaces
@@ -158,13 +139,27 @@ const Sidebar: FC<IProps> = ({ isProfilePage, isWorkspaceSettingsPage }) => {
                 setVisible={setShowFavoriteFolders}
               />
             </div>*/}
-
             {/* <WhiteboardsButton
               isActive={isActive}
               setFavFoldersVisible={setFavFoldersVisible}
             /> */}
+            <div className="tw-mt-20">
+              {menuItems.map((item: any) => {
+                const handleClick = createClickHandler(item);
+                const key = item.id || item.route; // use unique key if available
 
-            <div className="tw-mt-20">{renderMenuItems()}</div>
+                return (
+                  <Link href={item.route} key={key}>
+                    <SidebarMenuItem
+                      icon={item.icon}
+                      title={item.title}
+                      active={isActive(item)}
+                      onClick={handleClick}
+                    />
+                  </Link>
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>
