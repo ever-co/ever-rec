@@ -1,4 +1,4 @@
-import { FC, useCallback, useRef, useState } from 'react';
+import { FC, useRef, useState } from 'react';
 import styles from './Sidebar.module.scss';
 import { useRouter } from 'next/router';
 import { RootStateOrAny, useDispatch, useSelector } from 'react-redux';
@@ -97,9 +97,9 @@ const Sidebar: FC<IProps> = ({ isProfilePage, isWorkspaceSettingsPage }) => {
     }
 
     return menuItems.map((item: any, index: number) => {
-      const handleItemClick = useCallback(() => {
+      const handleItemClick = () => {
         sidebarItemClicked(item);
-      }, [item]);
+      };
       const sidebarItem = (
         <SidebarMenuItem
           key={`menu_item${index}`}

@@ -615,7 +615,7 @@ sm:tw-mr-13px lg:tw-mr-5px xl:tw-mr-13px"
               />
               <div className="tw-flex tw-justify-between tw-items-end">
                 <div className="tw-flex">
-                  <Tooltip placement="topLeft" title={t('extras.emoji')}>
+                  <Tooltip placement="topLeft" title="Emoji">
                     {emojiContainer}
                   </Tooltip>
                   {/* <img
