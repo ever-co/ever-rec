@@ -1,4 +1,4 @@
-import { FC, useRef, useState } from 'react';
+import { FC, useCallback, useRef, useState } from 'react';
 import styles from './Sidebar.module.scss';
 import { useRouter } from 'next/router';
 import { RootStateOrAny, useDispatch, useSelector } from 'react-redux';
@@ -83,6 +83,12 @@ const Sidebar: FC<IProps> = ({ isProfilePage, isWorkspaceSettingsPage }) => {
 
     return router.asPath.includes(item.route);
   };
+  const handleItemClick = useCallback(
+    (item: any) => {
+      sidebarItemClicked(item);
+    },
+    [sidebarItemClicked], // Dependency array
+  );
 
   const renderMenuItems = () => {
     let menuItems: any[] = [];
@@ -103,7 +109,7 @@ const Sidebar: FC<IProps> = ({ isProfilePage, isWorkspaceSettingsPage }) => {
           icon={item.icon}
           title={item.title}
           active={isActive(item)}
-          onClick={() => sidebarItemClicked(item)}
+          onClick={() => handleItemClick(item)}
         />
       );
 
