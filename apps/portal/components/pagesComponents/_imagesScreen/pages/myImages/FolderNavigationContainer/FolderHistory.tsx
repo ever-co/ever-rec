@@ -15,9 +15,9 @@ const FolderHistory: FC<IFoldersProps> = ({
   goToMainFolder,
   goToFolder,
 }) => {
+  const { t } = useTranslation();
   if (folders.length === 0) return null;
 
-  const { t } = useTranslation();
   const folderElements = folders.map((folder, index, { length }) => {
     const isLastFolder = length - 1 === index;
 

@@ -53,7 +53,7 @@ export const useMenuItems = () => {
       type: 'favFolders',
       //title: 'Starred',
       title: t('navigation.starred'),
-      route: '',
+      route: preRoutes.media + panelRoutes.favorites,
       icon: <AppSvg path="/sidebar/new/starred.svg" size="20px" />,
     },
     {

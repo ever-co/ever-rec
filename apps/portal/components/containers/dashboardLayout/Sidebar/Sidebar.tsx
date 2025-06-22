@@ -83,41 +83,27 @@ const Sidebar: FC<IProps> = ({ isProfilePage, isWorkspaceSettingsPage }) => {
 
     return router.asPath.includes(item.route);
   };
+  const handleItemClick = useCallback(
+    (item: any) => {
+      sidebarItemClicked(item);
+    },
+    [router], // Dependency array
+  );
 
-  const renderMenuItems = () => {
-    let menuItems: any[] = [];
+  let menuItems;
 
-    if (isWorkspaceSettingsPage) {
-      const { workspaceId } = router.query;
-      menuItems = getWorkspaceSettingsMenuItems(workspaceId as string);
-    } else if (isProfilePage) {
-      menuItems = [...settingsMenuItems];
-    } else {
-      menuItems = [...mainMenuItems];
-    }
-
-    return menuItems.map((item: any, index: number) => {
-      const handleItemClick = useCallback(() => {
-        sidebarItemClicked(item);
-      }, [item]);
-      const sidebarItem = (
-        <SidebarMenuItem
-          key={`menu_item${index}`}
-          icon={item.icon}
-          title={item.title}
-          active={isActive(item)}
-          onClick={handleItemClick}
-        />
-      );
-
-      return (
-        <Link href={item.route} key={`menu_item${index}`}>
-          {sidebarItem}
-        </Link>
-      );
-    });
-  };
-
+  if (isWorkspaceSettingsPage) {
+    const { workspaceId } = router.query;
+    menuItems = getWorkspaceSettingsMenuItems(workspaceId as string);
+  } else if (isProfilePage) {
+    menuItems = [...settingsMenuItems];
+  } else {
+    menuItems = [...mainMenuItems];
+  }
+  const createClickHandler = useCallback(
+    (item: any) => () => handleItemClick(item),
+    [handleItemClick],
+  );
   return (
     <DashboardCard className={classNames(styles.dashboardCard)}>
       <SidebarWorkspaces
@@ -152,13 +138,27 @@ const Sidebar: FC<IProps> = ({ isProfilePage, isWorkspaceSettingsPage }) => {
                 setVisible={setShowFavoriteFolders}
               />
             </div>*/}
-
             {/* <WhiteboardsButton
               isActive={isActive}
               setFavFoldersVisible={setFavFoldersVisible}
             /> */}
+            <div className="tw-mt-20">
+              {menuItems.map((item: any) => {
+                const handleClick = createClickHandler(item);
+                const key = item.id || item.route; // use unique key if available
 
-            <div className="tw-mt-20">{renderMenuItems()}</div>
+                return (
+                  <Link href={item.route} key={key}>
+                    <SidebarMenuItem
+                      icon={item.icon}
+                      title={item.title}
+                      active={isActive(item)}
+                      onClick={handleClick}
+                    />
+                  </Link>
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>
