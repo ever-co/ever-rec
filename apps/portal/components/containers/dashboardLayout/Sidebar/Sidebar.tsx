@@ -106,7 +106,7 @@ const Sidebar: FC<IProps> = ({ isProfilePage, isWorkspaceSettingsPage }) => {
           icon={item.icon}
           title={item.title}
           active={isActive(item)}
-          onClick={handleItemClick}
+          onClick={() => handleItemClick()}
         />
       );
 
