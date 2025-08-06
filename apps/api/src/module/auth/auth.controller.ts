@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -10,30 +11,39 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { LoginDto } from './dto/login.dto';
-import { AuthService } from './auth.service';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { AuthGuard } from './guards/auth.guard';
-import { SharedService } from '../../services/shared/shared.service';
 import { IDataResponse } from '../../interfaces/_types';
+import { SharedService } from '../../services/shared/shared.service';
+import { AuthService } from './auth.service';
+import { RefreshToken } from './decorators/refresh-token.decorator';
+import { User } from './decorators/user.decorator';
+import {
+  RegisterDto,
+  UpdateEmailDto,
+  UpdatePasswordDto,
+  UpdateUserDto,
+} from './dto/auth.dto';
+import { LoginDto } from './dto/login.dto';
+import { GenerateEmailVerificationLinkDto } from './dto/send-email-verification.dto';
+import { AuthGuard, IRequestUser } from './guards/auth.guard';
+import { TokenService } from './token.service';
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
+    private readonly tokenService: TokenService,
     private readonly sharedService: SharedService,
   ) {}
 
   @UseGuards(AuthGuard)
   @Delete('remove-shared')
-  async removeShared(@Req() req): Promise<any> {
-    return await this.sharedService.removeShared(req.user?.id);
+  async removeShared(@User() user: IRequestUser): Promise<any> {
+    return await this.sharedService.removeShared(user?.id);
   }
 
   @Post('register')
-  async register(
-    @Body() body: { email: string; password: string; username: string },
-  ): Promise<IDataResponse> {
+  async register(@Body() body: RegisterDto): Promise<IDataResponse> {
     return await this.authService.register(body);
   }
 
@@ -44,19 +54,23 @@ export class AuthController {
 
   @UseGuards(AuthGuard)
   @Get('user-data')
-  async getUserData(@Req() req) {
-    const response = await this.authService.getUserData(req.user?.id);
+  async getUserData(@User() user: IRequestUser) {
+    const response = await this.authService.getUserData(user?.id);
     return response;
   }
 
   @UseGuards(AuthGuard)
   @Put('user-data')
   @UseInterceptors(FileInterceptor('file'))
-  async updateUserData(@Req() req, @Body() body, @UploadedFile() photo) {
+  async updateUserData(
+    @User() user: IRequestUser,
+    @Body() body: UpdateUserDto,
+    @UploadedFile() photoURL: string,
+  ) {
     return this.authService.updateUserData(
-      req.user?.id,
+      user?.id,
       body.displayName,
-      photo,
+      photoURL,
     );
   }
 
@@ -64,10 +78,10 @@ export class AuthController {
   @Post('upload-avatar')
   @UseInterceptors(FileInterceptor('file'))
   async updateUserAvatar(
-    @Req() req,
+    @User() user: IRequestUser,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    return this.authService.uploadAvatar(req.user?.id, file);
+    return this.authService.uploadAvatar(user?.id, file);
   }
 
   @Post('login-google')
@@ -79,24 +93,64 @@ export class AuthController {
 
   @UseGuards(AuthGuard)
   @Delete('user')
-  async deleteUser(@Req() req) {
-    return await this.authService.deleteUser(req.user?.id);
+  async deleteUser(@User() user: IRequestUser) {
+    return await this.authService.deleteUser(user?.id);
+  }
+
+  @UseGuards(AuthGuard)
+  @Post('generate-email-verification-link')
+  async generateEmailtVerificationLinkVerificationLink(
+    @Body() { email }: GenerateEmailVerificationLinkDto,
+  ) {
+    return this.authService.generateEmailVerificationLink(email);
   }
 
   @UseGuards(AuthGuard)
   @Put('update-email')
-  async updateUserEmail(@Req() req, @Body() body) {
-    return this.authService.changeUserEmail(req.user?.id, body.email);
+  async updateUserEmail(
+    @User() user: IRequestUser,
+    @Body() body: UpdateEmailDto,
+  ) {
+    return this.authService.changeUserEmail(user?.id, body.email);
   }
 
   @UseGuards(AuthGuard)
   @Put('update-pass')
-  async updatePassword(@Req() req, @Body() body) {
+  async updatePassword(
+    @User() user: IRequestUser,
+    @Body() body: UpdatePasswordDto,
+  ) {
     return this.authService.changeUserPassword(
-      req.user?.id,
+      user?.id,
       body.email,
       body.oldPassword,
       body.newPassword,
     );
+  }
+
+  @Get('refresh-token')
+  async refreshToken(@Req() request: Request, @RefreshToken() token: string) {
+    const { expiresAt, refreshToken, idToken } =
+      await this.tokenService.refreshToken(token, request);
+    return {
+      expiresAt,
+      refreshToken,
+      token: idToken,
+    };
+  }
+
+  @UseGuards(AuthGuard)
+  @Get('user-reload')
+  async reload(@User() user: IRequestUser) {
+    return this.authService.getUserById(user?.id);
+  }
+
+  @UseGuards(AuthGuard)
+  @Post('reauthenticate')
+  async reauthenticate(@User() user: IRequestUser, @Body() body: LoginDto) {
+    if (user.email !== body.email) {
+      throw new BadRequestException('Emails do not match');
+    }
+    return this.authService.reauthenticate(body.email, body.password);
   }
 }

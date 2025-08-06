@@ -1,0 +1,201 @@
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import * as admin from 'firebase-admin';
+import { DecodedIdToken } from 'firebase-admin/auth';
+import { HttpService } from 'nestjs-http-promise';
+import { FIREBASE_ADMIN } from '../firebase';
+import { IRequestUser } from './guards/auth.guard';
+
+export interface TokenRefreshResponse {
+  idToken: string;
+  refreshToken: string;
+  expiresAt: string;
+}
+
+@Injectable()
+export class TokenService {
+  private readonly logger = new Logger(TokenService.name);
+  private readonly auth!: admin.auth.Auth;
+
+  constructor(
+    private eventEmitter: EventEmitter2,
+    private readonly httpService: HttpService,
+    private readonly configService: ConfigService,
+    @Inject(FIREBASE_ADMIN)
+    private readonly firebaseAdmin: admin.app.App,
+  ) {
+    this.auth = this.firebaseAdmin.auth();
+  }
+
+  /**
+   * Process and validate token with enhanced security
+   */
+  async processToken(token: string, request: any): Promise<void> {
+    if (!token) {
+      this.logger.warn('No token provided for authentication');
+      throw new UnauthorizedException('Authentication token is required');
+    }
+
+    try {
+      const decodedToken: DecodedIdToken = await this.auth.verifyIdToken(
+        token,
+        true,
+      );
+
+      // Additional token validation
+      if (!decodedToken.uid || !decodedToken.email) {
+        throw new UnauthorizedException('Invalid token payload');
+      }
+
+      // Check if token is not expired (additional safety check)
+      const now = Math.floor(Date.now() / 1000);
+      if (decodedToken.exp <= now) {
+        throw new UnauthorizedException('Token has expired');
+      }
+
+      const user: IRequestUser = {
+        id: decodedToken.uid,
+        email: decodedToken.email,
+        photoURL: decodedToken.picture || null,
+        name:
+          decodedToken.name ||
+          decodedToken.display_name ||
+          this.parseEmailToDisplayName(decodedToken.email),
+        isVerified: decodedToken.email_verified || false,
+      };
+
+      request.user = user;
+
+      // Log successful authentication (without sensitive data)
+      this.logger.debug(
+        `Token processed successfully for user: ${decodedToken.uid}`,
+      );
+    } catch (error: any) {
+      this.logger.error('Token processing failed:', error);
+
+      if (error.code === 'auth/id-token-expired') {
+        throw new UnauthorizedException('Authentication token has expired');
+      } else if (error.code === 'auth/id-token-revoked') {
+        throw new UnauthorizedException(
+          'Authentication token has been revoked',
+        );
+      } else if (error.code === 'auth/invalid-id-token') {
+        throw new UnauthorizedException('Invalid authentication token');
+      }
+
+      throw new UnauthorizedException('Authentication failed');
+    }
+  }
+
+  /**
+   * Refresh authentication token with enhanced error handling
+   */
+  async refreshToken(
+    refreshToken: string,
+    request: any,
+  ): Promise<TokenRefreshResponse> {
+    if (!refreshToken) {
+      throw new BadRequestException('Refresh token is required');
+    }
+
+    try {
+      const firebaseApiKey = this.configService.get<string>('firebase.apiKey');
+      if (!firebaseApiKey) {
+        this.logger.error('Firebase API key not configured');
+        throw new InternalServerErrorException(
+          'Authentication service configuration error',
+        );
+      }
+
+      const response = await this.httpService.post(
+        `https://securetoken.googleapis.com/v1/token?key=${firebaseApiKey}`,
+        {
+          grant_type: 'refresh_token',
+          refresh_token: refreshToken,
+        },
+        {
+          timeout: 10000, // 10 second timeout
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+
+      const { data } = response;
+
+      if (!data?.id_token || !data?.refresh_token) {
+        throw new UnauthorizedException('Invalid refresh token response');
+      }
+
+      const expiresIn = parseInt(data.expires_in, 10);
+      if (isNaN(expiresIn) || expiresIn <= 0) {
+        throw new UnauthorizedException('Invalid token expiration time');
+      }
+
+      // Process the new token to validate and set user context
+      await this.processToken(data.id_token, request);
+
+      // Emit analytics event
+      if (request.user?.id) {
+        this.eventEmitter.emit('analytics.track', 'Token Refreshed', {
+          userId: request.user.id,
+        });
+      }
+
+      const expiresAt = new Date(Date.now() + expiresIn * 1000).toISOString();
+
+      this.logger.log(
+        `Token refreshed successfully for user: ${request.user?.id || 'unknown'}`,
+      );
+
+      return {
+        idToken: data.id_token,
+        refreshToken: data.refresh_token,
+        expiresAt,
+      };
+    } catch (error: any) {
+      this.logger.error('Token refresh failed:', error);
+
+      if (error.response?.status === 400) {
+        throw new UnauthorizedException('Invalid or expired refresh token');
+      } else if (error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT') {
+        throw new InternalServerErrorException(
+          'Authentication service timeout',
+        );
+      }
+
+      throw new UnauthorizedException('Failed to refresh authentication token');
+    }
+  }
+
+  private parseEmailToDisplayName(email: string): string {
+    try {
+      const [localPart] = email.split('@');
+      if (!localPart) return 'User';
+
+      // Remove common separators and capitalize first letter
+      const cleanName = localPart
+        .split(/[._-]/)
+        .map(
+          (part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase(),
+        )
+        .join(' ');
+
+      return cleanName || 'User';
+    } catch (error) {
+      this.logger.warn(
+        `Failed to parse email to display name: ${email}`,
+        error,
+      );
+      return 'User';
+    }
+  }
+}

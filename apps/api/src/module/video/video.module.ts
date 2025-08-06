@@ -12,9 +12,10 @@ import { VideoController } from './video.controller';
 import { VideoChapterController } from './controllers/chapter.controller';
 import { FoldersSharedService } from '../../services/shared/folders.shared.service';
 import { EditorWebsocketModule } from '../editor-websocket-module/editor-websocket.module';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
-  imports: [HttpModule, StreamServiceModule, EditorWebsocketModule],
+  imports: [HttpModule, StreamServiceModule, EditorWebsocketModule, AuthModule],
   providers: [
     VideoService,
     VideoChapterService,

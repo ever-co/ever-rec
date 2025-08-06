@@ -1,14 +1,12 @@
+import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
-import { ConfigService } from '@nestjs/config';
-import { AppModule } from './app.module';
 import { SentryService } from '@ntegral/nestjs-sentry';
-import { initFirebaseAdmin } from './services/firebase/firebaseAdmin';
-import { join } from 'path';
-import fs from 'fs';
 import * as bodyParser from 'body-parser';
+import fs from 'fs';
+import { join } from 'path';
+import { AppModule } from './app.module';
 import { TMP_PATH, TMP_PATH_FIXED } from './enums/tmpPathsEnums';
-import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
@@ -22,8 +20,6 @@ async function bootstrap() {
   if (isDocker) {
     console.log('Running in Docker');
   }
-
-  initFirebaseAdmin(configService);
 
   let publicPath;
 

@@ -1,23 +1,28 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Inject,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import * as admin from 'firebase-admin';
-import { FirebaseClient } from 'src/services/firebase/firebase.client';
 import {
   createUserWithEmailAndPassword,
+  fetchSignInMethodsForEmail,
   GoogleAuthProvider,
-  sendPasswordResetEmail,
   signInWithCredential,
   signInWithEmailAndPassword,
   User,
-  fetchSignInMethodsForEmail,
 } from 'firebase/auth';
-import { SharedService } from '../../services/shared/shared.service';
-import { ResStatusEnum } from '../../enums/ResStatusEnum';
-import { IUser } from '../../interfaces/IUser';
-import { IResponseMetadata } from '../../interfaces/IResponseMetadata';
-import { IDataResponse } from '../../interfaces/_types';
-import { ImageService } from '../image/image.service';
-import { EventEmitter2 } from '@nestjs/event-emitter';
 import firebase from 'firebase/compat';
+import { FirebaseClient } from 'src/services/firebase/firebase.client';
+import { ResStatusEnum } from '../../enums/ResStatusEnum';
+import { IResponseMetadata } from '../../interfaces/IResponseMetadata';
+import { IUser } from '../../interfaces/IUser';
+import { IDataResponse } from '../../interfaces/_types';
+import { SharedService } from '../../services/shared/shared.service';
+import { FIREBASE_ADMIN } from '../firebase';
 import OAuthCredential = firebase.auth.OAuthCredential;
 
 const defaultProblemMessage = 'There was a problem, please try again later...';
@@ -36,23 +41,33 @@ interface ISignedUrlConfig {
   expires: string | number;
 }
 
+export interface TokenRefreshResponse {
+  idToken: string;
+  refreshToken: string;
+  expiresAt: string;
+}
+
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
   private readonly config: ISignedUrlConfig;
   private readonly expirationTime500years: number;
   private readonly rootDb = 'users';
+  private readonly auth!: admin.auth.Auth;
 
   constructor(
     private readonly firebaseClient: FirebaseClient,
     private readonly sharedService: SharedService,
-    private readonly imageService: ImageService,
     private eventEmitter: EventEmitter2,
+    @Inject(FIREBASE_ADMIN)
+    private readonly firebaseAdmin: admin.app.App,
   ) {
     this.config = {
       action: 'read',
       expires: '03-01-2500',
     };
     this.expirationTime500years = 1000 * 15778476000;
+    this.auth = this.firebaseAdmin.auth();
   }
 
   private readonly errorParser = {
@@ -181,7 +196,7 @@ export class AuthService {
         });
       }
 
-      const idToken = await user.getIdToken();
+      const { token, expirationTime } = await user.getIdTokenResult();
       const photoURL = newDbUser?.photoURL;
       const displayName = newDbUser?.displayName;
 
@@ -201,7 +216,9 @@ export class AuthService {
         data: {
           id: user.uid,
           refreshToken: user.refreshToken,
-          idToken,
+          isVerified: false,
+          idToken: token,
+          expiresAt: expirationTime,
           photoURL,
           displayName,
           email,
@@ -278,7 +295,7 @@ export class AuthService {
         email,
         password,
       );
-      const idToken = await userCreds.user.getIdToken();
+      const { token, expirationTime } = await userCreds.user.getIdTokenResult();
       const { displayName, photoURL, isSlackIntegrate, dropbox, jira, trello } =
         await this.getUserMetadata(userCreds.user.uid);
 
@@ -298,7 +315,9 @@ export class AuthService {
         data: {
           id: userCreds.user.uid,
           refreshToken: userCreds.user.refreshToken,
-          idToken,
+          isVerified: userCreds.user.emailVerified,
+          expiresAt: expirationTime,
+          idToken: token,
           photoURL,
           displayName,
           email,
@@ -333,7 +352,7 @@ export class AuthService {
           googleCredentials: googleAuthCredential,
         }));
 
-      const idToken = await userCreds.user.getIdToken();
+      const { token, expirationTime } = await userCreds.user.getIdTokenResult();
       const email = userCreds.user?.email;
       const { displayName, photoURL, isSlackIntegrate, dropbox, jira, trello } =
         await this.getUserMetadata(userCreds.user.uid);
@@ -355,7 +374,9 @@ export class AuthService {
         data: {
           id: userCreds.user.uid,
           refreshToken: userCreds.user.refreshToken,
-          idToken,
+          isVerified: userCreds.user.emailVerified,
+          idToken: token,
+          expiresAt: expirationTime,
           photoURL,
           displayName,
           email,
@@ -537,10 +558,10 @@ export class AuthService {
       const userRef = admin.database().ref(`users/${uid}`);
 
       await Promise.all([
-        userRef.remove(),
-        auth.deleteUser(uid),
         this.sharedService.removeShared(uid),
         this.deleteUserFiles(uid),
+        auth.deleteUser(uid),
+        userRef.remove(),
       ]);
 
       this.eventEmitter.emit(
@@ -575,6 +596,54 @@ export class AuthService {
       console.log('All user files deleted successfully.');
     } catch (err) {
       console.error('Error deleting user files:', err);
+    }
+  }
+
+  async generateEmailVerificationLink(email: string) {
+    const user = await this.auth.getUserByEmail(email);
+
+    if (user.emailVerified) {
+      throw new ConflictException('Email already verified');
+    }
+
+    const link = await this.auth.generateEmailVerificationLink(email);
+
+    return {
+      status: ResStatusEnum.success,
+      message: 'Link generated successfully!',
+      error: null,
+      data: { link },
+    };
+  }
+
+  async getUserById(uid: string) {
+    return this.auth.getUser(uid);
+  }
+
+  public async reauthenticate(email: string, password: string) {
+    try {
+      const { user } = await signInWithEmailAndPassword(
+        this.firebaseClient.firebaseAuth,
+        email,
+        password,
+      );
+      const { token, expirationTime } = await user.getIdTokenResult();
+
+      return {
+        status: ResStatusEnum.success,
+        message: 'Reauthentication successful',
+        error: null,
+        data: {
+          refreshToken: user.refreshToken,
+          expiresAt: expirationTime,
+          idToken: token,
+        },
+      };
+    } catch (error) {
+      if (error.code === 'auth/invalid-credential') {
+        throw new BadRequestException('Invalid credential');
+      }
+      throw error;
     }
   }
 }
