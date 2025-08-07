@@ -11,7 +11,7 @@ export const RefreshToken = createParamDecorator(
     const headerToken = request.headers['x-refresh-token'];
     const cookieToken = request.cookies?.refreshToken;
 
-    const token = headerToken || cookieToken || null;
+    const token = headerToken || cookieToken;
 
     if (!token) {
       throw new UnauthorizedException('Missing refresh token');

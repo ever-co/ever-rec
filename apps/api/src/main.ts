@@ -1,10 +1,11 @@
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
-import { SentryService } from '@ntegral/nestjs-sentry';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as bodyParser from 'body-parser';
 import fs from 'fs';
 import { join } from 'path';
+import './config/instrument';
 import { AppModule } from './app.module';
 import { TMP_PATH, TMP_PATH_FIXED } from './enums/tmpPathsEnums';
 
@@ -14,8 +15,6 @@ async function bootstrap() {
   });
   const configService: ConfigService = app.get(ConfigService);
   const isDocker = configService.get<boolean>('IS_DOCKER');
-
-  app.useLogger(SentryService.SentryServiceInstance());
 
   if (isDocker) {
     console.log('Running in Docker');
@@ -55,6 +54,15 @@ async function bootstrap() {
       extended: true,
     }),
   );
+
+  const config = new DocumentBuilder()
+    .setTitle('Ever Rec API')
+    .setDescription('Ever Rec API Documentation')
+    .setVersion('1.0')
+    .addTag('Ever')
+    .build();
+  const documentFactory = () => SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('docs', app, documentFactory);
 
   await app.listen(port);
 }
