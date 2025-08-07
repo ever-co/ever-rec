@@ -8,7 +8,7 @@ import { AppService } from './app.service';
 import { AdminModule } from './module/admin/admin.module';
 import { AtlassianModule } from './module/atlassian/atlassian.module';
 import { AuthModule } from './module/auth/auth.module';
-import { DriveModule } from './module/drive/drve.module';
+import { DriveModule } from './module/drive/drive.module';
 import { DropboxModule } from './module/dropbox/dropbox.module';
 import { EditorWebsocketModule } from './module/editor-websocket-module/editor-websocket.module';
 import { EditorGateway } from './module/editor-websocket-module/editor.gateway';

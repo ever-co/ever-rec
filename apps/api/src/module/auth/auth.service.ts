@@ -560,8 +560,8 @@ export class AuthService {
       await Promise.all([
         this.sharedService.removeShared(uid),
         this.deleteUserFiles(uid),
-        auth.deleteUser(uid),
         userRef.remove(),
+        auth.deleteUser(uid),
       ]);
 
       this.eventEmitter.emit(

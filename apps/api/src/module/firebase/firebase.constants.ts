@@ -1,1 +1,1 @@
-export const FIREBASE_ADMIN = 'Firebase admin token';
+export const FIREBASE_ADMIN = Symbol('FirebaseAdminToken');
