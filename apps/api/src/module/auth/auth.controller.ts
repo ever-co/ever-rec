@@ -105,7 +105,7 @@ export class AuthController {
     return this.authService.generateEmailVerificationLink(email);
   }
 
-  @UseGuards(AuthGuard, EmailOwnershipGuard)
+  @UseGuards(AuthGuard)
   @Put('update-email')
   async updateUserEmail(
     @User() user: IRequestUser,
