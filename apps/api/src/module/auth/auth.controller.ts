@@ -27,6 +27,7 @@ import { LoginDto } from './dto/login.dto';
 import { GenerateEmailVerificationLinkDto } from './dto/send-email-verification.dto';
 import { AuthGuard, IRequestUser } from './guards/auth.guard';
 import { TokenService } from './token.service';
+import { EmailOwnershipGuard } from './guards/email-ownership.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -39,12 +40,12 @@ export class AuthController {
   @UseGuards(AuthGuard)
   @Delete('remove-shared')
   async removeShared(@User() user: IRequestUser): Promise<any> {
-    return await this.sharedService.removeShared(user?.id);
+    return this.sharedService.removeShared(user?.id);
   }
 
   @Post('register')
   async register(@Body() body: RegisterDto): Promise<IDataResponse> {
-    return await this.authService.register(body);
+    return this.authService.register(body);
   }
 
   @Post('login')
@@ -55,8 +56,7 @@ export class AuthController {
   @UseGuards(AuthGuard)
   @Get('user-data')
   async getUserData(@User() user: IRequestUser) {
-    const response = await this.authService.getUserData(user?.id);
-    return response;
+    return this.authService.getUserData(user?.id);
   }
 
   @UseGuards(AuthGuard)
@@ -97,7 +97,7 @@ export class AuthController {
     return await this.authService.deleteUser(user?.id);
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, EmailOwnershipGuard)
   @Post('generate-email-verification-link')
   async generateEmailVerificationLink(
     @Body() { email }: GenerateEmailVerificationLinkDto,
@@ -105,7 +105,7 @@ export class AuthController {
     return this.authService.generateEmailVerificationLink(email);
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, EmailOwnershipGuard)
   @Put('update-email')
   async updateUserEmail(
     @User() user: IRequestUser,
@@ -114,7 +114,7 @@ export class AuthController {
     return this.authService.changeUserEmail(user?.id, body.email);
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, EmailOwnershipGuard)
   @Put('update-pass')
   async updatePassword(
     @User() user: IRequestUser,
@@ -145,7 +145,7 @@ export class AuthController {
     return this.authService.getUserById(user?.id);
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, EmailOwnershipGuard)
   @Post('reauthenticate')
   async reauthenticate(@User() user: IRequestUser, @Body() body: LoginDto) {
     if (user.email !== body.email) {

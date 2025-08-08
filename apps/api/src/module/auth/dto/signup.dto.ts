@@ -8,7 +8,7 @@ export class SignUpDto {
     required: true,
   })
   @IsEmail({}, { message: 'Please provide a valid email address' })
-  email: string;
+  readonly email: string;
 
   @ApiProperty({
     description: 'User password (min 8 characters)',
@@ -18,7 +18,7 @@ export class SignUpDto {
   })
   @IsString()
   @MinLength(8, { message: 'Password must be at least 8 characters long' })
-  password: string;
+  readonly password: string;
 
   @ApiProperty({
     description: 'User display name',
@@ -27,5 +27,5 @@ export class SignUpDto {
   })
   @IsString()
   @IsNotEmpty({ message: 'Display name cannot be empty' })
-  displayName: string;
+  readonly displayName: string;
 }
