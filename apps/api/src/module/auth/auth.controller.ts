@@ -99,7 +99,7 @@ export class AuthController {
 
   @UseGuards(AuthGuard)
   @Post('generate-email-verification-link')
-  async generateEmailtVerificationLink(
+  async generateEmailVerificationLink(
     @Body() { email }: GenerateEmailVerificationLinkDto,
   ) {
     return this.authService.generateEmailVerificationLink(email);

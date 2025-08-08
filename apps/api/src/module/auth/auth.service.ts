@@ -639,11 +639,26 @@ export class AuthService {
           idToken: token,
         },
       };
-    } catch (error) {
-      if (error.code === 'auth/invalid-credential') {
-        throw new BadRequestException('Invalid credential');
+    } catch (error: any) {
+      // Handle specific Firebase authentication error codes
+      switch (error.code) {
+        case 'auth/invalid-credential':
+          throw new BadRequestException('Invalid credential');
+        case 'auth/user-not-found':
+          throw new BadRequestException('This email is not yet registered...');
+        case 'auth/wrong-password':
+          throw new BadRequestException('Invalid email or password. Please try again...');
+        case 'auth/user-disabled':
+          throw new BadRequestException('This User is disabled.');
+        case 'auth/invalid-email':
+          throw new BadRequestException('Invalid email or password. Please try again...');
+        case 'auth/too-many-requests':
+          throw new BadRequestException('Too many failed login attempts. Please try again later.');
+        case 'auth/network-request-failed':
+          throw new BadRequestException('Network error. Please check your internet connection and try again.');
+        default:
+          throw new BadRequestException('Authentication failed. Please try again.');
       }
-      throw error;
     }
   }
 }

@@ -55,12 +55,6 @@ export class TokenService {
         throw new UnauthorizedException('Invalid token payload');
       }
 
-      // Check if token is not expired (additional safety check)
-      const now = Math.floor(Date.now() / 1000);
-      if (decodedToken.exp <= now) {
-        throw new UnauthorizedException('Token has expired');
-      }
-
       const user: IRequestUser = {
         id: decodedToken.uid,
         email: decodedToken.email,
