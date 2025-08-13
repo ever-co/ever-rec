@@ -334,6 +334,9 @@ export class AuthService {
         throw new BadRequestException('Login failed');
       }
 
+      // Get user record to check email verification status
+      const userRecord = await this.firebaseAdminService.getUser(loginResult.localId);
+
       const { displayName, photoURL, isSlackIntegrate, dropbox, jira, trello } =
         await this.getUserMetadata(loginResult.localId);
 
@@ -356,6 +359,7 @@ export class AuthService {
         photoURL,
         displayName,
         email,
+        isVerified: userRecord.emailVerified,
         isSlackIntegrate,
         dropbox,
         trello,
@@ -653,10 +657,14 @@ export class AuthService {
         throw new BadRequestException('Invalid credentials');
       }
 
+      // Get user record to check email verification status
+      const userRecord = await this.firebaseAdminService.getUser(loginResult.localId);
+
       return sendResponse({
         refreshToken: loginResult.refreshToken,
         expiresAt: loginResult.expiresIn,
         idToken: loginResult.idToken,
+        isVerified: userRecord.emailVerified,
       });
     } catch (error: any) {
       return this.handleAuthError(error);
