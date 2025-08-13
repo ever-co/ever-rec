@@ -1,6 +1,5 @@
 import {
   BadRequestException,
-  Inject,
   Injectable,
   InternalServerErrorException,
   Logger,
@@ -8,10 +7,9 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import * as admin from 'firebase-admin';
 import { DecodedIdToken } from 'firebase-admin/auth';
 import { HttpService } from 'nestjs-http-promise';
-import { FIREBASE_ADMIN } from '../firebase';
+import { FirebaseAdminService } from '../firebase/services/firebase-admin.service';
 import { IRequestUser } from './guards/auth.guard';
 
 export interface TokenRefreshResponse {
@@ -23,17 +21,13 @@ export interface TokenRefreshResponse {
 @Injectable()
 export class TokenService {
   private readonly logger = new Logger(TokenService.name);
-  private readonly auth!: admin.auth.Auth;
 
   constructor(
     private eventEmitter: EventEmitter2,
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
-    @Inject(FIREBASE_ADMIN)
-    private readonly firebaseAdmin: admin.app.App,
-  ) {
-    this.auth = this.firebaseAdmin.auth();
-  }
+    private readonly firebaseAdminService: FirebaseAdminService,
+  ) {}
 
   /**
    * Process and validate token with enhanced security
@@ -45,10 +39,8 @@ export class TokenService {
     }
 
     try {
-      const decodedToken: DecodedIdToken = await this.auth.verifyIdToken(
-        token,
-        true,
-      );
+      const decodedToken: DecodedIdToken =
+        await this.firebaseAdminService.verifyIdToken(token);
 
       // Additional token validation
       if (!decodedToken.uid || !decodedToken.email) {

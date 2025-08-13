@@ -1,29 +1,19 @@
 import {
   BadRequestException,
   ConflictException,
-  Inject,
   Injectable,
   Logger,
 } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import * as admin from 'firebase-admin';
-import {
-  createUserWithEmailAndPassword,
-  fetchSignInMethodsForEmail,
-  GoogleAuthProvider,
-  signInWithCredential,
-  signInWithEmailAndPassword,
-  User,
-} from 'firebase/auth';
-import firebase from 'firebase/compat';
-import { FirebaseClient } from 'src/services/firebase/firebase.client';
 import { ResStatusEnum } from '../../enums/ResStatusEnum';
 import { IResponseMetadata } from '../../interfaces/IResponseMetadata';
 import { IUser } from '../../interfaces/IUser';
 import { IDataResponse } from '../../interfaces/_types';
 import { SharedService } from '../../services/shared/shared.service';
-import { FIREBASE_ADMIN } from '../firebase';
-import OAuthCredential = firebase.auth.OAuthCredential;
+import { sendError, sendResponse } from '../../services/utils/sendResponse';
+import { FirebaseAdminService } from '../firebase/services/firebase-admin.service';
+import { FirebaseAuthService } from '../firebase/services/firebase-auth.service';
 
 const defaultProblemMessage = 'There was a problem, please try again later...';
 
@@ -32,13 +22,24 @@ interface IRegisterProps {
   password: string;
   username: string;
 }
+
 interface ILoginProps {
   email: string;
   password: string;
 }
+
 interface ISignedUrlConfig {
   action: string;
   expires: string | number;
+}
+
+interface IUserWithCredentials {
+  uid: string;
+  email?: string;
+  displayName?: string;
+  photoURL?: string;
+  emailVerified: boolean;
+  googleCredentials?: any;
 }
 
 export interface TokenRefreshResponse {
@@ -53,21 +54,18 @@ export class AuthService {
   private readonly config: ISignedUrlConfig;
   private readonly expirationTime500years: number;
   private readonly rootDb = 'users';
-  private readonly auth!: admin.auth.Auth;
 
   constructor(
-    private readonly firebaseClient: FirebaseClient,
     private readonly sharedService: SharedService,
     private eventEmitter: EventEmitter2,
-    @Inject(FIREBASE_ADMIN)
-    private readonly firebaseAdmin: admin.app.App,
+    private readonly firebaseAuthService: FirebaseAuthService,
+    private readonly firebaseAdminService: FirebaseAdminService,
   ) {
     this.config = {
       action: 'read',
       expires: '03-01-2500',
     };
     this.expirationTime500years = 1000 * 15778476000;
-    this.auth = this.firebaseAdmin.auth();
   }
 
   private readonly errorParser = {
@@ -77,101 +75,127 @@ export class AuthService {
     'auth/invalid-email': 'Invalid email or password. Please try again...',
     'auth/user-disabled': 'This User is disabled.',
     'auth/user-not-found': 'This email is not yet registered...',
+    'auth/invalid-credential': 'Invalid credential provided.',
+    'auth/too-many-requests':
+      'Too many failed login attempts. Please try again later.',
+    'auth/network-request-failed':
+      'Network error. Please check your internet connection and try again.',
     'custom/user-uses-google-auth':
       'This account is already associated with a Google account. Please sign in using Google login button.',
   };
 
-  private parseUserEmailToDisplayName(email: string) {
-    const rawUserName = email.split('@')[0];
-    const userName = rawUserName.split(/\.|_/g);
-    const parsedUserName = userName.join('');
+  private parseUserEmailToDisplayName(email: string): string {
+    try {
+      const rawUserName = email.split('@')[0];
+      const userName = rawUserName.split(/\.|_/g);
+      const parsedUserName = userName.join('');
+      return parsedUserName || 'User';
+    } catch (error) {
+      this.logger.warn(
+        `Failed to parse email to display name: ${email}`,
+        error,
+      );
+      return 'User';
+    }
+  }
 
-    return parsedUserName;
+  private handleAuthError(error: any): IDataResponse<null> {
+    const errorCode = error.code || 'unknown';
+    const message = this.errorParser[errorCode] || defaultProblemMessage;
+
+    this.logger.error(`Authentication error: ${errorCode}`, error);
+
+    return sendError(message, error);
   }
 
   async addUserToDb(
-    user: User & { googleCredentials?: OAuthCredential },
+    user: IUserWithCredentials,
   ): Promise<IUser | IResponseMetadata> {
-    const userRef = admin.database().ref(`users/${user.uid}`);
-    const snapshot = await userRef.get();
+    try {
+      const userRef = this.firebaseAdminService.getDatabaseRef(
+        `${this.rootDb}/${user.uid}`,
+      );
+      const snapshot = await userRef.get();
 
-    if (!snapshot.exists()) {
-      const newUser: IUser = {
-        email: user.email,
-        displayName:
-          user.displayName || this.parseUserEmailToDisplayName(user.email),
-        // @ts-ignore
-        photoURL: user.photoURL || user.photoUrl || null,
-        googleCredentials: user.googleCredentials || null,
-      };
+      if (!snapshot.exists()) {
+        const newUser: IUser = {
+          email: user.email,
+          displayName:
+            user.displayName || this.parseUserEmailToDisplayName(user.email),
+          photoURL: user.photoURL || null,
+          googleCredentials: user.googleCredentials || null,
+        };
 
-      await userRef.set(newUser);
+        await userRef.set(newUser);
+        this.logger.log(`User added to database: ${user.uid}`);
 
-      return newUser;
-    } else {
-      return {
-        status: ResStatusEnum.error,
-        message: 'User already exists!',
-        error: null,
-      };
+        return newUser;
+      } else {
+        return {
+          status: ResStatusEnum.error,
+          message: 'User already exists!',
+          error: null,
+        };
+      }
+    } catch (error) {
+      this.logger.error(`Failed to add user to database: ${user.uid}`, error);
+      throw new BadRequestException('Failed to create user profile');
     }
   }
 
   async getUserData(uid: string): Promise<IDataResponse> {
     try {
-      const userRef = admin.database().ref(`users/${uid}`);
+      const userRef = this.firebaseAdminService.getDatabaseRef(
+        `${this.rootDb}/${uid}`,
+      );
       const userSnap = await userRef.get();
       const userVal = userSnap.val();
-      return {
-        status: ResStatusEnum.success,
-        message: 'Get user data successfully!',
-        error: null,
-        data: {
-          id: uid,
-          email: userVal?.email,
-          photoURL: userVal?.photoURL,
-          displayName: userVal?.displayName,
-          isSlackIntegrate: userVal?.isSlackIntegrate,
-          favoriteFolders: userVal?.favoriteFolders,
-          dropbox: {
-            isDropBoxIntegrated: !!(
-              userVal?.dropboxAPISCredentials &&
-              userVal.dropboxAPISCredentials.credentials &&
-              userVal.dropboxAPISCredentials.credentials.access_token
-            ),
-            email: userVal?.dropboxAPISCredentials
-              ? userVal.dropboxAPISCredentials.email
-              : null,
-          },
-          jira: {
-            isIntegrated: !!(
-              userVal?.jiraAPISCredentials &&
-              userVal.jiraAPISCredentials.credentials &&
-              userVal.jiraAPISCredentials.credentials.access_token
-            ),
-            email: userVal?.jiraAPISCredentials
-              ? userVal.jiraAPISCredentials.email
-              : null,
-          },
-          trello: {
-            isIntegrated: !!(
-              userVal?.trelloAPISCredentials &&
-              userVal.trelloAPISCredentials.credentials &&
-              userVal.trelloAPISCredentials.credentials.access_token
-            ),
-            email: userVal?.trelloAPISCredentials
-              ? userVal.trelloAPISCredentials.email
-              : null,
-          },
+
+      if (!userVal) {
+        return sendError('User does not exist!');
+      }
+
+      return sendResponse({
+        id: uid,
+        email: userVal?.email,
+        photoURL: userVal?.photoURL,
+        displayName: userVal?.displayName,
+        isSlackIntegrate: userVal?.isSlackIntegrate,
+        favoriteFolders: userVal?.favoriteFolders,
+        dropbox: {
+          isDropBoxIntegrated: !!(
+            userVal?.dropboxAPISCredentials &&
+            userVal.dropboxAPISCredentials.credentials &&
+            userVal.dropboxAPISCredentials.credentials.access_token
+          ),
+          email: userVal?.dropboxAPISCredentials
+            ? userVal.dropboxAPISCredentials.email
+            : null,
         },
-      };
-    } catch (e) {
-      return {
-        status: ResStatusEnum.error,
-        message: 'User does not exist!',
-        error: null,
-        data: null,
-      };
+        jira: {
+          isIntegrated: !!(
+            userVal?.jiraAPISCredentials &&
+            userVal.jiraAPISCredentials.credentials &&
+            userVal.jiraAPISCredentials.credentials.access_token
+          ),
+          email: userVal?.jiraAPISCredentials
+            ? userVal.jiraAPISCredentials.email
+            : null,
+        },
+        trello: {
+          isIntegrated: !!(
+            userVal?.trelloAPISCredentials &&
+            userVal.trelloAPISCredentials.credentials &&
+            userVal.trelloAPISCredentials.credentials.access_token
+          ),
+          email: userVal?.trelloAPISCredentials
+            ? userVal.trelloAPISCredentials.email
+            : null,
+        },
+      });
+    } catch (error) {
+      this.logger.error(`Failed to get user data: ${uid}`, error);
+      return sendError('Failed to retrieve user data');
     }
   }
 
@@ -181,220 +205,233 @@ export class AuthService {
     username,
   }: IRegisterProps): Promise<IDataResponse> {
     try {
-      const userCreds = await createUserWithEmailAndPassword(
-        this.firebaseClient.firebaseAuth,
+      // Use Firebase Admin SDK to create user
+      const userRecord = await this.firebaseAdminService.createUser({
         email,
         password,
-      );
-      const user = userCreds.user;
-      let newDbUser;
+        displayName: username,
+      });
 
-      if (user) {
+      let newDbUser;
+      if (userRecord) {
         newDbUser = await this.addUserToDb({
-          ...user,
-          displayName: username ? username : user.displayName,
+          uid: userRecord.uid,
+          email: userRecord.email,
+          displayName: username || userRecord.displayName,
+          photoURL: userRecord.photoURL,
+          emailVerified: userRecord.emailVerified,
+          googleCredentials: undefined,
         });
       }
 
-      const { token, expirationTime } = await user.getIdTokenResult();
-      const photoURL = newDbUser?.photoURL;
-      const displayName = newDbUser?.displayName;
+      // Generate custom token for the new user
+      const customToken = await this.firebaseAdminService.createCustomToken(
+        userRecord.uid,
+      );
 
-      this.eventEmitter.emit('analytics.identify', user.uid, {
-        email: user.email,
+      const photoURL = 'photoURL' in newDbUser ? newDbUser.photoURL : null;
+      const displayName =
+        'displayName' in newDbUser ? newDbUser.displayName : null;
+
+      // Emit analytics events
+      this.eventEmitter.emit('analytics.identify', userRecord.uid, {
+        email: userRecord.email,
         name: displayName,
         avatar: photoURL,
       });
-      await this.eventEmitter.emit('analytics.track', 'User Registered', {
-        userId: user.uid,
+      this.eventEmitter.emit('analytics.track', 'User Registered', {
+        userId: userRecord.uid,
         accountType: 'Email',
       });
-      return {
-        status: ResStatusEnum.success,
-        message: 'You logged in successfully!',
-        error: null,
-        data: {
-          id: user.uid,
-          refreshToken: user.refreshToken,
-          isVerified: false,
-          idToken: token,
-          expiresAt: expirationTime,
-          photoURL,
-          displayName,
-          email,
-        },
-      };
+
+      return sendResponse({
+        id: userRecord.uid,
+        customToken,
+        isVerified: false,
+        photoURL,
+        displayName,
+        email,
+      });
     } catch (error: any) {
-      console.log(error);
-      return {
-        status: ResStatusEnum.error,
-        message: this.errorParser[error.code] || defaultProblemMessage,
-        error: null,
-        data: null,
-      };
+      return this.handleAuthError(error);
     }
   }
 
   private async getUserMetadata(uid: string) {
-    const db = admin.database();
-    const userRef = db.ref(`users/${uid}`);
-    const snapshot = await userRef.get();
-    const userData = snapshot.val();
-    return {
-      displayName: userData?.displayName || null,
-      photoURL: userData?.photoURL || null,
-      isSlackIntegrate: userData?.isSlackIntegrate || false,
-      dropbox: {
-        isDropBoxIntegrated:
-          userData?.dropboxAPISCredentials &&
-          userData.dropboxAPISCredentials.credentials &&
-          userData.dropboxAPISCredentials.credentials.access_token
-            ? true
-            : false,
-        email: userData?.dropboxAPISCredentials
-          ? userData.dropboxAPISCredentials.email
-          : null,
-      },
-      jira: {
-        isIntegrated:
-          userData?.jiraAPISCredentials &&
-          userData.jiraAPISCredentials.credentials &&
-          userData.jiraAPISCredentials.credentials.access_token
-            ? true
-            : false,
-        email: userData?.jiraAPISCredentials
-          ? userData.jiraAPISCredentials.email
-          : null,
-      },
-      trello: {
-        isIntegrated:
-          userData?.trelloAPISCredentials &&
-          userData.trelloAPISCredentials.credentials &&
-          userData.trelloAPISCredentials.credentials.access_token
-            ? true
-            : false,
-        email: userData?.trelloAPISCredentials
-          ? userData.trelloAPISCredentials.email
-          : null,
-      },
-    };
+    try {
+      const db = this.firebaseAdminService.getDatabase();
+      const userRef = db.ref(`${this.rootDb}/${uid}`);
+      const snapshot = await userRef.get();
+      const userData = snapshot.val();
+
+      if (!userData) {
+        throw new Error('User not found in database');
+      }
+
+      return {
+        displayName: userData?.displayName || null,
+        photoURL: userData?.photoURL || null,
+        isSlackIntegrate: userData?.isSlackIntegrate || false,
+        dropbox: {
+          isDropBoxIntegrated:
+            userData?.dropboxAPISCredentials &&
+            userData.dropboxAPISCredentials.credentials &&
+            userData.dropboxAPISCredentials.credentials.access_token
+              ? true
+              : false,
+          email: userData?.dropboxAPISCredentials
+            ? userData.dropboxAPISCredentials.email
+            : null,
+        },
+        jira: {
+          isIntegrated:
+            userData?.jiraAPISCredentials &&
+            userData.jiraAPISCredentials.credentials &&
+            userData.jiraAPISCredentials.credentials.access_token
+              ? true
+              : false,
+          email: userData?.jiraAPISCredentials
+            ? userData.jiraAPISCredentials.email
+            : null,
+        },
+        trello: {
+          isIntegrated:
+            userData?.trelloAPISCredentials &&
+            userData.trelloAPISCredentials.credentials &&
+            userData.trelloAPISCredentials.credentials.access_token
+              ? true
+              : false,
+          email: userData?.trelloAPISCredentials
+            ? userData.trelloAPISCredentials.email
+            : null,
+        },
+      };
+    } catch (error) {
+      this.logger.error(`Failed to get user metadata: ${uid}`, error);
+      throw new BadRequestException('Failed to retrieve user metadata');
+    }
   }
 
   async login({ email, password }: ILoginProps): Promise<IDataResponse> {
     try {
-      const checkProvider = await fetchSignInMethodsForEmail(
-        this.firebaseClient.firebaseAuth,
-        email,
-      );
+      // Check sign-in methods using Firebase Auth Service
+      const signInMethodsResult =
+        await this.firebaseAuthService.fetchSignInMethodsForEmail(email);
 
-      if (checkProvider.includes('google.com'))
+      if (!signInMethodsResult.success) {
+        throw new BadRequestException('Failed to check sign-in methods');
+      }
+
+      const signInMethods = signInMethodsResult.data?.signinMethods || [];
+      if (signInMethods.includes('google.com')) {
         throw { code: 'custom/user-uses-google-auth' };
+      }
 
-      const userCreds = await signInWithEmailAndPassword(
-        this.firebaseClient.firebaseAuth,
-        email,
-        password,
-      );
-      const { token, expirationTime } = await userCreds.user.getIdTokenResult();
+      // Use Firebase Auth Service for login
+      const loginResult = await this.firebaseAuthService.login(email, password);
+
+      if (!loginResult) {
+        throw new BadRequestException('Login failed');
+      }
+
       const { displayName, photoURL, isSlackIntegrate, dropbox, jira, trello } =
-        await this.getUserMetadata(userCreds.user.uid);
+        await this.getUserMetadata(loginResult.localId);
 
-      this.eventEmitter.emit('analytics.identify', userCreds.user.uid, {
-        email: userCreds.user.email,
+      // Emit analytics events
+      this.eventEmitter.emit('analytics.identify', loginResult.localId, {
+        email: loginResult.email,
         name: displayName,
         avatar: photoURL,
       });
       this.eventEmitter.emit('analytics.track', 'User Logged', {
-        userId: userCreds.user.uid,
+        userId: loginResult.localId,
         accountType: 'Email',
       });
-      return {
-        status: ResStatusEnum.success,
-        message: 'You logged in successfully!',
-        error: null,
-        data: {
-          id: userCreds.user.uid,
-          refreshToken: userCreds.user.refreshToken,
-          isVerified: userCreds.user.emailVerified,
-          expiresAt: expirationTime,
-          idToken: token,
-          photoURL,
-          displayName,
-          email,
-          isSlackIntegrate,
-          dropbox,
-          trello,
-          jira,
-        },
-      };
+
+      return sendResponse({
+        id: loginResult.localId,
+        refreshToken: loginResult.refreshToken,
+        expiresAt: loginResult.expiresIn,
+        idToken: loginResult.idToken,
+        photoURL,
+        displayName,
+        email,
+        isSlackIntegrate,
+        dropbox,
+        trello,
+        jira,
+      });
     } catch (error: any) {
-      console.log(error);
-      return {
-        status: ResStatusEnum.error,
-        message: this.errorParser[error.code] || defaultProblemMessage,
-        error: null,
-        data: null,
-      };
+      return this.handleAuthError(error);
     }
   }
 
   async processGoogleLogin(credentials: string): Promise<IDataResponse> {
     try {
-      const googleAuthCredential = GoogleAuthProvider.credential(credentials);
-      const userCreds = await signInWithCredential(
-        this.firebaseClient.firebaseAuth,
-        googleAuthCredential,
-      );
-      const isNewUser = JSON.stringify(userCreds).includes('"isNewUser":true');
-      userCreds.user &&
-        (await this.addUserToDb({
-          ...userCreds.user,
-          googleCredentials: googleAuthCredential,
-        }));
+      // Verify the Google ID token using Firebase Admin SDK
+      const decodedToken =
+        await this.firebaseAdminService.verifyIdToken(credentials);
 
-      const { token, expirationTime } = await userCreds.user.getIdTokenResult();
-      const email = userCreds.user?.email;
+      // Check if user exists, if not create them
+      let userRecord: admin.auth.UserRecord;
+      try {
+        userRecord = await this.firebaseAdminService.getUser(decodedToken.uid);
+      } catch (error) {
+        // User doesn't exist, create them
+        userRecord = await this.firebaseAdminService.createUser({
+          email: decodedToken.email,
+          displayName: decodedToken.name || decodedToken.display_name,
+          photoURL: decodedToken.picture,
+        });
+      }
+
+      // Add user to database if needed
+      await this.addUserToDb({
+        uid: userRecord.uid,
+        email: userRecord.email,
+        displayName: userRecord.displayName,
+        photoURL: userRecord.photoURL,
+        emailVerified: userRecord.emailVerified,
+        googleCredentials: { provider: 'google.com' },
+      });
+
+      const email = userRecord.email;
       const { displayName, photoURL, isSlackIntegrate, dropbox, jira, trello } =
-        await this.getUserMetadata(userCreds.user.uid);
+        await this.getUserMetadata(userRecord.uid);
 
-      await this.eventEmitter.emit('analytics.identify', userCreds.user.uid, {
+      // Generate custom token
+      const customToken = await this.firebaseAdminService.createCustomToken(
+        userRecord.uid,
+      );
+
+      // Emit analytics events
+      this.eventEmitter.emit('analytics.identify', userRecord.uid, {
         email: email,
         name: displayName,
         avatar: photoURL,
       });
 
-      await this.eventEmitter.emit('analytics.track', 'User Logged', {
-        userId: userCreds.user.uid,
+      this.eventEmitter.emit('analytics.track', 'User Logged', {
+        userId: userRecord.uid,
         accountType: 'Google',
       });
-      return {
-        status: ResStatusEnum.success,
-        message: 'You logged in successfully!',
-        error: null,
-        data: {
-          id: userCreds.user.uid,
-          refreshToken: userCreds.user.refreshToken,
-          isVerified: userCreds.user.emailVerified,
-          idToken: token,
-          expiresAt: expirationTime,
-          photoURL,
-          displayName,
-          email,
-          isSlackIntegrate,
-          dropbox,
-          jira,
-          isNewUser,
-          trello,
-        },
-      };
-    } catch (e) {
-      console.log(e);
-      return {
-        status: ResStatusEnum.error,
-        message: 'Login failed',
-        error: null,
-        data: null,
-      };
+
+      return sendResponse({
+        id: userRecord.uid,
+        customToken,
+        isVerified: userRecord.emailVerified,
+        photoURL,
+        displayName,
+        email,
+        isSlackIntegrate,
+        dropbox,
+        jira,
+        isNewUser: !userRecord.metadata.lastSignInTime,
+        trello,
+      });
+    } catch (error: any) {
+      this.logger.error('Google login failed', error);
+      return sendError('Google login failed', error);
     }
   }
 
@@ -404,12 +441,15 @@ export class AuthService {
     photoURL?: string,
   ): Promise<IDataResponse> {
     try {
-      const userRef = admin.database().ref(`users/${uid}`);
+      const userRef = this.firebaseAdminService.getDatabaseRef(
+        `${this.rootDb}/${uid}`,
+      );
       let snapshot = await userRef.get();
-      userRef.on('value', (snap) => (snapshot = snap));
 
       if (!snapshot.exists()) {
-        throw `Could not get user reference with uid: ${uid}`;
+        throw new BadRequestException(
+          `Could not get user reference with uid: ${uid}`,
+        );
       }
 
       const updates = {
@@ -420,23 +460,15 @@ export class AuthService {
       await userRef.update(updates);
 
       const updatedUser = snapshot.val();
-      await this.eventEmitter.emit('analytics.identify', uid, {
+      this.eventEmitter.emit('analytics.identify', uid, {
         name: displayName,
         avatar: photoURL,
       });
-      return {
-        status: ResStatusEnum.success,
-        message: 'User data updated.',
-        error: null,
-        data: updatedUser,
-      };
+
+      return sendResponse(updatedUser);
     } catch (error: any) {
-      return {
-        status: ResStatusEnum.error,
-        message: error || defaultProblemMessage,
-        error: null,
-        data: null,
-      };
+      this.logger.error(`Failed to update user data: ${uid}`, error);
+      return sendError(error.message || defaultProblemMessage, error);
     }
   }
 
@@ -445,10 +477,9 @@ export class AuthService {
     avatar: Express.Multer.File,
   ): Promise<IDataResponse> {
     try {
-      const bucket = admin.storage().bucket();
+      const bucket = this.firebaseAdminService.getStorageBucket();
       const avaRef = bucket.file(`users/${uid}/tools/avatar`);
 
-      // TODO: probably delete
       await avaRef.save(avatar.buffer);
 
       const photoURL = (
@@ -457,55 +488,40 @@ export class AuthService {
           expires: Date.now() + this.expirationTime500years,
         })
       )[0];
+
       await this.updateUserData(uid, undefined, photoURL);
-      await this.eventEmitter.emit('analytics.identify', uid, {
+      this.eventEmitter.emit('analytics.identify', uid, {
         avatar: photoURL,
       });
-      return {
-        status: ResStatusEnum.success,
-        message: 'Profile picture changed successfully!',
-        error: null,
-        data: { photoURL },
-      };
+
+      return sendResponse({ photoURL });
     } catch (error: any) {
-      console.log(error);
-      return {
-        status: ResStatusEnum.error,
-        message: error.message || defaultProblemMessage,
-        error: null,
-        data: null,
-      };
+      this.logger.error(`Failed to upload avatar: ${uid}`, error);
+      return sendError(error.message || defaultProblemMessage, error);
     }
   }
 
   async changeUserEmail(uid: string, newEmail: string): Promise<IDataResponse> {
     try {
-      const auth = admin.auth();
-      const userRef = admin.database().ref(`users/${uid}`);
+      await this.firebaseAdminService.updateUser(uid, { email: newEmail });
 
-      await auth.updateUser(uid, { email: newEmail });
+      const userRef = this.firebaseAdminService.getDatabaseRef(
+        `${this.rootDb}/${uid}`,
+      );
       await userRef.update({ email: newEmail });
-      await this.eventEmitter.emit('analytics.identify', uid, {
+
+      this.eventEmitter.emit('analytics.identify', uid, {
         email: newEmail,
       });
-      await this.eventEmitter.emit('analytics.track', 'User Email Changed.', {
+      this.eventEmitter.emit('analytics.track', 'User Email Changed.', {
         userId: uid,
         newEmail: newEmail,
       });
-      return {
-        status: ResStatusEnum.success,
-        message: 'User email successfully changed.',
-        error: null,
-        data: { email: newEmail },
-      };
-    } catch (e) {
-      console.log(e);
-      return {
-        status: ResStatusEnum.error,
-        message: e.message || defaultProblemMessage,
-        error: null,
-        data: null,
-      };
+
+      return sendResponse({ email: newEmail });
+    } catch (error: any) {
+      this.logger.error(`Failed to change user email: ${uid}`, error);
+      return sendError(error.message || defaultProblemMessage, error);
     }
   }
 
@@ -516,52 +532,50 @@ export class AuthService {
     newPassword: string,
   ): Promise<IDataResponse> {
     try {
-      const auth = admin.auth();
+      // Check if user uses Google auth
+      const signInMethodsResult =
+        await this.firebaseAuthService.fetchSignInMethodsForEmail(email);
 
-      // this request shouldn't be pinged by a Google user,
-      // but have a check regardless (defensive programming)
-      const checkProvider = await fetchSignInMethodsForEmail(
-        this.firebaseClient.firebaseAuth,
-        email,
-      );
-      if (checkProvider.includes('google.com'))
+      if (!signInMethodsResult.success) {
+        throw new BadRequestException('Failed to check sign-in methods');
+      }
+
+      const signInMethods = signInMethodsResult.data?.signinMethods || [];
+      if (signInMethods.includes('google.com')) {
         throw { code: 'custom/user-uses-google-auth' };
+      }
 
-      await signInWithEmailAndPassword(
-        this.firebaseClient.firebaseAuth,
+      // Verify old password using Firebase Auth Service
+      const loginResult = await this.firebaseAuthService.login(
         email,
         oldPassword,
       );
+      if (!loginResult) {
+        throw new BadRequestException('Invalid old password');
+      }
 
-      await auth.updateUser(uid, { password: newPassword });
+      // Update password using admin service
+      await this.firebaseAdminService.updateUser(uid, {
+        password: newPassword,
+      });
 
-      return {
-        status: ResStatusEnum.success,
-        message: 'Password changed successfully!',
-        error: null,
-        data: 'Password changed successfully!',
-      };
-    } catch (e) {
-      console.log(e);
-      return {
-        status: ResStatusEnum.error,
-        message: e.message || defaultProblemMessage,
-        error: null,
-        data: null,
-      };
+      return sendResponse('Password changed successfully!');
+    } catch (error: any) {
+      return this.handleAuthError(error);
     }
   }
 
   async deleteUser(uid: string): Promise<IDataResponse> {
     try {
-      const auth = admin.auth();
-      const userRef = admin.database().ref(`users/${uid}`);
+      const userRef = this.firebaseAdminService.getDatabaseRef(
+        `${this.rootDb}/${uid}`,
+      );
 
       await Promise.all([
         this.sharedService.removeShared(uid),
         this.deleteUserFiles(uid),
         userRef.remove(),
-        auth.deleteUser(uid),
+        this.firebaseAdminService.deleteUser(uid),
       ]);
 
       this.eventEmitter.emit(
@@ -570,95 +584,133 @@ export class AuthService {
         { userId: uid },
       );
 
-      return {
-        status: ResStatusEnum.success,
-        message: 'User deleted! All user files deleted!',
-        error: null,
-        data: null,
-      };
+      return sendResponse(null);
     } catch (error: any) {
-      console.log(error);
-      return {
-        status: ResStatusEnum.error,
-        message: 'Error while trying to delete user or user files!',
-        error: null,
-        data: null,
-      };
+      this.logger.error(`Failed to delete user: ${uid}`, error);
+      return sendError(
+        'Error while trying to delete user or user files!',
+        error,
+      );
     }
   }
 
-  async deleteUserFiles(userId: string) {
-    const bucket = admin.storage().bucket();
-    const userFolder = `users/${userId}`;
-
+  async deleteUserFiles(userId: string): Promise<void> {
     try {
+      const bucket = this.firebaseAdminService.getStorageBucket();
+      const userFolder = `users/${userId}`;
+
       await bucket.deleteFiles({ prefix: userFolder });
-      console.log('All user files deleted successfully.');
-    } catch (err) {
-      console.error('Error deleting user files:', err);
+      this.logger.log(
+        `All user files deleted successfully for user: ${userId}`,
+      );
+    } catch (error) {
+      this.logger.error(`Error deleting user files: ${userId}`, error);
+      throw error;
     }
   }
 
-  async generateEmailVerificationLink(email: string) {
-    const user = await this.auth.getUserByEmail(email);
+  async generateEmailVerificationLink(email: string): Promise<IDataResponse> {
+    try {
+      const user = await this.firebaseAdminService.getUserByEmail(email);
 
-    if (user.emailVerified) {
-      throw new ConflictException('Email already verified');
+      if (user.emailVerified) {
+        throw new ConflictException('Email already verified');
+      }
+
+      const link =
+        await this.firebaseAdminService.generateEmailVerificationLink(email);
+
+      return sendResponse({ link });
+    } catch (error: any) {
+      this.logger.error(
+        `Failed to generate email verification link: ${email}`,
+        error,
+      );
+      if (error instanceof ConflictException) {
+        throw error;
+      }
+      return sendError('Failed to generate verification link', error);
     }
-
-    const link = await this.auth.generateEmailVerificationLink(email);
-
-    return {
-      status: ResStatusEnum.success,
-      message: 'Link generated successfully!',
-      error: null,
-      data: { link },
-    };
   }
 
   async getUserById(uid: string) {
-    return this.auth.getUser(uid);
+    try {
+      return await this.firebaseAdminService.getUser(uid);
+    } catch (error) {
+      this.logger.error(`Failed to get user by ID: ${uid}`, error);
+      throw new BadRequestException('User not found');
+    }
   }
 
-  public async reauthenticate(email: string, password: string) {
+  async reauthenticate(
+    email: string,
+    password: string,
+  ): Promise<IDataResponse> {
     try {
-      const { user } = await signInWithEmailAndPassword(
-        this.firebaseClient.firebaseAuth,
-        email,
-        password,
-      );
-      const { token, expirationTime } = await user.getIdTokenResult();
+      const loginResult = await this.firebaseAuthService.login(email, password);
 
-      return {
-        status: ResStatusEnum.success,
-        message: 'Reauthentication successful',
-        error: null,
-        data: {
-          refreshToken: user.refreshToken,
-          expiresAt: expirationTime,
-          idToken: token,
-        },
-      };
-    } catch (error: any) {
-      // Handle specific Firebase authentication error codes
-      switch (error.code) {
-        case 'auth/invalid-credential':
-          throw new BadRequestException('Invalid credential');
-        case 'auth/user-not-found':
-          throw new BadRequestException('This email is not yet registered...');
-        case 'auth/wrong-password':
-          throw new BadRequestException('Invalid email or password. Please try again...');
-        case 'auth/user-disabled':
-          throw new BadRequestException('This User is disabled.');
-        case 'auth/invalid-email':
-          throw new BadRequestException('Invalid email or password. Please try again...');
-        case 'auth/too-many-requests':
-          throw new BadRequestException('Too many failed login attempts. Please try again later.');
-        case 'auth/network-request-failed':
-          throw new BadRequestException('Network error. Please check your internet connection and try again.');
-        default:
-          throw new BadRequestException('Authentication failed. Please try again.');
+      if (!loginResult) {
+        throw new BadRequestException('Invalid credentials');
       }
+
+      return sendResponse({
+        refreshToken: loginResult.refreshToken,
+        expiresAt: loginResult.expiresIn,
+        idToken: loginResult.idToken,
+      });
+    } catch (error: any) {
+      return this.handleAuthError(error);
+    }
+  }
+
+  // New methods for enhanced functionality
+  async sendPasswordResetEmail(email: string): Promise<IDataResponse> {
+    try {
+      const result =
+        await this.firebaseAuthService.sendPasswordResetEmail(email);
+
+      if (result.success) {
+        return sendResponse({
+          message: 'Password reset email sent successfully',
+        });
+      } else {
+        return sendError(
+          result.error?.message || 'Failed to send password reset email',
+        );
+      }
+    } catch (error: any) {
+      this.logger.error(`Failed to send password reset email: ${email}`, error);
+      return sendError('Failed to send password reset email', error);
+    }
+  }
+
+  async sendEmailVerification(idToken: string): Promise<IDataResponse> {
+    try {
+      const result =
+        await this.firebaseAuthService.sendVerificationEmail(idToken);
+
+      if (result.success) {
+        return sendResponse({
+          message: 'Verification email sent successfully',
+        });
+      } else {
+        return sendError(
+          result.error?.message || 'Failed to send verification email',
+        );
+      }
+    } catch (error: any) {
+      this.logger.error('Failed to send verification email', error);
+      return sendError('Failed to send verification email', error);
+    }
+  }
+
+  async setUserCustomClaims(uid: string, claims: any): Promise<IDataResponse> {
+    try {
+      await this.firebaseAdminService.setCustomClaims(uid, claims);
+      return sendResponse({ message: 'Custom claims updated successfully' });
+    } catch (error: any) {
+      this.logger.error(`Failed to set custom claims: ${uid}`, error);
+      return sendError('Failed to update custom claims', error);
     }
   }
 }

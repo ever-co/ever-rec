@@ -1,33 +1,41 @@
 import { Module } from '@nestjs/common';
-import { HttpModule } from 'nestjs-http-promise';
-import { EventSegment } from 'src/event/event.segment';
-import { FirebaseClient } from 'src/services/firebase/firebase.client';
-import { GoogleApis } from 'src/services/googleapis/google.apis';
-import { SlackBoltService } from 'src/services/slack/slack-bolt.service';
-import { FoldersSharedService } from '../../services/shared/folders.shared.service';
-import { SharedService } from '../../services/shared/shared.service';
-import { EditorWebsocketModule } from '../editor-websocket-module/editor-websocket.module';
-import { ImageService } from '../image/image.service';
+import { SharedModule } from '../../services/shared/shared.module';
+import { FirebaseModule } from '../firebase';
 import { AuthController } from './auth.controller';
-import { AuthService } from './auth.service';
-import { AuthGuard } from './guards/auth.guard';
+import { AuthOrchestratorService } from './services/auth-orchestrator.service';
+import { AuthenticationService } from './services/authentication.service';
+import { EmailService } from './services/email.service';
+import { GoogleAuthService } from './services/google-auth.service';
+import { UserProfileService } from './services/user-profile.service';
+import { UserService } from './services/user.service';
 import { TokenService } from './token.service';
+import { HttpModule } from 'nestjs-http-promise';
 
 @Module({
-  imports: [HttpModule, EditorWebsocketModule],
-  exports: [AuthService, TokenService, AuthGuard],
-  providers: [
-    AuthService,
-    FirebaseClient,
-    SharedService,
-    GoogleApis,
-    SlackBoltService,
-    ImageService,
-    FoldersSharedService,
-    TokenService,
-    EventSegment,
-    AuthGuard,
-  ],
+  imports: [HttpModule, FirebaseModule, SharedModule],
   controllers: [AuthController],
+  providers: [
+    // Main orchestrator service
+    AuthOrchestratorService,
+
+    // Dedicated services
+    UserService,
+    AuthenticationService,
+    GoogleAuthService,
+    EmailService,
+    UserProfileService,
+
+    // Legacy services (for backward compatibility)
+    TokenService,
+  ],
+  exports: [
+    AuthOrchestratorService,
+    UserService,
+    AuthenticationService,
+    GoogleAuthService,
+    EmailService,
+    UserProfileService,
+    TokenService,
+  ],
 })
 export class AuthModule {}
