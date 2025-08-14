@@ -122,5 +122,5 @@ export class UpdatePasswordDto extends UpdateEmailDto {
   @IsNotEmpty()
   @MinLength(6)
   @IsString()
-  newPassword: string;
+  password: string;
 }

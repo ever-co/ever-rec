@@ -118,7 +118,7 @@ export class AuthController {
       uid: user?.id,
       email: body.email,
       oldPassword: body.oldPassword,
-      newPassword: body.newPassword,
+      newPassword: body.password,
     });
   }
 
