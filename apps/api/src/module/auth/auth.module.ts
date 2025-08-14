@@ -9,10 +9,9 @@ import { GoogleAuthService } from './services/google-auth.service';
 import { UserProfileService } from './services/user-profile.service';
 import { UserService } from './services/user.service';
 import { TokenService } from './token.service';
-import { HttpModule } from 'nestjs-http-promise';
 
 @Module({
-  imports: [HttpModule, FirebaseModule, SharedModule],
+  imports: [FirebaseModule, SharedModule],
   controllers: [AuthController],
   providers: [
     // Main orchestrator service
@@ -38,4 +37,4 @@ import { HttpModule } from 'nestjs-http-promise';
     TokenService,
   ],
 })
-export class AuthModule {}
+export class AuthModule { }

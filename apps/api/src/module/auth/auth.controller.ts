@@ -34,7 +34,7 @@ export class AuthController {
     private readonly authOrchestratorService: AuthOrchestratorService,
     private readonly tokenService: TokenService,
     private readonly sharedService: SharedService,
-  ) {}
+  ) { }
 
   @UseGuards(AuthGuard)
   @Delete('remove-shared')
@@ -122,12 +122,12 @@ export class AuthController {
     });
   }
 
-  @Post('refresh-token')
+  @Get('refresh-token')
   async refreshToken(
-    @RefreshToken() refreshToken: string,
+    @RefreshToken() token: string,
     @Req() request: any,
   ): Promise<TokenRefreshResponse> {
-    return this.tokenService.refreshToken(refreshToken, request);
+    return this.tokenService.refreshToken(token, request);
   }
 
   @Post('reauthenticate')

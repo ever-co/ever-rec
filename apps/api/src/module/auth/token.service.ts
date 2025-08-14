@@ -5,12 +5,11 @@ import {
   Logger,
   UnauthorizedException,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { DecodedIdToken } from 'firebase-admin/auth';
-import { HttpService } from 'nestjs-http-promise';
 import { FirebaseAdminService } from '../firebase/services/firebase-admin.service';
 import { IRequestUser } from './guards/auth.guard';
+import { FirebaseRestService } from '../firebase/services/firebase-rest.service';
 
 export interface TokenRefreshResponse {
   idToken: string;
@@ -24,10 +23,9 @@ export class TokenService {
 
   constructor(
     private eventEmitter: EventEmitter2,
-    private readonly httpService: HttpService,
-    private readonly configService: ConfigService,
     private readonly firebaseAdminService: FirebaseAdminService,
-  ) {}
+    private readonly firebaseRestService: FirebaseRestService
+  ) { }
 
   /**
    * Process and validate token with enhanced security
@@ -93,26 +91,12 @@ export class TokenService {
     }
 
     try {
-      const firebaseApiKey = this.configService.get<string>('firebase.apiKey');
-      if (!firebaseApiKey) {
-        this.logger.error('Firebase API key not configured');
-        throw new InternalServerErrorException(
-          'Authentication service configuration error',
-        );
-      }
 
-      const response = await this.httpService.post(
-        `https://securetoken.googleapis.com/v1/token?key=${firebaseApiKey}`,
+      const response = await this.firebaseRestService.post('token',
         {
           grant_type: 'refresh_token',
           refresh_token: refreshToken,
-        },
-        {
-          timeout: 10000, // 10 second timeout
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        },
+        }
       );
 
       const { data } = response;
