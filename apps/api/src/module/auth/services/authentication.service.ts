@@ -143,7 +143,8 @@ export class AuthenticationService {
         throw new BadRequestException('Failed to check sign-in methods');
       }
 
-      const signInMethods = signInMethodsResult.data?.signinMethods || [];
+      const signInMethods = signInMethodsResult.data?.signInMethods || [];
+
       if (signInMethods.includes('google.com')) {
         throw { code: 'custom/user-uses-google-auth' };
       }
@@ -219,7 +220,8 @@ export class AuthenticationService {
         throw new BadRequestException('Failed to check sign-in methods');
       }
 
-      const signInMethods = signInMethodsResult.data?.signinMethods || [];
+      const signInMethods = signInMethodsResult.data?.signInMethods || [];
+
       if (signInMethods.includes('google.com')) {
         throw { code: 'custom/user-uses-google-auth' };
       }
@@ -229,20 +231,38 @@ export class AuthenticationService {
         changePasswordData.email,
         changePasswordData.oldPassword,
       );
+
       if (!loginResult) {
         throw new BadRequestException('Invalid old password');
       }
 
-      // Update password
-      await this.userService.updateUser(changePasswordData.uid, {
-        password: changePasswordData.newPassword,
-      });
+      // Update password via Identity Toolkit using idToken to ensure session consistency
+      const updateResult = await this.firebaseAuthService.updatePassword(
+        loginResult.idToken,
+        changePasswordData.newPassword,
+      );
+
+      if (!updateResult.success) {
+        throw new BadRequestException(
+          updateResult.error?.message || 'Failed to update password',
+        );
+      }
+
+      // Invalidate previous sessions as a best practice when password changes
+      await this.firebaseAdminService.revokeUserSessions(
+        changePasswordData.uid,
+      );
 
       this.logger.log(
         `Password changed successfully for user: ${changePasswordData.uid}`,
       );
 
-      return sendResponse('Password changed successfully!');
+      return sendResponse({
+        message: 'Password changed successfully!',
+        idToken: updateResult.data?.idToken,
+        refreshToken: updateResult.data?.refreshToken,
+        expiresAt: updateResult.data?.expiresIn,
+      });
     } catch (error: any) {
       return this.handleAuthError(error);
     }

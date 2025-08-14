@@ -99,7 +99,7 @@ export class AuthController {
     return await this.authOrchestratorService.deleteUser(user?.id);
   }
 
-  @UseGuards(AuthGuard, EmailOwnershipGuard)
+  @UseGuards(AuthGuard)
   @Put('email')
   async updateEmail(
     @User() user: IRequestUser,
