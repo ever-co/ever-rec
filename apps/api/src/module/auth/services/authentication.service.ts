@@ -72,52 +72,73 @@ export class AuthenticationService {
     try {
       this.logger.log(`Registering new user: ${registerData.email}`);
 
-      // Create user in Firebase Auth
-      const userRecord = await this.userService.createUser({
-        email: registerData.email,
-        password: registerData.password,
-        displayName: registerData.username,
-      });
+      // Sign up user using Firebase Identity Toolkit to obtain idToken/refreshToken
+      const signupResult = await this.firebaseAuthService.signup(
+        registerData.email,
+        registerData.password,
+      );
+
+      if (!signupResult.success) {
+        throw new BadRequestException(
+          signupResult.error?.message || 'Failed to sign up user',
+        );
+      }
+
+      const {
+        localId: uid,
+        idToken,
+        refreshToken,
+        expiresIn,
+        email,
+      } = signupResult.data;
+
+      // Ensure displayName is set using Admin SDK (safer server-side)
+      if (registerData.username) {
+        await this.firebaseAuthService.updateUser(uid, {
+          displayName: registerData.username,
+        });
+      }
 
       // Add user to database
       const newDbUser = await this.userService.addUserToDb({
-        uid: userRecord.uid,
-        email: userRecord.email,
-        displayName: registerData.username || userRecord.displayName,
-        photoURL: userRecord.photoURL,
-        emailVerified: userRecord.emailVerified,
+        uid,
+        email,
+        displayName: registerData.username,
+        photoURL: null,
+        emailVerified: false,
         googleCredentials: undefined,
       });
 
-      // Generate custom token
-      const customToken = await this.userService.generateCustomToken(
-        userRecord.uid,
-      );
+      // Generate custom token for server-authenticated flows
+      const customToken = await this.userService.generateCustomToken(uid);
 
       const photoURL = 'photoURL' in newDbUser ? newDbUser.photoURL : null;
       const displayName =
         'displayName' in newDbUser ? newDbUser.displayName : null;
 
       // Emit analytics events
-      this.eventEmitter.emit('analytics.identify', userRecord.uid, {
-        email: userRecord.email,
+      this.eventEmitter.emit('analytics.identify', uid, {
+        email,
         name: displayName,
         avatar: photoURL,
       });
       this.eventEmitter.emit('analytics.track', 'User Registered', {
-        userId: userRecord.uid,
+        userId: uid,
         accountType: 'Email',
       });
 
-      this.logger.log(`User registered successfully: ${userRecord.uid}`);
+      this.logger.log(`User registered successfully: ${uid}`);
 
       return sendResponse({
-        id: userRecord.uid,
+        id: uid,
         customToken,
+        idToken,
+        refreshToken,
+        expiresAt: expiresIn,
         isVerified: false,
         photoURL,
         displayName,
-        email: registerData.email,
+        email,
       });
     } catch (error: any) {
       return this.handleAuthError(error);
