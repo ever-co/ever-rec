@@ -173,6 +173,10 @@ export class AuthenticationService {
         accountType: 'Email',
       });
 
+      const userRecord = await this.firebaseAdminService.getUser(
+        loginResult.localId,
+      );
+
       this.logger.log(`User logged in successfully: ${loginResult.localId}`);
 
       return sendResponse({
@@ -183,6 +187,7 @@ export class AuthenticationService {
         photoURL,
         displayName,
         email: loginData.email,
+        isVerified: userRecord.emailVerified,
         isSlackIntegrate,
         dropbox,
         trello,
@@ -261,10 +266,15 @@ export class AuthenticationService {
 
       this.logger.log(`Reauthentication successful: ${loginResult.localId}`);
 
+      const userRecord = await this.firebaseAdminService.getUser(
+        loginResult.localId,
+      );
+
       return sendResponse({
         refreshToken: loginResult.refreshToken,
         expiresAt: loginResult.expiresIn,
         idToken: loginResult.idToken,
+        isVerified: userRecord.emailVerified,
       });
     } catch (error: any) {
       return this.handleAuthError(error);

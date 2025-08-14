@@ -162,7 +162,7 @@ export class AuthOrchestratorService {
         this.userService.deleteUser(uid),
       ]);
 
-      await this.eventEmitter.emit(
+      this.eventEmitter.emit(
         'analytics.track',
         'User deleted! All user files deleted!',
         { userId: uid },
