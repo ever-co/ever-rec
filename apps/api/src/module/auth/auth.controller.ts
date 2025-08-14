@@ -59,6 +59,12 @@ export class AuthController {
   }
 
   @UseGuards(AuthGuard)
+  @Get('verify-email')
+  async verifyEmail(@User() user: IRequestUser): Promise<IDataResponse<boolean>> {
+    return this.authOrchestratorService.verifyEmail(user?.email);
+  }
+
+  @UseGuards(AuthGuard)
   @Put('user-data')
   @UseInterceptors(FileInterceptor('file'))
   async updateUserData(

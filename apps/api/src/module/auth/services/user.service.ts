@@ -114,7 +114,7 @@ export class UserService {
   async getUserById(uid: string): Promise<admin.auth.UserRecord> {
     try {
       this.logger.debug(`Getting user by ID: ${uid}`);
-      return await this.firebaseAdminService.getUser(uid);
+      return this.firebaseAdminService.getUser(uid);
     } catch (error) {
       this.logger.error(`Failed to get user by ID: ${uid}`, error);
       throw new BadRequestException('User not found');
@@ -127,7 +127,7 @@ export class UserService {
   async getUserByEmail(email: string): Promise<admin.auth.UserRecord> {
     try {
       this.logger.debug(`Getting user by email: ${email}`);
-      return await this.firebaseAdminService.getUserByEmail(email);
+      return this.firebaseAdminService.getUserByEmail(email);
     } catch (error) {
       this.logger.error(`Failed to get user by email: ${email}`, error);
       throw new BadRequestException('User not found');
@@ -149,7 +149,7 @@ export class UserService {
   ): Promise<admin.auth.UserRecord> {
     try {
       this.logger.log(`Updating user: ${uid}`);
-      return await this.firebaseAdminService.updateUser(uid, userData);
+      return this.firebaseAdminService.updateUser(uid, userData);
     } catch (error) {
       this.logger.error(`Failed to update user: ${uid}`, error);
       throw new BadRequestException('Failed to update user');
@@ -188,7 +188,7 @@ export class UserService {
   async generateCustomToken(uid: string): Promise<string> {
     try {
       this.logger.debug(`Generating custom token for user: ${uid}`);
-      return await this.firebaseAdminService.createCustomToken(uid);
+      return this.firebaseAdminService.createCustomToken(uid);
     } catch (error) {
       this.logger.error(
         `Failed to generate custom token for user: ${uid}`,
@@ -204,7 +204,7 @@ export class UserService {
   async verifyIdToken(idToken: string): Promise<admin.auth.DecodedIdToken> {
     try {
       this.logger.debug('Verifying ID token');
-      return await this.firebaseAdminService.verifyIdToken(idToken);
+      return this.firebaseAdminService.verifyIdToken(idToken);
     } catch (error) {
       this.logger.error('Failed to verify ID token', error);
       throw new BadRequestException('Invalid authentication token');

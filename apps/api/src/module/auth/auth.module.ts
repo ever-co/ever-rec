@@ -5,6 +5,9 @@ import { AuthController } from './auth.controller';
 import { AuthOrchestratorService } from './services/auth-orchestrator.service';
 import { AuthenticationService } from './services/authentication.service';
 import { EmailService } from './services/email.service';
+import { PasswordResetStrategyProvider } from './services/password-reset/password-reset.factory';
+import { PostmarkPasswordResetStrategy } from './services/password-reset/postmark-password-reset.strategy';
+import { FirebasePasswordResetStrategy } from './services/password-reset/firebase-password-reset.strategy';
 import { GoogleAuthService } from './services/google-auth.service';
 import { UserProfileService } from './services/user-profile.service';
 import { UserService } from './services/user.service';
@@ -22,6 +25,10 @@ import { TokenService } from './token.service';
     AuthenticationService,
     GoogleAuthService,
     EmailService,
+    // Password reset strategies
+    PostmarkPasswordResetStrategy,
+    FirebasePasswordResetStrategy,
+    PasswordResetStrategyProvider,
     UserProfileService,
 
     // Legacy services (for backward compatibility)

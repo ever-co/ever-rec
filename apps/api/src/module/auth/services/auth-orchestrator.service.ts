@@ -50,7 +50,7 @@ export class AuthOrchestratorService {
     private readonly userProfileService: UserProfileService,
     private readonly sharedService: SharedService,
     private readonly eventEmitter: EventEmitter2,
-  ) {}
+  ) { }
 
   // ==================== AUTHENTICATION METHODS ====================
 
@@ -242,8 +242,8 @@ export class AuthOrchestratorService {
   /**
    * Check if email is verified
    */
-  async isEmailVerified(email: string): Promise<boolean> {
-    return this.emailService.isEmailVerified(email);
+  async verifyEmail(email: string): Promise<IDataResponse<boolean>> {
+    return this.emailService.verifyEmail(email);
   }
 
   /**

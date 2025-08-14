@@ -1,19 +1,23 @@
-import { ConflictException, Injectable, Logger } from '@nestjs/common';
+import { ConflictException, Inject, Injectable, Logger } from '@nestjs/common';
 import { IDataResponse } from '../../../interfaces/_types';
 import { sendError, sendResponse } from '../../../services/utils/sendResponse';
 import { FirebaseAdminService } from '../../firebase/services/firebase-admin.service';
 import { FirebaseAuthService } from '../../firebase/services/firebase-auth.service';
 import { UserService } from './user.service';
+import { PASSWORD_RESET_EMAIL_STRATEGY, PasswordResetEmailStrategy } from './password-reset/password-reset.strategy';
+import { ResStatusEnum } from '../../../enums/ResStatusEnum';
 
 @Injectable()
 export class EmailService {
   private readonly logger = new Logger(EmailService.name);
 
   constructor(
+    @Inject(PASSWORD_RESET_EMAIL_STRATEGY)
+    private readonly passwordResetStrategy: PasswordResetEmailStrategy,
     private readonly firebaseAuthService: FirebaseAuthService,
     private readonly firebaseAdminService: FirebaseAdminService,
     private readonly userService: UserService,
-  ) {}
+  ) { }
 
   /**
    * Send password reset email
@@ -21,24 +25,16 @@ export class EmailService {
   async sendPasswordResetEmail(email: string): Promise<IDataResponse> {
     try {
       this.logger.log(`Sending password reset email to: ${email}`);
-
-      const result =
-        await this.firebaseAuthService.sendPasswordResetEmail(email);
-
-      if (result.success) {
+      const response = await this.passwordResetStrategy.execute(email);
+      if (response.status === ResStatusEnum.success) {
         this.logger.log(`Password reset email sent successfully to: ${email}`);
-        return sendResponse({
-          message: 'Password reset email sent successfully',
-        });
-      } else {
-        this.logger.error(
-          `Failed to send password reset email to: ${email}`,
-          result.error,
-        );
-        return sendError(
-          result.error?.message || 'Failed to send password reset email',
-        );
+        return sendResponse({ message: response.message });
       }
+      this.logger.error(
+        `Failed to send password reset email to: ${email}`,
+        response.error,
+      );
+      return sendError(response.message || 'Failed to send password reset email');
     } catch (error: any) {
       this.logger.error(
         `Failed to send password reset email to: ${email}`,
@@ -113,18 +109,18 @@ export class EmailService {
   /**
    * Check if email is verified
    */
-  async isEmailVerified(email: string): Promise<boolean> {
+  async verifyEmail(email: string): Promise<IDataResponse<boolean>> {
     try {
       this.logger.debug(`Checking email verification status for: ${email}`);
 
       const user = await this.userService.getUserByEmail(email);
-      return user.emailVerified;
+      return sendResponse(user.emailVerified);
     } catch (error) {
       this.logger.error(
         `Failed to check email verification status for: ${email}`,
         error,
       );
-      return false;
+      return sendError('Failed to check email verification status', error);
     }
   }
 
@@ -156,7 +152,7 @@ export class EmailService {
       this.logger.log(`Resending verification email to: ${email}`);
 
       // Check if email is already verified
-      const isVerified = await this.isEmailVerified(email);
+      const { data: isVerified } = await this.verifyEmail(email);
       if (isVerified) {
         throw new ConflictException('Email is already verified');
       }
