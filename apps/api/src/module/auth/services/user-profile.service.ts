@@ -214,6 +214,7 @@ export class UserProfileService {
 
       await userRef.update(updates);
 
+      snapshot = await userRef.get();
       const updatedUser = snapshot.val();
 
       // Emit analytics event
