@@ -63,13 +63,13 @@ export class GoogleAuthService {
       );
 
       // Emit analytics events
-      await this.eventEmitter.emit('analytics.identify', userRecord.uid, {
+      this.eventEmitter.emit('analytics.identify', userRecord.uid, {
         email: email,
         name: displayName,
         avatar: photoURL,
       });
 
-      await this.eventEmitter.emit('analytics.track', 'User Logged', {
+      this.eventEmitter.emit('analytics.track', 'User Logged', {
         userId: userRecord.uid,
         accountType: 'Google',
       });

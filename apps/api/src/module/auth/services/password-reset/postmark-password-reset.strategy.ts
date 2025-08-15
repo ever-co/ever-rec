@@ -1,26 +1,32 @@
 import { Injectable } from '@nestjs/common';
-import * as postmark from 'postmark';
 import { ConfigService } from '@nestjs/config';
-import * as admin from 'firebase-admin';
-import { getAuth } from 'firebase-admin/auth';
-import { IDataResponse } from '../../../../interfaces/_types';
-import { ResStatusEnum } from '../../../../enums/ResStatusEnum';
+import * as postmark from 'postmark';
 import { PostmarkTemplate } from '../../../../config/email';
+import { ResStatusEnum } from '../../../../enums/ResStatusEnum';
+import { IDataResponse } from '../../../../interfaces/_types';
+import { FirebaseAuthService } from '../../../firebase/services/firebase-auth.service';
+import { GoogleAuthService } from '../google-auth.service';
 import { PasswordResetEmailStrategy } from './password-reset.strategy';
 
 @Injectable()
-export class PostmarkPasswordResetStrategy implements PasswordResetEmailStrategy {
-  constructor(private readonly configService: ConfigService) { }
+export class PostmarkPasswordResetStrategy
+  implements PasswordResetEmailStrategy
+{
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly googleAuthService: GoogleAuthService,
+    private readonly firebaseAuthService: FirebaseAuthService,
+  ) {}
 
   async execute(email: string): Promise<IDataResponse> {
     try {
-      const auth = admin.auth();
       const client = new postmark.ServerClient(
         this.configService.get<string>('POSTMARK_CLIENT_TOKEN'),
       );
-      const user = await auth.getUserByEmail(email);
+      const hasGoogleProvider =
+        await this.googleAuthService.checkGoogleAuth(email);
 
-      if (user?.providerData[0]?.providerId === 'google.com') {
+      if (hasGoogleProvider) {
         return {
           status: ResStatusEnum.error,
           message: 'You cannot change Google account password.',
@@ -29,7 +35,9 @@ export class PostmarkPasswordResetStrategy implements PasswordResetEmailStrategy
         };
       }
 
-      const originalLink = await getAuth().generatePasswordResetLink(email);
+      const {
+        data: { link: originalLink },
+      } = await this.firebaseAuthService.generatePasswordResetLink(email);
       const indexOfLink = originalLink.indexOf('oobCode');
       const customLink = originalLink.slice(indexOfLink);
 
