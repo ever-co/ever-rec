@@ -4,6 +4,7 @@ import * as admin from 'firebase-admin';
 import { IDataResponse } from '../../../interfaces/_types';
 import { sendError, sendResponse } from '../../../services/utils/sendResponse';
 import { FirebaseAdminService } from '../../firebase/services/firebase-admin.service';
+import { FirebaseAuthService } from '../../firebase/services/firebase-auth.service';
 import { UserService } from './user.service';
 
 @Injectable()
@@ -12,6 +13,7 @@ export class GoogleAuthService {
 
   constructor(
     private readonly firebaseAdminService: FirebaseAdminService,
+    private readonly firebaseAuthService: FirebaseAuthService,
     private readonly userService: UserService,
     private readonly eventEmitter: EventEmitter2,
   ) {}
@@ -23,23 +25,34 @@ export class GoogleAuthService {
     try {
       this.logger.log('Processing Google login');
 
-      // Verify the Google ID token using Firebase Admin SDK
-      const decodedToken = await this.userService.verifyIdToken(credentials);
+      const {
+        data: decoded,
+        success,
+        error,
+      } = await this.firebaseAuthService.exchangeGoogleIdTokenWithFirebase(
+        credentials,
+      );
+
+      if (!success) {
+        this.logger.error('Google login failed', error);
+        return sendError('Google login failed', error);
+      }
+
+      const localId = decoded.localId;
 
       // Check if user exists, if not create them
       let userRecord: admin.auth.UserRecord;
+
       try {
-        userRecord = await this.userService.getUserById(decodedToken.uid);
+        userRecord = await this.userService.getUserById(localId);
         this.logger.log(`Existing user found: ${userRecord.uid}`);
       } catch (error) {
         // User doesn't exist, create them
-        this.logger.log(
-          `Creating new user from Google token: ${decodedToken.uid}`,
-        );
+        this.logger.log(`Creating new user from Google token: ${credentials}`);
         userRecord = await this.userService.createUser({
-          email: decodedToken.email,
-          displayName: decodedToken.name || decodedToken.display_name,
-          photoURL: decodedToken.picture,
+          email: decoded.email,
+          displayName: decoded.displayName,
+          photoURL: decoded.photoUrl,
         });
       }
 
@@ -53,7 +66,6 @@ export class GoogleAuthService {
         googleCredentials: { provider: 'google.com' },
       });
 
-      const email = userRecord.email;
       const { displayName, photoURL, isSlackIntegrate, dropbox, jira, trello } =
         await this.getUserMetadata(userRecord.uid);
 
@@ -61,6 +73,8 @@ export class GoogleAuthService {
       const customToken = await this.userService.generateCustomToken(
         userRecord.uid,
       );
+
+      const email = userRecord.email;
 
       // Emit analytics events
       this.eventEmitter.emit('analytics.identify', userRecord.uid, {
@@ -76,10 +90,18 @@ export class GoogleAuthService {
 
       this.logger.log(`Google login successful: ${userRecord.uid}`);
 
+      const idToken = decoded.idToken;
+      const refreshToken = decoded.refreshToken;
+      const expiresIn = Number(decoded.expiresIn);
+      const expiresAt = new Date(Date.now() + expiresIn * 1000).toString();
+
       return sendResponse({
         id: userRecord.uid,
         customToken,
         isVerified: userRecord.emailVerified,
+        idToken,
+        refreshToken,
+        expiresAt,
         photoURL,
         displayName,
         email,

@@ -1,12 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { DecodedIdToken } from 'firebase-admin/auth';
-import { IFirebaseLogin } from '../interfaces/firebase.model';
+import {
+  IFirebaseLogin,
+  IVerifyAssertionResponse,
+} from '../interfaces/firebase.model';
 import { FirebaseAdminService } from './firebase-admin.service';
 import { FirebaseRestService } from './firebase-rest.service';
 
-export interface IAuthResponse {
+export interface IAuthResponse<T = any> {
   success: boolean;
-  data?: any;
+  data?: T;
   error?: {
     code: string;
     message: string;
@@ -427,6 +430,32 @@ export class FirebaseAuthService {
         success: false,
         error: {
           code: 'GENERATE_SIGNIN_LINK_ERROR',
+          message: error.message,
+          details: error,
+        },
+      };
+    }
+  }
+
+  public async exchangeGoogleIdTokenWithFirebase(
+    idToken: string,
+  ): Promise<IAuthResponse<IVerifyAssertionResponse>> {
+    try {
+      const { data } = await this.firebaseRestService.post(
+        'accounts:signInWithIdp',
+        {
+          postBody: `id_token=${idToken}&providerId=google.com`,
+          requestUri: 'http://localhost',
+          returnIdpCredential: true,
+          returnSecureToken: true,
+        },
+      );
+      return { success: true, data };
+    } catch (error) {
+      return {
+        success: false,
+        error: {
+          code: 'EXCHANGE_GOOGLE_ID_TOKEN_ERROR',
           message: error.message,
           details: error,
         },

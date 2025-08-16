@@ -254,3 +254,31 @@ export interface IFirebaseUserImportResult {
     message: string;
   }>;
 }
+
+export interface IVerifyAssertionResponse {
+  federatedId: string; // Google user ID (sub)
+  providerId: string; // e.g. "google.com"
+
+  email: string;
+  emailVerified: boolean;
+
+  firstName?: string;
+  lastName?: string;
+  fullName?: string;
+  displayName?: string;
+
+  photoUrl?: string;
+  localId: string; // Firebase UID
+
+  // Tokens
+  idToken: string;
+  refreshToken: string;
+  expiresIn: string; // seconds
+
+  // OAuth
+  oauthIdToken?: string;
+  rawUserInfo?: string;
+
+  // API kind
+  kind: 'identitytoolkit#VerifyAssertionResponse';
+}

@@ -34,7 +34,7 @@ export class AuthController {
     private readonly authOrchestratorService: AuthOrchestratorService,
     private readonly tokenService: TokenService,
     private readonly sharedService: SharedService,
-  ) { }
+  ) {}
 
   @UseGuards(AuthGuard)
   @Delete('remove-shared')
@@ -60,7 +60,9 @@ export class AuthController {
 
   @UseGuards(AuthGuard)
   @Get('verify-email')
-  async verifyEmail(@User() user: IRequestUser): Promise<IDataResponse<boolean>> {
+  async verifyEmail(
+    @User() user: IRequestUser,
+  ): Promise<IDataResponse<boolean>> {
     return this.authOrchestratorService.verifyEmail(user?.email);
   }
 
@@ -94,7 +96,7 @@ export class AuthController {
 
   @Post('login-google')
   async loginGoogle(
-    @Body() { credentials }: { credentials: any },
+    @Body() { credentials }: { credentials: string },
   ): Promise<any> {
     return this.authOrchestratorService.processGoogleLogin(credentials);
   }

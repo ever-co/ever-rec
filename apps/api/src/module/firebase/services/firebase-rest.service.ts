@@ -24,21 +24,27 @@ export class FirebaseRestService {
     private readonly httpService: HttpService,
     configService: ConfigService,
   ) {
-    this.baseUrl = 'https://identitytoolkit.googleapis.com/v1';
     this.apiKey = configService.get<string>('firebase.apiKey');
+    this.baseUrl = configService.get<string>(
+      'firebase.identityToolkit.baseUrl',
+    );
   }
 
   private url(path: string) {
     return `${this.baseUrl}/${path}?key=${this.apiKey}`;
   }
 
-
-
-  public async post<U = any, T = any>(path: string, data: U): Promise<{ data: T }> {
+  public async post<U = any, T = any>(
+    path: string,
+    data: U,
+  ): Promise<{ data: T }> {
     try {
       return this.httpService.post<T>(this.url(path), data);
     } catch (error) {
-      this.logger.error(`Firebase REST API error: ${error.message}`, error.stack);
+      this.logger.error(
+        `Firebase REST API error: ${error.message}`,
+        error.stack,
+      );
 
       if (error.response?.data) {
         const firebaseError = error.response.data as IFirebaseRestError;
@@ -49,11 +55,17 @@ export class FirebaseRestService {
     }
   }
 
-  public async put<U = any, T = any>(path: string, data: U): Promise<{ data: T }> {
+  public async put<U = any, T = any>(
+    path: string,
+    data: U,
+  ): Promise<{ data: T }> {
     try {
       return this.httpService.put<T>(this.url(path), data);
     } catch (error) {
-      this.logger.error(`Firebase REST API error: ${error.message}`, error.stack);
+      this.logger.error(
+        `Firebase REST API error: ${error.message}`,
+        error.stack,
+      );
 
       if (error.response?.data) {
         const firebaseError = error.response.data as IFirebaseRestError;
@@ -68,7 +80,10 @@ export class FirebaseRestService {
     try {
       return this.httpService.get<T>(this.url(path));
     } catch (error) {
-      this.logger.error(`Firebase REST API error: ${error.message}`, error.stack);
+      this.logger.error(
+        `Firebase REST API error: ${error.message}`,
+        error.stack,
+      );
 
       if (error.response?.data) {
         const firebaseError = error.response.data as IFirebaseRestError;
@@ -83,7 +98,10 @@ export class FirebaseRestService {
     try {
       return this.httpService.delete<T>(this.url(path));
     } catch (error) {
-      this.logger.error(`Firebase REST API error: ${error.message}`, error.stack);
+      this.logger.error(
+        `Firebase REST API error: ${error.message}`,
+        error.stack,
+      );
 
       if (error.response?.data) {
         const firebaseError = error.response.data as IFirebaseRestError;
@@ -94,11 +112,17 @@ export class FirebaseRestService {
     }
   }
 
-  public async patch<U = any, T = any>(path: string, data: U): Promise<{ data: T }> {
+  public async patch<U = any, T = any>(
+    path: string,
+    data: U,
+  ): Promise<{ data: T }> {
     try {
       return this.httpService.patch<T>(this.url(path), data);
     } catch (error) {
-      this.logger.error(`Firebase REST API error: ${error.message}`, error.stack);
+      this.logger.error(
+        `Firebase REST API error: ${error.message}`,
+        error.stack,
+      );
 
       if (error.response?.data) {
         const firebaseError = error.response.data as IFirebaseRestError;
@@ -153,7 +177,11 @@ export class FirebaseRestService {
     });
   }
 
-  public async updateProfile(idToken: string, displayName?: string, photoURL?: string) {
+  public async updateProfile(
+    idToken: string,
+    displayName?: string,
+    photoURL?: string,
+  ) {
     return this.post('accounts:update', {
       idToken,
       displayName,
@@ -187,7 +215,11 @@ export class FirebaseRestService {
     });
   }
 
-  public async getOobConfirmationCode(email: string, requestType: string, actionCodeSettings?: any) {
+  public async getOobConfirmationCode(
+    email: string,
+    requestType: string,
+    actionCodeSettings?: any,
+  ) {
     return this.post('accounts:sendOobCode', {
       email,
       requestType,
