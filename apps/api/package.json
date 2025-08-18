@@ -53,7 +53,7 @@
     "firebase": "^10.9.0",
     "firebase-admin": "^10.0.0",
     "fluent-ffmpeg": "^2.1.2",
-    "form-data": "^4.0.1",
+    "form-data": "^4.0.4",
     "google-auth-library": "^8.1.1",
     "googleapis": "^105.0.0",
     "jwt-decode": "^3.1.2",
