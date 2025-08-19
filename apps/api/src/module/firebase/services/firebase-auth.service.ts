@@ -6,6 +6,7 @@ import {
 } from '../interfaces/firebase.model';
 import { FirebaseAdminService } from './firebase-admin.service';
 import { FirebaseRestService } from './firebase-rest.service';
+import { ConfigService } from '@nestjs/config';
 
 export interface IAuthResponse<T = any> {
   success: boolean;
@@ -35,7 +36,8 @@ export class FirebaseAuthService {
   constructor(
     private readonly firebaseRestService: FirebaseRestService,
     private readonly firebaseAdminService: FirebaseAdminService,
-  ) {}
+    private readonly configService: ConfigService
+  ) { }
 
   // Client-side operations using Identity Toolkit API
   public async sendVerificationEmail(idToken: string): Promise<IAuthResponse> {
@@ -163,7 +165,7 @@ export class FirebaseAuthService {
         'accounts:createAuthUri',
         {
           identifier: email,
-          continueUri: 'http://localhost',
+          continueUri: this.configService.get<string>('firebase.requestUri'),
         },
       );
       return { success: true, data };
@@ -445,7 +447,7 @@ export class FirebaseAuthService {
         'accounts:signInWithIdp',
         {
           postBody: `id_token=${idToken}&providerId=google.com`,
-          requestUri: 'http://localhost',
+          requestUri: this.configService.get('firebase.requestUri'),
           returnIdpCredential: true,
           returnSecureToken: true,
         },

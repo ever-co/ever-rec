@@ -1,4 +1,5 @@
 import { registerAs } from '@nestjs/config';
+import * as request from 'supertest';
 
 export default registerAs('firebase', () => ({
   // Admin SDK Configuration
@@ -15,6 +16,7 @@ export default registerAs('firebase', () => ({
   authDomain: process.env.FIREBASE_AUTH_DOMAIN ?? '',
   messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID ?? '',
   appId: process.env.FIREBASE_APP_ID ?? '',
+  requestUri: process.env.FIREBASE_REQ_URI ?? 'localhost',
 
   // Identity Toolkit API Settings
   identityToolkit: {
