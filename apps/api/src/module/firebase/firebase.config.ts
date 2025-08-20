@@ -15,13 +15,13 @@ export default registerAs('firebase', () => ({
   authDomain: process.env.FIREBASE_AUTH_DOMAIN ?? '',
   messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID ?? '',
   appId: process.env.FIREBASE_APP_ID ?? '',
-  requestUri: process.env.FIREBASE_REQ_URI ?? 'localhost',
 
   // Identity Toolkit API Settings
   identityToolkit: {
     baseUrl: 'https://identitytoolkit.googleapis.com/v1',
     recaptchaSiteKey: process.env.FIREBASE_RECAPTCHA_SITE_KEY ?? '',
     recaptchaSecretKey: process.env.FIREBASE_RECAPTCHA_SECRET_KEY ?? '',
+    requestUri: process.env.FIREBASE_REQ_URI ?? 'http://localhost',
   },
 
   // Email Templates (optional)

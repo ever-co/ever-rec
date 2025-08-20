@@ -165,7 +165,7 @@ export class FirebaseAuthService {
         'accounts:createAuthUri',
         {
           identifier: email,
-          continueUri: this.configService.get<string>('firebase.requestUri'),
+          continueUri: this.configService.getOrThrow<string>('firebase.identityToolkit.requestUri'),
         },
       );
       return { success: true, data };
@@ -447,7 +447,7 @@ export class FirebaseAuthService {
         'accounts:signInWithIdp',
         {
           postBody: `id_token=${idToken}&providerId=google.com`,
-          requestUri: this.configService.get('firebase.requestUri'),
+          requestUri: this.configService.getOrThrow<string>('firebase.identityToolkit.requestUri'),
           returnIdpCredential: true,
           returnSecureToken: true,
         },
