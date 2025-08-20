@@ -1,28 +1,47 @@
 import { Module } from '@nestjs/common';
-import { FirebaseClient } from 'src/services/firebase/firebase.client';
-import { GoogleApis } from 'src/services/googleapis/google.apis';
+import { SharedModule } from '../../services/shared/shared.module';
+import { FirebaseModule } from '../firebase';
 import { AuthController } from './auth.controller';
-import { AuthService } from './auth.service';
-import { SharedService } from '../../services/shared/shared.service';
-import { HttpModule } from 'nestjs-http-promise';
-import { ImageService } from '../image/image.service';
-import { SlackBoltService } from 'src/services/slack/slack-bolt.service';
-import { EventSegment } from 'src/event/event.segment';
-import { FoldersSharedService } from '../../services/shared/folders.shared.service';
-import { EditorWebsocketModule } from '../editor-websocket-module/editor-websocket.module';
+import { AuthOrchestratorService } from './services/auth-orchestrator.service';
+import { AuthenticationService } from './services/authentication.service';
+import { EmailService } from './services/email.service';
+import { PasswordResetStrategyProvider } from './services/password-reset/password-reset.factory';
+import { PostmarkPasswordResetStrategy } from './services/password-reset/postmark-password-reset.strategy';
+import { FirebasePasswordResetStrategy } from './services/password-reset/firebase-password-reset.strategy';
+import { GoogleAuthService } from './services/google-auth.service';
+import { UserProfileService } from './services/user-profile.service';
+import { UserService } from './services/user.service';
+import { TokenService } from './token.service';
 
 @Module({
-  imports: [HttpModule, EditorWebsocketModule],
-  providers: [
-    AuthService,
-    FirebaseClient,
-    SharedService,
-    GoogleApis,
-    SlackBoltService,
-    ImageService,
-    FoldersSharedService,
-    EventSegment,
-  ],
+  imports: [FirebaseModule, SharedModule],
   controllers: [AuthController],
+  providers: [
+    // Main orchestrator service
+    AuthOrchestratorService,
+
+    // Dedicated services
+    UserService,
+    AuthenticationService,
+    GoogleAuthService,
+    EmailService,
+    // Password reset strategies
+    PostmarkPasswordResetStrategy,
+    FirebasePasswordResetStrategy,
+    PasswordResetStrategyProvider,
+    UserProfileService,
+
+    // Legacy services (for backward compatibility)
+    TokenService,
+  ],
+  exports: [
+    AuthOrchestratorService,
+    UserService,
+    AuthenticationService,
+    GoogleAuthService,
+    EmailService,
+    UserProfileService,
+    TokenService,
+  ],
 })
-export class AuthModule {}
+export class AuthModule { }

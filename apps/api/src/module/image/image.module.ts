@@ -8,9 +8,10 @@ import { UniqueViewsSharedService } from 'src/services/shared/uniqueViews.shared
 import { ImageController } from './image.controller';
 import { FoldersSharedService } from '../../services/shared/folders.shared.service';
 import { EditorWebsocketModule } from '../editor-websocket-module/editor-websocket.module';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
-  imports: [HttpModule, EditorWebsocketModule],
+  imports: [HttpModule, EditorWebsocketModule, AuthModule],
   providers: [
     ImageService,
     FirebaseClient,
