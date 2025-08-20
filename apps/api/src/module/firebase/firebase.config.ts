@@ -1,5 +1,4 @@
 import { registerAs } from '@nestjs/config';
-import * as request from 'supertest';
 
 export default registerAs('firebase', () => ({
   // Admin SDK Configuration
@@ -28,7 +27,8 @@ export default registerAs('firebase', () => ({
   // Email Templates (optional)
   emailTemplates: {
     verificationEmail: process.env.FIREBASE_VERIFICATION_EMAIL_TEMPLATE ?? '',
-    passwordResetEmail: process.env.FIREBASE_PASSWORD_RESET_EMAIL_TEMPLATE ?? '',
+    passwordResetEmail:
+      process.env.FIREBASE_PASSWORD_RESET_EMAIL_TEMPLATE ?? '',
     emailSignIn: process.env.FIREBASE_EMAIL_SIGNIN_TEMPLATE ?? '',
   },
 
