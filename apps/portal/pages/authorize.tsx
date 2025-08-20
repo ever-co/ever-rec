@@ -82,7 +82,7 @@ export default function AuthorizePage() {
             Processing login...
           </h1>
           <p className="tw-text-gray-500 tw-text-center tw-text-sm">
-            Redirecting to your app. If it doesn’t open automatically, click the
+            Redirecting to Ever Rec Desktop. If it doesn’t open automatically, click the
             button below.
           </p>
 
@@ -93,7 +93,7 @@ export default function AuthorizePage() {
               aria-label="Open the native app"
               className="tw-bg-blue-600 hover:tw-bg-blue-700 tw-font-bold tw-px-8 tw-py-3 tw-rounded-xl tw-shadow-md tw-transition-colors tw-duration-200 tw-text-center tw-block"
             >
-              Open App
+              Open Ever Rec Desktop
             </a>
           )}
         </div>

@@ -203,18 +203,6 @@ export class FirebaseRestService {
     });
   }
 
-  public async verifyPasswordResetCode(oobCode: string) {
-    return this.post('accounts:confirm', {
-      oobCode,
-    });
-  }
-
-  public async applyActionCode(oobCode: string) {
-    return this.post('accounts:confirm', {
-      oobCode,
-    });
-  }
-
   public async getOobConfirmationCode(
     email: string,
     requestType: string,
@@ -227,24 +215,9 @@ export class FirebaseRestService {
     });
   }
 
-  public async getRecaptchaParams() {
-    return this.get('recaptchaParams');
-  }
-
-  public async getProjectConfig() {
-    return this.get('projectConfig');
-  }
-
   public async getSessionInfo(idToken: string) {
     return this.post('accounts:lookup', {
       idToken,
-    });
-  }
-
-  public async createSessionCookie(idToken: string, validDuration: number) {
-    return this.post('accounts:createSessionCookie', {
-      idToken,
-      validDuration,
     });
   }
 
