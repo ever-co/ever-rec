@@ -8,6 +8,29 @@ function parseOAuthHash(hash: string) {
   return Object.fromEntries(params.entries());
 }
 
+function validateDeeplink(rawUrl: string | null): string | null {
+  if (!rawUrl) return null;
+
+  try {
+    const url = new URL(rawUrl);
+
+    // Allowed schemes — extend as needed
+    const allowedProtocols = [
+      process.env.NEXT_PUBLIC_DESKTOP_PROTOCOL, // e.g. "ever-rec:"
+      'https:',
+      'http:',
+    ];
+
+    if (!allowedProtocols.includes(url.protocol)) {
+      return null; // reject dangerous schemes like javascript:, data:, etc.
+    }
+
+    return url.toString();
+  } catch {
+    return null; // invalid URL string
+  }
+}
+
 export default function AuthorizePage() {
   const router = useRouter();
   const [deeplinkUrl, setDeeplinkUrl] = useState<string | null>(null);
@@ -18,23 +41,26 @@ export default function AuthorizePage() {
 
     const oauthData = parseOAuthHash(window.location.hash);
 
-    let url: string | null = null;
+    let candidateUrl: string | null = null;
 
     if (oauthData.access_token || oauthData.id_token) {
-      url = `${process.env.NEXT_PUBLIC_DESKTOP_PROTOCOL}//oauth?${new URLSearchParams(oauthData).toString()}`;
+      candidateUrl = `${process.env.NEXT_PUBLIC_DESKTOP_PROTOCOL}//oauth?${new URLSearchParams(
+        oauthData
+      ).toString()}`;
     } else if (router.query.deep_link) {
-      url = String(router.query.deep_link);
+      candidateUrl = String(router.query.deep_link);
     }
 
-    if (url) {
-      setDeeplinkUrl(url);
+    const safeUrl = validateDeeplink(candidateUrl);
+    if (safeUrl) {
+      setDeeplinkUrl(safeUrl);
 
       // Try automatic redirect first
       const redirectTimeout = setTimeout(() => {
-        window.location.href = url!;
-      }, 100); // slight delay to allow spinner to render
+        window.location.href = safeUrl;
+      }, 100); // slight delay to allow spinner render
 
-      // Show manual button if app did not open automatically
+      // Show manual button if redirect fails
       const showBtnTimeout = setTimeout(() => setShowButton(true), 1500);
 
       return () => {
@@ -64,7 +90,7 @@ export default function AuthorizePage() {
               href={deeplinkUrl}
               rel="noopener noreferrer"
               aria-label="Open the native app"
-              className="tw-bg-blue-600 hover:tw-bg-blue-700 tw-text-gray-800 tw-font-bold tw-px-8 tw-py-3 tw-rounded-xl tw-shadow-md tw-transition-colors tw-duration-200 tw-text-center tw-block"
+              className="tw-bg-blue-600 hover:tw-bg-blue-700 tw-font-bold tw-px-8 tw-py-3 tw-rounded-xl tw-shadow-md tw-transition-colors tw-duration-200 tw-text-center tw-block"
             >
               Open App
             </a>

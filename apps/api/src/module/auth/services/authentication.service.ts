@@ -5,6 +5,7 @@ import { sendError, sendResponse } from '../../../services/utils/sendResponse';
 import { FirebaseAdminService } from '../../firebase/services/firebase-admin.service';
 import { FirebaseAuthService } from '../../firebase/services/firebase-auth.service';
 import { UserService } from './user.service';
+import { getExpirationTime } from '../../../utils/get-expiration-time';
 
 export interface IRegisterProps {
   email: string;
@@ -49,7 +50,7 @@ export class AuthenticationService {
     private readonly firebaseAdminService: FirebaseAdminService,
     private readonly userService: UserService,
     private readonly eventEmitter: EventEmitter2,
-  ) {}
+  ) { }
 
   /**
    * Handle authentication errors
@@ -134,7 +135,7 @@ export class AuthenticationService {
         customToken,
         idToken,
         refreshToken,
-        expiresAt: expiresIn,
+        expiresAt: getExpirationTime(expiresIn),
         isVerified: false,
         photoURL,
         displayName,
@@ -166,7 +167,7 @@ export class AuthenticationService {
 
       const signInMethods = signInMethodsResult.data?.signInMethods || [];
 
-      if (signInMethods.includes('google.com')) {
+      if (signInMethods.some((method: string) => method === 'google.com')) {
         throw { code: 'custom/user-uses-google-auth' };
       }
 
@@ -204,7 +205,7 @@ export class AuthenticationService {
       return sendResponse({
         id: loginResult.localId,
         refreshToken: loginResult.refreshToken,
-        expiresAt: loginResult.expiresIn,
+        expiresAt: getExpirationTime(loginResult.expiresIn),
         idToken: loginResult.idToken,
         photoURL,
         displayName,
@@ -243,7 +244,7 @@ export class AuthenticationService {
 
       const signInMethods = signInMethodsResult.data?.signInMethods || [];
 
-      if (signInMethods.includes('google.com')) {
+      if (signInMethods.some((method: string) => method === 'google.com')) {
         throw { code: 'custom/user-uses-google-auth' };
       }
 
@@ -282,7 +283,7 @@ export class AuthenticationService {
         message: 'Password changed successfully!',
         idToken: updateResult.data?.idToken,
         refreshToken: updateResult.data?.refreshToken,
-        expiresAt: updateResult.data?.expiresIn,
+        expiresAt: getExpirationTime(updateResult.data?.expiresIn),
       });
     } catch (error: any) {
       return this.handleAuthError(error);
@@ -313,7 +314,7 @@ export class AuthenticationService {
 
       return sendResponse({
         refreshToken: loginResult.refreshToken,
-        expiresAt: loginResult.expiresIn,
+        expiresAt: getExpirationTime(loginResult.expiresIn),
         idToken: loginResult.idToken,
         isVerified: userRecord.emailVerified,
       });
@@ -343,8 +344,8 @@ export class AuthenticationService {
         dropbox: {
           isDropBoxIntegrated:
             userData?.dropboxAPISCredentials &&
-            userData.dropboxAPISCredentials.credentials &&
-            userData.dropboxAPISCredentials.credentials.access_token
+              userData.dropboxAPISCredentials.credentials &&
+              userData.dropboxAPISCredentials.credentials.access_token
               ? true
               : false,
           email: userData?.dropboxAPISCredentials
@@ -354,8 +355,8 @@ export class AuthenticationService {
         jira: {
           isIntegrated:
             userData?.jiraAPISCredentials &&
-            userData.jiraAPISCredentials.credentials &&
-            userData.jiraAPISCredentials.credentials.access_token
+              userData.jiraAPISCredentials.credentials &&
+              userData.jiraAPISCredentials.credentials.access_token
               ? true
               : false,
           email: userData?.jiraAPISCredentials
@@ -365,8 +366,8 @@ export class AuthenticationService {
         trello: {
           isIntegrated:
             userData?.trelloAPISCredentials &&
-            userData.trelloAPISCredentials.credentials &&
-            userData.trelloAPISCredentials.credentials.access_token
+              userData.trelloAPISCredentials.credentials &&
+              userData.trelloAPISCredentials.credentials.access_token
               ? true
               : false,
           email: userData?.trelloAPISCredentials
