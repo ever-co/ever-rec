@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/router';
 import AppContainer from 'components/containers/appContainer/AppContainer';
 import LogoWrapper from 'components/elements/LogoWrapper';
+import { useRouter } from 'next/router';
+import { useEffect, useState } from 'react';
 
 function parseOAuthHash(hash: string) {
   const params = new URLSearchParams(hash.replace(/^#/, ''));
@@ -15,13 +15,10 @@ function validateDeeplink(rawUrl: string | null): string | null {
     const url = new URL(rawUrl);
 
     // Allowed schemes — extend as needed
-    const allowedProtocols = [
-      process.env.NEXT_PUBLIC_DESKTOP_PROTOCOL, // e.g. "ever-rec:"
-      'https:',
-      'http:',
-    ];
+    const allowedProtocols = new Set([process.env.NEXT_PUBLIC_DESKTOP_PROTOCOL, // e.g. "ever-rec:"
+    ]);
 
-    if (!allowedProtocols.includes(url.protocol)) {
+    if (!allowedProtocols.has(url.protocol)) {
       return null; // reject dangerous schemes like javascript:, data:, etc.
     }
 
@@ -77,7 +74,7 @@ export default function AuthorizePage() {
       <div className="tw-flex tw-items-center tw-justify-center tw-h-screen tw-bg-gray-50">
         <div className="tw-bg-white tw-shadow tw-rounded-3xl tw-p-10 tw-flex tw-flex-col tw-items-center tw-space-y-6 tw-max-w-md tw-w-full tw-transition-all tw-duration-300">
           <LogoWrapper />
-          <h1 className="tw-text-2xl tw-font-semibold tw-text-center tw-text-gray-800">
+          <h1 className="tw-text-2xl tw-font-semibold tw-text-center tw-text-gray-800" aria-live="polite">
             Processing login...
           </h1>
           <p className="tw-text-gray-500 tw-text-center tw-text-sm">
