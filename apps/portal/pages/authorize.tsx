@@ -18,6 +18,10 @@ function validateDeeplink(rawUrl: string | null): string | null {
     const allowedProtocols = new Set([process.env.NEXT_PUBLIC_DESKTOP_PROTOCOL, // e.g. "ever-rec:"
     ]);
 
+    if (allowedProtocols.size === 0) {
+      return null; // env not configured; fail safe
+    }
+
     if (!allowedProtocols.has(url.protocol)) {
       return null; // reject dangerous schemes like javascript:, data:, etc.
     }
