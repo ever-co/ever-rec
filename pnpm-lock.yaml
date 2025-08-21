@@ -141,7 +141,7 @@ importers:
         specifier: ^2.29.3
         version: 2.30.1
       multer:
-        specifier: ^2.0.1
+        specifier: ^2.0.2
         version: 2.0.2
       nanoid:
         specifier: ^3.3.8
@@ -2594,8 +2594,8 @@ packages:
     resolution: {integrity: sha512-Z7C/xXCiGWsg0KuKsHTKJxbWhpI3Vs5GwLfOean7MGyVFGqdRgBbAjOCh6u4bbjPc/8MJ2pZmK/0DLdCbivLDA==}
     engines: {node: '>=8'}
 
-  '@maxim_mazurok/gapi.client.discovery-v1@0.1.20200806':
-    resolution: {integrity: sha512-Wl6UfmZVDdWbY3PUu8E2ULk9RPLjnMqp/iOA4tcK8Ne+U/GmlnWP/e34IaZNGArfl7iXJNOG+/3Rj9L9jQyF9Q==}
+  '@maxim_mazurok/gapi.client.discovery-v1@0.2.20200806':
+    resolution: {integrity: sha512-+XcO05aucvj/pNgU2JlqT+ZK9ziaxdwS34aiJvaXYliiaIukJ33Me9c92ONGMlqdX8mxgnR5k2+lx7UCC514fA==}
 
   '@maxim_mazurok/gapi.client.drive-v3@0.0.20250811':
     resolution: {integrity: sha512-hexYbwEHQRdd8oY+SRZwOI3rp5OaOqGxKmbvKSizxPj73ntKJtIJN2SOMXFebfR8wRjZ+y8mEEmZl4GP9VFZTg==}
@@ -15356,7 +15356,7 @@ snapshots:
 
   '@lukeed/csprng@1.1.0': {}
 
-  '@maxim_mazurok/gapi.client.discovery-v1@0.1.20200806':
+  '@maxim_mazurok/gapi.client.discovery-v1@0.2.20200806':
     dependencies:
       '@types/gapi.client': 1.0.8
       '@types/gapi.client.discovery-v1': 0.0.4
@@ -17353,7 +17353,7 @@ snapshots:
 
   '@types/gapi.client.discovery-v1@0.0.4':
     dependencies:
-      '@maxim_mazurok/gapi.client.discovery-v1': 0.1.20200806
+      '@maxim_mazurok/gapi.client.discovery-v1': 0.2.20200806
 
   '@types/gapi.client.drive@3.0.15':
     dependencies:
