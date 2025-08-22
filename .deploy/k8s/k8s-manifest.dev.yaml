@@ -1,0 +1,131 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+    name: ever-rec-portal-dev
+spec:
+    selector:
+        app: ever-rec-portal-dev
+    ports:
+        - name: web
+          protocol: TCP
+          port: 4200
+          targetPort: 4200
+---
+kind: Service
+apiVersion: v1
+metadata:
+    name: ever-rec-api-dev
+spec:
+    selector:
+        app: ever-rec-api-dev
+    ports:
+        - name: web
+          protocol: TCP
+          port: 3000
+          targetPort: 3000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: ever-rec-api-dev
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: ever-rec-api-dev
+    template:
+        metadata:
+            labels:
+                app: ever-rec-api-dev
+        spec:
+            containers:
+                - name: ever-rec-api-dev
+                  image: ghcr.io/ever-co/ever-rec-api-dev:latest
+                  env:
+                      - name: API_HOST
+                        value: 0.0.0.0
+                  ports:
+                      - containerPort: 3000
+                        protocol: TCP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: ever-rec-portal-dev
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: ever-rec-portal-dev
+    template:
+        metadata:
+            labels:
+                app: ever-rec-portal-dev
+        spec:
+            containers:
+                - name: ever-rec-portal-dev
+                  image: ghcr.io/ever-co/ever-rec-portal-dev:latest
+                  env:
+                      - name: DEMO
+                        value: 'true'
+                  ports:
+                      - containerPort: 4200
+                        protocol: TCP
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+    name: https-redirect
+spec:
+    redirectScheme:
+        permanent: true
+        scheme: https
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+    name: ever-rec-dev
+    namespace: default
+    annotations:
+        kubernetes.io/ingress.class: traefik
+spec:
+    rules:
+        - host: appdev.rec.so
+          http:
+              paths:
+                  - backend:
+                        service:
+                            name: ever-rec-dev
+                            port:
+                                number: 4200
+                    path: /
+                    pathType: Prefix
+    tls:
+        - hosts:
+              - appdev.rec.so
+          secretName: appdev.rec.so-tls
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+    name: ever-rec-api-dev
+    namespace: default
+    annotations:
+        kubernetes.io/ingress.class: traefik
+spec:
+    rules:
+        - host: appdev.rec.co
+          http:
+              paths:
+                  - backend:
+                        service:
+                            name: ever-rec-api-dev
+                            port:
+                                number: 3000
+                    path: /
+                    pathType: Prefix
+    tls:
+        - hosts:
+              - appdev.rec.so
+          secretName: appdev.rec.so-tls
