@@ -140,7 +140,7 @@ metadata:
 spec:
     ingressClassName: traefik
     rules:
-        - host: app.rec.so
+        - host: api.rec.so
           http:
               paths:
                   - backend:
@@ -152,5 +152,5 @@ spec:
                     pathType: Prefix
     tls:
         - hosts:
-              - app.rec.so
-          secretName: app.rec.so-tls
+              - api.rec.so
+          secretName: api.rec.so-tls
