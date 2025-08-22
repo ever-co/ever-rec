@@ -1,0 +1,58 @@
+name: Deploy to DigitalOcean Dev
+
+on:
+  workflow_run:
+    workflows: ['Build and Publish API Docker Images Dev']
+    branches: [develop]
+    types:
+      - completed
+
+jobs:
+  deploy-demo:
+    runs-on: buildjet-4vcpu-ubuntu-2204
+
+    environment: dev
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+
+      - name: Log in to DigitalOcean Container Registry with short-lived credentials
+        run: doctl registry login --expiry-seconds 600
+
+      - name: Save DigitalOcean kubeconfig with short-lived credentials
+        run: doctl kubernetes cluster kubeconfig save --expiry-seconds 600 k8s-gauzy
+
+      - name: Apply k8s manifests changes in DigitalOcean k8s cluster (if any)
+        run: |
+          envsubst < $GITHUB_WORKSPACE/.deploy/k8s/k8s-manifest.dev.yaml | kubectl --context do-sfo2-k8s-gauzy apply -f -
+        env:          
+          CLOUD_PROVIDER: 'DO'
+          FIREBASE_API_KEY: '${{ secrets.FIREBASE_API_KEY }}'
+          FIREBASE_AUTH_DOMAIN: '${{ secrets.FIREBASE_AUTH_DOMAIN }}'
+          FIREBASE_DATABASE_URL: '${{ secrets.FIREBASE_DATABASE_URL }}'
+          FIREBASE_PROJECT_ID: '${{ secrets.FIREBASE_PROJECT_ID }}'
+          FIREBASE_STORAGE_BUCKET: '${{ secrets.FIREBASE_STORAGE_BUCKET }}'
+          FIREBASE_MESSAGING_SENDER_ID: '${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}'
+          FIREBASE_APP_ID: '${{ secrets.FIREBASE_APP_ID }}'
+          FIREBASE_MEASUREMENT_ID: '${{ secrets.FIREBASE_MEASUREMENT_ID }}'
+          FIREBASE_ADMIN_PRIVATE_KEY: '${{ secrets.FIREBASE_ADMIN_PRIVATE_KEY }}'
+          FIREBASE_ADMIN_CLIENT_EMAIL: '${{secrets.FIREBASE_ADMIN_CLIENT_EMAIL}}'         
+          SENTRY_DSN: '${{ secrets.SENTRY_DSN }}'
+          SENTRY_TRACES_SAMPLE_RATE: '${{ secrets.SENTRY_TRACES_SAMPLE_RATE }}'
+          SENTRY_PROFILE_SAMPLE_RATE: '${{ secrets.SENTRY_PROFILE_SAMPLE_RATE }}'
+          SENTRY_HTTP_TRACING_ENABLED: '${{ secrets.SENTRY_HTTP_TRACING_ENABLED }}'
+          SENTRY_POSTGRES_TRACKING_ENABLED: '${{ secrets.SENTRY_POSTGRES_TRACKING_ENABLED }}'
+          SENTRY_PROFILING_ENABLED: '${{ secrets.SENTRY_PROFILING_ENABLED }}'          
+
+      # we need this step because for now we just use :latest tag
+      # note: for production we will use different strategy later
+      - name: Restart Pods to pick up :latest tag version
+        run: |
+          kubectl --context do-sfo2-k8s-gauzy rollout restart deployment/ever-rec-api-dev
+          kubectl --context do-sfo2-k8s-gauzy rollout restart deployment/ever-rec-poral-dev
