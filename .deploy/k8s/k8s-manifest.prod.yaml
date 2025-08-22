@@ -45,6 +45,27 @@ spec:
                   env:
                       - name: API_HOST
                         value: 0.0.0.0
+                      - name: FIREBASE_API_KEY
+                        value: '$FIREBASE_API_KEY'
+                      - name: FIREBASE_AUTH_DOMAIN
+                        value: '$FIREBASE_AUTH_DOMAIN'
+                      - name: FIREBASE_DATABASE_URL
+                        value: '$FIREBASE_DATABASE_URL'
+                      - name: FIREBASE_PROJECT_ID
+                        value: '$FIREBASE_PROJECT_ID'
+                      - name: FIREBASE_STORAGE_BUCKET
+                        value: '$FIREBASE_STORAGE_BUCKET'
+                      - name: FIREBASE_MESSAGING_SENDER_ID
+                        value: '$FIREBASE_MESSAGING_SENDER_ID'
+                      - name: FIREBASE_APP_ID
+                        value: '$FIREBASE_APP_ID'
+                      - name: FIREBASE_MEASUREMENT_ID
+                        value: '$FIREBASE_MEASUREMENT_ID'                      
+                      - name: FIREBASE_ADMIN_PRIVATE_KEY
+                        value: '$FIREBASE_ADMIN_PRIVATE_KEY'
+                      - name: FIREBASE_ADMIN_CLIENT_EMAIL
+                        value: '$FIREBASE_ADMIN_CLIENT_EMAIL'
+
                   ports:
                       - containerPort: 3000
                         protocol: TCP
