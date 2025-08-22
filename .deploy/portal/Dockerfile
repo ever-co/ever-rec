@@ -10,8 +10,8 @@ ARG NEXT_PUBLIC_STATIC_FILES_URL=${NEXT_PUBLIC_API_BASE_URL}
 ARG NEXT_PUBLIC_SENTRY_DSN
 ARG SENTRY_ORG=ever-co
 
-# NodeJS Base
-FROM node:20-alpine AS base
+FROM node:22-alpine AS base
+
 # Update npm and configure corepack
 RUN npm install -g npm@latest && \
     npm install -g corepack@latest && \
@@ -26,16 +26,12 @@ RUN corepack use pnpm@9.9.0
 RUN mkdir -p "$PNPM_HOME" && \
     chown -R node:node "$PNPM_HOME"
 
-
-#--
 FROM base AS builder
 USER node
 WORKDIR /app
 COPY . .
 RUN turbo prune --scope=ever-rec-portal --docker
 
-
-#--
 # Add lockfile and package.json's of isolated subworkspace
 FROM base AS installer
 USER root
@@ -64,7 +60,7 @@ RUN cd apps/portal && (echo "Y" | pnpm prune --prod)
 
 #--
 # Build
-FROM node:20-alpine
+FROM node:22-alpine
 
 USER node
 WORKDIR /app
