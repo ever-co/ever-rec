@@ -1,6 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable @typescript-eslint/no-unused-expressions */
-/* eslint-disable no-inner-declarations */
 import React, { useEffect, useRef, useState } from 'react';
 import { RootStateOrAny, useDispatch, useSelector } from 'react-redux';
 import {
@@ -411,19 +408,19 @@ const EditorScreen: React.FC = () => {
         img,
         renderDimentions: resizer
           ? {
-              width: resizer.width,
-              height: resizer.height,
-            }
+            width: resizer.width,
+            height: resizer.height,
+          }
           : {
-              width:
-                resizeDimentions.width !== 0
-                  ? resizeDimentions.width
-                  : initialDimentions.width,
-              height:
-                resizeDimentions.height !== 0
-                  ? resizeDimentions.height
-                  : initialDimentions.height,
-            },
+            width:
+              resizeDimentions.width !== 0
+                ? resizeDimentions.width
+                : initialDimentions.width,
+            height:
+              resizeDimentions.height !== 0
+                ? resizeDimentions.height
+                : initialDimentions.height,
+          },
       });
       setHistory(historyArr);
       setHistoryStep(historyArr.length - 1);
@@ -949,10 +946,10 @@ const EditorScreen: React.FC = () => {
       !workspaceId
         ? EditorService.saveOriginalImageData(editorImage)
         : saveOriginalWSImageData(
-            activeWorkspace?.id,
-            editorImage.dbData?.refName || '',
-            editorImage,
-          );
+          activeWorkspace?.id,
+          editorImage.dbData?.refName || '',
+          editorImage,
+        );
     }
 
     !editorImage && (workspaceId ? getImageWorkspace() : getImage());
@@ -1490,7 +1487,7 @@ const EditorScreen: React.FC = () => {
         currentShape={currentShape}
         scale={stageScale}
         comments={comments}
-        // addComment={addComment}
+      // addComment={addComment}
       />
       <AppSpinner show={!imageLoaded} tip="Loading image..." />
     </div>

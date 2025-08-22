@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
-import PlyrPlayer from 'components/shared/plyrPlayer/PlyrPlayer';
+import dynamic from 'next/dynamic';
+const PlyrPlayer = dynamic(() => import('components/shared/plyrPlayer/PlyrPlayer'), { ssr: false });
 
 type RenderVideoRenderProps = {
   renderVideo: JSX.Element;
