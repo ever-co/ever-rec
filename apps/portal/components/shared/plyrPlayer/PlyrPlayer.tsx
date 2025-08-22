@@ -1,5 +1,5 @@
 import React, { FC, useRef, useEffect, useState } from 'react';
-import { SourceInfo, Source } from 'plyr';
+import type { SourceInfo, Source } from 'plyr';
 import Plyr, { APITypes } from 'plyr-react';
 import Hls from 'hls.js';
 import plyrOptions from './plyr-options';

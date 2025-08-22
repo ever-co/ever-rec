@@ -9,8 +9,8 @@ import EmptyScreenshotsOrVideos from 'components/pagesComponents/_imagesScreen/p
 import PanelSplitter from '../../toolsPanel/PanelSplitter';
 import { ItemTypeEnum } from 'app/enums/itemTypeEnum';
 import { IUser } from 'app/interfaces/IUserData';
-import Plyr from 'plyr';
-import PlyrPlayer from 'components/shared/plyrPlayer/PlyrPlayer';
+import dynamic from 'next/dynamic';
+const PlyrPlayer = dynamic(() => import('components/shared/plyrPlayer/PlyrPlayer'), { ssr: false });
 import styles from './videoChooser.module.scss';
 import { useTranslation } from 'react-i18next';
 // import { Player, BigPlayButton } from 'video-react';
