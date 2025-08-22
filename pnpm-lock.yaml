@@ -773,9 +773,6 @@ importers:
       axios:
         specifier: ^0.26.0
         version: 0.26.1
-      canvas:
-        specifier: ^2.11.2
-        version: 2.11.2(encoding@0.1.13)
       canvg:
         specifier: ^4.0.3
         version: 4.0.3
@@ -920,6 +917,10 @@ importers:
       uuid:
         specifier: ^8.3.2
         version: 8.3.2
+    optionalDependencies:
+      canvas:
+        specifier: ^2.11.2
+        version: 2.11.2(encoding@0.1.13)
     devDependencies:
       '@fullhuman/postcss-purgecss':
         specifier: ^3.0.0
@@ -15409,6 +15410,7 @@ snapshots:
     transitivePeerDependencies:
       - encoding
       - supports-color
+    optional: true
 
   '@maxim_mazurok/gapi.client.discovery-v1@0.4.20200806':
     dependencies:
@@ -18511,6 +18513,7 @@ snapshots:
     dependencies:
       delegates: 1.0.0
       readable-stream: 3.6.2
+    optional: true
 
   are-we-there-yet@3.0.1:
     dependencies:
@@ -19237,6 +19240,7 @@ snapshots:
     transitivePeerDependencies:
       - encoding
       - supports-color
+    optional: true
 
   canvg@3.0.11:
     dependencies:
@@ -19967,6 +19971,7 @@ snapshots:
   decompress-response@4.2.1:
     dependencies:
       mimic-response: 2.1.0
+    optional: true
 
   decompress-response@6.0.0:
     dependencies:
@@ -21511,6 +21516,7 @@ snapshots:
       string-width: 4.2.3
       strip-ansi: 6.0.1
       wide-align: 1.1.5
+    optional: true
 
   gauge@4.0.4:
     dependencies:
@@ -21680,7 +21686,7 @@ snapshots:
       fs.realpath: 1.0.0
       inflight: 1.0.6
       inherits: 2.0.4
-      minimatch: 3.0.8
+      minimatch: 3.1.2
       once: 1.4.0
       path-is-absolute: 1.0.1
 
@@ -24218,7 +24224,8 @@ snapshots:
 
   mimic-response@1.0.1: {}
 
-  mimic-response@2.1.0: {}
+  mimic-response@2.1.0:
+    optional: true
 
   mimic-response@3.1.0: {}
 
@@ -24613,6 +24620,7 @@ snapshots:
       console-control-strings: 1.1.0
       gauge: 3.0.2
       set-blocking: 2.0.0
+    optional: true
 
   npmlog@6.0.2:
     dependencies:
@@ -27513,6 +27521,7 @@ snapshots:
       decompress-response: 4.2.1
       once: 1.4.0
       simple-concat: 1.0.1
+    optional: true
 
   simple-get@4.0.1:
     dependencies:
