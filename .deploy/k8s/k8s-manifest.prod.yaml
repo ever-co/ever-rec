@@ -136,7 +136,7 @@ metadata:
         kubernetes.io/ingress.class: traefik
 spec:
     rules:
-        - host: app.rec.co
+        - host: app.rec.so
           http:
               paths:
                   - backend:
