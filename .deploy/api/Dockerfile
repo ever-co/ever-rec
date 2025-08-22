@@ -11,9 +11,8 @@ ARG FIREBASE_MEASUREMENT_ID
 ARG FIREBASE_ADMIN_PRIVATE_KEY
 ARG FIREBASE_ADMIN_CLIENT_EMAIL
 
-#--
-# NodeJS Base
-FROM node:20-alpine AS base
+FROM node:22-alpine AS base
+
 # Update npm and configure corepack
 RUN npm install -g npm@latest && \
     npm install -g corepack@latest && \
@@ -28,8 +27,6 @@ RUN corepack use pnpm@9.9.0
 RUN mkdir -p "$PNPM_HOME" && \
     chown -R node:node "$PNPM_HOME"
 
-
-#--
 FROM base AS builder
 USER node
 WORKDIR /app
@@ -63,9 +60,8 @@ RUN rm -rf apps/api/.turbo
 RUN rm -rf apps/api/tmp_videos
 RUN rm -rf apps/api/tmp_videos_fixed
 
-#--
 # Build
-FROM node:20-alpine
+FROM node:22-alpine
 
 USER node
 WORKDIR /app
