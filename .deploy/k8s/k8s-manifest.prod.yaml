@@ -45,6 +45,27 @@ spec:
                   env:
                       - name: API_HOST
                         value: 0.0.0.0
+                      - name: FIREBASE_API_KEY
+                        value: '$FIREBASE_API_KEY'
+                      - name: FIREBASE_AUTH_DOMAIN
+                        value: '$FIREBASE_AUTH_DOMAIN'
+                      - name: FIREBASE_DATABASE_URL
+                        value: '$FIREBASE_DATABASE_URL'
+                      - name: FIREBASE_PROJECT_ID
+                        value: '$FIREBASE_PROJECT_ID'
+                      - name: FIREBASE_STORAGE_BUCKET
+                        value: '$FIREBASE_STORAGE_BUCKET'
+                      - name: FIREBASE_MESSAGING_SENDER_ID
+                        value: '$FIREBASE_MESSAGING_SENDER_ID'
+                      - name: FIREBASE_APP_ID
+                        value: '$FIREBASE_APP_ID'
+                      - name: FIREBASE_MEASUREMENT_ID
+                        value: '$FIREBASE_MEASUREMENT_ID'                      
+                      - name: FIREBASE_ADMIN_PRIVATE_KEY
+                        value: '$FIREBASE_ADMIN_PRIVATE_KEY'
+                      - name: FIREBASE_ADMIN_CLIENT_EMAIL
+                        value: '$FIREBASE_ADMIN_CLIENT_EMAIL'
+
                   ports:
                       - containerPort: 3000
                         protocol: TCP
@@ -73,7 +94,7 @@ spec:
                       - containerPort: 4200
                         protocol: TCP
 ---
-apiVersion: traefik.containo.us/v1alpha1
+apiVersion: traefik.io/v1alpha1
 kind: Middleware
 metadata:
     name: https-redirect
@@ -85,18 +106,20 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-    name: ever-rec-prod
+    name: ever-rec-portal-prod-ing
     namespace: default
     annotations:
-        kubernetes.io/ingress.class: traefik
+         traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+         traefik.ingress.kubernetes.io/router.middlewares: default-https-redirect@kubernetescrd
 spec:
+    ingressClassName: traefik
     rules:
         - host: app.rec.so
           http:
               paths:
                   - backend:
                         service:
-                            name: ever-rec-prod
+                            name: ever-rec-portal-prod
                             port:
                                 number: 4200
                     path: /
@@ -109,13 +132,15 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-    name: ever-rec-api-prod
+    name: ever-rec-api-prod-ing
     namespace: default
     annotations:
-        kubernetes.io/ingress.class: traefik
+         traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+         traefik.ingress.kubernetes.io/router.middlewares: default-https-redirect@kubernetescrd
 spec:
+    ingressClassName: traefik
     rules:
-        - host: app.rec.co
+        - host: api.rec.so
           http:
               paths:
                   - backend:
@@ -127,5 +152,5 @@ spec:
                     pathType: Prefix
     tls:
         - hosts:
-              - app.rec.so
-          secretName: app.rec.so-tls
+              - api.rec.so
+          secretName: api.rec.so-tls
