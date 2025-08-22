@@ -60,7 +60,7 @@ spec:
                       - name: FIREBASE_APP_ID
                         value: '$FIREBASE_APP_ID'
                       - name: FIREBASE_MEASUREMENT_ID
-                        value: '$FIREBASE_MEASUREMENT_ID'                      
+                        value: '$FIREBASE_MEASUREMENT_ID'
                       - name: FIREBASE_ADMIN_PRIVATE_KEY
                         value: '$FIREBASE_ADMIN_PRIVATE_KEY'
                       - name: FIREBASE_ADMIN_CLIENT_EMAIL
