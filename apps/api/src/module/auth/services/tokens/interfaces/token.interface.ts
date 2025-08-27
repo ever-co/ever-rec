@@ -1,6 +1,6 @@
 export interface ITokenRefreshStrategy {
   supports(refreshToken: string): Promise<boolean>;
-  execute(
+  handle(
     refreshToken: string,
     request: any
   ): Promise<TokenRefreshResponse>;
@@ -21,4 +21,9 @@ export enum StrategyPosition {
   HEAD = "head",
   TAIL = "tail",
   INDEX = "index",
+}
+
+export interface TokenState<T> {
+  setNext(next: TokenState<T>): TokenState<T>;
+  resolve(token: string, request?: any): Promise<T>;
 }

@@ -1,42 +1,26 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { ITokenRefreshStrategy, ITokenValidateStrategy, StrategyPosition } from './interfaces/token.interface';
+import { Injectable } from '@nestjs/common';
+import { TokenRefreshResponse, TokenState } from './interfaces/token.interface';
 
 @Injectable()
 export class TokenStrategyChain {
-  private readonly refreshStrategies: ITokenRefreshStrategy[] = [];
-  private readonly validateStrategies: ITokenValidateStrategy[] = [];
+  private refreshHead?: TokenState<TokenRefreshResponse>;
+  private validateHead?: TokenState<void>;
 
-  public linkRefreshStrategy(strategy: ITokenRefreshStrategy, position: StrategyPosition = StrategyPosition.TAIL) {
-    switch (position) {
-      case StrategyPosition.HEAD:
-        this.refreshStrategies.unshift(strategy);
-        break;
-      case StrategyPosition.TAIL:
-      default:
-        this.refreshStrategies.push(strategy);
-        break;
-    }
+  public setInitialRefreshStrategy(strategy: TokenState<TokenRefreshResponse>) {
+    this.refreshHead = strategy;
   }
 
-  public linkValidateStrategy(strategy: ITokenValidateStrategy) {
-    this.validateStrategies.push(strategy);
+  public setInitialValidateStrategy(strategy: TokenState<void>) {
+    this.validateHead = strategy;
   }
 
-  async resolveRefresh(refreshToken: string): Promise<ITokenRefreshStrategy> {
-    for (const strategy of this.refreshStrategies) {
-      if (await strategy.supports(refreshToken)) {
-        return strategy;
-      }
-    }
-    throw new UnauthorizedException('No refresh strategy could handle token');
+  async resolveRefresh(refreshToken: string, request: any): Promise<TokenRefreshResponse> {
+    if (!this.refreshHead) throw new Error('No refresh strategy linked');
+    return this.refreshHead.resolve(refreshToken, request);
   }
 
-  async resolveValidation(token: string): Promise<ITokenValidateStrategy> {
-    for (const strategy of this.validateStrategies) {
-      if (await strategy.supports(token)) {
-        return strategy;
-      }
-    }
-    throw new UnauthorizedException('No validation strategy could handle token');
+  async resolveValidation(token: string, request: any): Promise<void> {
+    if (!this.validateHead) throw new Error('No validate strategy linked');
+    return this.validateHead.resolve(token, request);
   }
 }

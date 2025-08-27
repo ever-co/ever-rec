@@ -1,20 +1,23 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ITokenRefreshStrategy, TokenRefreshResponse } from '../interfaces/token.interface';
 import { GauzyAuthService } from 'src/module/gauzy';
+import { RefreshStrategyState } from '../states/refresh-strategy.state';
 
 
 @Injectable()
-export class GauzyRefreshStrategy implements ITokenRefreshStrategy {
+export class GauzyRefreshStrategy extends RefreshStrategyState {
   constructor(
     private readonly gauzyAuthService: GauzyAuthService
-  ) { }
+  ) {
+    super()
+  }
 
   async supports(refreshToken: string): Promise<boolean> {
     // default to true if no other strategy matched
     return true;
   }
 
-  async execute(refreshToken: string, request: any): Promise<TokenRefreshResponse> {
+  async handle(refreshToken: string, request: any): Promise<TokenRefreshResponse> {
     const { data: { token } } = await this.gauzyAuthService.refreshToken(refreshToken);
 
     this.validateResponse(token);
