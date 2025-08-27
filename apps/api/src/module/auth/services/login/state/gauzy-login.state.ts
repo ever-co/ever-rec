@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { LoginState, LoginStateResult, StateId } from '../interfaces/login-state.interface';
+import { LoginState, StateId } from '../interfaces/login-state.interface';
 import { LoginContext } from '../login.context';
 import { GauzyAuthService } from '../../../../gauzy';
 import { ILoginProps } from '../../authentication.service';

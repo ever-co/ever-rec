@@ -19,6 +19,7 @@ import { LoginChain } from './services/login/login.chain';
 import { MergeTokenPolicy } from './services/policies/merge-token.policy';
 import { JwtModule, JwtModuleOptions } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TokenStorageService } from './services/tokens/token-storage.service';
 
 @Module({
   imports: [JwtModule.registerAsync({
@@ -58,6 +59,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     FirebaseLoginState,
     GauzyLoginState,
     MergeTokenPolicy,
+    TokenStorageService,
     LoginChain
   ],
   exports: [
