@@ -12,9 +12,29 @@ import { GoogleAuthService } from './services/google-auth.service';
 import { UserProfileService } from './services/user-profile.service';
 import { UserService } from './services/user.service';
 import { TokenService } from './token.service';
+import { GauzyModule } from '../gauzy';
+import { FirebaseLoginState } from './services/login/state/firebase-login.state';
+import { GauzyLoginState } from './services/login/state/gauzy-login.state';
+import { LoginChain } from './services/login/login.chain';
+import { MergeTokenPolicy } from './services/policies/merge-token.policy';
+import { JwtModule, JwtModuleOptions } from '@nestjs/jwt';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
-  imports: [FirebaseModule, SharedModule],
+  imports: [JwtModule.registerAsync({
+    imports: [ConfigModule],
+    useFactory: async (configService: ConfigService): Promise<JwtModuleOptions> =>
+    ({
+      secret: configService.get<string>('REC_JWT_SECRET', 'rec-secret'),
+      signOptions: {
+        expiresIn: configService.get<string>('REC_JWT_EXPIRES_IN', '1h'),
+        audience: configService.get<string>('REC_JWT_AUDIENCE', 'ever-rec'),
+        issuer: configService.get<string>('REC_JWT_ISSUER', 'rec-service'),
+      }
+    })
+    ,
+    inject: [ConfigService],
+  }), FirebaseModule, SharedModule, GauzyModule],
   controllers: [AuthController],
   providers: [
     // Main orchestrator service
@@ -33,6 +53,12 @@ import { TokenService } from './token.service';
 
     // Legacy services (for backward compatibility)
     TokenService,
+
+    // State service
+    FirebaseLoginState,
+    GauzyLoginState,
+    MergeTokenPolicy,
+    LoginChain
   ],
   exports: [
     AuthOrchestratorService,
