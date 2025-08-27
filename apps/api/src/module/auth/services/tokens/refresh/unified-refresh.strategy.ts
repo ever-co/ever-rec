@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
+import { LoginStateResult, StateId } from '../../login/interfaces/login-state.interface';
+import { TokenRefreshResponse } from '../interfaces/token.interface';
 import { MergeTokenPolicy } from '../policies/merge-token.policy';
 import { RefreshStrategyState } from '../states/refresh-strategy.state';
-import { TokenRefreshResponse } from '../interfaces/token.interface';
+import { TokenStrategyChain } from '../token-strategy.chain';
 import { FirebaseRefreshStrategy } from './firebase-refresh.strategy';
 import { GauzyRefreshStrategy } from './gauzy-refresh.strategy';
-import { TokenStrategyChain } from '../token-strategy.chain';
-import { LoginStateResult, StateId } from '../../login/interfaces/login-state.interface';
 
 @Injectable()
 export class UnifiedRefreshStrategy extends RefreshStrategyState {

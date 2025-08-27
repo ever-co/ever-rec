@@ -1,9 +1,9 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { FirebaseRestService } from 'src/module/firebase/services/firebase-rest.service';
 import { FirebaseAdminService } from 'src/module/firebase/services/firebase-admin.service';
-import { UserFactory } from '../user.factory';
-import { RefreshStrategyState } from '../states/refresh-strategy.state';
+import { FirebaseRestService } from 'src/module/firebase/services/firebase-rest.service';
 import { TokenRefreshResponse } from '../interfaces/token.interface';
+import { RefreshStrategyState } from '../states/refresh-strategy.state';
+import { UserFactory } from '../user.factory';
 
 @Injectable()
 export class FirebaseRefreshStrategy extends RefreshStrategyState {
@@ -14,7 +14,7 @@ export class FirebaseRefreshStrategy extends RefreshStrategyState {
   ) { super(); }
 
   public async supports(refreshToken: string): Promise<boolean> {
-    return true; // fallback strategy
+    return !!refreshToken; // fallback strategy
   }
 
   public async handle(refreshToken: string, request: any): Promise<TokenRefreshResponse> {

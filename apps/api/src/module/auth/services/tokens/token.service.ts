@@ -1,7 +1,7 @@
-import { Injectable, BadRequestException, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { TokenStrategyChain } from './token-strategy.chain';
 import { TokenRefreshResponse } from './interfaces/token.interface';
+import { TokenStrategyChain } from './token-strategy.chain';
 
 @Injectable()
 export class TokenService {

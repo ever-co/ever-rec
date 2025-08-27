@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
-import { FirebaseAdminService } from "../../../firebase/services/firebase-admin.service";
 import * as admin from "firebase-admin";
+import { FirebaseAdminService } from "../../../firebase/services/firebase-admin.service";
 
 export interface IToken {
   id: string;
