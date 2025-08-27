@@ -7,7 +7,6 @@ node_modules
 **/.next
 **/.turbo
 **/build
-**/i18n
 **/dist
 **/out
 **/uploads
