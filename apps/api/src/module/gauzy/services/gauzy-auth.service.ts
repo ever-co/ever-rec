@@ -1,0 +1,16 @@
+import { Injectable } from '@nestjs/common';
+import { GauzyRestService } from './gauzy-rest.service';
+import { ILoginProps } from '../../auth/services/authentication.service';
+import { IAuthResponse } from '../interfaces/gauzy.model';
+
+
+@Injectable()
+export class GauzyAuthService {
+  constructor(
+    private readonly gauzyRestService: GauzyRestService
+  ) { }
+
+  public async login(input: ILoginProps) {
+    return this.gauzyRestService.post<ILoginProps, IAuthResponse>('auth/login', input);
+  }
+}
