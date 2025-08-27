@@ -13,4 +13,8 @@ export class GauzyAuthService {
   public async login(input: ILoginProps) {
     return this.gauzyRestService.post<ILoginProps, IAuthResponse>('auth/login', input);
   }
+
+  public async refreshToken(value: string) {
+    return this.gauzyRestService.post<{ refresh_token: string }, { token: string }>('auth/refresh-token', { refresh_token: value })
+  }
 }

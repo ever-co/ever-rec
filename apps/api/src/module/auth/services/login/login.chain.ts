@@ -4,7 +4,7 @@ import { FirebaseLoginState } from './state/firebase-login.state';
 import { ILoginProps } from '../authentication.service';
 import { sendError, sendResponse } from 'src/services/utils/sendResponse';
 import { StateId } from './interfaces/login-state.interface';
-import { MergeTokenPolicy } from '../policies/merge-token.policy';
+import { MergeTokenPolicy } from '../tokens/policies/merge-token.policy';
 
 
 @Injectable()

@@ -1,6 +1,6 @@
 import { ILoginProps } from "../authentication.service";
 import type { ContextResult, LoginState, LoginStateResult, StateId } from "./interfaces/login-state.interface";
-import { MergeTokenPolicy } from '../policies/merge-token.policy';
+import { MergeTokenPolicy } from '../tokens/policies/merge-token.policy';
 
 export class LoginContext {
   private state: LoginState;

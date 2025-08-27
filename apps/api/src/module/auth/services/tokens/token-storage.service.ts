@@ -87,4 +87,19 @@ export class TokenStorageService {
 
     return snapshot.val() as IToken;
   }
+
+  /**
+ * Delete (revoke) a token by its ID
+ */
+  public async delete(id: string): Promise<boolean> {
+    const ref = this.db.ref(`${this.PATH}/${id}`);
+    const snapshot = await ref.once("value");
+
+    if (!snapshot.exists()) {
+      return false; // Token already revoked or does not exist
+    }
+
+    await ref.remove();
+    return true;
+  }
 }

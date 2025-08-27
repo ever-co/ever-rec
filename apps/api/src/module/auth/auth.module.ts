@@ -11,15 +11,16 @@ import { FirebasePasswordResetStrategy } from './services/password-reset/firebas
 import { GoogleAuthService } from './services/google-auth.service';
 import { UserProfileService } from './services/user-profile.service';
 import { UserService } from './services/user.service';
-import { TokenService } from './token.service';
 import { GauzyModule } from '../gauzy';
 import { FirebaseLoginState } from './services/login/state/firebase-login.state';
 import { GauzyLoginState } from './services/login/state/gauzy-login.state';
 import { LoginChain } from './services/login/login.chain';
-import { MergeTokenPolicy } from './services/policies/merge-token.policy';
+import { MergeTokenPolicy } from './services/tokens/policies/merge-token.policy';
 import { JwtModule, JwtModuleOptions } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TokenStorageService } from './services/tokens/token-storage.service';
+import { FirebaseRefreshStrategy, FirebaseValidateStrategy, TokenService, TokenStrategyChain, UnifiedRefreshStrategy, UserFactory } from './services/tokens';
+import { GauzyRefreshStrategy } from './services/tokens/refresh/gauzy-refresh.strategy';
 
 @Module({
   imports: [JwtModule.registerAsync({
@@ -52,8 +53,14 @@ import { TokenStorageService } from './services/tokens/token-storage.service';
     PasswordResetStrategyProvider,
     UserProfileService,
 
-    // Legacy services (for backward compatibility)
+    // Token services
     TokenService,
+    TokenStrategyChain,
+    GauzyRefreshStrategy,
+    UnifiedRefreshStrategy,
+    FirebaseRefreshStrategy,
+    FirebaseValidateStrategy,
+    UserFactory,
 
     // State service
     FirebaseLoginState,
@@ -69,7 +76,7 @@ import { TokenStorageService } from './services/tokens/token-storage.service';
     GoogleAuthService,
     EmailService,
     UserProfileService,
-    TokenService,
+    TokenService
   ],
 })
 export class AuthModule { }

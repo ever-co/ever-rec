@@ -4,8 +4,8 @@ import {
   InternalServerErrorException
 } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
-import { ContextResult, LoginStateResult, StateId } from "../login/interfaces/login-state.interface";
-import { TokenStorageService } from "../tokens/token-storage.service";
+import { ContextResult, LoginStateResult, StateId } from "../../login/interfaces/login-state.interface";
+import { TokenStorageService } from "../token-storage.service";
 
 @Injectable()
 export class MergeTokenPolicy {
@@ -78,6 +78,29 @@ export class MergeTokenPolicy {
       return true;
     } catch {
       return false;
+    }
+  }
+
+  /**
+ * Revoke a token by removing it from storage.
+ * @param token - Reference token to revoke.
+ */
+  public async revokeToken(token: string): Promise<void> {
+    if (!this.isTokenLike(token)) {
+      throw new BadRequestException("Invalid token provided");
+    }
+
+    try {
+      const { id } = await this.verify<{ id: string }>(token);
+      const deleted = await this.tokenStorageService.delete(id);
+
+      if (!deleted) {
+        throw new BadRequestException("Token not found or already revoked");
+      }
+    } catch (error: any) {
+      throw new InternalServerErrorException(
+        `Failed to revoke token: ${error.message}`,
+      );
     }
   }
 
