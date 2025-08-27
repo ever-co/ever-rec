@@ -10,6 +10,8 @@ import { DecodedIdToken } from 'firebase-admin/auth';
 import { FirebaseAdminService } from '../firebase/services/firebase-admin.service';
 import { IRequestUser } from './guards/auth.guard';
 import { FirebaseRestService } from '../firebase/services/firebase-rest.service';
+import { MergeTokenPolicy } from './services/policies/merge-token.policy';
+import { ContextResult, LoginStateResult, StateId } from './services/login/interfaces/login-state.interface';
 
 export interface TokenRefreshResponse {
   idToken: string;
@@ -24,7 +26,8 @@ export class TokenService {
   constructor(
     private eventEmitter: EventEmitter2,
     private readonly firebaseAdminService: FirebaseAdminService,
-    private readonly firebaseRestService: FirebaseRestService
+    private readonly firebaseRestService: FirebaseRestService,
+    private readonly mergeTokenPolicy: MergeTokenPolicy
   ) { }
 
   /**
@@ -80,8 +83,8 @@ export class TokenService {
   }
 
   /**
-   * Refresh authentication token with enhanced error handling
-   */
+ * Refresh authentication token with enhanced error handling
+ */
   async refreshToken(
     refreshToken: string,
     request: any,
@@ -91,59 +94,119 @@ export class TokenService {
     }
 
     try {
+      let context: ContextResult | null = null;
+      let effectiveRefreshToken = refreshToken;
 
-      const response = await this.firebaseRestService.post('token',
-        {
-          grant_type: 'refresh_token',
-          refresh_token: refreshToken,
-        }
-      );
-
-      const { data } = response;
-
-      if (!data?.id_token || !data?.refresh_token) {
-        throw new UnauthorizedException('Invalid refresh token response');
+      // Handle unified token case
+      if (await this.mergeTokenPolicy.isValid(refreshToken)) {
+        context = await this.mergeTokenPolicy.decode(refreshToken);
+        effectiveRefreshToken = context.get(StateId.FIREBASE).refreshToken;
       }
+
+      // Request new tokens from Firebase
+      const { data } = await this.firebaseRestService.post('token', {
+        grant_type: 'refresh_token',
+        refresh_token: effectiveRefreshToken,
+      });
+
+      this.validateFirebaseResponse(data);
 
       const expiresIn = parseInt(data.expires_in, 10);
-      if (isNaN(expiresIn) || expiresIn <= 0) {
-        throw new UnauthorizedException('Invalid token expiration time');
-      }
+      const expiresAt = new Date(Date.now() + expiresIn * 1000).toISOString();
 
-      // Process the new token to validate and set user context
+      // Validate token and set user context
       await this.processToken(data.id_token, request);
 
-      // Emit analytics event
+      // Emit analytics if user is known
       if (request.user?.id) {
         this.eventEmitter.emit('analytics.track', 'Token Refreshed', {
           userId: request.user.id,
         });
       }
 
-      const expiresAt = new Date(Date.now() + expiresIn * 1000).toISOString();
-
       this.logger.log(
         `Token refreshed successfully for user: ${request.user?.id || 'unknown'}`,
       );
 
-      return {
-        idToken: data.id_token,
-        refreshToken: data.refresh_token,
-        expiresAt,
-      };
+      // Return either a unified token or plain response
+      return context
+        ? this.buildUnifiedResponse(context, data, expiresAt)
+        : {
+          idToken: data.id_token,
+          refreshToken: data.refresh_token,
+          expiresAt,
+        };
     } catch (error: any) {
-      this.logger.error('Token refresh failed:', error);
-
-      if (error.response?.status === 400) {
-        throw new UnauthorizedException('Invalid or expired refresh token');
-      } else if (error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT') {
-        throw new InternalServerErrorException(
-          'Authentication service timeout',
-        );
-      }
-
-      throw new UnauthorizedException('Failed to refresh authentication token');
+      this.handleRefreshError(error);
     }
+  }
+
+  /**
+   * Validate Firebase response payload
+   */
+  private validateFirebaseResponse(data: any): void {
+    if (!data?.id_token || !data?.refresh_token) {
+      throw new UnauthorizedException('Invalid refresh token response');
+    }
+
+    const expiresIn = parseInt(data.expires_in, 10);
+    if (isNaN(expiresIn) || expiresIn <= 0) {
+      throw new UnauthorizedException('Invalid token expiration time');
+    }
+  }
+
+  /**
+   * Build a unified token response with updated Firebase & Gauzy context
+   */
+  private async buildUnifiedResponse(
+    context: ContextResult,
+    data: any,
+    expiresAt: string,
+  ): Promise<TokenRefreshResponse> {
+    const firebaseCtx: LoginStateResult = {
+      data: context.get(StateId.FIREBASE).data,
+      refreshToken: data.refresh_token,
+      accessToken: data.id_token,
+    };
+
+    const gauzyCtx = context.get(StateId.GAUZY);
+
+    const ctx = new Map<StateId, LoginStateResult>([
+      [StateId.FIREBASE, firebaseCtx],
+      [
+        StateId.GAUZY,
+        {
+          data: gauzyCtx.data,
+          refreshToken: gauzyCtx.refreshToken,
+          accessToken: gauzyCtx.accessToken,
+        },
+      ],
+    ]);
+
+    const mergedRefreshToken = await this.mergeTokenPolicy.encode(ctx);
+
+    return {
+      refreshToken: mergedRefreshToken,
+      idToken: data.id_token,
+      expiresAt,
+    };
+  }
+
+  /**
+   * Centralized error handling for refreshToken
+   */
+  private handleRefreshError(error: any): never {
+    this.logger.error('Token refresh failed:', error);
+
+    if (error.response?.status === 400) {
+      throw new UnauthorizedException('Invalid or expired refresh token');
+    }
+
+    if (['ECONNABORTED', 'ETIMEDOUT'].includes(error.code)) {
+      throw new InternalServerErrorException('Authentication service timeout');
+    }
+
+    throw new UnauthorizedException('Failed to refresh authentication token');
   }
 
   private parseEmailToDisplayName(email: string): string {
