@@ -1,62 +1,49 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { LoginStateResult, StateId } from '../../login/interfaces/login-state.interface';
-import { TokenRefreshResponse } from '../interfaces/token.interface';
+import { IRefreshTokenContext, TokenRefreshResponse } from '../interfaces/token.interface';
 import { MergeTokenPolicy } from '../policies/merge-token.policy';
 import { RefreshStrategyState } from '../states/refresh-strategy.state';
-import { TokenStrategyChain } from '../token-strategy.chain';
-import { FirebaseRefreshStrategy } from './firebase-refresh.strategy';
-import { GauzyRefreshStrategy } from './gauzy-refresh.strategy';
 
 @Injectable()
 export class UnifiedRefreshStrategy extends RefreshStrategyState {
+  private readonly logger = new Logger(UnifiedRefreshStrategy.name);
   constructor(
     private readonly mergeTokenPolicy: MergeTokenPolicy,
-    private readonly firebaseStrategy: FirebaseRefreshStrategy,
-    private readonly gauzyRefreshStrategy: GauzyRefreshStrategy,
-    private readonly tokenStrategyChain: TokenStrategyChain,
   ) {
     super();
-
-    // Set chain head
-    this.tokenStrategyChain.setInitialRefreshStrategy(this);
-
-    // Proper delegation
-    this.setNext(this.firebaseStrategy); // fallback if not unified
   }
 
   protected async supports(refreshToken: string): Promise<boolean> {
     return this.mergeTokenPolicy.isValid(refreshToken);
   }
 
-  protected async handle(refreshToken: string, request: any): Promise<TokenRefreshResponse> {
-    const context = await this.mergeTokenPolicy.decode(refreshToken);
-    const firebaseRefreshToken = context.get(StateId.FIREBASE).refreshToken;
-    const gauzyRefreshToken = context.get(StateId.GAUZY).refreshToken;
+  protected async handle(ctx: IRefreshTokenContext): Promise<TokenRefreshResponse> {
+    const { token, result } = ctx
+    // Decode existing merged token
+    const context = await ctx.current();
 
-    await this.mergeTokenPolicy.revokeToken(refreshToken);
+    // Revoke old token
+    await this.mergeTokenPolicy.revokeToken(token);
 
-    const [firebaseResponse, gauzyResponse] = await Promise.all([
-      this.firebaseStrategy.handle(firebaseRefreshToken, request),
-      this.gauzyRefreshStrategy.handle(gauzyRefreshToken, request),
-    ]);
+    // Merge all states automatically
+    const mergedMap = new Map<StateId, LoginStateResult<TokenRefreshResponse>>();
 
-    const mergedToken = await this.mergeTokenPolicy.encode(
-      new Map<StateId, LoginStateResult>([
-        [
-          StateId.FIREBASE,
-          { ...context.get(StateId.FIREBASE), accessToken: firebaseResponse.idToken, refreshToken: firebaseResponse.refreshToken },
-        ],
-        [
-          StateId.GAUZY,
-          { ...context.get(StateId.GAUZY), accessToken: gauzyResponse.idToken, refreshToken: gauzyResponse.refreshToken },
-        ],
-      ]),
-    );
+    for (const [stateId, stateResult] of result.entries()) {
+      const decodedData = context.get(stateId)?.data;
+      mergedMap.set(stateId, { ...stateResult, data: decodedData });
+    }
+
+    const mergedToken = await this.mergeTokenPolicy.encode(mergedMap);
+
+    // Use one of the state results as primary for response (e.g., FIREBASE)
+    const primary = result.get(StateId.FIREBASE) ?? result.values().next().value;
+
+    this.logger.log('Unified tokens refreshed.');
 
     return {
-      idToken: firebaseResponse.idToken,
+      idToken: primary.accessToken,
       refreshToken: mergedToken,
-      expiresAt: firebaseResponse.expiresAt,
+      expiresAt: primary.data.expiresAt,
     };
   }
 }

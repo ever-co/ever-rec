@@ -1,14 +1,15 @@
+import { ContextResult, StateId } from "../../login/interfaces/login-state.interface";
+import { MergeTokenPolicy } from "../policies/merge-token.policy";
+
+
 export interface ITokenRefreshStrategy {
   supports(refreshToken: string): Promise<boolean>;
-  handle(
-    refreshToken: string,
-    request: any
-  ): Promise<TokenRefreshResponse>;
+  handle(context: IRefreshTokenContext): Promise<TokenRefreshResponse>;
 }
 
 export interface ITokenValidateStrategy {
   supports(token: string): Promise<boolean>;
-  validate(token: string, request: any): Promise<void>;
+  validate(context: IRefreshTokenContext): Promise<void>;
 }
 
 export interface TokenRefreshResponse {
@@ -17,13 +18,16 @@ export interface TokenRefreshResponse {
   expiresAt: string;
 }
 
-export enum StrategyPosition {
-  HEAD = "head",
-  TAIL = "tail",
-  INDEX = "index",
+export interface IRefreshTokenContext {
+  readonly token: string;
+  readonly request: any;
+  readonly result: ContextResult<TokenRefreshResponse>;
+  readonly mergeTokenPolicy: MergeTokenPolicy;
+  current(): Promise<ContextResult>
 }
 
 export interface TokenState<T> {
+  tokenId: StateId,
   setNext(next: TokenState<T>): TokenState<T>;
-  resolve(token: string, request?: any): Promise<T>;
+  resolve(context: IRefreshTokenContext): Promise<T>;
 }

@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { ITokenValidateStrategy } from "../../interfaces/token.interface";
+import { IRefreshTokenContext, ITokenValidateStrategy } from "../../interfaces/token.interface";
 import { FirebaseAdminService } from "src/module/firebase/services/firebase-admin.service";
 import { UserFactory } from "../../user.factory";
 import { TokenStrategyChain } from "../../token-strategy.chain";
@@ -25,7 +25,7 @@ export class FirebaseValidateStrategy extends ValidateStrategyState {
     }
   }
 
-  async handle(token: string, request: any): Promise<void> {
+  async handle({ token, request }: IRefreshTokenContext): Promise<void> {
     const decoded = await this.firebaseAdmin.verifyIdToken(token);
     request.user = this.userFactory.create(decoded);
   }
