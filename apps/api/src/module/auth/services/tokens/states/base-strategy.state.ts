@@ -1,5 +1,6 @@
 import { IRefreshTokenContext, TokenState } from '../interfaces/token.interface';
 import { StateId } from '../../login/interfaces/login-state.interface';
+import { BadRequestException } from '@nestjs/common';
 
 export abstract class BaseStrategyState<T> implements TokenState<T> {
   private nextState?: TokenState<T>;
@@ -16,6 +17,8 @@ export abstract class BaseStrategyState<T> implements TokenState<T> {
 
     if (await this.supports(token)) {
       response = await this.handle(context, token);
+    } else {
+      throw new BadRequestException('Token is expired or not supported');
     }
 
     const hasNext = this.nextState && response && token !== context.token;
