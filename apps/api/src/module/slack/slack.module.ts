@@ -9,9 +9,10 @@ import { VideoModule } from '../video/video.module';
 import { SharedService } from '../../services/shared/shared.service';
 import { FoldersSharedService } from '../../services/shared/folders.shared.service';
 import { EditorWebsocketModule } from '../editor-websocket-module/editor-websocket.module';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
-  imports: [HttpModule, VideoModule, EditorWebsocketModule],
+  imports: [HttpModule, VideoModule, EditorWebsocketModule, AuthModule],
   providers: [
     SlackService,
     ImageService,

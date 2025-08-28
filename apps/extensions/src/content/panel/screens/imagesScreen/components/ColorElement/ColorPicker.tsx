@@ -1,5 +1,6 @@
 import type React from 'react';
 import { useState, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface ColorPickerProps {
   color: string;
@@ -7,6 +8,7 @@ interface ColorPickerProps {
 }
 
 export function ColorPicker({ color, setColor }: ColorPickerProps) {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const colorInputRef = useRef<HTMLInputElement>(null);
@@ -45,7 +47,7 @@ export function ColorPicker({ color, setColor }: ColorPickerProps) {
         className="tw-w-16 tw-h-[24px] tw-mt-2 tw-border-none  tw-p-0.5 tw-border tw-border-input"
         style={{ backgroundColor: color }}
       >
-        <span className="tw-sr-only">Open color picker</span>
+        <span className="tw-sr-only">{t('unique.openColor')}</span>
       </button>
       <input
         ref={colorInputRef}

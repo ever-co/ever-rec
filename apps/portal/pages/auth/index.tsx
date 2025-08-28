@@ -11,15 +11,16 @@ import Image from 'next/legacy/image';
 import { CredentialResponse } from '@react-oauth/google';
 import { googleAuthorization } from '../../app/services/auth';
 import FeaturesSection from 'components/pagesComponents/_signScreen/FeaturesSection';
-import {
-  features,
-  newFeatures,
-} from 'components/pagesComponents/_signScreen/FeatCard';
+import { useFeatures } from 'components/pagesComponents/_signScreen/FeatCard';
 import {
   loadingMessage,
   updateMessage,
 } from 'app/services/helpers/toastMessages';
 import redirect from 'misc/redirect';
+import { useTranslation } from 'react-i18next';
+import { languagesList } from 'components/shared/SCHeader/SCHeader';
+import AppSvg from 'components/elements/AppSvg';
+import { Dropdown } from 'antd';
 
 type SignFlowName = 'login' | 'register' | 'resetPassword' | 'newResetPassword';
 
@@ -34,28 +35,32 @@ interface FlowLink {
   route: string;
 }
 
-const flowLinks: FlowLink[] = [
-  {
-    name: 'login',
-    title: 'Already have an account? Log in',
-    route: panelRoutes.login,
-  },
-  {
-    name: 'register',
-    title: 'Create an account',
-    route: panelRoutes.register,
-  },
-  {
-    name: 'resetPassword',
-    title: 'I forgot my password',
-    route: panelRoutes.reset,
-  },
-];
-
 const Auth: React.FC<SignFlowComponent> = ({ children, componentType }) => {
   const router = useRouter();
   const [params, setParams] = useState('');
+  const { features, newFeatures } = useFeatures();
   const currentPathname = router.pathname.match(panelRoutes.login);
+  const { t, i18n } = useTranslation();
+  const flowLinks: FlowLink[] = [
+    {
+      name: 'login',
+      title:
+        t('page.auth.common.existingAccount') +
+        ' ' +
+        t('page.auth.common.login'),
+      route: panelRoutes.login,
+    },
+    {
+      name: 'register',
+      title: t('page.auth.login.createAccount'),
+      route: panelRoutes.register,
+    },
+    {
+      name: 'resetPassword',
+      title: t('page.auth.login.forgotPasswordLink'),
+      route: panelRoutes.reset,
+    },
+  ];
 
   useEffect(() => {
     if (!router.isReady) return;
@@ -83,13 +88,29 @@ const Auth: React.FC<SignFlowComponent> = ({ children, componentType }) => {
       }
     }
   };
+  const toggleLanguage = (code: string) => {
+    i18n.changeLanguage(code);
+  };
 
   const filteredLinks = (): FlowLink[] => {
     return flowLinks.filter((link) => link.name !== componentType);
   };
+  const languagesMenu = languagesList((code) => toggleLanguage(code));
 
   return (
     <div className="mx-lg:tw-grid-cols-1 tw-inline-grid tw-grid-cols-2 tw-p-4 tw-min-h-screen tw-w-screen">
+      <div className="tw-absolute tw-top-5 tw-left-5 ">
+        <Dropdown
+          trigger={['click']}
+          placement="bottomRight"
+          overlay={languagesMenu}
+        >
+          <div className=" tw-px-4 tw-py-2 tw-flex tw-cursor-pointer tw-border tw-rounded-md tw-border-[#5b4dbe]/20">
+            <p>{t('common.language')}</p>
+            <AppSvg path="/new-design-v2/down-caret.svg" size="20px" />
+          </div>
+        </Dropdown>
+      </div>
       <div className="tw-flex tw-flex-col tw-items-center">
         <div className="tw-flex-1 tw-pt-16 tw-relative">
           <LogoWrapper />
@@ -100,20 +121,22 @@ const Auth: React.FC<SignFlowComponent> = ({ children, componentType }) => {
                 part2=""
                 title={
                   componentType == 'resetPassword'
-                    ? 'Reset your password'
+                    ? t('page.auth.resetPassword.title')
                     : currentPathname
-                      ? 'Hello, Welcome!'
-                      : 'Register'
+                      ? t('page.auth.login.welcomeTitle')
+                      : t('page.register.title')
                 }
-                className="tw-mb-8 tw-font-bold"
+                className="tw-mb-6 tw-font-bold"
               />
-              <p className="tw-mb-6 tw-text-sm">
-                <b>{currentPathname ? `We are glad you are here!` : ''}</b>
+              <p className="tw-mb-6 !tw-text-sm !tw-font-extralight">
+                <b>
+                  {currentPathname ? t('page.auth.login.welcomeTitle') : ''}
+                </b>
               </p>
-              <p className="tw-mb-6 tw-text-sm">
+              <p className="tw-mb-16 !tw-text-sm !tw-font-extralight">
                 <b>
                   {currentPathname
-                    ? 'To use our cloud-based services designed for sharing and saving your screenshots, please sign in to continue.'
+                    ? t('page.auth.login.welcomeDescription')
                     : ''}
                 </b>
               </p>
@@ -136,7 +159,7 @@ const Auth: React.FC<SignFlowComponent> = ({ children, componentType }) => {
                           <React.Fragment key={`link_${index}`}>
                             {componentType !== link.name && (
                               <AppLink
-                                className="tw-text-primary-purple"
+                                className="tw-text-primary-purple !tw-text-sm"
                                 onClick={() =>
                                   router.push(
                                     `${preRoutes.auth}${link.route}${params}`,

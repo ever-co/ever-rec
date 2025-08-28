@@ -14,7 +14,7 @@ import TopMenuBar from 'components/pagesComponents/_singleImageScreen/topMenuBar
 import AppContainer from 'components/containers/appContainer/AppContainer';
 import AppSpinner from 'components/containers/appSpinner/AppSpinner';
 import UserShortInfo from 'components/containers/dashboardLayout/elements/UserShortInfo/UserShortInfo';
-import { copySourceURL } from 'misc/singleItemFunctions';
+import { useCopySourceURL } from 'misc/singleItemFunctions';
 import UniqueViews from 'components/elements/UniqueViews';
 import ImageModal from 'components/pagesComponents/_singleImageScreen/imageModal/ImageModal';
 import SingleImagePageManageAreaTemplate from 'components/pagesComponents/_singleImageScreen/SingleImagePageManageAreaTemplate';
@@ -24,10 +24,13 @@ import { IoLinkOutline } from 'react-icons/io5';
 import useWorkspaceItemsPermission from 'hooks/useWorkspaceItemsPermission';
 import { IUserShort } from 'app/interfaces/IUserData';
 import VideoComments from 'components/pagesComponents/_videoEditorScreen/comments/VideoComments/VideoComments';
+import { useTranslation } from 'react-i18next';
 
 // TODO: Refactor that so some logic from the single image page can be abstracted.
 const WorkspaceSingleImage = () => {
+  const { t } = useTranslation();
   const router = useRouter();
+  const { copySourceURL } = useCopySourceURL();
   const user = useAuthenticateUser();
   const [image, setImage] = useState<IWorkspaceImage | null>(null);
   const activeWorkspace: IWorkspace | null = useSelector(
@@ -190,15 +193,15 @@ tw-items-center tw-justify-center tw-bg-blue-grey tw-h-500px"
                               className="tw-min-w-20px tw-text-app-grey-darker tw-mr-2"
                             />
                             <div className="tw-text-app-grey-darker tw-text-sm ">
-                              Source URL
+                              {t('extras.sourceURL')}
                             </div>
                           </div>
                         </div>
 
                         <div className="tw-font-sm tw-flex tw-flex-wrap tw-justify-end tw-mt-4 tw-items-center">
                           <div className="tw-text-app-grey-darker tw-mr-2 tw-whitespace-nowrap">{`${
-                            image.dbData?.likes?.length || 'No'
-                          } likes`}</div>
+                            image.dbData?.likes?.length || t('common.no')
+                          } ${t('page.video.likes')}`}</div>
                           <div className="tw-mr-2">&bull;</div>
                           <UniqueViews
                             item={image}

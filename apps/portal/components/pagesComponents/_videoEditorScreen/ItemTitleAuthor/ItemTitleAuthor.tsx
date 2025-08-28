@@ -1,5 +1,6 @@
 import { FC } from 'react';
 import styles from './ItemTitleAuthor.module.scss';
+import { useTranslation } from 'react-i18next';
 
 interface IItemTitleAuthorProps {
   title: string;
@@ -14,14 +15,15 @@ const ItemTitleAuthor: FC<IItemTitleAuthorProps> = ({
   displayName,
   date,
 }) => {
+  const { t } = useTranslation();
   return (
     <div className={styles.itemAuthor}>
-      <h3>{title || 'Title'}</h3>
+      <h3>{title || t('page.profile.title')}</h3>
 
       <div className={styles.itemAuthorDetails}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={photoURL || '/sign/default-profile.svg'} alt="" />
-        <span>{displayName || 'User'}</span>
+        <span>{displayName || t('common.user')}</span>
         {date && (
           <>
             <span className={styles.dotSeparator}>●</span>

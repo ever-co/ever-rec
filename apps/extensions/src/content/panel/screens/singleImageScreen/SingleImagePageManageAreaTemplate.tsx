@@ -15,7 +15,7 @@ import { IAppMessage } from '@/app/messagess';
 import { IDriveDbData } from '@/app/interfaces/IDriveDbData';
 import { deleteDriveItem, driveUploadFile } from '@/app/services/google/drive';
 import { ResStatusEnum } from '@/app/interfaces/IDataResponse';
-import { errorHandler } from '@/app/services/helpers/errors';
+import { useErrorHandler } from '@/app/services/helpers/errors';
 import {
   errorMessage,
   infoMessage,
@@ -48,9 +48,10 @@ import ItemsFolderModal from '../imagesScreen/components/itemsFolderModal/ItemsF
 import DeleteCloudFileModal from '@/content/components/shared/DeleteCloudFileModal';
 import WorkspaceItemsFolderModal from '../imagesScreen/pages/workspace/WorkspaceItemsFolderModal';
 import DeleteItemModal from '../imagesScreen/pages/shared/DeleteItemModal';
-import { workspaceImageDelete } from '@/content/utilities/misc/workspaceFunctions';
+import { useWorkspaceImageDelete } from '@/content/utilities/misc/workspaceFunctions';
 import useGenerateShareLink from '@/content/utilities/hooks/useGenerateShareLink';
 import { pdfFromImageUrl } from '@/app/utilities/pdfFromImageUrl';
+import { useTranslation } from 'react-i18next';
 
 interface IDeletionModal {
   state: boolean;
@@ -87,6 +88,9 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
   setLoaderState,
   workspace,
 }) => {
+  const { errorHandler } = useErrorHandler()
+  const { t } = useTranslation();
+  const { workspaceImageDelete } = useWorkspaceImageDelete();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [showFolderModal, setShowFolderModal] = useState(false);
@@ -144,7 +148,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
     updateImageState,
   );
   const [shareLoadingState, setShareLoadingState] = useState(false);
-  const folderName = image?.dbData?.folderData?.name || 'My Images';
+  const folderName = image?.dbData?.folderData?.name || t('common.myImages');
   const currentlySavedIn = useMemo(
     () =>
       workspace
@@ -223,7 +227,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
         updateExplorerDataDrive(response.data);
         setDriveImageId(null);
         setDriveOperationLoading(false);
-        successMessage('File deleted from Drive');
+        successMessage(t('toasts.fileDeletedFromDrive'));
       }
     }
   };
@@ -258,7 +262,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
       if (data) {
         updateExplorerDataDrive(data.drivesData);
         setDriveImageId(data.fileId);
-        successMessage('image uploaded successfully.');
+        successMessage(t('toasts.imageUploaded'));
       }
       setDriveOperationLoading(false);
     } else {
@@ -271,11 +275,9 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
       );
       if (response.status == ResStatusEnum.success) {
         setDropBoxImageId(response.data);
-        successMessage('Image uploaded successfully.');
+        successMessage(t('toasts.imageUploaded'));
       } else {
-        errorMessage(
-          response.message || 'Something went wrong, Please try again later',
-        );
+        errorMessage(response.message || t('toasts.somethingWentWrong'));
       }
       setDropboxOperationLoading(false);
     }
@@ -348,14 +350,14 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
 
     screenshot && (await moveRestoreTrash(screenshot));
 
-    infoMessage('The image has been moved to the Trash');
+    infoMessage(t('toasts.imageMovedToTrash'));
   };
 
   const localSaveFunction = async () => {
     try {
       if (image.dbData?.title) {
         localSave(image);
-        successMessage('Image downloaded');
+        successMessage(t('toasts.imageDownloaded'));
       }
     } catch (e) {
       errorHandler(e);
@@ -374,9 +376,9 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
   const pdfSave = async () => {
     if (image) {
       const blob = await pdfFromImageUrl(image.url);
-      successMessage('Image downloaded');
+      successMessage(t('toasts.imageDownloaded'));
       saveAs(blob, image.dbData?.title);
-      saveSegmentEvent('Image Download as PDF', image.dbData);
+      saveSegmentEvent(t('ext.imageDownloadAsPDF'), image.dbData);
     }
   };
 
@@ -389,10 +391,10 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
         });
         try {
           item && navigator.clipboard.write([item as any]);
-          successMessage('Copied to clipboard');
-          saveSegmentEvent('Image Copied to clipboard');
+          successMessage('toasts.copiedToClipboard');
+          saveSegmentEvent(t('ext.imageCopied'));
         } catch (e) {
-          errorHandler({ message: 'Link not copied' });
+          errorHandler({ message: t('toasts.linkNotCopied') });
         }
       }
     } catch (e) {
@@ -428,7 +430,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
       } else {
         setDropBoxImageId('');
         setDropboxOperationLoading(false);
-        successMessage('File deleted from Dropbox');
+        successMessage(t('toasts.fileDeletedFromDropbox'));
       }
     }
   };
@@ -445,7 +447,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
         onClick={pdfSave}
         key="menu_item_pdf"
       >
-        <span className="tw-text-xs">Download as PDF</span>
+        <span className="tw-text-xs">{t('page.image.downloadAsPDF')}</span>
       </Menu.Item>
 
       <Menu.Item
@@ -453,7 +455,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
         onClick={clipboardCopy}
         key="menu_item_copy"
       >
-        <span className="tw-text-xs">Copy to clipboard</span>
+        <span className="tw-text-xs">{t('page.image.copyToClipboard')}</span>
       </Menu.Item>
 
       <Menu.Item
@@ -461,7 +463,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
         onClick={() => openEmailModal(image)}
         key="menu_item_email"
       >
-        <span className="tw-text-xs">Email</span>
+        <span className="tw-text-xs">{t('page.image.email')}</span>
       </Menu.Item>
 
       <Menu.Item
@@ -469,7 +471,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
         onClick={() => openDeleteModal(image)}
         key="menu_item_delete"
       >
-        <span className="tw-text-xs">Delete Image</span>
+        <span className="tw-text-xs">{t('page.image.deleteImage')}</span>
       </Menu.Item>
     </Menu>
   );
@@ -505,7 +507,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
                   size={'25px'}
                 />
               </div>
-              <div>Manage</div>
+              <div>{t('page.image.manage')}</div>
             </Tab>
             {/* <Tab className="tw-flex tw-justify-center tw-items-center tw-w-1/2 tw-h-50px tw-cursor-pointer tw-outline-none">
               <div className="tw-mr-2">
@@ -517,7 +519,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
           <TabPanel>
             <ImageActionsCard className="tw-rounded-t-none">
               <div>
-                Currently saved in
+                {t('page.image.currentlySavedIn')}
                 <strong className="tw-ml-1.5">{currentlySavedIn}</strong>
               </div>
               <div
@@ -525,7 +527,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
                 onClick={() => setShowFolderModal(true)}
               >
                 <div className={styles.moveToFolderInner}>
-                  <div>Move to folder</div>
+                  <div>{t('page.image.moveToFolder')}</div>
                   <AppSvg
                     size="24px"
                     path="images/panel/common/arrow-right.svg"
@@ -537,7 +539,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
             <ImageActionsCard>
               <div className="tw-grid tw-gap-4 tw-grid-cols-3 tw-justify-items-center across-btns:tw-gap-1 across-btns:tw-grid-rows-1 across-btns:tw-place-items-center">
                 <ImageActionItem
-                  title="Download"
+                  title={t('page.image.download')}
                   icon={IoMdDownload}
                   onClick={localSaveFunction}
                   outerClassName={styles.containerImageAction}
@@ -546,7 +548,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
                 />
 
                 <ImageActionItem
-                  title="Annotate"
+                  title={t('page.image.annotate')}
                   icon={RiImageEditLine}
                   onClick={goToEdit}
                   outerClassName={styles.containerImageAction}
@@ -560,7 +562,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
                   placement="bottomLeft"
                 >
                   <ImageActionItem
-                    title="More"
+                    title={t('page.image.more')}
                     icon={FiMoreHorizontal}
                     outerClassName={styles.containerImageAction}
                     circleClassName={styles.innerCircle}
@@ -574,14 +576,16 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
                 <div>
                   <div className="tw-flex tw-items-center tw-justify-between tw-mb-2">
                     <div className="tw-font-semibold tw-text-sm tw-text-center">
-                      Shareable link:
+                      {t('page.image.shareableLink')}
                     </div>
                     <AppButton
                       onClick={removeSharedLink}
                       bgColor="tw-bg-red"
                       className="tw-pt-0 tw-pb-0 tw-pl-2 tw-pr-2"
                     >
-                      <span className="tw-text-xs tw-text-white">Remove</span>
+                      <span className="tw-text-xs tw-text-white">
+                        {t('page.image.remove')}
+                      </span>
                     </AppButton>
                   </div>
 
@@ -605,7 +609,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
                           size={'25px'}
                           className="tw-mr-2"
                         />
-                        Copy
+                        {t('page.image.copy')}
                       </>
                     )}
                   </AppButton>
@@ -613,7 +617,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
               ) : (
                 <div>
                   <div className="tw-font-semibold tw-text-sm tw-mb-2 tw-text-center">
-                    Share Your Image
+                    {t('page.image.shareYourImage')}
                   </div>
                   <AppButton
                     onClick={generateShareableLink}
@@ -625,7 +629,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
                         <AppSpinnerLocal />
                       </div>
                     ) : (
-                      'Generate Shareable Link'
+                      t('page.image.generateShareableLink')
                     )}
                   </AppButton>
                 </div>
@@ -635,7 +639,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
             {!workspace && (
               <ImageActionsCard>
                 <div className="tw-font-semibold tw-text-sm tw-mb-2 tw-text-center">
-                  Save to Cloud
+                  {t('page.image.saveToCloud')}
                 </div>
                 <div className={styles.cloudProvidersWrapper}>
                   <div
@@ -664,7 +668,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
                         </div>
                         <div className={styles.providerText}>
                           <div className={styles.openImageText}>
-                            Processing...
+                            {t('page.image.processing')}
                           </div>
                         </div>
                       </AppButton>
@@ -689,7 +693,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
                           <div className={styles.providerText}>
                             {driveImageId && driveUser ? (
                               <div className={styles.openImageText}>
-                                Open image
+                                {t('page.image.openImage')}
                               </div>
                             ) : (
                               driveUser?.email || 'Google Drive'
@@ -740,7 +744,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
                           </div>
                           <div className={styles.providerText}>
                             <div className={styles.openImageText}>
-                              Processing...
+                              {t('page.image.processing')}
                             </div>
                           </div>
                         </div>
@@ -754,7 +758,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
                           />
                           <div className={styles.providerText}>
                             {dropBoxImageId
-                              ? 'Open image'
+                              ? t('page.image.openImage')
                               : user?.dropbox?.email || 'Dropbox'}
                           </div>
                         </div>

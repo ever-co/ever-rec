@@ -35,6 +35,7 @@ import {
 } from '../../app/interfaces/IApiResponse';
 import { responseDataParser } from 'app/services/helpers/responseDataParser';
 import { errorHandler } from '../../app/services/helpers/errors';
+import { useTranslation } from 'react-i18next';
 // this can and should be refactored into a component as it just returns a useMemo() template.
 
 interface commentDeleteIntF {
@@ -84,6 +85,7 @@ const useEnableComments = ({
   setPublicError,
 }: IProps): EnableComments => {
   const router = useRouter();
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const lastestComment = useRef<HTMLDivElement>(null);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
@@ -346,10 +348,10 @@ const useEnableComments = ({
         setAllCommentsNumber(data.commentsLength);
         setLocalLoaderState(false);
         resetEditState();
-        infoMessage('Comment deleted.');
+        infoMessage(t('hooks.toasts.commentDeleted'));
         setDeleteBoolean(true);
       } else {
-        errorHandler('No item data');
+        errorHandler(t('hooks.noItemData'));
       }
     } catch (e) {
       errorHandler(e);
@@ -413,11 +415,11 @@ const useEnableComments = ({
 
           handleCommentsLengthInState(updatedComments);
         } else {
-          return errorHandler({ message: 'Comment cannot be empty' });
+          return errorHandler({ message: t('hooks.commentEmpty') });
         }
 
         setLocalLoaderState(false);
-        editedMessage && infoMessage('Comment edited.');
+        editedMessage && infoMessage(t('hooks.commentEdited'));
         resetEditState();
 
         if (updatedComments.message) {
@@ -481,8 +483,7 @@ const useEnableComments = ({
               ref={commentsHeaderRef}
               className="tw-text-primary-purple tw-font-bold tw-m-4"
             >
-              {' '}
-              No Comments
+              {t('hooks.noComments')}
             </h6>
             <span className="tw-inline-flex tw-justify-center">
               <img
@@ -511,7 +512,7 @@ const useEnableComments = ({
                     className="tw-pl-3 tw-text-sm tw-italic tw-text-app-grey tw-mb-2 mx-xl:tw-ml-2"
                     ref={lastestComment}
                   >
-                    Latest comment
+                    {t('hooks.latestComment')}
                   </span>
                 )}
                 <div className="tw-flex tw-ml-2 tw-mr-2">
@@ -561,13 +562,13 @@ sm:tw-mr-13px lg:tw-mr-5px xl:tw-mr-13px"
                           editCommentInit(comment.id, comment.content)
                         }
                       >
-                        Edit
+                        {t('common.edit')}
                       </div>
                       <div
                         className="tw-text-red lg:tw-mr-2 tw-text-sm tw-cursor-pointer"
                         onClick={() => openCommentDeleteModal(comment.id)}
                       >
-                        Delete
+                        {t('common.delete')}
                       </div>
                     </div>
                   )}
@@ -580,7 +581,7 @@ sm:tw-mr-13px lg:tw-mr-5px xl:tw-mr-13px"
                   className="tw-underline tw-text-blue tw-cursor-pointer tw-my-2"
                   onClick={loadLessComments}
                 >
-                  &lt; Prev
+                  {t('hooks.prev')}
                 </div>
               )}
               {loadButtonsState.loadMore && (
@@ -588,7 +589,7 @@ sm:tw-mr-13px lg:tw-mr-5px xl:tw-mr-13px"
                   className="tw-underline tw-text-blue tw-cursor-pointer tw-my-2"
                   onClick={loadMoreComments}
                 >
-                  Next &gt;
+                  {t('hooks.next')}
                 </div>
               )}
             </div>
@@ -607,7 +608,7 @@ sm:tw-mr-13px lg:tw-mr-5px xl:tw-mr-13px"
                   'tw-w-full tw-h-40px tw-resize-none tw-indent-1 tw-pl-2 tw-pt-2',
                 )}
                 name="comment"
-                placeholder="Add a comment..."
+                placeholder={t('page.video.commentsSection.placeholder')}
                 value={commentValue}
                 onChange={commentOnChange}
                 ref={textAreaRef}
@@ -634,17 +635,17 @@ sm:tw-mr-13px lg:tw-mr-5px xl:tw-mr-13px"
                     disabled={commentInEditAndUnchanged}
                   >
                     {editCommentState.isBeingEdited
-                      ? 'Update'
+                      ? t('common.update')
                       : localLoaderState
-                        ? 'Posting...'
-                        : 'Comment'}
+                        ? t('hooks.posting')
+                        : t('hooks.comment')}
                   </button>
                   <div
                     onClick={cancelComment}
                     className="tw-bg-white tw-rounded-md tw-text-primary-purple tw-p-5px tw-m-3px tw-cursor-pointer hover:tw-font-bold tw-border tw-border-solid tw-border-primary-purple hover:tw-bg-light-gray tw-w-90px tw-text-center"
                     id="cancel-comments"
                   >
-                    Cancel
+                    {t('common.cancel')}
                   </div>
                 </div>
               </div>
@@ -668,15 +669,13 @@ tw-border-primary-purple tw-rounded-md tw-border-solid tw-border tw-text-primary
               <button
                 onClick={() => {
                   if (isWorkspace)
-                    return infoMessage(
-                      'Sorry, comments are currently unavailable...',
-                    );
+                    return infoMessage(t('hooks.toasts.commentsUnavailable'));
 
                   setShowCommentTextBox(true);
                 }}
                 className="tw-w-full tw-flex tw-justify-center tw-items-center tw-bg-primary-purple tw-rounded-md tw-text-white tw-h-45px hover:tw-bg-primary-light-purple hover:tw-underline"
               >
-                Leave your comments
+                {t('hooks.leaveYourComments')}
               </button>
             ) : (
               <button
@@ -685,7 +684,7 @@ tw-border-primary-purple tw-rounded-md tw-border-solid tw-border tw-text-primary
                 }
                 className="tw-w-full tw-flex tw-justify-center tw-items-center tw-bg-primary-purple tw-rounded-md tw-text-white tw-h-55px hover:tw-bg-primary-light-purple hover:tw-underline"
               >
-                Login to comment
+                {t('hooks.loginToComment')}
               </button>
             )}
           </div>

@@ -1,14 +1,13 @@
+import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
-import { ConfigService } from '@nestjs/config';
-import { AppModule } from './app.module';
-import { SentryService } from '@ntegral/nestjs-sentry';
-import { initFirebaseAdmin } from './services/firebase/firebaseAdmin';
-import { join } from 'path';
-import fs from 'fs';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as bodyParser from 'body-parser';
+import fs from 'fs';
+import { join } from 'path';
+import './config/instrument';
+import { AppModule } from './app.module';
 import { TMP_PATH, TMP_PATH_FIXED } from './enums/tmpPathsEnums';
-import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
@@ -17,13 +16,9 @@ async function bootstrap() {
   const configService: ConfigService = app.get(ConfigService);
   const isDocker = configService.get<boolean>('IS_DOCKER');
 
-  app.useLogger(SentryService.SentryServiceInstance());
-
   if (isDocker) {
     console.log('Running in Docker');
   }
-
-  initFirebaseAdmin(configService);
 
   let publicPath;
 
@@ -59,6 +54,15 @@ async function bootstrap() {
       extended: true,
     }),
   );
+
+  const config = new DocumentBuilder()
+    .setTitle('Ever Rec API')
+    .setDescription('Ever Rec API Documentation')
+    .setVersion('1.0')
+    .addTag('Ever')
+    .build();
+  const documentFactory = () => SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('docs', app, documentFactory);
 
   await app.listen(port);
 }

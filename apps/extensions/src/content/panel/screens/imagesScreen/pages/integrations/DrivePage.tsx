@@ -14,8 +14,10 @@ import {
 } from '@/app/services/helpers/toastMessages';
 import AppButton from '@/content/components/controls/appButton/AppButton';
 import AppSvg from '@/content/components/elements/AppSvg';
+import { useTranslation } from 'react-i18next';
 
 const DrivePage: React.FC<ISettingsPageProps> = ({ imagePath }) => {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const user = useSelector((state: RootStateOrAny) => state.auth.user);
   const driveUser: DriveUser = useSelector(
@@ -61,10 +63,10 @@ const DrivePage: React.FC<ISettingsPageProps> = ({ imagePath }) => {
       setLoading(false);
       setIsDisconnect(false);
       removeDriveUser();
-      infoMessage('Successfully disconnected from Google Drive account.');
+      infoMessage(t('toasts.googleDriveDisconnected'));
     } catch (err) {
       setLoading(false);
-      errorMessage('Something went wrong, please try again');
+      errorMessage(t('toasts.somethingWentWrong'));
     }
   }, [user]);
 
@@ -77,7 +79,7 @@ const DrivePage: React.FC<ISettingsPageProps> = ({ imagePath }) => {
             path="images/panel/settings/google-icon.svg"
             size="22px"
           />
-          Google Drive Integration
+         {t('page.integrations.googleDrive.title')}
         </div>
       </h1>
 
@@ -85,7 +87,7 @@ const DrivePage: React.FC<ISettingsPageProps> = ({ imagePath }) => {
         <>
           <h2 className="tw-max-w-full tw-text-center">
             <div className="tw-flex tw-flex-col tw-gap-2 tw-justify-center">
-              <div className="tw-mr-2">Connected to: </div>
+              <div className="tw-mr-2">{t('page.integrations.connectedTo')}</div>
               <div className="tw-flex">
                 <span className="tw-text-primary-purple tw-font-bold">
                   {driveUser.email}
@@ -100,19 +102,18 @@ const DrivePage: React.FC<ISettingsPageProps> = ({ imagePath }) => {
               className={styles.disconnectBtn}
               onClick={() => setIsDisconnect(true)}
             >
-              Disconnect from Google Drive
+             {t('page.integrations.googleDrive.disconnectGoogleDrive')}
             </AppButton>
           </div>
         </>
       ) : (
         <>
           <p className={styles.description}>
-            You can connect your Google Drive account to save screenshots and
-            videos captured by Rec.
+           {t('page.integrations.googleDrive.description')}
           </p>
           <div className="tw-w-90p">
             <AppButton full onClick={connectToAccount}>
-              Continue with Google Drive
+             {t('page.integrations.googleDrive.buttonText')}
             </AppButton>
           </div>
         </>
@@ -120,8 +121,10 @@ const DrivePage: React.FC<ISettingsPageProps> = ({ imagePath }) => {
 
       {!!isDisconnect && (
         <DisconnectServiceModal
-          title="Disconnect your Dropbox account?"
-          subTitle="Are you sure you want to disable Dropbox integration? By disconnecting you won't be able to share your screenshots and videos."
+          title={t('page.integrations.googleDrive.disconnectErrorTitle')}
+          subTitle={t(
+            'page.integrations.googleDrive.disconnectErrorDescription',
+          )}
           loading={loading}
           onOk={handleDriveSignOut}
           onCancel={() => setIsDisconnect(false)}

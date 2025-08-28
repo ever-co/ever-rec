@@ -51,7 +51,7 @@ interface FolderIconProps {
   size: string;
 }
 
-const FolderIcon: FC<FolderIconProps> = ({ path, bgColor, size }) => {
+export const FolderIcon: FC<FolderIconProps> = ({ path, bgColor, size }) => {
   return (
     <div className={styles.folderIconWrapper}>
       <AppSvg path={path} bgColor={bgColor} size={size} />

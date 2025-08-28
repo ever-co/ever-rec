@@ -28,7 +28,7 @@ jobs:
               uses: docker/build-push-action@v5
               with:
                   context: .
-                  file: ./.deploy/portal/Dockerfile
+                  file: ./.deploy/api/Dockerfile
                   load: true
                   tags: |
                       ghcr.io/ever-co/ever-rec-api:latest
@@ -38,17 +38,6 @@ jobs:
                   cache-to: type=inline
                   build-args: |
                       NODE_ENV=production
-                      FIREBASE_API_KEY=${{ secrets.FIREBASE_API_KEY }}
-                      FIREBASE_AUTH_DOMAIN=${{ secrets.FIREBASE_AUTH_DOMAIN }}
-                      FIREBASE_DATABASE_URL=${{ secrets.FIREBASE_DATABASE_URL }}
-                      FIREBASE_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }}
-                      FIREBASE_STORAGE_BUCKET=${{ secrets.FIREBASE_STORAGE_BUCKET }}
-                      FIREBASE_MESSAGING_SENDER_ID=${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}
-                      FIREBASE_APP_ID=${{ secrets.FIREBASE_APP_ID }}
-                      FIREBASE_MEASUREMENT_ID=${{ secrets.FIREBASE_MEASUREMENT_ID }}
-                      # FIREBASE ADMIN
-                      FIREBASE_ADMIN_PRIVATE_KEY=${{ secrets.FIREBASE_ADMIN_PRIVATE_KEY }}
-                      FIREBASE_ADMIN_CLIENT_EMAIL=${{ secrets.FIREBASE_ADMIN_CLIENT_EMAIL }}
 
             - name: Login to DockerHub
               uses: docker/login-action@v3

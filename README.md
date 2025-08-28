@@ -8,13 +8,35 @@
 
 [Ever® Rec™](https://rec.so) - Screen Capture, Screen Recording, Images & Video Sharing Platform.
 
-**NOTE: Platform currently is in active development stage / WIP, please use with caution!**
+**NOTE: Platform is currently in active development stage / WIP, please use with caution!**
 
-## ✨ Features
+Ever® Rec™ is a powerful, all-in-one platform for effortlessly capturing, annotating, and sharing screen, webcam, and microphone recordings.
+Available as a standalone web app, Chrome extension, or desktop application, it adapts to your workflow, wherever you work.
 
--   Screen Capture
--   Screen Recording
--   Images / Videos Storage and Sharing
+The desktop version goes even further by converting continuous screenshots into smooth, high-quality videos, making it ideal for creating tutorials, recording gameplay, tracking workflows, and more.
+
+Designed to run discreetly in the background, Ever® Rec™ lets you stay focused on what matters while it handles recording with speed and simplicity.
+
+## ✨ Platform Features Overview
+
+-   **Web-based Platform** (React/NextJs)
+-   **Chrome Extension**
+-   **Desktop App** (Electron)
+-   **Screen Capture** / **Screen Recording**
+-   **Mic Capture** / **Webcam Capture**
+-   **Images** / **Videos** **Storage**, **Annotations** and **Sharing**
+-   **Secure Video Upload**: Enables users to directly upload the generated videos to an S3 bucket for secure storage and easy sharing.
+
+## ✨ Desktop Application Features
+
+-   **Continuous Screen Capture**: automatically captures high-resolution screenshots at user-defined intervals, ensuring every critical moment is preserved.
+-   **Video Compilation**: converts sequences of screenshots into smooth, high-quality video files with just a few clicks.
+-   **Customizable Settings**:
+   - Configure capture intervals to suit your workflow (e.g., every second, every minute).
+   - Select video resolutions (e.g., 720p, 1080p) and output formats.
+-   **Resource Efficiency**: Optimized for minimal impact on system performance and resource usage, ensuring smooth operation even during intensive tasks.
+-   **Intuitive Interface**: Offers a clean and user-friendly interface for starting, stopping, and configuring screen capture sessions.
+-   **Cross-Platform Compatibility**: Fully compatible with Windows, macOS, and Linux environments.
 
 ## 📑 Table of Contents
 
@@ -49,7 +71,9 @@ TODO
 
 ## 🔗 Links
 
--   **<https://ever.co>** - get more information about our company products.
+- **<https://rec.so>** - official website
+- **<https://app.rec.so>** - SaaS Platform (WIP)
+- **<https://ever.co>** - get more information about our company products.
 
 ## 📊 Activity
 
@@ -81,6 +105,11 @@ Before you begin, ensure you have the following installed:
     -   [SASS](https://sass-lang.com)
     -   [Ant Design](https://github.com/ant-design/ant-design)
 
+-   **Desktop Application:**
+
+    - Angular
+    - Electron
+     
 -   **Development Tools:**
 
     -   [Turborepo](https://github.com/vercel/turborepo) (Monorepo Management)
@@ -96,15 +125,92 @@ ever-rec/
 ├── apps/
 │   ├── api/          # API Server (NestJS)
 │   ├── portal/       # Web UI Portal
+│   ├── desktop/      # Desktop Application
 │   └── extensions/   # Browser Extensions Portal
 ```
 
 ### Desktop App
 
-Our Desktop App is currently **not** released as open-source. The private repository is available at: <https://github.com/ever-co/ever-rec-desktop>.  
-We are considering a future release under the GPLv3 license.
+#### Usage
 
-## Getting Started
+1. Start Recording
+
+- Launch the application and press the **Start Capturing** button to begin screen recording.
+- Screenshots will be captured continuously at the configured intervals.
+
+2. Stop Recording
+
+- Press the **Stop Capturing** button to end the recording session.
+- The application will automatically compile the captured screenshots into a video file.
+
+3. Configure Settings
+
+- Access the settings menu to adjust the capture interval (e.g., 1 second, 10 seconds).
+- Select the desired video resolution (e.g., 720p, 1080p).
+- Configure S3 bucket details for direct video upload.
+
+#### Development
+
+*Prerequisites*
+
+- Ensure **Node.js** and **npm** are installed on your system.
+- Confirm that your development environment supports **NX** for build processes.
+
+*Build Commands*
+
+1. Install dependencies:
+
+   ```bash
+   yarn install
+   ```
+
+2. Build the project:
+
+   ```bash
+   yarn run build
+   ```
+
+3. Create a desktop application build:
+
+   ```bash
+   yarn run make
+   ```
+
+*Publishing to a Private NPM Registry*
+
+Step 1: Configure npm
+
+1. Set npm to use your private registry:
+
+   ```bash
+   npm set registry https://your-private-registry.com
+   npm adduser --registry https://your-private-registry.com
+   npm set scope=@your-org
+   ```
+
+2. Provide your credentials (username, password, email).
+
+Step 2: Publish a Package
+
+1. Publish an individual package:
+
+   ```bash
+   nx run lib-name:publish
+   ```
+
+2. Verify the package appears in your private registry.
+
+Step 3: Publish All Packages (Optional)
+
+1. Publish all packages or affected libraries:
+
+   ```bash
+   yarn run publish:all or yarn run publish:affected:libraries
+   ```
+
+2. Verify all packages are listed in your private registry.
+
+## Platform Getting Started
 
 ### Development Environment Setup
 
@@ -411,3 +517,7 @@ You can also view a full list of our [contributors tracked by Github](https://gi
 ## ©️ Copyright
 
 #### Copyright © 2024-present, Ever Co. LTD. All rights reserved
+
+---
+
+Enjoy effortless recording with Ever® Rec™! 🎥

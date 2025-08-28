@@ -5,6 +5,7 @@ import { IUser, IUserShort } from 'app/interfaces/IUserData';
 import styles from './UserShortInfo.module.scss';
 import AppSvg from '../../../../elements/AppSvg';
 import Link from 'next/link';
+import { useTranslation } from 'react-i18next';
 
 interface IUserShortInfoProps {
   user: IUser | IUserShort;
@@ -25,6 +26,7 @@ const UserShortInfo: React.FC<IUserShortInfoProps> = ({
   publicPage,
   disableGoToProfile = false,
 }) => {
+  const { t } = useTranslation();
   return (
     <div className="tw-flex tw-items-center tw-h-full tw-max-w-100p">
       <Link
@@ -82,7 +84,7 @@ const UserShortInfo: React.FC<IUserShortInfoProps> = ({
             title={user?.displayName}
             className={classNames(fullNameClasses, styles.userName)}
           >
-            {user?.displayName || 'User'}
+            {user?.displayName || t('common.user')}
           </Link>
 
           <div className={classNames(styles.emailStyle, emailClasses)}>

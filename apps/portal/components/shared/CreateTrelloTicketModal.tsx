@@ -16,6 +16,7 @@ import AppTextArea from 'components/controls/AppTextArea';
 import AppButton from 'components/controls/AppButton';
 import AppSpinner from 'components/containers/appSpinner/AppSpinner';
 import AppSpinnerLocal from 'components/containers/appSpinnerLocal/AppSpinnerLocal';
+import { useTranslation } from 'react-i18next';
 
 interface ICreateTrelloTicketModalProps {
   user: any;
@@ -30,6 +31,7 @@ const CreateTrelloTicketModal: React.FC<ICreateTrelloTicketModalProps> = ({
   type = 'image',
   onCancel,
 }) => {
+  const { t } = useTranslation();
   const [boards, setBoards] = useState<any[] | null>(null);
   const [issueList, setIssueList] = useState<any[]>([]);
   const [selectedBoard, setSelectedBoard] = useState<string | null>(null);
@@ -62,7 +64,7 @@ const CreateTrelloTicketModal: React.FC<ICreateTrelloTicketModalProps> = ({
         selectedItem.item.dbData?.streamData &&
         selectedItem.item.dbData.streamData.downloadUrl == ''
       ) {
-        infoMessage('You will be able to upload video shortly...');
+        infoMessage(t('toasts.uploadingVideo'));
         return;
       }
 
@@ -79,7 +81,7 @@ const CreateTrelloTicketModal: React.FC<ICreateTrelloTicketModalProps> = ({
         infoMessage(res.message);
         if (res.data && res.data.url) {
           navigator.clipboard.writeText(res.data.url);
-          successMessage('Trello card link Copied to clipboard');
+          successMessage(t('toasts.uploadingVideo'));
         }
 
         onCancel();
@@ -134,14 +136,14 @@ const CreateTrelloTicketModal: React.FC<ICreateTrelloTicketModalProps> = ({
       }
     >
       <h2 className="tw-mb-4 tw-text-2xl tw-font-semibold">
-        Create Trello card with selected attachment
+        {t('modals.createTrello')}{' '}
       </h2>
 
-      <label className="tw-mb-1">Select board: *</label>
+      <label className="tw-mb-1">{t('modals.selectBoard')}</label>
       <Select
         value={selectedBoard}
         size="large"
-        placeholder="Please select an option"
+        placeholder={t('modals.selectAOption')}
         style={{ marginBottom: '1rem' }}
         className="tw-w-full tw-bg-white tw-rounded"
         notFoundContent={
@@ -171,11 +173,11 @@ const CreateTrelloTicketModal: React.FC<ICreateTrelloTicketModalProps> = ({
           ))}
       </Select>
 
-      <label>Select issue type: *</label>
+      <label>{t('modals.selectIssueType')}</label>
       <Select
         value={selectedIssueType}
         size="large"
-        placeholder="Please select an option"
+        placeholder={t('modals.selectAOption')}
         style={{ marginBottom: '1rem' }}
         className="tw-w-full tw-bg-white tw-rounded"
         onChange={(value) => {
@@ -195,7 +197,7 @@ const CreateTrelloTicketModal: React.FC<ICreateTrelloTicketModalProps> = ({
 
       <AppInput
         value={title}
-        placeholder="Title/Summary *"
+        placeholder={t('modals.titleSummary')}
         className="tw-w-full"
         inputClass="tw-bg-transparent tw-border-mid-grey tw-placeholder-black"
         onChange={(e) => setTitle(e.value)}
@@ -204,7 +206,7 @@ const CreateTrelloTicketModal: React.FC<ICreateTrelloTicketModalProps> = ({
       <AppTextArea
         value={description}
         canResize={false}
-        placeholder="Card description"
+        placeholder={t('modals.cardDescription')}
         className="tw-mt-6 tw-w-full"
         inputClass="scroll-div tw-outline-none tw-bg-transparent tw-border-mid-grey tw-placeholder-black"
         onChange={(e) => setDescription(e.value)}
@@ -232,12 +234,15 @@ const Footer: React.FC<IFooterProps> = ({
   handleOnSubmit,
   onCancel,
 }) => {
+  const { t } = useTranslation();
   return (
     <div className="tw-flex tw-justify-between tw-items-center tw-mt-8">
       {hideBoardsText ? (
         <div></div>
       ) : (
-        <p className="tw-text-sm tw-text-center">No Trello boards found.</p>
+        <p className="tw-text-sm tw-text-center">
+          {t('modals.noTrelloBoards')}
+        </p>
       )}
 
       <div className="tw-flex">
@@ -247,7 +252,7 @@ const Footer: React.FC<IFooterProps> = ({
           className="tw-px-8 tw-mx-4 tw-pb-1 tw-pt-1"
           onClick={onCancel}
         >
-          Cancel
+          {t('common.cancel')}
         </AppButton>
 
         <AppButton
@@ -255,7 +260,7 @@ const Footer: React.FC<IFooterProps> = ({
           disabled={projectLoading || !isFormValid}
           onClick={handleOnSubmit}
         >
-          Create
+          {t('common.create')}
         </AppButton>
       </div>
     </div>

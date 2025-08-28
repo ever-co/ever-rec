@@ -24,7 +24,7 @@ import useGetExplorerDataListener from '@/content/panel/screens/imagesScreen/pag
 import PanelAC from '@/app/store/panel/actions/PanelAC';
 import { PlaybackStatusEnum } from '@/app/enums/StreamingServicesEnums';
 import { dropboxFileUpload, saveSegmentEvent } from '@/app/services/general';
-import { errorHandler } from '@/app/services/helpers/errors';
+import { useErrorHandler } from '@/app/services/helpers/errors';
 import { IDriveDbData } from '@/app/interfaces/IDriveDbData';
 import browser from '@/app/utilities/browser';
 import { deleteDriveItem, driveUploadFile } from '@/app/services/google/drive';
@@ -45,11 +45,12 @@ import DeleteCloudFileModal from '@/content/components/shared/DeleteCloudFileMod
 import { IWorkspace, IWorkspaceVideo } from '@/app/interfaces/IWorkspace';
 import { IStreamState } from '@/app/interfaces/IStreamState';
 import DeleteItemModal from '../imagesScreen/pages/shared/DeleteItemModal';
-import { workspaceVideoDelete } from '@/content/utilities/misc/workspaceFunctions';
+import { useWorkspaceVideoDelete } from '@/content/utilities/misc/workspaceFunctions';
 import WorkspaceItemsFolderModal from '../imagesScreen/pages/workspace/WorkspaceItemsFolderModal';
 import useGenerateShareLink from '@/content/utilities/hooks/useGenerateShareLink';
 import useVideoChapters from '../../hooks/useVideoChapters';
 import VideoChapters from './chapters/VideoChapters/VideoChapters';
+import { Trans, useTranslation } from 'react-i18next';
 
 interface IEmailModal {
   state: boolean;
@@ -81,7 +82,10 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
   updateChaptersEnabled,
   setLoaderState,
 }) => {
+  const { errorHandler } = useErrorHandler();
+  const { t } = useTranslation();
   const dispatch = useDispatch();
+  const { workspaceVideoDelete } = useWorkspaceVideoDelete();
   const navigate = useNavigate();
   const driveUser: DriveUser | null = useSelector(
     (state: RootStateOrAny) => state.auth.driveUser,
@@ -163,7 +167,7 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
     setVideo && setVideo(updatedVideo);
   }
 
-  const folderName = video?.dbData?.folderData?.name || 'My Videos';
+  const folderName = video?.dbData?.folderData?.name || t('common.myVideos');
   const currentlySavedIn = useMemo(
     () =>
       workspace
@@ -199,7 +203,7 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
 
     video && (await moveRestoreVideoTrash(video));
 
-    infoMessage('The video has been moved to the trash');
+    infoMessage(t('toasts.videoMovedToTrash'));
   };
 
   const closeDeletionModalHandler = () => {
@@ -264,7 +268,7 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
       const canDownload =
         streamState?.downloadStatus === PlaybackStatusEnum.READY;
       if (!canDownload) {
-        infoMessage('You will be able to upload to drive shortly...');
+        infoMessage(t('toasts.uploading'));
         return;
       }
       res = await fetch(video.dbData.streamData.downloadUrl);
@@ -283,7 +287,7 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
       if (data) {
         updateExplorerDataDrive(data.drivesData);
         setDriveVideoId(data.fileId);
-        successMessage('video uploaded successfully.');
+        successMessage(t('toasts.videoUploadedSuccess'));
       }
       setDriveOperationLoading(false);
     } else {
@@ -296,11 +300,9 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
       );
       if (response.status == ResStatusEnum.success) {
         setDropBoxImageId(response.data);
-        successMessage('Image uploaded successfully.');
+        successMessage(t('toasts.imageUploadedSuccessfully'));
       } else {
-        errorMessage(
-          response.message || 'Something went wrong, Please try again later',
-        );
+        errorMessage(response.message || t('toasts.problemTryAgain'));
       }
       setDropboxOperationLoading(false);
     }
@@ -319,7 +321,7 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
         updateExplorerDataDrive(response.data);
         setDriveVideoId(null);
         setDriveOperationLoading(false);
-        successMessage('File deleted from Drive');
+        successMessage(t('toasts.fileDeletedFromDrive'));
       }
     }
   };
@@ -335,7 +337,7 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
       } else {
         setDropBoxImageId('');
         setDropboxOperationLoading(false);
-        successMessage('File deleted from Dropbox');
+        successMessage(t('toasts.fileDeletedFromDropbox'));
       }
     }
   };
@@ -365,13 +367,13 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
   };
 
   const localSave = async () => {
-    if (!video) return infoMessage('Your download will be ready shortly...');
+    if (!video) return infoMessage(t('toasts.downloadReady'));
 
     if (streamState?.downloadStatus === PlaybackStatusEnum.PREPARING)
-      return infoMessage('Your download will be ready shortly...');
+      return infoMessage(t('toasts.downloadReady'));
 
     const downloaded = await downloadVideo(video);
-    if (downloaded) successMessage('Video downloaded');
+    if (downloaded) successMessage(t('toasts.videoDownloaded'));
   };
 
   const openEmailModal = (video: IEditorVideo) => {
@@ -395,7 +397,7 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
         onClick={() => openDeleteModal(video)}
         key="menu_item_delete"
       >
-        <span className="tw-text-xs">Delete Video</span>
+        <span className="tw-text-xs">{t('unique.deleteVideo')}</span>
       </Menu.Item>
       <Menu.Item
         icon={<AppSvg size="18px" path="images/panel/common/collection.svg" />}
@@ -403,7 +405,11 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
         key="menu_item_chapters_enabled"
       >
         <span className="tw-text-xs">
-          {chaptersEnabled ? 'Disable' : 'Enable'} Chapters
+          {t('page.video.actionsSection.chaptersToggle', {
+            action: chaptersEnabled
+              ? t('page.video.actionsSection.disable')
+              : t('page.video.actionsSection.enable'),
+          })}{' '}
         </span>
       </Menu.Item>
     </Menu>
@@ -457,7 +463,7 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
                   size={25 + 'px'}
                 />
               </div>
-              <div>Manage</div>
+              <div>{t('common.manage')}</div>
             </Tab>
             <Tab className={tabClassesTw}>
               <div className={styles.iconContainer}>
@@ -468,7 +474,7 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
                 />
               </div>
               <div className="tw-flex tw-gap-1">
-                <span>Chapters</span>
+                <span>{t('page.video.actionsSection.chapters')}</span>
                 {hasChanges && (
                   <AppSvg
                     path="images/panel/common/circle-solid.svg"
@@ -485,21 +491,26 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
                   size={25 + 'px'}
                 />
               </div>
-              <div>Comments</div>
+              <div>{t('common.comments')}</div>
             </Tab>
           </TabList>
           <TabPanel>
             <ImageActionsCard className="tw-rounded-t-none">
               <div>
-                Currently saved in
-                <strong className="tw-ml-1.5">{currentlySavedIn}</strong>
+                <Trans
+                  values={{ currentlySavedIn: currentlySavedIn }}
+                  i18nKey="page.image.currentlySavedInOnly"
+                  components={{
+                    strong: <strong></strong>,
+                  }}
+                />
               </div>
               <div
                 className={styles.moveToFolder}
                 onClick={() => setShowFolderModal(true)}
               >
                 <div className={styles.moveToFolderInner}>
-                  <div>Move to folder</div>
+                  <div>{t('page.image.moveToFolder')}</div>
                   <AppSvg
                     size="24px"
                     path="images/panel/common/arrow-right.svg"
@@ -511,7 +522,7 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
             <ImageActionsCard>
               <div className="tw-grid tw-gap-4 tw-grid-cols-3 tw-justify-items-center across-btns:tw-gap-1 across-btns:tw-grid-rows-1 across-btns:tw-place-items-center">
                 <ImageActionItem
-                  title="Download"
+                  title={t('common.download')}
                   onClick={localSave}
                   icon={IoMdDownload}
                   outerClassName={styles.containerVideoAction}
@@ -519,7 +530,7 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
                   iconColor="#5B4DBE"
                 />
                 <ImageActionItem
-                  title="Email"
+                  title={t('page.image.email')}
                   icon={BiMailSend}
                   onClick={() => openEmailModal(video)}
                   outerClassName={styles.containerVideoAction}
@@ -533,7 +544,7 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
                   placement="bottomLeft"
                 >
                   <ImageActionItem
-                    title="More"
+                    title={t('common.more')}
                     icon={FiMoreHorizontal}
                     outerClassName={styles.containerVideoAction}
                     circleClassName={styles.innerCircle}
@@ -548,14 +559,16 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
                 <div>
                   <div className="tw-flex tw-items-center tw-justify-between tw-mb-2">
                     <div className="tw-font-semibold tw-text-sm tw-text-center">
-                      Shareable link:
+                      {t('page.image.shareableLink')}
                     </div>
                     <AppButton
                       onClick={removeSharedLink}
                       bgColor="tw-bg-red"
                       className="tw-pt-0 tw-pb-0 tw-pl-2 tw-pr-2"
                     >
-                      <span className="tw-text-xs tw-text-white">Remove</span>
+                      <span className="tw-text-xs tw-text-white">
+                        {t('page.image.remove')}
+                      </span>
                     </AppButton>
                   </div>
 
@@ -579,7 +592,7 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
                           size={25 + 'px'}
                           className="tw-mr-2"
                         />
-                        Copy
+                        {t('page.image.copy')}
                       </>
                     )}
                   </AppButton>
@@ -587,7 +600,7 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
               ) : (
                 <div>
                   <div className="tw-font-semibold tw-text-sm tw-mb-2 tw-text-center">
-                    Share Your Video
+                    {t('page.image.shareYourVideo')}
                   </div>
                   <AppButton
                     onClick={generateShareableLink}
@@ -599,7 +612,7 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
                         <AppSpinnerLocal />
                       </div>
                     ) : (
-                      'Generate Shareable Link'
+                      t('page.image.generateShareableLink')
                     )}
                   </AppButton>
                 </div>
@@ -607,7 +620,7 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
             </ImageActionsCard>
             <ImageActionsCard>
               <div className="tw-font-semibold tw-text-sm tw-mb-2 tw-text-center">
-                Save to Cloud
+                {t('page.image.saveToCloud')}
               </div>
               <div className={styles.cloudProvidersWrapper}>
                 <div
@@ -636,7 +649,7 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
                       </div>
                       <div className={styles.providerText}>
                         <div className={styles.openVideoText}>
-                          Processing...
+                          {t('page.image.processing')}{' '}
                         </div>
                       </div>
                     </AppButton>
@@ -659,7 +672,7 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
                         <div className={styles.providerText}>
                           {driveVideoId && driveUser ? (
                             <div className={styles.openVideoText}>
-                              Open video
+                              {t('page.image.openVideo')}
                             </div>
                           ) : (
                             driveUser?.email || 'Google Drive'
@@ -710,7 +723,7 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
                         </div>
                         <div className={styles.providerText}>
                           <div className={styles.openImageText}>
-                            Processing...
+                            {t('page.image.processing')}
                           </div>
                         </div>
                       </div>
@@ -722,7 +735,7 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
                         />
                         <div className={styles.providerText}>
                           {dropBoxImageId
-                            ? 'Open image'
+                            ? t('page.image.openImage')
                             : user?.dropbox?.email || 'Dropbox'}
                         </div>
                       </div>

@@ -50,7 +50,7 @@ import {
   IWorkspaceVideo,
 } from 'app/interfaces/IWorkspace';
 import { errorHandler } from 'app/services/helpers/errors';
-import { workspaceVideoDelete } from 'misc/workspaceFunctions';
+import { useWorkspaceVideoDelete } from 'misc/workspaceFunctions';
 import { IUserShort } from 'app/interfaces/IUserData';
 import AppContainer from 'components/containers/appContainer/AppContainer';
 import AppButton from 'components/controls/AppButton';
@@ -63,6 +63,7 @@ import RenameItemModal from 'components/shared/RenameItemModal';
 import { updateItemDataWorkspace } from 'app/services/workspace';
 import ItemsFolderModal from 'components/pagesComponents/_imagesScreen/components/itemsFolderModal/ItemsFolderModal';
 import WorkspaceItemsFolderModal from 'components/pagesComponents/_imagesScreen/components/itemsFolderModal/WorkspaceItemsFolderModal';
+import { useTranslation } from 'react-i18next';
 
 interface IProps {
   ip?: string;
@@ -77,6 +78,8 @@ const SingleVideoPage: FC<IProps> = ({
   isWorkspace = false,
   activeWorkspace,
 }) => {
+  const { workspaceVideoDelete } = useWorkspaceVideoDelete();
+  const { t } = useTranslation();
   const addedUniqueView = useRef(false);
   const router = useRouter();
   const dispatch = useDispatch();
@@ -301,7 +304,7 @@ const SingleVideoPage: FC<IProps> = ({
   ) => {
     if (!video || !video?.dbData) return;
 
-    const id = loadingMessage('Updating video title...');
+    const id = loadingMessage(t('toasts.updatingVideoTitle'));
 
     const updatedDbData = { ...video.dbData, title: newTitle };
 
@@ -317,7 +320,7 @@ const SingleVideoPage: FC<IProps> = ({
     }
 
     if (!data)
-      return updateMessage(id, 'Could not update the video title.', 'error');
+      return updateMessage(id, t('toasts.couldNotUpdateVideoTitle'), 'error');
 
     const newVideo = { ...video, dbData: data.dbData };
     setVideo(newVideo);
@@ -325,22 +328,21 @@ const SingleVideoPage: FC<IProps> = ({
     !isWorkspace &&
       dispatch(PanelAC.updateExplorerVideoData({ video: newVideo }));
 
-    updateMessage(id, 'Successfully updated the video title.', 'success');
+    updateMessage(id, t('toasts.videoTitleUpdatedSuccess'), 'success');
   };
 
   const localSave = async () => {
     if (!video) return;
     if (!user) {
-      showLogInNotification &&
-        infoMessage('Please log in to download this video.');
+      showLogInNotification && infoMessage(t('toasts.pleaseLoginToDownload'));
       setShowLogInNotification(false);
       return;
     }
 
     if (streamState?.downloadStatus === PlaybackStatusEnum.PREPARING)
-      return infoMessage('Your download will be ready shortly...');
+      return infoMessage(t('toasts.downloadReady'));
 
-    const id = loadingMessage('Downloading video...');
+    const id = loadingMessage(t('toasts.downloadingVideo'));
 
     setDownloadingVideo(true);
 
@@ -348,14 +350,14 @@ const SingleVideoPage: FC<IProps> = ({
 
     setDownloadingVideo(false);
 
-    if (downloaded) updateMessage(id, 'Video downloaded!', 'success');
-    else updateMessage(id, 'Video could not be downloaded!', 'error');
+    if (downloaded) updateMessage(id, t('toasts.videoDownloaded'), 'success');
+    else updateMessage(id, t('toasts.videoCouldNotBeDownloaded'), 'error');
   };
 
   const onItemLike = async () => {
     if (!video) return;
     if (!user) {
-      showLogInNotification && infoMessage('Please log in to like this video.');
+      showLogInNotification && infoMessage(t('toasts.pleaseLoginToLike'));
       setShowLogInNotification(false);
       return;
     }
@@ -382,12 +384,10 @@ const SingleVideoPage: FC<IProps> = ({
       const endPath = router.asPath;
       const generatedSharedLink = `${process.env.NEXT_PUBLIC_WEBSITE_URL}${endPath}`;
       await window.navigator.clipboard.writeText(generatedSharedLink);
-      infoMessage('Link copied.');
+      infoMessage(t('toasts.linkCopied'));
     } catch (e) {
       console.log(e);
-      errorMessage(
-        'Something went wrong copying the shared link. Please copy it manually from the browser URL.',
-      );
+      errorMessage(t('toasts.couldNotCopyLink'));
     }
   };
 
@@ -398,7 +398,7 @@ const SingleVideoPage: FC<IProps> = ({
     if (!video) return;
 
     setShowDeleteModal(false);
-    const id = loadingMessage('Moving video to trash...');
+    const id = loadingMessage(t('toasts.movingVideoToTrash'));
 
     if (workspace) {
       await workspaceVideoDelete(video, workspace);
@@ -407,11 +407,7 @@ const SingleVideoPage: FC<IProps> = ({
         preRoutes.media + panelRoutes.workspace + `/${workspace?.id}`,
       );
 
-      updateMessage(
-        id,
-        'Video deleted successfully. Redirecting to workspace...',
-        'success',
-      );
+      updateMessage(id, t('toasts.videoDeletedAndRedirect'), 'success');
 
       return;
     }
@@ -420,11 +416,7 @@ const SingleVideoPage: FC<IProps> = ({
 
     router.push(preRoutes.media + panelRoutes.videos);
 
-    updateMessage(
-      id,
-      'Video moved to trash successfully. Redirecting to My Videos...',
-      'success',
-    );
+    updateMessage(id, t('toasts.videoMovedToTrashAndRedirecting'), 'success');
   };
 
   const videoDelete = async (video: IEditorVideo) => {
@@ -464,7 +456,7 @@ const SingleVideoPage: FC<IProps> = ({
           {!hideChapters && (
             <div className={styles.chapters}>
               <div className={styles.chaptersHeading}>
-                <span>Chapters</span>
+                <span>{t('page.video.chapters')}</span>
               </div>
 
               <VideoChapters
@@ -555,9 +547,9 @@ const SingleVideoPage: FC<IProps> = ({
       <RenameItemModal
         visible={showRenameModal}
         title={video?.dbData?.title || ''}
-        modalHeading="Edit title"
-        inputLabel="Current item title:"
-        inputPlaceholder="Edit a new item title"
+        modalHeading={t('page.video.actionsSection.editTitle')}
+        inputLabel={t('page.video.currentItemTitle')}
+        inputPlaceholder={t('page.video.editANewTitle')}
         onOk={(title) => updateTitle(title, video as any, isWorkspace)}
         onCancel={() => setShowRenameModal(false)}
       />
@@ -607,6 +599,7 @@ export default SingleVideoPage;
 
 const VideoNotFoundPage = () => {
   const router = useRouter();
+  const { t } = useTranslation();
 
   return (
     <AppContainer>
@@ -618,10 +611,10 @@ const VideoNotFoundPage = () => {
           <div className="tw-flex tw-justify-center">
             <div>
               <div className="tw-font-bold tw-text-3xl tw-text-center tw-mt-4">
-                Whoo...oops!
+                {t('page.video.oops')}
               </div>
               <div className="tw-text-lg tw-text-center tw-mt-2">
-                You don’t have the access to this item anymore.
+                {t('page.video.noAccess')}
               </div>
 
               <div>
@@ -631,7 +624,7 @@ const VideoNotFoundPage = () => {
                   }}
                   className="tw-m-auto tw-mt-5 tw-px-10 tw-py-4"
                 >
-                  Back to Portal
+                  {t('page.video.backToPortal')}
                 </AppButton>
               </div>
             </div>

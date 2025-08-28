@@ -1,6 +1,7 @@
 import React, { ReactElement, useState } from 'react';
 import classNames from 'classnames';
 import { Tooltip } from 'antd';
+import { useTranslation } from 'react-i18next';
 
 interface ICaptureHorizontalBtnProps {
   title: string;
@@ -18,6 +19,7 @@ const CaptureHorizontalBtn: React.FC<ICaptureHorizontalBtnProps> = ({
   onClick,
 }) => {
   const [hover, setHover] = useState('');
+  const { t } = useTranslation();
 
   const clickHandler = () => {
     !disabled && onClick();
@@ -26,10 +28,7 @@ const CaptureHorizontalBtn: React.FC<ICaptureHorizontalBtnProps> = ({
   return (
     <Tooltip
       placement="topLeft"
-      title={
-        disabled &&
-        'This action is not available on this page due to browser restrictions.'
-      }
+      title={disabled && t('ext.errors.browserRestrictions')}
     >
       <div
         className={classNames(

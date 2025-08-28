@@ -2,6 +2,7 @@ import { ChangeEvent, useEffect, useState } from 'react';
 import { Modal } from 'antd';
 import AppSvg from '../../elements/AppSvg';
 import AppButton from '../../controls/AppButton';
+import { useTranslation } from 'react-i18next';
 
 interface IProps {
   visible: boolean;
@@ -18,6 +19,7 @@ const RenameWorkspaceModal: React.FC<IProps> = ({
 }) => {
   const [newName, setNewName] = useState('');
 
+  const { t } = useTranslation();
   useEffect(() => {
     setNewName(workspaceName);
   }, [workspaceName]);
@@ -41,19 +43,19 @@ const RenameWorkspaceModal: React.FC<IProps> = ({
             onClick={() => onOk(newName)}
             className="tw-px-8 tw-text-white tw-pb-1 tw-pt-1"
           >
-            Confirm
+            {t('workspace.confirm')}
           </AppButton>
         </div>
       }
     >
-      <h2 className="tw-mb-6 tw-text-xl tw-font-bold">Rename Workspace</h2>
-      <p className="tw-pb-0">
-        Name your workspace something that will represent its purpose
-      </p>
+      <h2 className="tw-mb-6 tw-text-xl tw-font-bold">
+        {t('workspace.renameWorkspace')}
+      </h2>
+      <p className="tw-pb-0">{t('workspace.nameYourWorkspaceDescription')}</p>
       <input
         value={newName}
         type="text"
-        placeholder="Enter a workspace name"
+        placeholder={t('workspace.enterAWorkspaceName')}
         style={{
           marginTop: '20px',
           padding: '10px',

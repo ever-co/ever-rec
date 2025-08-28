@@ -7,6 +7,7 @@ import {
   successMessage,
 } from 'app/services/helpers/toastMessages';
 import { IWorkspace } from 'app/interfaces/IWorkspace';
+import { useTranslation } from 'react-i18next';
 
 interface IProps {
   workspace: IWorkspace;
@@ -15,6 +16,7 @@ interface IProps {
 
 const useShareWorkspaceInviteModal = ({ workspace, visible }: IProps) => {
   const dispatch = useDispatch();
+  const { t } = useTranslation();
   const [link, setLink] = useState('');
   const [copied, setCopied] = useState(false);
 
@@ -40,7 +42,7 @@ const useShareWorkspaceInviteModal = ({ workspace, visible }: IProps) => {
 
     const data = await createWorkspaceInviteLink(workspace.id);
 
-    if (!data) return errorMessage('Could not create workspace invite link.');
+    if (!data) return errorMessage(t('hooks.toasts.inviteLinkError'));
 
     const id = data.id;
     const inviteLink = `${process.env.NEXT_PUBLIC_WEBSITE_URL}/workspace/invite/${id}`;
@@ -59,10 +61,10 @@ const useShareWorkspaceInviteModal = ({ workspace, visible }: IProps) => {
       await navigator.clipboard.writeText(link);
 
       setCopied(true);
-      successMessage('Copied!');
+      successMessage(t('toasts.copied'));
     } catch (err) {
       setCopied(false);
-      errorMessage('Could not copy.');
+      errorMessage(t('hooks.toasts.copyError'));
     }
   };
 

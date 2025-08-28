@@ -3,6 +3,7 @@ import * as styles from './CreateNewWorkspaceModal.module.scss';
 import { Modal } from 'antd';
 import AppSvg from '@/content/components/elements/AppSvg';
 import AppButton from '@/content/components/controls/appButton/AppButton';
+import { useTranslation } from 'react-i18next';
 
 interface IProps {
   visible: boolean;
@@ -15,6 +16,7 @@ const CreateNewWorkspaceModal: React.FC<IProps> = ({
   onOk,
   onClose,
 }) => {
+  const { t } = useTranslation();
   const [name, setName] = useState('');
 
   const okHandler = () => {
@@ -48,20 +50,17 @@ const CreateNewWorkspaceModal: React.FC<IProps> = ({
             className={styles.appButton}
             onClick={okHandler}
           >
-            Save
+            {t('common.save')}
           </AppButton>
         </div>
       }
     >
-      <h2 className={styles.mainHeading}>New Workspace Name</h2>
-      <h4 className={styles.subHeading}>
-        Collaboration made easy with a workspace to share images and videos
-        instantly.
-      </h4>
+      <h2 className={styles.mainHeading}>{t('workspace.newWorkspaceName')}</h2>
+      <h4 className={styles.subHeading}>{t('workspace.description')}</h4>
 
       <input
         type="text"
-        placeholder="Enter a workspace name"
+        placeholder={t('workspace.enterAWorkspaceName')}
         className={styles.input}
         onChange={(e: ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
         maxLength={50}

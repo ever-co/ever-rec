@@ -8,21 +8,16 @@ import Logo from '../../../elements/Logo';
 import SidebarMenuItem from '../elements/SidebarMenuItems/SidebarMenuItem';
 import DashboardCard from '../elements/DashboardCard';
 import SidebarWorkspaces from '../SidebarWorkspaces/SidebarWorkspaces';
-import FavFoldersSidebarSection from 'components/elements/FavFoldersSidebarSection/FavFoldersSidebarSection';
 import AppSpinner from 'components/containers/appSpinner/AppSpinner';
 import UploadWorkspaceImageModal from 'components/pagesComponents/_imagesScreen/components/uploadWorkspaceImageModal/UploadWorkspaceImageModal';
 import PanelAC from '../../../../app/store/panel/actions/PanelAC';
 import { getExplorerData } from 'app/services/screenshots';
 import { getExplorerDataVideo } from 'app/services/videos';
 import { panelRoutes, preRoutes } from '../../../_routes';
-import {
-  IMainMenuItem,
-  getWorkspaceSettingsMenuItems,
-  mainMenuItems,
-  settingsMenuItems,
-} from 'misc/menuItems';
+import { IMainMenuItem, useMenuItems } from 'misc/menuItems';
 import useClickOrKeyOutside from 'hooks/useClickOrKeyOutside';
 import { useCreateWorkspace } from 'hooks/useCreateWorkspaceHandler';
+import { useTranslation } from 'react-i18next';
 
 interface IProps {
   isProfilePage?: boolean;
@@ -30,9 +25,12 @@ interface IProps {
 }
 
 const Sidebar: FC<IProps> = ({ isProfilePage, isWorkspaceSettingsPage }) => {
+  const { t } = useTranslation();
   const router = useRouter();
   const dispatch = useDispatch();
   const favFoldersRef = useRef(null);
+  const { mainMenuItems, getWorkspaceSettingsMenuItems, settingsMenuItems } =
+    useMenuItems();
   const explorerData = useSelector(
     (state: RootStateOrAny) => state.panel.explorerData,
   );
@@ -81,47 +79,31 @@ const Sidebar: FC<IProps> = ({ isProfilePage, isWorkspaceSettingsPage }) => {
   };
 
   const isActive = (item: IMainMenuItem) => {
-    if (item.type === 'favFolders' || item.type === 'back') return false;
+    if (item.type === 'back') return false;
 
     return router.asPath.includes(item.route);
   };
+  const handleItemClick = useCallback(
+    (item: any) => {
+      sidebarItemClicked(item);
+    },
+    [router], // Dependency array
+  );
 
-  const renderMenuItems = () => {
-    let menuItems: any[] = [];
+  let menuItems;
 
-    if (isWorkspaceSettingsPage) {
-      const { workspaceId } = router.query;
-      menuItems = getWorkspaceSettingsMenuItems(workspaceId as string);
-    } else if (isProfilePage) {
-      menuItems = [...settingsMenuItems];
-    } else {
-      menuItems = [...mainMenuItems];
-    }
-
-    return menuItems.map((item: any, index: number) => {
-      const sidebarItem = (
-        <SidebarMenuItem
-          key={`menu_item${index}`}
-          icon={item.icon}
-          title={item.title}
-          active={isActive(item)}
-          onClick={() => sidebarItemClicked(item)}
-        />
-      );
-
-      // We don't need to wrap "Favorite Folders" in <Link> component
-      if (item.type === 'favFolders') {
-        return sidebarItem;
-      }
-
-      return (
-        <Link href={item.route} key={`menu_item${index}`}>
-          {sidebarItem}
-        </Link>
-      );
-    });
-  };
-
+  if (isWorkspaceSettingsPage) {
+    const { workspaceId } = router.query;
+    menuItems = getWorkspaceSettingsMenuItems(workspaceId as string);
+  } else if (isProfilePage) {
+    menuItems = [...settingsMenuItems];
+  } else {
+    menuItems = [...mainMenuItems];
+  }
+  const createClickHandler = useCallback(
+    (item: any) => () => handleItemClick(item),
+    [handleItemClick],
+  );
   return (
     <DashboardCard className={classNames(styles.dashboardCard)}>
       <SidebarWorkspaces
@@ -129,7 +111,7 @@ const Sidebar: FC<IProps> = ({ isProfilePage, isWorkspaceSettingsPage }) => {
       />
 
       <div className={styles.sidebarContainer}>
-        <div className={styles.sidebarWrapper}>
+        <div className={`${styles.sidebarWrapper} tw-px-4`}>
           <div className={styles.logoWrapper}>
             <Logo
               className="tw-w-full"
@@ -137,28 +119,46 @@ const Sidebar: FC<IProps> = ({ isProfilePage, isWorkspaceSettingsPage }) => {
             />
           </div>
 
-          <hr className={styles.lineSeparator} />
+          {/* <hr className={styles.lineSeparator} /> */}
 
           {(isProfilePage || isWorkspaceSettingsPage) && (
             <div className={styles.sidebarHeading}>
-              <h1>{isProfilePage ? 'Profile' : 'Administration'}</h1>
+              <h1>
+                {isProfilePage
+                  ? t('sidebar.profile')
+                  : t('sidebar.administration')}
+              </h1>
             </div>
           )}
 
           <div>
-            <div ref={favFoldersRef}>
+            {/* <div ref={favFoldersRef}>
               <FavFoldersSidebarSection
                 visible={showFavoriteFolders}
                 setVisible={setShowFavoriteFolders}
               />
-            </div>
-
+            </div>*/}
             {/* <WhiteboardsButton
               isActive={isActive}
               setFavFoldersVisible={setFavFoldersVisible}
             /> */}
+            <div className="tw-mt-20">
+              {menuItems.map((item: any) => {
+                const handleClick = createClickHandler(item);
+                const key = item.id || item.route; // use unique key if available
 
-            <div>{renderMenuItems()}</div>
+                return (
+                  <Link href={item.route} key={key}>
+                    <SidebarMenuItem
+                      icon={item.icon}
+                      title={item.title}
+                      active={isActive(item)}
+                      onClick={handleClick}
+                    />
+                  </Link>
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>

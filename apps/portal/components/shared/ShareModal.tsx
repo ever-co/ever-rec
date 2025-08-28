@@ -2,6 +2,7 @@ import { FC } from 'react';
 import { Modal } from 'antd';
 import AppButton from 'components/controls/AppButton';
 import AppSvg from 'components/elements/AppSvg';
+import { useTranslation } from 'react-i18next';
 
 interface IShareModalProps {
   link: string;
@@ -18,6 +19,7 @@ const ShareModal: FC<IShareModalProps> = ({
   onCancel,
   onCopyLink,
 }) => {
+  const { t } = useTranslation();
   return (
     <Modal
       open={visible}
@@ -30,13 +32,15 @@ const ShareModal: FC<IShareModalProps> = ({
               size={'24px'}
               className="tw-mr-5px"
             />
-            Copy Link
+            {t('modals.copyLink')}
           </AppButton>
         </div>
       }
     >
-      <h2 className="tw-mb-3 tw-text-2xl tw-font-semibold">Share link</h2>
-      <label>Link to {linkTo}:</label>
+      <h2 className="tw-mb-3 tw-text-2xl tw-font-semibold">
+        {t('modals.shareLink')}
+      </h2>
+      <label>{t('modals.linkTo', { linkTo: linkTo })}</label>
       <p className="tw-border-black tw-border-b tw-py-5px tw-px-2px tw-mt-5px">
         {link}
       </p>

@@ -97,5 +97,11 @@
 			}
 		]
 	},
-	"snyk": true
+	"snyk": true,
+	"pnpm": {
+		"overrides": {
+			"@types/react": "18.2.67",
+			"@types/react-dom": "18.2.23"
+		}
+	}
 }

@@ -14,6 +14,7 @@ import {
 } from 'app/services/helpers/toastMessages';
 import redirect from 'misc/redirect';
 import PasswordEye from 'components/pagesComponents/_signScreen/PasswordEye';
+import { useTranslation } from 'react-i18next';
 
 const defaultInput: IAppControl = {
   value: '',
@@ -32,6 +33,7 @@ const PanelRegister: React.FC = () => {
   const [TOS, setTOS] = useState(false);
   const [valid, setValid] = useState(false);
 
+  const { t } = useTranslation();
   useEffect(() => {
     setValid(
       [email, password, passwordConfirm].every(
@@ -41,12 +43,12 @@ const PanelRegister: React.FC = () => {
   }, [email, password, passwordConfirm, TOS]);
 
   const emailRules: ((v: string) => boolean | string)[] = [
-    requiredRule('Please enter an email'),
-    emailRule('Email is incorrect'),
+    requiredRule(t('page.auth.error.enterEmail')),
+    emailRule(t('page.auth.error.emailCorrect')),
   ];
 
   const passwordRules: ((v: string) => boolean | string)[] = [
-    passwordPatternRule('Minimum eight characters and at least one number'),
+    passwordPatternRule(t('page.auth.error.minimumLength')),
   ];
 
   const usernameChangeHandler = async ({ value }: AppInputType) => {
@@ -64,7 +66,10 @@ const PanelRegister: React.FC = () => {
   const passwordChangeHandler = async ({ value, errors }: AppInputType) => {
     setPasswordConfirm({
       ...passwordConfirm,
-      errors: value !== passwordConfirm.value ? ['Passwords do not match'] : [],
+      errors:
+        value !== passwordConfirm.value
+          ? [t('page.auth.error.passwordNotMatch')]
+          : [],
     });
     setPassword({
       value,
@@ -75,7 +80,8 @@ const PanelRegister: React.FC = () => {
 
   const passwordConfirmChangeHandler = ({ value }: AppInputType) => {
     const errArr: string[] = [];
-    value !== password.value && errArr.push('Passwords do not match');
+    value !== password.value &&
+      errArr.push(t('page.auth.error.passwordNotMatch'));
     setPasswordConfirm({
       value,
       errors: errArr,
@@ -111,7 +117,7 @@ const PanelRegister: React.FC = () => {
       <div className="tw-flex tw-flex-col">
         <AppInput
           value={username}
-          placeholder="Full name"
+          placeholder={t('page.register.fields.fullName')}
           autoComplete="new-password"
           inputClass="tw-placeholder-mid-grey"
           onChange={usernameChangeHandler}
@@ -119,7 +125,7 @@ const PanelRegister: React.FC = () => {
 
         <AppInput
           value={email.value}
-          placeholder="Email Address"
+          placeholder={t('page.auth.common.email')}
           autoComplete="new-password"
           className="tw-mt-2"
           inputClass="tw-placeholder-mid-grey"
@@ -131,7 +137,7 @@ const PanelRegister: React.FC = () => {
         <div className="tw-flex tw-justify-between tw-items-center tw-border-b tw-border-black">
           <AppInput
             value={password.value}
-            placeholder="Password"
+            placeholder={t('page.auth.common.password')}
             autoComplete="new-password"
             className="tw-w-full"
             inputClass="tw-placeholder-mid-grey tw-border-b-0 tw-mt-4"
@@ -152,7 +158,7 @@ const PanelRegister: React.FC = () => {
           <AppInput
             value={passwordConfirm.value}
             type={passwordShown ? 'text' : 'password'}
-            placeholder="Confirm Password"
+            placeholder={t('page.auth.common.confirmPassword')}
             className="tw-w-full tw-mt-4"
             inputClass="tw-placeholder-mid-grey tw-border-b-0 tw-mt-4"
             errors={passwordConfirm.errors}
@@ -172,23 +178,23 @@ const PanelRegister: React.FC = () => {
             onChange={() => setTOS((prevTos) => !prevTos)}
           />
           <p>
-            {'Agree to '}
+            {t('page.register.terms.agree')}
             <a
               className="tw-underline tw-text-primary-purple"
               href="https://rec.com/tos"
               target="_blank"
               rel="noreferrer"
             >
-              Terms & Conditions
+              {t('page.register.terms.terms')}
             </a>
-            {' and '}
+            {t('page.register.terms.and')}
             <a
               className="tw-underline tw-text-primary-purple"
               href="https://rec.com/privacy"
               target="_blank"
               rel="noreferrer"
             >
-              Privacy Policy
+              {t('page.register.terms.privacy')}
             </a>
           </p>
         </div>
@@ -201,12 +207,12 @@ const PanelRegister: React.FC = () => {
             twPadding="tw-p-4"
             onClick={submitHandler}
           >
-            Register
+            {t('page.register.title')}
           </AppButton>
         </div>
 
         <p className="tw-my-8 tw-font-medium tw-text-center">
-          Or continue with
+          {t('page.register.continueOptions.title')}
         </p>
 
         <AppSpinner show={registering} />

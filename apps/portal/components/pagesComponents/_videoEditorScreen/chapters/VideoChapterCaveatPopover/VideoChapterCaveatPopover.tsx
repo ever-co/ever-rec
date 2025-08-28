@@ -7,6 +7,7 @@ import {
   CHAPTER_MIN_REQUIRED_SECONDS,
   CHAPTER_MIN_VIDEO_LENGTH,
 } from 'misc/appConstConfig';
+import { useTranslation } from 'react-i18next';
 
 const s = styles;
 
@@ -42,45 +43,46 @@ const VideoChapterCaveatPopover: FC<IProps> = ({ caveat = 'default' }) => {
 };
 
 const DefaultCaveat = () => {
+  const { t } = useTranslation();
+
   return (
     <div className={s.Caveats}>
-      <h3>Caveats for using chapters:</h3>
+      <h3>{t('page.video.caveatsUsingChapters')}</h3>
       <ul>
-        <li>First chapter starts from 00:00</li>
-        <li>All chapter contents must be filled</li>
+        <li>{t('page.video.firstchapterstarts')}</li>
+        <li>{t('page.video.allchaptercontents')}</li>
         <li>
-          There must be at least <strong>{CHAPTER_MIN_CHAPTERS}</strong>{' '}
-          chapters
+          {t('page.video.mustbeatleast')}{' '}
+          <strong>{CHAPTER_MIN_CHAPTERS}</strong> {t('page.video.chapters')}
         </li>
         <li>
-          The minimum length for a chapter is{' '}
-          <strong>{CHAPTER_MIN_REQUIRED_SECONDS}</strong> seconds
+          {t('page.video.minimumlengthof')}{' '}
+          <strong>{CHAPTER_MIN_REQUIRED_SECONDS}</strong>
+          {t('page.video.seconds')}
         </li>
       </ul>
-      <p className={s.Paragraph}>To add a new chapter move the video progress bar and click on the Add Chapter button.</p>
+      <p className={s.Paragraph}>{t('page.video.addchapterdescription')}</p>
     </div>
   );
 };
 
 const WarningCaveat = () => {
+  const { t } = useTranslation();
   return (
     <div className={s.Caveats}>
-      <p>
-        Your setting for showing chapters is disabled. Your chapters will not
-        show if you share this video. To enable it, please go to More options in
-        Manage tab.
-      </p>
+      <p>{t('page.video.chaptersDisabledDescription')} </p>
     </div>
   );
 };
 
 const ErrorCaveat = () => {
+  const { t } = useTranslation();
   return (
     <div className={s.Caveats}>
       <p>
-        Your video does not meet chapters criteria because it is too short.
-        Minimum required video length is {CHAPTER_MIN_VIDEO_LENGTH} seconds
-        long.
+        {t('page.video.chaptersCriteriaDescription', {
+          length: CHAPTER_MIN_VIDEO_LENGTH,
+        })}
       </p>
     </div>
   );

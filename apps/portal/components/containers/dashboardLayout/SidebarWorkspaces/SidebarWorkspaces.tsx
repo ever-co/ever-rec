@@ -11,6 +11,7 @@ import PanelAC from 'app/store/panel/actions/PanelAC';
 import { panelRoutes, preRoutes } from 'components/_routes';
 import AppSvg from 'components/elements/AppSvg';
 import styles from './SidebarWorkspaces.module.scss';
+import { useTranslation } from 'react-i18next';
 
 interface SidebarWorkspacesProps {
   addNewWorkspaceClicked: () => void;
@@ -69,7 +70,7 @@ const SidebarWorkspaces: FC<SidebarWorkspacesProps> = ({
   );
 
   return (
-    <div className={styles.sidebarWorkspaces}>
+    <div className={`${styles.sidebarWorkspaces} tw-py-10 tw-px-2`}>
       <div className={classNames(styles.workspaceItems, 'scroll-div')}>
         {workspaceItems}
         {!workspaceItems.length && (
@@ -133,31 +134,40 @@ const SidebarWorkspacesDefaultItem: FC<SidebarWorkspacesDefaultItemProps> = ({
   );
 };
 
-const AddWorkspaceButton: FC<{ onClick: () => void }> = ({ onClick }) => (
-  <div onClick={onClick}>
-    <Tooltip title="Add workspace" placement="right">
-      <div>
-        <AppSvg
-          path="/common/add-workspace.svg"
-          size="25px"
-          className={classNames(styles.itemWrapper, styles.addNewWorkspace)}
-          bgColor="black"
-        />
-      </div>
-    </Tooltip>
-  </div>
-);
+const AddWorkspaceButton: FC<{ onClick: () => void }> = ({ onClick }) => {
+  const { t } = useTranslation();
+  return (
+    <div onClick={onClick}>
+      <Tooltip title={t('common.addWorkspace')} placement="right">
+        <div>
+          <AppSvg
+            path="/common/add-workspace.svg"
+            size="25px"
+            className={classNames(
+              styles.addItemWrapper,
+              styles.addNewWorkspace,
+            )}
+            bgColor="black"
+          />
+        </div>
+      </Tooltip>
+    </div>
+  );
+};
 
-const ManageWorkspacesButton: FC = () => (
-  <Link href={preRoutes.media + panelRoutes.manageWorkspaces} passHref>
-    <Tooltip title="Manage workspaces" placement="right">
-      <div>
-        <AppSvg
-          className={classNames(styles.itemWrapper, styles.addNewWorkspace)}
-          path="/common/icon-Manage-light.svg"
-          size="20px"
-        />
-      </div>
-    </Tooltip>
-  </Link>
-);
+const ManageWorkspacesButton: FC = () => {
+  const { t } = useTranslation();
+  return (
+    <Link href={preRoutes.media + panelRoutes.manageWorkspaces} passHref>
+      <Tooltip title={t('common.manageWorkspace')} placement="right">
+        <div>
+          <AppSvg
+            className={classNames(styles.itemWrapper, styles.addNewWorkspace)}
+            path="/common/icon-Manage-light.svg"
+            size="20px"
+          />
+        </div>
+      </Tooltip>
+    </Link>
+  );
+};

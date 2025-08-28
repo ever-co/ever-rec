@@ -9,6 +9,7 @@ import AppSvg from 'components/elements/AppSvg';
 import UniqueViews from 'components/elements/UniqueViews';
 import { ItemType } from 'app/interfaces/ItemType';
 import useWindowSize from 'hooks/useWindowSize';
+import { useTranslation } from 'react-i18next';
 
 interface IItemActionsProps {
   isPublic?: boolean;
@@ -49,6 +50,7 @@ const ItemActions: FC<IItemActionsProps> = ({
 }) => {
   const windowDimensions = useWindowSize();
 
+  const { t } = useTranslation();
   const moreMenu = renderMoreMenuJSX(
     isPublic,
     chaptersEnabled,
@@ -59,6 +61,16 @@ const ItemActions: FC<IItemActionsProps> = ({
     () => onShare(),
     () => onDownload(),
     () => onDelete(),
+    {
+      changeFolder: t('page.video.actionsSection.changeFolder'),
+      deleteVideo: t('page.video.actionsSection.deleteVideo'),
+      chapters: t('page.video.actionsSection.chapters'),
+      share: t('page.video.actionsSection.share'),
+      editTitle: t('page.video.actionsSection.editTitle'),
+      download: t('page.video.actionsSection.download'),
+      enable: t('page.video.actionsSection.enable'),
+      disable: t('page.video.actionsSection.disable'),
+    },
   );
 
   // Hide some buttons below 1000px viewport width
@@ -87,20 +99,20 @@ const ItemActions: FC<IItemActionsProps> = ({
             : '/new-design-v2/single-video-buttons/like-thumb.svg'
         }
         iconSvg={!isLiked}
-        title={`${likes?.length || 'No'} likes`}
+        title={`${likes?.length || t('common.no')} ${t('page.video.likes')}`}
         clicked={onItemLike}
       />
       {shouldHideButton && !isPublic && (
         <ItemActionButton
           iconPath="/new-design-v2/comment-more-options/edit.svg"
-          title="Edit Title"
+          title={t('page.video.actionsSection.editTitle')}
           clicked={onEditTitle}
         />
       )}
       {shouldHideButton && (
         <ItemActionButton
           iconPath="/new-design-v2/single-video-buttons/download.svg"
-          title="Download"
+          title={t('page.image.download')}
           disabled={!downloadingEnabled}
           clicked={onDownload}
         />
@@ -108,7 +120,7 @@ const ItemActions: FC<IItemActionsProps> = ({
       {shouldHideButton && (
         <ItemActionButton
           iconPath="/new-design-v2/single-video-buttons/share.svg"
-          title="Share"
+          title={t('common.share')}
           clicked={onShare}
         />
       )}
@@ -147,6 +159,16 @@ const renderMoreMenuJSX = (
   shareClicked: () => void,
   downloadClicked: () => void,
   deleteClicked: () => void,
+  translations: {
+    enable: string;
+    disable: string;
+    share: string;
+    editTitle: string;
+    changeFolder: string;
+    download: string;
+    deleteVideo: string;
+    chapters: string;
+  },
 ) => {
   return (
     <Menu>
@@ -178,7 +200,7 @@ const renderMoreMenuJSX = (
           }
           onClick={editTitleClicked}
         >
-          <span className={styles.menuItemSpan}>Edit Title</span>
+          <span className={styles.menuItemSpan}>{translations.editTitle}</span>
         </Menu.Item>
       )}
 
@@ -195,7 +217,9 @@ const renderMoreMenuJSX = (
           }
           onClick={changeFolderClicked}
         >
-          <span className={styles.menuItemSpan}>Change Folder</span>
+          <span className={styles.menuItemSpan}>
+            {translations.changeFolder}
+          </span>
         </Menu.Item>
       )}
 
@@ -211,7 +235,7 @@ const renderMoreMenuJSX = (
         }
         onClick={shareClicked}
       >
-        <span className={styles.menuItemSpan}>Share</span>
+        <span className={styles.menuItemSpan}>{translations.share}</span>
       </Menu.Item>
 
       <Menu.Item
@@ -226,7 +250,7 @@ const renderMoreMenuJSX = (
         }
         onClick={downloadClicked}
       >
-        <span className={styles.menuItemSpan}>Download</span>
+        <span className={styles.menuItemSpan}>{translations.download}</span>
       </Menu.Item>
 
       {!isPublic && (
@@ -237,7 +261,10 @@ const renderMoreMenuJSX = (
           onClick={updateChaptersEnabled}
           key="menu_item_chapters_enabled"
         >
-          <span>{chaptersEnabled ? 'Disable' : 'Enable'} Chapters</span>
+          <span>
+            {chaptersEnabled ? translations.enable : translations.disable}{' '}
+            {translations.chapters}
+          </span>
         </Menu.Item>
       )}
 
@@ -254,7 +281,9 @@ const renderMoreMenuJSX = (
           }
           onClick={deleteClicked}
         >
-          <span className={styles.menuItemSpan}>Delete Video</span>
+          <span className={styles.menuItemSpan}>
+            {translations.deleteVideo}
+          </span>
         </Menu.Item>
       )}
     </Menu>
