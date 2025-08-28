@@ -3,6 +3,7 @@ import * as styles from './InviteMembersInsideModal.module.scss';
 import AppSvg from '@/content/components/elements/AppSvg';
 import InvitationSection from './InvitationSection';
 import { changeWheelSpeed } from '@/content/utilities/scripts/changeWheelSpeed';
+import { useTranslation } from 'react-i18next';
 
 export interface IInviteMembersInsideModalProps {
   link: string;
@@ -40,10 +41,11 @@ export const InviteMembersInsideModal: FC<IInviteMembersInsideModalProps> = ({
 };
 
 const IllustrationWrapper = () => {
+  const { t } = useTranslation();
   return (
     <div className={styles.illustrationWrapper}>
       <AppSvg path="/images/images/noimage.svg" className="tw-w-max" />
-      <p>Start inviting coworkers and friends to your company.</p>
+      <p>{t('workspace.invitingCoworkers')}</p>
     </div>
   );
 };

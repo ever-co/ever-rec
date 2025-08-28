@@ -1,25 +1,30 @@
 import AppSvg from '@/content/components/elements/AppSvg';
 import React, { FC } from 'react';
 import { ItemTypeEnum } from '../../pages/shared/enums/itemTypeEnum';
+import { Trans, useTranslation } from 'react-i18next';
 
 interface IProps {
   emptyType?: ItemTypeEnum;
 }
 
 const EmptyScreenshotsOrVideos: FC<IProps> = ({ emptyType }) => {
-  let heading = 'No shared items';
+  const { t } = useTranslation();
+  let heading = t('shared.noSharedItems');
   let type = 'a video or screenshot';
+  let typeTranslated = t('shared.videoOrTranslation');
   let taking = '';
   let imagePath = 'images/panel/images/emptyItems/noshared.svg';
 
   if (emptyType === ItemTypeEnum.videos) {
-    heading = 'No videos';
+    heading = t('shared.noVideos');
     type = 'Record';
+    typeTranslated = t('shared.videoOrTranslationVideo');
     taking = 'recording videos';
     imagePath = 'images/panel/images/emptyItems/novideos.svg';
   } else if (emptyType === ItemTypeEnum.images) {
-    heading = 'No images';
+    heading = t('shared.noImages');
     type = 'Capture';
+    typeTranslated = t('shared.videoOrTranslationImage');
     taking = 'taking screenshots now';
     imagePath = 'images/panel/images/emptyItems/noimage.svg';
   }
@@ -32,17 +37,23 @@ const EmptyScreenshotsOrVideos: FC<IProps> = ({ emptyType }) => {
       </h2>
       <p className="tw-text-center">
         {type == 'a video or screenshot' ? (
-          `The items you have created and shared with others `
+          t('shared.sharedWithOthers')
         ) : (
           <>
-            Start {taking}. Click the <b>{type}</b> button
+            <Trans
+              values={{ taking: taking, type: typeTranslated }}
+              i18nKey="shared.videoOrScreenShot"
+              components={{
+                1: <b />,
+              }}
+            />
           </>
         )}
 
         <br />
         {type == 'a video or screenshot'
-          ? `will be displayed here.`
-          : `in the extension’s popup menu.`}
+          ? t('shared.willBeDisplayed')
+          : t('shared.extensionMenu')}
       </p>
     </div>
   );

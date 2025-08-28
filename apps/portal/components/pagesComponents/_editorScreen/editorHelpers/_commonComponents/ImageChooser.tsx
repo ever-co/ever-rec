@@ -9,6 +9,7 @@ import { RootStateOrAny, useSelector } from 'react-redux';
 import EmptyScreenshotsOrVideos from 'components/pagesComponents/_imagesScreen/pages/shared/components/EmptyScreenshotsOrVideos';
 import { ItemTypeEnum } from 'app/enums/itemTypeEnum';
 import styles from './imageChooser.module.scss';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
   visible: boolean;
@@ -22,6 +23,7 @@ const ImageChooser: React.FC<Props> = ({ visible, onOk, onCancel, actual }) => {
     (state: RootStateOrAny) => state.panel.explorerData,
   );
 
+  const { t } = useTranslation();
   useEffect(() => {
     getExplorerData();
   }, []);
@@ -74,14 +76,14 @@ const ImageChooser: React.FC<Props> = ({ visible, onOk, onCancel, actual }) => {
       }
     >
       <div className={styles.imagesWrapper}>
-        <h2 className={styles.imagesContainer}>My Images</h2>
+        <h2 className={styles.imagesContainer}>{t('navigation.myImages')}</h2>
         <label htmlFor={actual}>
           <AppButton
             onClick={() => console.log()}
             className={styles.button}
             twPadding={styles.btnPadding}
           >
-            Choose from your computer
+            {t('page.image.chooseFromComputer')}
           </AppButton>
         </label>
       </div>

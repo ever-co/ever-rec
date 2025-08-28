@@ -45,17 +45,17 @@ const deleteUserAPI = () => {
 const changeUserPasswordAPI = (
   email: string,
   oldPassword: string,
-  newPassword: string,
+  password: string,
 ): Promise<IDataResponse> => {
-  return api.put(`/api/v1/auth/update-pass`, {
+  return api.put(`/api/v1/auth/password`, {
     email,
     oldPassword,
-    newPassword,
+    password
   });
 };
 
 const changeUserEmailAPI = (email: string): Promise<IDataResponse> => {
-  return api.put(`/api/v1/auth/update-email`, { email });
+  return api.put(`/api/v1/auth/email`, { email });
 };
 
 export {

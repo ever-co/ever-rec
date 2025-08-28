@@ -59,7 +59,7 @@ const ToolBar = (props: IToolBar) => {
           icon={tools.comments.icon}
         />*/}
 
-        <CommentsBtn 
+        <CommentsBtn
           isOpenEditTool={props.active_tool === tools.comments ? true : false}
           active={isActive(tools.comments)}
           onToolChange={props.setActiveTool}

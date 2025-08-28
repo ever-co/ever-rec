@@ -2,6 +2,7 @@ import React from 'react';
 import { Modal } from 'antd';
 import AppButton from '../controls/appButton/AppButton';
 import AppSvg from '@/content/components/elements/AppSvg';
+import { useTranslation } from 'react-i18next';
 
 interface IDisconnectServiceModalProps {
   onOk: () => void;
@@ -18,6 +19,7 @@ const DisconnectServiceModal: React.FC<IDisconnectServiceModalProps> = ({
   title,
   subTitle,
 }) => {
+  const { t } = useTranslation();
   const onOkHandler = () => {
     onOk();
   };
@@ -35,7 +37,7 @@ const DisconnectServiceModal: React.FC<IDisconnectServiceModalProps> = ({
       footer={
         <div className="tw-flex tw-justify-end tw-mt-8">
           <AppButton onClick={onOkHandler} disabled={loading} full={true}>
-            Yes, disconnect
+            {t('modals.disconnect')}
           </AppButton>
         </div>
       }

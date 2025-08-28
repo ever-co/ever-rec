@@ -8,9 +8,10 @@ import { DropboxController } from './dropbox.controller';
 import { DropboxService } from './dropbox.service';
 import { FoldersSharedService } from '../../services/shared/folders.shared.service';
 import { EditorWebsocketModule } from '../editor-websocket-module/editor-websocket.module';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
-  imports: [HttpModule, VideoModule, EditorWebsocketModule],
+  imports: [HttpModule, VideoModule, EditorWebsocketModule, AuthModule],
   providers: [
     DropboxService,
     ImageService,

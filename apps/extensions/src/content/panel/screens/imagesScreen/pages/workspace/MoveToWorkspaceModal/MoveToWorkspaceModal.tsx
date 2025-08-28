@@ -6,6 +6,7 @@ import classNames from 'classnames';
 import { useState } from 'react';
 //@ts-ignore
 import * as styles from './MoveToWorkspaceModal.module.scss';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
   visible: boolean;
@@ -19,6 +20,7 @@ const MoveToWorkspaceModal: React.FC<Props> = ({
   onCancel,
   workspaces,
 }) => {
+  const { t } = useTranslation();
   const [selectedWorkspace, setSelectedWorkspace] = useState<IWorkspace | null>(
     null,
   );
@@ -44,7 +46,7 @@ const MoveToWorkspaceModal: React.FC<Props> = ({
             twPadding="tw-px-8"
             disabled={!selectedWorkspace}
           >
-            Add
+            {t('common.add')}
           </AppButton>
           <AppButton
             onClick={() => {
@@ -56,7 +58,7 @@ const MoveToWorkspaceModal: React.FC<Props> = ({
             className="tw-mx-4 tw-pb-1 tw-pt-1"
             twPadding="tw-px-8"
           >
-            Cancel
+            {t('common.cancel')}
           </AppButton>
         </div>
       }

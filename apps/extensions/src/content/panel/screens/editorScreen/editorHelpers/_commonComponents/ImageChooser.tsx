@@ -6,6 +6,7 @@ import { getExplorerData } from '@/app/services/screenshots';
 import { RootStateOrAny, useSelector } from 'react-redux';
 import EmptyScreenshotsOrVideos from '../../../imagesScreen/components/emptyScreenshotsOrVideos/EmptyScreenshotsOrVideos';
 import { ItemTypeEnum } from '../../../imagesScreen/pages/shared/enums/itemTypeEnum';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
   visible: boolean;
@@ -15,6 +16,7 @@ interface Props {
 }
 
 const ImageChooser: React.FC<Props> = ({ visible, onOk, onCancel, actual }) => {
+  const { t } = useTranslation();
   const explorerData: IExplorerData = useSelector(
     (state: RootStateOrAny) => state.panel.explorerData,
   );
@@ -73,14 +75,16 @@ const ImageChooser: React.FC<Props> = ({ visible, onOk, onCancel, actual }) => {
       }
     >
       <div className="tw-flex tw-items-center tw-justify-between tw-w-full tw-pr-5  ">
-        <h2 className="tw-mb-6 tw-text-xl tw-font-bold">My Images</h2>
+        <h2 className="tw-mb-6 tw-text-xl tw-font-bold">
+          {t('navigation.myImages')}
+        </h2>
         <label htmlFor={actual}>
           <AppButton
             onClick={() => console.log()}
             className="tw-text-white tw-pb-2 tw-pt-2"
             twPadding="tw-px-14"
           >
-            Choose from your computer
+            {t('page.image.chooseFromComputer')}
           </AppButton>
         </label>
       </div>

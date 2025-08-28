@@ -5,6 +5,7 @@ import AppButton from 'components/controls/AppButton';
 import { successMessage } from 'app/services/helpers/toastMessages';
 import { RootStateOrAny, useSelector } from 'react-redux';
 import AppSvg from 'components/elements/AppSvg';
+import { useTranslation } from 'react-i18next';
 
 interface IShareVideoModalProps {
   visible: boolean;
@@ -21,6 +22,7 @@ const ShareVideoModal: React.FC<IShareVideoModalProps> = ({
   copystate,
   copied,
 }) => {
+  const { t } = useTranslation();
   const editorVideo: IEditorVideo = useSelector(
     (state: RootStateOrAny) => state.panel.editorVideo,
   );
@@ -32,7 +34,7 @@ const ShareVideoModal: React.FC<IShareVideoModalProps> = ({
         : null;
     absSharedLink && (await navigator.clipboard.writeText(absSharedLink));
     copied();
-    successMessage('Copied');
+    successMessage(t('toasts.copied'));
   };
 
   return (
@@ -55,13 +57,15 @@ const ShareVideoModal: React.FC<IShareVideoModalProps> = ({
                 className="tw-mr-5px"
               />
             )}
-            Copy Link
+            {t('modals.copyLink')}
           </AppButton>
         </div>
       }
     >
-      <h2 className="tw-mb-3 tw-text-2xl tw-font-semibold">Share link</h2>
-      <label>Link to video</label>
+      <h2 className="tw-mb-3 tw-text-2xl tw-font-semibold">
+        {t('modals.shareLink')}
+      </h2>
+      <label>{t('modals.linkToVideo')}</label>
       <p className=" tw-border-black tw-border-b tw-py-5px tw-px-2px tw-mt-5px">{`${
         process.env.NEXT_PUBLIC_WEBSITE_URL
       }/video/shared/${video?.sharedLink || editorVideo?.sharedLink}`}</p>

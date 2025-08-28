@@ -3,7 +3,8 @@
 import React, { useEffect, useState } from 'react';
 import { Image, Menu } from 'antd';
 import AudioPlayer from './AudioPlayer';
-import PlyrPlayer from 'components/shared/plyrPlayer/PlyrPlayer';
+import dynamic from 'next/dynamic';
+const PlyrPlayer = dynamic(() => import('components/shared/plyrPlayer/PlyrPlayer'), { ssr: false });
 import styles from './contentItemText.module.scss';
 import { MarkerService } from 'app/services/editor/markers';
 import { IMarker } from 'app/interfaces/IMarker';

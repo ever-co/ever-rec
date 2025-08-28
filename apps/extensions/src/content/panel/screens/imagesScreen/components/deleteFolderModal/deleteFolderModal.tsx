@@ -1,6 +1,7 @@
 import React from 'react';
 import { Modal } from 'antd';
 import AppButton from '@/content/components/controls/appButton/AppButton';
+import { useTranslation } from 'react-i18next';
 
 interface IDeleteScreenshotModalProps {
   visible: boolean;
@@ -13,6 +14,7 @@ const DeleteFolderModal: React.FC<IDeleteScreenshotModalProps> = ({
   onCancel,
   visible,
 }) => {
+  const { t } = useTranslation();
   return (
     <Modal
       open={visible}
@@ -25,16 +27,16 @@ const DeleteFolderModal: React.FC<IDeleteScreenshotModalProps> = ({
             outlined
             className="tw-px-8 tw-mx-4 tw-pb-1 tw-pt-1"
           >
-            Cancel
+            {t('common.cancel')}
           </AppButton>
           <AppButton onClick={onOk} className="tw-px-8 tw-pb-1 tw-pt-1">
-            Delete Folder
+            {t('modals.deleteFolder')}
           </AppButton>
         </div>
       }
     >
       <h2 className="tw-mb-6 tw-text-2xl tw-font-semibold">
-        Do you want to delete this folder?
+        {t('modals.deleteFolderQuestion')}
       </h2>
     </Modal>
   );

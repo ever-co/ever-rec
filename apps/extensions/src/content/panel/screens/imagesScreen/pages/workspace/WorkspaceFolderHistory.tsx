@@ -3,6 +3,7 @@ import AppSvg from '@/content/components/elements/AppSvg';
 import { IWorkspaceDbFolder } from '@/app/interfaces/IWorkspace';
 import { useNavigate } from 'react-router';
 import { useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 interface IFoldersProps {
   folders: IWorkspaceDbFolder[];
@@ -13,6 +14,7 @@ const WorkspaceFolderHistory: FC<IFoldersProps> = ({
   folders,
   currentWorkspaceFolder,
 }) => {
+  const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const [navigationFolders, setNavigationFolders] = useState<
     IWorkspaceDbFolder[] | null
@@ -74,7 +76,7 @@ const WorkspaceFolderHistory: FC<IFoldersProps> = ({
             className="tw-text-lg tw-font-semibold tw-text-app-grey-darker tw-cursor-pointer"
             onClick={() => switchFolder(undefined)}
           >
-            Library
+            {t('page.video.library')}
           </h1>
           <AppSvg
             path="images/panel/common/Chevron_right.svg"

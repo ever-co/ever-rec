@@ -9,6 +9,7 @@ import { ItemTypeEnum } from '../../../imagesScreen/pages/shared/enums/itemTypeE
 import { IUser } from '@/app/interfaces/IUserData';
 import Plyr from 'plyr';
 import PlyrPlayer from '../../../videoEditorScreen/plyrPlayer/PlyrPlayer';
+import { useTranslation } from 'react-i18next';
 
 // import { Player, BigPlayButton } from 'video-react';
 
@@ -20,6 +21,7 @@ interface Props {
 }
 
 const VideoChooser: React.FC<Props> = ({ visible, onOk, onCancel, actual }) => {
+  const { t } = useTranslation();
   const explorerData: IExplorerData = useSelector(
     (state: RootStateOrAny) => state.panel.explorerData,
   );
@@ -97,7 +99,9 @@ const VideoChooser: React.FC<Props> = ({ visible, onOk, onCancel, actual }) => {
       }
     >
       <div className="tw-flex tw-items-center tw-justify-between tw-w-full tw-pr-5  ">
-        <h2 className="tw-mb-6 tw-text-xl tw-font-bold">My Videos</h2>
+        <h2 className="tw-mb-6 tw-text-xl tw-font-bold">
+          {t('common.myVideos')}
+        </h2>
         <label htmlFor={actual}>
           <AppButton
             disabled={true}
@@ -105,7 +109,7 @@ const VideoChooser: React.FC<Props> = ({ visible, onOk, onCancel, actual }) => {
             className="tw-text-white tw-pb-2 tw-pt-2"
             twPadding="tw-px-14"
           >
-            Choose from your computer
+            {t('page.image.chooseFromComputer')}
           </AppButton>
         </label>
       </div>

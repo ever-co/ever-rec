@@ -26,6 +26,7 @@ import { saveSegmentEvent } from 'app/services/general';
 import { RootStateOrAny, useSelector, useDispatch } from 'react-redux';
 import PanelAC from 'app/store/panel/actions/PanelAC';
 import { saveAs } from 'file-saver';
+import { useTranslation } from 'react-i18next';
 interface IEmailModalProps {
   visible: boolean;
   onCancel: () => void;
@@ -45,6 +46,7 @@ const EmailModal: React.FC<IEmailModalProps> = ({
   fromEditor,
 }) => {
   const dispatch = useDispatch();
+  const { t } = useTranslation();
   const [messagestatus, setMesagestatus] = useState<boolean>(false);
   const [message, setMessage] = useState<string>('');
   const [emailcollection, setEmailcollection] = useState<{
@@ -121,13 +123,13 @@ const EmailModal: React.FC<IEmailModalProps> = ({
             title: item.dbData?.title,
           });
         }
-        infoMessage('Email sent successfully');
+        infoMessage(t('toasts.emailSent'));
         setEmailcollection({ emails: [] });
       } catch (err) {
         errorHandler(err);
       }
     } else {
-      warnMessage('Email field cannot be empty');
+      warnMessage(t('toasts.emailFieldEmpty'));
     }
   };
 
@@ -153,7 +155,7 @@ const EmailModal: React.FC<IEmailModalProps> = ({
           }),
         );
       }
-    } else errorMessage('Email filed cannot be empty');
+    } else errorMessage(t('toasts.emailFieldEmpty'));
   };
 
   useEffect(() => {
@@ -188,7 +190,7 @@ const EmailModal: React.FC<IEmailModalProps> = ({
             outlined
             className="tw-px-8 tw-mx-4 tw-pb-1 tw-pt-1"
           >
-            Cancel
+            {t('common.cancel')}
           </AppButton>
           <AppButton
             disabled={
@@ -197,18 +199,18 @@ const EmailModal: React.FC<IEmailModalProps> = ({
             onClick={fromEditor ? saveAndSend : onOkHandler}
             className="tw-px-8 tw-pb-1 tw-pt-1"
           >
-            Send Email
+            {t('common.sendEmail')}
           </AppButton>
         </div>
       }
     >
       <h2 className="tw-text-2xl tw-font-semibold tw-mb-2">
-        Send {itemType} to
+        {t('extras.sendItemTo', { itemType: itemType })}
       </h2>
 
       <ReactMultiEmail
         emails={emailcollection?.emails}
-        placeholder="Add Email"
+        placeholder={t('workspace.addEmail')}
         className="tw-border tw-border-solid tw-border-purple-active tw-rounded-5 tw-w-full "
         onChange={(_emails: string[]) => {
           setEmailcollection({ emails: _emails });
@@ -246,7 +248,7 @@ const EmailModal: React.FC<IEmailModalProps> = ({
           checked={messagestatus}
           onChange={() => setMesagestatus(!messagestatus)}
         >
-          <span className="tw-text-black"> Add message</span>
+          <span className="tw-text-black">{t('common.addMessage')}</span>
         </Checkbox>
         {messagestatus ? (
           <TextArea
@@ -260,7 +262,7 @@ const EmailModal: React.FC<IEmailModalProps> = ({
               setMessage(e.target.value);
             }}
             defaultValue={message}
-            placeholder="Type your message here"
+            placeholder={t('common.typeMessage')}
             autoSize={{ minRows: 3, maxRows: 5 }}
           />
         ) : (

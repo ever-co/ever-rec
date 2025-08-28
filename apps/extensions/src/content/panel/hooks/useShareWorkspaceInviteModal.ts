@@ -7,6 +7,7 @@ import {
 } from '@/app/services/helpers/toastMessages';
 import { createWorkspaceInviteLink } from '@/app/services/workspace';
 import PanelAC from '@/app/store/panel/actions/PanelAC';
+import { useTranslation } from 'react-i18next';
 
 interface IProps {
   workspace: IWorkspace | null;
@@ -14,6 +15,7 @@ interface IProps {
 }
 
 const useShareWorkspaceInviteModal = ({ workspace, visible }: IProps) => {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const [copied, setCopied] = useState(false);
   const [link, setLink] = useState('');
@@ -60,10 +62,10 @@ const useShareWorkspaceInviteModal = ({ workspace, visible }: IProps) => {
       await navigator.clipboard.writeText(link);
 
       setCopied(true);
-      successMessage('Copied!');
+      successMessage(t('toasts.copied'));
     } catch (err) {
       setCopied(false);
-      errorMessage('Could not copy.');
+      errorMessage(t('hooks.toasts.copyError'));
     }
   };
 

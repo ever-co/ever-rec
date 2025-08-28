@@ -2,7 +2,10 @@
   "extends": [
     "next",
     "next/typescript",
-    "next/core-web-vitals"
+    "next/core-web-vitals",
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    "prettier"
   ],
   "ignorePatterns": [
     "!**/*"
@@ -19,22 +22,17 @@
         "@next/next/no-html-link-for-pages": [
           "error",
           "apps/portal/pages"
-        ]
+        ],
+        "no-unused-vars": "off",
+        "@typescript-eslint/no-unused-vars": [
+          "warn",
+          {
+            "argsIgnorePattern": "^_",
+            "varsIgnorePattern": "^_"
+          }
+        ],
+        "react-hooks/exhaustive-deps": "warn"
       }
-    },
-    {
-      "files": [
-        "*.ts",
-        "*.tsx"
-      ],
-      "rules": {}
-    },
-    {
-      "files": [
-        "*.js",
-        "*.jsx"
-      ],
-      "rules": {}
     }
   ],
   "env": {

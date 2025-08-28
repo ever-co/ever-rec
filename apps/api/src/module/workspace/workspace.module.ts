@@ -24,10 +24,12 @@ import { FoldersSharedService } from '../../services/shared/folders.shared.servi
 import { StreamServiceModule } from '../video-services/streamService.module';
 import { WorkspaceSharedService } from './services/shared.service';
 import { EditorWebsocketModule } from '../editor-websocket-module/editor-websocket.module';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
   imports: [
     HttpModule,
+    AuthModule,
     ImageModule,
     StreamServiceModule,
     EditorWebsocketModule,

@@ -42,6 +42,7 @@ import {
   SET_WIN_ID,
   SET_VIDEO_DURATION,
   CLEAR_VIDEO_DURATION,
+  CHANGE_FAVORITE_REFETCH,
 } from './actionTypes';
 
 export default class PanelAC {
@@ -272,5 +273,8 @@ export default class PanelAC {
       type: SET_EMAIL_IMAGE,
       payload: { emailImage, emailImageLink, itemPublicLink },
     };
+  }
+  static setFavoriteRefetch(count: number): ActionType {
+    return { type: CHANGE_FAVORITE_REFETCH, payload: count };
   }
 }

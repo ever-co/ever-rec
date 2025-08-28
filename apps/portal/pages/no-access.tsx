@@ -6,10 +6,13 @@ import AppContainer from 'components/containers/appContainer/AppContainer';
 import React from 'react';
 import useAuthenticateUser from 'hooks/useAuthenticateUser';
 import { useRouter } from 'next/router';
+import { useTranslation } from 'react-i18next';
 
 const NoAccess = () => {
   const user = useAuthenticateUser();
   const router = useRouter();
+
+  const { t } = useTranslation();
   return (
     <AppContainer>
       <Row style={{ minHeight: '85vh', marginLeft: 0, marginRight: 0 }}>
@@ -20,10 +23,10 @@ const NoAccess = () => {
           <div className="tw-flex tw-justify-center">
             <div>
               <div className="tw-font-bold tw-text-3xl tw-text-center tw-mt-4">
-                Whoo...oops!
+                {t('page.video.oops')}
               </div>
               <div className="tw-text-lg tw-text-center tw-mt-2">
-                You don’t have the access to this item anymore.
+                {t('page.video.noAccess')}
               </div>
 
               <div>
@@ -35,7 +38,7 @@ const NoAccess = () => {
                   }}
                   className="tw-m-auto tw-mt-5 tw-px-10 tw-py-4"
                 >
-                  Back to Portal
+                  {t('page.video.backToPortal')}
                 </AppButton>
               </div>
             </div>

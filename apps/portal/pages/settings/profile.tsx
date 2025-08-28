@@ -33,10 +33,12 @@ import { useRouter } from 'next/router';
 import { errorHandler } from 'app/services/helpers/errors';
 import SCHeader from 'components/shared/SCHeader/SCHeader';
 import { BiLoaderAlt } from 'react-icons/bi';
+import { useTranslation } from 'react-i18next';
 
 const avaSize = 88;
 
 const Profile: React.FC = () => {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const router = useRouter();
   const user: IUser = useSelector((state: RootStateOrAny) => state.auth.user);
@@ -87,24 +89,24 @@ const Profile: React.FC = () => {
 
   const changeName = async (newName: string) => {
     if (!newName) return;
-
-    const id = loadingMessage('Updating name...');
+    const id = loadingMessage(t('toasts.updatingName'));
     const data = await updateUserData({
       displayName: newName,
     });
 
     setShowNameModal(false);
 
-    if (!data) return updateMessage(id, 'Could not update the name.', 'error');
+    if (!data)
+      return updateMessage(id, t('toasts.couldNotUpdateTheName'), 'error');
 
     updateReduxUser(data);
-    updateMessage(id, 'Name updated successfully.', 'success');
+    updateMessage(id, t('toasts.nameUpdated'), 'success');
   };
 
   const changeEmail = async (newEmail: string) => {
     if (!newEmail) return;
 
-    const id = loadingMessage('Updating email...');
+    const id = loadingMessage(t('toasts.updatingEmail'));
     const response = await changeUserEmail(newEmail);
     const message = response.message;
     const email = response.data?.email;
@@ -112,7 +114,7 @@ const Profile: React.FC = () => {
     if (email) {
       dispatch(AuthAC.setUser({ user: { ...user, email } }));
       setShowEmailModal(false);
-      updateMessage(id, 'Email updated successfully.', 'success');
+      updateMessage(id, t('toasts.emailUpdated'), 'success');
     } else {
       updateMessage(id, message, 'error');
     }
@@ -121,7 +123,7 @@ const Profile: React.FC = () => {
   const changePassword = async (oldPassword: string, newPassword: string) => {
     if (!newPassword || !oldPassword) return;
 
-    const id = loadingMessage('Updating password...');
+    const id = loadingMessage(t('toasts.updatingPassword'));
     const response = await changeUserPassword(
       user.email,
       oldPassword,
@@ -131,13 +133,9 @@ const Profile: React.FC = () => {
     setShowPasswordModal(false);
 
     if (!response.data)
-      return updateMessage(
-        id,
-        'There was a problem updating your password.',
-        'error',
-      );
+      return updateMessage(id, t('toasts.couldNotUpdate'), 'error');
 
-    updateMessage(id, 'Password updated successfully.', 'success');
+    updateMessage(id, t('toasts.passwordUpdated'), 'success');
   };
 
   const loginToDeleteAccount = async (password: string) => {
@@ -148,7 +146,7 @@ const Profile: React.FC = () => {
       return;
     }
 
-    errorMessage('There was a problem with reauthentication.');
+    errorMessage(t('toasts.couldNotReauthenticate'));
     setShowDeleteAccountModal(false);
   };
 
@@ -164,16 +162,14 @@ const Profile: React.FC = () => {
     try {
       await deleteUser();
       await signOutHandler();
-      successMessage(
-        'Account deleted successfully. Create or login with another account.',
-      );
+      successMessage(t('toasts.accountDeleted'));
     } catch (error: any) {
       console.log('error', error);
       if (error.code === 'auth/user-mismatch') {
-        errorHandler({ message: 'Cannot delete different account.' });
+        errorHandler({ message: t('toasts.couldNotDeleteAccount') });
       } else {
         error.code !== 'auth/requires-recent-login' &&
-          errorHandler({ message: 'Error while trying to delete user?.' });
+          errorHandler({ message: t('toasts.errorDeletingUser') });
       }
     }
   };
@@ -197,7 +193,7 @@ const Profile: React.FC = () => {
         <div className={styles.profileSettings}>
           <div className={styles.profileSettingsMain}>
             <div className={styles.profilePhoto}>
-              <h1>Profile</h1>
+              <h1>{t('page.profile.title')}</h1>
 
               <FileUploader onFileSelected={onFileSelectedHandler}>
                 {({ onFileSelectorOpen }) => (
@@ -225,7 +221,7 @@ const Profile: React.FC = () => {
                       clicked={onFileSelectorOpen}
                     />
 
-                    <span onClick={onFileSelectorOpen}>Edit</span>
+                    <span onClick={onFileSelectorOpen}>{t('common.edit')}</span>
                   </div>
                 )}
               </FileUploader>
@@ -233,20 +229,22 @@ const Profile: React.FC = () => {
 
             <div className={styles.profileDetails}>
               <ProfileDetail
-                title="Name"
+                title={t('common.name')}
                 value={user?.displayName}
                 clicked={() => setShowNameModal(true)}
               />
               <ProfileDetail
-                title="Email"
+                title={t('page.image.email')}
                 value={user?.email}
                 disabled={isGoogleAccount}
                 clicked={() => !isGoogleAccount && setShowEmailModal(true)}
               />
               <ProfileDetail
-                title="Password"
+                title={t('page.profile.settings.password')}
                 value={
-                  isGoogleAccount ? 'Logged in with Google account' : undefined
+                  isGoogleAccount
+                    ? t('page.profile.loggedInWithGoogle')
+                    : undefined
                 }
                 disabled={isGoogleAccount}
                 clicked={() => !isGoogleAccount && setShowPasswordModal(true)}
@@ -256,15 +254,15 @@ const Profile: React.FC = () => {
 
           <div className={styles.profileDeleteAccount}>
             <ProfileDetail
-              title="Account"
-              value="Delete account"
+              title={t('page.profile.account.title')}
+              value={t('page.setting.deleteAccount')}
               valueColor="red"
               clicked={() => setShowDeleteAccountModal(true)}
             />
           </div>
 
           <span className={styles.profileSignOut} onClick={signOutHandler}>
-            Sign out
+            {t('header.user.signout')}
           </span>
         </div>
 

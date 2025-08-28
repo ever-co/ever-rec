@@ -12,9 +12,10 @@ import { AtlassianController } from './atlassian.controller';
 import { AtlassianService } from './atlassian.service';
 import { FoldersSharedService } from '../../services/shared/folders.shared.service';
 import { EditorWebsocketModule } from '../editor-websocket-module/editor-websocket.module';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
-  imports: [HttpModule, EditorWebsocketModule],
+  imports: [HttpModule, EditorWebsocketModule, AuthModule],
   providers: [
     AtlassianService,
     ImageService,
