@@ -26,7 +26,7 @@ import { GenerateEmailVerificationLinkDto } from './dto/send-email-verification.
 import { AuthGuard, IRequestUser } from './guards/auth.guard';
 import { EmailOwnershipGuard } from './guards/email-ownership.guard';
 import { AuthOrchestratorService } from './services/auth-orchestrator.service';
-import { TokenRefreshResponse, TokenService } from './token.service';
+import { TokenRefreshResponse, TokenService } from './services/tokens';
 
 @Controller('auth')
 export class AuthController {
@@ -34,7 +34,7 @@ export class AuthController {
     private readonly authOrchestratorService: AuthOrchestratorService,
     private readonly tokenService: TokenService,
     private readonly sharedService: SharedService,
-  ) {}
+  ) { }
 
   @UseGuards(AuthGuard)
   @Delete('remove-shared')

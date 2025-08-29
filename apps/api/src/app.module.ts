@@ -56,4 +56,4 @@ import { WorkspaceModule } from './module/workspace/workspace.module';
     },
   ],
 })
-export class AppModule {}
+export class AppModule { }
