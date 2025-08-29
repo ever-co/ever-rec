@@ -1,8 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { LoginState, StateId } from '../interfaces/login-state.interface';
 import { LoginContext } from '../login.context';
 import { GauzyLoginState } from './gauzy-login.state';
 import { AuthenticationService, ILoginProps } from '../../authentication.service';
+import { ResStatusEnum } from 'src/enums/ResStatusEnum';
 
 
 @Injectable()
@@ -14,7 +15,12 @@ export class FirebaseLoginState implements LoginState {
   ) { }
   public async handle(context: LoginContext, payload: ILoginProps): Promise<void> {
 
-    const { data } = await this.firebaseAuthService.login(payload);
+    const { data, status, message } = await this.firebaseAuthService.login(payload);
+
+    if (status === ResStatusEnum.error) {
+      throw new BadRequestException(message);
+    }
+
     context.result.set(this.ID, {
       refreshToken: data.refreshToken,
       accessToken: data.idToken,
