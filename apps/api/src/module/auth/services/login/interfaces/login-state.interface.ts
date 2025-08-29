@@ -1,19 +1,15 @@
+import { AuthState } from "src/module/auth/interfaces/auth.interface";
 import { ILoginProps } from "../../authentication.service";
 import { LoginContext } from "../login.context";
+import { AuthStateResult } from '../../../interfaces/auth.interface';
 
 export enum StateId {
   FIREBASE = 'firebase',
   GAUZY = 'gauzy'
 }
 
-export interface LoginState {
-  handle(context: LoginContext, payload: ILoginProps): Promise<void>;
-}
+export type LoginState = AuthState<LoginContext, ILoginProps>;
 
-export interface LoginStateResult<T = any> {
-  accessToken: string,
-  refreshToken: string,
-  data: T
-}
+export type LoginStateResult<T = any> = AuthStateResult<T>
 
 export type ContextResult<U = any> = Map<StateId, LoginStateResult<U>>;

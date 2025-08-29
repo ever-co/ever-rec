@@ -28,6 +28,7 @@ export class FirebaseLoginState implements LoginState {
     });
 
     context.setState(this.gauzyLoginState);
+
     await context.request(payload);
   }
 }

@@ -9,6 +9,7 @@ import { GoogleAuthService } from './google-auth.service';
 import { UserProfileService } from './user-profile.service';
 import { UserService } from './user.service';
 import { LoginChain } from './login/login.chain';
+import { RegisterChain } from './register';
 
 export interface IRegisterProps {
   email: string;
@@ -52,6 +53,7 @@ export class AuthOrchestratorService {
     private readonly sharedService: SharedService,
     private readonly eventEmitter: EventEmitter2,
     private readonly loginChain: LoginChain,
+    private readonly registerChain: RegisterChain
   ) { }
 
   // ==================== AUTHENTICATION METHODS ====================
@@ -60,7 +62,7 @@ export class AuthOrchestratorService {
    * Register a new user
    */
   async register(registerData: IRegisterProps): Promise<IDataResponse> {
-    return this.authenticationService.register(registerData);
+    return this.registerChain.execute(registerData);
   }
 
   /**

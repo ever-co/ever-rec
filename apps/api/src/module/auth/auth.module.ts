@@ -21,6 +21,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TokenStorageService } from './services/tokens/token-storage.service';
 import { FirebaseRefreshStrategy, FirebaseValidateStrategy, TokenService, TokenStrategyChain, UnifiedRefreshStrategy, UserFactory } from './services/tokens';
 import { GauzyRefreshStrategy } from './services/tokens/refresh/gauzy-refresh.strategy';
+import { FirebaseRegisterState, GauzyRegisterState, RegisterChain } from './services/register';
 
 @Module({
   imports: [JwtModule.registerAsync({
@@ -56,18 +57,23 @@ import { GauzyRefreshStrategy } from './services/tokens/refresh/gauzy-refresh.st
     // Token services
     TokenService,
     TokenStrategyChain,
+    TokenStorageService,
+    MergeTokenPolicy,
     GauzyRefreshStrategy,
     UnifiedRefreshStrategy,
     FirebaseRefreshStrategy,
     FirebaseValidateStrategy,
     UserFactory,
 
-    // State service
+    // Login State service
     FirebaseLoginState,
     GauzyLoginState,
-    MergeTokenPolicy,
-    TokenStorageService,
-    LoginChain
+    LoginChain,
+
+    // Register State service
+    FirebaseRegisterState,
+    GauzyRegisterState,
+    RegisterChain
   ],
   exports: [
     AuthOrchestratorService,

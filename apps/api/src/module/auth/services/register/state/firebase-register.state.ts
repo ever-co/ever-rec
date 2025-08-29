@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { AuthenticationService, ILoginProps, IRegisterProps } from '../../authentication.service';
+import { AuthenticationService, IRegisterProps } from '../../authentication.service';
 import { StateId } from '../../login/interfaces/login-state.interface';
 import { RegisterState } from '../interfaces/register-state.interface';
 import { GauzyRegisterState } from './gauzy-register.state';
@@ -28,8 +28,8 @@ export class FirebaseRegisterState implements RegisterState {
       data
     });
 
-    await context.request(payload);
-
     context.setState(this.gauzyRegisterState);
+
+    await context.request(payload);
   }
 }
