@@ -13,7 +13,7 @@ export class AuthContext<T = unknown> {
     this.state = state;
   }
 
-  public async request<T>(payload: T): Promise<void> {
+  public async request<P>(payload: P): Promise<void> {
     await this.state.handle(this, payload);
   }
 

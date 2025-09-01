@@ -1,5 +1,5 @@
 import { IUser } from '../../../interfaces/IUser';
-import { IRegisterProps } from "../../auth/services/authentication.service";
+import { IRegisterProps } from "../../auth/services/auth-orchestrator.service";
 
 export interface IAuthResponse {
   user: IGauzyUser;
@@ -64,8 +64,8 @@ export class GauzyMapper {
     return {
       id: user.id,
       email: user.email,
-      displayName: user.fullName,
-      isVerified: user.isEmailVerified,
+      displayName: user.fullName || user.name,
+      isVerified: user.isEmailVerified ?? false,
       photoURL: user.imageUrl
     }
   }
