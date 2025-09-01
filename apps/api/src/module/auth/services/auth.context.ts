@@ -19,7 +19,7 @@ export class AuthContext {
 
   public async merge(): Promise<string> {
     if (this.result.size === 0) {
-      throw new Error('Something went wrong.')
+      throw new Error('Something went wrong.');
     }
     return this.mergeTokenPolicy.encode(this.result);
   }

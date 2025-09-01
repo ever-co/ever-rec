@@ -13,7 +13,7 @@ export abstract class BaseStrategyState<T> implements TokenState<T> {
 
   public async resolve(context: IRefreshTokenContext): Promise<T> {
     const token = await this.getToken(context);
-    let response = null
+    let response = null;
 
     if (await this.supports(token)) {
       response = await this.handle(context, token);
@@ -23,7 +23,7 @@ export abstract class BaseStrategyState<T> implements TokenState<T> {
 
     const hasNext = this.nextState && response && token !== context.token;
 
-    return hasNext ? this.nextState.resolve(context) : response
+    return hasNext ? this.nextState.resolve(context) : response;
   }
 
   protected abstract getToken(context: IRefreshTokenContext): Promise<string>;
