@@ -15,14 +15,11 @@ export class FirebaseRefreshStrategy extends RefreshStrategyState {
     private readonly firebaseRest: FirebaseRestService,
     private readonly userFactory: UserFactory,
     private readonly firebaseAdmin: FirebaseAdminService,
-    private readonly tokenStrategyChain: TokenStrategyChain,
     private readonly gauzyRefreshStrategy: GauzyRefreshStrategy
   ) {
     super();
 
     this.tokenId = StateId.FIREBASE;
-
-    this.tokenStrategyChain.setInitialRefreshStrategy(this);
   }
 
   public async supports(refreshToken: string): Promise<boolean> {

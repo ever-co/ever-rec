@@ -10,10 +10,8 @@ export class FirebaseValidateStrategy extends ValidateStrategyState {
   constructor(
     private readonly firebaseAdmin: FirebaseAdminService,
     private readonly userFactory: UserFactory,
-    private readonly tokenStrategyChain: TokenStrategyChain,
   ) {
     super();
-    this.tokenStrategyChain.setInitialValidateStrategy(this);
   }
 
   async supports(token: string): Promise<boolean> {
