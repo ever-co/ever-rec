@@ -4,7 +4,6 @@ import { FirebaseRestService } from 'src/module/firebase/services/firebase-rest.
 import { IRefreshTokenContext, TokenRefreshResponse } from '../interfaces/token.interface';
 import { RefreshStrategyState } from '../states/refresh-strategy.state';
 import { UserFactory } from '../user.factory';
-import { TokenStrategyChain } from '../token-strategy.chain';
 import { GauzyRefreshStrategy } from './gauzy-refresh.strategy';
 import { StateId } from '../../login/interfaces/login-state.interface';
 

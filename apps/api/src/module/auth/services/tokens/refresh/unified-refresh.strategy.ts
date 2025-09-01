@@ -36,14 +36,14 @@ export class UnifiedRefreshStrategy extends RefreshStrategyState {
     const mergedToken = await this.mergeTokenPolicy.encode(mergedMap);
 
     // Use one of the state results as primary for response (e.g., FIREBASE)
-    const primary = result?.get(StateId.FIREBASE) ?? result?.values()?.next()?.value;
+    const primary = result.get(StateId.FIREBASE) ?? result.values()?.next()?.value;
 
     this.logger.log('Unified tokens refreshed.');
 
     return {
-      idToken: primary.accessToken,
+      idToken: primary?.accessToken,
       refreshToken: mergedToken,
-      expiresAt: primary.data.expiresAt,
+      expiresAt: primary?.data?.expiresAt,
     };
   }
 }

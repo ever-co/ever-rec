@@ -2,7 +2,6 @@ import { Injectable } from "@nestjs/common";
 import { IRefreshTokenContext } from "../../interfaces/token.interface";
 import { FirebaseAdminService } from "src/module/firebase/services/firebase-admin.service";
 import { UserFactory } from "../../user.factory";
-import { TokenStrategyChain } from "../../token-strategy.chain";
 import { ValidateStrategyState } from "../../states/validate-strategy.state";
 
 @Injectable()

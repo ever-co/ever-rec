@@ -1,7 +1,6 @@
 import {
   BadRequestException,
   Injectable,
-  InternalServerErrorException
 } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { ContextResult, LoginStateResult, StateId } from "../../login/interfaces/login-state.interface";
