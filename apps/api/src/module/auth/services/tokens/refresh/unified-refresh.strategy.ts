@@ -18,7 +18,7 @@ export class UnifiedRefreshStrategy extends RefreshStrategyState {
   }
 
   protected async handle(ctx: IRefreshTokenContext): Promise<TokenRefreshResponse> {
-    const { token, result } = ctx
+    const { token, result } = ctx;
     // Decode existing merged token
     const context = await ctx.current();
 
