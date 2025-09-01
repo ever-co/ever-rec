@@ -24,7 +24,7 @@ export class TokenStorageService {
   public async save(token: string): Promise<IToken> {
     const ref = this.db.ref(this.PATH).push();
     const entity: IToken = {
-      id: ref.key!,
+      id: ref.key,
       token,
       createdAt: Date.now(),
       updatedAt: Date.now(),
