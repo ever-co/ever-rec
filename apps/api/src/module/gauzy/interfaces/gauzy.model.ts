@@ -61,13 +61,13 @@ export class GauzyMapper {
 
   private static parseFullName(fullName: string): { firstName: string; lastName: string } {
     if (!fullName?.trim()) {
-      throw new NameParseError('Full name cannot be empty');
+      return { firstName: '', lastName: '' };
     }
 
     const names = fullName.trim().split(/\s+/);
 
-    if (names.length < 2) {
-      throw new NameParseError('Full name must contain at least first and last name');
+    if (names.length === 1) {
+      return { firstName: names[0], lastName: '' };
     }
 
     const firstName = names[0];
