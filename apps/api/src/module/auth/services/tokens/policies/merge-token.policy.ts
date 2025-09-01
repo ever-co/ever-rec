@@ -30,9 +30,7 @@ export class MergeTokenPolicy {
       const { id } = await this.tokenStorageService.save(serializedToken);
       return this.sign({ id });
     } catch (error: any) {
-      throw new InternalServerErrorException(
-        `Failed to encode tokens: ${error.message}`,
-      );
+      throw this.mapJwtError(error);
     }
   }
 
@@ -98,9 +96,7 @@ export class MergeTokenPolicy {
         throw new BadRequestException("Token not found or already revoked");
       }
     } catch (error: any) {
-      throw new InternalServerErrorException(
-        `Failed to revoke token: ${error.message}`,
-      );
+      throw this.mapJwtError(error);
     }
   }
 
