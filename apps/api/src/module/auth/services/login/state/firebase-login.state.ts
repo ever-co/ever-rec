@@ -1,11 +1,11 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { LoginState } from '../interfaces/login-state.interface';
-import { LoginContext } from '../login.context';
 import { GauzyLoginState } from './gauzy-login.state';
 import { AuthenticationService, ILoginProps } from '../../authentication.service';
 import { ResStatusEnum } from '../../../../../enums/ResStatusEnum';
 import { GAUZY_AVAILABLE } from '../../../../gauzy';
 import { AuthProviderId } from '../../../interfaces/auth.interface';
+import { AuthContext } from '../../auth.context';
 
 
 @Injectable()
@@ -17,7 +17,7 @@ export class FirebaseLoginState implements LoginState {
     @Inject(GAUZY_AVAILABLE)
     private readonly isGauzyAvailable: boolean
   ) { }
-  public async handle(context: LoginContext, payload: ILoginProps): Promise<void> {
+  public async handle(context: AuthContext, payload: ILoginProps): Promise<void> {
 
     const { data, status, message } = await this.firebaseAuthService.login(payload);
 

@@ -1,9 +1,9 @@
 import { ILoginProps } from "../../authentication.service";
-import type { LoginContext } from "../login.context";
 import { AuthStateResult, AuthState, AuthProviderId } from '../../../interfaces/auth.interface';
+import { AuthContext } from "../../auth.context";
 
 
-export type LoginState = AuthState<LoginContext, ILoginProps>;
+export type LoginState = AuthState<AuthContext, ILoginProps>;
 
 export type LoginStateResult<T = any> = AuthStateResult<T>
 

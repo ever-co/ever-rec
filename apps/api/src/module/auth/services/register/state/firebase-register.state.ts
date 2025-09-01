@@ -2,10 +2,10 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { AuthenticationService, IRegisterProps } from '../../authentication.service';
 import { RegisterState } from '../interfaces/register-state.interface';
 import { GauzyRegisterState } from './gauzy-register.state';
-import { RegisterContext } from '../register.context';
 import { ResStatusEnum } from 'src/enums/ResStatusEnum';
 import { GAUZY_AVAILABLE } from '../../../../gauzy';
 import { AuthProviderId } from '../../../interfaces/auth.interface';
+import { AuthContext } from '../../auth.context';
 
 
 @Injectable()
@@ -17,7 +17,7 @@ export class FirebaseRegisterState implements RegisterState {
     @Inject(GAUZY_AVAILABLE)
     private readonly isGauzyAvailable: boolean
   ) { }
-  public async handle(context: RegisterContext, payload: IRegisterProps): Promise<void> {
+  public async handle(context: AuthContext, payload: IRegisterProps): Promise<void> {
 
     const { data, status, message } = await this.firebaseAuthService.register(payload);
 

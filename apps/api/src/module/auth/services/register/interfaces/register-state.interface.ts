@@ -1,8 +1,8 @@
 import { AuthProviderId, AuthState, AuthStateResult } from "../../../interfaces/auth.interface";
+import { AuthContext } from "../../auth.context";
 import { IRegisterProps } from "../../authentication.service";
-import type { RegisterContext } from "../register.context";
 
-export type RegisterState = AuthState<RegisterContext, IRegisterProps>
+export type RegisterState = AuthState<AuthContext, IRegisterProps>
 
 export type RegisterStateResult<T = any> = AuthStateResult<T>
 
