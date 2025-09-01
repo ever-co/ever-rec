@@ -1,10 +1,10 @@
 import { IRefreshTokenContext, TokenState } from '../interfaces/token.interface';
-import { StateId } from '../../login/interfaces/login-state.interface';
+import { AuthProviderId } from '../../../interfaces/auth.interface';
 import { BadRequestException } from '@nestjs/common';
 
 export abstract class BaseStrategyState<T> implements TokenState<T> {
   private nextState?: TokenState<T>;
-  public tokenId: StateId;
+  public providerId: AuthProviderId;
 
   public setNext(next: TokenState<T>): TokenState<T> {
     this.nextState = next;

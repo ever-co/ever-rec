@@ -3,7 +3,7 @@ import { GauzyAuthService } from '../../../../gauzy';
 import { IRefreshTokenContext, TokenRefreshResponse } from '../interfaces/token.interface';
 import { RefreshStrategyState } from '../states/refresh-strategy.state';
 import { UnifiedRefreshStrategy } from './unified-refresh.strategy';
-import { StateId } from '../../login/interfaces/login-state.interface';
+import { AuthProviderId } from '../../../interfaces/auth.interface';
 
 
 @Injectable()
@@ -15,7 +15,7 @@ export class GauzyRefreshStrategy extends RefreshStrategyState {
   ) {
     super();
 
-    this.tokenId = StateId.GAUZY;
+    this.providerId = AuthProviderId.GAUZY;
   }
 
   async supports(refreshToken: string): Promise<boolean> {
@@ -37,7 +37,7 @@ export class GauzyRefreshStrategy extends RefreshStrategyState {
       expiresAt,
     };
 
-    result.set(this.tokenId, {
+    result.set(this.providerId, {
       accessToken: token,
       refreshToken,
       data: response
@@ -47,7 +47,7 @@ export class GauzyRefreshStrategy extends RefreshStrategyState {
 
     this.logger.log('Gauzy tokens refreshed.');
 
-    return result.get(this.tokenId).data;
+    return result.get(this.providerId).data;
   }
 
   private validateResponse(token: string): void {

@@ -3,8 +3,9 @@ import {
   Injectable,
 } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
-import { ContextResult, LoginStateResult, StateId } from "../../login/interfaces/login-state.interface";
+import { ContextResult, LoginStateResult } from "../../login/interfaces/login-state.interface";
 import { TokenStorageService } from "../token-storage.service";
+import { AuthProviderId } from '../../../interfaces/auth.interface';
 
 @Injectable()
 export class MergeTokenPolicy {
@@ -54,12 +55,12 @@ export class MergeTokenPolicy {
       }
 
       // 3. Decode stored token → reconstruct context
-      const deserialized = await this.verify<Record<StateId, LoginStateResult>>(
+      const deserialized = await this.verify<Record<AuthProviderId, LoginStateResult>>(
         stored.token,
       );
 
-      return new Map<StateId, LoginStateResult>(
-        Object.entries(deserialized) as [StateId, LoginStateResult][],
+      return new Map<AuthProviderId, LoginStateResult>(
+        Object.entries(deserialized) as [AuthProviderId, LoginStateResult][],
       );
     } catch (error: any) {
       throw this.mapJwtError(error);

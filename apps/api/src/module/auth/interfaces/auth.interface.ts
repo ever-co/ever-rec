@@ -7,3 +7,8 @@ export interface AuthStateResult<T = any> {
   refreshToken: string,
   data: T
 }
+
+export enum AuthProviderId {
+  FIREBASE = 'firebase',
+  GAUZY = 'gauzy'
+}

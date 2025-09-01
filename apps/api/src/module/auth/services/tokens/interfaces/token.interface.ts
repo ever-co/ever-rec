@@ -1,4 +1,5 @@
-import { ContextResult, StateId } from "../../login/interfaces/login-state.interface";
+import { AuthProviderId } from "../../../interfaces/auth.interface";
+import { ContextResult } from "../../login/interfaces/login-state.interface";
 import { MergeTokenPolicy } from "../policies/merge-token.policy";
 
 export interface TokenRefreshResponse {
@@ -16,7 +17,7 @@ export interface IRefreshTokenContext {
 }
 
 export interface TokenState<T> {
-  tokenId: StateId,
+  providerId: AuthProviderId,
   setNext(next: TokenState<T>): TokenState<T>;
   resolve(context: IRefreshTokenContext): Promise<T>;
 }

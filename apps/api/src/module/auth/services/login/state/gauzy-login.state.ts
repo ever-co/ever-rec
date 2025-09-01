@@ -1,12 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { LoginState, StateId } from '../interfaces/login-state.interface';
+import { LoginState } from '../interfaces/login-state.interface';
 import { LoginContext } from '../login.context';
 import { GauzyAuthService } from '../../../../gauzy';
 import { ILoginProps } from '../../authentication.service';
+import { AuthProviderId } from '../../../interfaces/auth.interface';
 
 @Injectable()
 export class GauzyLoginState implements LoginState {
-  public readonly ID = StateId.GAUZY;
+  public readonly ID = AuthProviderId.GAUZY;
   constructor(private readonly gauzyAuthService: GauzyAuthService) { }
   public async handle(context: LoginContext, payload: ILoginProps): Promise<void> {
 

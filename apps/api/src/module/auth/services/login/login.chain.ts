@@ -3,9 +3,9 @@ import { LoginContext } from './login.context';
 import { FirebaseLoginState } from './state/firebase-login.state';
 import { ILoginProps } from '../authentication.service';
 import { sendError, sendResponse } from '../../../../services/utils/sendResponse';
-import { StateId } from './interfaces/login-state.interface';
 import { MergeTokenPolicy } from '../tokens/policies/merge-token.policy';
 import { IDataResponse } from '../../../../interfaces/_types';
+import { AuthProviderId } from '../../interfaces/auth.interface';
 
 
 @Injectable()
@@ -17,7 +17,7 @@ export class LoginChain {
       await context.request(payload);
       const refreshToken = await context.merge();
       return sendResponse({
-        ...context.result.get(StateId.FIREBASE).data,
+        ...context.result.get(AuthProviderId.FIREBASE).data,
         refreshToken
       })
     } catch (error) {

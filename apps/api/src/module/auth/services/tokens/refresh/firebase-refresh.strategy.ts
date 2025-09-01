@@ -5,7 +5,7 @@ import { IRefreshTokenContext, TokenRefreshResponse } from '../interfaces/token.
 import { RefreshStrategyState } from '../states/refresh-strategy.state';
 import { UserFactory } from '../user.factory';
 import { GauzyRefreshStrategy } from './gauzy-refresh.strategy';
-import { StateId } from '../../login/interfaces/login-state.interface';
+import { AuthProviderId } from '../../../interfaces/auth.interface';
 import { GAUZY_AVAILABLE } from '../../../../gauzy';
 
 @Injectable()
@@ -21,7 +21,7 @@ export class FirebaseRefreshStrategy extends RefreshStrategyState {
   ) {
     super();
 
-    this.tokenId = StateId.FIREBASE;
+    this.providerId = AuthProviderId.FIREBASE;
   }
 
   public async supports(refreshToken: string): Promise<boolean> {
@@ -48,7 +48,7 @@ export class FirebaseRefreshStrategy extends RefreshStrategyState {
       expiresAt,
     };
 
-    result.set(this.tokenId, {
+    result.set(this.providerId, {
       accessToken: data.id_token,
       refreshToken: data.refresh_token,
       data: response
@@ -60,6 +60,6 @@ export class FirebaseRefreshStrategy extends RefreshStrategyState {
 
     this.logger.log('Firebase tokens refreshed');
 
-    return result.get(this.tokenId).data;
+    return result.get(this.providerId).data;
   }
 }

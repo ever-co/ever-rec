@@ -1,17 +1,17 @@
 import { IRegisterProps } from "../authentication.service";
 import type { ContextResult, RegisterState, RegisterStateResult, } from "./interfaces/register-state.interface";
 import { MergeTokenPolicy } from '../tokens/policies/merge-token.policy';
-import { StateId } from "../login/interfaces/login-state.interface";
+import { AuthProviderId, AuthState } from '../../interfaces/auth.interface';
 
 export class RegisterContext {
   private state: RegisterState;
-  public readonly result: ContextResult = new Map<StateId, RegisterStateResult>();
+  public readonly result: ContextResult = new Map<AuthProviderId, RegisterStateResult>();
 
   constructor(initialState: RegisterState, private readonly mergeTokenPolicy: MergeTokenPolicy) {
     this.state = initialState;
   }
 
-  public setState(state: RegisterState) {
+  public setState(state: AuthState) {
     this.state = state;
   }
 

@@ -4,7 +4,7 @@ import { sendError, sendResponse } from '../../../../services/utils/sendResponse
 import { MergeTokenPolicy } from '../tokens/policies/merge-token.policy';
 import { FirebaseRegisterState } from './state/firebase-register.state';
 import { RegisterContext } from './register.context';
-import { StateId } from '../login/interfaces/login-state.interface';
+import { AuthProviderId } from '../../interfaces/auth.interface';
 import { IDataResponse } from '../../../../interfaces/_types';
 
 
@@ -16,7 +16,7 @@ export class RegisterChain {
       const context = new RegisterContext(this.firebaseRegisterState, this.mergeTokenPolicy);
       await context.request(payload);
       const refreshToken = await context.merge();
-      const firebase = context.result.get(StateId.FIREBASE);
+      const firebase = context.result.get(AuthProviderId.FIREBASE);
 
       if (!firebase?.data) {
         throw new InternalServerErrorException('Missing FIREBASE register state result');

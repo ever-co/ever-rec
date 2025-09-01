@@ -3,13 +3,13 @@ import { BaseStrategyState } from './base-strategy.state';
 
 export abstract class ValidateStrategyState extends BaseStrategyState<void> {
   protected async getToken(context: IRefreshTokenContext): Promise<string> {
-    if (!this.tokenId) {
+    if (!this.providerId) {
       return context.token;
     }
 
     const currentCtx = await context.current();
-    const ctx = currentCtx?.get(this.tokenId);
+    const provider = currentCtx?.get(this.providerId);
 
-    return ctx?.accessToken ?? context.token;
+    return provider?.accessToken ?? context.token;
   }
 }
