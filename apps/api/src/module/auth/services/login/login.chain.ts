@@ -18,7 +18,7 @@ export class LoginChain {
       await context.request(payload);
       const refreshToken = await context.merge();
       return sendResponse({
-        ...context.result.get(AuthProviderId.FIREBASE).data,
+        ...context.getResults().get(AuthProviderId.FIREBASE).data,
         refreshToken
       })
     } catch (error) {

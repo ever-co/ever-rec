@@ -3,7 +3,7 @@ import { MergeTokenPolicy } from "./tokens/policies/merge-token.policy";
 
 export class AuthContext<T = unknown> {
   private state: AuthState;
-  public readonly result = new Map<AuthProviderId, AuthStateResult<T>>();
+  private readonly result = new Map<AuthProviderId, AuthStateResult<T>>();
 
   constructor(initialState: AuthState, private readonly mergeTokenPolicy: MergeTokenPolicy) {
     this.state = initialState;
@@ -11,6 +11,14 @@ export class AuthContext<T = unknown> {
 
   public setState(state: AuthState): void {
     this.state = state;
+  }
+
+  public setResult(provider: AuthProviderId, value: AuthStateResult<T>): void {
+    this.result.set(provider, value);
+  }
+
+  public getResults(): ReadonlyMap<AuthProviderId, AuthStateResult<T>> {
+    return this.result;
   }
 
   public async request<P>(payload: P): Promise<void> {

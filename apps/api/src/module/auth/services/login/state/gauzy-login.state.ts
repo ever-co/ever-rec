@@ -14,7 +14,7 @@ export class GauzyLoginState implements LoginState {
   public async handle(context: AuthContext<IUser>, payload: ILoginProps): Promise<void> {
 
     const { data } = await this.gauzyAuthService.login(payload);
-    context.result.set(this.ID, {
+    context.setResult(this.ID, {
       refreshToken: data.refresh_token,
       accessToken: data.token,
       data: GauzyMapper.toUser(data.user)

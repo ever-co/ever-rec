@@ -26,7 +26,7 @@ export class FirebaseRegisterState implements RegisterState {
       throw new BadRequestException(message);
     }
 
-    context.result.set(this.ID, {
+    context.setResult(this.ID, {
       refreshToken: data.refreshToken,
       accessToken: data.idToken,
       data

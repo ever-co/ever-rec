@@ -17,7 +17,7 @@ export class RegisterChain {
       const context = new AuthContext<IUser>(this.firebaseRegisterState, this.mergeTokenPolicy);
       await context.request(payload);
       const refreshToken = await context.merge();
-      const firebase = context.result.get(AuthProviderId.FIREBASE);
+      const firebase = context.getResults().get(AuthProviderId.FIREBASE);
 
       if (!firebase?.data) {
         throw new InternalServerErrorException('Missing FIREBASE register state result');
