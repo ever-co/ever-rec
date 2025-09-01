@@ -20,10 +20,10 @@ export class MergeTokenPolicy {
    */
   public async encode<T>(ctx: AuthContextResult<T>): Promise<string> {
     try {
-      const plainObj = Object.fromEntries(ctx.entries());
+      const entries = Array.from(ctx.entries());
 
       // Sign the full context
-      const serializedToken = await this.sign(plainObj);
+      const serializedToken = await this.sign({ entries });
 
       // Store and return a reference token containing only the storage id
       const { id } = await this.tokenStorageService.save(serializedToken);
@@ -54,13 +54,8 @@ export class MergeTokenPolicy {
       }
 
       // 3. Decode stored token → reconstruct context
-      const deserialized = await this.verify<Record<AuthProviderId, AuthStateResult>>(
-        stored.token,
-      );
-
-      return new Map<AuthProviderId, AuthStateResult>(
-        Object.entries(deserialized) as [AuthProviderId, AuthStateResult][],
-      );
+      const deserialized = await this.verify<{ entries: [AuthProviderId, AuthStateResult][] }>(stored.token);
+      return new Map<AuthProviderId, AuthStateResult>(deserialized.entries);
     } catch (error: any) {
       throw this.mapJwtError(error);
     }
