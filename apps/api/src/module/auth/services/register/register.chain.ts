@@ -9,10 +9,10 @@ import { StateId } from '../login/interfaces/login-state.interface';
 
 @Injectable()
 export class RegisterChain {
-  constructor(private readonly firebaseLoginState: FirebaseRegisterState, private readonly mergeTokenPolicy: MergeTokenPolicy) { }
+  constructor(private readonly firebaseRegisterState: FirebaseRegisterState, private readonly mergeTokenPolicy: MergeTokenPolicy) { }
   public async execute(payload: IRegisterProps): Promise<any> {
     try {
-      const context = new RegisterContext(this.firebaseLoginState, this.mergeTokenPolicy);
+      const context = new RegisterContext(this.firebaseRegisterState, this.mergeTokenPolicy);
       await context.request(payload);
       const refreshToken = await context.merge();
       return sendResponse({
