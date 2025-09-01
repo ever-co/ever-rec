@@ -28,7 +28,7 @@ import { FirebaseRegisterState, GauzyRegisterState, RegisterChain } from './serv
     imports: [ConfigModule],
     useFactory: async (configService: ConfigService): Promise<JwtModuleOptions> =>
     ({
-      secret: configService.get<string>('REC_JWT_SECRET', 'rec-secret'),
+      secret: configService.get<string>('REC_JWT_SECRET') || (() => { throw new Error('REC_JWT_SECRET environment variable is required') })(),
       signOptions: {
         expiresIn: configService.get<string>('REC_JWT_EXPIRES_IN', '1h'),
         audience: configService.get<string>('REC_JWT_AUDIENCE', 'ever-rec'),
