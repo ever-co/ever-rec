@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { IRegisterProps } from '../authentication.service';
 import { sendError, sendResponse } from 'src/services/utils/sendResponse';
 import { MergeTokenPolicy } from '../tokens/policies/merge-token.policy';
@@ -16,8 +16,14 @@ export class RegisterChain {
       const context = new RegisterContext(this.firebaseRegisterState, this.mergeTokenPolicy);
       await context.request(payload);
       const refreshToken = await context.merge();
+      const firebase = context.result.get(StateId.FIREBASE);
+
+      if (!firebase?.data) {
+        throw new InternalServerErrorException('Missing FIREBASE register state result');
+      }
+
       return sendResponse({
-        ...context.result.get(StateId.FIREBASE).data,
+        ...firebase.data,
         refreshToken
       })
     } catch (error) {
