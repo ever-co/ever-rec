@@ -35,17 +35,17 @@ export class GauzyRefreshStrategy extends RefreshStrategyState {
       idToken: token,
       refreshToken,
       expiresAt,
-    }
+    };
 
     result.set(this.tokenId, {
       accessToken: token,
       refreshToken,
       data: response
-    })
+    });
 
     this.setNext(this.unifiedRefreshStrategy);
 
-    this.logger.log('Gauzy tokens refreshed.')
+    this.logger.log('Gauzy tokens refreshed.');
 
     return result.get(this.tokenId).data;
   }

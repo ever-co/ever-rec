@@ -44,17 +44,17 @@ export class FirebaseRefreshStrategy extends RefreshStrategyState {
       idToken: data.id_token,
       refreshToken: data.refresh_token,
       expiresAt,
-    }
+    };
 
     result.set(this.tokenId, {
       accessToken: data.id_token,
       refreshToken: data.refresh_token,
       data: response
-    })
+    });
 
     this.setNext(this.gauzyRefreshStrategy);
 
-    this.logger.log('Firebase tokens refreshed')
+    this.logger.log('Firebase tokens refreshed');
 
     return result.get(this.tokenId).data;
   }
