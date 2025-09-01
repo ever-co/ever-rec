@@ -7,24 +7,24 @@ import { FirebaseValidateStrategy } from './refresh/validations/firebase-validat
 
 @Injectable()
 export class TokenStrategyChain {
-  private refreshHead: TokenState<TokenRefreshResponse>;
-  private validateHead: TokenState<void>;
+  private refresh: TokenState<TokenRefreshResponse>;
+  private validate: TokenState<void>;
 
   constructor(
     private readonly firebaseRefreshStrategy: FirebaseRefreshStrategy,
     private readonly firebaseValidateStrategy: FirebaseValidateStrategy,
     private readonly mergeTokenPolicy: MergeTokenPolicy) {
-    this.refreshHead = this.firebaseRefreshStrategy;
-    this.validateHead = this.firebaseValidateStrategy;
+    this.refresh = this.firebaseRefreshStrategy;
+    this.validate = this.firebaseValidateStrategy;
   }
 
   public async resolveRefresh(refreshToken: string, request: any): Promise<TokenRefreshResponse> {
     const context = new RefreshTokenContext(refreshToken, request, this.mergeTokenPolicy);
-    return this.refreshHead.resolve(context);
+    return this.refresh.resolve(context);
   }
 
   public async resolveValidation(token: string, request: any): Promise<void> {
     const context = new RefreshTokenContext(token, request, this.mergeTokenPolicy);
-    return this.validateHead.resolve(context);
+    return this.validate.resolve(context);
   }
 }
