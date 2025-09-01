@@ -1,6 +1,6 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { IRegisterProps } from '../authentication.service';
-import { sendError, sendResponse } from 'src/services/utils/sendResponse';
+import { sendError, sendResponse } from '../../../../services/utils/sendResponse';
 import { MergeTokenPolicy } from '../tokens/policies/merge-token.policy';
 import { FirebaseRegisterState } from './state/firebase-register.state';
 import { RegisterContext } from './register.context';

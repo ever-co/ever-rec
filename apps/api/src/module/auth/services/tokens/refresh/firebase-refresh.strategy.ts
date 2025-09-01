@@ -1,11 +1,12 @@
-import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
-import { FirebaseAdminService } from 'src/module/firebase/services/firebase-admin.service';
-import { FirebaseRestService } from 'src/module/firebase/services/firebase-rest.service';
+import { Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { FirebaseAdminService } from '../../../../firebase/services/firebase-admin.service';
+import { FirebaseRestService } from '../../../../firebase/services/firebase-rest.service';
 import { IRefreshTokenContext, TokenRefreshResponse } from '../interfaces/token.interface';
 import { RefreshStrategyState } from '../states/refresh-strategy.state';
 import { UserFactory } from '../user.factory';
 import { GauzyRefreshStrategy } from './gauzy-refresh.strategy';
 import { StateId } from '../../login/interfaces/login-state.interface';
+import { GAUZY_AVAILABLE } from '../../../../gauzy';
 
 @Injectable()
 export class FirebaseRefreshStrategy extends RefreshStrategyState {
@@ -14,7 +15,9 @@ export class FirebaseRefreshStrategy extends RefreshStrategyState {
     private readonly firebaseRest: FirebaseRestService,
     private readonly userFactory: UserFactory,
     private readonly firebaseAdmin: FirebaseAdminService,
-    private readonly gauzyRefreshStrategy: GauzyRefreshStrategy
+    private readonly gauzyRefreshStrategy: GauzyRefreshStrategy,
+    @Inject(GAUZY_AVAILABLE)
+    private readonly isGauzyAvailable: boolean
   ) {
     super();
 
@@ -51,7 +54,9 @@ export class FirebaseRefreshStrategy extends RefreshStrategyState {
       data: response
     });
 
-    this.setNext(this.gauzyRefreshStrategy);
+    if (this.isGauzyAvailable) {
+      this.setNext(this.gauzyRefreshStrategy);
+    }
 
     this.logger.log('Firebase tokens refreshed');
 

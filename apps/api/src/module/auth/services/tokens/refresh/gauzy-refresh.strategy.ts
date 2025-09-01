@@ -1,5 +1,5 @@
 import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
-import { GauzyAuthService } from 'src/module/gauzy';
+import { GauzyAuthService } from '../../../../gauzy';
 import { IRefreshTokenContext, TokenRefreshResponse } from '../interfaces/token.interface';
 import { RefreshStrategyState } from '../states/refresh-strategy.state';
 import { UnifiedRefreshStrategy } from './unified-refresh.strategy';

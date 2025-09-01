@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { LoginContext } from './login.context';
 import { FirebaseLoginState } from './state/firebase-login.state';
 import { ILoginProps } from '../authentication.service';
-import { sendError, sendResponse } from 'src/services/utils/sendResponse';
+import { sendError, sendResponse } from '../../../../services/utils/sendResponse';
 import { StateId } from './interfaces/login-state.interface';
 import { MergeTokenPolicy } from '../tokens/policies/merge-token.policy';
 import { IDataResponse } from '../../../../interfaces/_types';

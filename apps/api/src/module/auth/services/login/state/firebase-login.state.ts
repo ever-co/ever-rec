@@ -1,9 +1,10 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { LoginState, StateId } from '../interfaces/login-state.interface';
 import { LoginContext } from '../login.context';
 import { GauzyLoginState } from './gauzy-login.state';
 import { AuthenticationService, ILoginProps } from '../../authentication.service';
 import { ResStatusEnum } from 'src/enums/ResStatusEnum';
+import { GAUZY_AVAILABLE } from 'src/module/gauzy';
 
 
 @Injectable()
@@ -11,7 +12,9 @@ export class FirebaseLoginState implements LoginState {
   public readonly ID = StateId.FIREBASE;
   constructor(
     private readonly firebaseAuthService: AuthenticationService,
-    private readonly gauzyLoginState: GauzyLoginState
+    private readonly gauzyLoginState: GauzyLoginState,
+    @Inject(GAUZY_AVAILABLE)
+    private readonly isGauzyAvailable: boolean
   ) { }
   public async handle(context: LoginContext, payload: ILoginProps): Promise<void> {
 
@@ -26,6 +29,8 @@ export class FirebaseLoginState implements LoginState {
       accessToken: data.idToken,
       data
     });
+
+    if (!this.isGauzyAvailable) return;
 
     context.setState(this.gauzyLoginState);
 
