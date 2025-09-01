@@ -18,7 +18,7 @@ export class AuthContext<T = unknown> {
   }
 
   public getResults(): ReadonlyMap<AuthProviderId, AuthStateResult<T>> {
-    return this.result;
+    return new Map(this.result);
   }
 
   public async request<P>(payload: P): Promise<void> {
