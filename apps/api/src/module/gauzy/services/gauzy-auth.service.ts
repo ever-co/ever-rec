@@ -15,11 +15,11 @@ export class GauzyAuthService {
   }
 
   public async register(input: IRegisterProps) {
-    const dto = GauzyMapper.persitance(input);
+    const dto = GauzyMapper.toPersistence(input);
     return this.gauzyRestService.post<IGauzyRegisterProps, IAuthResponse>('auth/register', dto);
   }
 
   public async refreshToken(value: string) {
-    return this.gauzyRestService.post<{ refresh_token: string }, { token: string }>('auth/refresh-token', { refresh_token: value })
+    return this.gauzyRestService.post<{ refresh_token: string }, { token: string }>('auth/refresh-token', { refresh_token: value });
   }
 }

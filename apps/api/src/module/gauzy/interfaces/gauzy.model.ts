@@ -1,38 +1,52 @@
-import { IRegisterProps } from "src/module/auth/services/authentication.service";
+import { IRegisterProps } from "../../auth/services/authentication.service";
 
 export interface IAuthResponse {
-  user: {
-    id?: string;
-    name?: string;
-    email?: string;
-    phoneNumber?: string;
-    username?: string;
-    imageUrl?: string;
-    employeeId?: string;
-    fullName?: string;
-    emailVerifiedAt?: Date;
-    lastLoginAt?: Date;
-    isEmailVerified?: boolean;
-  };
+  user: IAuthUser;
   token: string;
   refresh_token?: string;
 }
 
+export interface IAuthUser {
+  id?: string;
+  name?: string;
+  email?: string;
+  phoneNumber?: string;
+  username?: string;
+  imageUrl?: string;
+  employeeId?: string;
+  fullName?: string;
+  emailVerifiedAt?: Date;
+  lastLoginAt?: Date;
+  isEmailVerified?: boolean;
+}
+
 export interface IGauzyRegisterProps {
-  password: string,
-  confirmPassword: string,
+  password: string;
+  confirmPassword: string;
   user: {
-    email: string,
-    firstName: string,
-    lastName: string,
-    preferredLanguage: string
+    email: string;
+    firstName: string;
+    lastName: string;
+    preferredLanguage: string;
+  };
+}
+
+export interface IRefreshTokenResponse {
+  token: string;
+  refresh_token?: string;
+}
+
+export class NameParseError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'NameParseError';
   }
 }
 
 export class GauzyMapper {
-  public static persitance(input: IRegisterProps): IGauzyRegisterProps {
-    const firstName = input.username.split(' ')[0];
-    const lastName = input.username.split(' ')[1];
+  public static toPersistence(input: IRegisterProps): IGauzyRegisterProps {
+    const { firstName, lastName } = this.parseFullName(input.username);
+
     return {
       password: input.password,
       confirmPassword: input.password,
@@ -42,6 +56,23 @@ export class GauzyMapper {
         lastName,
         preferredLanguage: "en"
       }
+    };
+  }
+
+  private static parseFullName(fullName: string): { firstName: string; lastName: string } {
+    if (!fullName?.trim()) {
+      throw new NameParseError('Full name cannot be empty');
     }
+
+    const names = fullName.trim().split(/\s+/);
+
+    if (names.length < 2) {
+      throw new NameParseError('Full name must contain at least first and last name');
+    }
+
+    const firstName = names[0];
+    const lastName = names.slice(1).join(' ');
+
+    return { firstName, lastName };
   }
 }
