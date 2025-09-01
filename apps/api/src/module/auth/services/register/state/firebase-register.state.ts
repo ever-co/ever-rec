@@ -6,6 +6,7 @@ import { ResStatusEnum } from 'src/enums/ResStatusEnum';
 import { GAUZY_AVAILABLE } from '../../../../gauzy';
 import { AuthProviderId } from '../../../interfaces/auth.interface';
 import { AuthContext } from '../../auth.context';
+import { IUser } from '../../../../../interfaces/IUser';
 
 
 @Injectable()
@@ -17,7 +18,7 @@ export class FirebaseRegisterState implements RegisterState {
     @Inject(GAUZY_AVAILABLE)
     private readonly isGauzyAvailable: boolean
   ) { }
-  public async handle(context: AuthContext, payload: IRegisterProps): Promise<void> {
+  public async handle(context: AuthContext<IUser>, payload: IRegisterProps): Promise<void> {
 
     const { data, status, message } = await this.firebaseAuthService.register(payload);
 

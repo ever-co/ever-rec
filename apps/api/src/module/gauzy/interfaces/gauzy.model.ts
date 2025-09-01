@@ -1,12 +1,13 @@
+import { IUser } from '../../../interfaces/IUser';
 import { IRegisterProps } from "../../auth/services/authentication.service";
 
 export interface IAuthResponse {
-  user: IAuthUser;
+  user: IGauzyUser;
   token: string;
   refresh_token?: string;
 }
 
-export interface IAuthUser {
+export interface IGauzyUser {
   id?: string;
   name?: string;
   email?: string;
@@ -57,6 +58,16 @@ export class GauzyMapper {
         preferredLanguage: "en"
       }
     };
+  }
+
+  public static toUser(user: IGauzyUser): IUser {
+    return {
+      id: user.id,
+      email: user.email,
+      displayName: user.fullName,
+      isVerified: user.isEmailVerified,
+      photoURL: user.imageUrl
+    }
   }
 
   private static parseFullName(fullName: string): { firstName: string; lastName: string } {

@@ -52,7 +52,7 @@ export class GauzyRefreshStrategy extends RefreshStrategyState {
 
   private validateResponse(token: string): void {
     if (!token || typeof token !== 'string') {
-      throw new UnauthorizedException('Invalid gaauzy refresh response');
+      throw new UnauthorizedException('Invalid gauzy refresh response');
     }
   }
 }

@@ -9,7 +9,7 @@ export class RefreshTokenContext implements IRefreshTokenContext {
     this.result = new Map<AuthProviderId, AuthStateResult<TokenRefreshResponse>>();
   }
 
-  public async current(): Promise<AuthContextResult> {
+  public async current(): Promise<AuthContextResult<TokenRefreshResponse>> {
     const isValid = await this.mergeTokenPolicy.isValid(this.token);
 
     if (!isValid) {

@@ -7,12 +7,12 @@ export interface TokenRefreshResponse {
   expiresAt: string;
 }
 
-export interface IRefreshTokenContext {
+export interface IRefreshTokenContext<T = unknown> {
   readonly token: string;
   readonly request: any;
   readonly result: AuthContextResult<TokenRefreshResponse>;
   readonly mergeTokenPolicy: MergeTokenPolicy;
-  current(): Promise<AuthContextResult>
+  current(): Promise<AuthContextResult<T>>
 }
 
 export interface TokenState<T> {

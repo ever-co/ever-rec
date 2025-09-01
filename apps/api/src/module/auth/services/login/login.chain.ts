@@ -6,6 +6,7 @@ import { MergeTokenPolicy } from '../tokens/policies/merge-token.policy';
 import { IDataResponse } from '../../../../interfaces/_types';
 import { AuthProviderId } from '../../interfaces/auth.interface';
 import { AuthContext } from '../auth.context';
+import { IUser } from '../../../../interfaces/IUser';
 
 
 @Injectable()
@@ -13,7 +14,7 @@ export class LoginChain {
   constructor(private readonly firebaseLoginState: FirebaseLoginState, private readonly mergeTokenPolicy: MergeTokenPolicy) { }
   public async execute(payload: ILoginProps): Promise<IDataResponse> {
     try {
-      const context = new AuthContext(this.firebaseLoginState, this.mergeTokenPolicy);
+      const context = new AuthContext<IUser>(this.firebaseLoginState, this.mergeTokenPolicy);
       await context.request(payload);
       const refreshToken = await context.merge();
       return sendResponse({

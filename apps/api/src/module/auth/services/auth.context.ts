@@ -1,9 +1,9 @@
 import { AuthProviderId, AuthState, AuthStateResult } from "../interfaces/auth.interface";
 import { MergeTokenPolicy } from "./tokens/policies/merge-token.policy";
 
-export class AuthContext {
+export class AuthContext<T = unknown> {
   private state: AuthState;
-  public readonly result = new Map<AuthProviderId, AuthStateResult>();
+  public readonly result = new Map<AuthProviderId, AuthStateResult<T>>();
 
   constructor(initialState: AuthState, private readonly mergeTokenPolicy: MergeTokenPolicy) {
     this.state = initialState;

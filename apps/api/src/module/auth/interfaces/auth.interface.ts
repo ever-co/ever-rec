@@ -1,14 +1,14 @@
-export interface AuthState<T = any, U = any> {
+export interface AuthState<T = unknown, U = unknown> {
   handle(context: T, payload: U): Promise<void>;
 }
 
-export interface AuthStateResult<T = any> {
-  accessToken: string,
-  refreshToken: string,
-  data: T
+export interface AuthStateResult<T = unknown> {
+  accessToken: string;
+  refreshToken: string;
+  data: T;
 }
 
-export type AuthContextResult<U = any> = Map<AuthProviderId, AuthStateResult<U>>;
+export type AuthContextResult<U = unknown> = Map<AuthProviderId, AuthStateResult<U>>;
 
 export enum AuthProviderId {
   FIREBASE = 'firebase',

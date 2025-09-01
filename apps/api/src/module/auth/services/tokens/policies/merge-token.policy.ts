@@ -54,8 +54,8 @@ export class MergeTokenPolicy {
       }
 
       // 3. Decode stored token → reconstruct context
-      const deserialized = await this.verify<{ entries: [AuthProviderId, AuthStateResult][] }>(stored.token);
-      return new Map<AuthProviderId, AuthStateResult>(deserialized.entries);
+      const deserialized = await this.verify<{ entries: [AuthProviderId, AuthStateResult<T>][] }>(stored.token);
+      return new Map<AuthProviderId, AuthStateResult<T>>(deserialized.entries);
     } catch (error: any) {
       throw this.mapJwtError(error);
     }
