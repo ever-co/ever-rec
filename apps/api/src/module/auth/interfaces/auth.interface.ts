@@ -8,6 +8,8 @@ export interface AuthStateResult<T = any> {
   data: T
 }
 
+export type AuthContextResult<U = any> = Map<AuthProviderId, AuthStateResult<U>>;
+
 export enum AuthProviderId {
   FIREBASE = 'firebase',
   GAUZY = 'gauzy'

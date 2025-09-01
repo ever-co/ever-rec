@@ -21,7 +21,7 @@ export class FirebaseLoginState implements LoginState {
 
     const { data, status, message } = await this.firebaseAuthService.login(payload);
 
-    if (status === ResStatusEnum.error) {
+    if (status === ResStatusEnum.error || !data) {
       throw new BadRequestException(message);
     }
 

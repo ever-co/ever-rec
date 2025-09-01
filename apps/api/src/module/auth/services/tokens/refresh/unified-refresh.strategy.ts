@@ -1,9 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { LoginStateResult } from '../../login/interfaces/login-state.interface';
 import { IRefreshTokenContext, TokenRefreshResponse } from '../interfaces/token.interface';
 import { MergeTokenPolicy } from '../policies/merge-token.policy';
 import { RefreshStrategyState } from '../states/refresh-strategy.state';
-import { AuthProviderId } from '../../../interfaces/auth.interface';
+import { AuthProviderId, AuthStateResult } from '../../../interfaces/auth.interface';
 
 @Injectable()
 export class UnifiedRefreshStrategy extends RefreshStrategyState {
@@ -27,7 +26,7 @@ export class UnifiedRefreshStrategy extends RefreshStrategyState {
     await this.mergeTokenPolicy.revokeToken(token);
 
     // Merge all states automatically
-    const mergedMap = new Map<AuthProviderId, LoginStateResult<TokenRefreshResponse>>();
+    const mergedMap = new Map<AuthProviderId, AuthStateResult<TokenRefreshResponse>>();
 
     for (const [stateId, stateResult] of result.entries()) {
       const decodedData = context.get(stateId)?.data;

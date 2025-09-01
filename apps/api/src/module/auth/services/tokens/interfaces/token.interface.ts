@@ -1,5 +1,4 @@
-import { AuthProviderId } from "../../../interfaces/auth.interface";
-import { ContextResult } from "../../login/interfaces/login-state.interface";
+import { AuthContextResult, AuthProviderId } from "../../../interfaces/auth.interface";
 import { MergeTokenPolicy } from "../policies/merge-token.policy";
 
 export interface TokenRefreshResponse {
@@ -11,9 +10,9 @@ export interface TokenRefreshResponse {
 export interface IRefreshTokenContext {
   readonly token: string;
   readonly request: any;
-  readonly result: ContextResult<TokenRefreshResponse>;
+  readonly result: AuthContextResult<TokenRefreshResponse>;
   readonly mergeTokenPolicy: MergeTokenPolicy;
-  current(): Promise<ContextResult>
+  current(): Promise<AuthContextResult>
 }
 
 export interface TokenState<T> {

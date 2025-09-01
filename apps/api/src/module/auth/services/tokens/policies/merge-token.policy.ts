@@ -3,9 +3,8 @@ import {
   Injectable,
 } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
-import { ContextResult, LoginStateResult } from "../../login/interfaces/login-state.interface";
 import { TokenStorageService } from "../token-storage.service";
-import { AuthProviderId } from '../../../interfaces/auth.interface';
+import { AuthContextResult, AuthProviderId, AuthStateResult } from '../../../interfaces/auth.interface';
 
 @Injectable()
 export class MergeTokenPolicy {
@@ -19,7 +18,7 @@ export class MergeTokenPolicy {
    * @param ctx - Authentication context containing tokens per state.
    * @returns A signed reference token containing the storage ID.
    */
-  public async encode(ctx: ContextResult): Promise<string> {
+  public async encode<T>(ctx: AuthContextResult<T>): Promise<string> {
     try {
       const plainObj = Object.fromEntries(ctx.entries());
 
@@ -39,7 +38,7 @@ export class MergeTokenPolicy {
    * @param token - Reference token containing storage ID.
    * @returns Reconstructed authentication context.
    */
-  public async decode(token: string): Promise<ContextResult> {
+  public async decode<T>(token: string): Promise<AuthContextResult<T>> {
     if (!this.isTokenLike(token)) {
       throw new BadRequestException("Invalid token provided");
     }
@@ -55,12 +54,12 @@ export class MergeTokenPolicy {
       }
 
       // 3. Decode stored token → reconstruct context
-      const deserialized = await this.verify<Record<AuthProviderId, LoginStateResult>>(
+      const deserialized = await this.verify<Record<AuthProviderId, AuthStateResult>>(
         stored.token,
       );
 
-      return new Map<AuthProviderId, LoginStateResult>(
-        Object.entries(deserialized) as [AuthProviderId, LoginStateResult][],
+      return new Map<AuthProviderId, AuthStateResult>(
+        Object.entries(deserialized) as [AuthProviderId, AuthStateResult][],
       );
     } catch (error: any) {
       throw this.mapJwtError(error);
