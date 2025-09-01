@@ -1,7 +1,6 @@
-import { AuthState } from "src/module/auth/interfaces/auth.interface";
 import { ILoginProps } from "../../authentication.service";
-import { LoginContext } from "../login.context";
-import { AuthStateResult } from '../../../interfaces/auth.interface';
+import type { LoginContext } from "../login.context";
+import { AuthStateResult, AuthState } from '../../../interfaces/auth.interface';
 
 export enum StateId {
   FIREBASE = 'firebase',

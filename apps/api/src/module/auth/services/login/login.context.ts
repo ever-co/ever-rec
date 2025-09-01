@@ -10,7 +10,7 @@ export class LoginContext {
     this.state = initialState;
   }
 
-  public setState(state: LoginState) {
+  public setState(state: LoginState): void {
     this.state = state;
   }
 
