@@ -71,7 +71,14 @@ export class TokenStorageService {
     }
 
     const result = snapshot.val();
-    const [id, entity] = Object.entries(result)[0];
+    const entries = Object.entries(result);
+
+    if (entries.length === 0) {
+      return null;
+    }
+
+    const [id, entity] = entries[0];
+
     return { id, ...(entity as Omit<IToken, "id">) };
   }
 
