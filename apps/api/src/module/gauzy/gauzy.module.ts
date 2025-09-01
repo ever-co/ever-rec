@@ -13,7 +13,8 @@ export const GAUZY_AVAILABLE = Symbol('gauzy availability token');
     {
       provide: GAUZY_AVAILABLE,
       useFactory: (configService: ConfigService) => {
-        return !!configService.get<string>('gauzy.apiUrl');
+        const url = configService.get<string>('gauzy.apiUrl');
+        return !!(url && url.trim().length > 0);
       },
       inject: [ConfigService],
     }
