@@ -6,7 +6,7 @@ export class LoginContext {
   private state: LoginState;
   public readonly result: ContextResult = new Map<StateId, LoginStateResult>();
 
-  constructor(initialState: LoginState, private readonly mergeTokenPolicy?: MergeTokenPolicy) {
+  constructor(initialState: LoginState, private readonly mergeTokenPolicy: MergeTokenPolicy) {
     this.state = initialState;
   }
 

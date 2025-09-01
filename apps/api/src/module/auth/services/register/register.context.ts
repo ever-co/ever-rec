@@ -7,7 +7,7 @@ export class RegisterContext {
   private state: RegisterState;
   public readonly result: ContextResult = new Map<StateId, RegisterStateResult>();
 
-  constructor(initialState: RegisterState, private readonly mergeTokenPolicy?: MergeTokenPolicy) {
+  constructor(initialState: RegisterState, private readonly mergeTokenPolicy: MergeTokenPolicy) {
     this.state = initialState;
   }
 
