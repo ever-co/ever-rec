@@ -1,17 +1,6 @@
 import { ContextResult, StateId } from "../../login/interfaces/login-state.interface";
 import { MergeTokenPolicy } from "../policies/merge-token.policy";
 
-
-export interface ITokenRefreshStrategy {
-  supports(refreshToken: string): Promise<boolean>;
-  handle(context: IRefreshTokenContext): Promise<TokenRefreshResponse>;
-}
-
-export interface ITokenValidateStrategy {
-  supports(token: string): Promise<boolean>;
-  validate(context: IRefreshTokenContext): Promise<void>;
-}
-
 export interface TokenRefreshResponse {
   idToken: string;
   refreshToken: string;
