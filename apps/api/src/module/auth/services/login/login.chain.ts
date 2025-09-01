@@ -5,12 +5,13 @@ import { ILoginProps } from '../authentication.service';
 import { sendError, sendResponse } from 'src/services/utils/sendResponse';
 import { StateId } from './interfaces/login-state.interface';
 import { MergeTokenPolicy } from '../tokens/policies/merge-token.policy';
+import { IDataResponse } from '../../../../interfaces/_types';
 
 
 @Injectable()
 export class LoginChain {
   constructor(private readonly firebaseLoginState: FirebaseLoginState, private readonly mergeTokenPolicy: MergeTokenPolicy) { }
-  public async execute(payload: ILoginProps): Promise<any> {
+  public async execute(payload: ILoginProps): Promise<IDataResponse> {
     try {
       const context = new LoginContext(this.firebaseLoginState, this.mergeTokenPolicy);
       await context.request(payload);

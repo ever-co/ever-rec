@@ -20,7 +20,7 @@ export class TokenService {
   public async refreshToken(refreshToken: string, request: any): Promise<TokenRefreshResponse> {
     if (!refreshToken) throw new BadRequestException('Refresh token is required');
 
-    this.logger.debug('Refresh token has started...')
+    this.logger.debug('Refresh token has started...');
     const response = await this.chain.resolveRefresh(refreshToken, request);
 
     if (request.user?.id) {
