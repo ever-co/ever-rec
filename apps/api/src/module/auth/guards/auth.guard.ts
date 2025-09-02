@@ -36,24 +36,20 @@ export class AuthGuard implements CanActivate {
 
       return true;
     } catch (e) {
-      if (e.code === 'auth/id-token-expired') {
-        try {
-          const accessToken = request.headers['x-refresh-token'];
-          const refreshToken = request.headers.refreshtoken || accessToken;
+      try {
+        const accessToken = request.headers['x-refresh-token'];
+        const refreshToken = request.headers.refreshtoken || accessToken;
 
-          if (!refreshToken) {
-            throw new UnauthorizedException('Unauthorized user');
-          }
-
-          await this.tokenService.refreshToken(refreshToken, request);
-
-          return true;
-        } catch {
+        if (!refreshToken) {
           throw new UnauthorizedException('Unauthorized user');
         }
-      }
 
-      throw new UnauthorizedException('Unauthorized user');
+        await this.tokenService.refreshToken(refreshToken, request);
+
+        return true;
+      } catch {
+        throw new UnauthorizedException('Unauthorized user');
+      }
     }
   }
 }
