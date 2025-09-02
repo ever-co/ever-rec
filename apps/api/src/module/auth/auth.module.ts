@@ -22,6 +22,9 @@ import { GauzyRefreshStrategy } from './services/tokens/refresh/gauzy-refresh.st
 import { TokenStorageService } from './services/tokens/token-storage.service';
 import { UserProfileService } from './services/user-profile.service';
 import { UserService } from './services/user.service';
+import { GauzyRequestPasswordState } from './services/password-reset/state/gauzy-request-password.state';
+import { FirebaseRequestPasswordState } from './services/password-reset/state/firebase-request-password.state';
+import { RequestPasswordChain } from './services/password-reset/password-request.chain';
 
 @Module({
   imports: [JwtModule.registerAsync({
@@ -72,7 +75,12 @@ import { UserService } from './services/user.service';
     // Register State service
     FirebaseRegisterState,
     GauzyRegisterState,
-    RegisterChain
+    RegisterChain,
+
+    // Request Password
+    GauzyRequestPasswordState,
+    FirebaseRequestPasswordState,
+    RequestPasswordChain
   ],
   exports: [
     AuthOrchestratorService,

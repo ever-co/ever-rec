@@ -10,6 +10,7 @@ import { UserProfileService } from './user-profile.service';
 import { UserService } from './user.service';
 import { LoginChain } from './login/login.chain';
 import { RegisterChain } from './register';
+import { RequestPasswordChain } from './password-reset/password-request.chain';
 
 export interface IRegisterProps {
   email: string;
@@ -53,7 +54,8 @@ export class AuthOrchestratorService {
     private readonly sharedService: SharedService,
     private readonly eventEmitter: EventEmitter2,
     private readonly loginChain: LoginChain,
-    private readonly registerChain: RegisterChain
+    private readonly registerChain: RegisterChain,
+    private readonly requestPasswordChain: RequestPasswordChain
   ) { }
 
   // ==================== AUTHENTICATION METHODS ====================
@@ -203,7 +205,7 @@ export class AuthOrchestratorService {
    * Send password reset email
    */
   async sendPasswordResetEmail(email: string): Promise<IDataResponse> {
-    return this.emailService.sendPasswordResetEmail(email);
+    return this.requestPasswordChain.execute(email);
   }
 
   /**
