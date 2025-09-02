@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { IRegisterProps } from '../authentication.service';
 import { sendError, sendResponse } from '../../../../services/utils/sendResponse';
 import { AuthProviderId } from '../../interfaces/auth.interface';
 import { IDataResponse } from '../../../../interfaces/_types';
@@ -16,9 +15,9 @@ export class RequestPasswordChain {
       const context = new AuthContext<PasswordRequest>(this.firebaseRequestPasswordState, null);
       await context.request(payload);
 
-      return sendResponse(context.getResults().get(AuthProviderId.FIREBASE))
+      return sendResponse(context.getResults().get(AuthProviderId.FIREBASE));
     } catch (error) {
-      return sendError(error.message, error)
+      return sendError(error.message, error);
     }
   }
 }

@@ -24,11 +24,7 @@ export class FirebaseRequestPasswordState implements PasswordRequestState {
       throw new BadRequestException(message);
     }
 
-    context.setResult(this.ID, {
-      message,
-      status,
-      data
-    })
+    context.setResult(this.ID, data);
 
     if (!this.isGauzyAvailable) return;
 

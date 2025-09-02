@@ -4,8 +4,6 @@ import { AuthContext } from "../../auth.context";
 
 export interface PasswordRequest {
   message: string;
-  status: ResStatusEnum,
-  data: string
 }
 
 export type PasswordRequestState = AuthState<AuthContext<PasswordRequest>, string>;
