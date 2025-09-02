@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { TokenRefreshResponse, TokenState } from './interfaces/token.interface';
+import { RefreshResponse, TokenState } from './interfaces/token.interface';
 import { RefreshTokenContext } from './refresh/refresh-token.context';
 import { MergeTokenPolicy } from './policies/merge-token.policy';
 import { FirebaseRefreshStrategy } from './refresh/firebase-refresh.strategy';
@@ -7,7 +7,7 @@ import { FirebaseValidateStrategy } from './refresh/validations/firebase-validat
 
 @Injectable()
 export class TokenStrategyChain {
-  private refresh: TokenState<TokenRefreshResponse>;
+  private refresh: TokenState<RefreshResponse>;
   private validate: TokenState<void>;
 
   constructor(
@@ -18,7 +18,7 @@ export class TokenStrategyChain {
     this.validate = this.firebaseValidateStrategy;
   }
 
-  public async resolveRefresh(refreshToken: string, request: any): Promise<TokenRefreshResponse> {
+  public async resolveRefresh(refreshToken: string, request: any): Promise<RefreshResponse> {
     const context = new RefreshTokenContext(refreshToken, request, this.mergeTokenPolicy);
     return this.refresh.resolve(context);
   }

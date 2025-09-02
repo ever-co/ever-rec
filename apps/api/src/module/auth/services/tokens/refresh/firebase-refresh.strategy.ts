@@ -1,7 +1,7 @@
 import { Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { FirebaseAdminService } from '../../../../firebase/services/firebase-admin.service';
 import { FirebaseRestService } from '../../../../firebase/services/firebase-rest.service';
-import { IRefreshTokenContext, TokenRefreshResponse } from '../interfaces/token.interface';
+import { IRefreshTokenContext, RefreshResponse } from '../interfaces/token.interface';
 import { RefreshStrategyState } from '../states/refresh-strategy.state';
 import { UserFactory } from '../user.factory';
 import { GauzyRefreshStrategy } from './gauzy-refresh.strategy';
@@ -28,7 +28,7 @@ export class FirebaseRefreshStrategy extends RefreshStrategyState {
     return !!refreshToken; // fallback strategy
   }
 
-  public async handle({ request, result }: IRefreshTokenContext, token: string): Promise<TokenRefreshResponse> {
+  public async handle({ request, result }: IRefreshTokenContext, token: string): Promise<RefreshResponse> {
     const { data } = await this.firebaseRest.post('token', {
       grant_type: 'refresh_token',
       refresh_token: token,

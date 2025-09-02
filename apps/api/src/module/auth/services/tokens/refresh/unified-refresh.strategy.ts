@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { IRefreshTokenContext, TokenRefreshResponse } from '../interfaces/token.interface';
+import { IRefreshTokenContext, RefreshResponse, TokenRefreshResponse } from '../interfaces/token.interface';
 import { MergeTokenPolicy } from '../policies/merge-token.policy';
 import { RefreshStrategyState } from '../states/refresh-strategy.state';
 import { AuthProviderId, AuthStateResult } from '../../../interfaces/auth.interface';
@@ -17,7 +17,7 @@ export class UnifiedRefreshStrategy extends RefreshStrategyState {
     return this.mergeTokenPolicy.isValid(refreshToken);
   }
 
-  protected async handle(ctx: IRefreshTokenContext): Promise<TokenRefreshResponse> {
+  protected async handle(ctx: IRefreshTokenContext): Promise<RefreshResponse> {
     const { token, result } = ctx;
     // Decode existing merged token
     const context = await ctx.current();

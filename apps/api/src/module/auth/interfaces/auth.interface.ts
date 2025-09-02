@@ -2,7 +2,9 @@ export interface AuthState<T = unknown, U = unknown> {
   handle(context: T, payload: U): Promise<void>;
 }
 
-export interface AuthStateResult<T = unknown> {
+export type AuthStateResult<T = unknown> = T;
+
+export type TokenContainer<T> = {
   accessToken: string;
   refreshToken: string;
   data: T;
