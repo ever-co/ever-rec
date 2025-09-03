@@ -4,9 +4,8 @@ import { Register, RegisterState } from '../interfaces/register-state.interface'
 import { GauzyRegisterState } from './gauzy-register.state';
 import { ResStatusEnum } from 'src/enums/ResStatusEnum';
 import { GAUZY_AVAILABLE } from '../../../../gauzy';
-import { AuthProviderId, TokenContainer } from '../../../interfaces/auth.interface';
+import { AuthProviderId } from '../../../interfaces/auth.interface';
 import { AuthContext } from '../../auth.context';
-import { IUser } from '../../../../../interfaces/IUser';
 
 
 @Injectable()

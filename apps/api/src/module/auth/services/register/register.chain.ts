@@ -3,10 +3,9 @@ import { IRegisterProps } from '../authentication.service';
 import { sendError, sendResponse } from '../../../../services/utils/sendResponse';
 import { MergeTokenPolicy } from '../tokens/policies/merge-token.policy';
 import { FirebaseRegisterState } from './state/firebase-register.state';
-import { AuthProviderId, TokenContainer } from '../../interfaces/auth.interface';
+import { AuthProviderId } from '../../interfaces/auth.interface';
 import { IDataResponse } from '../../../../interfaces/_types';
 import { AuthContext } from '../auth.context';
-import { IUser } from '../../../../interfaces/IUser';
 import { Register } from './interfaces/register-state.interface';
 
 
