@@ -5,7 +5,7 @@ export class AuthContext<T = unknown> {
   private state: AuthState;
   private readonly result = new Map<AuthProviderId, AuthStateResult<T>>();
 
-  constructor(initialState: AuthState, private readonly mergeTokenPolicy: MergeTokenPolicy) {
+  constructor(initialState: AuthState, readonly mergeTokenPolicy: MergeTokenPolicy) {
     this.state = initialState;
   }
 

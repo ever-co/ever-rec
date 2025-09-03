@@ -1,4 +1,3 @@
-import { ResStatusEnum } from "src/enums/ResStatusEnum";
 import { AuthState } from "../../../interfaces/auth.interface";
 import { AuthContext } from "../../auth.context";
 

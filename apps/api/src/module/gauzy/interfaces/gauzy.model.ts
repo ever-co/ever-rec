@@ -87,3 +87,9 @@ export class GauzyMapper {
     return { firstName, lastName };
   }
 }
+
+export interface IGauzyChangePassword {
+  token: string;
+  password: string;
+  confirmPassword: string;
+}

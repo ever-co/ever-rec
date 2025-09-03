@@ -121,12 +121,14 @@ export class AuthController {
   async updatePassword(
     @User() user: IRequestUser,
     @Body() body: UpdatePasswordDto,
+    @RefreshToken() token: string
   ): Promise<IDataResponse> {
     return this.authOrchestratorService.changeUserPassword({
       uid: user?.id,
       email: body.email,
       oldPassword: body.oldPassword,
       newPassword: body.password,
+      token
     });
   }
 
