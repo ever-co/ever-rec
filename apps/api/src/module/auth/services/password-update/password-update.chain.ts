@@ -10,7 +10,7 @@ import { PasswordUpdate } from './interfaces/password-update.interface';
 
 
 @Injectable()
-export class PasswordUpdatePasswordChain {
+export class PasswordUpdateChain {
   constructor(private readonly firebasePasswordUpdateState: FirebasePasswordUpdateState, private readonly mergeTokenPolicy: MergeTokenPolicy) { }
   public async execute(payload: IChangePasswordProps): Promise<IDataResponse> {
     try {

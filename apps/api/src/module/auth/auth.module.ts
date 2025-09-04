@@ -27,7 +27,7 @@ import { FirebaseRequestPasswordState } from './services/password-reset/state/fi
 import { RequestPasswordChain } from './services/password-reset/password-request.chain';
 import { GauzyPasswordUpdateState } from './services/password-update/state/gauzy-password-update.state';
 import { FirebasePasswordUpdateState } from './services/password-update/state/firebase-password-update.state';
-import { PasswordUpdatePasswordChain } from './services/password-update/password-update.chain';
+import { PasswordUpdateChain } from './services/password-update/password-update.chain';
 
 @Module({
   imports: [JwtModule.registerAsync({
@@ -88,7 +88,7 @@ import { PasswordUpdatePasswordChain } from './services/password-update/password
     // Update Password
     GauzyPasswordUpdateState,
     FirebasePasswordUpdateState,
-    PasswordUpdatePasswordChain
+    PasswordUpdateChain
   ],
   exports: [
     AuthOrchestratorService,

@@ -7,8 +7,8 @@ import { FirebaseValidateStrategy } from './refresh/validations/firebase-validat
 
 @Injectable()
 export class TokenStrategyChain {
-  private refresh: TokenState<RefreshResponse>;
-  private validate: TokenState<void>;
+  private readonly refresh: TokenState<RefreshResponse>;
+  private readonly validate: TokenState<void>;
 
   constructor(
     private readonly firebaseRefreshStrategy: FirebaseRefreshStrategy,
