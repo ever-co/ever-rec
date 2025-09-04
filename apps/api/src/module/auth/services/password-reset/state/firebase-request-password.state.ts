@@ -1,5 +1,5 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
-import { ResStatusEnum } from 'src/enums/ResStatusEnum';
+import { ResStatusEnum } from '../../../../../enums/ResStatusEnum';
 import { GAUZY_AVAILABLE } from '../../../../gauzy';
 import { AuthProviderId } from '../../../interfaces/auth.interface';
 import { AuthContext } from '../../auth.context';

@@ -5,4 +5,6 @@ export interface PasswordRequest {
   message: string;
 }
 
-export type PasswordRequestState = AuthState<AuthContext<PasswordRequest>, string>;
+export type Email = string;
+
+export type PasswordRequestState = AuthState<AuthContext<PasswordRequest>, Email>;
