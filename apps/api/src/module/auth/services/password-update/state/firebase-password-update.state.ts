@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, Logger } from '@nestjs/common';
 import { AuthenticationService, IChangePasswordProps } from '../../authentication.service';
 import { AuthProviderId } from '../../../interfaces/auth.interface';
 import { AuthContext } from '../../auth.context';
@@ -10,6 +10,7 @@ import { GAUZY_AVAILABLE } from 'src/module/gauzy';
 @Injectable()
 export class FirebasePasswordUpdateState implements PasswordUpdateState {
   public readonly ID = AuthProviderId.FIREBASE;
+  private readonly logger = new Logger(FirebasePasswordUpdateState.name);
   constructor(
     private readonly authenticationService: AuthenticationService,
     private readonly gauzyPasswordUpdateState: GauzyPasswordUpdateState,
@@ -52,7 +53,7 @@ export class FirebasePasswordUpdateState implements PasswordUpdateState {
       });
     } catch (err) {
       // log but don’t mask original error
-      console.error(`Rollback failed for password update:`, err);
+      this.logger.error(`Rollback failed for password update:`, err);
     }
   }
 }

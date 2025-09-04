@@ -11,7 +11,7 @@ export class GauzyPasswordUpdateState implements PasswordUpdateState {
   public readonly ID = AuthProviderId.GAUZY;
   constructor(private readonly gauzyAuthService: GauzyAuthService) { }
   public async handle(context: AuthContext, payload: IChangePasswordProps): Promise<void> {
-    const decoded = await context.mergeTokenPolicy.decode<Login>(payload.token);
+    const decoded = await context.getTokenPolicy().decode<Login>(payload.token);
     const gauzyCtx = decoded.get(this.ID);
 
     await this.gauzyAuthService.changePassword({

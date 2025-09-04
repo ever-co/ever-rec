@@ -4,9 +4,9 @@ import { IChangePasswordProps } from "../../authentication.service";
 import { RefreshResponse } from "../../tokens";
 
 export interface PasswordUpdateResponse extends RefreshResponse {
-  message: string
+  message: string;
 };
 
-export type PasswordUpdate = TokenContainer<PasswordUpdateResponse>
+export type PasswordUpdate = TokenContainer<PasswordUpdateResponse>;
 
 export type PasswordUpdateState = AuthState<AuthContext<PasswordUpdate>, IChangePasswordProps>;
