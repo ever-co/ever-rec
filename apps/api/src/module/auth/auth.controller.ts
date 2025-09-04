@@ -26,7 +26,7 @@ import { GenerateEmailVerificationLinkDto } from './dto/send-email-verification.
 import { AuthGuard, IRequestUser } from './guards/auth.guard';
 import { EmailOwnershipGuard } from './guards/email-ownership.guard';
 import { AuthOrchestratorService } from './services/auth-orchestrator.service';
-import { TokenRefreshResponse, TokenService } from './services/tokens';
+import { RefreshResponse, TokenService } from './services/tokens';
 
 @Controller('auth')
 export class AuthController {
@@ -121,12 +121,14 @@ export class AuthController {
   async updatePassword(
     @User() user: IRequestUser,
     @Body() body: UpdatePasswordDto,
+    @RefreshToken() token: string
   ): Promise<IDataResponse> {
     return this.authOrchestratorService.changeUserPassword({
       uid: user?.id,
       email: body.email,
       oldPassword: body.oldPassword,
       newPassword: body.password,
+      token
     });
   }
 
@@ -134,7 +136,7 @@ export class AuthController {
   async refreshToken(
     @RefreshToken() token: string,
     @Req() request: any,
-  ): Promise<TokenRefreshResponse> {
+  ): Promise<RefreshResponse> {
     return this.tokenService.refreshToken(token, request);
   }
 

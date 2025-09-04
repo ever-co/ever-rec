@@ -13,6 +13,10 @@ export class AuthContext<T = unknown> {
     this.state = state;
   }
 
+  public getTokenPolicy(): MergeTokenPolicy {
+    return this.mergeTokenPolicy;
+  }
+
   public setResult(provider: AuthProviderId, value: AuthStateResult<T>): void {
     this.result.set(provider, value);
   }

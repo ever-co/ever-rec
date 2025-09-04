@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { GauzyRestService } from './gauzy-rest.service';
 import { ILoginProps, IRegisterProps } from '../../auth/services/authentication.service';
-import { GauzyMapper, IAuthResponse, IGauzyRegisterProps } from '../interfaces/gauzy.model';
+import { GauzyMapper, IAuthResponse, IGauzyChangePassword, IGauzyRegisterProps } from '../interfaces/gauzy.model';
 
 
 @Injectable()
@@ -21,5 +21,13 @@ export class GauzyAuthService {
 
   public async refreshToken(value: string) {
     return this.gauzyRestService.post<{ refresh_token: string }, { token: string }>('auth/refresh-token', { refresh_token: value });
+  }
+
+  public async requestPassword(email: string) {
+    return this.gauzyRestService.post<{ email: string }, void>('auth/request-password', { email });
+  }
+
+  public async changePassword(input: IGauzyChangePassword) {
+    return this.gauzyRestService.post<IGauzyChangePassword, void>('auth/reset-password', input);
   }
 }

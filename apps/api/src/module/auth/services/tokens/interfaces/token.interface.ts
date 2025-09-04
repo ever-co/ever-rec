@@ -1,11 +1,13 @@
-import { AuthContextResult, AuthProviderId } from "../../../interfaces/auth.interface";
+import { AuthContextResult, AuthProviderId, TokenContainer } from "../../../interfaces/auth.interface";
 import { MergeTokenPolicy } from "../policies/merge-token.policy";
 
-export interface TokenRefreshResponse {
+export interface RefreshResponse {
   idToken: string;
   refreshToken: string;
   expiresAt: string;
-}
+};
+
+export type TokenRefreshResponse = TokenContainer<RefreshResponse>;
 
 export interface IRefreshTokenContext {
   readonly token: string;

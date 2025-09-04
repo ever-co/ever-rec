@@ -1,6 +1,6 @@
 import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { GauzyAuthService } from '../../../../gauzy';
-import { IRefreshTokenContext, TokenRefreshResponse } from '../interfaces/token.interface';
+import { IRefreshTokenContext, RefreshResponse } from '../interfaces/token.interface';
 import { RefreshStrategyState } from '../states/refresh-strategy.state';
 import { UnifiedRefreshStrategy } from './unified-refresh.strategy';
 import { AuthProviderId } from '../../../interfaces/auth.interface';
@@ -23,7 +23,7 @@ export class GauzyRefreshStrategy extends RefreshStrategyState {
     return !!refreshToken;
   }
 
-  async handle({ result }: IRefreshTokenContext, refreshToken: string): Promise<TokenRefreshResponse> {
+  async handle({ result }: IRefreshTokenContext, refreshToken: string): Promise<RefreshResponse> {
     const { data: { token } } = await this.gauzyAuthService.refreshToken(refreshToken);
 
     this.validateResponse(token);

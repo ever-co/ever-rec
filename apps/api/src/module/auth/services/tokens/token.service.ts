@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { TokenRefreshResponse } from './interfaces/token.interface';
+import { RefreshResponse } from './interfaces/token.interface';
 import { TokenStrategyChain } from './token-strategy.chain';
 
 @Injectable()
@@ -17,7 +17,7 @@ export class TokenService {
     this.logger.debug(`Token processed successfully for user: ${request.user?.id}`);
   }
 
-  public async refreshToken(refreshToken: string, request: any): Promise<TokenRefreshResponse> {
+  public async refreshToken(refreshToken: string, request: any): Promise<RefreshResponse> {
     if (!refreshToken) throw new BadRequestException('Refresh token is required');
 
     this.logger.debug('Refresh token has started...');

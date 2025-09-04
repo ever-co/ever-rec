@@ -6,7 +6,7 @@ import { FirebaseRegisterState } from './state/firebase-register.state';
 import { AuthProviderId } from '../../interfaces/auth.interface';
 import { IDataResponse } from '../../../../interfaces/_types';
 import { AuthContext } from '../auth.context';
-import { IUser } from '../../../../interfaces/IUser';
+import { Register } from './interfaces/register-state.interface';
 
 
 @Injectable()
@@ -14,7 +14,7 @@ export class RegisterChain {
   constructor(private readonly firebaseRegisterState: FirebaseRegisterState, private readonly mergeTokenPolicy: MergeTokenPolicy) { }
   public async execute(payload: IRegisterProps): Promise<IDataResponse> {
     try {
-      const context = new AuthContext<IUser>(this.firebaseRegisterState, this.mergeTokenPolicy);
+      const context = new AuthContext<Register>(this.firebaseRegisterState, this.mergeTokenPolicy);
       await context.request(payload);
       const refreshToken = await context.merge();
       const firebase = context.getResults().get(AuthProviderId.FIREBASE);
