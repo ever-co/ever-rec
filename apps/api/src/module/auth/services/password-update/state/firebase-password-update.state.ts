@@ -46,11 +46,14 @@ export class FirebasePasswordUpdateState implements PasswordUpdateState {
   private async rollback(payload: IChangePasswordProps): Promise<void> {
     try {
       // try to restore old password
-      await this.authenticationService.changePassword({
+      const { status, message } = await this.authenticationService.changePassword({
         ...payload,
         oldPassword: payload.newPassword,
         newPassword: payload.oldPassword,
       });
+      if (status === ResStatusEnum.error) {
+        this.logger.error(`Rollback failed for password update: ${message ?? 'Unknown error'}`);
+      }
     } catch (err) {
       // log but don’t mask original error
       this.logger.error(`Rollback failed for password update:`, err);
