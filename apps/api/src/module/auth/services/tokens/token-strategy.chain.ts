@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { RefreshResponse, TokenState } from './interfaces/token.interface';
 import { RefreshTokenContext } from './refresh/refresh-token.context';
 import { MergeTokenPolicy } from './policies/merge-token.policy';
@@ -19,11 +19,17 @@ export class TokenStrategyChain {
   }
 
   public async resolveRefresh(refreshToken: string, request: any): Promise<RefreshResponse> {
+    if (!refreshToken) {
+      throw new BadRequestException('Refresh token is required');
+    }
     const context = new RefreshTokenContext(refreshToken, request, this.mergeTokenPolicy);
     return this.refresh.resolve(context);
   }
 
   public async resolveValidation(token: string, request: any): Promise<void> {
+    if (!token) {
+      throw new BadRequestException('Token is required');
+    }
     const context = new RefreshTokenContext(token, request, this.mergeTokenPolicy);
     return this.validate.resolve(context);
   }
