@@ -73,11 +73,13 @@ export class AuthController {
     @User() user: IRequestUser,
     @Body() body: UpdateUserDto,
     @UploadedFile() photoURL: string,
+    @RefreshToken() token: string
   ) {
     return this.authOrchestratorService.updateUserData({
       uid: user?.id,
       displayName: body.displayName,
       photoURL,
+      token,
     });
   }
 
@@ -112,8 +114,13 @@ export class AuthController {
   async updateEmail(
     @User() user: IRequestUser,
     @Body() body: UpdateEmailDto,
+    @RefreshToken() token: string
   ): Promise<IDataResponse> {
-    return this.authOrchestratorService.changeUserEmail(user?.id, body.email);
+    return this.authOrchestratorService.changeUserEmail({
+      uid: user?.id,
+      email: body.email,
+      token
+    });
   }
 
   @UseGuards(AuthGuard, EmailOwnershipGuard)

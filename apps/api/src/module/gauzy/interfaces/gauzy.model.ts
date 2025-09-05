@@ -1,6 +1,13 @@
 import { IUser } from '../../../interfaces/IUser';
 import { IRegisterProps } from "../../auth/services/auth-orchestrator.service";
 
+export interface IRequestHeaders {
+  tenantId?: string;
+  organizationId?: string;
+  token: string;
+  refreshToken?: string;
+}
+
 export interface IAuthResponse {
   user: IGauzyUser;
   token: string;
@@ -19,6 +26,7 @@ export interface IGauzyUser {
   emailVerifiedAt?: Date;
   lastLoginAt?: Date;
   isEmailVerified?: boolean;
+  tenantId?: string;
 }
 
 export interface IGauzyRegisterProps {
@@ -66,11 +74,12 @@ export class GauzyMapper {
       email: user.email,
       displayName: user.fullName || user.name,
       isVerified: user.isEmailVerified ?? false,
-      photoURL: user.imageUrl
+      photoURL: user.imageUrl,
+      workspaceIds: [user.tenantId]
     }
   }
 
-  private static parseFullName(fullName: string): { firstName: string; lastName: string } {
+  public static parseFullName(fullName: string): { firstName: string; lastName: string } {
     if (!fullName?.trim()) {
       return { firstName: '', lastName: '' };
     }
@@ -88,8 +97,13 @@ export class GauzyMapper {
   }
 }
 
-export interface IGauzyChangePassword {
-  token: string;
+export interface IGauzyChangePassword extends IRequestHeaders {
   password: string;
   confirmPassword: string;
+}
+
+export interface IGauzyUpdateProfileProps {
+  id?: string;
+  email?: string;
+  fullName?: string;
 }
