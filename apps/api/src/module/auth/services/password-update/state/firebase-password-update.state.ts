@@ -31,7 +31,9 @@ export class FirebasePasswordUpdateState implements PasswordUpdateState {
       data
     });
 
-    if (!this.isGauzyAvailable) return;
+    const hasNext = await context.getTokenPolicy().isValid(payload.token);
+
+    if (!this.isGauzyAvailable || !hasNext) return;
 
     context.setState(this.gauzyPasswordUpdateState);
 

@@ -30,7 +30,9 @@ export class FirebaseUpdateUserEmailState implements UpdateUserProfileState {
 
     context.setResult(this.ID, data);
 
-    if (!this.isGauzyAvailable) return;
+    const hasNext = await context.getTokenPolicy().isValid(payload.token);
+
+    if (!this.isGauzyAvailable || !hasNext) return;
 
     context.setState(this.gauzyUpdateUserProfileState);
 
