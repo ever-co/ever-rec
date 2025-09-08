@@ -26,11 +26,6 @@ export class GauzyUserService {
       throw new BadRequestException('User ID is required');
     }
 
-    // Validate email format if provided
-    if (email && !this.isValidEmail(email)) {
-      throw new BadRequestException('Invalid email format');
-    }
-
     const { lastName, firstName } = GauzyMapper.parseFullName(fullName);
 
     // Build payload with validation for empty strings
@@ -63,13 +58,5 @@ export class GauzyUserService {
 
       throw new InternalServerErrorException('Failed to update user profile');
     }
-  }
-
-  /**
-   * Validates email format
-   */
-  private isValidEmail(email: string): boolean {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
   }
 }
