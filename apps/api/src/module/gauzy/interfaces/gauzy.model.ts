@@ -112,6 +112,8 @@ export interface IGauzyUpdateProfileProps {
   id?: string;
   email?: string;
   fullName?: string;
+  firstName?: string;
+  lastName?: string;
 }
 
 export interface IUploadAvatar extends IRequestHeaders {
