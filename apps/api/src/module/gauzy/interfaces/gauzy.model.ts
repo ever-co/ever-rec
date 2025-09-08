@@ -143,3 +143,7 @@ export interface FileAsset {
   fullUrl: string;
   thumbUrl: string | null;
 }
+
+export interface IHeaderBuilder {
+  build(params: IRequestHeaders): Record<string, string>;
+}

@@ -1,19 +1,21 @@
 import { BadRequestException, HttpException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { GauzyRestService } from './gauzy-rest.service';
 import { GauzyMapper, IAuthResponse, IGauzyUpdateProfileProps, IRequestHeaders } from '../interfaces/gauzy.model';
+import { HeaderBuilderService } from './header-builder.service';
 
 
 @Injectable()
 export class GauzyUserService {
   constructor(
-    private readonly gauzyRestService: GauzyRestService
+    private readonly gauzyRestService: GauzyRestService,
+    private readonly headerBuilderService: HeaderBuilderService
   ) { }
 
   public async updateProfile(
     id: string,
     input: IGauzyUpdateProfileProps & IRequestHeaders
   ) {
-    const { token, refreshToken, tenantId, organizationId, email, fullName } = input;
+    const { token, email, fullName } = input;
 
     // Validate required fields with specific error messages
     if (!token?.trim()) {
@@ -45,12 +47,7 @@ export class GauzyUserService {
     }
 
     // Build headers with validation
-    const headers: Record<string, string> = {
-      authorization: `Bearer ${token.trim()}`,
-      ...(refreshToken?.trim() && { 'Refresh-Token': refreshToken.trim() }),
-      ...(tenantId?.trim() && { 'Tenant-Id': tenantId.trim() }),
-      ...(organizationId?.trim() && { 'Organization-Id': organizationId.trim() }),
-    };
+    const headers = this.headerBuilderService.build(input);
 
     try {
       return this.gauzyRestService.put<IGauzyUpdateProfileProps, IAuthResponse>(
