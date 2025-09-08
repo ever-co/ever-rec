@@ -13,7 +13,7 @@ import { RegisterChain } from './register';
 import { RequestPasswordChain } from './password-reset/password-request.chain';
 import { PasswordUpdateChain } from './password-update/password-update.chain';
 import { UpdateUserProfileChain } from './update-user-profile/update-user-profile.chain';
-import { IUpdateUserProfileProps, WorkflowProfileType } from './update-user-profile/interfaces/update-user-profile.interface';
+import { IUpdateUserProfileProps, IUploadAvatarProfileProps, WorkflowProfileType } from './update-user-profile/interfaces/update-user-profile.interface';
 
 export interface IRegisterProps {
   email: string;
@@ -125,7 +125,7 @@ export class AuthOrchestratorService {
   /**
    * Upload user avatar
    */
-  async uploadAvatar(uploadData: IUploadAvatarProps & { token: string }): Promise<IDataResponse> {
+  async uploadAvatar(uploadData: IUploadAvatarProfileProps): Promise<IDataResponse> {
     return this.updateUserProfileChain.execute(
       uploadData,
       WorkflowProfileType.AVATAR,

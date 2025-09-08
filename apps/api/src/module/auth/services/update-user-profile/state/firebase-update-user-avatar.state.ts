@@ -3,10 +3,9 @@ import { AuthProviderId } from '../../../interfaces/auth.interface';
 import { AuthContext } from '../../auth.context';
 import { ResStatusEnum } from 'src/enums/ResStatusEnum';
 import { GAUZY_AVAILABLE } from 'src/module/gauzy';
-import { UpdateUserProfile, UpdateUserProfileState } from '../interfaces/update-user-profile.interface';
+import { IUploadAvatarProfileProps, UpdateUserProfile, UpdateUserProfileState } from '../interfaces/update-user-profile.interface';
 import { UserProfileService } from '../../user-profile.service';
 import { GauzyUpdateUserAvatarState } from './gauzy-update-user-avatar.state';
-import { IUploadAvatarProps } from '../../auth-orchestrator.service';
 
 @Injectable()
 export class FirebaseUpdateUserAvatarState implements UpdateUserProfileState {
@@ -17,7 +16,7 @@ export class FirebaseUpdateUserAvatarState implements UpdateUserProfileState {
     @Inject(GAUZY_AVAILABLE)
     private readonly isGauzyAvailable: boolean
   ) { }
-  public async handle(context: AuthContext<UpdateUserProfile>, payload: IUploadAvatarProps & { token: string }): Promise<void> {
+  public async handle(context: AuthContext<UpdateUserProfile>, payload: IUploadAvatarProfileProps): Promise<void> {
     // Upload avatar
     const { data, status, message } = await this.userProfileService.uploadAvatar(payload.uid, payload.avatar);
 
