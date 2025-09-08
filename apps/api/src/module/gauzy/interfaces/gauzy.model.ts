@@ -1,6 +1,6 @@
 import { IUser } from '../../../interfaces/IUser';
 import { IRegisterProps } from "../../auth/services/auth-orchestrator.service";
-import FormData from 'form-data';
+import type FormData from 'form-data';
 
 export interface IRequestHeaders {
   tenantId?: string;
