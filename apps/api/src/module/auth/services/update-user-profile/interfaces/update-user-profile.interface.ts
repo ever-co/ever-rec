@@ -6,14 +6,15 @@ import { AuthContext } from "../../auth.context";
 export enum WorkflowProfileType {
   EMAIL = 'email',
   NAME = 'name',
+  AVATAR = 'avatar'
 }
 
 export interface IUpdateUserProfileProps extends IUpdateUserDataProps {
   email?: string;
-  token: string
+  token: string;
 };
 
-export type UpdateUserProfile = IUser;
+export type UpdateUserProfile = IUser
 
 
 export type UpdateUserProfileState = AuthState<AuthContext<UpdateUserProfile>, IUpdateUserDataProps>;

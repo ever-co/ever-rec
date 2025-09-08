@@ -33,6 +33,8 @@ import { FirebaseUpdateUserNameState } from './services/update-user-profile/stat
 import { GauzyUpdateUserProfileState } from './services/update-user-profile/state/gauzy-update-user-profile.state';
 import { WorkflowFirebaseProfileFactory } from './services/update-user-profile/workflow-profile.factory';
 import { FirebaseUpdateUserEmailState } from './services/update-user-profile/state/firebase-update-user-email.state';
+import { FirebaseUpdateUserAvatarState } from './services/update-user-profile/state/firebase-update-user-avatar.state';
+import { GauzyUpdateUserAvatarState } from './services/update-user-profile/state/gauzy-update-user-avatar.state';
 
 @Module({
   imports: [JwtModule.registerAsync({
@@ -99,6 +101,8 @@ import { FirebaseUpdateUserEmailState } from './services/update-user-profile/sta
     FirebaseUpdateUserNameState,
     FirebaseUpdateUserEmailState,
     GauzyUpdateUserProfileState,
+    FirebaseUpdateUserAvatarState,
+    GauzyUpdateUserAvatarState,
     UpdateUserProfileChain,
     WorkflowFirebaseProfileFactory
   ],

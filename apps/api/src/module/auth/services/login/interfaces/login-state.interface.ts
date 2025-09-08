@@ -4,6 +4,6 @@ import { AuthContext } from "../../auth.context";
 import { IUser } from '../../../../../interfaces/IUser';
 
 
-export type Login = TokenContainer<IUser>;
+export type Login = TokenContainer<IUser & { organizationId: string; }>;
 
 export type LoginState = AuthState<AuthContext<Login>, ILoginProps>;

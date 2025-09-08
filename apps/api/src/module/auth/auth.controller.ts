@@ -89,10 +89,12 @@ export class AuthController {
   async updateUserAvatar(
     @User() user: IRequestUser,
     @UploadedFile() file: Express.Multer.File,
+    @RefreshToken() token: string
   ) {
     return this.authOrchestratorService.uploadAvatar({
       uid: user?.id,
       avatar: file,
+      token
     });
   }
 

@@ -125,10 +125,10 @@ export class AuthOrchestratorService {
   /**
    * Upload user avatar
    */
-  async uploadAvatar(uploadData: IUploadAvatarProps): Promise<IDataResponse> {
-    return this.userProfileService.uploadAvatar(
-      uploadData.uid,
-      uploadData.avatar,
+  async uploadAvatar(uploadData: IUploadAvatarProps & { token: string }): Promise<IDataResponse> {
+    return this.updateUserProfileChain.execute(
+      uploadData,
+      WorkflowProfileType.AVATAR,
     );
   }
 
