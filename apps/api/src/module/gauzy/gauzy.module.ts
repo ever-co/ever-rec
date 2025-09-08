@@ -5,12 +5,13 @@ import GauzyConfig from './gauzy.config';
 import { GauzyRestService } from './services/gauzy-rest.service';
 import { GauzyAuthService } from './services/gauzy-auth.service';
 import { GauzyUserService } from './services/gauzy-user.service';
+import { GauzyUploadAssetService } from './services/gauzy-upload-asset.service';
 
 export const GAUZY_AVAILABLE = Symbol('gauzy availability token');
 
 @Module({
   imports: [ConfigModule.forFeature(GauzyConfig), HttpModule],
-  providers: [GauzyAuthService, GauzyRestService, GauzyUserService,
+  providers: [GauzyAuthService, GauzyRestService, GauzyUserService, GauzyUploadAssetService,
     {
       provide: GAUZY_AVAILABLE,
       useFactory: (configService: ConfigService) => {
@@ -20,6 +21,6 @@ export const GAUZY_AVAILABLE = Symbol('gauzy availability token');
       inject: [ConfigService],
     }
   ],
-  exports: [GauzyRestService, GauzyAuthService, GauzyUserService, GAUZY_AVAILABLE]
+  exports: [GauzyRestService, GauzyAuthService, GauzyUserService, GauzyUploadAssetService, GAUZY_AVAILABLE]
 })
 export class GauzyModule { }

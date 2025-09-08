@@ -59,7 +59,6 @@ export class GauzyUserService {
         { headers }
       );
     } catch (error) {
-      console.error('GAUZY', error);
       // Re-throw with appropriate error handling
       if (error instanceof HttpException) {
         throw error;

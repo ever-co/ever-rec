@@ -27,6 +27,10 @@ export interface IGauzyUser {
   lastLoginAt?: Date;
   isEmailVerified?: boolean;
   tenantId?: string;
+  employee?: {
+    id?: string;
+    organizationId?: string;
+  }
 }
 
 export interface IGauzyRegisterProps {
@@ -68,14 +72,15 @@ export class GauzyMapper {
     };
   }
 
-  public static toUser(user: IGauzyUser): IUser {
+  public static toUser(user: IGauzyUser): IUser & { organizationId: string } {
     return {
       id: user.id,
       email: user.email,
       displayName: user.fullName || user.name,
       isVerified: user.isEmailVerified ?? false,
       photoURL: user.imageUrl,
-      workspaceIds: [user.tenantId]
+      workspaceIds: [user.tenantId],
+      organizationId: user.employee.organizationId
     }
   }
 
@@ -106,4 +111,35 @@ export interface IGauzyUpdateProfileProps {
   id?: string;
   email?: string;
   fullName?: string;
+}
+
+export interface IUploadAvatar extends IRequestHeaders {
+  organizationId?: string;
+  tenantId?: string;
+  file: Express.Multer.File;
+}
+
+
+export interface FileAsset {
+  deletedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  createdByUserId: string;
+  updatedByUserId: string | null;
+  deletedByUserId: string | null;
+  id: string;
+  isActive: boolean;
+  isArchived: boolean;
+  archivedAt: string | null;
+  tenantId: string;
+  organizationId: string;
+  name: string;
+  url: string;
+  thumb: string | null;
+  width: number;
+  height: number;
+  size: number;
+  isFeatured: boolean;
+  fullUrl: string;
+  thumbUrl: string | null;
 }
