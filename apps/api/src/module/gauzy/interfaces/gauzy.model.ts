@@ -115,8 +115,6 @@ export interface IGauzyUpdateProfileProps {
 }
 
 export interface IUploadAvatar extends IRequestHeaders {
-  organizationId?: string;
-  tenantId?: string;
   file: Express.Multer.File;
 }
 
