@@ -94,7 +94,7 @@ export class AuthController {
     return this.authOrchestratorService.uploadAvatar({
       uid: user?.id,
       avatar: file,
-      token
+      token,
     });
   }
 

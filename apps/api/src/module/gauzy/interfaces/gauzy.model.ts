@@ -1,5 +1,6 @@
 import { IUser } from '../../../interfaces/IUser';
 import { IRegisterProps } from "../../auth/services/auth-orchestrator.service";
+import FormData from 'form-data';
 
 export interface IRequestHeaders {
   tenantId?: string;
@@ -79,8 +80,8 @@ export class GauzyMapper {
       displayName: user.fullName || user.name,
       isVerified: user.isEmailVerified ?? false,
       photoURL: user.imageUrl,
-      workspaceIds: [user.tenantId],
-      organizationId: user.employee.organizationId
+      workspaceIds: user.tenantId ? [user.tenantId] : [],
+      organizationId: user.employee?.organizationId || ''
     }
   }
 
@@ -144,6 +145,8 @@ export interface FileAsset {
   thumbUrl: string | null;
 }
 
+export type RequestHeaders = IRequestHeaders & { formData?: FormData }
+
 export interface IHeaderBuilder {
-  build(params: IRequestHeaders): Record<string, string>;
+  build(params: RequestHeaders): Record<string, string>;
 }

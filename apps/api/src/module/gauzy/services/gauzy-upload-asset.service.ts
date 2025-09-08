@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { GauzyRestService } from './gauzy-rest.service';
 import { IUploadAvatar, FileAsset } from '../interfaces/gauzy.model';
 import { HeaderBuilderService } from './header-builder.service';
+import FormData from 'form-data';
 
 
 @Injectable()
@@ -11,8 +12,7 @@ export class GauzyUploadAssetService {
     private readonly headerBuilderService: HeaderBuilderService
   ) { }
 
-  public uploadAvatar(payload: IUploadAvatar) {
-    const FormData = require('form-data');
+  public uploadAvatar(payload: IUploadAvatar): Promise<{ data: FileAsset }> {
     const { tenantId, organizationId, file } = payload;
     const form = new FormData();
 
@@ -30,7 +30,7 @@ export class GauzyUploadAssetService {
       form.append('organizationId', organizationId);
     }
 
-    const headers = this.headerBuilderService.build(payload)
+    const headers = this.headerBuilderService.build(payload);
 
     return this.gauzyRestService.post<FormData, FileAsset>('image-assets/upload/profile_pictures', form, { headers });
   }

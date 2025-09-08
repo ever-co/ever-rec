@@ -32,8 +32,10 @@ export class GauzyUserService {
     const payload: Partial<IGauzyUpdateProfileProps> = {
       id,
       ...(email?.trim() && { email: email.trim() }),
-      ...(fullName?.trim() && { lastName: lastName.trim() }),
-      ...(fullName?.trim() && { firstName: firstName.trim() }),
+      ...(fullName?.trim() && {
+        lastName: lastName.trim(),
+        firstName: firstName.trim()
+      }),
     };
 
     // Check if payload has any valid properties

@@ -1,10 +1,9 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { IHeaderBuilder, IRequestHeaders } from '../interfaces/gauzy.model';
-import * as FormData from 'form-data';
+import { IHeaderBuilder, RequestHeaders } from '../interfaces/gauzy.model';
 
 @Injectable()
 export class HeaderBuilderService implements IHeaderBuilder {
-  public build(params: IRequestHeaders & { formData?: FormData }): Record<string, string> {
+  public build(params: RequestHeaders): Record<string, string> {
     const { token, refreshToken, tenantId, organizationId, formData } = params;
 
     this.validateRequiredParams(params);
@@ -20,7 +19,7 @@ export class HeaderBuilderService implements IHeaderBuilder {
     return headers;
   }
 
-  private validateRequiredParams(params: IRequestHeaders): void {
+  private validateRequiredParams(params: RequestHeaders): void {
     if (!params.token?.trim()) {
       throw new BadRequestException('Authentication token is required');
     }

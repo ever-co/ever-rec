@@ -10,14 +10,14 @@ import { WorkflowFirebaseProfileFactory } from './workflow-profile.factory';
 
 @Injectable()
 export class UpdateUserProfileChain {
-  constructor(private readonly worflow: WorkflowFirebaseProfileFactory, private readonly mergeTokenPolicy: MergeTokenPolicy) { }
+  constructor(private readonly workflow: WorkflowFirebaseProfileFactory, private readonly mergeTokenPolicy: MergeTokenPolicy) { }
   public async execute(payload: IUpdateUserProfileProps, type: WorkflowProfileType): Promise<IDataResponse> {
     try {
-      const context = new AuthContext<UpdateUserProfile>(this.worflow.create(type), this.mergeTokenPolicy);
+      const context = new AuthContext<UpdateUserProfile>(this.workflow.create(type), this.mergeTokenPolicy);
 
       await context.request(payload);
 
-      const data = context.getResults().get(AuthProviderId.FIREBASE);
+      const data = context.getResults().get(AuthProviderId.FIREBASE)
 
       if (!data) {
         throw new BadRequestException('Something went wrong.');

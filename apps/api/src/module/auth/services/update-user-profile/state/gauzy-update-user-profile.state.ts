@@ -13,6 +13,8 @@ export class GauzyUpdateUserProfileState implements UpdateUserProfileState {
     const decoded = await context.getTokenPolicy().decode<Login>(payload.token);
     const gauzyCtx = decoded.get(this.ID);
 
+    if (!gauzyCtx) return;
+
     await this.gauzyUserService.updateProfile(
       gauzyCtx.data.id,
       {
