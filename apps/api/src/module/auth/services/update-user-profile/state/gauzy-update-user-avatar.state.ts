@@ -14,7 +14,7 @@ export class GauzyUpdateUserAvatarState implements UpdateUserProfileState {
     const decoded = await context.getTokenPolicy().decode<Login>(payload.token);
     const gauzyCtx = decoded.get(this.ID);
 
-    const res = await this.gauzyUploadAssetService.uploadAvatar(
+    await this.gauzyUploadAssetService.uploadAvatar(
       {
         file: payload.avatar,
         tenantId: gauzyCtx.data.workspaceIds[0],
@@ -23,7 +23,5 @@ export class GauzyUpdateUserAvatarState implements UpdateUserProfileState {
         refreshToken: gauzyCtx.refreshToken,
       }
     );
-
-    console.log(res)
   }
 }

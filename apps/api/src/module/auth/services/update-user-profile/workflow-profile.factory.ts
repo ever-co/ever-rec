@@ -20,7 +20,7 @@ export class WorkflowFirebaseProfileFactory {
       case WorkflowProfileType.AVATAR:
         return this.firebaseUpdateUserAvatarState;
       default:
-        throw new Error('Unknow workflow type');
+        throw new Error('Unknown workflow type');
     }
   }
 }
