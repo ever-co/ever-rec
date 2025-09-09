@@ -28,6 +28,13 @@ import { RequestPasswordChain } from './services/password-reset/password-request
 import { GauzyPasswordUpdateState } from './services/password-update/state/gauzy-password-update.state';
 import { FirebasePasswordUpdateState } from './services/password-update/state/firebase-password-update.state';
 import { PasswordUpdateChain } from './services/password-update/password-update.chain';
+import { UpdateUserProfileChain } from './services/update-user-profile/update-user-profile.chain';
+import { FirebaseUpdateUserNameState } from './services/update-user-profile/state/firebase-update-user-name.state';
+import { GauzyUpdateUserProfileState } from './services/update-user-profile/state/gauzy-update-user-profile.state';
+import { WorkflowFirebaseProfileFactory } from './services/update-user-profile/workflow-profile.factory';
+import { FirebaseUpdateUserEmailState } from './services/update-user-profile/state/firebase-update-user-email.state';
+import { FirebaseUpdateUserAvatarState } from './services/update-user-profile/state/firebase-update-user-avatar.state';
+import { GauzyUpdateUserAvatarState } from './services/update-user-profile/state/gauzy-update-user-avatar.state';
 
 @Module({
   imports: [JwtModule.registerAsync({
@@ -88,7 +95,16 @@ import { PasswordUpdateChain } from './services/password-update/password-update.
     // Update Password
     GauzyPasswordUpdateState,
     FirebasePasswordUpdateState,
-    PasswordUpdateChain
+    PasswordUpdateChain,
+
+    // Update User Profile
+    FirebaseUpdateUserNameState,
+    FirebaseUpdateUserEmailState,
+    GauzyUpdateUserProfileState,
+    FirebaseUpdateUserAvatarState,
+    GauzyUpdateUserAvatarState,
+    UpdateUserProfileChain,
+    WorkflowFirebaseProfileFactory
   ],
   exports: [
     AuthOrchestratorService,

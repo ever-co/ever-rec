@@ -1,13 +1,15 @@
 import { Injectable } from '@nestjs/common';
-import { GauzyRestService } from './gauzy-rest.service';
 import { ILoginProps, IRegisterProps } from '../../auth/services/authentication.service';
 import { GauzyMapper, IAuthResponse, IGauzyChangePassword, IGauzyRegisterProps } from '../interfaces/gauzy.model';
+import { GauzyRestService } from './gauzy-rest.service';
+import { HeaderBuilderService } from './header-builder.service';
 
 
 @Injectable()
 export class GauzyAuthService {
   constructor(
-    private readonly gauzyRestService: GauzyRestService
+    private readonly gauzyRestService: GauzyRestService,
+    private readonly headerBuilderService: HeaderBuilderService
   ) { }
 
   public async login(input: ILoginProps) {
@@ -28,6 +30,8 @@ export class GauzyAuthService {
   }
 
   public async changePassword(input: IGauzyChangePassword) {
-    return this.gauzyRestService.post<IGauzyChangePassword, void>('auth/reset-password', input);
+    const headers = this.headerBuilderService.build(input);
+    const { password, confirmPassword } = input;
+    return this.gauzyRestService.post<{ password: string; confirmPassword: string }, void>('auth/reset-password', { password, confirmPassword }, { headers });
   }
 }
