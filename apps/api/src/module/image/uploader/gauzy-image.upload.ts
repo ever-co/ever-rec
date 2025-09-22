@@ -1,3 +1,5 @@
+import { Injectable } from '@nestjs/common';
+import IEditorImage from 'src/interfaces/IEditorImage';
 import {
   AuthProviderId,
   AuthStateResult,
@@ -7,15 +9,15 @@ import { MergeTokenPolicy } from 'src/module/auth/services/tokens/policies/merge
 import { GauzyUploadService } from 'src/module/gauzy/services/gauzy-upload.service';
 import { IImagePayload } from '../view.models/image.model';
 import { ImageUploader } from './image.uploader';
-import IEditorImage from 'src/interfaces/IEditorImage';
 
+@Injectable()
 export class GauzyImageUploader extends ImageUploader {
   private context: AuthStateResult<Login>;
   constructor(
     private readonly gauzyUploaderService: GauzyUploadService,
     private readonly tokenPolicy: MergeTokenPolicy,
   ) {
-    super(AuthProviderId.FIREBASE);
+    super(AuthProviderId.GAUZY);
   }
 
   protected async canHandle(idToken: string): Promise<boolean> {

@@ -27,14 +27,15 @@ export const GAUZY_AVAILABLE = Symbol('gauzy availability token');
         return !!(url && url.trim().length > 0);
       },
       inject: [ConfigService],
-    }
+    },
   ],
   exports: [
     GauzyRestService,
     GauzyAuthService,
     GauzyUserService,
     GauzyUploadAssetService,
-    GAUZY_AVAILABLE
-  ]
+    GauzyUploadService,
+    GAUZY_AVAILABLE,
+  ],
 })
-export class GauzyModule { }
+export class GauzyModule {}

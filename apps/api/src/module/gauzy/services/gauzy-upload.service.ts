@@ -1,7 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { GauzyRestService } from './gauzy-rest.service';
-import { FileAsset, IRequestHeaders } from '../interfaces/gauzy.model';
-import { HeaderBuilderService } from './header-builder.service';
 import FormData from 'form-data';
 import {
   GauzyUploadType,
@@ -10,29 +7,50 @@ import {
   IUploadSoundShot,
   IUploadVideo,
 } from '../interfaces/gauzy-upload.model';
+import { FileAsset, IRequestHeaders } from '../interfaces/gauzy.model';
+import { GauzyRestService } from './gauzy-rest.service';
+import { HeaderBuilderService } from './header-builder.service';
 
 @Injectable()
 export class GauzyUploadService {
-  private readonly baseUrl = '/plugins';
+  private readonly baseUrl = 'plugins';
 
   constructor(
     private readonly gauzyRestService: GauzyRestService,
     private readonly headerBuilderService: HeaderBuilderService,
-  ) { }
+  ) {}
 
   /** ----------------------------------------------------------------------
    *  Generic POST wrapper
    *  ---------------------------------------------------------------------- */
-  private post<T, U>(form: T, headers: Record<string, string>, type: GauzyUploadType): Promise<{ data: U }> {
-    return this.gauzyRestService.post<T, U>(`${this.baseUrl}/${type}`, form, { headers });
+  private post<T, U>(
+    form: T,
+    headers: Record<string, string>,
+    type: GauzyUploadType,
+  ): Promise<{ data: U }> {
+    return this.gauzyRestService.post<T, U>(`${this.baseUrl}/${type}`, form, {
+      headers,
+    });
   }
 
   /** ----------------------------------------------------------------------
    *  Public upload methods – each now uses the common helpers
    *  ---------------------------------------------------------------------- */
 
-  public video(payload: IUploadVideo & IRequestHeaders): Promise<{ data: FileAsset }> {
-    const { tenantId, organizationId, file, title, description, recordedAt, resolution, codec, frameRate } = payload;
+  public video(
+    payload: IUploadVideo & IRequestHeaders,
+  ): Promise<{ data: FileAsset }> {
+    const {
+      tenantId,
+      organizationId,
+      file,
+      title,
+      description,
+      recordedAt,
+      resolution,
+      codec,
+      frameRate,
+    } = payload;
 
     const form = this.buildForm({
       file,
@@ -51,8 +69,11 @@ export class GauzyUploadService {
     return this.post<FormData, FileAsset>(form, headers, GauzyUploadType.VIDEO);
   }
 
-  public screenshot(payload: IUploadScreenshot & IRequestHeaders): Promise<{ data: FileAsset }> {
-    const { tenantId, organizationId, file, recordedAt, pathname, timeSlotId } = payload;
+  public screenshot(
+    payload: IUploadScreenshot & IRequestHeaders,
+  ): Promise<{ data: FileAsset }> {
+    const { tenantId, organizationId, file, recordedAt, pathname, timeSlotId } =
+      payload;
 
     const form = this.buildForm({
       file,
@@ -65,11 +86,18 @@ export class GauzyUploadService {
     form.append('timeSlotId', timeSlotId);
 
     const headers = this.headerBuilderService.build(payload);
-    return this.post<FormData, FileAsset>(form, headers, GauzyUploadType.IMAGE);
+    return this.gauzyRestService.post<FormData, FileAsset>(
+      'timesheet/screenshot',
+      form,
+      { headers },
+    );
   }
 
-  public camshot(payload: IUploadCamShot & IRequestHeaders): Promise<{ data: FileAsset }> {
-    const { tenantId, organizationId, file, recordedAt, pathname, timeSlotId } = payload;
+  public camshot(
+    payload: IUploadCamShot & IRequestHeaders,
+  ): Promise<{ data: FileAsset }> {
+    const { tenantId, organizationId, file, recordedAt, pathname, timeSlotId } =
+      payload;
 
     const form = this.buildForm({
       file,
@@ -85,8 +113,20 @@ export class GauzyUploadService {
     return this.post<FormData, FileAsset>(form, headers, GauzyUploadType.PHOTO);
   }
 
-  public soundshot(payload: IUploadSoundShot & IRequestHeaders): Promise<{ data: FileAsset }> {
-    const { tenantId, organizationId, file, recordedAt, name, pathname, timeSlotId, rate, channels } = payload;
+  public soundshot(
+    payload: IUploadSoundShot & IRequestHeaders,
+  ): Promise<{ data: FileAsset }> {
+    const {
+      tenantId,
+      organizationId,
+      file,
+      recordedAt,
+      name,
+      pathname,
+      timeSlotId,
+      rate,
+      channels,
+    } = payload;
 
     const form = this.buildForm({
       file,
