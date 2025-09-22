@@ -14,21 +14,25 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { AuthGuard } from '../auth/guards/auth.guard';
-import { ImageService } from './image.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
+import { UniqueViewsSharedService } from 'src/services/shared/uniqueViews.shared.service';
+import { IUniqueView } from 'src/services/utils/models/shared.model';
+import { IDataResponse } from '../../interfaces/_types';
+import IEditorImage, { IDbFolder } from '../../interfaces/IEditorImage';
+import { FoldersSharedService } from '../../services/shared/folders.shared.service';
 import {
   queryReturnType,
   SharedService,
 } from '../../services/shared/shared.service';
+import { RefreshToken } from '../auth/decorators/refresh-token.decorator';
+import { User } from '../auth/decorators/user.decorator';
+import { AuthGuard, IRequestUser } from '../auth/guards/auth.guard';
 import { UserGuard } from '../auth/guards/user.guard';
-import { IDataResponse } from '../../interfaces/_types';
-import { IDbFolder } from '../../interfaces/IEditorImage';
-import { IUniqueView } from 'src/services/utils/models/shared.model';
-import { UniqueViewsSharedService } from 'src/services/shared/uniqueViews.shared.service';
-import { FoldersSharedService } from '../../services/shared/folders.shared.service';
+import { ImageService } from './image.service';
+import { ContextUploader } from './uploader/context.uploader';
+import { IImagePayload } from './view.models/image.model';
 
 // TODO: add return type on all endpoints
 
@@ -39,6 +43,7 @@ export class ImageController {
     private readonly sharedService: SharedService,
     private readonly foldersSharedService: FoldersSharedService,
     private readonly uniqueViewsSharedService: UniqueViewsSharedService,
+    private readonly contextUploader: ContextUploader,
   ) {}
 
   // This one is for deleting shared Images AND videos from user when he delets account.
@@ -260,17 +265,19 @@ export class ImageController {
   @Post('upload/file')
   @UseInterceptors(FileInterceptor('file'))
   async uploadFile(
-    @Req() req,
-    @Body() body,
+    @User() user: IRequestUser,
+    @Body() body: IImagePayload,
     @UploadedFile() file: Express.Multer.File,
-  ) {
-    return await this.imageService.uploadFile(
-      req.user?.id,
-      file,
-      body.title,
-      body.fullFileName,
-      body.folderId,
-    );
+    @RefreshToken() token: string,
+  ): Promise<IEditorImage> {
+    return await this.contextUploader.upload({
+      image: {
+        ...body,
+        userId: user.id,
+        file,
+      },
+      token,
+    });
   }
 
   @UseGuards(AuthGuard)
