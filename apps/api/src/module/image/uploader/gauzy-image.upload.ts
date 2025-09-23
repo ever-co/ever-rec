@@ -1,4 +1,7 @@
 import { Injectable } from '@nestjs/common';
+import { AbstractHandler } from 'src/common/pipeline/abstract.handler';
+import { PipelineHandler } from 'src/common/pipeline/pipeline.decorator';
+import { PipelineType } from 'src/common/pipeline/types';
 import IEditorImage from 'src/interfaces/IEditorImage';
 import {
   AuthProviderId,
@@ -7,27 +10,35 @@ import {
 import { Login } from 'src/module/auth/services/login/interfaces/login-state.interface';
 import { MergeTokenPolicy } from 'src/module/auth/services/tokens/policies/merge-token.policy';
 import { GauzyUploadService } from 'src/module/gauzy/services/gauzy-upload.service';
-import { IImagePayload } from '../view.models/image.model';
-import { ImageUploader } from './image.uploader';
+import { IRequestImageUploader } from '../view.models/image.model';
 
 @Injectable()
-export class GauzyImageUploader extends ImageUploader {
+@PipelineHandler({
+  pipelineType: PipelineType.UPLOAD_IMAGE,
+  provider: AuthProviderId.GAUZY,
+  order: 1,
+})
+export class GauzyImageUploader extends AbstractHandler<
+  IRequestImageUploader,
+  IEditorImage
+> {
   private context: AuthStateResult<Login>;
+
   constructor(
     private readonly gauzyUploaderService: GauzyUploadService,
     private readonly tokenPolicy: MergeTokenPolicy,
   ) {
-    super(AuthProviderId.GAUZY);
+    super();
   }
 
-  protected async canHandle(idToken: string): Promise<boolean> {
+  public async canHandle({ token }: IRequestImageUploader): Promise<boolean> {
     try {
       // First check if token is valid according to our policy
-      const isValid = await this.tokenPolicy.isValid(idToken);
+      const isValid = await this.tokenPolicy.isValid(token);
 
       if (isValid) {
-        const decoded = await this.tokenPolicy.decode<Login>(idToken);
-        this.context = decoded.get(this.providerId);
+        const decoded = await this.tokenPolicy.decode<Login>(token);
+        this.context = decoded.get(this.providerId as AuthProviderId);
         return true;
       }
 
@@ -37,7 +48,9 @@ export class GauzyImageUploader extends ImageUploader {
     }
   }
 
-  protected async process(payload: IImagePayload): Promise<IEditorImage> {
+  public async process({
+    image: payload,
+  }: IRequestImageUploader): Promise<IEditorImage> {
     const { data } = await this.gauzyUploaderService.screenshot({
       duration: payload.duration,
       file: payload.file,
