@@ -261,8 +261,6 @@ export class VideoService {
       let videoDuration = String(duration);
       const editorVideo: IEditorVideo = { url: '' };
 
-      console.log(blob);
-
       const inputPath = blob.path;
       const fixedVideoPath = join(TMP_PATH_FIXED, fullFilename);
 
