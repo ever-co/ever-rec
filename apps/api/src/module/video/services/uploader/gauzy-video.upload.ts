@@ -1,5 +1,9 @@
 import { Injectable } from '@nestjs/common';
+import { AbstractHandler } from 'src/common/pipeline/abstract.handler';
+import { PipelineHandler } from 'src/common/pipeline/pipeline.decorator';
+import { PipelineType } from 'src/common/pipeline/types';
 import IEditorImage from 'src/interfaces/IEditorImage';
+import IEditorVideo from 'src/interfaces/IEditorVideo';
 import {
   AuthProviderId,
   AuthStateResult,
@@ -7,27 +11,34 @@ import {
 import { Login } from 'src/module/auth/services/login/interfaces/login-state.interface';
 import { MergeTokenPolicy } from 'src/module/auth/services/tokens/policies/merge-token.policy';
 import { GauzyUploadService } from 'src/module/gauzy/services/gauzy-upload.service';
-import { IVideoPayload } from '../../view.models/video.model';
-import { VideoUploader } from './video.uploader';
+import { IRequestVideoUploader } from '../../view.models/video.model';
 
 @Injectable()
-export class GauzyVideoUploader extends VideoUploader {
+@PipelineHandler({
+  pipelineType: PipelineType.UPLOAD_VIDEO,
+  provider: AuthProviderId.GAUZY,
+  order: 1,
+})
+export class GauzyVideoUploader extends AbstractHandler<
+  IRequestVideoUploader,
+  IEditorVideo
+> {
   private context: AuthStateResult<Login>;
   constructor(
     private readonly gauzyUploaderService: GauzyUploadService,
     private readonly tokenPolicy: MergeTokenPolicy,
   ) {
-    super(AuthProviderId.GAUZY);
+    super();
   }
 
-  protected async canHandle(idToken: string): Promise<boolean> {
+  public async canHandle({ token }: IRequestVideoUploader): Promise<boolean> {
     try {
       // First check if token is valid according to our policy
-      const isValid = await this.tokenPolicy.isValid(idToken);
+      const isValid = await this.tokenPolicy.isValid(token);
 
       if (isValid) {
-        const decoded = await this.tokenPolicy.decode<Login>(idToken);
-        this.context = decoded.get(this.providerId);
+        const decoded = await this.tokenPolicy.decode<Login>(token);
+        this.context = decoded.get(this.providerId as AuthProviderId);
         return true;
       }
 
@@ -37,7 +48,9 @@ export class GauzyVideoUploader extends VideoUploader {
     }
   }
 
-  protected async process(payload: IVideoPayload): Promise<IEditorImage> {
+  public async process({
+    video: payload,
+  }: IRequestVideoUploader): Promise<IEditorImage> {
     const { data } = await this.gauzyUploaderService.video({
       duration: payload.duration,
       file: payload.file,

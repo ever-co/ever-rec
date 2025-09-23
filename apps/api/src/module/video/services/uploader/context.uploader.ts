@@ -1,22 +1,23 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { PipelineService } from 'src/common/pipeline/pipeline.service';
+import { PipelineType } from 'src/common/pipeline/types';
 import IEditorVideo from 'src/interfaces/IEditorVideo';
 import { AuthProviderId } from 'src/module/auth/interfaces/auth.interface';
 import { IRequestVideoUploader } from '../../view.models/video.model';
-import { FirebaseVideoUploader } from './firebase-video.upload';
 
 @Injectable()
 export class ContextUploader {
   private readonly logger = new Logger(ContextUploader.name);
 
-  constructor(private readonly firebaseImageUploader: FirebaseVideoUploader) {}
+  constructor(private readonly pipeline: PipelineService) {}
 
-  public async upload(payload: IRequestVideoUploader): Promise<IEditorVideo> {
-    this.logger.log(`uploading file ${payload.video.fullFileName}...`);
+  public async upload(context: IRequestVideoUploader): Promise<IEditorVideo> {
+    this.logger.log(`uploading file ${context.video.fullFileName}...`);
 
-    const result = new Map<AuthProviderId, IEditorVideo>();
-
-    await this.firebaseImageUploader.handle(payload, result);
-
-    return result.get(AuthProviderId.FIREBASE);
+    return this.pipeline.execute<IRequestVideoUploader, IEditorVideo>(
+      PipelineType.UPLOAD_VIDEO,
+      AuthProviderId.FIREBASE,
+      { context },
+    );
   }
 }
