@@ -23,7 +23,7 @@ export class HandlerFactory {
   public getChainFor<TCtx, TResult>(
     pipelineType: PipelineType,
   ): AbstractHandler<TCtx, TResult> {
-    const list = this.registry.get(pipelineType) || [];
+    let list = this.registry.get(pipelineType) || [];
     if (!list.length) {
       throw new Error(`No handlers registered for pipeline ${pipelineType}`);
     }
