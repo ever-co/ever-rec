@@ -36,6 +36,7 @@ import { UserGuard } from '../auth/guards/user.guard';
 import { ContextUploader } from './services/uploader/context.uploader';
 import { VideoService } from './video.service';
 import { sendResponse } from 'src/services/utils/sendResponse';
+import { IVideoPayload } from './view.models/video.model';
 
 @Controller('video')
 export class VideoController {
@@ -291,7 +292,7 @@ export class VideoController {
   )
   @Post('upload/file')
   async uploadFile(
-    @Body() body,
+    @Body() body: IVideoPayload,
     @UploadedFile() blob: Express.Multer.File,
     @User() user: IRequestUser,
     @RefreshToken() token: string,
