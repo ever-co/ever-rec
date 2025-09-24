@@ -12,7 +12,7 @@ export class HandlerFactory {
   /** Called by the explorer to register every decorated handler */
   public register(handler: AbstractHandler<any, any>) {
     const key = handler.pipelineType;
-    const list = this.registry.get(key) || [];
+    let list = this.registry.get(key) || [];
     list.push(handler);
     // sort by order ascending (lower order → run earlier)
     list.sort((a, b) => a.order - b.order);
