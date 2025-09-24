@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { AbstractHandler } from 'src/common/pipeline/abstract.handler';
 import { PipelineHandler } from 'src/common/pipeline/pipeline.decorator';
 import { PipelineType } from 'src/common/pipeline/types';
-import IEditorImage from 'src/interfaces/IEditorImage';
 import IEditorVideo from 'src/interfaces/IEditorVideo';
 import {
   AuthProviderId,
@@ -50,7 +49,7 @@ export class GauzyVideoUploader extends AbstractHandler<
 
   public async process({
     video: payload,
-  }: IRequestVideoUploader): Promise<IEditorImage> {
+  }: IRequestVideoUploader): Promise<IEditorVideo> {
     const { data } = await this.gauzyUploaderService.video({
       duration: payload.duration,
       file: payload.file,
