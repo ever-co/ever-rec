@@ -39,7 +39,7 @@ export class GauzyImageUploader extends AbstractHandler<
       if (isValid) {
         const decoded = await this.tokenPolicy.decode<Login>(token);
         this.context = decoded.get(this.providerId as AuthProviderId);
-        return true;
+        return !!this.context;
       }
 
       return false;
