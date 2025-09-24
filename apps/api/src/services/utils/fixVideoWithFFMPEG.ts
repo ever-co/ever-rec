@@ -2,8 +2,8 @@ import * as fs from 'fs/promises';
 import Ffmpeg from 'fluent-ffmpeg';
 import ffmpegPath from 'ffmpeg-static';
 import ffprobePath from 'ffprobe-static';
-import { basename, dirname, extname, join } from 'path';
-
+import { basename, dirname, extname, join, resolve } from 'path';
+import { TMP_PATH } from '../../enums/tmpPathsEnums';
 Ffmpeg.setFfmpegPath(ffmpegPath);
 Ffmpeg.setFfprobePath(ffprobePath.path);
 
@@ -58,9 +58,18 @@ export async function fixVideoWithFFMPEG(
   });
 
   // Step 4: Clean up original video (best effort)
-  fs.unlink(brokenVideoPath).catch((err) =>
-    console.warn(`Failed to delete original file: ${err.message}`),
-  );
+  try {
+    const resolvedPath = resolve(brokenVideoPath);
+    if (resolvedPath.startsWith(resolve(TMP_PATH))) {
+      fs.unlink(resolvedPath).catch((err) =>
+        console.warn(`Failed to delete original file: ${err.message}`),
+      );
+    } else {
+      console.warn(`Attempted to delete file outside TMP_PATH: ${resolvedPath}`);
+    }
+  } catch (err) {
+    console.warn(`Error during path validation for deletion: ${err.message}`);
+  }
 
   return { outputPath, duration };
 }
