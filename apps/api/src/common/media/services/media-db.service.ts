@@ -2,15 +2,15 @@ import { Injectable } from '@nestjs/common';
 import {
   IMediaDbOptions,
   IMediaDbRecord,
-  MediaDbStrategy,
 } from '../interfaces/media-db.interface';
+import { FirebaseDbStrategy } from '../strategies/firebase-db.strategy';
 
 @Injectable()
 export class MediaDbService {
-  constructor(private readonly dbStrategy: MediaDbStrategy) {}
+  constructor(private readonly firebaseDbStrategy: FirebaseDbStrategy) {}
 
   async create(options: IMediaDbOptions): Promise<IMediaDbRecord> {
-    return this.dbStrategy.create(options);
+    return this.firebaseDbStrategy.create(options);
   }
 
   async read(
@@ -18,7 +18,7 @@ export class MediaDbService {
     id: string,
     mediaType: string,
   ): Promise<IMediaDbRecord | null> {
-    return this.dbStrategy.read(uid, id, mediaType);
+    return this.firebaseDbStrategy.read(uid, id, mediaType);
   }
 
   async update(
@@ -27,10 +27,10 @@ export class MediaDbService {
     mediaType: string,
     data: Partial<IMediaDbRecord>,
   ): Promise<IMediaDbRecord> {
-    return this.dbStrategy.update(uid, id, mediaType, data);
+    return this.firebaseDbStrategy.update(uid, id, mediaType, data);
   }
 
   async delete(uid: string, id: string, mediaType: string): Promise<void> {
-    return this.dbStrategy.delete(uid, id, mediaType);
+    return this.firebaseDbStrategy.delete(uid, id, mediaType);
   }
 }

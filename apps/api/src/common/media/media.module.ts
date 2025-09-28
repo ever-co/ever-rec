@@ -8,15 +8,15 @@ import { FirebaseStorageStrategy } from './strategies/firebase-storage.strategy'
 @Module({
   imports: [FirebaseModule],
   providers: [
-    MediaUploadService,
     FirebaseStorageStrategy,
     MediaDbService,
+    MediaUploadService,
     FirebaseDbStrategy,
   ],
   exports: [
+    MediaDbService,
     MediaUploadService,
     FirebaseStorageStrategy,
-    MediaDbService,
     FirebaseDbStrategy,
   ],
 })
