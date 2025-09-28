@@ -22,6 +22,7 @@ import { VideoModule } from './module/video/video.module';
 import { WhiteboardsModule } from './module/whiteboards/whiteboards.module';
 import { WorkspaceModule } from './module/workspace/workspace.module';
 import { PipelineModule } from './common/pipeline/pipeline.module';
+import { SoundshotModule } from './module/soundshot/soundshot.module';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { PipelineModule } from './common/pipeline/pipeline.module';
     WhiteboardsModule,
     EditorWebsocketModule,
     PipelineModule,
+    SoundshotModule,
   ],
   controllers: [AppController],
   providers: [
