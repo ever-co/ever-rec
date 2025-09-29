@@ -23,6 +23,7 @@ import { WhiteboardsModule } from './module/whiteboards/whiteboards.module';
 import { WorkspaceModule } from './module/workspace/workspace.module';
 import { PipelineModule } from './common/pipeline/pipeline.module';
 import { SoundshotModule } from './module/soundshot/soundshot.module';
+import { CamshotModule } from './module/camshot/camshot.module';
 
 @Module({
   imports: [
@@ -49,6 +50,7 @@ import { SoundshotModule } from './module/soundshot/soundshot.module';
     EditorWebsocketModule,
     PipelineModule,
     SoundshotModule,
+    CamshotModule
   ],
   controllers: [AppController],
   providers: [
@@ -60,4 +62,4 @@ import { SoundshotModule } from './module/soundshot/soundshot.module';
     },
   ],
 })
-export class AppModule {}
+export class AppModule { }
