@@ -14,15 +14,15 @@ export class CamshotService {
     private readonly mediaUploadService: MediaUploadService,
     private readonly mediaDbService: MediaDbService,
     private readonly eventEmitter: EventEmitter2,
-  ) { }
+  ) {}
 
   async uploadCamshot(
     input: Partial<ICamshotPayload>,
   ): Promise<IDataResponse<any>> {
-    const { userId: uid, file, title, duration, folderId } = input;
+    const { userId: uid, file, title, folderId } = input;
 
     try {
-      // Optional: validate audio file (e.g., mime type)
+      // Optional: validate image file (e.g., mime type)
       if (!file.mimetype.startsWith('image/')) {
         return sendError('Invalid file type. Only image files are allowed.');
       }
@@ -45,7 +45,6 @@ export class CamshotService {
         data: {
           refName: filename,
           title,
-          duration,
           parentId: folderId || false,
           mimeType: file.mimetype,
         },
@@ -53,7 +52,7 @@ export class CamshotService {
 
       this.eventEmitter.emit('analytics.track', 'Camshot Uploaded', {
         userId: uid,
-        properties: { title, url: uploadResult.url, duration },
+        properties: { title, url: uploadResult.url },
       });
 
       return sendResponse({
