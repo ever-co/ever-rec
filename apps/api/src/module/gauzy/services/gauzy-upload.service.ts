@@ -59,7 +59,7 @@ export class GauzyUploadService {
       recordedAt,
     });
 
-    form.append('title', title);
+    if (title) form.append('title', title);
     if (description) form.append('description', description);
     if (resolution) form.append('resolution', resolution);
     if (codec) form.append('codec', codec);
@@ -82,8 +82,8 @@ export class GauzyUploadService {
       recordedAt,
     });
 
-    form.append('pathname', pathname);
-    form.append('timeSlotId', timeSlotId);
+    if (pathname) form.append('pathname', pathname);
+    if (timeSlotId) form.append('timeSlotId', timeSlotId);
 
     const headers = this.headerBuilderService.build(payload);
     return this.gauzyRestService.post<FormData, FileAsset>(
@@ -106,8 +106,8 @@ export class GauzyUploadService {
       recordedAt,
     });
 
-    form.append('pathname', pathname);
-    form.append('timeSlotId', timeSlotId);
+    if (pathname) form.append('pathname', pathname);
+    if (timeSlotId) form.append('timeSlotId', timeSlotId);
 
     const headers = this.headerBuilderService.build(payload);
     return this.post<FormData, FileAsset>(form, headers, GauzyUploadType.PHOTO);
@@ -136,11 +136,11 @@ export class GauzyUploadService {
     });
 
     // Backend expects the audio title under the key “title”
-    form.append('title', name);
-    form.append('pathname', pathname);
-    form.append('timeSlotId', timeSlotId);
-    form.append('rate', rate.toString());
-    form.append('channels', channels.toString());
+    if (name) form.append('title', name);
+    if (pathname) form.append('pathname', pathname);
+    if (timeSlotId) form.append('timeSlotId', timeSlotId);
+    if (rate) form.append('rate', rate.toString());
+    if (channels) form.append('channels', channels.toString());
 
     const headers = this.headerBuilderService.build(payload);
     return this.post<FormData, FileAsset>(form, headers, GauzyUploadType.AUDIO);

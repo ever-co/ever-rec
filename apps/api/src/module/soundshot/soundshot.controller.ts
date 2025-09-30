@@ -44,11 +44,7 @@ export class SoundshotController {
     type: SoundshotUploadDto,
   })
   async upload(
-    @UploadedFile(
-      new ParseFilePipe({
-        validators: [new FileTypeValidator({ fileType: 'audio/*' })],
-      }),
-    )
+    @UploadedFile()
     file: Express.Multer.File,
     @Body() body: ISoundShotPayload,
     @User() user: IRequestUser,
