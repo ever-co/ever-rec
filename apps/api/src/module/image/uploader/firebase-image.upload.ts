@@ -50,7 +50,7 @@ export class FirebaseImageUploader extends AbstractHandler<
   public async process({
     image: payload,
   }: IRequestImageUploader): Promise<IEditorImage> {
-    const safeName = payload?.file?.originalname || nanoid();
+    const safeName = payload.file?.originalname || nanoid();
 
     return this.imageService.uploadFile(
       payload.userId,
