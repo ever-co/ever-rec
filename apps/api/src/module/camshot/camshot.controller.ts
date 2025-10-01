@@ -27,6 +27,8 @@ import {
   ICamshotDbRecord,
   ICamshotPayload,
 } from './interfaces/camshot.interface';
+import { sendResponse } from 'src/services/utils/sendResponse';
+import { IDataResponse } from 'src/interfaces/_types';
 
 @Controller('camshots')
 export class CamshotController {
@@ -53,7 +55,7 @@ export class CamshotController {
     @Body() body: ICamshotPayload,
     @User() user: IRequestUser,
     @RefreshToken() token: string,
-  ) {
+  ): Promise<IDataResponse<ICamshotDbRecord>> {
     const context = {
       camshot: {
         ...body,
@@ -63,9 +65,11 @@ export class CamshotController {
       token,
     };
 
-    return this.pipelineService.execute<
+    const data = await this.pipelineService.execute<
       IRequestCamshotUploader,
       ICamshotDbRecord
     >(PipelineType.UPLOAD_CAMSHOT, AuthProviderId.FIREBASE, { context });
+
+    return sendResponse(data);
   }
 }

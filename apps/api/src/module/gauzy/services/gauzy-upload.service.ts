@@ -136,7 +136,7 @@ export class GauzyUploadService {
     });
 
     // Backend expects the audio title under the key “title”
-    if (name) form.append('title', name);
+    if (name) form.append('name', name);
     if (pathname) form.append('pathname', pathname);
     if (timeSlotId) form.append('timeSlotId', timeSlotId);
     if (rate) form.append('rate', rate.toString());

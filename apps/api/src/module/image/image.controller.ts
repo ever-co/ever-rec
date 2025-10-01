@@ -19,6 +19,7 @@ import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
 import { UniqueViewsSharedService } from 'src/services/shared/uniqueViews.shared.service';
 import { IUniqueView } from 'src/services/utils/models/shared.model';
+import { sendResponse } from 'src/services/utils/sendResponse';
 import { IDataResponse } from '../../interfaces/_types';
 import IEditorImage, { IDbFolder } from '../../interfaces/IEditorImage';
 import { FoldersSharedService } from '../../services/shared/folders.shared.service';
@@ -269,8 +270,8 @@ export class ImageController {
     @Body() body: IImagePayload,
     @UploadedFile() file: Express.Multer.File,
     @RefreshToken() token: string,
-  ): Promise<IEditorImage> {
-    return await this.contextUploader.upload({
+  ): Promise<IDataResponse<IEditorImage>> {
+    const data = await this.contextUploader.upload({
       image: {
         ...body,
         userId: user.id,
@@ -278,6 +279,8 @@ export class ImageController {
       },
       token,
     });
+
+    return sendResponse(data);
   }
 
   @UseGuards(AuthGuard)

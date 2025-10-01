@@ -37,6 +37,7 @@ import { ContextUploader } from './services/uploader/context.uploader';
 import { VideoService } from './video.service';
 import { sendResponse } from 'src/services/utils/sendResponse';
 import { IVideoPayload } from './view.models/video.model';
+import IEditorVideo from 'src/interfaces/IEditorVideo';
 
 @Controller('video')
 export class VideoController {
@@ -296,7 +297,7 @@ export class VideoController {
     @UploadedFile() blob: Express.Multer.File,
     @User() user: IRequestUser,
     @RefreshToken() token: string,
-  ) {
+  ): Promise<IDataResponse<IEditorVideo>> {
     const fileExtension = fileExtensionMap[blob.mimetype];
 
     const data = await this.contextUploader.upload({
@@ -310,10 +311,7 @@ export class VideoController {
       },
     });
 
-    return sendResponse({
-      message: 'Video uploaded successfully',
-      data,
-    });
+    return sendResponse(data);
   }
 
   @UseGuards(AuthGuard)

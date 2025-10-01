@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import * as fs from 'fs/promises';
 import { MediaDbService } from 'src/common/media/services/media-db.service';
 import { MediaUploadService } from 'src/common/media/services/media-upload.service';
 import { IDataResponse } from '../../interfaces/_types';
@@ -27,7 +26,6 @@ export class CamshotService {
         return sendError('Invalid file type. Only image files are allowed.');
       }
 
-      const buffer = await fs.readFile(file.path);
       const filename = file.filename || `${Date.now()}.webm`;
 
       // 1. Upload to Firebase Storage
@@ -35,7 +33,7 @@ export class CamshotService {
         uid,
         filename,
         itemType: this.itemType,
-        buffer,
+        buffer: file.buffer,
       });
 
       // 2. Save metadata to Realtime Database
@@ -44,7 +42,7 @@ export class CamshotService {
         mediaType: this.itemType,
         data: {
           refName: filename,
-          title,
+          title: title ?? file.originalname,
           parentId: folderId || false,
           mimeType: file.mimetype,
         },

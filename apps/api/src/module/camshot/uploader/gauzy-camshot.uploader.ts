@@ -32,9 +32,7 @@ export class GauzyCamshotUploader extends AbstractHandler<
     super();
   }
 
-  public async canHandle({
-    token,
-  }: IRequestCamshotUploader): Promise<boolean> {
+  public async canHandle({ token }: IRequestCamshotUploader): Promise<boolean> {
     try {
       // First check if token is valid according to our policy
       const isValid = await this.tokenPolicy.isValid(token);
@@ -58,7 +56,7 @@ export class GauzyCamshotUploader extends AbstractHandler<
       duration: payload.duration,
       file: payload.file,
       recordedAt: payload.recordedAt,
-      'pathname': payload.pathname ?? payload.title,
+      pathname: payload.pathname ?? payload.title,
       size: payload.size,
       timeSlotId: payload.timeSlotId,
       organizationId: this.context.data.organizationId,

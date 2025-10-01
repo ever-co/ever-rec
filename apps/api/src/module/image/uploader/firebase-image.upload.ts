@@ -9,6 +9,7 @@ import { MergeTokenPolicy } from 'src/module/auth/services/tokens/policies/merge
 import { FirebaseAuthService } from 'src/module/firebase/services/firebase-auth.service';
 import { ImageService } from '../image.service';
 import { IRequestImageUploader } from '../view.models/image.model';
+import { file } from 'googleapis/build/src/apis/file';
 
 @Injectable()
 @PipelineHandler({
@@ -49,11 +50,12 @@ export class FirebaseImageUploader extends AbstractHandler<
   public async process({
     image: payload,
   }: IRequestImageUploader): Promise<IEditorImage> {
+    const { originalname } = payload.file;
     return this.imageService.uploadFile(
       payload.userId,
       payload.file,
-      payload.title,
-      payload.fullFileName,
+      payload.title ?? originalname,
+      payload.fullFileName ?? originalname,
       payload.folderId,
     );
   }
