@@ -13,6 +13,8 @@ import {
   UploadedFile,
   UseGuards,
   UseInterceptors,
+  BadRequestException,
+  UnsupportedMediaTypeException,
 } from '@nestjs/common';
 import {
   FileFieldsInterceptor,
@@ -47,7 +49,7 @@ export class VideoController {
     private readonly foldersSharedService: FoldersSharedService,
     private readonly uniqueViewsSharedService: UniqueViewsSharedService,
     private readonly contextUploader: ContextUploader,
-  ) {}
+  ) { }
 
   @UseGuards(AuthGuard)
   @Get('share/:id')
@@ -266,7 +268,17 @@ export class VideoController {
     @Body() body,
     @UploadedFile() blob: Express.Multer.File,
   ) {
+    if (!blob || !blob.mimetype || !blob.filename) {
+      throw new BadRequestException('Missing uploaded file or file metadata.');
+    }
+
     const fileExtension = fileExtensionMap[blob.mimetype];
+
+    if (!fileExtension) {
+      throw new UnsupportedMediaTypeException(
+        `Unsupported media type: ${blob.mimetype}`,
+      );
+    }
 
     return await this.videoService.uploadVideo(
       req.user?.id,
@@ -298,7 +310,17 @@ export class VideoController {
     @User() user: IRequestUser,
     @RefreshToken() token: string,
   ): Promise<IDataResponse<IEditorVideo>> {
+    if (!blob || !blob.mimetype || !blob.filename) {
+      throw new BadRequestException('Missing uploaded file or file metadata.');
+    }
+
     const fileExtension = fileExtensionMap[blob.mimetype];
+
+    if (!fileExtension) {
+      throw new UnsupportedMediaTypeException(
+        `Unsupported media type: ${blob.mimetype}`,
+      );
+    }
 
     const data = await this.contextUploader.upload({
       token,
