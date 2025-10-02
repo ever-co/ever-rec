@@ -1,6 +1,6 @@
 import { AuthProviderId } from 'src/module/auth/interfaces/auth.interface';
 import { IUploadScreenshot } from '../../gauzy/interfaces/gauzy-upload.model';
-import IEditorImage from 'src/interfaces/IEditorImage';
+import type IEditorImage from 'src/interfaces/IEditorImage';
 
 export interface IImagePayload extends IUploadScreenshot {
   userId: string;
