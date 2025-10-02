@@ -4,7 +4,7 @@ import { PipelineType } from './types';
 export const PIPELINE_HANDLER_METADATA = 'PIPELINE_HANDLER_METADATA';
 
 export interface PipelineHandlerMetadata {
-  /** Which pipeline (UPLOAD, TRANSFORM, NOTIFY…), see types.ts below */
+  /** Which pipeline (UPLOAD, TRANSFORM, NOTIFY…), see types.ts */
   pipelineType: PipelineType;
   /** The “provider” or “key” under which you want your result stored */
   provider: string;
