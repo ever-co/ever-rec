@@ -64,6 +64,6 @@ export class GauzyCamshotUploader extends AbstractHandler<
       token: this.context.accessToken,
     });
 
-    return data as any;
+    return data as unknown as ICamshotDbRecord;
   }
 }
