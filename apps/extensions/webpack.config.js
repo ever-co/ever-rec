@@ -46,6 +46,15 @@ const config = {
   },
   module: {
     rules: [
+      // Allow extension-less ESM imports in certain packages (e.g. plyr)
+      // Fixes Webpack 5 "fully specified" resolution errors for packages that import without file extensions
+      {
+        test: /\.m?js$/,
+        resolve: {
+          fullySpecified: false,
+        },
+      },
+
       // {
       //   test: /\.(js|jsx)$/,
       //   use: "babel-loader",
