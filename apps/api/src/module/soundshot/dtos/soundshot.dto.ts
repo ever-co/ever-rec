@@ -3,7 +3,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class SoundshotUploadDto {
   @ApiProperty({
-    example: 'audio.mp3',
+    example: 'My recording',
     description: 'Title of the soundshot',
   })
   @Optional()
@@ -17,11 +17,11 @@ export class SoundshotUploadDto {
   @Optional()
   duration?: number;
 
-  @Optional()
   @ApiProperty({
     example: 'folder_abc123',
     description: 'ID of parent folder (optional)',
     required: false,
   })
+  @Optional()
   folderId?: string;
 }

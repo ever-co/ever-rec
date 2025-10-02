@@ -9,7 +9,7 @@ export interface ISoundshotDbRecord extends IMediaDbRecord {
   sampleRate?: number;
 }
 
-export interface ISoundShotPayload extends IUploadSoundShot {
+export interface ISoundshotPayload extends IUploadSoundShot {
   userId: string;
   file: Express.Multer.File;
   title: string;
@@ -19,7 +19,7 @@ export interface ISoundShotPayload extends IUploadSoundShot {
 
 export interface IRequestSoundshotUploader {
   token: string;
-  soundshot: ISoundShotPayload;
+  soundshot: ISoundshotPayload;
 }
 
 export interface ISoundshotUploader {

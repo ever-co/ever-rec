@@ -69,6 +69,6 @@ export class GauzySoundshotUploader extends AbstractHandler<
       token: this.context.accessToken,
     });
 
-    return data as any;
+    return data as unknown as ISoundshotDbRecord;
   }
 }

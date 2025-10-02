@@ -9,7 +9,7 @@ export interface IMediaUploadOptions {
   uid?: string;
   workspaceId?: string;
   filename: string;
-  itemType: 'videos' | 'screenshots' | 'soundshots' | 'camshots' | string;
+  itemType: 'videos' | 'screenshots' | 'soundshots' | 'camshots';
   buffer: Buffer;
   refName?: string; // for overwrites
 }

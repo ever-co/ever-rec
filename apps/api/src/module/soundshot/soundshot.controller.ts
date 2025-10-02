@@ -25,7 +25,7 @@ import { SoundshotUploadDto } from './dtos/soundshot.dto';
 import {
   IRequestSoundshotUploader,
   ISoundshotDbRecord,
-  ISoundShotPayload,
+  ISoundshotPayload,
 } from './interfaces/soundshot.interface';
 
 @Controller('soundshots')
@@ -46,7 +46,7 @@ export class SoundshotController {
   async upload(
     @UploadedFile()
     file: Express.Multer.File,
-    @Body() body: ISoundShotPayload,
+    @Body() body: ISoundshotPayload,
     @User() user: IRequestUser,
     @RefreshToken() token: string,
   ): Promise<IDataResponse<ISoundshotDbRecord>> {

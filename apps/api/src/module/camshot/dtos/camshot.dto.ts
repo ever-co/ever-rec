@@ -1,11 +1,13 @@
 import { Optional } from '@nestjs/common';
 import { ApiProperty } from '@nestjs/swagger';
+import { IsNumber, IsString } from 'class-validator';
 
 export class CamshotUploadDto {
   @ApiProperty({
-    example: 'audio.mp3',
+    example: 'camshot.jpg',
     description: 'Title of the camshot',
   })
+  @IsString()
   @Optional()
   title?: string;
 
@@ -14,14 +16,16 @@ export class CamshotUploadDto {
     description: 'Duration in seconds (optional)',
     required: false,
   })
+  @IsNumber()
   @Optional()
   duration?: number;
 
-  @Optional()
   @ApiProperty({
     example: 'folder_abc123',
     description: 'ID of parent folder (optional)',
     required: false,
   })
+  @IsString()
+  @Optional()
   folderId?: string;
 }

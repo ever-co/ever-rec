@@ -5,7 +5,7 @@ import { MediaDbService } from 'src/common/media/services/media-db.service';
 import { MediaUploadService } from 'src/common/media/services/media-upload.service';
 import { IDataResponse } from '../../interfaces/_types';
 import { sendError, sendResponse } from '../../services/utils/sendResponse';
-import { ISoundShotPayload } from './interfaces/soundshot.interface';
+import { ISoundshotPayload } from './interfaces/soundshot.interface';
 
 @Injectable()
 export class SoundshotService {
@@ -17,7 +17,7 @@ export class SoundshotService {
   ) {}
 
   async uploadSoundshot(
-    input: Partial<ISoundShotPayload>,
+    input: Partial<ISoundshotPayload>,
   ): Promise<IDataResponse<any>> {
     const { userId: uid, file, title, duration, folderId } = input;
 
@@ -62,7 +62,6 @@ export class SoundshotService {
         dbData,
       });
     } catch (error) {
-      console.error('Soundshot upload failed:', error);
       return sendError('Failed to upload soundshot', error.message);
     }
   }
