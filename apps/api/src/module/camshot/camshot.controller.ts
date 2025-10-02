@@ -32,11 +32,11 @@ import { IDataResponse } from 'src/interfaces/_types';
 
 @Controller('camshots')
 export class CamshotController {
-  constructor(private readonly pipelineService: PipelineService) {}
+  constructor(private readonly pipelineService: PipelineService) { }
 
   @Post('upload/file')
   @UseGuards(AuthGuard)
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('file', { limits: { fileSize: 10 * 1024 * 1024 } }))
   @ApiOperation({ summary: 'Upload an image file (camshot)' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({ type: CamshotUploadDto })

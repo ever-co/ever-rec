@@ -30,11 +30,11 @@ import {
 
 @Controller('soundshots')
 export class SoundshotController {
-  constructor(private readonly pipelineService: PipelineService) {}
+  constructor(private readonly pipelineService: PipelineService) { }
 
   @Post('upload/file')
   @UseGuards(AuthGuard)
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('file', { limits: { fileSize: 100 * 1024 * 1024 } }))
   @ApiOperation({ summary: 'Upload an audio file (soundshot)' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({ type: SoundshotUploadDto })

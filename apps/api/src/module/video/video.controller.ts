@@ -292,6 +292,7 @@ export class VideoController {
   @UseGuards(AuthGuard)
   @UseInterceptors(
     FileInterceptor('file', {
+      limits: { fileSize: 1024 * 1024 * 1024 },
       storage: diskStorage({
         destination: (req, file, callback) => {
           callback(null, TMP_PATH);
