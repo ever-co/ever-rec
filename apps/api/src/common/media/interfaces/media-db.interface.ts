@@ -1,3 +1,5 @@
+export type MediaType = 'videos' | 'screenshots' | 'soundshots' | 'camshots';
+
 export interface IMediaDbRecord {
   id: string;
   uid: string;
@@ -13,7 +15,7 @@ export interface IMediaDbRecord {
 
 export interface IMediaDbOptions {
   uid: string;
-  mediaType: 'videos' | 'screenshots' | 'soundshots' | 'camshots'; // or extendable enum
+  mediaType: MediaType;
   data: Partial<IMediaDbRecord>;
   id?: string; // for updates
 }

@@ -1,4 +1,4 @@
-// src/media/interfaces/media-upload.interface.ts
+import { MediaType } from './media-db.interface';
 export interface IMediaMetadata {
   timeCreated: string;
   name: string;
@@ -9,7 +9,7 @@ export interface IMediaUploadOptions {
   uid?: string;
   workspaceId?: string;
   filename: string;
-  itemType: 'videos' | 'screenshots' | 'soundshots' | 'camshots';
+  itemType: MediaType;
   buffer: Buffer;
   refName?: string; // for overwrites
 }
