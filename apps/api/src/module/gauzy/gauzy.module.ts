@@ -7,6 +7,7 @@ import { GauzyRestService } from './services/gauzy-rest.service';
 import { GauzyUploadAssetService } from './services/gauzy-upload-asset.service';
 import { GauzyUserService } from './services/gauzy-user.service';
 import { HeaderBuilderService } from './services/header-builder.service';
+import { GauzyUploadService } from './services/gauzy-upload.service';
 
 export const GAUZY_AVAILABLE = Symbol('gauzy availability token');
 
@@ -18,6 +19,7 @@ export const GAUZY_AVAILABLE = Symbol('gauzy availability token');
     GauzyUserService,
     GauzyUploadAssetService,
     HeaderBuilderService,
+    GauzyUploadService,
     {
       provide: GAUZY_AVAILABLE,
       useFactory: (configService: ConfigService) => {
@@ -25,14 +27,15 @@ export const GAUZY_AVAILABLE = Symbol('gauzy availability token');
         return !!(url && url.trim().length > 0);
       },
       inject: [ConfigService],
-    }
+    },
   ],
   exports: [
     GauzyRestService,
     GauzyAuthService,
     GauzyUserService,
     GauzyUploadAssetService,
-    GAUZY_AVAILABLE
-  ]
+    GauzyUploadService,
+    GAUZY_AVAILABLE,
+  ],
 })
-export class GauzyModule { }
+export class GauzyModule {}

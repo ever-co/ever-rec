@@ -13,25 +13,33 @@ import {
   UploadedFile,
   UseGuards,
   UseInterceptors,
+  BadRequestException,
+  UnsupportedMediaTypeException,
 } from '@nestjs/common';
-import { AuthGuard } from '../auth/guards/auth.guard';
-import { VideoService } from './video.service';
-import { SharedService } from '../../services/shared/shared.service';
 import {
   FileFieldsInterceptor,
   FileInterceptor,
 } from '@nestjs/platform-express';
 import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
-import { UserGuard } from '../auth/guards/user.guard';
-import { IUniqueView } from 'src/services/utils/models/shared.model';
 import { diskStorage } from 'multer';
-import { v4 as uuidv4 } from 'uuid';
-import { TMP_PATH } from '../../enums/tmpPathsEnums';
-import { fileExtensionMap } from 'src/services/utils/fileExtensionMap';
 import { IDataResponse } from 'src/interfaces/_types';
 import { UniqueViewsSharedService } from 'src/services/shared/uniqueViews.shared.service';
+import { fileExtensionMap } from 'src/services/utils/fileExtensionMap';
+import { IUniqueView } from 'src/services/utils/models/shared.model';
+import { v4 as uuidv4 } from 'uuid';
+import { TMP_PATH } from '../../enums/tmpPathsEnums';
 import { FoldersSharedService } from '../../services/shared/folders.shared.service';
+import { SharedService } from '../../services/shared/shared.service';
+import { RefreshToken } from '../auth/decorators/refresh-token.decorator';
+import { User } from '../auth/decorators/user.decorator';
+import { AuthGuard, IRequestUser } from '../auth/guards/auth.guard';
+import { UserGuard } from '../auth/guards/user.guard';
+import { ContextUploader } from './services/uploader/context.uploader';
+import { VideoService } from './video.service';
+import { sendResponse } from 'src/services/utils/sendResponse';
+import { IVideoPayload } from './view.models/video.model';
+import IEditorVideo from 'src/interfaces/IEditorVideo';
 
 @Controller('video')
 export class VideoController {
@@ -40,7 +48,8 @@ export class VideoController {
     private readonly sharedService: SharedService,
     private readonly foldersSharedService: FoldersSharedService,
     private readonly uniqueViewsSharedService: UniqueViewsSharedService,
-  ) {}
+    private readonly contextUploader: ContextUploader,
+  ) { }
 
   @UseGuards(AuthGuard)
   @Get('share/:id')
@@ -259,7 +268,17 @@ export class VideoController {
     @Body() body,
     @UploadedFile() blob: Express.Multer.File,
   ) {
+    if (!blob || !blob.mimetype || !blob.filename) {
+      throw new BadRequestException('Missing uploaded file or file metadata.');
+    }
+
     const fileExtension = fileExtensionMap[blob.mimetype];
+
+    if (!fileExtension) {
+      throw new UnsupportedMediaTypeException(
+        `Unsupported media type: ${blob.mimetype}`,
+      );
+    }
 
     return await this.videoService.uploadVideo(
       req.user?.id,
@@ -273,6 +292,7 @@ export class VideoController {
   @UseGuards(AuthGuard)
   @UseInterceptors(
     FileInterceptor('file', {
+      limits: { fileSize: 1024 * 1024 * 1024 },
       storage: diskStorage({
         destination: (req, file, callback) => {
           callback(null, TMP_PATH);
@@ -286,20 +306,35 @@ export class VideoController {
   )
   @Post('upload/file')
   async uploadFile(
-    @Req() req,
-    @Body() body,
+    @Body() body: IVideoPayload,
     @UploadedFile() blob: Express.Multer.File,
-  ) {
+    @User() user: IRequestUser,
+    @RefreshToken() token: string,
+  ): Promise<IDataResponse<IEditorVideo>> {
+    if (!blob || !blob.mimetype || !blob.filename) {
+      throw new BadRequestException('Missing uploaded file or file metadata.');
+    }
+
     const fileExtension = fileExtensionMap[blob.mimetype];
 
-    return await this.videoService.uploadVideoFile(
-      req.user?.id,
-      blob,
-      body.title,
-      body.duration,
-      blob.filename + fileExtension, // fullFilename
-      body.folderId,
-    );
+    if (!fileExtension) {
+      throw new UnsupportedMediaTypeException(
+        `Unsupported media type: ${blob.mimetype}`,
+      );
+    }
+
+    const data = await this.contextUploader.upload({
+      token,
+      video: {
+        ...body,
+        file: blob,
+        userId: user.id,
+        title: body.title,
+        fullFileName: blob.filename + fileExtension,
+      },
+    });
+
+    return sendResponse(data);
   }
 
   @UseGuards(AuthGuard)

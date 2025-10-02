@@ -21,6 +21,9 @@ import { SlackModule } from './module/slack/slack.module';
 import { VideoModule } from './module/video/video.module';
 import { WhiteboardsModule } from './module/whiteboards/whiteboards.module';
 import { WorkspaceModule } from './module/workspace/workspace.module';
+import { PipelineModule } from './common/pipeline/pipeline.module';
+import { SoundshotModule } from './module/soundshot/soundshot.module';
+import { CamshotModule } from './module/camshot/camshot.module';
 
 @Module({
   imports: [
@@ -45,6 +48,9 @@ import { WorkspaceModule } from './module/workspace/workspace.module';
     AtlassianModule,
     WhiteboardsModule,
     EditorWebsocketModule,
+    PipelineModule,
+    SoundshotModule,
+    CamshotModule
   ],
   controllers: [AppController],
   providers: [

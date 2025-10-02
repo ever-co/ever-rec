@@ -34,7 +34,7 @@ export class AuthController {
     private readonly authOrchestratorService: AuthOrchestratorService,
     private readonly tokenService: TokenService,
     private readonly sharedService: SharedService,
-  ) { }
+  ) {}
 
   @UseGuards(AuthGuard)
   @Delete('remove-shared')
@@ -73,7 +73,7 @@ export class AuthController {
     @User() user: IRequestUser,
     @Body() body: UpdateUserDto,
     @UploadedFile() photoURL: string,
-    @RefreshToken() token: string
+    @RefreshToken() token: string,
   ) {
     return this.authOrchestratorService.updateUserData({
       uid: user?.id,
@@ -89,7 +89,7 @@ export class AuthController {
   async updateUserAvatar(
     @User() user: IRequestUser,
     @UploadedFile() file: Express.Multer.File,
-    @RefreshToken() token: string
+    @RefreshToken() token: string,
   ) {
     return this.authOrchestratorService.uploadAvatar({
       uid: user?.id,
@@ -116,12 +116,12 @@ export class AuthController {
   async updateEmail(
     @User() user: IRequestUser,
     @Body() body: UpdateEmailDto,
-    @RefreshToken() token: string
+    @RefreshToken() token: string,
   ): Promise<IDataResponse> {
     return this.authOrchestratorService.changeUserEmail({
       uid: user?.id,
       email: body.email,
-      token
+      token,
     });
   }
 
@@ -130,14 +130,14 @@ export class AuthController {
   async updatePassword(
     @User() user: IRequestUser,
     @Body() body: UpdatePasswordDto,
-    @RefreshToken() token: string
+    @RefreshToken() token: string,
   ): Promise<IDataResponse> {
     return this.authOrchestratorService.changeUserPassword({
       uid: user?.id,
       email: body.email,
       oldPassword: body.oldPassword,
       newPassword: body.password,
-      token
+      token,
     });
   }
 
