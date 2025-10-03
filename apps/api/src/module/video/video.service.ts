@@ -1,33 +1,32 @@
-import * as admin from 'firebase-admin';
-import { Injectable } from '@nestjs/common';
-import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Reference } from '@firebase/database-types';
 import type { FullMetadata } from '@firebase/storage';
-import { nanoid } from 'nanoid';
+import { Injectable } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import * as admin from 'firebase-admin';
 import moment from 'moment';
-import { SharedService } from '../../services/shared/shared.service';
-import { IUniqueView, IView } from '../../services/utils/models/shared.model';
-import { IDataResponse } from '../../interfaces/_types';
+import { nanoid } from 'nanoid';
+import { join } from 'path';
+import {
+  formatDataToArray,
+  parseCollectionToArray,
+} from 'src/services/utils/helpers';
+import { uploadVideoToBucket } from 'src/services/utils/uploadVideoToBucket';
 import { ResStatusEnum } from '../../enums/ResStatusEnum';
+import { TMP_PATH_FIXED } from '../../enums/tmpPathsEnums';
+import { IDataResponse } from '../../interfaces/_types';
+import { IFavoriteFolders } from '../../interfaces/Folders';
 import { DbFolderDataRaw, IDbFolder } from '../../interfaces/IEditorImage';
-import { StreamServiceService } from '../video-services/streamService.service';
-import { IUser, IUserShort } from '../../interfaces/IUser';
 import IEditorVideo, {
   DbFolderData,
   DbVideoData,
   ISharedDataVideo,
 } from '../../interfaces/IEditorVideo';
-import { fixVideoWithFFMPEG } from '../../services/utils/fixVideoWithFFMPEG';
-import { TMP_PATH_FIXED } from '../../enums/tmpPathsEnums';
-import { join } from 'path';
-import { uploadVideoToBucket } from 'src/services/utils/uploadVideoToBucket';
-import {
-  formatDataToArray,
-  parseCollectionToArray,
-} from 'src/services/utils/helpers';
+import { IUserShort } from '../../interfaces/IUser';
 import { FoldersSharedService } from '../../services/shared/folders.shared.service';
-import { sendResponse, sendError } from '../../services/utils/sendResponse';
-import { IFavoriteFolders } from '../../interfaces/Folders';
+import { SharedService } from '../../services/shared/shared.service';
+import { fixVideoWithFFMPEG } from '../../services/utils/fixVideoWithFFMPEG';
+import { sendError, sendResponse } from '../../services/utils/sendResponse';
+import { StreamServiceService } from '../video-services/streamService.service';
 
 @Injectable()
 export class VideoService {
@@ -254,12 +253,12 @@ export class VideoService {
     uid: string,
     blob: Express.Multer.File,
     title: string,
-    duration: string,
+    duration: number,
     fullFilename: string,
     folderId?: string,
   ): Promise<IDataResponse<IEditorVideo>> {
     try {
-      let videoDuration = duration;
+      let videoDuration = String(duration);
       const editorVideo: IEditorVideo = { url: '' };
 
       const inputPath = blob.path;

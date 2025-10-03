@@ -7,6 +7,7 @@ export interface IUser {
   displayName?: string;
   photoURL?: string;
   email?: string;
+  isVerified?: boolean;
   slackToken?: string;
   googleCredentials?: OAuthCredential;
   whiteboardIds?: string[];
@@ -19,6 +20,7 @@ export interface IUserShort {
   displayName: string;
   photoURL: string;
   email: string;
+  isVerified?: boolean;
 }
 
 export interface ITokens {
