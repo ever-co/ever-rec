@@ -8,6 +8,12 @@ import { EmailService } from './email.service';
 import { GoogleAuthService } from './google-auth.service';
 import { UserProfileService } from './user-profile.service';
 import { UserService } from './user.service';
+import { LoginChain } from './login/login.chain';
+import { RegisterChain } from './register';
+import { RequestPasswordChain } from './password-reset/password-request.chain';
+import { PasswordUpdateChain } from './password-update/password-update.chain';
+import { UpdateUserProfileChain } from './update-user-profile/update-user-profile.chain';
+import { IUpdateUserProfileProps, IUploadAvatarProfileProps, WorkflowProfileType } from './update-user-profile/interfaces/update-user-profile.interface';
 
 export interface IRegisterProps {
   email: string;
@@ -25,6 +31,7 @@ export interface IChangePasswordProps {
   email: string;
   oldPassword: string;
   newPassword: string;
+  token: string;
 }
 
 export interface IUpdateUserDataProps {
@@ -50,6 +57,11 @@ export class AuthOrchestratorService {
     private readonly userProfileService: UserProfileService,
     private readonly sharedService: SharedService,
     private readonly eventEmitter: EventEmitter2,
+    private readonly loginChain: LoginChain,
+    private readonly registerChain: RegisterChain,
+    private readonly requestPasswordChain: RequestPasswordChain,
+    private readonly passwordUpdateChain: PasswordUpdateChain,
+    private readonly updateUserProfileChain: UpdateUserProfileChain
   ) { }
 
   // ==================== AUTHENTICATION METHODS ====================
@@ -58,14 +70,14 @@ export class AuthOrchestratorService {
    * Register a new user
    */
   async register(registerData: IRegisterProps): Promise<IDataResponse> {
-    return this.authenticationService.register(registerData);
+    return this.registerChain.execute(registerData);
   }
 
   /**
    * Login user with email and password
    */
-  async login(loginData: ILoginProps): Promise<IDataResponse> {
-    return this.authenticationService.login(loginData);
+  async login(login: ILoginProps): Promise<IDataResponse> {
+    return this.loginChain.execute(login);
   }
 
   /**
@@ -105,39 +117,28 @@ export class AuthOrchestratorService {
    * Update user data
    */
   async updateUserData(
-    updateData: IUpdateUserDataProps,
+    updateData: IUpdateUserProfileProps,
   ): Promise<IDataResponse> {
-    return this.userProfileService.updateUserData(
-      updateData.uid,
-      updateData.displayName,
-      updateData.photoURL,
-    );
+    return this.updateUserProfileChain.execute(updateData, WorkflowProfileType.NAME);
   }
 
   /**
    * Upload user avatar
    */
-  async uploadAvatar(uploadData: IUploadAvatarProps): Promise<IDataResponse> {
-    return this.userProfileService.uploadAvatar(
-      uploadData.uid,
-      uploadData.avatar,
+  async uploadAvatar(uploadData: IUploadAvatarProfileProps): Promise<IDataResponse> {
+    return this.updateUserProfileChain.execute(
+      uploadData,
+      WorkflowProfileType.AVATAR,
     );
   }
 
   /**
    * Change user email
    */
-  async changeUserEmail(uid: string, newEmail: string): Promise<IDataResponse> {
-    try {
-      // Update email in Firebase Auth
-      await this.userService.updateUser(uid, { email: newEmail });
-
-      // Update email in database
-      return this.userProfileService.changeUserEmail(uid, newEmail);
-    } catch (error: any) {
-      this.logger.error(`Failed to change user email: ${uid}`, error);
-      return sendError('Failed to change user email', error);
-    }
+  async changeUserEmail(
+    updateData: IUpdateUserProfileProps,
+  ): Promise<IDataResponse> {
+    return this.updateUserProfileChain.execute(updateData, WorkflowProfileType.EMAIL);
   }
 
   /**
@@ -146,7 +147,7 @@ export class AuthOrchestratorService {
   async changeUserPassword(
     changePasswordData: IChangePasswordProps,
   ): Promise<IDataResponse> {
-    return this.authenticationService.changePassword(changePasswordData);
+    return this.passwordUpdateChain.execute(changePasswordData);
   }
 
   /**
@@ -199,7 +200,7 @@ export class AuthOrchestratorService {
    * Send password reset email
    */
   async sendPasswordResetEmail(email: string): Promise<IDataResponse> {
-    return this.emailService.sendPasswordResetEmail(email);
+    return this.requestPasswordChain.execute(email);
   }
 
   /**

@@ -1,76 +1,75 @@
 import * as fs from 'fs/promises';
-import Ffmpeg from 'fluent-ffmpeg'; // https://github.com/fluent-ffmpeg/node-fluent-ffmpeg#readme
+import Ffmpeg from 'fluent-ffmpeg';
+import ffmpegPath from 'ffmpeg-static';
+import ffprobePath from 'ffprobe-static';
+import { basename, dirname, extname, join, resolve } from 'path';
+import { TMP_PATH } from '../../enums/tmpPathsEnums';
+Ffmpeg.setFfmpegPath(ffmpegPath);
+Ffmpeg.setFfprobePath(ffprobePath.path);
 
-// Create a new mp4 video with correct metadata with Ffmpeg:
+export interface FixVideoResult {
+  outputPath: string;
+  duration?: string;
+}
 
-// First create a command and test it a few times
-// example: ffmpeg -i test.webm -vcodec vp9 -cpu-used -5 -deadline realtime out.webm
-const fixVideoWithFFMPEG = async (
+/**
+ * Fix a video container/metadata using ffmpeg.
+ * Detects codec and switches to `.webm` if VP8 is found.
+ */
+export async function fixVideoWithFFMPEG(
   brokenVideoPath: string,
   fixedVideoPath: string,
-) => {
-  let outputPath = fixedVideoPath;
-  const command = Ffmpeg(); // Package fluent-ffmpeg
-  let duration = null;
-
-  // Some browsers (Firefox) don't work with h264 codec and have used vp8, lets just save it as .webm file and upload it
-  const data: any = await new Promise((resolve, reject) => {
-    command.input(brokenVideoPath).ffprobe(function (err, metadata) {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(metadata);
-      }
+): Promise<FixVideoResult> {
+  // Step 1: Inspect video metadata
+  const metadata = await new Promise<Ffmpeg.FfprobeData>((resolve, reject) => {
+    Ffmpeg(brokenVideoPath).ffprobe((err, meta) => {
+      if (err) reject(err);
+      else resolve(meta);
     });
   });
 
-  data.streams.forEach((stream) => {
-    if (stream.codec_name === 'vp8') {
-      outputPath = fixedVideoPath.replace('mp4', 'webm');
-    }
-  });
+  // Step 2: Decide output format
+  let outputPath = fixedVideoPath;
+  const usesVp8 = metadata.streams.some((s) => s.codec_name === 'vp8');
 
-  const outputVideo = await new Promise((resolve, reject) => {
-    command
-      .input(brokenVideoPath)
-      .videoCodec('copy')
+  if (usesVp8) {
+    const base = basename(fixedVideoPath, extname(fixedVideoPath));
+    outputPath = join(dirname(fixedVideoPath), `${base}.webm`);
+  }
+
+  // Step 3: Process video
+  const duration = await new Promise<string | undefined>((resolve, reject) => {
+    let detectedDuration: string | undefined;
+
+    Ffmpeg(brokenVideoPath)
+      .videoCodec('copy') // no re-encode
       .output(outputPath)
-
-      .on('end', async (event) => {
-        console.log(event);
-        resolve(null);
-      })
-
-      .on('error', async (error) => {
-        console.log(error);
-        reject(error);
-      })
-
-      .on('progress', async (progress) => {
-        console.log('Processing: ' + progress.percent + '% done');
-      })
-
-      .on('codecData', async (codecData) => {
-        // ex. '00:01:30.52'
-        // @ts-ignore
-        if (codecData.duration !== 'N/A') {
-          // @ts-ignore
-          const durationArray = codecData.duration.split(':');
-          const minutes = durationArray[1];
-          const seconds = durationArray[2].split('.')[0];
-          duration = minutes + ':' + seconds;
+      .on('codecData', (codecData) => {
+        if (codecData.duration && codecData.duration !== 'N/A') {
+          detectedDuration = codecData.duration; // full format (HH:MM:SS.xx)
         }
       })
-
+      .on('end', () => resolve(detectedDuration))
+      .on('error', (err) => reject(err))
+      .on('progress', (progress) => {
+        console.debug(`Processing: ${progress.percent?.toFixed(2)}%`);
+      })
       .run();
   });
 
-  // Remove initial video - don't await this - we don't care to continue
-  fs.unlink(brokenVideoPath).catch((error) => {
-    console.log(error);
-  });
+  // Step 4: Clean up original video (best effort)
+  try {
+    const resolvedPath = resolve(brokenVideoPath);
+    if (resolvedPath.startsWith(resolve(TMP_PATH))) {
+      fs.unlink(resolvedPath).catch((err) =>
+        console.warn(`Failed to delete original file: ${err.message}`),
+      );
+    } else {
+      console.warn(`Attempted to delete file outside TMP_PATH: ${resolvedPath}`);
+    }
+  } catch (err) {
+    console.warn(`Error during path validation for deletion: ${err.message}`);
+  }
 
-  return { outputVideo, duration, outputPath };
-};
-
-export { fixVideoWithFFMPEG };
+  return { outputPath, duration };
+}

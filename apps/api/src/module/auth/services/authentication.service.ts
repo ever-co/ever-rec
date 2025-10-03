@@ -23,6 +23,7 @@ export interface IChangePasswordProps {
   email: string;
   oldPassword: string;
   newPassword: string;
+  token: string;
 }
 
 @Injectable()

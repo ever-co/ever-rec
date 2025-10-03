@@ -26,7 +26,7 @@ import { GenerateEmailVerificationLinkDto } from './dto/send-email-verification.
 import { AuthGuard, IRequestUser } from './guards/auth.guard';
 import { EmailOwnershipGuard } from './guards/email-ownership.guard';
 import { AuthOrchestratorService } from './services/auth-orchestrator.service';
-import { TokenRefreshResponse, TokenService } from './token.service';
+import { RefreshResponse, TokenService } from './services/tokens';
 
 @Controller('auth')
 export class AuthController {
@@ -73,11 +73,13 @@ export class AuthController {
     @User() user: IRequestUser,
     @Body() body: UpdateUserDto,
     @UploadedFile() photoURL: string,
+    @RefreshToken() token: string,
   ) {
     return this.authOrchestratorService.updateUserData({
       uid: user?.id,
       displayName: body.displayName,
       photoURL,
+      token,
     });
   }
 
@@ -87,10 +89,12 @@ export class AuthController {
   async updateUserAvatar(
     @User() user: IRequestUser,
     @UploadedFile() file: Express.Multer.File,
+    @RefreshToken() token: string,
   ) {
     return this.authOrchestratorService.uploadAvatar({
       uid: user?.id,
       avatar: file,
+      token,
     });
   }
 
@@ -112,8 +116,13 @@ export class AuthController {
   async updateEmail(
     @User() user: IRequestUser,
     @Body() body: UpdateEmailDto,
+    @RefreshToken() token: string,
   ): Promise<IDataResponse> {
-    return this.authOrchestratorService.changeUserEmail(user?.id, body.email);
+    return this.authOrchestratorService.changeUserEmail({
+      uid: user?.id,
+      email: body.email,
+      token,
+    });
   }
 
   @UseGuards(AuthGuard, EmailOwnershipGuard)
@@ -121,12 +130,14 @@ export class AuthController {
   async updatePassword(
     @User() user: IRequestUser,
     @Body() body: UpdatePasswordDto,
+    @RefreshToken() token: string,
   ): Promise<IDataResponse> {
     return this.authOrchestratorService.changeUserPassword({
       uid: user?.id,
       email: body.email,
       oldPassword: body.oldPassword,
       newPassword: body.password,
+      token,
     });
   }
 
@@ -134,7 +145,7 @@ export class AuthController {
   async refreshToken(
     @RefreshToken() token: string,
     @Req() request: any,
-  ): Promise<TokenRefreshResponse> {
+  ): Promise<RefreshResponse> {
     return this.tokenService.refreshToken(token, request);
   }
 
