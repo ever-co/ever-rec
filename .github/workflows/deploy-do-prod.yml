@@ -31,10 +31,10 @@ jobs:
       - name: Generate TLS Secrets
         run: |
           rm -f ${HOME}/ingress.api.crt ${HOME}/ingress.api.key ${HOME}/ingress.webapp.crt ${HOME}/ingress.webapp.key
-          echo ${{ secrets.INGRESS_API_CERT }} | base64 --decode > ${HOME}/ingress.api.crt
-          echo ${{ secrets.INGRESS_API_CERT_KEY }} | base64 --decode > ${HOME}/ingress.api.key
-          echo ${{ secrets.INGRESS_WEBAPP_CERT }} | base64 --decode > ${HOME}/ingress.webapp.crt
-          echo ${{ secrets.INGRESS_WEBAPP_CERT_KEY }} | base64 --decode > ${HOME}/ingress.webapp.key
+          echo "${{ secrets.INGRESS_API_CERT }}" | base64 --decode > ${HOME}/ingress.api.crt
+          echo "${{ secrets.INGRESS_API_CERT_KEY }}" | base64 --decode > ${HOME}/ingress.api.key
+          echo "${{ secrets.INGRESS_WEBAPP_CERT }}" | base64 --decode > ${HOME}/ingress.webapp.crt
+          echo "${{ secrets.INGRESS_WEBAPP_CERT_KEY }}" | base64 --decode > ${HOME}/ingress.webapp.key
           kubectl create secret tls api.rec.so-tls --save-config --dry-run=client --cert=${HOME}/ingress.api.crt --key=${HOME}/ingress.api.key -o yaml | kubectl --context do-sfo2-k8s-gauzy apply -f -
           kubectl create secret tls app.rec.so-tls --save-config --dry-run=client --cert=${HOME}/ingress.webapp.crt --key=${HOME}/ingress.webapp.key -o yaml | kubectl --context do-sfo2-k8s-gauzy apply -f -
 
