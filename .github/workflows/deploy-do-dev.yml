@@ -65,4 +65,4 @@ jobs:
       - name: Restart Pods to pick up :latest tag version
         run: |
           kubectl --context do-sfo2-k8s-gauzy rollout restart deployment/ever-rec-api-dev
-          kubectl --context do-sfo2-k8s-gauzy rollout restart deployment/ever-rec-poral-dev
+          kubectl --context do-sfo2-k8s-gauzy rollout restart deployment/ever-rec-portal-dev
