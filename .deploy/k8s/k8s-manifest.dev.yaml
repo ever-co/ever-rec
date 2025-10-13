@@ -47,6 +47,8 @@ spec:
           env:
             - name: API_HOST
               value: 0.0.0.0
+            - name: REC_JWT_SECRET
+              value: "$REC_JWT_SECRET"
             - name: FIREBASE_API_KEY
               value: "$FIREBASE_API_KEY"
             - name: FIREBASE_AUTH_DOMAIN
