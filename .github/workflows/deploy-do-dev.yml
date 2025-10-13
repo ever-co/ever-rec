@@ -43,6 +43,7 @@ jobs:
           envsubst < $GITHUB_WORKSPACE/.deploy/k8s/k8s-manifest.dev.yaml | kubectl --context do-sfo2-k8s-gauzy apply -f -
         env:
           CLOUD_PROVIDER: "DO"
+          REC_JWT_SECRET: "${{ secrets.REC_JWT_SECRET }}"
           FIREBASE_API_KEY: "${{ secrets.FIREBASE_API_KEY }}"
           FIREBASE_AUTH_DOMAIN: "${{ secrets.FIREBASE_AUTH_DOMAIN }}"
           FIREBASE_DATABASE_URL: "${{ secrets.FIREBASE_DATABASE_URL }}"
@@ -65,4 +66,4 @@ jobs:
       - name: Restart Pods to pick up :latest tag version
         run: |
           kubectl --context do-sfo2-k8s-gauzy rollout restart deployment/ever-rec-api-dev
-          kubectl --context do-sfo2-k8s-gauzy rollout restart deployment/ever-rec-poral-dev
+          kubectl --context do-sfo2-k8s-gauzy rollout restart deployment/ever-rec-portal-dev
