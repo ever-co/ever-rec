@@ -32,7 +32,7 @@ kind: Deployment
 metadata:
   name: ever-rec-api-prod
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: ever-rec-api-prod
@@ -79,7 +79,7 @@ kind: Deployment
 metadata:
   name: ever-rec-portal-prod
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: ever-rec-portal-prod
