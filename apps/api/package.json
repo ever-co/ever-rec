@@ -47,7 +47,7 @@
     "analytics-node": "^6.1.0",
     "axios": "^0.30.2",
     "blob-to-stream": "^1.0.3",
-    "body-parser": "^2.2.0",
+    "body-parser": "^2.2.1",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.13.2",
     "dateformat": "^4.6.3",
