@@ -22,7 +22,7 @@ export class GauzyAuthService {
   }
 
   public async refreshToken(value: string) {
-    return this.gauzyRestService.post<{ refresh_token: string }, { token: string }>('auth/refresh-token', { refresh_token: value });
+    return this.gauzyRestService.post<{ refresh_token: string }, { token: string, refresh_token: string }>('auth/refresh-token', { refresh_token: value });
   }
 
   public async requestPassword(email: string) {

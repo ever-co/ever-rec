@@ -24,7 +24,7 @@ export class GauzyRefreshStrategy extends RefreshStrategyState {
   }
 
   async handle({ result }: IRefreshTokenContext, refreshToken: string): Promise<RefreshResponse> {
-    const { data: { token } } = await this.gauzyAuthService.refreshToken(refreshToken);
+    const { data: { token, refresh_token } } = await this.gauzyAuthService.refreshToken(refreshToken);
 
     this.validateResponse(token);
 
@@ -33,13 +33,13 @@ export class GauzyRefreshStrategy extends RefreshStrategyState {
 
     const response = {
       idToken: token,
-      refreshToken,
+      refreshToken: refresh_token,
       expiresAt,
     };
 
     result.set(this.providerId, {
       accessToken: token,
-      refreshToken,
+      refreshToken: refresh_token,
       data: response
     });
 
