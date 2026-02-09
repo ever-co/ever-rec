@@ -27,6 +27,7 @@ export class GauzyRefreshStrategy extends RefreshStrategyState {
     const { data: { token, refresh_token } } = await this.gauzyAuthService.refreshToken(refreshToken);
 
     this.validateResponse(token);
+    this.validateResponse(refresh_token);
 
     const expiresIn = 3000;
     const expiresAt = new Date(Date.now() + expiresIn * 1000).toISOString();
