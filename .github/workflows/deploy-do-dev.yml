@@ -9,6 +9,7 @@ on:
 
 jobs:
   deploy-demo:
+    if: ${{ vars.DO_ENABLED == 'true' }}
     runs-on: buildjet-4vcpu-ubuntu-2204
 
     environment: dev
