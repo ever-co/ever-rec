@@ -10,7 +10,7 @@ concurrency:
 
 jobs:
   ever-rec-api:
-    runs-on: buildjet-8vcpu-ubuntu-2204
+    runs-on: ${{ vars.RUNNER_LINUX_X64_8 || 'ubuntu-latest' }}
 
     environment: dev
 
