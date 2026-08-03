@@ -3,7 +3,10 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { IDataResponse } from '../../../interfaces/_types';
 import { SharedService } from '../../../services/shared/shared.service';
 import { sendError, sendResponse } from '../../../services/utils/sendResponse';
-import { AuthenticationService } from './authentication.service';
+import {
+  AuthenticationService,
+  type IRegisterProps as IAuthRegisterProps,
+} from './authentication.service';
 import { EmailService } from './email.service';
 import { GoogleAuthService } from './google-auth.service';
 import { UserProfileService } from './user-profile.service';
@@ -15,11 +18,15 @@ import { PasswordUpdateChain } from './password-update/password-update.chain';
 import { UpdateUserProfileChain } from './update-user-profile/update-user-profile.chain';
 import { IUpdateUserProfileProps, IUploadAvatarProfileProps, WorkflowProfileType } from './update-user-profile/interfaces/update-user-profile.interface';
 
-export interface IRegisterProps {
-  email: string;
-  password: string;
-  username: string;
-}
+/**
+ * Re-exported from `AuthenticationService` rather than restated.
+ *
+ * These were two independent declarations of the same shape, and the register
+ * chain passes its payload straight through — so adding a field to one and not
+ * the other silently drops it. That is exactly how the TOS checkbox value went
+ * missing, and it is not worth risking twice.
+ */
+export type IRegisterProps = IAuthRegisterProps;
 
 export interface ILoginProps {
   email: string;
