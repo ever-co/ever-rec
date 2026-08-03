@@ -4,6 +4,7 @@ import { JwtModule, JwtModuleOptions } from '@nestjs/jwt';
 import { SharedModule } from '../../services/shared/shared.module';
 import { FirebaseModule } from '../firebase';
 import { GauzyModule } from '../gauzy';
+import { TermsModule } from '../terms/terms.module';
 import { AuthController } from './auth.controller';
 import { AuthOrchestratorService } from './services/auth-orchestrator.service';
 import { AuthenticationService } from './services/authentication.service';
@@ -70,6 +71,9 @@ import { UserService } from './services/user.service';
     FirebaseModule,
     SharedModule,
     GauzyModule,
+    // Supplies TermsAcceptanceService to AuthenticationService.register, which
+    // is where the signup checkbox finally becomes a stored record.
+    TermsModule,
   ],
   controllers: [AuthController],
   providers: [

@@ -18,6 +18,7 @@ import { ImageModule } from './module/image/image.module';
 import { LogModule } from './module/log/log.module';
 import { MessagesModule } from './module/messages/messages.module';
 import { SlackModule } from './module/slack/slack.module';
+import { TermsModule } from './module/terms/terms.module';
 import { VideoModule } from './module/video/video.module';
 import { WhiteboardsModule } from './module/whiteboards/whiteboards.module';
 import { WorkspaceModule } from './module/workspace/workspace.module';
@@ -36,6 +37,7 @@ import { CamshotModule } from './module/camshot/camshot.module';
     FirebaseModule,
     AdminModule,
     AuthModule,
+    TermsModule,
     ImageModule,
     VideoModule,
     LogModule,
