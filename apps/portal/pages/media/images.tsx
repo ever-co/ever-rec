@@ -172,7 +172,9 @@ const Images: React.FC = () => {
     setLoading(true);
     try {
       const dbData: DbImgData = { ...image.dbData, parentId: folder.id };
-      await updateImageData(dbData);
+      // updateImageData shows its own error toast and returns null on failure
+      const updatedImage = await updateImageData(dbData);
+      if (!updatedImage) return;
 
       if (explorerData.currentFolder) {
         await decreaseFolderItems(explorerData.currentFolder, 'image', 1);
