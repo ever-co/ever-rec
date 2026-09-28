@@ -10,6 +10,7 @@ import IExplorerData from 'app/interfaces/IExplorerData';
 import {
   createImagesFolder,
   getExplorerData,
+  updateImageData,
   uploadFile,
 } from 'app/services/screenshots';
 import AppSpinner from 'components/containers/appSpinner/AppSpinner';
@@ -19,7 +20,15 @@ import PanelAC from 'app/store/panel/actions/PanelAC';
 import CreateFolderModal from '../../components/pagesComponents/_imagesScreen/components/CreateFolderModal';
 import FolderItem from '../../components/pagesComponents/_imagesScreen/components/folderItem/FolderItem';
 import { isRootFolder } from 'app/store/panel/panelUtils/utials';
-import { IDbFolderData } from 'app/interfaces/IEditorImage';
+import IEditorImage, {
+  DbImgData,
+  IDbFolderData,
+} from 'app/interfaces/IEditorImage';
+import {
+  decreaseFolderItems,
+  increaseFolderItems,
+} from 'app/services/helpers/manageFolders';
+import { infoMessage } from 'app/services/helpers/toastMessages';
 import ScreenshotsContainer from '../../components/pagesComponents/_imagesScreen/pages/myImages/screenshotsContainer/ScreenshotsContainer';
 import FolderNavigationContainer from '../../components/pagesComponents/_imagesScreen/pages/myImages/FolderNavigationContainer/FolderNavigationContainer';
 import useFolderNavigationHistory from '../../hooks/useFolderNavigationHistory';
@@ -148,33 +157,34 @@ const Images: React.FC = () => {
   //   }
   // };
 
-  // const onDrop = async (
-  //   e: DragEvent<HTMLDivElement> | undefined,
-  //   folder: IDbFolderData,
-  // ) => {
-  //   const id = e?.dataTransfer.getData('id');
-  //   if (id) {
-  //     const image: IEditorImage | undefined = explorerData.files.find(
-  //       (file) => file.dbData?.id === id,
-  //     );
-  //     if (image?.dbData) {
-  //       setLoading(true);
-  //       const dbData: DbImgData = { ...image.dbData, parentId: folder.id };
-  //       image && (await updateImageData(dbData));
+  const onDropToFolder = async (
+    e: DragEvent<HTMLDivElement> | undefined,
+    folder: IDbFolderData,
+  ) => {
+    const id = e?.dataTransfer.getData('id');
+    if (!id) return;
 
-  //       if (explorerData.currentFolder) {
-  //         await decreaseFolderItems(explorerData.currentFolder, 'image', 1);
-  //       }
+    const image: IEditorImage | undefined = explorerData.files.find(
+      (file) => file.dbData?.id === id,
+    );
+    if (!image?.dbData || image.dbData.parentId === folder.id) return;
 
-  //       if (folder) {
-  //         await increaseFolderItems(folder, 'image', 1);
-  //       }
+    setLoading(true);
+    try {
+      const dbData: DbImgData = { ...image.dbData, parentId: folder.id };
+      await updateImageData(dbData);
 
-  //       await getExplorerData(explorerData.currentFolder?.id || false);
-  //       setLoading(false);
-  //     }
-  //   }
-  // };
+      if (explorerData.currentFolder) {
+        await decreaseFolderItems(explorerData.currentFolder, 'image', 1);
+      }
+      await increaseFolderItems(folder, 'image', 1);
+
+      await getExplorerData(explorerData.currentFolder?.id || false);
+      infoMessage(`${t('toasts.imageMovedTo')} ${folder.name}`);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const openFolderHandler = async (folder: IDbFolderData | null) => {
     console.log('click-test');
@@ -347,7 +357,7 @@ const Images: React.FC = () => {
                     key={folder.id}
                     folder={folder}
                     onClick={() => openFolderHandler(folder)}
-                    onDrop={(e) => onDrop(e)}
+                    onDrop={(e) => onDropToFolder(e, folder)}
                     setLoading={(loadingState) => setLoading(loadingState)}
                     isFavorite={isFavorite(folder) || false}
                     canEdit={true}
