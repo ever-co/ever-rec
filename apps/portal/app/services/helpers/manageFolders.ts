@@ -57,4 +57,19 @@ const decreaseFolderItems = async (
   }
 };
 
-export { increaseFolderItems, decreaseFolderItems };
+// Stores the number of items actually in the folder, instead of adjusting a
+// possibly missing or stale count. Call it after the items have been moved.
+const syncFolderItemsCount = async (
+  folderData: IDbFolderData,
+  type: ItemType,
+) => {
+  if (type == 'image') {
+    const files = await getFilesImageAPI(folderData.id);
+    await updateFolderData({ ...folderData, items: files.length });
+  } else if (type == 'video') {
+    const files = await getVideoFilesAPI(folderData.id);
+    await updateVideoFolderData({ ...folderData, items: files.length });
+  }
+};
+
+export { increaseFolderItems, decreaseFolderItems, syncFolderItemsCount };

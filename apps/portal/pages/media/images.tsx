@@ -24,10 +24,7 @@ import IEditorImage, {
   DbImgData,
   IDbFolderData,
 } from 'app/interfaces/IEditorImage';
-import {
-  decreaseFolderItems,
-  increaseFolderItems,
-} from 'app/services/helpers/manageFolders';
+import { syncFolderItemsCount } from 'app/services/helpers/manageFolders';
 import { infoMessage } from 'app/services/helpers/toastMessages';
 import ScreenshotsContainer from '../../components/pagesComponents/_imagesScreen/pages/myImages/screenshotsContainer/ScreenshotsContainer';
 import FolderNavigationContainer from '../../components/pagesComponents/_imagesScreen/pages/myImages/FolderNavigationContainer/FolderNavigationContainer';
@@ -176,12 +173,16 @@ const Images: React.FC = () => {
       const updatedImage = await updateImageData(dbData);
       if (!updatedImage) return;
 
-      if (explorerData.currentFolder) {
-        await decreaseFolderItems(explorerData.currentFolder, 'image', 1);
-      }
-      await increaseFolderItems(folder, 'image', 1);
+      // Recount both folders after the move rather than adjusting by ±1, so a
+      // stale count can't drift. allSettled keeps a failed count write from
+      // skipping the reload, since the image itself has already moved.
+      const sourceFolder = explorerData.currentFolder;
+      await Promise.allSettled([
+        sourceFolder && syncFolderItemsCount(sourceFolder, 'image'),
+        syncFolderItemsCount(folder, 'image'),
+      ]);
 
-      await getExplorerData(explorerData.currentFolder?.id || false);
+      await getExplorerData(sourceFolder?.id || false);
       infoMessage(`${t('toasts.imageMovedTo')} ${folder.name}`);
     } finally {
       setLoading(false);
