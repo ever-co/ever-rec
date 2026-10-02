@@ -10,6 +10,7 @@ import IExplorerData from 'app/interfaces/IExplorerData';
 import {
   createImagesFolder,
   getExplorerData,
+  updateImageData,
   uploadFile,
 } from 'app/services/screenshots';
 import AppSpinner from 'components/containers/appSpinner/AppSpinner';
@@ -19,7 +20,12 @@ import PanelAC from 'app/store/panel/actions/PanelAC';
 import CreateFolderModal from '../../components/pagesComponents/_imagesScreen/components/CreateFolderModal';
 import FolderItem from '../../components/pagesComponents/_imagesScreen/components/folderItem/FolderItem';
 import { isRootFolder } from 'app/store/panel/panelUtils/utials';
-import { IDbFolderData } from 'app/interfaces/IEditorImage';
+import IEditorImage, {
+  DbImgData,
+  IDbFolderData,
+} from 'app/interfaces/IEditorImage';
+import { adjustImageFolderItems } from 'app/services/helpers/manageFolders';
+import { infoMessage } from 'app/services/helpers/toastMessages';
 import ScreenshotsContainer from '../../components/pagesComponents/_imagesScreen/pages/myImages/screenshotsContainer/ScreenshotsContainer';
 import FolderNavigationContainer from '../../components/pagesComponents/_imagesScreen/pages/myImages/FolderNavigationContainer/FolderNavigationContainer';
 import useFolderNavigationHistory from '../../hooks/useFolderNavigationHistory';
@@ -95,7 +101,7 @@ const Images: React.FC = () => {
 
   useEffect(() => {
     if (!explorerDataLoaded) {
-      (async function () {
+      void (async function () {
         try {
           setLoading(true);
           await getExplorerData();
@@ -116,7 +122,7 @@ const Images: React.FC = () => {
       rootFolderId = currentFolder?.id;
     }
 
-    createImagesFolder(
+    void createImagesFolder(
       explorerData?.currentFolder?.id || false,
       name,
       color,
@@ -148,33 +154,45 @@ const Images: React.FC = () => {
   //   }
   // };
 
-  // const onDrop = async (
-  //   e: DragEvent<HTMLDivElement> | undefined,
-  //   folder: IDbFolderData,
-  // ) => {
-  //   const id = e?.dataTransfer.getData('id');
-  //   if (id) {
-  //     const image: IEditorImage | undefined = explorerData.files.find(
-  //       (file) => file.dbData?.id === id,
-  //     );
-  //     if (image?.dbData) {
-  //       setLoading(true);
-  //       const dbData: DbImgData = { ...image.dbData, parentId: folder.id };
-  //       image && (await updateImageData(dbData));
+  const onDropToFolder = async (
+    e: DragEvent<HTMLDivElement> | undefined,
+    folder: IDbFolderData,
+  ) => {
+    const id = e?.dataTransfer.getData('id');
+    if (!id) return;
 
-  //       if (explorerData.currentFolder) {
-  //         await decreaseFolderItems(explorerData.currentFolder, 'image', 1);
-  //       }
+    const image: IEditorImage | undefined = explorerData.files.find(
+      (file) => file.dbData?.id === id,
+    );
+    if (!image?.dbData || image.dbData.parentId === folder.id) return;
 
-  //       if (folder) {
-  //         await increaseFolderItems(folder, 'image', 1);
-  //       }
+    setLoading(true);
+    try {
+      const dbData: DbImgData = { ...image.dbData, parentId: folder.id };
+      // updateImageData shows its own error toast and returns null on failure
+      const updatedImage = await updateImageData(dbData);
+      if (!updatedImage) return;
 
-  //       await getExplorerData(explorerData.currentFolder?.id || false);
-  //       setLoading(false);
-  //     }
-  //   }
-  // };
+      // The source is the image's own folder, not the open one: the root view
+      // also lists images that live in folders. allSettled keeps a failed
+      // count write from skipping the reload, since the image already moved.
+      const sourceFolderId = image.dbData.parentId;
+      const countResults = await Promise.allSettled([
+        sourceFolderId && adjustImageFolderItems(sourceFolderId, -1),
+        adjustImageFolderItems(folder.id, 1),
+      ]);
+      countResults.forEach((result) => {
+        if (result.status === 'rejected') {
+          console.error('Failed to update folder items count:', result.reason);
+        }
+      });
+
+      await getExplorerData(explorerData.currentFolder?.id || false);
+      infoMessage(`${t('toasts.imageMovedTo')} ${folder.name}`);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const openFolderHandler = async (folder: IDbFolderData | null) => {
     console.log('click-test');
@@ -347,7 +365,7 @@ const Images: React.FC = () => {
                     key={folder.id}
                     folder={folder}
                     onClick={() => openFolderHandler(folder)}
-                    onDrop={(e) => onDrop(e)}
+                    onDrop={(e) => onDropToFolder(e, folder)}
                     setLoading={(loadingState) => setLoading(loadingState)}
                     isFavorite={isFavorite(folder) || false}
                     canEdit={true}
