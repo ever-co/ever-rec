@@ -24,7 +24,7 @@ import IEditorImage, {
   DbImgData,
   IDbFolderData,
 } from 'app/interfaces/IEditorImage';
-import { syncFolderItemsCount } from 'app/services/helpers/manageFolders';
+import { adjustImageFolderItems } from 'app/services/helpers/manageFolders';
 import { infoMessage } from 'app/services/helpers/toastMessages';
 import ScreenshotsContainer from '../../components/pagesComponents/_imagesScreen/pages/myImages/screenshotsContainer/ScreenshotsContainer';
 import FolderNavigationContainer from '../../components/pagesComponents/_imagesScreen/pages/myImages/FolderNavigationContainer/FolderNavigationContainer';
@@ -173,21 +173,21 @@ const Images: React.FC = () => {
       const updatedImage = await updateImageData(dbData);
       if (!updatedImage) return;
 
-      // Recount both folders after the move rather than adjusting by ±1, so a
-      // stale count can't drift. allSettled keeps a failed count write from
-      // skipping the reload, since the image itself has already moved.
-      const sourceFolder = explorerData.currentFolder;
+      // The source is the image's own folder, not the open one: the root view
+      // also lists images that live in folders. allSettled keeps a failed
+      // count write from skipping the reload, since the image already moved.
+      const sourceFolderId = image.dbData.parentId;
       const countResults = await Promise.allSettled([
-        sourceFolder && syncFolderItemsCount(sourceFolder, 'image'),
-        syncFolderItemsCount(folder, 'image'),
+        sourceFolderId && adjustImageFolderItems(sourceFolderId, -1),
+        adjustImageFolderItems(folder.id, 1),
       ]);
       countResults.forEach((result) => {
         if (result.status === 'rejected') {
-          console.error('Failed to sync folder items count:', result.reason);
+          console.error('Failed to update folder items count:', result.reason);
         }
       });
 
-      await getExplorerData(sourceFolder?.id || false);
+      await getExplorerData(explorerData.currentFolder?.id || false);
       infoMessage(`${t('toasts.imageMovedTo')} ${folder.name}`);
     } finally {
       setLoading(false);
