@@ -359,7 +359,7 @@ const FolderItem: React.FC<IFolderItemProps> = ({
                   colorId={item.colorId}
                   bgColor={item.bgColor}
                   handleColor={(id) => {
-                    handleColor(id);
+                    void handleColor(id);
                     setIsDropdownVisible(false);
                   }}
                   circleSize={14}

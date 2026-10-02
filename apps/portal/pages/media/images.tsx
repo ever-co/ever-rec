@@ -101,7 +101,7 @@ const Images: React.FC = () => {
 
   useEffect(() => {
     if (!explorerDataLoaded) {
-      (async function () {
+      void (async function () {
         try {
           setLoading(true);
           await getExplorerData();
@@ -122,7 +122,7 @@ const Images: React.FC = () => {
       rootFolderId = currentFolder?.id;
     }
 
-    createImagesFolder(
+    void createImagesFolder(
       explorerData?.currentFolder?.id || false,
       name,
       color,
@@ -177,10 +177,15 @@ const Images: React.FC = () => {
       // stale count can't drift. allSettled keeps a failed count write from
       // skipping the reload, since the image itself has already moved.
       const sourceFolder = explorerData.currentFolder;
-      await Promise.allSettled([
+      const countResults = await Promise.allSettled([
         sourceFolder && syncFolderItemsCount(sourceFolder, 'image'),
         syncFolderItemsCount(folder, 'image'),
       ]);
+      countResults.forEach((result) => {
+        if (result.status === 'rejected') {
+          console.error('Failed to sync folder items count:', result.reason);
+        }
+      });
 
       await getExplorerData(sourceFolder?.id || false);
       infoMessage(`${t('toasts.imageMovedTo')} ${folder.name}`);
