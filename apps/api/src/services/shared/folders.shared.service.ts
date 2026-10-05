@@ -147,35 +147,37 @@ export class FoldersSharedService {
           rawFolderData.id,
         );
 
+        // Write only the paths that change. Rewriting the whole collection
+        // would undo item count changes committed on other folders meanwhile.
+        const fileUpdates: Record<string, null> = {};
         if (filesVal) {
           idsToDelete.forEach((x) => {
             if (filesVal[x]) {
-              delete filesVal[x];
+              fileUpdates[x] = null;
             }
           });
         }
 
-        const foldersObj = folders
-          .map((x) => {
-            if (Array.isArray(x.children)) {
-              const parentIndex = x.children.findIndex(
-                (y) => y === rawFolderData.id,
-              );
-
-              if (parentIndex !== -1) {
-                x.children.splice(parentIndex, 1);
-              }
+        // Built from the raw DB values: mapDbFoldersToTreeArray replaces
+        // `children` ids with populated folders on the parsed copies.
+        const folderUpdates: Record<string, null | string[]> = {};
+        idsToDelete.forEach((id) => {
+          folderUpdates[id] = null;
+        });
+        Object.entries(foldersVal as Record<string, DbFolderDataRaw>).forEach(
+          ([id, folder]) => {
+            // In the DB, children are always folder ids
+            const children = folder.children as string[];
+            if (idsToDelete.includes(id) || !Array.isArray(children)) {
+              return;
             }
-
-            return x;
-          })
-          .filter((x) => !idsToDelete.some((y) => y === x.id))
-          .reduce((acc, val) => {
-            const id = val.id;
-            acc[id] = val;
-
-            return acc;
-          }, {});
+            if (children.includes(rawFolderData.id)) {
+              folderUpdates[`${id}/children`] = children.filter(
+                (childId) => childId !== rawFolderData.id,
+              );
+            }
+          },
+        );
 
         await this.addRemoveFavoriteService(
           uid,
@@ -184,12 +186,10 @@ export class FoldersSharedService {
           undefined,
           forceRemove,
         );
-        if (folders && filesVal) {
-          await Promise.all([
-            foldersRef.set(foldersObj),
-            filesRef.set(filesVal),
-          ]);
-        }
+        await Promise.all([
+          foldersRef.update(folderUpdates),
+          Object.keys(fileUpdates).length > 0 && filesRef.update(fileUpdates),
+        ]);
       }
     } catch (e) {
       console.log(e);
@@ -325,6 +325,55 @@ export class FoldersSharedService {
     } catch (e) {
       console.log(e);
       sendError(e || 'Error while trying to operate favorite folder.');
+    }
+  }
+
+  /**
+   * Adds `change` to a folder's item count in a transaction, so concurrent
+   * changes can't overwrite each other and the folder's other fields are
+   * never rewritten from a stale copy.
+   */
+  async changeFolderItems(
+    uid: string,
+    folderId: string,
+    change: number,
+    itemType: ItemType,
+  ): Promise<IDataResponse<{ id: string; items: number } | null>> {
+    if (!Number.isInteger(change)) {
+      return sendError('Change must be an integer.');
+    }
+
+    try {
+      const foldersString = itemType === 'image' ? 'folders' : 'videoFolders';
+      const folderRef = admin
+        .database()
+        .ref(`users/${uid}/${foldersString}/${folderId}`);
+      const updated = new Date().toISOString();
+
+      // Returning the null value unchanged lets Firebase retry with the
+      // server copy, instead of aborting before it has been loaded.
+      const { committed, snapshot } = await folderRef.transaction((folder) => {
+        if (folder) {
+          // Number() guards against a count stored as a string by older writes
+          folder.items = Math.max(0, (Number(folder.items) || 0) + change);
+          folder.updated = updated;
+        }
+        return folder;
+      });
+
+      if (!snapshot.exists()) {
+        return sendError('Folder not found.');
+      }
+
+      // Firebase gives up after repeated conflicts; don't report that as success
+      if (!committed) {
+        return sendError('Folder is busy, please try again.');
+      }
+
+      return sendResponse({ id: folderId, items: snapshot.val().items });
+    } catch (e) {
+      console.log(e);
+      return sendError('Error while trying to update folder items.');
     }
   }
 

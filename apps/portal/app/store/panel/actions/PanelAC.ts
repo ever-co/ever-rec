@@ -163,7 +163,7 @@ export default class PanelAC {
   static updateExplorerFolderData({
     folder,
   }: {
-    folder: IDbFolderData;
+    folder: Pick<IDbFolderData, 'id'> & Partial<IDbFolderData>;
   }): ActionType {
     return { type: UPDATE_EXPLORER_FOLDER_DATA, payload: folder };
   }
@@ -257,7 +257,7 @@ export default class PanelAC {
   static updateExplorerVideoFolderData({
     folder,
   }: {
-    folder: IDbFolderData;
+    folder: Pick<IDbFolderData, 'id'> & Partial<IDbFolderData>;
   }): ActionType {
     return { type: UPDATE_EXPLORER_VIDEO_FOLDER_DATA, payload: folder };
   }

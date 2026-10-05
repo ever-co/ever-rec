@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  Patch,
   Post,
   Put,
   Query,
@@ -417,13 +418,13 @@ export class ImageController {
   @UseGuards(AuthGuard)
   @Put('folder')
   async updateFolderData(@Req() req, @Body() body) {
-    const { folderId, name, parentId, items, color } = body;
+    // Item counts are changed only through PATCH folder/:folderId/items.
+    const { folderId, name, parentId, color } = body;
     return await this.imageService.updateFolderData(
       req.user?.id,
       folderId,
       name,
       parentId,
-      items,
       color,
     );
   }
@@ -436,6 +437,21 @@ export class ImageController {
       folderId,
       'image',
       true,
+    );
+  }
+
+  @UseGuards(AuthGuard)
+  @Patch('folder/:folderId/items')
+  async changeFolderItems(
+    @Req() req,
+    @Param('folderId') folderId: string,
+    @Body() body: { change: number },
+  ) {
+    return await this.foldersSharedService.changeFolderItems(
+      req.user?.id,
+      folderId,
+      body?.change,
+      'image',
     );
   }
 

@@ -210,7 +210,15 @@ const getImageFavFoldersAPI = async (): Promise<
   return api.get(`api/v1/image/folders/favorite`);
 };
 
+const changeFolderItemsAPI = (
+  folderId: string,
+  change: number,
+): Promise<IDataResponse<{ id: string; items: number } | null>> => {
+  return api.patch(`/api/v1/image/folder/${folderId}/items`, { change });
+};
+
 export {
+  changeFolderItemsAPI,
   uploadImageAPI,
   uploadFileImageAPI,
   getFilesImageAPI,

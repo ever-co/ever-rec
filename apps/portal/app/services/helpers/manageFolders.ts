@@ -1,34 +1,71 @@
 import { IDbFolderData } from 'app/interfaces/IEditorImage';
 import { ItemType, MixedItemType } from 'app/interfaces/ItemType';
-import { getFilesImageAPI, getFolderByIdAPI } from '../api/image';
-import { getVideoFilesAPI } from '../api/video';
-import { updateFolderData } from '../screenshots';
-import { updateVideoFolderData } from '../videos';
+import store from 'app/store/panel';
+import PanelAC from 'app/store/panel/actions/PanelAC';
+import { changeFolderItemsAPI } from '../api/image';
+import { changeVideoFolderItemsAPI } from '../api/video';
+import { iDataResponseParser } from './iDataResponseParser';
+
+// The server applies the change atomically, so concurrent changes can't
+// overwrite each other or the folder's other fields. Returns the new count.
+const sendFolderItemsChange = async (
+  folderId: string,
+  type: ItemType,
+  change: number,
+): Promise<number | null> => {
+  const response =
+    type == 'image'
+      ? await changeFolderItemsAPI(folderId, change)
+      : await changeVideoFolderItemsAPI(folderId, change);
+
+  return iDataResponseParser<typeof response.data>(response)?.items ?? null;
+};
+
+// Changes to the same folder are sent one at a time, so their responses (and
+// the counts shown in the explorer) arrive in the order the server applied them.
+const pendingChanges = new Map<string, Promise<number | null>>();
+
+const changeFolderItems = (
+  folderId: string,
+  type: ItemType,
+  change: number,
+): Promise<number | null> => {
+  const previous = pendingChanges.get(folderId) ?? Promise.resolve(null);
+  const request = previous
+    .catch(() => null)
+    .then(() => sendFolderItemsChange(folderId, type, change));
+
+  pendingChanges.set(folderId, request);
+  const cleanUp = () => {
+    if (pendingChanges.get(folderId) === request)
+      pendingChanges.delete(folderId);
+  };
+  request.then(cleanUp, cleanUp);
+
+  return request;
+};
+
+// Updates only the count, so a newer name or color in the explorer is kept.
+const updateFolderItemsInExplorer = (
+  folderId: string,
+  items: number,
+  type: ItemType,
+) => {
+  const folder = { id: folderId, items };
+  store.dispatch(
+    type == 'image'
+      ? PanelAC.updateExplorerFolderData({ folder })
+      : PanelAC.updateExplorerVideoFolderData({ folder }),
+  );
+};
 
 const increaseFolderItems = async (
   folderData: IDbFolderData,
   type: ItemType,
   index: number,
 ) => {
-  if (type == 'image') {
-    const getItemsLength =
-      folderData.items || folderData.items == 0
-        ? folderData.items + index
-        : (await getFilesImageAPI(folderData.id)).length;
-    await updateFolderData({
-      ...folderData,
-      items: getItemsLength,
-    });
-  } else if (type == 'video') {
-    const getVideosLength =
-      folderData.items || folderData.items == 0
-        ? folderData.items + index
-        : (await getVideoFilesAPI(folderData.id)).length;
-    await updateVideoFolderData({
-      ...folderData,
-      items: getVideosLength,
-    });
-  }
+  const items = await changeFolderItems(folderData.id, type, index);
+  if (items !== null) updateFolderItemsInExplorer(folderData.id, items, type);
 };
 
 const decreaseFolderItems = async (
@@ -36,42 +73,15 @@ const decreaseFolderItems = async (
   type: MixedItemType,
   index: number,
 ) => {
-  if (type == 'image') {
-    const filesInFolder = folderData.items
-      ? folderData.items - index
-      : (await getFilesImageAPI(folderData.id)).length - index;
+  if (type == 'mixed') return;
 
-    await updateFolderData({
-      ...folderData,
-      items: filesInFolder,
-    });
-  } else if (type == 'video') {
-    const filesInFolder = folderData.items
-      ? folderData.items - index
-      : (await getVideoFilesAPI(folderData.id)).length - index;
-
-    await updateVideoFolderData({
-      ...folderData,
-      items: filesInFolder,
-    });
-  }
+  const items = await changeFolderItems(folderData.id, type, -index);
+  if (items !== null) updateFolderItemsInExplorer(folderData.id, items, type);
 };
 
-// Applies `change` to an image folder's stored count. Call it after the image
-// has been moved. The folder is fetched fresh because the update endpoint also
-// writes name, parent and color, so a stale copy could undo a concurrent edit.
+// For callers that only have the folder id; they reload the explorer anyway.
 const adjustImageFolderItems = async (folderId: string, change: number) => {
-  const { data: folder } = await getFolderByIdAPI(folderId);
-  if (!folder) return;
-
-  // Without a stored count, use the folder's image list, which already
-  // reflects the move and so must not be adjusted again.
-  const items =
-    typeof folder.items === 'number'
-      ? Math.max(0, folder.items + change)
-      : (await getFilesImageAPI(folderId)).length;
-
-  await updateFolderData({ ...folder, items });
+  await changeFolderItems(folderId, 'image', change);
 };
 
 export { increaseFolderItems, decreaseFolderItems, adjustImageFolderItems };

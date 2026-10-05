@@ -922,7 +922,6 @@ export class ImageService {
     folderId: string,
     name: string,
     parentId: string,
-    items: number,
     color: string,
   ): Promise<
     IDataResponse<{ folder: IDbFolder; favFolders: IFavoriteFolders } | null>
@@ -951,7 +950,6 @@ export class ImageService {
       const updatedFolder = {
         ...(name !== undefined ? { name: name } : {}),
         ...(parentId !== undefined ? { parentId: parentId } : {}),
-        ...(items !== undefined ? { items } : { items: 0 }),
         ...(updated !== undefined ? { updated } : { updated }),
         ...(color !== undefined ? { color } : { color }),
       };

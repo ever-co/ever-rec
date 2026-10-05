@@ -136,13 +136,15 @@ const initState = {
   whiteboards: [],
 };
 
+// Merges the given fields into the matching folder, so a partial update
+// (e.g. only `items`) keeps the folder's other, possibly newer, fields.
 const updateExplorerFolder = (
   foldersArg: IDbFolderData[],
-  folder: IDbFolderData,
+  folder: Pick<IDbFolderData, 'id'> & Partial<IDbFolderData>,
 ) => {
   for (let i = 0; i < foldersArg.length; i++) {
     if (foldersArg[i].id === folder.id) {
-      foldersArg[i] = folder;
+      foldersArg[i] = { ...foldersArg[i], ...folder };
       return foldersArg;
     } else {
       foldersArg[i]?.children &&
