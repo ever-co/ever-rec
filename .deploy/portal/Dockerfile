@@ -10,7 +10,7 @@ ARG NEXT_PUBLIC_STATIC_FILES_URL=${NEXT_PUBLIC_API_BASE_URL}
 ARG NEXT_PUBLIC_SENTRY_DSN
 ARG SENTRY_ORG=ever-co
 
-FROM node:22-alpine AS base
+FROM node:26.12.1-alpine AS base
 
 # Update npm and configure corepack
 RUN npm install -g npm@latest && \
@@ -60,7 +60,7 @@ RUN cd apps/portal && (echo "Y" | pnpm prune --prod)
 
 #--
 # Build
-FROM node:22-alpine
+FROM node:26.12.1-alpine
 
 USER node
 WORKDIR /app
