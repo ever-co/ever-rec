@@ -37,10 +37,7 @@ import useGetExplorerDataListener from '../../hooks/useGetExplorerDataListener';
 import MediaIndex from './index';
 import { IUser } from 'app/interfaces/IUserData';
 import classNames from 'classnames';
-import {
-  decreaseFolderItems,
-  increaseFolderItems,
-} from 'app/services/helpers/manageFolders';
+import { adjustVideoFolderItems } from 'app/services/helpers/manageFolders';
 import { infoMessage } from 'app/services/helpers/toastMessages';
 import { IFavoriteFolders } from 'app/interfaces/Folders';
 import { parseCollectionToArray } from 'misc/_helper';
@@ -162,32 +159,38 @@ const Videos: FC = () => {
     folder: IDbFolderData,
   ) => {
     const id = e?.dataTransfer.getData('id');
-    if (id) {
-      const video: IEditorVideo | undefined = explorerDataVideos.files.find(
-        (file) => file.dbData?.id === id,
+    if (!id) return;
+
+    const video: IEditorVideo | undefined = explorerDataVideos.files.find(
+      (file) => file.dbData?.id === id,
+    );
+    // Dropping a video on the folder it already lives in is a no-op.
+    if (!video?.dbData || video.dbData.parentId === folder.id) return;
+
+    setLoading(true);
+    try {
+      const dbData: DbVideoData = { ...video.dbData, parentId: folder.id };
+      await updateVideoData(dbData);
+
+      // As for images: the source is the video's own folder, not the open one
+      // (the root view also lists videos that live in folders), and
+      // allSettled keeps a failed count write from skipping the reload.
+      const sourceFolderId = video.dbData.parentId;
+      const countResults = await Promise.allSettled([
+        sourceFolderId && adjustVideoFolderItems(sourceFolderId, -1),
+        adjustVideoFolderItems(folder.id, 1),
+      ]);
+      countResults.forEach((result) => {
+        if (result.status === 'rejected') {
+          console.error('Failed to update folder items count:', result.reason);
+        }
+      });
+
+      await getExplorerDataVideo(
+        explorerDataVideos.currentFolder?.id || false,
       );
-      if (video?.dbData) {
-        setLoading(true);
-        const dbData: DbVideoData = { ...video.dbData, parentId: folder.id };
-        video && (await updateVideoData(dbData));
-
-        if (explorerDataVideos.currentFolder) {
-          await decreaseFolderItems(
-            explorerDataVideos.currentFolder,
-            'video',
-            1,
-          );
-        }
-
-        if (folder) {
-          await increaseFolderItems(folder, 'video', 1);
-        }
-
-        await getExplorerDataVideo(
-          explorerDataVideos.currentFolder?.id || false,
-        );
-        setLoading(false);
-      }
+    } finally {
+      setLoading(false);
     }
   };
 
