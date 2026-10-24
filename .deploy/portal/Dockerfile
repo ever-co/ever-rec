@@ -10,7 +10,7 @@ ARG NEXT_PUBLIC_STATIC_FILES_URL=${NEXT_PUBLIC_API_BASE_URL}
 ARG NEXT_PUBLIC_SENTRY_DSN
 ARG SENTRY_ORG=ever-co
 
-FROM node:22-alpine AS base
+FROM node:26.12.1-alpine AS base
 
 # Update npm and configure corepack
 RUN npm install -g npm@latest && \
@@ -60,7 +60,11 @@ RUN cd apps/portal && (echo "Y" | pnpm prune --prod)
 
 #--
 # Build
-FROM node:22-alpine
+FROM node:26.12.1-alpine
+
+# canvas 3 (konva's server entry) has no musl prebuild, so the installer stage compiles it against
+# the system cairo/pango; the runtime needs those shared libraries (canvas 2 bundled them).
+RUN apk add --no-cache cairo giflib libjpeg-turbo pango pixman
 
 USER node
 WORKDIR /app
