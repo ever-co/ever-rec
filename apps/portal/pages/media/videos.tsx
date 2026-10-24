@@ -170,7 +170,9 @@ const Videos: FC = () => {
     setLoading(true);
     try {
       const dbData: DbVideoData = { ...video.dbData, parentId: folder.id };
-      await updateVideoData(dbData);
+      // updateVideoData shows its own error toast and returns null on failure
+      const updatedVideo = await updateVideoData(dbData);
+      if (!updatedVideo) return;
 
       // As for images: the source is the video's own folder, not the open one
       // (the root view also lists videos that live in folders), and
