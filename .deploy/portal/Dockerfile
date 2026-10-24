@@ -62,6 +62,10 @@ RUN cd apps/portal && (echo "Y" | pnpm prune --prod)
 # Build
 FROM node:26.12.1-alpine
 
+# canvas 3 (konva's server entry) has no musl prebuild, so the installer stage compiles it against
+# the system cairo/pango; the runtime needs those shared libraries (canvas 2 bundled them).
+RUN apk add --no-cache cairo giflib libjpeg-turbo pango pixman
+
 USER node
 WORKDIR /app
 

@@ -93,6 +93,6 @@
     "typescript": "^5"
   },
   "optionalDependencies": {
-    "canvas": "^2.11.2"
+    "canvas": "^3.2.3"
   }
 }
