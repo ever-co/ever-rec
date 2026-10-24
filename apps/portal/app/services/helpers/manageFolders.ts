@@ -1,7 +1,10 @@
 import { IDbFolderData } from 'app/interfaces/IEditorImage';
 import { ItemType, MixedItemType } from 'app/interfaces/ItemType';
 import { getFilesImageAPI, getFolderByIdAPI } from '../api/image';
-import { getVideoFilesAPI } from '../api/video';
+import {
+  getFolderByIdAPI as getVideoFolderByIdAPI,
+  getVideoFilesAPI,
+} from '../api/video';
 import { updateFolderData } from '../screenshots';
 import { updateVideoFolderData } from '../videos';
 
@@ -74,4 +77,22 @@ const adjustImageFolderItems = async (folderId: string, change: number) => {
   await updateFolderData({ ...folder, items });
 };
 
-export { increaseFolderItems, decreaseFolderItems, adjustImageFolderItems };
+// The video twin of adjustImageFolderItems: same fresh fetch, same fallback.
+const adjustVideoFolderItems = async (folderId: string, change: number) => {
+  const { data: folder } = await getVideoFolderByIdAPI(folderId);
+  if (!folder) return;
+
+  const items =
+    typeof folder.items === 'number'
+      ? Math.max(0, folder.items + change)
+      : (await getVideoFilesAPI(folderId)).length;
+
+  await updateVideoFolderData({ ...folder, items });
+};
+
+export {
+  increaseFolderItems,
+  decreaseFolderItems,
+  adjustImageFolderItems,
+  adjustVideoFolderItems,
+};
