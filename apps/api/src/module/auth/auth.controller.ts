@@ -11,6 +11,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import type { Request } from 'express';
 import { IDataResponse } from '../../interfaces/_types';
 import { SharedService } from '../../services/shared/shared.service';
 import { RefreshToken } from './decorators/refresh-token.decorator';
@@ -43,8 +44,37 @@ export class AuthController {
   }
 
   @Post('register')
-  async register(@Body() body: RegisterDto): Promise<IDataResponse> {
-    return this.authOrchestratorService.register(body);
+  async register(
+    @Body() body: RegisterDto,
+    @Req() request: Request,
+  ): Promise<IDataResponse> {
+    // The IP and user-agent travel with the payload so the acceptance record
+    // can carry them. `ip` is salted and digested by the recorder before it is
+    // stored — the address itself is never persisted, because an audit trail
+    // that retains raw addresses is a tracking database.
+    return this.authOrchestratorService.register({
+      ...body,
+      ip: this.getClientIp(request),
+      userAgent: request?.headers?.['user-agent'] ?? null,
+    });
+  }
+
+  /**
+   * First hop of `x-forwarded-for`, else the socket address.
+   *
+   * Only ever handed to `TermsAcceptanceService`, which hashes it with a
+   * per-deployment salt. A spoofed `x-forwarded-for` therefore corrupts one
+   * non-authoritative field of an audit row and nothing else.
+   */
+  private getClientIp(request: Request): string | null {
+    const forwarded = request?.headers?.['x-forwarded-for'];
+    const first = Array.isArray(forwarded) ? forwarded[0] : forwarded;
+
+    if (typeof first === 'string' && first.trim()) {
+      return first.split(',')[0].trim();
+    }
+
+    return request?.ip ?? null;
   }
 
   @Post('login')

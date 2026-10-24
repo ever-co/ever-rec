@@ -15,6 +15,7 @@ import {
   changeUserPasswordAPI,
   deleteUserAPI,
   getUserDataAPI,
+  getRequiredTermsAPI,
   registerUserEmailPassAPI,
   signInWithEmailAndPasswordAPI,
   signInWithGoogleAPI,
@@ -22,6 +23,10 @@ import {
   uploadAvatarAPI,
 } from './api/auth';
 import { ITokens, IUser, IUserData } from '../interfaces/IUserData';
+import {
+  ITermsAcceptanceClaim,
+  ITermsAcceptanceDocument,
+} from '../interfaces/ITermsAcceptance';
 import cookie from 'js-cookie';
 import { CredentialResponse } from '@react-oauth/google';
 import { IDataResponse } from 'app/interfaces/IApiResponse';
@@ -69,15 +74,44 @@ export const login = async (
   return response;
 };
 
+/**
+ * The legal documents a new account must accept, as currently published.
+ *
+ * Returns an empty array on failure; the signup form treats that as "cannot
+ * register" rather than letting someone tick a box whose acceptance cannot be
+ * recorded — which is the defect being fixed here.
+ */
+export const getRequiredTerms = async (
+  locale?: string,
+): Promise<ITermsAcceptanceDocument[]> => {
+  try {
+    const documents = await getRequiredTermsAPI(locale);
+    return Array.isArray(documents) ? documents : [];
+  } catch (error) {
+    console.error('Failed to load the required legal documents', error);
+    return [];
+  }
+};
+
 export const register = async (
   email: string,
   password: string,
   username = '',
+  /**
+   * What the user ticked the box for, exactly as the form displayed it.
+   *
+   * This parameter is the missing link: `submitHandler` called
+   * `register(email.value, password.value, username)` and the TOS state was
+   * never referenced again, so nothing about the acceptance ever left the
+   * browser.
+   */
+  terms?: ITermsAcceptanceClaim[],
 ): Promise<IDataResponse> => {
   const response: IDataResponse = await registerUserEmailPassAPI(
     email,
     password,
     username,
+    terms,
   );
 
   if (response.status === 'success') {

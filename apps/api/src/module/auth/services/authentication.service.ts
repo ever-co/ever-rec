@@ -6,11 +6,28 @@ import { FirebaseAdminService } from '../../firebase/services/firebase-admin.ser
 import { FirebaseAuthService } from '../../firebase/services/firebase-auth.service';
 import { UserService } from './user.service';
 import { getExpirationTime } from '../../../utils/get-expiration-time';
+import {
+  ITermsAcceptanceClaim,
+  TermsAcceptanceService,
+} from '../../terms/terms-acceptance.service';
 
 export interface IRegisterProps {
   email: string;
   password: string;
   username: string;
+  /**
+   * The legal documents the signup form displayed next to its TOS checkbox.
+   *
+   * The checkbox gated the submit button and its value stopped there — no
+   * argument, no request field, no record. These claims are what let the
+   * acceptance be pinned to the exact published text; the server re-checks each
+   * against the corpus before writing.
+   */
+  terms?: ITermsAcceptanceClaim[];
+  /** Client IP, hashed with a per-deployment salt before storage. Never stored raw. */
+  ip?: string | null;
+  /** Client user-agent, truncated by the recorder. */
+  userAgent?: string | null;
 }
 
 export interface ILoginProps {
@@ -51,6 +68,7 @@ export class AuthenticationService {
     private readonly firebaseAdminService: FirebaseAdminService,
     private readonly userService: UserService,
     private readonly eventEmitter: EventEmitter2,
+    private readonly termsAcceptanceService: TermsAcceptanceService,
   ) { }
 
   /**
@@ -73,6 +91,17 @@ export class AuthenticationService {
   async register(registerData: IRegisterProps): Promise<IDataResponse> {
     try {
       this.logger.log(`Registering new user: ${registerData.email}`);
+
+      // Validate the terms claims BEFORE the Firebase user exists.
+      //
+      // The register page gated its submit button on a TOS checkbox whose value
+      // was then discarded, so this field is new. Checking it here rather than
+      // after signup means a malformed or unpublished claim rejects the
+      // registration outright instead of stranding an account whose owner would
+      // then be told their email is already in use.
+      if (registerData.terms?.length) {
+        this.termsAcceptanceService.assertClaimsArePublished(registerData.terms);
+      }
 
       // Sign up user using Firebase Identity Toolkit to obtain idToken/refreshToken
       const signupResult = await this.firebaseAuthService.signup(
@@ -110,6 +139,33 @@ export class AuthenticationService {
         emailVerified: false,
         googleCredentials: undefined,
       });
+
+      // Record the terms acceptance, now that the uid exists.
+      //
+      // This is the row that makes the tick provable: which document, at which
+      // version, of which exact text (pinned by sha256 to the published legal
+      // corpus), in which language, and by what mechanism.
+      //
+      // Failures are logged and swallowed on purpose — the claims were already
+      // validated above, so anything failing here is infrastructure, and the
+      // Firebase user now exists. Throwing would abandon a created account. The
+      // Firestore write is keyed on a deterministic document id, so a retry is
+      // safe rather than duplicative.
+      if (registerData.terms?.length) {
+        try {
+          await this.termsAcceptanceService.record(uid, registerData.terms, {
+            method: 'signup-checkbox',
+            ip: registerData.ip ?? null,
+            userAgent: registerData.userAgent ?? null,
+          });
+        } catch (error) {
+          this.logger.error(
+            `Failed to record terms acceptance for user ${uid}: ${
+              error instanceof Error ? error.message : String(error)
+            }`,
+          );
+        }
+      }
 
       // Generate custom token for server-authenticated flows
       const customToken = await this.userService.generateCustomToken(uid);

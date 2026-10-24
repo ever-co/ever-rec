@@ -3,7 +3,8 @@ import { useRouter } from 'next/router';
 import IAppControl from 'app/interfaces/IAppControl';
 import { emailRule, passwordPatternRule, requiredRule } from 'app/rules';
 import AppButton from 'components/controls/AppButton';
-import { register } from 'app/services/auth';
+import { getRequiredTerms, register } from 'app/services/auth';
+import { ITermsAcceptanceDocument } from 'app/interfaces/ITermsAcceptance';
 import Checkbox from 'antd/lib/checkbox/Checkbox';
 import AppInput, { AppInputType } from 'components/controls/AppInput';
 import AppSpinner from 'components/containers/appSpinner/AppSpinner';
@@ -33,14 +34,47 @@ const PanelRegister: React.FC = () => {
   const [TOS, setTOS] = useState(false);
   const [valid, setValid] = useState(false);
 
+  /**
+   * The legal documents this signup must accept, as published by the API.
+   *
+   * The TOS checkbox used to be a bare boolean that gated `valid` and went no
+   * further — `submitHandler` called `register(email, password, username)` and
+   * never referenced it again. These carry the identity of the exact text shown
+   * next to the checkbox (document id, version, sha256, locale), which is what
+   * the acceptance record is pinned to.
+   */
+  const [termsDocuments, setTermsDocuments] = useState<
+    ITermsAcceptanceDocument[]
+  >([]);
+  const [termsLoaded, setTermsLoaded] = useState(false);
+
   const { t } = useTranslation();
+
+  useEffect(() => {
+    let cancelled = false;
+
+    getRequiredTerms().then((documents) => {
+      if (cancelled) return;
+      setTermsDocuments(documents);
+      setTermsLoaded(true);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   useEffect(() => {
     setValid(
       [email, password, passwordConfirm].every(
         (control) => control.touched && !control.errors.length,
-      ) && TOS,
+      ) &&
+        TOS &&
+        // Nothing to pin an acceptance to means nothing truthful to record, so
+        // the form refuses rather than creating an account with no evidence.
+        termsDocuments.length > 0,
     );
-  }, [email, password, passwordConfirm, TOS]);
+  }, [email, password, passwordConfirm, TOS, termsDocuments]);
 
   const emailRules: ((v: string) => boolean | string)[] = [
     requiredRule(t('page.auth.error.enterEmail')),
@@ -98,7 +132,21 @@ const PanelRegister: React.FC = () => {
 
     if (valid) {
       const id = loadingMessage();
-      const result = await register(email.value, password.value, username);
+      // The fourth argument is the whole point of this change: the tick used to
+      // stop at `valid`, and the account was created with no record that
+      // anything had been accepted. The server re-checks every claim against
+      // the published corpus before it becomes a row.
+      const result = await register(
+        email.value,
+        password.value,
+        username,
+        termsDocuments.map(({ documentId, version, sha256, locale }) => ({
+          documentId,
+          version,
+          sha256,
+          locale,
+        })),
+      );
       updateMessage(id, result.message, result.status);
       if (result.status == 'success') {
         redirect(router);
@@ -172,9 +220,15 @@ const PanelRegister: React.FC = () => {
         </div>
 
         <div className="tw-flex tw-mt-10 tw-gap-4">
+          {/*
+            Disabled until the published documents are in hand. Ticking a box
+            whose acceptance cannot be recorded is the appearance of consent
+            with none of the evidence — which is what this used to be.
+          */}
           {/* @ts-ignore */}
           <Checkbox
             checked={TOS}
+            disabled={!termsLoaded || termsDocuments.length === 0}
             onChange={() => setTOS((prevTos) => !prevTos)}
           />
           <p>

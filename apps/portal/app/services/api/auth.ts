@@ -1,5 +1,9 @@
 import { IDataResponse } from 'app/interfaces/IApiResponse';
 import { IUser } from 'app/interfaces/IUserData';
+import {
+  ITermsAcceptanceClaim,
+  ITermsAcceptanceDocument,
+} from 'app/interfaces/ITermsAcceptance';
 import api from './api';
 
 const signInWithEmailAndPasswordAPI = (
@@ -16,12 +20,40 @@ const signInWithGoogleAPI = (credentials: string): Promise<IDataResponse> => {
   return api.post(`/api/v1/auth/login-google`, { credentials });
 };
 
+/**
+ * The legal documents a new account must accept, as currently published.
+ *
+ * Fetched rather than hard-coded so the version and digest the user is shown are
+ * the ones the server will accept — and so the object that gates the submit
+ * button is the object that gets posted back on submit.
+ */
+const getRequiredTermsAPI = (
+  locale?: string,
+): Promise<ITermsAcceptanceDocument[]> => {
+  return api
+    .get('/api/v1/terms/required', { params: locale ? { locale } : undefined })
+    .then((response: any) => response as unknown as ITermsAcceptanceDocument[]);
+};
+
 const registerUserEmailPassAPI = (
   email: string,
   password: string,
   username: string,
+  /**
+   * What the user ticked the box for.
+   *
+   * `submitHandler` used to call `register(email, password, username)` with the
+   * TOS value unreferenced, so this argument — and the request field behind it —
+   * simply did not exist. The tick enabled a button and vanished.
+   */
+  terms?: ITermsAcceptanceClaim[],
 ): Promise<IDataResponse> => {
-  return api.post('/api/v1/auth/register', { email, password, username });
+  return api.post('/api/v1/auth/register', {
+    email,
+    password,
+    username,
+    terms,
+  });
 };
 
 const updateUserDataAPI = (
@@ -98,6 +130,7 @@ const getUserServerSideProps = async (
 
 export {
   signInWithEmailAndPasswordAPI,
+  getRequiredTermsAPI,
   registerUserEmailPassAPI,
   updateUserDataAPI,
   uploadAvatarAPI,

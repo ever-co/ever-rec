@@ -11,7 +11,7 @@ ARG FIREBASE_MEASUREMENT_ID
 ARG FIREBASE_ADMIN_PRIVATE_KEY
 ARG FIREBASE_ADMIN_CLIENT_EMAIL
 
-FROM node:22-alpine AS base
+FROM node:26.12.1-alpine AS base
 
 # Update npm and configure corepack
 RUN npm install -g npm@latest && \
@@ -61,7 +61,7 @@ RUN rm -rf apps/api/tmp_videos
 RUN rm -rf apps/api/tmp_videos_fixed
 
 # Build
-FROM node:22-alpine
+FROM node:26.12.1-alpine
 
 USER node
 WORKDIR /app

@@ -71,6 +71,32 @@ const FolderItem: React.FC<IFolderItemProps> = ({
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showPermissionModal, setShowPermissionModal] = useState(false);
+  const [isDragOver, setIsDragOver] = useState(false);
+
+  // Only item cards (which set an 'id' on drag start) can be dropped on a folder.
+  // Workspace folders are excluded until moving workspace items is implemented.
+  const isItemDrag = (e: DragEvent<HTMLDivElement>) =>
+    !workspace && e.dataTransfer.types.includes('id');
+
+  const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
+    if (!isItemDrag(e)) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: DragEvent<HTMLDivElement>) => {
+    // Ignore leave events fired when moving between the folder's own children
+    if (e.currentTarget.contains(e.relatedTarget as Node)) return;
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (e: DragEvent<HTMLDivElement>) => {
+    setIsDragOver(false);
+    if (!isItemDrag(e)) return;
+    e.preventDefault();
+    onDrop(e);
+  };
 
   const openFolderModal = () => {
     setShowEditModal(true);
@@ -333,7 +359,7 @@ const FolderItem: React.FC<IFolderItemProps> = ({
                   colorId={item.colorId}
                   bgColor={item.bgColor}
                   handleColor={(id) => {
-                    handleColor(id);
+                    void handleColor(id);
                     setIsDropdownVisible(false);
                   }}
                   circleSize={14}
@@ -351,10 +377,12 @@ const FolderItem: React.FC<IFolderItemProps> = ({
       <div
         className={classNames(
           styles.mainWrapper,
-          isDropdownVisible && styles.active,
+          (isDropdownVisible || isDragOver) && styles.active,
         )}
         style={{ height: '58px' }}
-        onDrop={onDrop}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
         onClick={(e: any) => {
           // stopping onClick if the user clicks just a little bit outside a button inside the dropdown
           if (e.target.localName === 'ul') return;
