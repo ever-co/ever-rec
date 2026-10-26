@@ -39,6 +39,9 @@ WORKDIR /app
 
 ENV NODE_ENV=build
 ENV NEXT_BUILD_OUTPUT=standalone
+# canvas compiles with node-gyp (no musl prebuild); build it against this image's own Node headers
+# (/usr/local/include/node) instead of downloading them from nodejs.org on every build (failed twice on 10-24/25).
+ENV npm_config_nodedir=/usr/local
 
 # Install python3
 RUN apk add --no-cache python3 pkgconfig build-base
