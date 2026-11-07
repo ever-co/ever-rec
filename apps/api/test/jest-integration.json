@@ -1,7 +1,14 @@
 {
-  "moduleFileExtensions": ["js", "json", "ts"],
+  "moduleFileExtensions": [
+    "js",
+    "json",
+    "ts"
+  ],
   "rootDir": "..",
-  "roots": ["<rootDir>/src", "<rootDir>/test"],
+  "roots": [
+    "<rootDir>/src",
+    "<rootDir>/test"
+  ],
   "testEnvironment": "node",
   "testRegex": ".integration-spec.ts$",
   "testTimeout": 60000,
@@ -11,5 +18,6 @@
   },
   "transform": {
     "^.+\\.(t|j)s$": "ts-jest"
-  }
+  },
+  "resolver": "<rootDir>/test/jest-node-resolver.js"
 }

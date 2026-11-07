@@ -34,6 +34,8 @@ jobs:
         run: pnpm install --frozen-lockfile --ignore-scripts
       - name: Unit tests
         run: pnpm --filter ever-rec-api exec jest src/module/ever-id
+      - name: Unit tests (anonymous usage statistics)
+        run: pnpm --filter ever-rec-api exec jest src/common src/app.module.ever-platform src/module/ever-instance src/module/ever-stats
 
   api-e2e:
     name: API end-to-end tests (sign-in providers, existing sign-in routes)
@@ -52,6 +54,32 @@ jobs:
         run: pnpm install --frozen-lockfile --ignore-scripts
       - name: End-to-end tests
         run: pnpm --filter ever-rec-api exec jest --config ./test/jest-e2e.json test/ever-id test/auth-regression
+      - name: End-to-end tests (anonymous usage statistics, route table)
+        run: pnpm --filter ever-rec-api exec jest --config ./test/jest-e2e.json test/ever-stats test/route-table
+
+  api-integration:
+    name: API integration tests (Firebase emulators)
+    runs-on: ${{ vars.RUNNER_LINUX_X64_8 || 'ubuntu-latest' }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 26
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Install pnpm and the Firebase CLI
+        run: npm install -g --ignore-scripts pnpm@9.9.0 firebase-tools@13.35.1
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+      - name: Integration tests against the Firebase emulators (demo project, nothing leaves the runner)
+        env:
+          FIREBASE_CLI_DISABLE_UPDATE_CHECK: 'true'
+        run: pnpm --filter ever-rec-api test:integration
 
   portal-unit:
     name: Portal unit tests

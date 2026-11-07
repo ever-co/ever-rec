@@ -39,8 +39,10 @@ export class EverStatsLease {
   async release(): Promise<void> {
     await this.database()
       .ref(this.path)
+      // A first call may see the locally cached `null`: answering `null` (not aborting) lets the
+      // database compare with the stored lease and call again with it.
       .transaction((current: StatsLeaseRecord | null) =>
-        current && current.leasedBy === this.holderId ? null : undefined,
+        !current || current.leasedBy === this.holderId ? null : undefined,
       );
   }
 }
