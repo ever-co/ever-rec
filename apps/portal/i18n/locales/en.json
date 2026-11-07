@@ -324,7 +324,8 @@
         "rate_limited": "Send now can be used once every 10 minutes.",
         "cloud_managed": "Managed by Ever Cloud: this switch cannot be changed here.",
         "no_destination": "The statistics address of this server cannot be used: nothing was sent.",
-        "busy": "Another report is being sent right now. Try again in a few minutes."
+        "busy": "Another report is being sent right now. Try again in a few minutes.",
+        "refused_until_upgrade": "Ever Platform does not accept the reports of this version: nothing is sent until Rec is upgraded."
       }
     },
     "install": {

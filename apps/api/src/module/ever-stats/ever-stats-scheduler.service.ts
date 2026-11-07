@@ -10,7 +10,10 @@ import { OnEvent } from '@nestjs/event-emitter';
 import type * as admin from 'firebase-admin';
 import { randomInt } from 'node:crypto';
 import { EverInstanceService } from '../ever-instance/ever-instance.service';
-import { EVER_INSTANCE_EVENTS } from '../ever-instance/ever-instance.types';
+import {
+  EVER_INSTANCE_EVENTS,
+  EverInstanceStatsToggleEvent,
+} from '../ever-instance/ever-instance.types';
 import { FIREBASE_ADMIN } from '../firebase/firebase.constants';
 import {
   EVER_STATS_CLOCK,
@@ -27,6 +30,7 @@ import {
   STATS_OVERDUE_DELAY_MS,
   STATS_PATHS,
   STATS_RETRY_DELAYS_S,
+  STATS_SEND_DRAIN_MS,
 } from './ever-stats.constants';
 import { EverStatsBackfillService } from './ever-stats-backfill.service';
 import { EverStatsLease } from './ever-stats-lease';
@@ -62,8 +66,10 @@ const SCHEDULER_RECOVERY_MS = 10 * 60 * 1000;
  * When reports are sent: once a day at a second drawn at random for each day (UTC); the first
  * report a day after the first start (10 minutes after a start when a report is more than a day
  * overdue); on days 1-3 of a month the previous month once more with `final: true`. A
- * `setTimeout` chain, no extra dependency. Every slot is skipped while the operator's switch is
- * off. Several API processes share the schedule and a lease, so one of them sends.
+ * `setTimeout` chain, no extra dependency. The operator's switch is read again right before every
+ * report, so nothing is sent while it is off. Several API processes share the schedule and a
+ * lease, so one of them sends; in one process, the slots, *Send now*, a switch-off and a reset of
+ * the identity run one at a time (the send lock).
  */
 @Injectable()
 export class EverStatsSchedulerService
@@ -74,7 +80,11 @@ export class EverStatsSchedulerService
   private stopped = false;
   private ticking: Promise<void> | null = null;
   private booted = false;
+  /** The send lock of this process (see {@link serialize}); never rejects. */
+  private sendLock: Promise<unknown> = Promise.resolve();
   readonly lease: EverStatsLease;
+  /** How long a switch-off or a reset waits for a report another process is sending (tests shorten it). */
+  drainWaitMs = STATS_SEND_DRAIN_MS;
   /** When this process will look next (for the status route). */
   nextAt: number | null = null;
 
@@ -127,6 +137,25 @@ export class EverStatsSchedulerService
 
   private async patchSchedule(patch: Partial<StatsSchedule>): Promise<void> {
     await this.scheduleRef().update(patch);
+  }
+
+  /**
+   * Runs `work` once everything queued before it in this process has finished: the slots,
+   * *Send now*, a switch-off and a reset of the identity never overlap here. Between processes,
+   * the lease does the same.
+   */
+  private serialize<T>(work: () => Promise<T>): Promise<T> {
+    const result = this.sendLock.then(work);
+    this.sendLock = result.catch(() => undefined);
+    return result;
+  }
+
+  /** Whether another process already sent the slot due at `now` (it moved `nextSendAt` on). */
+  private sentAlready(
+    schedule: StatsSchedule,
+    now: number,
+  ): schedule is StatsSchedule & { nextSendAt: number } {
+    return !!schedule.nextSendAt && schedule.nextSendAt > now + 1000;
   }
 
   /** Runs `work` at `at` (a timer that never keeps the process alive). */
@@ -195,13 +224,15 @@ export class EverStatsSchedulerService
   async boot(): Promise<void> {
     const now = this.clock();
     await this.instance.ensure();
-    if (await this.lease.acquire(now)) {
-      try {
-        await this.backfill.runIfNeeded();
-      } finally {
-        await this.lease.release();
+    await this.serialize(async () => {
+      if (await this.lease.acquire(now)) {
+        try {
+          await this.backfill.runIfNeeded();
+        } finally {
+          await this.lease.release();
+        }
       }
-    }
+    });
     const due = await this.firstDue(now);
     this.booted = true;
     this.arm(due);
@@ -217,22 +248,15 @@ export class EverStatsSchedulerService
     return this.ticking;
   }
 
-  private async runSlot(): Promise<void> {
+  private runSlot(): Promise<void> {
+    return this.serialize(() => this.runSlotLocked());
+  }
+
+  private async runSlotLocked(): Promise<void> {
     const now = this.clock();
-    const schedule = await this.readSchedule();
-    if (schedule.nextSendAt && schedule.nextSendAt > now + 1000) {
-      // Another process sent this slot already.
-      this.arm(schedule.nextSendAt);
-      return;
-    }
-    if (!(await this.instance.isStatsEnabledUi())) {
-      this.logger.log('ever_stats.send outcome=skipped_ui_off');
-      this.arm(this.nextSlot(now));
-      return;
-    }
-    if (schedule.blockedModuleVersion === MODULE_VERSION) {
-      this.logger.log('ever_stats.send outcome=skipped_refused_until_upgrade');
-      this.arm(this.nextSlot(now));
+    const early = await this.readSchedule();
+    if (this.sentAlready(early, now)) {
+      this.arm(early.nextSendAt);
       return;
     }
     if (!(await this.lease.acquire(now))) {
@@ -240,12 +264,45 @@ export class EverStatsSchedulerService
       return;
     }
     try {
+      // Read again under the lease: another process may have sent this slot (and moved the
+      // schedule on) between the first read and the lease.
+      const schedule = await this.readSchedule();
+      if (this.sentAlready(schedule, now)) {
+        this.arm(schedule.nextSendAt);
+        return;
+      }
+      if (!(await this.instance.isStatsEnabledUi())) {
+        this.logger.log('ever_stats.send outcome=skipped_ui_off');
+        this.arm(this.nextSlot(now));
+        return;
+      }
+      if (schedule.blockedModuleVersion === MODULE_VERSION) {
+        this.logger.log(
+          'ever_stats.send outcome=skipped_refused_until_upgrade',
+        );
+        this.arm(this.nextSlot(now));
+        return;
+      }
       const next = await this.sendDue(now, schedule);
       await this.patchSchedule({ nextSendAt: next });
       this.arm(next);
     } finally {
       await this.lease.release();
     }
+  }
+
+  /** One report, unless the operator's switch is off now: it is read right before every report. */
+  private async sendIfEnabled(input: {
+    period: string;
+    final: boolean;
+  }): Promise<StatsReportRow | null> {
+    if (!(await this.instance.isStatsEnabledUi())) {
+      this.logger.log(
+        `ever_stats.send outcome=skipped_ui_off final=${input.final}`,
+      );
+      return null;
+    }
+    return this.sender.send(input);
   }
 
   /** Sends what is due at `now` (the closed previous month on days 1-3, then the running month); returns the next time. */
@@ -259,17 +316,26 @@ export class EverStatsSchedulerService
       FINAL_RESEND_DAYS.includes(day) &&
       schedule.lastFinalSentFor !== previous
     ) {
-      const finalRow = await this.sender.send({
+      const finalRow = await this.sendIfEnabled({
         period: previous,
         final: true,
       });
+      if (!finalRow) {
+        return this.nextSlot(now);
+      }
       rows.push(finalRow);
       if (finalRow.status === 'sent' || finalRow.status === 'rejected') {
         patch.lastFinalSentFor = previous;
       }
     }
-    const row = await this.sender.send({ period, final: false });
-    rows.push(row);
+    // The switch may have been turned off while the closed month was being sent.
+    const row = await this.sendIfEnabled({ period, final: false });
+    if (row) {
+      rows.push(row);
+    }
+    if (!rows.length) {
+      return this.nextSlot(now);
+    }
     return this.record(now, schedule, rows, patch);
   }
 
@@ -302,27 +368,38 @@ export class EverStatsSchedulerService
 
   /**
    * *Send now*: the running month, at once, when the operator's switch is on, at most once per
-   * 10 minutes. Throws a code the controller maps to an HTTP answer.
+   * 10 minutes, and, like the slots, not after Ever Platform refused this module version (`422`)
+   * until it is upgraded. It waits for this process's send lock and takes the lease, and checks
+   * the limits under both, so two calls never both send. Throws a code the controller maps to an
+   * HTTP answer.
    */
   async sendNow(minIntervalMs: number): Promise<StatsReportRow> {
-    const now = this.clock();
     if (!this.config.apiUrl) throw new Error('no_destination');
+    return this.serialize(() => this.sendNowLocked(minIntervalMs));
+  }
+
+  private async sendNowLocked(minIntervalMs: number): Promise<StatsReportRow> {
+    const now = this.clock();
     if (!(await this.instance.isStatsEnabledUi()))
       throw new Error('stats_disabled');
-    const schedule = await this.readSchedule();
-    if (
-      schedule.lastManualSendAt &&
-      now - schedule.lastManualSendAt < minIntervalMs
-    ) {
-      throw new Error('rate_limited');
-    }
     if (!(await this.lease.acquire(now))) throw new Error('busy');
     try {
+      const schedule = await this.readSchedule();
+      if (schedule.blockedModuleVersion === MODULE_VERSION) {
+        throw new Error('refused_until_upgrade');
+      }
+      if (
+        schedule.lastManualSendAt &&
+        now - schedule.lastManualSendAt < minIntervalMs
+      ) {
+        throw new Error('rate_limited');
+      }
       await this.patchSchedule({ lastManualSendAt: now });
-      const row = await this.sender.send({
+      const row = await this.sendIfEnabled({
         period: monthOf(now),
         final: false,
       });
+      if (!row) throw new Error('stats_disabled');
       const patch: Partial<StatsSchedule> = {
         lastAttemptAt: now,
         lastStatus: row.status,
@@ -337,18 +414,61 @@ export class EverStatsSchedulerService
     }
   }
 
-  /** A reset identity starts a new series: its history and any refusal are forgotten. */
+  /**
+   * Waits until no other process sends (it holds the lease), at most {@link drainWaitMs}, and
+   * takes the lease: whether this process now holds it.
+   */
+  private async waitForOtherSenders(): Promise<boolean> {
+    const held = await this.lease.acquireWithin(this.clock, this.drainWaitMs);
+    if (!held) {
+      this.logger.warn('ever_stats.scheduler state=lease_still_held');
+    }
+    return held;
+  }
+
+  /**
+   * The operator switched the statistics off. The switch is stored before this runs, and every
+   * report reads it first; this waits for a report already being sent, here (the send lock) and
+   * in another process (the lease, at most {@link drainWaitMs}), so that when the switch answers
+   * no report is left in flight.
+   */
+  @OnEvent(EVER_INSTANCE_EVENTS.statsToggle, {
+    async: false,
+    promisify: true,
+    suppressErrors: true,
+  })
+  async onStatsToggle(event?: EverInstanceStatsToggleEvent): Promise<void> {
+    if (event?.to !== false) return;
+    await this.serialize(async () => {
+      if (await this.waitForOtherSenders()) {
+        await this.lease.release();
+      }
+    });
+  }
+
+  /**
+   * A reset identity starts a new series: its history and any refusal are forgotten. It waits for
+   * a report already being sent (here and, at most {@link drainWaitMs}, in another process), so
+   * that a report of the old identity cannot write itself back into the cleared history.
+   */
   @OnEvent(EVER_INSTANCE_EVENTS.resetIdentity, {
     async: false,
     promisify: true,
     suppressErrors: true,
   })
   async onResetIdentity(): Promise<void> {
-    await this.sender.clearReports();
-    await this.scheduleRef().update({
-      blockedModuleVersion: null,
-      retryAttempt: 0,
-      lastFinalSentFor: null,
+    await this.serialize(async () => {
+      const held = await this.waitForOtherSenders();
+      try {
+        await this.sender.clearReports();
+        await this.scheduleRef().update({
+          blockedModuleVersion: null,
+          retryAttempt: 0,
+          lastFinalSentFor: null,
+        });
+      } finally {
+        if (held) await this.lease.release();
+      }
     });
   }
 }

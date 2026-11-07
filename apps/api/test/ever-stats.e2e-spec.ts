@@ -219,6 +219,57 @@ describe('ever-stats routes', () => {
       expect(reset.body.resetCount).toBe(1);
       expect(t.firebase.db.dump('ever_stats/reports')).toBeNull();
     });
+
+    it('after Ever Platform refused this version (422), send answers 409 until an upgrade', async () => {
+      const operator = await t.signIn(OPERATOR_UID);
+      t.answer.status = 422;
+      const first = await call('post', '/api/v1/ever-stats/send', operator);
+      expect(first.status).toBe(200);
+      expect(first.body.report.status).toBe('rejected');
+      t.clock.now += 11 * 60 * 1000;
+      t.answer.status = 202;
+      const again = await call('post', '/api/v1/ever-stats/send', operator);
+      expect(again.status).toBe(409);
+      expect(again.body.code).toBe('refused_until_upgrade');
+      expect(t.calls).toHaveLength(1);
+    });
+  });
+
+  describe('switching off while a report is being sent', () => {
+    it('the switch answers once that report is done', async () => {
+      let open!: () => void;
+      const wire = new Promise<void>((resolve) => {
+        open = resolve;
+      });
+      let posted = 0;
+      t = await createStatsTestApp({
+        fetch: async () => {
+          posted += 1;
+          await wire;
+          return { status: 202 };
+        },
+      });
+      const operator = await t.signIn(OPERATOR_UID);
+      const sending = call('post', '/api/v1/ever-stats/send', operator);
+      const deadline = Date.now() + 2_000;
+      while (posted === 0 && Date.now() < deadline) {
+        await new Promise((resolve) => setTimeout(resolve, 2));
+      }
+      expect(posted).toBe(1);
+      let answered = false;
+      const off = call('put', '/api/v1/ever-stats/enabled', operator, {
+        enabled: false,
+      }).then((response: request.Response) => {
+        answered = true;
+        return response;
+      });
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      expect(answered).toBe(false);
+      open();
+      expect((await sending).status).toBe(200);
+      expect((await off).status).toBe(200);
+      expect(posted).toBe(1);
+    });
   });
 
   describe('Ever Cloud (EVER_INSTALL_SOURCE=cloud)', () => {

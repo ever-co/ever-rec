@@ -106,7 +106,7 @@ calendar day). A report that fails is stored as `rejected` and never signed or s
   redirect followed, a 10-second limit. The address must be `https`; plain `http` is accepted only
   for a local address (this machine, a private address range or a container name).
 - Answers: `202` is recorded as `sent`. `422` is recorded as `rejected` and nothing is sent again
-  until the module is upgraded. `409` (Ever Platform knows this instance id with another key) is
+  until the module is upgraded, *Send now* included. `409` (Ever Platform knows this instance id with another key) is
   recorded as `rejected` with the hint *Reset instance identity*. `429`, `5xx` and connection errors
   are recorded as `failed` and tried again after 1 hour, 4 hours and 12 hours, then at the next
   day's slot. Any other answer is tried again at the next day's slot.
@@ -126,7 +126,7 @@ your own `REC_JWT_SECRET` (the API warns at start while it is the `.env.sample` 
 | Switch | Effect |
 |---|---|
 | `EVER_STATS_ENABLED=false` in the API environment, then a restart | The statistics are not loaded at all: no route (`/api/v1/ever-stats/*` answers 404), no timer, no request. The value is compared exactly: anything other than `false` (`FALSE`, `0`, `off`) keeps the default and is logged once at start. |
-| *Settings → Ever Platform → Send anonymous usage statistics* off | The module stays loaded so the page works, but no report is built or sent and *Send now* is refused. |
+| *Settings → Ever Platform → Send anonymous usage statistics* off | The module stays loaded so the page works, but no report is built or sent and *Send now* is refused. The switch is read again before every report, and it answers once a report already being sent is done. |
 
 The setting is shown to the operator of the installation only: the uid in `SUPER_ADMIN_ACCOUNT_UID`
 and any uid listed in `EVER_OPERATOR_UIDS` (comma separated). Everyone else, workspace admins

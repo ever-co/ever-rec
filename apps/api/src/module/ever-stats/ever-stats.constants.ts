@@ -84,6 +84,12 @@ export const STATS_SEND_NOW_INTERVAL_MS = 10 * 60 * 1000;
 /** The sending lease lasts 10 minutes. */
 export const STATS_LEASE_MS = 10 * 60 * 1000;
 
+/**
+ * How long switching the statistics off, or resetting the identity, waits for a report another
+ * API process is sending (two requests of at most 10 seconds each, and their records).
+ */
+export const STATS_SEND_DRAIN_MS = 30_000;
+
 /** The first report after a restart when the last one is more than a day old. */
 export const STATS_OVERDUE_DELAY_MS = 10 * 60 * 1000;
 

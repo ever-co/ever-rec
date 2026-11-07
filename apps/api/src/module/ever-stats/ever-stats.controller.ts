@@ -147,7 +147,10 @@ export class EverStatsController {
     return { reports: rows.map(reportView) };
   }
 
-  /** *Send now*: 409 while the switch is off, at most once per 10 minutes. */
+  /**
+   * *Send now*: 409 while the switch is off, while another report is being sent, and after Ever
+   * Platform refused this module version until it is upgraded; at most once per 10 minutes.
+   */
   @Post('send')
   @HttpCode(200)
   @UseGuards(EverOperatorGuard)
@@ -160,7 +163,8 @@ export class EverStatsController {
       if (
         code === 'stats_disabled' ||
         code === 'no_destination' ||
-        code === 'busy'
+        code === 'busy' ||
+        code === 'refused_until_upgrade'
       ) {
         throw new ConflictException({
           statusCode: 409,

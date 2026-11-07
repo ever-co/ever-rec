@@ -14,6 +14,26 @@ import {
 
 const DAY = 86_400_000;
 
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/** Waits until `done()` holds (polls every 2 ms, at most 2 s). */
+async function until(done: () => boolean): Promise<void> {
+  const deadline = Date.now() + 2_000;
+  while (!done()) {
+    if (Date.now() > deadline) throw new Error('timed out');
+    await delay(2);
+  }
+}
+
+/** A promise the test resolves when it wants. */
+function gate() {
+  let open!: () => void;
+  const opened = new Promise<void>((resolve) => {
+    open = resolve;
+  });
+  return { open, opened };
+}
+
 /** One API process of an installation, on a shared in-memory Firebase project. */
 function process_(
   firebase: InMemoryFirebaseApp,
@@ -55,6 +75,9 @@ function process_(
     false,
   );
   events.on('ever.instance.reset_identity', () => scheduler.onResetIdentity());
+  events.on('ever.instance.stats_toggle', (event) =>
+    scheduler.onStatsToggle(event),
+  );
   return { instance, sender, scheduler, events };
 }
 
@@ -63,11 +86,14 @@ describe('statistics scheduler', () => {
   let clock: { now: number };
   let calls: Array<{ url: string; body: string }>;
   let status: number | null;
+  /** Runs while a report is "on the wire", before its answer. */
+  let beforeAnswer: (() => Promise<unknown>) | null;
   const fetch: StatsFetch = async (url, init) => {
     calls.push({
       url,
       body: Buffer.from(init.body as Buffer).toString('utf8'),
     });
+    if (beforeAnswer) await beforeAnswer();
     if (status === null) throw new TypeError('fetch failed');
     return { status };
   };
@@ -77,7 +103,11 @@ describe('statistics scheduler', () => {
     clock = { now: Date.UTC(2026, 10, 12, 9, 0, 0) };
     calls = [];
     status = 202;
+    beforeAnswer = null;
   });
+
+  const sent = () =>
+    calls.map((call) => JSON.parse(call.body)).map((r) => [r.period, r.final]);
 
   it('first report a day after the first start, then once a day at a random second', async () => {
     const { scheduler } = process_(firebase, clock, fetch);
@@ -233,5 +263,199 @@ describe('statistics scheduler', () => {
     expect(scheduler.nextAt).toBe(clock.now + 10 * 60 * 1000);
     expect(calls).toEqual([]);
     scheduler.onModuleDestroy();
+  });
+
+  it('a slot another process sent after this one read the schedule is not sent again', async () => {
+    const a = process_(firebase, clock, fetch);
+    const b = process_(firebase, clock, fetch);
+    await a.instance.ensure();
+    // B reads the schedule (the slot is due), then A sends the slot and gives the lease back...
+    const stale = await b.scheduler.readSchedule();
+    await a.scheduler.tick();
+    expect(calls).toHaveLength(1);
+    // ...and B, holding that old read, takes the lease: it reads the schedule again under it.
+    jest.spyOn(b.scheduler, 'readSchedule').mockResolvedValueOnce(stale);
+    await b.scheduler.tick();
+    expect(calls).toHaveLength(1);
+    a.scheduler.onModuleDestroy();
+    b.scheduler.onModuleDestroy();
+  });
+
+  it('Send now: two calls at once send one report', async () => {
+    const { scheduler } = process_(firebase, clock, fetch);
+    const results = await Promise.allSettled([
+      scheduler.sendNow(600_000),
+      scheduler.sendNow(600_000),
+    ]);
+    expect(results.map((result) => result.status)).toEqual([
+      'fulfilled',
+      'rejected',
+    ]);
+    expect((results[1] as PromiseRejectedResult).reason.message).toBe(
+      'rate_limited',
+    );
+    expect(calls).toHaveLength(1);
+  });
+
+  it('a slot and Send now never send at the same time, and the lease outlives both', async () => {
+    let inFlight = 0;
+    let most = 0;
+    const leaseWhileSending: unknown[] = [];
+    const { scheduler } = process_(firebase, clock, fetch);
+    beforeAnswer = async () => {
+      inFlight += 1;
+      most = Math.max(most, inFlight);
+      await delay(10);
+      // The lease is held for as long as a report is being sent.
+      leaseWhileSending.push(firebase.db.dump('ever_stats/lease'));
+      inFlight -= 1;
+    };
+    await Promise.all([scheduler.tick(), scheduler.sendNow(600_000)]);
+    expect(calls).toHaveLength(2);
+    expect(most).toBe(1);
+    expect(leaseWhileSending).not.toContain(null);
+    expect(firebase.db.dump('ever_stats/lease')).toBeNull();
+    scheduler.onModuleDestroy();
+  });
+
+  it('Send now is refused after a 422, until the module version changes', async () => {
+    status = 422;
+    const { scheduler } = process_(firebase, clock, fetch);
+    await scheduler.tick();
+    expect(calls).toHaveLength(1);
+    status = 202;
+    await expect(scheduler.sendNow(0)).rejects.toThrow('refused_until_upgrade');
+    expect(calls).toHaveLength(1);
+    // A 422 answered to Send now stops it too.
+    await firebase.db
+      .ref('ever_stats/schedule/blockedModuleVersion')
+      .set('0.9.0');
+    status = 422;
+    expect((await scheduler.sendNow(0)).status).toBe('rejected');
+    await expect(scheduler.sendNow(0)).rejects.toThrow('refused_until_upgrade');
+    expect(calls).toHaveLength(2);
+    scheduler.onModuleDestroy();
+  });
+
+  it('switched off while the closed month is being sent: the running month is not sent', async () => {
+    clock.now = Date.UTC(2026, 11, 2, 6, 0, 0);
+    const { scheduler, instance } = process_(firebase, clock, fetch);
+    let switched: Promise<unknown> | null = null;
+    beforeAnswer = async () => {
+      switched ??= instance.setStatsEnabledUi('uid-op', false);
+      await until(
+        () => firebase.db.dump('ever_instance/self/statsEnabledUi') === false,
+      );
+    };
+    await scheduler.tick();
+    await switched;
+    expect(sent()).toEqual([['2026-11', true]]);
+    clock.now += DAY;
+    await firebase.db.ref('ever_stats/schedule/nextSendAt').remove();
+    await scheduler.tick();
+    expect(calls).toHaveLength(1);
+    scheduler.onModuleDestroy();
+  });
+
+  it('switching off answers once the report being sent is done', async () => {
+    const { scheduler, instance } = process_(firebase, clock, fetch);
+    const wire = gate();
+    beforeAnswer = () => wire.opened;
+    const slot = scheduler.tick();
+    await until(() => calls.length === 1);
+    let answered = false;
+    const off = instance.setStatsEnabledUi('uid-op', false).then(() => {
+      answered = true;
+    });
+    await delay(20);
+    expect(answered).toBe(false);
+    wire.open();
+    await Promise.all([slot, off]);
+    expect(answered).toBe(true);
+    expect(calls).toHaveLength(1);
+    scheduler.onModuleDestroy();
+  });
+
+  it('switching off waits for a report another process is sending (the lease), within a limit', async () => {
+    const a = process_(firebase, clock, fetch);
+    const b = process_(firebase, clock, fetch);
+    a.scheduler.drainWaitMs = 2_000;
+    const wire = gate();
+    beforeAnswer = () => wire.opened;
+    const slot = b.scheduler.tick();
+    await until(() => calls.length === 1);
+    let answered = false;
+    const off = a.instance.setStatsEnabledUi('uid-op', false).then(() => {
+      answered = true;
+    });
+    await delay(50);
+    expect(answered).toBe(false);
+    wire.open();
+    await Promise.all([slot, off]);
+    expect(answered).toBe(true);
+
+    // A process that stopped while holding the lease delays the switch by the limit only.
+    await firebase.db
+      .ref('ever_stats/lease')
+      .set({ leasedBy: 'a-stopped-process', leaseUntil: clock.now + 600_000 });
+    a.scheduler.drainWaitMs = 10;
+    await a.instance.setStatsEnabledUi('uid-op', true);
+    await a.instance.setStatsEnabledUi('uid-op', false);
+    expect(firebase.db.dump('ever_stats/lease').leasedBy).toBe(
+      'a-stopped-process',
+    );
+    a.scheduler.onModuleDestroy();
+    b.scheduler.onModuleDestroy();
+  });
+
+  it('a reset while a report is being sent: the cleared history stays clear', async () => {
+    const { scheduler, instance } = process_(firebase, clock, fetch);
+    const before = (await instance.ensure()).instanceId;
+    let reset: Promise<unknown> | null = null;
+    beforeAnswer = async () => {
+      reset ??= instance.resetIdentity('uid-op');
+      await until(
+        () => firebase.db.dump('ever_instance/self/instanceId') !== before,
+      );
+    };
+    await scheduler.tick();
+    await reset;
+    expect(calls).toHaveLength(1);
+    expect(firebase.db.dump('ever_stats/reports')).toBeNull();
+    scheduler.onModuleDestroy();
+  });
+
+  it('a reset waits for a report another process is sending, and an old report never writes itself back', async () => {
+    const a = process_(firebase, clock, fetch);
+    const b = process_(firebase, clock, fetch);
+    await a.instance.ensure();
+    a.scheduler.drainWaitMs = 2_000;
+    let wire = gate();
+    beforeAnswer = () => wire.opened;
+    let slot = b.scheduler.tick();
+    await until(() => calls.length === 1);
+    let answered = false;
+    const reset = a.instance.resetIdentity('uid-op').then(() => {
+      answered = true;
+    });
+    await delay(50);
+    expect(answered).toBe(false);
+    wire.open();
+    await Promise.all([slot, reset]);
+    expect(firebase.db.dump('ever_stats/reports')).toBeNull();
+
+    // When the wait runs out (a slow process), the old report is still not written back.
+    a.scheduler.drainWaitMs = 0;
+    wire = gate();
+    await firebase.db.ref('ever_stats/schedule/nextSendAt').remove();
+    slot = b.scheduler.tick();
+    await until(() => calls.length === 2);
+    await a.instance.resetIdentity('uid-op');
+    expect(firebase.db.dump('ever_stats/reports')).toBeNull();
+    wire.open();
+    await slot;
+    expect(firebase.db.dump('ever_stats/reports')).toBeNull();
+    a.scheduler.onModuleDestroy();
+    b.scheduler.onModuleDestroy();
   });
 });

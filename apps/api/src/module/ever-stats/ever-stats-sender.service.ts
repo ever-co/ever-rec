@@ -195,7 +195,7 @@ export class EverStatsSenderService {
       this.logger.warn(
         `ever_stats.send outcome=rejected reason=${built.error} final=${input.final}`,
       );
-      return this.store({
+      return this.storeFor(identity.record.instanceId, {
         reportId,
         period: input.period,
         final: input.final,
@@ -228,10 +228,10 @@ export class EverStatsSenderService {
       error: null,
       hint: null,
     };
-    await this.store(row);
+    await this.storeFor(identity.record.instanceId, row);
 
     if (!this.config.apiUrl) {
-      return this.store({
+      return this.storeFor(identity.record.instanceId, {
         ...row,
         status: 'failed',
         retry: 'next_day',
@@ -264,7 +264,7 @@ export class EverStatsSenderService {
     this.logger.log(
       `ever_stats.send outcome=${outcome.status} status=${httpStatus ?? 'connection_error'} final=${input.final}`,
     );
-    return this.store({
+    return this.storeFor(identity.record.instanceId, {
       ...row,
       sentAt: outcome.status === 'sent' ? this.clock() : null,
       httpStatus,
@@ -278,6 +278,25 @@ export class EverStatsSenderService {
             : `http_${httpStatus}`,
       hint: outcome.hint,
     });
+  }
+
+  /**
+   * Writes the row of a report built for `instanceId`, unless the identity was reset meanwhile: a
+   * reset clears the history, and a report of the old identity that finishes later must not write
+   * itself back into it. Returns the row either way.
+   */
+  private async storeFor(
+    instanceId: string,
+    row: StatsReportRow,
+  ): Promise<StatsReportRow> {
+    const current = await this.instance.read();
+    if (current?.instanceId !== instanceId) {
+      this.logger.warn(
+        'ever_stats.send outcome=not_kept reason=identity_reset',
+      );
+      return row;
+    }
+    return this.store(row);
   }
 
   /** Writes a row and keeps the last {@link STATS_REPORTS_KEPT}. */

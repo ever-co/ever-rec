@@ -20,7 +20,7 @@ Loaded by `AppModule` (through `src/common/ever-platform/modules.ts`) unless
 | `ever-stats-collector.service.ts` | Builds the report from the counters and checks the exact bytes |
 | `ever-stats-validator.ts` | Size, strict JSON, schema (ajv, strict), string walker, calendar day |
 | `ever-stats-sender.service.ts` | Signs, stores and posts the report; records the answer; keeps the last 12 |
-| `ever-stats-scheduler.service.ts` | Daily slot, first send, `final` re-send, retries, lease, *Send now* |
+| `ever-stats-scheduler.service.ts` | Daily slot, first send, `final` re-send, retries, lease, send lock, *Send now* |
 | `ever-stats-lease.ts` | The `ever_stats/lease` compare-and-set |
 | `ever-stats.controller.ts` | The `/api/v1/ever-stats/*` routes |
 | `ever-stats.routes.json` | The list of those routes |

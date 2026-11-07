@@ -39,6 +39,23 @@ export class EverStatsLease {
     return result.committed && stored?.leasedBy === this.holderId;
   }
 
+  /**
+   * Takes the lease, waiting up to `waitMs` (real time) for another process to give it back:
+   * `false` when it is still held after that.
+   */
+  async acquireWithin(
+    now: () => number,
+    waitMs: number,
+    pollMs = 250,
+  ): Promise<boolean> {
+    const deadline = Date.now() + waitMs;
+    for (;;) {
+      if (await this.acquire(now())) return true;
+      if (Date.now() >= deadline) return false;
+      await new Promise((resolve) => setTimeout(resolve, pollMs));
+    }
+  }
+
   /** Gives the lease back, if this process still holds it. */
   async release(): Promise<void> {
     await this.database()
