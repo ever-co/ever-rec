@@ -16,15 +16,24 @@ import {
 } from '@nestjs/common';
 import { EverInstanceService } from '../ever-instance/ever-instance.service';
 import { EVER_INSTANCE_EVENTS } from '../ever-instance/ever-instance.types';
-import { EverOperatorGuard, EverSignedInGuard } from '../ever-instance/ever-operator.guard';
+import {
+  EverOperatorGuard,
+  EverSignedInGuard,
+} from '../ever-instance/ever-operator.guard';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { EVER_STATS_CLOCK, EverStatsClock, monthOf } from './ever-stats.clock';
 import { EVER_STATS_CONFIG, EverStatsConfig } from './ever-stats.config';
-import { STATS_REPORTS_KEPT, STATS_SEND_NOW_INTERVAL_MS } from './ever-stats.constants';
+import {
+  STATS_REPORTS_KEPT,
+  STATS_SEND_NOW_INTERVAL_MS,
+} from './ever-stats.constants';
 import { EverStatsBackfillService } from './ever-stats-backfill.service';
 import { EverStatsCollectorService } from './ever-stats-collector.service';
 import { EverStatsSchedulerService } from './ever-stats-scheduler.service';
-import { EverStatsSenderService, StatsReportRow } from './ever-stats-sender.service';
+import {
+  EverStatsSenderService,
+  StatsReportRow,
+} from './ever-stats-sender.service';
 
 /** Why the statistics are on or off. */
 export type StatsReason = 'env' | 'ui' | 'cloud-managed';
@@ -86,7 +95,9 @@ export class EverStatsController {
       reason,
       toggleEnabled: uiOn,
       destinationUsable: this.config.apiUrl !== null,
-      nextSendAt: enabled ? (schedule.nextSendAt ?? this.scheduler.nextAt ?? null) : null,
+      nextSendAt: enabled
+        ? (schedule.nextSendAt ?? this.scheduler.nextAt ?? null)
+        : null,
       lastSentAt: schedule.lastSentAt ?? null,
       lastStatus: schedule.lastStatus ?? null,
       instanceId: record.instanceId,
@@ -112,15 +123,25 @@ export class EverStatsController {
       final: false,
       now,
     });
-    return { valid: built.error === null, error: built.error, payload: built.report };
+    return {
+      valid: built.error === null,
+      error: built.error,
+      payload: built.report,
+    };
   }
 
   @Get('reports')
   @UseGuards(EverOperatorGuard)
   async reports(@Query('limit') limit?: string) {
     const parsed = limit === undefined ? STATS_REPORTS_KEPT : Number(limit);
-    if (!Number.isInteger(parsed) || parsed < 1 || parsed > STATS_REPORTS_KEPT) {
-      throw new BadRequestException(`limit is a whole number from 1 to ${STATS_REPORTS_KEPT}`);
+    if (
+      !Number.isInteger(parsed) ||
+      parsed < 1 ||
+      parsed > STATS_REPORTS_KEPT
+    ) {
+      throw new BadRequestException(
+        `limit is a whole number from 1 to ${STATS_REPORTS_KEPT}`,
+      );
     }
     const rows = await this.sender.reports(parsed);
     return { reports: rows.map(reportView) };
@@ -136,12 +157,24 @@ export class EverStatsController {
       return { report: reportView(row) };
     } catch (error) {
       const code = (error as Error)?.message;
-      if (code === 'stats_disabled' || code === 'no_destination' || code === 'busy') {
-        throw new ConflictException({ statusCode: 409, code, message: 'Nothing was sent.' });
+      if (
+        code === 'stats_disabled' ||
+        code === 'no_destination' ||
+        code === 'busy'
+      ) {
+        throw new ConflictException({
+          statusCode: 409,
+          code,
+          message: 'Nothing was sent.',
+        });
       }
       if (code === 'rate_limited') {
         throw new HttpException(
-          { statusCode: 429, code, message: 'Send now can be used once every 10 minutes.' },
+          {
+            statusCode: 429,
+            code,
+            message: 'Send now can be used once every 10 minutes.',
+          },
           HttpStatus.TOO_MANY_REQUESTS,
         );
       }
@@ -155,7 +188,10 @@ export class EverStatsController {
     if (typeof body?.enabled !== 'boolean') {
       throw new BadRequestException('enabled must be true or false');
     }
-    const enabled = await this.instance.setStatsEnabledUi(request.user.id, body.enabled);
+    const enabled = await this.instance.setStatsEnabledUi(
+      request.user.id,
+      body.enabled,
+    );
     return { enabled };
   }
 
@@ -166,7 +202,10 @@ export class EverStatsController {
   async recount(@Req() request: any) {
     const at = this.clock();
     await this.instance.audit('stats.recount', null, null, request.user.id, at);
-    this.events.emit(EVER_INSTANCE_EVENTS.recount, { actorUid: request.user.id, at });
+    this.events.emit(EVER_INSTANCE_EVENTS.recount, {
+      actorUid: request.user.id,
+      at,
+    });
     void this.backfill.start(true);
     return { started: true };
   }

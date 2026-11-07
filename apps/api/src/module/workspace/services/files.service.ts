@@ -38,7 +38,10 @@ import { WorkspaceShareService } from './share.service';
 import sharp from 'sharp';
 import { IUser } from 'src/interfaces/IUser';
 import { EditorGateway } from 'src/module/editor-websocket-module/editor.gateway';
-import { EVER_COUNTER_EVENTS, storedBytes } from '../../../common/events/ever-counters.events';
+import {
+  EVER_COUNTER_EVENTS,
+  storedBytes,
+} from '../../../common/events/ever-counters.events';
 
 const typeParser = {
   itemLocation: {
@@ -165,7 +168,10 @@ export class WorkspaceFilesService {
           },
         );
 
-        this.eventEmitter.emit(EVER_COUNTER_EVENTS.mediaCreated, { kind: 'screenshot', bytes: Number(metadata.size) || 0 });
+        this.eventEmitter.emit(EVER_COUNTER_EVENTS.mediaCreated, {
+          kind: 'screenshot',
+          bytes: Number(metadata.size) || 0,
+        });
         return sendResponse<IWorkspaceImage>(image);
       } else {
         return sendError('No screenshot metadata.');
@@ -621,7 +627,10 @@ export class WorkspaceFilesService {
         );
 
         // Should decide what to send to the Extension after and IF storageReference is resolved
-        this.eventEmitter.emit(EVER_COUNTER_EVENTS.mediaCreated, { kind: 'video', bytes: Number(metadata.size) || 0 });
+        this.eventEmitter.emit(EVER_COUNTER_EVENTS.mediaCreated, {
+          kind: 'video',
+          bytes: Number(metadata.size) || 0,
+        });
         return sendResponse<IWorkspaceVideo>(video);
       } else {
         return sendError('No video metadata');
@@ -658,7 +667,10 @@ export class WorkspaceFilesService {
         `workspaces/${workspaceId}/screenshots/originals/${refName}`,
       );
 
-      const everStatsBytes = await storedBytes(this.eventEmitter, imageStorageRef);
+      const everStatsBytes = await storedBytes(
+        this.eventEmitter,
+        imageStorageRef,
+      );
       this.workspaceShareService.deleteLinkById(workspaceId, imageId);
 
       imageStorageRef.delete().catch(() => {
@@ -675,7 +687,10 @@ export class WorkspaceFilesService {
       });
 
       await imageReference.remove();
-      this.eventEmitter.emit(EVER_COUNTER_EVENTS.mediaDeleted, { kind: 'screenshot', bytes: everStatsBytes });
+      this.eventEmitter.emit(EVER_COUNTER_EVENTS.mediaDeleted, {
+        kind: 'screenshot',
+        bytes: everStatsBytes,
+      });
 
       const updatedFolders =
         this.utilitiesService.changeFolderItemCountRecursive(
@@ -732,7 +747,10 @@ export class WorkspaceFilesService {
       });
 
       await videoRef.remove();
-      this.eventEmitter.emit(EVER_COUNTER_EVENTS.mediaDeleted, { kind: 'video', bytes: everStatsBytes });
+      this.eventEmitter.emit(EVER_COUNTER_EVENTS.mediaDeleted, {
+        kind: 'video',
+        bytes: everStatsBytes,
+      });
 
       this.eventEmitter.emit(
         'analytics.track',

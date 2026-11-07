@@ -17,7 +17,10 @@ import {
   unwrapStatsKey,
   wrapStatsKey,
 } from './ever-instance.crypto';
-import { EVER_INSTANCE_SETTINGS, EverInstanceSettings } from './ever-instance.settings';
+import {
+  EVER_INSTANCE_SETTINGS,
+  EverInstanceSettings,
+} from './ever-instance.settings';
 import {
   EVER_INSTANCE_AUDIT_KEPT,
   EVER_INSTANCE_EVENTS,
@@ -47,7 +50,8 @@ export class EverInstanceService implements OnModuleInit {
 
   constructor(
     @Inject(FIREBASE_ADMIN) private readonly firebase: admin.app.App,
-    @Inject(EVER_INSTANCE_SETTINGS) private readonly settings: EverInstanceSettings,
+    @Inject(EVER_INSTANCE_SETTINGS)
+    private readonly settings: EverInstanceSettings,
     private readonly events: EventEmitter2,
   ) {}
 
@@ -74,7 +78,11 @@ export class EverInstanceService implements OnModuleInit {
 
   /** Whether `uid` operates this installation: `SUPER_ADMIN_ACCOUNT_UID` or one of `EVER_OPERATOR_UIDS`. */
   isOperator(uid: string | null | undefined): boolean {
-    return typeof uid === 'string' && uid.length > 0 && this.settings.operatorUids.has(uid);
+    return (
+      typeof uid === 'string' &&
+      uid.length > 0 &&
+      this.settings.operatorUids.has(uid)
+    );
   }
 
   private newIdentity(now: number, instanceId = randomUUID()) {
@@ -82,7 +90,11 @@ export class EverInstanceService implements OnModuleInit {
     return {
       instanceId,
       statsPublicKey: publicKey,
-      statsPrivateKeyEnc: wrapStatsKey(privateKeyDer, this.settings.recJwtSecret, instanceId),
+      statsPrivateKeyEnc: wrapStatsKey(
+        privateKeyDer,
+        this.settings.recJwtSecret,
+        instanceId,
+      ),
       statsKeyId: keyIdOf(publicKey),
       createdAt: now,
     };
@@ -130,10 +142,15 @@ export class EverInstanceService implements OnModuleInit {
   /** Whether the stored statistics key can be decrypted with the current `REC_JWT_SECRET`. */
   keyState(record: EverInstanceRecord): EverInstanceKeyState {
     try {
-      unwrapStatsKey(record.statsPrivateKeyEnc, this.settings.recJwtSecret, record.instanceId);
+      unwrapStatsKey(
+        record.statsPrivateKeyEnc,
+        this.settings.recJwtSecret,
+        record.instanceId,
+      );
       return 'ok';
     } catch (error) {
-      return error instanceof EverInstanceKeyError && error.code === 'secret_missing'
+      return error instanceof EverInstanceKeyError &&
+        error.code === 'secret_missing'
         ? 'secret_missing'
         : 'key_unreadable';
     }
@@ -172,7 +189,10 @@ export class EverInstanceService implements OnModuleInit {
    * The operator turns the statistics on or off in Settings. Refused on Ever's own cloud, where
    * the deployment decides (`cloud_managed`).
    */
-  async setStatsEnabledUi(actorUid: string, enabled: boolean): Promise<boolean> {
+  async setStatsEnabledUi(
+    actorUid: string,
+    enabled: boolean,
+  ): Promise<boolean> {
     if (this.isCloudManaged()) {
       throw new ConflictException({
         statusCode: 409,
@@ -182,10 +202,17 @@ export class EverInstanceService implements OnModuleInit {
     }
     const record = await this.ensure();
     const from = record.statsEnabledUi !== false;
-    await this.db().ref(`${EVER_INSTANCE_PATHS.self}/statsEnabledUi`).set(enabled);
+    await this.db()
+      .ref(`${EVER_INSTANCE_PATHS.self}/statsEnabledUi`)
+      .set(enabled);
     const at = Date.now();
     await this.audit('stats.toggle', from, enabled, actorUid, at);
-    const event: EverInstanceStatsToggleEvent = { actorUid, from, to: enabled, at };
+    const event: EverInstanceStatsToggleEvent = {
+      actorUid,
+      from,
+      to: enabled,
+      at,
+    };
     await this.events.emitAsync(EVER_INSTANCE_EVENTS.statsToggle, event);
     return enabled;
   }
@@ -201,7 +228,13 @@ export class EverInstanceService implements OnModuleInit {
     const result = await this.db()
       .ref(EVER_INSTANCE_PATHS.self)
       .transaction((current: EverInstanceRecord | null) => {
-        const base = current ?? ({ statsEnabledUi: true, resetCount: 0, createdAt: now } as EverInstanceRecord);
+        const base =
+          current ??
+          ({
+            statsEnabledUi: true,
+            resetCount: 0,
+            createdAt: now,
+          } as EverInstanceRecord);
         return {
           ...base,
           instanceId: fresh.instanceId,
@@ -214,10 +247,18 @@ export class EverInstanceService implements OnModuleInit {
       });
     const record = result.snapshot.val() as EverInstanceRecord;
     const resetCount = record.resetCount;
-    await this.audit('instance.reset_identity', resetCount - 1, resetCount, actorUid, now);
+    await this.audit(
+      'instance.reset_identity',
+      resetCount - 1,
+      resetCount,
+      actorUid,
+      now,
+    );
     const event: EverInstanceResetEvent = { actorUid, resetCount, at: now };
     await this.events.emitAsync(EVER_INSTANCE_EVENTS.resetIdentity, event);
-    this.logger.log('The operator reset the anonymous identity of this installation.');
+    this.logger.log(
+      'The operator reset the anonymous identity of this installation.',
+    );
     return record;
   }
 
@@ -239,7 +280,9 @@ export class EverInstanceService implements OnModuleInit {
     const keys = Object.keys(snapshot.val() ?? {}).sort();
     const excess = keys.length - EVER_INSTANCE_AUDIT_KEPT;
     if (excess > 0) {
-      await auditRef.update(Object.fromEntries(keys.slice(0, excess).map((key) => [key, null])));
+      await auditRef.update(
+        Object.fromEntries(keys.slice(0, excess).map((key) => [key, null])),
+      );
     }
   }
 

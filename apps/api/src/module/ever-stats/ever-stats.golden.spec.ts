@@ -9,7 +9,12 @@ import { readEverStatsConfig } from './ever-stats.config';
  * `report_id`, `sent_at` and `instance_id`, given counters and configuration that hold its values.
  */
 describe('statistics report golden', () => {
-  const golden = JSON.parse(readFileSync(join(__dirname, 'schema', 'fixtures', 'valid', 'rec.json'), 'utf8'));
+  const golden = JSON.parse(
+    readFileSync(
+      join(__dirname, 'schema', 'fixtures', 'valid', 'rec.json'),
+      'utf8',
+    ),
+  );
 
   it('matches valid/rec.json', async () => {
     const firebase = new InMemoryFirebaseApp();
@@ -20,10 +25,20 @@ describe('statistics report golden', () => {
         teams: golden.counts.teams,
         storageBytes: golden.aggregates.storage_mb * 1_000_000 + 123_456,
       },
-      periods: { [golden.period]: { screenshots: golden.aggregates.screenshots, videos: golden.aggregates.videos } },
+      periods: {
+        [golden.period]: {
+          screenshots: golden.aggregates.screenshots,
+          videos: golden.aggregates.videos,
+        },
+      },
     });
     const config = readEverStatsConfig(
-      { GAUZY_API_URL: golden.features.gauzy_mirror ? 'https://gauzy.example/api' : '', GOOGLE_CLIENT_ID: golden.features.google_login ? 'id' : '' },
+      {
+        GAUZY_API_URL: golden.features.gauzy_mirror
+          ? 'https://gauzy.example/api'
+          : '',
+        GOOGLE_CLIENT_ID: golden.features.google_login ? 'id' : '',
+      },
       () => undefined,
       golden.version,
     );
@@ -35,7 +50,12 @@ describe('statistics report golden', () => {
       now: Date.parse(`${golden.period}-15T12:00:00Z`),
     });
     expect(built.error).toBeNull();
-    const strip = ({ report_id: _r, sent_at: _s, instance_id: _i, ...rest }: Record<string, unknown>) => rest;
+    const strip = (report: Record<string, unknown>) =>
+      Object.fromEntries(
+        Object.entries(report).filter(
+          ([key]) => !['report_id', 'sent_at', 'instance_id'].includes(key),
+        ),
+      );
     expect(strip(built.report)).toEqual(strip(golden));
     // Same key order as the fixture: the bytes differ only in the three fields.
     expect(Object.keys(built.report)).toEqual(Object.keys(golden));

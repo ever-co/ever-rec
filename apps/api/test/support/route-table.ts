@@ -8,7 +8,16 @@
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
-const METHODS = ['Get', 'Post', 'Put', 'Patch', 'Delete', 'All', 'Options', 'Head'];
+const METHODS = [
+  'Get',
+  'Post',
+  'Put',
+  'Patch',
+  'Delete',
+  'All',
+  'Options',
+  'Head',
+];
 
 function firstStringArgument(args: string): string {
   const match = /^\s*(?:\{\s*path\s*:\s*)?['"`]([^'"`]*)['"`]/.exec(args);
@@ -35,7 +44,9 @@ export function routesOfSource(text: string): string[] {
     const at = match.index ?? 0;
     const owner = [...marks].reverse().find((mark) => mark.at < at);
     if (!owner) continue;
-    routes.push(`${match[1].toUpperCase()} ${join_('api/v1', owner.base, firstStringArgument(match[2]))}`);
+    routes.push(
+      `${match[1].toUpperCase()} ${join_('api/v1', owner.base, firstStringArgument(match[2]))}`,
+    );
   }
   return routes;
 }
@@ -48,7 +59,8 @@ export function routeTable(srcDir: string): string[] {
       const path = join(dir, name);
       if (statSync(path).isDirectory()) visit(path);
       else if (name.endsWith('.ts') && !name.endsWith('.spec.ts')) {
-        for (const route of routesOfSource(readFileSync(path, 'utf8'))) routes.add(route);
+        for (const route of routesOfSource(readFileSync(path, 'utf8')))
+          routes.add(route);
       }
     }
   };

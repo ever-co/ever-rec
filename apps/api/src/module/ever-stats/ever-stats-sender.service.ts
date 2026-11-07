@@ -2,7 +2,10 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import type * as admin from 'firebase-admin';
 import * as http from 'node:http';
 import * as https from 'node:https';
-import { EverInstanceKeyError, signBytes } from '../ever-instance/ever-instance.crypto';
+import {
+  EverInstanceKeyError,
+  signBytes,
+} from '../ever-instance/ever-instance.crypto';
 import { EverInstanceService } from '../ever-instance/ever-instance.service';
 import { FIREBASE_ADMIN } from '../firebase/firebase.constants';
 import { EVER_STATS_CLOCK, EverStatsClock } from './ever-stats.clock';
@@ -42,7 +45,10 @@ export const defaultStatsFetch: StatsFetch = (url, init) =>
       target,
       {
         method: init.method,
-        headers: { ...init.headers, 'Content-Length': String(init.body.length) },
+        headers: {
+          ...init.headers,
+          'Content-Length': String(init.body.length),
+        },
         agent: false,
         timeout: STATS_SEND_TIMEOUT_MS,
       },
@@ -52,7 +58,10 @@ export const defaultStatsFetch: StatsFetch = (url, init) =>
         resolve({ status: response.statusCode ?? 0 });
       },
     );
-    const deadline = setTimeout(() => request.destroy(new Error('timeout')), STATS_SEND_TIMEOUT_MS);
+    const deadline = setTimeout(
+      () => request.destroy(new Error('timeout')),
+      STATS_SEND_TIMEOUT_MS,
+    );
     deadline.unref?.();
     request.on('timeout', () => request.destroy(new Error('timeout')));
     request.on('error', (error) => {
@@ -138,13 +147,19 @@ export class EverStatsSenderService {
   }
 
   /** Builds, checks, signs, stores and sends the report of `period`. */
-  async send(input: { period: string; final: boolean }): Promise<StatsReportRow> {
+  async send(input: {
+    period: string;
+    final: boolean;
+  }): Promise<StatsReportRow> {
     const now = this.clock();
     let identity;
     try {
       identity = await this.instance.signingIdentity();
     } catch (error) {
-      const code = error instanceof EverInstanceKeyError ? error.code : 'identity_unavailable';
+      const code =
+        error instanceof EverInstanceKeyError
+          ? error.code
+          : 'identity_unavailable';
       this.logger.warn(`ever_stats.send outcome=failed reason=${code}`);
       return this.store({
         reportId: `local-${now}`,
@@ -158,8 +173,14 @@ export class EverStatsSenderService {
         status: 'failed',
         attempts: 0,
         retry: 'next_day',
-        error: code === 'unreadable' || code === 'malformed' ? 'key_unreadable' : code,
-        hint: code === 'unreadable' || code === 'malformed' ? 'reset_identity' : null,
+        error:
+          code === 'unreadable' || code === 'malformed'
+            ? 'key_unreadable'
+            : code,
+        hint:
+          code === 'unreadable' || code === 'malformed'
+            ? 'reset_identity'
+            : null,
       });
     }
 
@@ -171,7 +192,9 @@ export class EverStatsSenderService {
     });
     const reportId = String(built.report.report_id);
     if (built.error) {
-      this.logger.warn(`ever_stats.send outcome=rejected reason=${built.error} final=${input.final}`);
+      this.logger.warn(
+        `ever_stats.send outcome=rejected reason=${built.error} final=${input.final}`,
+      );
       return this.store({
         reportId,
         period: input.period,
@@ -208,22 +231,30 @@ export class EverStatsSenderService {
     await this.store(row);
 
     if (!this.config.apiUrl) {
-      return this.store({ ...row, status: 'failed', retry: 'next_day', error: 'api_url_unusable' });
+      return this.store({
+        ...row,
+        status: 'failed',
+        retry: 'next_day',
+        error: 'api_url_unusable',
+      });
     }
 
     let httpStatus: number | null = null;
     try {
-      const response = await this.fetchFn(`${this.config.apiUrl}${STATS_REPORTS_PATH}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'User-Agent': this.userAgent(),
-          [STATS_HEADERS.key]: identity.record.statsPublicKey,
-          [STATS_HEADERS.signature]: signature,
-          [STATS_HEADERS.keyId]: identity.record.statsKeyId,
+      const response = await this.fetchFn(
+        `${this.config.apiUrl}${STATS_REPORTS_PATH}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'User-Agent': this.userAgent(),
+            [STATS_HEADERS.key]: identity.record.statsPublicKey,
+            [STATS_HEADERS.signature]: signature,
+            [STATS_HEADERS.keyId]: identity.record.statsKeyId,
+          },
+          body: built.bytes,
         },
-        body: built.bytes,
-      });
+      );
       httpStatus = response.status;
     } catch {
       httpStatus = null;
@@ -239,7 +270,12 @@ export class EverStatsSenderService {
       httpStatus,
       status: outcome.status,
       retry: outcome.retry,
-      error: httpStatus === null ? 'connection_error' : outcome.status === 'sent' ? null : `http_${httpStatus}`,
+      error:
+        httpStatus === null
+          ? 'connection_error'
+          : outcome.status === 'sent'
+            ? null
+            : `http_${httpStatus}`,
       hint: outcome.hint,
     });
   }
@@ -248,12 +284,19 @@ export class EverStatsSenderService {
   async store(row: StatsReportRow): Promise<StatsReportRow> {
     await this.reportsRef().child(row.reportId).set(row);
     const snapshot = await this.reportsRef().get();
-    const rows = Object.values((snapshot.val() ?? {}) as Record<string, StatsReportRow>);
+    const rows = Object.values(
+      (snapshot.val() ?? {}) as Record<string, StatsReportRow>,
+    );
     if (rows.length > STATS_REPORTS_KEPT) {
       const old = rows
-        .sort((a, b) => b.createdAt - a.createdAt || (a.reportId < b.reportId ? 1 : -1))
+        .sort(
+          (a, b) =>
+            b.createdAt - a.createdAt || (a.reportId < b.reportId ? 1 : -1),
+        )
         .slice(STATS_REPORTS_KEPT);
-      await this.reportsRef().update(Object.fromEntries(old.map((r) => [r.reportId, null])));
+      await this.reportsRef().update(
+        Object.fromEntries(old.map((r) => [r.reportId, null])),
+      );
     }
     return row;
   }
@@ -261,7 +304,9 @@ export class EverStatsSenderService {
   /** The last reports, newest first. */
   async reports(limit = STATS_REPORTS_KEPT): Promise<StatsReportRow[]> {
     const snapshot = await this.reportsRef().get();
-    return Object.values((snapshot.val() ?? {}) as Record<string, StatsReportRow>)
+    return Object.values(
+      (snapshot.val() ?? {}) as Record<string, StatsReportRow>,
+    )
       .sort((a, b) => b.createdAt - a.createdAt)
       .slice(0, Math.max(1, Math.min(STATS_REPORTS_KEPT, limit)));
   }

@@ -61,13 +61,16 @@ export class EverStatsCountersListener {
       .database()
       .ref(`${STATS_PATHS.totals}/${field}`)
       .transaction((current: number | null) => {
-        const base = typeof current === 'number' && Number.isFinite(current) ? current : 0;
+        const base =
+          typeof current === 'number' && Number.isFinite(current) ? current : 0;
         const next = base + delta;
         clamped = next < 0;
         return Math.max(0, next);
       });
     if (clamped) {
-      this.logger.warn(`The ${field} total would go below zero; kept at 0 (a recount corrects it).`);
+      this.logger.warn(
+        `The ${field} total would go below zero; kept at 0 (a recount corrects it).`,
+      );
     }
   }
 
@@ -76,8 +79,11 @@ export class EverStatsCountersListener {
     await this.firebase
       .database()
       .ref(`${STATS_PATHS.periods}/${monthOf(this.clock())}/${field}`)
-      .transaction((current: number | null) =>
-        (typeof current === 'number' && Number.isFinite(current) ? current : 0) + 1,
+      .transaction(
+        (current: number | null) =>
+          (typeof current === 'number' && Number.isFinite(current)
+            ? current
+            : 0) + 1,
       );
   }
 
@@ -85,7 +91,9 @@ export class EverStatsCountersListener {
     try {
       await work();
     } catch (error) {
-      this.logger.warn(`A statistics counter could not be updated: ${(error as Error)?.name ?? 'error'}.`);
+      this.logger.warn(
+        `A statistics counter could not be updated: ${(error as Error)?.name ?? 'error'}.`,
+      );
     }
   }
 
@@ -121,7 +129,12 @@ export class EverStatsCountersListener {
 
   @OnEvent(EVER_COUNTER_EVENTS.mediaCreated, OPTIONS)
   onMediaCreated(payload?: EverMediaEvent) {
-    const field = payload?.kind === 'video' ? 'videos' : payload?.kind === 'screenshot' ? 'screenshots' : null;
+    const field =
+      payload?.kind === 'video'
+        ? 'videos'
+        : payload?.kind === 'screenshot'
+          ? 'screenshots'
+          : null;
     if (!field) return Promise.resolve();
     return this.safely(async () => {
       await this.addToPeriod(field);
@@ -131,7 +144,10 @@ export class EverStatsCountersListener {
 
   @OnEvent(EVER_COUNTER_EVENTS.mediaDeleted, OPTIONS)
   onMediaDeleted(payload?: EverMediaEvent) {
-    if (payload?.kind !== 'video' && payload?.kind !== 'screenshot') return Promise.resolve();
-    return this.safely(() => this.addToTotal('storageBytes', -bytesOf(payload)));
+    if (payload?.kind !== 'video' && payload?.kind !== 'screenshot')
+      return Promise.resolve();
+    return this.safely(() =>
+      this.addToTotal('storageBytes', -bytesOf(payload)),
+    );
   }
 }

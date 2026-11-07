@@ -20,6 +20,9 @@ services:
     environment:
       NODE_ENV: production
       API_PORT: '3000'
+      # The web SDK the API also loads needs an API key to start; the emulators never check it.
+      FIREBASE_API_KEY: egress-audit-not-a-key
+      FIREBASE_AUTH_DOMAIN: demo-ever-rec.firebaseapp.com
       FIREBASE_PROJECT_ID: demo-ever-rec
       FIREBASE_ADMIN_CLIENT_EMAIL: egress-audit@demo-ever-rec.iam.gserviceaccount.com
       FIREBASE_ADMIN_PRIVATE_KEY: ${REC_AUDIT_FIREBASE_KEY:?set REC_AUDIT_FIREBASE_KEY to a throwaway RSA key}

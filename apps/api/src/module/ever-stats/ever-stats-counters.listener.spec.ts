@@ -1,6 +1,9 @@
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InMemoryFirebaseApp } from '../../../test/support/in-memory-firebase';
-import { EVER_COUNTER_EVENTS, storedBytes } from '../../common/events/ever-counters.events';
+import {
+  EVER_COUNTER_EVENTS,
+  storedBytes,
+} from '../../common/events/ever-counters.events';
 import { EverStatsCountersListener } from './ever-stats-counters.listener';
 
 describe('statistics counters', () => {
@@ -15,7 +18,8 @@ describe('statistics counters', () => {
   });
 
   const totals = () => firebase.db.dump('ever_stats/counters/totals') ?? {};
-  const period = (month: string) => firebase.db.dump(`ever_stats/counters/periods/${month}`) ?? {};
+  const period = (month: string) =>
+    firebase.db.dump(`ever_stats/counters/periods/${month}`) ?? {};
 
   it('counts users, workspaces and teams exactly', async () => {
     await listener.onUserCreated({});
@@ -83,6 +87,10 @@ describe('storedBytes (delete paths)', () => {
     const events = new EventEmitter2();
     events.on(EVER_COUNTER_EVENTS.mediaDeleted, () => undefined);
     expect(await storedBytes(events, file)).toBe(2048);
-    expect(await storedBytes(events, { getMetadata: async () => Promise.reject(new Error('gone')) })).toBe(0);
+    expect(
+      await storedBytes(events, {
+        getMetadata: async () => Promise.reject(new Error('gone')),
+      }),
+    ).toBe(0);
   });
 });

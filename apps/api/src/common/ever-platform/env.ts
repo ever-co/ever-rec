@@ -152,7 +152,9 @@ export function isLocalHost(hostname: string): boolean {
     return true;
   }
   return (
-    /^[a-z\d-]+$/.test(host) && !/^\d+$/.test(host) && !NOT_LOCAL_NAMES.has(host)
+    /^[a-z\d-]+$/.test(host) &&
+    !/^\d+$/.test(host) &&
+    !NOT_LOCAL_NAMES.has(host)
   );
 }
 
@@ -186,13 +188,7 @@ export function readApiUrl(
   const protocolOk =
     url.protocol === 'https:' ||
     (url.protocol === 'http:' && isLocalHost(url.hostname));
-  if (
-    !protocolOk ||
-    url.username ||
-    url.password ||
-    url.search ||
-    url.hash
-  ) {
+  if (!protocolOk || url.username || url.password || url.search || url.hash) {
     warnOnce(
       `url:${name}`,
       `${name} must be https (plain http only for localhost, a private address or a container name) and carry no credential, query or fragment; nothing is sent until it is corrected.`,

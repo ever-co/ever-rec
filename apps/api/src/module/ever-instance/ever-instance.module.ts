@@ -3,7 +3,10 @@ import { ConfigService } from '@nestjs/config';
 import { AuthModule } from '../auth/auth.module';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { EverInstanceService } from './ever-instance.service';
-import { EVER_INSTANCE_SETTINGS, everInstanceSettingsFactory } from './ever-instance.settings';
+import {
+  EVER_INSTANCE_SETTINGS,
+  everInstanceSettingsFactory,
+} from './ever-instance.settings';
 import { EverOperatorGuard, EverSignedInGuard } from './ever-operator.guard';
 
 /**
@@ -24,6 +27,13 @@ import { EverOperatorGuard, EverSignedInGuard } from './ever-operator.guard';
     EverOperatorGuard,
     EverSignedInGuard,
   ],
-  exports: [EVER_INSTANCE_SETTINGS, AuthGuard, AuthModule, EverInstanceService, EverOperatorGuard, EverSignedInGuard],
+  exports: [
+    EVER_INSTANCE_SETTINGS,
+    AuthGuard,
+    AuthModule,
+    EverInstanceService,
+    EverOperatorGuard,
+    EverSignedInGuard,
+  ],
 })
 export class EverInstanceModule {}

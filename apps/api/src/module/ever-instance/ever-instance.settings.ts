@@ -1,5 +1,9 @@
 import { ConfigService } from '@nestjs/config';
-import { InstallSource, readInstallSource, Warn } from '../../common/ever-platform/env';
+import {
+  InstallSource,
+  readInstallSource,
+  Warn,
+} from '../../common/ever-platform/env';
 
 /** The settings of the instance identity, read once at boot. */
 export interface EverInstanceSettings {
@@ -30,12 +34,17 @@ export function readEverInstanceSettings(
     ...parseUidList(get('EVER_OPERATOR_UIDS')),
   ]);
   return {
-    installSource: readInstallSource({ EVER_INSTALL_SOURCE: get('EVER_INSTALL_SOURCE') }, warn),
+    installSource: readInstallSource(
+      { EVER_INSTALL_SOURCE: get('EVER_INSTALL_SOURCE') },
+      warn,
+    ),
     operatorUids,
     recJwtSecret: get('REC_JWT_SECRET') ?? '',
   };
 }
 
-export function everInstanceSettingsFactory(config: ConfigService): EverInstanceSettings {
+export function everInstanceSettingsFactory(
+  config: ConfigService,
+): EverInstanceSettings {
   return readEverInstanceSettings((name) => config.get<string>(name));
 }

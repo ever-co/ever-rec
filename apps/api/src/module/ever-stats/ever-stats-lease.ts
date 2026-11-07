@@ -26,7 +26,11 @@ export class EverStatsLease {
     const result = await this.database()
       .ref(this.path)
       .transaction((current: StatsLeaseRecord | null) => {
-        if (current && current.leasedBy !== this.holderId && Number(current.leaseUntil) > now) {
+        if (
+          current &&
+          current.leasedBy !== this.holderId &&
+          Number(current.leaseUntil) > now
+        ) {
           return undefined;
         }
         return { leasedBy: this.holderId, leaseUntil: now + this.durationMs };

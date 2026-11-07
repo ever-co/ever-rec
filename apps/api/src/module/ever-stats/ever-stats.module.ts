@@ -7,8 +7,15 @@ import { EverStatsBackfillService } from './ever-stats-backfill.service';
 import { EverStatsCollectorService } from './ever-stats-collector.service';
 import { EverStatsController } from './ever-stats.controller';
 import { EverStatsCountersListener } from './ever-stats-counters.listener';
-import { EVER_STATS_AUTOSTART, EverStatsSchedulerService } from './ever-stats-scheduler.service';
-import { defaultStatsFetch, EVER_STATS_FETCH, EverStatsSenderService } from './ever-stats-sender.service';
+import {
+  EVER_STATS_AUTOSTART,
+  EverStatsSchedulerService,
+} from './ever-stats-scheduler.service';
+import {
+  defaultStatsFetch,
+  EVER_STATS_FETCH,
+  EverStatsSenderService,
+} from './ever-stats-sender.service';
 
 const logger = new Logger('EverStatsModule');
 
@@ -25,7 +32,8 @@ const logger = new Logger('EverStatsModule');
   providers: [
     {
       provide: EVER_STATS_CONFIG,
-      useFactory: (config: ConfigService) => everStatsConfigFactory(config, (message) => logger.warn(message)),
+      useFactory: (config: ConfigService) =>
+        everStatsConfigFactory(config, (message) => logger.warn(message)),
       inject: [ConfigService],
     },
     { provide: EVER_STATS_CLOCK, useValue: systemClock },
@@ -37,6 +45,11 @@ const logger = new Logger('EverStatsModule');
     EverStatsBackfillService,
     EverStatsSchedulerService,
   ],
-  exports: [EVER_STATS_CONFIG, EverStatsCollectorService, EverStatsSenderService, EverStatsSchedulerService],
+  exports: [
+    EVER_STATS_CONFIG,
+    EverStatsCollectorService,
+    EverStatsSenderService,
+    EverStatsSchedulerService,
+  ],
 })
 export class EverStatsModule {}

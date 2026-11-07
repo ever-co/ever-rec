@@ -12,7 +12,12 @@ import { randomInt } from 'node:crypto';
 import { EverInstanceService } from '../ever-instance/ever-instance.service';
 import { EVER_INSTANCE_EVENTS } from '../ever-instance/ever-instance.types';
 import { FIREBASE_ADMIN } from '../firebase/firebase.constants';
-import { EVER_STATS_CLOCK, EverStatsClock, monthOf, previousMonth } from './ever-stats.clock';
+import {
+  EVER_STATS_CLOCK,
+  EverStatsClock,
+  monthOf,
+  previousMonth,
+} from './ever-stats.clock';
 import { EVER_STATS_CONFIG, EverStatsConfig } from './ever-stats.config';
 import {
   DEFAULT_SEND_INTERVAL_S,
@@ -25,7 +30,10 @@ import {
 } from './ever-stats.constants';
 import { EverStatsBackfillService } from './ever-stats-backfill.service';
 import { EverStatsLease } from './ever-stats-lease';
-import { EverStatsSenderService, StatsReportRow } from './ever-stats-sender.service';
+import {
+  EverStatsSenderService,
+  StatsReportRow,
+} from './ever-stats-sender.service';
 
 /** `ever_stats/schedule`: shared by every API process of the installation. */
 export interface StatsSchedule {
@@ -55,7 +63,9 @@ const MAX_TIMER_MS = 2_147_483_647;
  * off. Several API processes share the schedule and a lease, so one of them sends.
  */
 @Injectable()
-export class EverStatsSchedulerService implements OnModuleInit, OnModuleDestroy {
+export class EverStatsSchedulerService
+  implements OnModuleInit, OnModuleDestroy
+{
   private readonly logger = new Logger(EverStatsSchedulerService.name);
   private timer: NodeJS.Timeout | null = null;
   private stopped = false;
@@ -71,9 +81,15 @@ export class EverStatsSchedulerService implements OnModuleInit, OnModuleDestroy 
     private readonly instance: EverInstanceService,
     private readonly sender: EverStatsSenderService,
     private readonly backfill: EverStatsBackfillService,
-    @Optional() @Inject(EVER_STATS_AUTOSTART) private readonly autostart?: boolean,
+    @Optional()
+    @Inject(EVER_STATS_AUTOSTART)
+    private readonly autostart?: boolean,
   ) {
-    this.lease = new EverStatsLease(() => this.firebase.database(), STATS_PATHS.lease, STATS_LEASE_MS);
+    this.lease = new EverStatsLease(
+      () => this.firebase.database(),
+      STATS_PATHS.lease,
+      STATS_LEASE_MS,
+    );
   }
 
   onModuleInit(): void {
@@ -81,7 +97,9 @@ export class EverStatsSchedulerService implements OnModuleInit, OnModuleDestroy 
       return;
     }
     if (!this.config.apiUrl) {
-      this.logger.warn('ever_stats.scheduler state=no_destination: no report will be sent.');
+      this.logger.warn(
+        'ever_stats.scheduler state=no_destination: no report will be sent.',
+      );
       return;
     }
     this.arm(this.clock(), () => this.boot());
@@ -116,7 +134,9 @@ export class EverStatsSchedulerService implements OnModuleInit, OnModuleDestroy 
     this.timer = setTimeout(() => {
       this.timer = null;
       work().catch((error) =>
-        this.logger.warn(`ever_stats.scheduler error=${(error as Error)?.name ?? 'error'}`),
+        this.logger.warn(
+          `ever_stats.scheduler error=${(error as Error)?.name ?? 'error'}`,
+        ),
       );
     }, delay);
     this.timer.unref?.();
@@ -141,7 +161,9 @@ export class EverStatsSchedulerService implements OnModuleInit, OnModuleDestroy 
       (schedule.nextSendAt && schedule.nextSendAt <= now) ||
       (schedule.lastSentAt && now - schedule.lastSentAt > DAY_MS);
     if (overdue) {
-      return now + Math.min(STATS_OVERDUE_DELAY_MS, this.config.intervalS * 1000);
+      return (
+        now + Math.min(STATS_OVERDUE_DELAY_MS, this.config.intervalS * 1000)
+      );
     }
     let firstBootAt = schedule.firstBootAt;
     if (!firstBootAt) {
@@ -150,7 +172,10 @@ export class EverStatsSchedulerService implements OnModuleInit, OnModuleDestroy 
         .transaction((current: number | null) => (current ? undefined : now));
       firstBootAt = Number(result.snapshot?.val()) || now;
     }
-    const delay = this.config.intervalS === DEFAULT_SEND_INTERVAL_S ? DAY_MS : this.config.intervalS * 1000;
+    const delay =
+      this.config.intervalS === DEFAULT_SEND_INTERVAL_S
+        ? DAY_MS
+        : this.config.intervalS * 1000;
     return Math.max(now, firstBootAt + delay);
   }
 
@@ -216,8 +241,14 @@ export class EverStatsSchedulerService implements OnModuleInit, OnModuleDestroy 
     const rows: StatsReportRow[] = [];
     const patch: Partial<StatsSchedule> = { lastAttemptAt: now };
     const previous = previousMonth(period);
-    if (FINAL_RESEND_DAYS.includes(day) && schedule.lastFinalSentFor !== previous) {
-      const finalRow = await this.sender.send({ period: previous, final: true });
+    if (
+      FINAL_RESEND_DAYS.includes(day) &&
+      schedule.lastFinalSentFor !== previous
+    ) {
+      const finalRow = await this.sender.send({
+        period: previous,
+        final: true,
+      });
       rows.push(finalRow);
       if (finalRow.status === 'sent' || finalRow.status === 'rejected') {
         patch.lastFinalSentFor = previous;
@@ -237,7 +268,8 @@ export class EverStatsSchedulerService implements OnModuleInit, OnModuleDestroy 
     const last = rows[rows.length - 1];
     patch.lastStatus = last.status;
     if (rows.some((r) => r.status === 'sent')) patch.lastSentAt = this.clock();
-    if (rows.some((r) => r.retry === 'module_upgrade')) patch.blockedModuleVersion = MODULE_VERSION;
+    if (rows.some((r) => r.retry === 'module_upgrade'))
+      patch.blockedModuleVersion = MODULE_VERSION;
     let next = this.nextSlot(now);
     if (rows.some((r) => r.retry === 'backoff')) {
       const attempt = schedule.retryAttempt ?? 0;
@@ -261,18 +293,29 @@ export class EverStatsSchedulerService implements OnModuleInit, OnModuleDestroy 
   async sendNow(minIntervalMs: number): Promise<StatsReportRow> {
     const now = this.clock();
     if (!this.config.apiUrl) throw new Error('no_destination');
-    if (!(await this.instance.isStatsEnabledUi())) throw new Error('stats_disabled');
+    if (!(await this.instance.isStatsEnabledUi()))
+      throw new Error('stats_disabled');
     const schedule = await this.readSchedule();
-    if (schedule.lastManualSendAt && now - schedule.lastManualSendAt < minIntervalMs) {
+    if (
+      schedule.lastManualSendAt &&
+      now - schedule.lastManualSendAt < minIntervalMs
+    ) {
       throw new Error('rate_limited');
     }
     if (!(await this.lease.acquire(now))) throw new Error('busy');
     try {
       await this.patchSchedule({ lastManualSendAt: now });
-      const row = await this.sender.send({ period: monthOf(now), final: false });
-      const patch: Partial<StatsSchedule> = { lastAttemptAt: now, lastStatus: row.status };
+      const row = await this.sender.send({
+        period: monthOf(now),
+        final: false,
+      });
+      const patch: Partial<StatsSchedule> = {
+        lastAttemptAt: now,
+        lastStatus: row.status,
+      };
       if (row.status === 'sent') patch.lastSentAt = this.clock();
-      if (row.retry === 'module_upgrade') patch.blockedModuleVersion = MODULE_VERSION;
+      if (row.retry === 'module_upgrade')
+        patch.blockedModuleVersion = MODULE_VERSION;
       await this.patchSchedule(patch);
       return row;
     } finally {
@@ -281,9 +324,17 @@ export class EverStatsSchedulerService implements OnModuleInit, OnModuleDestroy 
   }
 
   /** A reset identity starts a new series: its history and any refusal are forgotten. */
-  @OnEvent(EVER_INSTANCE_EVENTS.resetIdentity, { async: false, promisify: true, suppressErrors: true })
+  @OnEvent(EVER_INSTANCE_EVENTS.resetIdentity, {
+    async: false,
+    promisify: true,
+    suppressErrors: true,
+  })
   async onResetIdentity(): Promise<void> {
     await this.sender.clearReports();
-    await this.scheduleRef().update({ blockedModuleVersion: null, retryAttempt: 0, lastFinalSentFor: null });
+    await this.scheduleRef().update({
+      blockedModuleVersion: null,
+      retryAttempt: 0,
+      lastFinalSentFor: null,
+    });
   }
 }

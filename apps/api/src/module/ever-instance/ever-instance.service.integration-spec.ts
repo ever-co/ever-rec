@@ -22,17 +22,25 @@ describe('instance identity on the Realtime Database emulator', () => {
       (app) =>
         new EverInstanceService(
           app,
-          readEverInstanceSettings((name) => ({ REC_JWT_SECRET: 'integration-secret' })[name]),
+          readEverInstanceSettings(
+            (name) => ({ REC_JWT_SECRET: 'integration-secret' })[name],
+          ),
           new EventEmitter2(),
         ),
     );
-    const records = await Promise.all(services.map((service) => service.ensure()));
+    const records = await Promise.all(
+      services.map((service) => service.ensure()),
+    );
     expect(new Set(records.map((record) => record.instanceId)).size).toBe(1);
-    const stored = (await apps[0].database().ref(EVER_INSTANCE_PATHS.self).get()).val();
+    const stored = (
+      await apps[0].database().ref(EVER_INSTANCE_PATHS.self).get()
+    ).val();
     expect(stored.instanceId).toBe(records[0].instanceId);
     expect(stored.statsPrivateKeyEnc).toMatch(/^v1:/);
     for (const service of services) {
-      expect((await service.signingIdentity()).record.instanceId).toBe(stored.instanceId);
+      expect((await service.signingIdentity()).record.instanceId).toBe(
+        stored.instanceId,
+      );
     }
   });
 });

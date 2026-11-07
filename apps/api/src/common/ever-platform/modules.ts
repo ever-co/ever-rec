@@ -11,5 +11,8 @@ import { Env, isEverStatsEnabled, Warn } from './env';
  */
 export function everPlatformModules(env: Env = process.env, warn?: Warn) {
   const statsEnabled = isEverStatsEnabled(env, warn);
-  return [...(statsEnabled ? [EverInstanceModule] : []), ...(statsEnabled ? [EverStatsModule] : [])];
+  return [
+    ...(statsEnabled ? [EverInstanceModule] : []),
+    ...(statsEnabled ? [EverStatsModule] : []),
+  ];
 }

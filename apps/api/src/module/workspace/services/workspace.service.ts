@@ -365,8 +365,14 @@ export class WorkspacesService {
     }
 
     await workspaceRef.remove();
-    if (workspaceVal) this.eventEmitter?.emit(EVER_COUNTER_EVENTS.workspaceDeleted, {});
-    if (workspaceVal?.teams) this.eventEmitter?.emit(EVER_COUNTER_EVENTS.teamDeleted, { count: Object.keys(workspaceVal.teams).length });
+    if (workspaceVal) {
+      this.eventEmitter?.emit(EVER_COUNTER_EVENTS.workspaceDeleted, {});
+    }
+    if (workspaceVal?.teams) {
+      this.eventEmitter?.emit(EVER_COUNTER_EVENTS.teamDeleted, {
+        count: Object.keys(workspaceVal.teams).length,
+      });
+    }
 
     bucket
       .deleteFiles({

@@ -4,8 +4,16 @@ import { randomUUID } from 'node:crypto';
 import { FIREBASE_ADMIN } from '../firebase/firebase.constants';
 import { dayOf } from './ever-stats.clock';
 import { EVER_STATS_CONFIG, EverStatsConfig } from './ever-stats.config';
-import { MODULE_VERSION, PRODUCT, STATS_PATHS, STATS_SCHEMA_ID } from './ever-stats.constants';
-import { StatsPeriodCounters, StatsTotals } from './ever-stats-counters.listener';
+import {
+  MODULE_VERSION,
+  PRODUCT,
+  STATS_PATHS,
+  STATS_SCHEMA_ID,
+} from './ever-stats.constants';
+import {
+  StatsPeriodCounters,
+  StatsTotals,
+} from './ever-stats-counters.listener';
 import { StatsCheck, StatsValidator } from './ever-stats-validator';
 
 /** The counters a report is built from. */
@@ -94,7 +102,9 @@ export class EverStatsCollectorService {
       aggregates: {
         screenshots: count(period.screenshots),
         videos: count(period.videos),
-        storage_mb: count(Math.floor(Math.max(0, Number(totals.storageBytes) || 0) / 1_000_000)),
+        storage_mb: count(
+          Math.floor(Math.max(0, Number(totals.storageBytes) || 0) / 1_000_000),
+        ),
       },
     };
   }
@@ -114,7 +124,12 @@ export class EverStatsCollectorService {
   }
 
   /** Builds and checks the report of `period` from the stored counters. */
-  async build(input: { instanceId: string; period: string; final: boolean; now: number }): Promise<BuiltStatsReport> {
+  async build(input: {
+    instanceId: string;
+    period: string;
+    final: boolean;
+    now: number;
+  }): Promise<BuiltStatsReport> {
     const counters = await this.readCounters(input.period);
     return this.check(this.assemble({ ...input, counters }));
   }

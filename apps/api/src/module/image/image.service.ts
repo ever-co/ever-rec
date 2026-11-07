@@ -23,7 +23,10 @@ import { FoldersSharedService } from '../../services/shared/folders.shared.servi
 import { IFavoriteFolders } from '../../interfaces/Folders';
 import { sendError, sendResponse } from 'src/services/utils/sendResponse';
 import { EditorGateway } from '../editor-websocket-module/editor.gateway';
-import { EVER_COUNTER_EVENTS, storedBytes } from '../../common/events/ever-counters.events';
+import {
+  EVER_COUNTER_EVENTS,
+  storedBytes,
+} from '../../common/events/ever-counters.events';
 @Injectable()
 export class ImageService {
   private readonly config;
@@ -328,7 +331,10 @@ export class ImageService {
         editorImage.ref = metadata;
         editorImage.url = downloadUrl;
         editorImage.dbData = dbData;
-        this.eventEmitter.emit(EVER_COUNTER_EVENTS.mediaCreated, { kind: 'screenshot', bytes: Number(metadata.size) || 0 });
+        this.eventEmitter.emit(EVER_COUNTER_EVENTS.mediaCreated, {
+          kind: 'screenshot',
+          bytes: Number(metadata.size) || 0,
+        });
       }
 
       this.eventEmitter.emit('analytics.track', 'Image Uploaded', {
@@ -571,7 +577,10 @@ export class ImageService {
         editorImage.ref = metadata;
         editorImage.url = downloadUrl;
         editorImage.dbData = dbData;
-        this.eventEmitter.emit(EVER_COUNTER_EVENTS.mediaCreated, { kind: 'screenshot', bytes: Number(metadata.size) || 0 });
+        this.eventEmitter.emit(EVER_COUNTER_EVENTS.mediaCreated, {
+          kind: 'screenshot',
+          bytes: Number(metadata.size) || 0,
+        });
       }
       this.eventEmitter.emit('analytics.track', 'Screenshot Uploaded', {
         userId: uid,
@@ -724,7 +733,10 @@ export class ImageService {
       `users/${uid}/screenshots/thumbnails/${refName}`,
     );
 
-    const everStatsBytes = await storedBytes(this.eventEmitter, storageScreenRef);
+    const everStatsBytes = await storedBytes(
+      this.eventEmitter,
+      storageScreenRef,
+    );
     await Promise.all([
       this.deleteSharedImageByImageId(uid, imageId),
       screenRef.remove(),
@@ -732,7 +744,10 @@ export class ImageService {
       storageOriginalScreenRef.delete(),
       storageThumbnailScreenRef.delete(),
     ]);
-    this.eventEmitter.emit(EVER_COUNTER_EVENTS.mediaDeleted, { kind: 'screenshot', bytes: everStatsBytes });
+    this.eventEmitter.emit(EVER_COUNTER_EVENTS.mediaDeleted, {
+      kind: 'screenshot',
+      bytes: everStatsBytes,
+    });
 
     this.eventEmitter.emit('analytics.track', 'Image Trashed', {
       userId: uid,

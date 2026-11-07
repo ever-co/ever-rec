@@ -15,7 +15,8 @@ const vendor = JSON.parse(readFileSync(join(DIR, 'VENDOR.json'), 'utf8')) as {
   files: VendorFile[];
 };
 
-const sha256 = (bytes: Buffer) => createHash('sha256').update(bytes).digest('hex');
+const sha256 = (bytes: Buffer) =>
+  createHash('sha256').update(bytes).digest('hex');
 
 /** Every vendored JSON file under this folder, relative, with `/` separators. */
 function vendoredFiles(dir = DIR, prefix = ''): string[] {
@@ -32,8 +33,12 @@ function vendoredFiles(dir = DIR, prefix = ''): string[] {
 }
 
 /** The files whose bytes differ from the hashes `VENDOR.json` records. */
-export function driftedFiles(read: (path: string) => Buffer = (p) => readFileSync(join(DIR, p))): string[] {
-  return vendor.files.filter((file) => sha256(read(file.path)) !== file.sha256).map((file) => file.path);
+export function driftedFiles(
+  read: (path: string) => Buffer = (p) => readFileSync(join(DIR, p)),
+): string[] {
+  return vendor.files
+    .filter((file) => sha256(read(file.path)) !== file.sha256)
+    .map((file) => file.path);
 }
 
 describe('vendored statistics contract', () => {
@@ -43,8 +48,12 @@ describe('vendored statistics contract', () => {
   });
 
   it('records every vendored file, none of them provisional', () => {
-    expect(vendor.files.map((file) => file.path).sort()).toEqual(vendoredFiles());
-    expect(vendor.files.filter((file) => file.provisional !== false)).toEqual([]);
+    expect(vendor.files.map((file) => file.path).sort()).toEqual(
+      vendoredFiles(),
+    );
+    expect(vendor.files.filter((file) => file.provisional !== false)).toEqual(
+      [],
+    );
   });
 
   it('has the bytes VENDOR.json records (drift)', () => {

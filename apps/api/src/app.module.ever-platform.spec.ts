@@ -14,7 +14,8 @@ import { everPlatformModules } from './common/ever-platform/modules';
 describe('AppModule and the optional Ever Platform modules', () => {
   let warnings: string[];
   const warn = (message: string) => warnings.push(message);
-  const names = (env: Record<string, string | undefined>) => everPlatformModules(env, warn).map((m) => m.name);
+  const names = (env: Record<string, string | undefined>) =>
+    everPlatformModules(env, warn).map((m) => m.name);
 
   beforeEach(() => {
     warnings = [];
@@ -32,8 +33,14 @@ describe('AppModule and the optional Ever Platform modules', () => {
   });
 
   it("'FALSE': both are imported (the default) and one warning names the value", () => {
-    expect(names({ EVER_STATS_ENABLED: 'FALSE' })).toEqual(['EverInstanceModule', 'EverStatsModule']);
-    expect(names({ EVER_STATS_ENABLED: 'FALSE' })).toEqual(['EverInstanceModule', 'EverStatsModule']);
+    expect(names({ EVER_STATS_ENABLED: 'FALSE' })).toEqual([
+      'EverInstanceModule',
+      'EverStatsModule',
+    ]);
+    expect(names({ EVER_STATS_ENABLED: 'FALSE' })).toEqual([
+      'EverInstanceModule',
+      'EverStatsModule',
+    ]);
     expect(warnings).toHaveLength(1);
     expect(warnings[0]).toContain('EVER_STATS_ENABLED is "FALSE"');
   });
@@ -46,7 +53,13 @@ describe('AppModule and the optional Ever Platform modules', () => {
     expect(spread).toBeGreaterThan(config);
     expect(source.slice(spread).indexOf('],')).toBeLessThan(40);
     expect(source).not.toMatch(/import \{ Ever(Stats|Instance)Module \}/);
-    for (const existing of ['FirebaseModule,', 'AuthModule,', 'EverIdModule,', 'WorkspaceModule,', 'CamshotModule,']) {
+    for (const existing of [
+      'FirebaseModule,',
+      'AuthModule,',
+      'EverIdModule,',
+      'WorkspaceModule,',
+      'CamshotModule,',
+    ]) {
       expect(source).toContain(existing);
     }
   });

@@ -18,5 +18,7 @@ export function dayOf(ms: number): string {
 /** The month before `period` (`YYYY-MM`). */
 export function previousMonth(period: string): string {
   const [year, month] = period.split('-').map(Number);
-  return month === 1 ? `${year - 1}-12` : `${year}-${String(month - 1).padStart(2, '0')}`;
+  return month === 1
+    ? `${year - 1}-12`
+    : `${year}-${String(month - 1).padStart(2, '0')}`;
 }

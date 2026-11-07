@@ -11,7 +11,8 @@ import { readEverStatsConfig } from '../src/module/ever-stats/ever-stats.config'
 import { canaryValues } from './support/seed';
 import { clearEmulators, emulatorApp, seedEmulators } from './setup-emulators';
 
-const hits = (text: string, canaries: string[]) => canaries.filter((value) => value.length >= 3 && text.includes(value));
+const hits = (text: string, canaries: string[]) =>
+  canaries.filter((value) => value.length >= 3 && text.includes(value));
 
 describe('canary on the Firebase emulators', () => {
   let app: admin.app.App;
@@ -29,7 +30,10 @@ describe('canary on the Firebase emulators', () => {
   });
 
   it('the report holds none of the seeded identifying values', async () => {
-    const collector = new EverStatsCollectorService(app, readEverStatsConfig({ GOOGLE_CLIENT_ID: 'x' }, () => undefined, '0.1.0'));
+    const collector = new EverStatsCollectorService(
+      app,
+      readEverStatsConfig({ GOOGLE_CLIENT_ID: 'x' }, () => undefined, '0.1.0'),
+    );
     const built = await collector.build({
       instanceId: '0b8d6b77-0e5e-4f43-8f2e-7f4c1f3e9a10',
       period: new Date().toISOString().slice(0, 7),
@@ -43,6 +47,8 @@ describe('canary on the Firebase emulators', () => {
 
   it('a leaking collector is caught (control)', async () => {
     const seeded = canaries.find((value) => value.includes('@'));
-    expect(hits(JSON.stringify({ counts: { users: 1 }, note: seeded }), canaries)).toContain(seeded);
+    expect(
+      hits(JSON.stringify({ counts: { users: 1 }, note: seeded }), canaries),
+    ).toContain(seeded);
   });
 });

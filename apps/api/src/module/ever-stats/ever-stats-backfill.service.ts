@@ -50,16 +50,30 @@ export class EverStatsBackfillService {
   /** Claims the recount for this process; `force` for the operator's *Recount now*. */
   private async claim(force: boolean): Promise<boolean> {
     const now = this.clock();
-    const result = await this.ref().transaction((current: StatsBackfillRecord | null) => {
-      if (current?.runningUntil && current.runningUntil > now && current.byPod !== this.podId) {
-        return undefined;
-      }
-      if (current?.completedAt && !force) {
-        return undefined;
-      }
-      return { ...(current ?? {}), byPod: this.podId, runningUntil: now + BACKFILL_CLAIM_MS };
-    });
-    return result.committed && (result.snapshot?.val() as StatsBackfillRecord | null)?.byPod === this.podId;
+    const result = await this.ref().transaction(
+      (current: StatsBackfillRecord | null) => {
+        if (
+          current?.runningUntil &&
+          current.runningUntil > now &&
+          current.byPod !== this.podId
+        ) {
+          return undefined;
+        }
+        if (current?.completedAt && !force) {
+          return undefined;
+        }
+        return {
+          ...(current ?? {}),
+          byPod: this.podId,
+          runningUntil: now + BACKFILL_CLAIM_MS,
+        };
+      },
+    );
+    return (
+      result.committed &&
+      (result.snapshot?.val() as StatsBackfillRecord | null)?.byPod ===
+        this.podId
+    );
   }
 
   /** Runs the first recount in the background when none has completed yet. */
@@ -91,8 +105,13 @@ export class EverStatsBackfillService {
       this.logger.log('ever_stats.recount outcome=done');
       return totals;
     } catch (error) {
-      await this.ref().child('runningUntil').remove().catch(() => undefined);
-      this.logger.warn(`ever_stats.recount outcome=failed reason=${(error as Error)?.name ?? 'error'}`);
+      await this.ref()
+        .child('runningUntil')
+        .remove()
+        .catch(() => undefined);
+      this.logger.warn(
+        `ever_stats.recount outcome=failed reason=${(error as Error)?.name ?? 'error'}`,
+      );
       return null;
     }
   }
@@ -117,7 +136,10 @@ export class EverStatsBackfillService {
     return users;
   }
 
-  private async countWorkspacesAndTeams(): Promise<{ workspaces: number; teams: number }> {
+  private async countWorkspacesAndTeams(): Promise<{
+    workspaces: number;
+    teams: number;
+  }> {
     const ref = this.firebase.database().ref('workspaces');
     let workspaces = 0;
     let teams = 0;
@@ -126,12 +148,16 @@ export class EverStatsBackfillService {
       let query = ref.orderByKey();
       if (after !== null) query = query.startAfter(after);
       const snapshot = await query.limitToFirst(WORKSPACE_PAGE).get();
-      const page = (snapshot.val() ?? {}) as Record<string, { teams?: unknown }>;
+      const page = (snapshot.val() ?? {}) as Record<
+        string,
+        { teams?: unknown }
+      >;
       const keys = Object.keys(page).sort();
       for (const key of keys) {
         workspaces += 1;
         const list = page[key]?.teams;
-        teams += list && typeof list === 'object' ? Object.keys(list).length : 0;
+        teams +=
+          list && typeof list === 'object' ? Object.keys(list).length : 0;
       }
       if (keys.length < WORKSPACE_PAGE) break;
       after = keys[keys.length - 1];
@@ -147,14 +173,23 @@ export class EverStatsBackfillService {
       return 0;
     }
     let bytes = 0;
-    let query: Record<string, unknown> | null = { autoPaginate: false, maxResults: PAGE };
+    let query: Record<string, unknown> | null = {
+      autoPaginate: false,
+      maxResults: PAGE,
+    };
     while (query) {
-      const [files, next] = (await bucket.getFiles(query)) as [Array<{ metadata?: { size?: string | number } }>, any];
+      const [files, next] = (await bucket.getFiles(query)) as [
+        Array<{ metadata?: { size?: string | number } }>,
+        any,
+      ];
       for (const file of files) {
         const size = Number(file.metadata?.size);
         if (Number.isFinite(size) && size > 0) bytes += size;
       }
-      query = next && next.pageToken ? { ...next, autoPaginate: false, maxResults: PAGE } : null;
+      query =
+        next && next.pageToken
+          ? { ...next, autoPaginate: false, maxResults: PAGE }
+          : null;
     }
     return bytes;
   }

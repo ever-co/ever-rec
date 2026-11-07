@@ -18,7 +18,10 @@
 import Ajv2020, { ErrorObject, ValidateFunction } from 'ajv/dist/2020';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { MAX_STATS_REPORT_BYTES, STATS_SCHEMA_DIR } from './ever-stats.constants';
+import {
+  MAX_STATS_REPORT_BYTES,
+  STATS_SCHEMA_DIR,
+} from './ever-stats.constants';
 
 type Json = null | boolean | number | string | Json[] | { [key: string]: Json };
 type Schema = { [key: string]: any };
@@ -97,7 +100,8 @@ export function strictParse(bytes: Uint8Array): Json {
   const fail = (path: string): never => {
     throw new Offence(path, 'type');
   };
-  const isDigit = (c: string | undefined) => c !== undefined && c >= '0' && c <= '9';
+  const isDigit = (c: string | undefined) =>
+    c !== undefined && c >= '0' && c <= '9';
 
   const string = (path: string): string => {
     at += 1;
@@ -237,7 +241,9 @@ export function isCalendarDate(text: string): boolean {
   const [y, mo, d] = [Number(m[1]), Number(m[2]), Number(m[3])];
   if (mo < 1 || mo > 12 || d < 1) return false;
   const leap = (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0;
-  const days = [31, leap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][mo - 1];
+  const days = [31, leap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][
+    mo - 1
+  ];
   return d <= days;
 }
 
@@ -280,7 +286,8 @@ function pathOf(error: ErrorObject): string {
   if (error.keyword === 'required') {
     return child(error.instancePath, String(params.missingProperty));
   }
-  const propertyName = (error as { propertyName?: string }).propertyName ?? params.propertyName;
+  const propertyName =
+    (error as { propertyName?: string }).propertyName ?? params.propertyName;
   if (typeof propertyName === 'string') {
     return child(error.instancePath, propertyName);
   }
@@ -340,14 +347,22 @@ export class StatsValidator {
   /** Runs every check on `bytes`. With `product`, a report of another product is refused. */
   checkBytes(bytes: Uint8Array, product?: string): StatsCheck {
     if (bytes.length > MAX_STATS_REPORT_BYTES) {
-      return { ok: false, status: 413, errors: [{ path: '', code: 'too_large' }] };
+      return {
+        ok: false,
+        status: 413,
+        errors: [{ path: '', code: 'too_large' }],
+      };
     }
     let document: Json;
     try {
       document = strictParse(bytes);
     } catch (error) {
       if (!(error instanceof Offence)) throw error;
-      return { ok: false, status: 422, errors: [{ path: error.path, code: error.code }] };
+      return {
+        ok: false,
+        status: 422,
+        errors: [{ path: error.path, code: error.code }],
+      };
     }
     const errors = this.schemaErrors(document);
     if (!errors.length) {
@@ -369,7 +384,11 @@ export class StatsValidator {
   /** The schema errors of a parsed document (both passes). */
   schemaErrors(document: unknown): StatsFieldError[] {
     const errors: StatsFieldError[] = [];
-    const collect = (validate: ValidateFunction, value: unknown, prefix: string) => {
+    const collect = (
+      validate: ValidateFunction,
+      value: unknown,
+      prefix: string,
+    ) => {
       if (validate(value)) return;
       for (const error of validate.errors ?? []) {
         const path = `${prefix}${pathOf(error)}`;
@@ -384,7 +403,8 @@ export class StatsValidator {
       for (const section of ['counts', 'features', 'aggregates']) {
         const validate = this.sections.get(`${product}/${section}`);
         const value = (document as Record<string, unknown>)[section];
-        if (validate && isObject(value)) collect(validate, value, `/${section}`);
+        if (validate && isObject(value))
+          collect(validate, value, `/${section}`);
       }
     }
     return sortErrors(errors);
@@ -406,9 +426,16 @@ export class StatsValidator {
 
     const resolve = (node: Schema | undefined): Schema | undefined => {
       let current = node;
-      for (let i = 0; i < 8 && current && typeof current.$ref === 'string'; i += 1) {
+      for (
+        let i = 0;
+        i < 8 && current && typeof current.$ref === 'string';
+        i += 1
+      ) {
         const parts = current.$ref.replace(/^#\//, '').split('/');
-        current = parts.reduce<any>((acc, part) => (acc ? acc[part] : undefined), this.schema);
+        current = parts.reduce<any>(
+          (acc, part) => (acc ? acc[part] : undefined),
+          this.schema,
+        );
       }
       return current;
     };
@@ -417,8 +444,13 @@ export class StatsValidator {
       if (!node) return false;
       if ('const' in node) return node.const === value;
       if (Array.isArray(node.enum)) return node.enum.includes(value);
-      if (typeof node.pattern !== 'string' || typeof node.maxLength !== 'number') return false;
-      if (node.maxLength > 64 || [...value].length > node.maxLength) return false;
+      if (
+        typeof node.pattern !== 'string' ||
+        typeof node.maxLength !== 'number'
+      )
+        return false;
+      if (node.maxLength > 64 || [...value].length > node.maxLength)
+        return false;
       return new RegExp(node.pattern, 'u').test(value);
     };
 
@@ -469,7 +501,9 @@ export class StatsValidator {
       .slice(1)
       .map((raw) => {
         const segment = raw.replace(/~1/g, '/').replace(/~0/g, '~');
-        return /^[A-Z]{3}$/.test(segment) || /^\d{1,2}$/.test(segment) || this.words.has(segment)
+        return /^[A-Z]{3}$/.test(segment) ||
+          /^\d{1,2}$/.test(segment) ||
+          this.words.has(segment)
           ? raw
           : '*';
       })
@@ -487,7 +521,15 @@ function sortErrors(errors: StatsFieldError[]): StatsFieldError[] {
       return true;
     })
     .sort((a, b) =>
-      a.path < b.path ? -1 : a.path > b.path ? 1 : a.code < b.code ? -1 : a.code > b.code ? 1 : 0,
+      a.path < b.path
+        ? -1
+        : a.path > b.path
+          ? 1
+          : a.code < b.code
+            ? -1
+            : a.code > b.code
+              ? 1
+              : 0,
     )
     .slice(0, 20);
 }

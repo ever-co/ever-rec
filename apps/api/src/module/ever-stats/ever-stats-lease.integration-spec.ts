@@ -8,7 +8,10 @@ import { EverStatsCollectorService } from './ever-stats-collector.service';
 import { readEverStatsConfig } from './ever-stats.config';
 import { EverStatsLease } from './ever-stats-lease';
 import { EverStatsSchedulerService } from './ever-stats-scheduler.service';
-import { EverStatsSenderService, StatsFetch } from './ever-stats-sender.service';
+import {
+  EverStatsSenderService,
+  StatsFetch,
+} from './ever-stats-sender.service';
 
 describe('sending lease on the Realtime Database emulator', () => {
   let a: admin.app.App;
@@ -26,8 +29,16 @@ describe('sending lease on the Realtime Database emulator', () => {
   });
 
   it('one of two concurrent holders gets the lease', async () => {
-    const one = new EverStatsLease(() => a.database(), 'ever_stats/lease_test', 600_000);
-    const two = new EverStatsLease(() => b.database(), 'ever_stats/lease_test', 600_000);
+    const one = new EverStatsLease(
+      () => a.database(),
+      'ever_stats/lease_test',
+      600_000,
+    );
+    const two = new EverStatsLease(
+      () => b.database(),
+      'ever_stats/lease_test',
+      600_000,
+    );
     const results = await Promise.all([one.acquire(1_000), two.acquire(1_000)]);
     expect(results.filter(Boolean)).toHaveLength(1);
     const holder = results[0] ? one : two;
@@ -48,13 +59,34 @@ describe('sending lease on the Realtime Database emulator', () => {
     const make = (app: admin.app.App) => {
       const instance = new EverInstanceService(
         app,
-        readEverInstanceSettings((name) => ({ REC_JWT_SECRET: 'integration-secret' })[name]),
+        readEverInstanceSettings(
+          (name) => ({ REC_JWT_SECRET: 'integration-secret' })[name],
+        ),
         new EventEmitter2(),
       );
-      const config = readEverStatsConfig({ EVER_STATS_API_URL: 'http://mock-platform:8080' }, () => undefined, '0.1.0');
+      const config = readEverStatsConfig(
+        { EVER_STATS_API_URL: 'http://mock-platform:8080' },
+        () => undefined,
+        '0.1.0',
+      );
       const now = () => clock.now;
-      const sender = new EverStatsSenderService(app, config, now, fetch, instance, new EverStatsCollectorService(app, config));
-      return new EverStatsSchedulerService(app, config, now, instance, sender, new EverStatsBackfillService(app, now), false);
+      const sender = new EverStatsSenderService(
+        app,
+        config,
+        now,
+        fetch,
+        instance,
+        new EverStatsCollectorService(app, config),
+      );
+      return new EverStatsSchedulerService(
+        app,
+        config,
+        now,
+        instance,
+        sender,
+        new EverStatsBackfillService(app, now),
+        false,
+      );
     };
     const first = make(a);
     const second = make(b);

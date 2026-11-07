@@ -13,11 +13,17 @@ import { everPlatformModules } from '../../src/common/ever-platform/modules';
 import { AuthModule } from '../../src/module/auth/auth.module';
 import { EVER_STATS_CLOCK } from '../../src/module/ever-stats/ever-stats.clock';
 import { EVER_STATS_AUTOSTART } from '../../src/module/ever-stats/ever-stats-scheduler.service';
-import { EVER_STATS_FETCH, StatsFetch } from '../../src/module/ever-stats/ever-stats-sender.service';
+import {
+  EVER_STATS_FETCH,
+  StatsFetch,
+} from '../../src/module/ever-stats/ever-stats-sender.service';
 import { FIREBASE_ADMIN } from '../../src/module/firebase/firebase.constants';
 import { FirebaseModule } from '../../src/module/firebase/firebase.module';
 import { FirebaseRestService } from '../../src/module/firebase/services/firebase-rest.service';
-import { InMemoryFirebaseApp, InMemoryIdentityToolkit } from './in-memory-firebase';
+import {
+  InMemoryFirebaseApp,
+  InMemoryIdentityToolkit,
+} from './in-memory-firebase';
 import { BASE_ENV } from './test-app';
 
 /** Every variable the statistics modules read, cleared so the host environment cannot leak in. */
@@ -63,7 +69,9 @@ export interface StatsTestAppOptions {
   fetch?: StatsFetch;
 }
 
-export async function createStatsTestApp(options: StatsTestAppOptions = {}): Promise<StatsTestApp> {
+export async function createStatsTestApp(
+  options: StatsTestAppOptions = {},
+): Promise<StatsTestApp> {
   for (const name of EVER_STATS_VARIABLES) {
     delete process.env[name];
   }
@@ -87,7 +95,11 @@ export async function createStatsTestApp(options: StatsTestAppOptions = {}): Pro
 
   const moduleRef = await Test.createTestingModule({
     imports: [
-      ConfigModule.forRoot({ isGlobal: true, ignoreEnvFile: true, load: [() => env] }),
+      ConfigModule.forRoot({
+        isGlobal: true,
+        ignoreEnvFile: true,
+        load: [() => env],
+      }),
       EventEmitterModule.forRoot(),
       FirebaseModule,
       AuthModule,
@@ -100,8 +112,11 @@ export async function createStatsTestApp(options: StatsTestAppOptions = {}): Pro
     .overrideProvider(FirebaseRestService)
     .useFactory({
       factory: () => {
-        const service = Object.create(FirebaseRestService.prototype) as FirebaseRestService;
-        (service as any).post = (path: string, body: unknown) => toolkit.post(path, body);
+        const service = Object.create(
+          FirebaseRestService.prototype,
+        ) as FirebaseRestService;
+        (service as any).post = (path: string, body: unknown) =>
+          toolkit.post(path, body);
         return service;
       },
     })
@@ -128,9 +143,17 @@ export async function createStatsTestApp(options: StatsTestAppOptions = {}): Pro
     async signIn(uid: string) {
       const email = `${uid}@example.test`;
       if (!firebase.authService.users.has(uid)) {
-        firebase.authService.addUser({ uid, email, password: 'Secret-1234', emailVerified: true });
+        firebase.authService.addUser({
+          uid,
+          email,
+          password: 'Secret-1234',
+          emailVerified: true,
+        });
       }
-      const { data } = await toolkit.post('accounts:signInWithPassword', { email, password: 'Secret-1234' });
+      const { data } = await toolkit.post('accounts:signInWithPassword', {
+        email,
+        password: 'Secret-1234',
+      });
       return data.idToken as string;
     },
     get: (token: any) => moduleRef.get(token, { strict: false }),

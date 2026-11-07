@@ -114,11 +114,19 @@ function parseCountry(raw: string | undefined, warn: Warn): string {
   if (/^[A-Z]{2}$/.test(value)) {
     return value;
   }
-  warnOnce('country', 'EVER_STATS_COUNTRY is not a two-letter country code; using ZZ (undeclared).', warn);
+  warnOnce(
+    'country',
+    'EVER_STATS_COUNTRY is not a two-letter country code; using ZZ (undeclared).',
+    warn,
+  );
   return 'ZZ';
 }
 
-function parseInterval(raw: string | undefined, shortAllowed: boolean, warn: Warn): number {
+function parseInterval(
+  raw: string | undefined,
+  shortAllowed: boolean,
+  warn: Warn,
+): number {
   if (raw === undefined || raw.trim() === '') {
     return DEFAULT_SEND_INTERVAL_S;
   }
@@ -142,7 +150,8 @@ function parseInterval(raw: string | undefined, shortAllowed: boolean, warn: War
   return value;
 }
 
-const filled = (value: string | undefined) => typeof value === 'string' && value.trim().length > 0;
+const filled = (value: string | undefined) =>
+  typeof value === 'string' && value.trim().length > 0;
 
 /** Reads the settings once. A malformed value falls back to its default with one warning. */
 export function readEverStatsConfig(
@@ -150,7 +159,12 @@ export function readEverStatsConfig(
   warn: Warn = () => undefined,
   packageVersion: string | undefined = readApiPackageVersion(),
 ): EverStatsConfig {
-  const apiUrl = readApiUrl(['EVER_STATS_API_URL', 'EVER_PLATFORM_API_URL'], DEFAULT_STATS_API_URL, env, warn);
+  const apiUrl = readApiUrl(
+    ['EVER_STATS_API_URL', 'EVER_PLATFORM_API_URL'],
+    DEFAULT_STATS_API_URL,
+    env,
+    warn,
+  );
   let local = false;
   try {
     local = apiUrl !== null && isLocalHost(new URL(apiUrl).hostname);
@@ -160,7 +174,11 @@ export function readEverStatsConfig(
   return {
     apiUrl,
     country: parseCountry(env['EVER_STATS_COUNTRY'], warn),
-    intervalS: parseInterval(env['EVER_STATS_SEND_INTERVAL_S'], env['NODE_ENV'] === 'test' || local, warn),
+    intervalS: parseInterval(
+      env['EVER_STATS_SEND_INTERVAL_S'],
+      env['NODE_ENV'] === 'test' || local,
+      warn,
+    ),
     installSource: readInstallSource(env, warn),
     release: parseReleaseVersion(packageVersion),
     features: {
@@ -172,7 +190,12 @@ export function readEverStatsConfig(
 
 export const EVER_STATS_CONFIG = Symbol('ever stats config');
 
-export function everStatsConfigFactory(config: ConfigService, warn?: Warn): EverStatsConfig {
-  const env = Object.fromEntries(EVER_STATS_ENV_NAMES.map((name) => [name, config.get<string>(name)]));
+export function everStatsConfigFactory(
+  config: ConfigService,
+  warn?: Warn,
+): EverStatsConfig {
+  const env = Object.fromEntries(
+    EVER_STATS_ENV_NAMES.map((name) => [name, config.get<string>(name)]),
+  );
   return readEverStatsConfig(env, warn);
 }

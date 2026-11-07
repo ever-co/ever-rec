@@ -22,7 +22,8 @@ describe('statistics counters on the Realtime Database emulator', () => {
     await b.delete();
   });
 
-  const read = async (path: string) => (await a.database().ref(path).get()).val();
+  const read = async (path: string) =>
+    (await a.database().ref(path).get()).val();
 
   it('two API processes, 50 concurrent events each, converge exactly', async () => {
     const one = new EverStatsCountersListener(a, () => now);
@@ -33,7 +34,9 @@ describe('statistics counters on the Realtime Database emulator', () => {
       work.push(two.onMediaCreated({ kind: 'screenshot', bytes: 20 }));
     }
     await Promise.all(work);
-    expect(await read('ever_stats/counters/periods/2026-11/screenshots')).toBe(100);
+    expect(await read('ever_stats/counters/periods/2026-11/screenshots')).toBe(
+      100,
+    );
     expect(await read('ever_stats/counters/totals/storageBytes')).toBe(1500);
   });
 
@@ -47,7 +50,15 @@ describe('statistics counters on the Realtime Database emulator', () => {
     await listener.onMediaCreated({ kind: 'video', bytes: 50 });
     await listener.onMediaDeleted({ kind: 'video', bytes: 100 });
     await listener.onTeamDeleted({ count: 5 });
-    expect(await read('ever_stats/counters/totals')).toEqual({ users: 1, workspaces: 1, teams: 0, storageBytes: 50 });
-    expect(await read('ever_stats/counters/periods')).toEqual({ '2026-11': { videos: 1 }, '2026-12': { videos: 1 } });
+    expect(await read('ever_stats/counters/totals')).toEqual({
+      users: 1,
+      workspaces: 1,
+      teams: 0,
+      storageBytes: 50,
+    });
+    expect(await read('ever_stats/counters/periods')).toEqual({
+      '2026-11': { videos: 1 },
+      '2026-12': { videos: 1 },
+    });
   });
 });

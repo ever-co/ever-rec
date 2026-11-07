@@ -10,7 +10,11 @@
 import request from 'supertest';
 import { EverStatsBackfillService } from '../src/module/ever-stats/ever-stats-backfill.service';
 import { EverStatsCollectorService } from '../src/module/ever-stats/ever-stats-collector.service';
-import { createStatsTestApp, OPERATOR_UID, StatsTestApp } from './support/ever-stats-app';
+import {
+  createStatsTestApp,
+  OPERATOR_UID,
+  StatsTestApp,
+} from './support/ever-stats-app';
 import { canaryValues, seedInMemory } from './support/seed';
 
 /** The canary strings `text` contains. */
@@ -38,17 +42,29 @@ describe('canary: no seeded identifying value reaches a report', () => {
   it('preview and the sent report hold counts only', async () => {
     await t.get(EverStatsBackfillService).start(true);
     const operator = await t.signIn(OPERATOR_UID);
-    const preview = await request(t.app.getHttpServer()).post('/api/v1/ever-stats/preview').set('idToken', operator);
+    const preview = await request(t.app.getHttpServer())
+      .post('/api/v1/ever-stats/preview')
+      .set('idToken', operator);
     expect(preview.status).toBe(200);
     expect(preview.body.valid).toBe(true);
-    expect(preview.body.payload.counts).toEqual({ users: 42, workspaces: 6, teams: 9 });
-    expect(canaryHits(JSON.stringify(preview.body.payload), canaries)).toEqual([]);
+    expect(preview.body.payload.counts).toEqual({
+      users: 42,
+      workspaces: 6,
+      teams: 9,
+    });
+    expect(canaryHits(JSON.stringify(preview.body.payload), canaries)).toEqual(
+      [],
+    );
 
-    const sent = await request(t.app.getHttpServer()).post('/api/v1/ever-stats/send').set('idToken', operator);
+    const sent = await request(t.app.getHttpServer())
+      .post('/api/v1/ever-stats/send')
+      .set('idToken', operator);
     expect(sent.status).toBe(200);
     const body = Buffer.from(t.calls[0].init.body).toString('utf8');
     expect(canaryHits(body, canaries)).toEqual([]);
-    expect(canaryHits(JSON.stringify(t.calls[0].init.headers), canaries)).toEqual([]);
+    expect(
+      canaryHits(JSON.stringify(t.calls[0].init.headers), canaries),
+    ).toEqual([]);
   });
 
   it('a collector that leaks a seeded e-mail address is caught (control)', async () => {
@@ -60,9 +76,16 @@ describe('canary: no seeded identifying value reaches a report', () => {
       now: Date.UTC(2026, 10, 12),
       counters: { totals: {}, period: {} },
     });
-    const leaked = { ...report, owner_email: canaries.find((value) => value.includes('@')) };
-    expect(canaryHits(JSON.stringify(leaked), canaries).length).toBeGreaterThan(0);
+    const leaked = {
+      ...report,
+      owner_email: canaries.find((value) => value.includes('@')),
+    };
+    expect(canaryHits(JSON.stringify(leaked), canaries).length).toBeGreaterThan(
+      0,
+    );
     // The checks refuse it too, so it could never be signed or sent.
-    expect(collector.check(leaked).error).toMatch(/^schema_violation:\/\*:unknown_field$/);
+    expect(collector.check(leaked).error).toMatch(
+      /^schema_violation:\/\*:unknown_field$/,
+    );
   });
 });

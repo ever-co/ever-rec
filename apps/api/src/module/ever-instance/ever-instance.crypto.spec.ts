@@ -28,7 +28,9 @@ describe('statistics key at rest', () => {
     const blob = wrapStatsKey(privateKeyDer, secret, instanceId);
     expect(blob).toMatch(/^v1:[A-Za-z0-9_-]+:[A-Za-z0-9_-]+:[A-Za-z0-9_-]+$/);
     expect(blob).not.toContain(privateKeyDer.toString('base64url'));
-    expect(unwrapStatsKey(blob, secret, instanceId).equals(privateKeyDer)).toBe(true);
+    expect(unwrapStatsKey(blob, secret, instanceId).equals(privateKeyDer)).toBe(
+      true,
+    );
   });
 
   it('fails closed on a tampered ciphertext, another secret or another instance id', () => {
@@ -37,7 +39,12 @@ describe('statistics key at rest', () => {
     const parts = blob.split(':');
     const ct = Buffer.from(parts[3], 'base64url');
     ct[0] ^= 0x01;
-    const tampered = [parts[0], parts[1], parts[2], ct.toString('base64url')].join(':');
+    const tampered = [
+      parts[0],
+      parts[1],
+      parts[2],
+      ct.toString('base64url'),
+    ].join(':');
     const code = (fn: () => unknown) => {
       try {
         fn();
@@ -46,11 +53,21 @@ describe('statistics key at rest', () => {
         return error instanceof EverInstanceKeyError ? error.code : 'other';
       }
     };
-    expect(code(() => unwrapStatsKey(tampered, secret, instanceId))).toBe('unreadable');
-    expect(code(() => unwrapStatsKey(blob, 'another-secret', instanceId))).toBe('unreadable');
-    expect(code(() => unwrapStatsKey(blob, secret, randomUUID()))).toBe('unreadable');
-    expect(code(() => unwrapStatsKey('garbage', secret, instanceId))).toBe('malformed');
-    expect(code(() => unwrapStatsKey(blob, '', instanceId))).toBe('secret_missing');
+    expect(code(() => unwrapStatsKey(tampered, secret, instanceId))).toBe(
+      'unreadable',
+    );
+    expect(code(() => unwrapStatsKey(blob, 'another-secret', instanceId))).toBe(
+      'unreadable',
+    );
+    expect(code(() => unwrapStatsKey(blob, secret, randomUUID()))).toBe(
+      'unreadable',
+    );
+    expect(code(() => unwrapStatsKey('garbage', secret, instanceId))).toBe(
+      'malformed',
+    );
+    expect(code(() => unwrapStatsKey(blob, '', instanceId))).toBe(
+      'secret_missing',
+    );
   });
 
   it('error messages carry no key material or secret', () => {

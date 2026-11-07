@@ -7,13 +7,27 @@ describe('statistics recount (backfill)', () => {
     const firebase = new InMemoryFirebaseApp();
     const { storage } = seedInMemory(firebase);
     const backfill = new EverStatsBackfillService(firebase as any, () => 1_000);
-    await firebase.db.ref('ever_stats/counters/periods/2026-11').set({ screenshots: 3 });
+    await firebase.db
+      .ref('ever_stats/counters/periods/2026-11')
+      .set({ screenshots: 3 });
     const totals = await backfill.start(false);
-    const bytes = storage.objects.reduce((sum: number, o: { size: number }) => sum + o.size, 0);
-    expect(totals).toEqual({ users: 42, workspaces: 6, teams: 9, storageBytes: bytes });
+    const bytes = storage.objects.reduce(
+      (sum: number, o: { size: number }) => sum + o.size,
+      0,
+    );
+    expect(totals).toEqual({
+      users: 42,
+      workspaces: 6,
+      teams: 9,
+      storageBytes: bytes,
+    });
     expect(firebase.db.dump('ever_stats/counters/totals')).toEqual(totals);
-    expect(firebase.db.dump('ever_stats/counters/backfill')).toMatchObject({ completedAt: 1_000 });
-    expect(firebase.db.dump('ever_stats/counters/periods/2026-11')).toEqual({ screenshots: 3 });
+    expect(firebase.db.dump('ever_stats/counters/backfill')).toMatchObject({
+      completedAt: 1_000,
+    });
+    expect(firebase.db.dump('ever_stats/counters/periods/2026-11')).toEqual({
+      screenshots: 3,
+    });
   });
 
   it('does not run again on the next start, unless the operator asks', async () => {
@@ -31,9 +45,15 @@ describe('statistics recount (backfill)', () => {
   it('pages through more than one page of workspaces', async () => {
     const firebase = new InMemoryFirebaseApp();
     const workspaces: Record<string, unknown> = {};
-    for (let i = 0; i < 250; i += 1) workspaces[`ws-${String(i).padStart(4, '0')}`] = { teams: [{ id: 't' }, { id: 'u' }] };
+    for (let i = 0; i < 250; i += 1)
+      workspaces[`ws-${String(i).padStart(4, '0')}`] = {
+        teams: [{ id: 't' }, { id: 'u' }],
+      };
     firebase.db.write(['workspaces'], workspaces);
-    const totals = await new EverStatsBackfillService(firebase as any, () => 1).count();
+    const totals = await new EverStatsBackfillService(
+      firebase as any,
+      () => 1,
+    ).count();
     expect(totals).toMatchObject({ workspaces: 250, teams: 500, users: 0 });
   });
 });

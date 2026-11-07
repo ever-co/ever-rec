@@ -15,17 +15,43 @@ import { fileURLToPath } from 'node:url';
 const api = join(dirname(fileURLToPath(import.meta.url)), '..');
 const args = process.argv.slice(2);
 const project = process.env.GCLOUD_PROJECT || 'demo-ever-rec';
-const jest = ['jest', '--config', './test/jest-integration.json', '--runInBand', ...args];
+const jest = [
+  'jest',
+  '--config',
+  './test/jest-integration.json',
+  '--runInBand',
+  ...args,
+];
 
 let result;
 if (process.env.FIREBASE_DATABASE_EMULATOR_HOST) {
-  result = spawnSync('npx', jest, { cwd: api, stdio: 'inherit', shell: process.platform === 'win32' });
+  result = spawnSync('npx', jest, {
+    cwd: api,
+    stdio: 'inherit',
+    shell: process.platform === 'win32',
+  });
 } else {
-  const quoted = jest.map((part) => (/^[\w./:=@-]+$/.test(part) ? part : JSON.stringify(part))).join(' ');
+  const quoted = jest
+    .map((part) => (/^[\w./:=@-]+$/.test(part) ? part : JSON.stringify(part)))
+    .join(' ');
   result = spawnSync(
     'firebase',
-    ['emulators:exec', '--config', '../../firebase.json', '--only', 'auth,database,storage', '--project', project, `npx ${quoted}`],
-    { cwd: api, stdio: 'inherit', shell: process.platform === 'win32', env: { ...process.env, GCLOUD_PROJECT: project } },
+    [
+      'emulators:exec',
+      '--config',
+      '../../firebase.json',
+      '--only',
+      'auth,database,storage',
+      '--project',
+      project,
+      `npx ${quoted}`,
+    ],
+    {
+      cwd: api,
+      stdio: 'inherit',
+      shell: process.platform === 'win32',
+      env: { ...process.env, GCLOUD_PROJECT: project },
+    },
   );
 }
 if (result.error) {

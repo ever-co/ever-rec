@@ -92,11 +92,17 @@ export class FakeQuery {
   }
 
   orderByKey(): FakeQuery {
-    return new FakeQuery(this.db, this.parts, { ...this.spec, orderByKey: true });
+    return new FakeQuery(this.db, this.parts, {
+      ...this.spec,
+      orderByKey: true,
+    });
   }
 
   startAfter(key: string): FakeQuery {
-    return new FakeQuery(this.db, this.parts, { ...this.spec, startAfter: key });
+    return new FakeQuery(this.db, this.parts, {
+      ...this.spec,
+      startAfter: key,
+    });
   }
 
   async once(_event = 'value'): Promise<FakeSnapshot> {
@@ -110,14 +116,19 @@ export class FakeQuery {
   protected snapshot(): FakeSnapshot {
     const value = this.db.read(this.parts);
     if (this.spec.orderByKey && value && typeof value === 'object') {
-      let entries = Object.entries(value as Record<string, Json>).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0));
+      let entries = Object.entries(value as Record<string, Json>).sort(
+        ([a], [b]) => (a < b ? -1 : a > b ? 1 : 0),
+      );
       if (this.spec.startAfter !== undefined) {
         entries = entries.filter(([key]) => key > this.spec.startAfter);
       }
       if (this.spec.limitToFirst !== undefined) {
         entries = entries.slice(0, this.spec.limitToFirst);
       }
-      return new FakeSnapshot(this.parts[this.parts.length - 1] ?? null, entries.length ? Object.fromEntries(entries) : null);
+      return new FakeSnapshot(
+        this.parts[this.parts.length - 1] ?? null,
+        entries.length ? Object.fromEntries(entries) : null,
+      );
     }
     if (!this.spec.orderByChild || !value || typeof value !== 'object') {
       return new FakeSnapshot(this.parts[this.parts.length - 1] ?? null, value);
@@ -403,10 +414,13 @@ export class InMemoryAuth {
   }
 
   async listUsers(maxResults = 1000, pageToken?: string) {
-    const all = [...this.users.values()].sort((a, b) => (a.uid < b.uid ? -1 : 1));
+    const all = [...this.users.values()].sort((a, b) =>
+      a.uid < b.uid ? -1 : 1,
+    );
     const start = pageToken ? Number(pageToken) : 0;
     const page = all.slice(start, start + maxResults);
-    const next = start + maxResults < all.length ? String(start + maxResults) : undefined;
+    const next =
+      start + maxResults < all.length ? String(start + maxResults) : undefined;
     return { users: page.map((user) => this.toRecord(user)), pageToken: next };
   }
 
@@ -434,7 +448,8 @@ export class FakeStorageFile {
 
   async getMetadata() {
     const metadata = this.metadata;
-    if (!metadata) throw Object.assign(new Error('No such object'), { code: 404 });
+    if (!metadata)
+      throw Object.assign(new Error('No such object'), { code: 404 });
     return [metadata];
   }
 
@@ -455,8 +470,11 @@ export class InMemoryBucket {
     const names = [...this.objects.keys()].sort();
     const start = query.pageToken ? Number(query.pageToken) : 0;
     const max = query.maxResults ?? 1000;
-    const files = names.slice(start, start + max).map((name) => this.file(name));
-    const next = start + max < names.length ? { pageToken: String(start + max) } : null;
+    const files = names
+      .slice(start, start + max)
+      .map((name) => this.file(name));
+    const next =
+      start + max < names.length ? { pageToken: String(start + max) } : null;
     return [files, next];
   }
 }

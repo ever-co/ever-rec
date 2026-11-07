@@ -7,24 +7,53 @@ import { EverStatsCollectorService } from './ever-stats-collector.service';
 import { readEverStatsConfig } from './ever-stats.config';
 import { MODULE_VERSION } from './ever-stats.constants';
 import { EverStatsSchedulerService } from './ever-stats-scheduler.service';
-import { EverStatsSenderService, StatsFetch } from './ever-stats-sender.service';
+import {
+  EverStatsSenderService,
+  StatsFetch,
+} from './ever-stats-sender.service';
 
 const DAY = 86_400_000;
 
 /** One API process of an installation, on a shared in-memory Firebase project. */
-function process_(firebase: InMemoryFirebaseApp, clock: { now: number }, fetch: StatsFetch, env: Record<string, string> = {}) {
+function process_(
+  firebase: InMemoryFirebaseApp,
+  clock: { now: number },
+  fetch: StatsFetch,
+  env: Record<string, string> = {},
+) {
   const events = new EventEmitter2();
   const instance = new EverInstanceService(
     firebase as any,
-    readEverInstanceSettings((name) => ({ REC_JWT_SECRET: 'scheduler-test-secret' })[name]),
+    readEverInstanceSettings(
+      (name) => ({ REC_JWT_SECRET: 'scheduler-test-secret' })[name],
+    ),
     events,
   );
-  const config = readEverStatsConfig({ EVER_STATS_API_URL: 'http://mock-platform:8080', ...env }, () => undefined, '0.1.0');
+  const config = readEverStatsConfig(
+    { EVER_STATS_API_URL: 'http://mock-platform:8080', ...env },
+    () => undefined,
+    '0.1.0',
+  );
   const now = () => clock.now;
   const collector = new EverStatsCollectorService(firebase as any, config);
-  const sender = new EverStatsSenderService(firebase as any, config, now, fetch, instance, collector);
+  const sender = new EverStatsSenderService(
+    firebase as any,
+    config,
+    now,
+    fetch,
+    instance,
+    collector,
+  );
   const backfill = new EverStatsBackfillService(firebase as any, now);
-  const scheduler = new EverStatsSchedulerService(firebase as any, config, now, instance, sender, backfill, false);
+  const scheduler = new EverStatsSchedulerService(
+    firebase as any,
+    config,
+    now,
+    instance,
+    sender,
+    backfill,
+    false,
+  );
   events.on('ever.instance.reset_identity', () => scheduler.onResetIdentity());
   return { instance, sender, scheduler, events };
 }
@@ -35,7 +64,10 @@ describe('statistics scheduler', () => {
   let calls: Array<{ url: string; body: string }>;
   let status: number | null;
   const fetch: StatsFetch = async (url, init) => {
-    calls.push({ url, body: Buffer.from(init.body as Buffer).toString('utf8') });
+    calls.push({
+      url,
+      body: Buffer.from(init.body as Buffer).toString('utf8'),
+    });
     if (status === null) throw new TypeError('fetch failed');
     return { status };
   };
@@ -60,13 +92,20 @@ describe('statistics scheduler', () => {
   });
 
   it('10 minutes after a start when a report is more than a day overdue', async () => {
-    await firebase.db.ref('ever_stats/schedule').set({ firstBootAt: clock.now - 5 * DAY, lastSentAt: clock.now - 2 * DAY });
+    await firebase.db.ref('ever_stats/schedule').set({
+      firstBootAt: clock.now - 5 * DAY,
+      lastSentAt: clock.now - 2 * DAY,
+    });
     const { scheduler } = process_(firebase, clock, fetch);
-    expect(await scheduler.firstDue(clock.now)).toBe(clock.now + 10 * 60 * 1000);
+    expect(await scheduler.firstDue(clock.now)).toBe(
+      clock.now + 10 * 60 * 1000,
+    );
   });
 
   it('honours the test interval override', async () => {
-    const { scheduler } = process_(firebase, clock, fetch, { EVER_STATS_SEND_INTERVAL_S: '5' });
+    const { scheduler } = process_(firebase, clock, fetch, {
+      EVER_STATS_SEND_INTERVAL_S: '5',
+    });
     expect(await scheduler.firstDue(clock.now)).toBe(clock.now + 5000);
     expect(scheduler.nextSlot(clock.now)).toBe(clock.now + 5000);
   });
@@ -75,7 +114,10 @@ describe('statistics scheduler', () => {
     const { scheduler } = process_(firebase, clock, fetch);
     await scheduler.tick();
     expect(calls).toHaveLength(1);
-    expect(JSON.parse(calls[0].body)).toMatchObject({ period: '2026-11', final: false });
+    expect(JSON.parse(calls[0].body)).toMatchObject({
+      period: '2026-11',
+      final: false,
+    });
     const schedule = await scheduler.readSchedule();
     expect(schedule.lastStatus).toBe('sent');
     expect(schedule.nextSendAt).toBeGreaterThan(clock.now);
@@ -83,7 +125,9 @@ describe('statistics scheduler', () => {
   });
 
   it('switched off by the operator: zero requests over three slots', async () => {
-    const { scheduler, instance } = process_(firebase, clock, fetch, { EVER_STATS_SEND_INTERVAL_S: '5' });
+    const { scheduler, instance } = process_(firebase, clock, fetch, {
+      EVER_STATS_SEND_INTERVAL_S: '5',
+    });
     await instance.setStatsEnabledUi('uid-op', false);
     for (let i = 0; i < 3; i += 1) {
       clock.now += 5000;
@@ -108,7 +152,11 @@ describe('statistics scheduler', () => {
     calls = [];
     await firebase.db.ref('ever_stats/schedule/nextSendAt').remove();
     await scheduler.tick();
-    expect(calls.map((call) => JSON.parse(call.body)).map((r) => [r.period, r.final])).toEqual([['2026-12', false]]);
+    expect(
+      calls
+        .map((call) => JSON.parse(call.body))
+        .map((r) => [r.period, r.final]),
+    ).toEqual([['2026-12', false]]);
     scheduler.onModuleDestroy();
   });
 
@@ -132,7 +180,9 @@ describe('statistics scheduler', () => {
     status = 422;
     const { scheduler } = process_(firebase, clock, fetch);
     await scheduler.tick();
-    expect((await scheduler.readSchedule()).blockedModuleVersion).toBe(MODULE_VERSION);
+    expect((await scheduler.readSchedule()).blockedModuleVersion).toBe(
+      MODULE_VERSION,
+    );
     await firebase.db.ref('ever_stats/schedule/nextSendAt').remove();
     clock.now += DAY;
     await scheduler.tick();
@@ -167,7 +217,9 @@ describe('statistics scheduler', () => {
     await scheduler.tick();
     await instance.resetIdentity('uid-op');
     expect(firebase.db.dump('ever_stats/reports')).toBeNull();
-    expect((await scheduler.readSchedule()).blockedModuleVersion).toBeUndefined();
+    expect(
+      (await scheduler.readSchedule()).blockedModuleVersion,
+    ).toBeUndefined();
     scheduler.onModuleDestroy();
   });
 });

@@ -5,7 +5,7 @@
   "api_service": "api",
   "process_services": ["api"],
   "services": ["api", "emulators"],
-  "health_url": "http://api:3000/api/v1/",
+  "health_url": "http://api:3000/api/v1/auth/ever-id/config",
   "health_timeout_s": 600,
   "module_routes": [
     "/api/v1/ever-stats/health",

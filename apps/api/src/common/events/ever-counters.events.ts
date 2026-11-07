@@ -34,7 +34,7 @@ export interface EverMediaEvent {
 
 /** What `storedBytes` needs of an emitter and of a stored file. */
 interface ListenerAware {
-  hasListeners(event?: string): boolean | Boolean; // eslint-disable-line @typescript-eslint/ban-types
+  hasListeners(event?: string): unknown;
 }
 interface StoredFile {
   getMetadata(): Promise<unknown>;
@@ -45,12 +45,17 @@ interface StoredFile {
  * (0 otherwise, and on any error), so a delete path makes no extra request when the module is
  * not loaded.
  */
-export async function storedBytes(emitter: ListenerAware | undefined, file: StoredFile): Promise<number> {
-  if (!emitter?.hasListeners(EVER_COUNTER_EVENTS.mediaDeleted)) {
+export async function storedBytes(
+  emitter: ListenerAware | undefined,
+  file: StoredFile,
+): Promise<number> {
+  if (!emitter || !emitter.hasListeners(EVER_COUNTER_EVENTS.mediaDeleted)) {
     return 0;
   }
   try {
-    const [metadata] = (await file.getMetadata()) as Array<{ size?: string | number }>;
+    const [metadata] = (await file.getMetadata()) as Array<{
+      size?: string | number;
+    }>;
     const bytes = Number(metadata?.size);
     return Number.isFinite(bytes) && bytes > 0 ? Math.floor(bytes) : 0;
   } catch {

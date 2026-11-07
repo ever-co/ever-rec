@@ -22,7 +22,8 @@ const FORBIDDEN = [
 const READ = new RegExp(
   `(process\\.env(\\.|\\[\\s*['"\`])|get(<[^>]*>)?\\(\\s*['"\`])(${FORBIDDEN.join('|')})\\b`,
 );
-const HOST_APIS = /os\.hostname\(|hostname\(\)|req(uest)?\.(hostname|headers\.host)|app\.options\.(projectId|databaseURL|storageBucket)/;
+const HOST_APIS =
+  /os\.hostname\(|hostname\(\)|req(uest)?\.(hostname|headers\.host)|app\.options\.(projectId|databaseURL|storageBucket)/;
 
 function sources(dirs: string[]): Array<{ file: string; text: string }> {
   const out: Array<{ file: string; text: string }> = [];
@@ -30,19 +31,28 @@ function sources(dirs: string[]): Array<{ file: string; text: string }> {
     for (const name of readdirSync(dir)) {
       const path = join(dir, name);
       if (statSync(path).isDirectory()) visit(path);
-      else if (name.endsWith('.ts') && !name.endsWith('.spec.ts')) out.push({ file: path, text: readFileSync(path, 'utf8') });
+      else if (name.endsWith('.ts') && !name.endsWith('.spec.ts'))
+        out.push({ file: path, text: readFileSync(path, 'utf8') });
     }
   };
   dirs.forEach(visit);
   return out;
 }
 
-export function inferenceOffenders(files: Array<{ file: string; text: string }>): string[] {
-  return files.filter(({ text }) => READ.test(text) || HOST_APIS.test(text)).map(({ file }) => file);
+export function inferenceOffenders(
+  files: Array<{ file: string; text: string }>,
+): string[] {
+  return files
+    .filter(({ text }) => READ.test(text) || HOST_APIS.test(text))
+    .map(({ file }) => file);
 }
 
 describe('cloud and identity are never inferred', () => {
-  const files = sources([__dirname, join(__dirname, '..', 'ever-instance'), join(__dirname, '..', '..', 'common', 'ever-platform')]);
+  const files = sources([
+    __dirname,
+    join(__dirname, '..', 'ever-instance'),
+    join(__dirname, '..', '..', 'common', 'ever-platform'),
+  ]);
 
   it('finds the module sources', () => {
     expect(files.length).toBeGreaterThan(10);
@@ -53,10 +63,23 @@ describe('cloud and identity are never inferred', () => {
   });
 
   it('catches a planted read (control)', () => {
-    const planted = [{ file: 'planted.ts', text: "const id = process.env.FIREBASE_PROJECT_ID;" }];
+    const planted = [
+      {
+        file: 'planted.ts',
+        text: 'const id = process.env.FIREBASE_PROJECT_ID;',
+      },
+    ];
     expect(inferenceOffenders(planted)).toEqual(['planted.ts']);
-    expect(inferenceOffenders([{ file: 'b.ts', text: "config.get<string>('DEMO')" }])).toEqual(['b.ts']);
-    expect(inferenceOffenders([{ file: 'c.ts', text: "process.env['WEBSITE_URL']" }])).toEqual(['c.ts']);
+    expect(
+      inferenceOffenders([
+        { file: 'b.ts', text: "config.get<string>('DEMO')" },
+      ]),
+    ).toEqual(['b.ts']);
+    expect(
+      inferenceOffenders([
+        { file: 'c.ts', text: "process.env['WEBSITE_URL']" },
+      ]),
+    ).toEqual(['c.ts']);
   });
 
   it('reads install source and country from their own variables only', () => {

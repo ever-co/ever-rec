@@ -49,7 +49,10 @@ export interface EverInstancePublicView {
 }
 
 /** The actions the audit trail records. */
-export type EverInstanceAuditAction = 'stats.toggle' | 'instance.reset_identity' | 'stats.recount';
+export type EverInstanceAuditAction =
+  | 'stats.toggle'
+  | 'instance.reset_identity'
+  | 'stats.recount';
 
 /** One row of `ever_instance/audit`: who did what, when. No IP address, user agent or secret. */
 export interface EverInstanceAuditRow {

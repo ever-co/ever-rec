@@ -11,7 +11,10 @@ import { EverInstanceService } from './ever-instance.service';
  * Runs the existing `AuthGuard` and answers 404 instead of 401: a route of the Ever Platform
  * modules does not exist for a signed-out caller.
  */
-async function signedInUid(authGuard: AuthGuard, context: ExecutionContext): Promise<string> {
+async function signedInUid(
+  authGuard: AuthGuard,
+  context: ExecutionContext,
+): Promise<string> {
   try {
     await authGuard.canActivate(context);
   } catch {
