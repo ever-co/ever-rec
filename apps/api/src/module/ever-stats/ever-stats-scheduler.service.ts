@@ -55,6 +55,9 @@ const DAY_MS = 86_400_000;
 export const EVER_STATS_AUTOSTART = Symbol('ever stats autostart');
 const MAX_TIMER_MS = 2_147_483_647;
 
+/** After a failed slot or start, the next try. */
+const SCHEDULER_RECOVERY_MS = 10 * 60 * 1000;
+
 /**
  * When reports are sent: once a day at a second drawn at random for each day (UTC); the first
  * report a day after the first start (10 minutes after a start when a report is more than a day
@@ -70,6 +73,7 @@ export class EverStatsSchedulerService
   private timer: NodeJS.Timeout | null = null;
   private stopped = false;
   private ticking: Promise<void> | null = null;
+  private booted = false;
   readonly lease: EverStatsLease;
   /** When this process will look next (for the status route). */
   nextAt: number | null = null;
@@ -133,11 +137,19 @@ export class EverStatsSchedulerService
     const delay = Math.max(0, Math.min(MAX_TIMER_MS, at - this.clock()));
     this.timer = setTimeout(() => {
       this.timer = null;
-      work().catch((error) =>
+      work().catch((error) => {
         this.logger.warn(
           `ever_stats.scheduler error=${(error as Error)?.name ?? 'error'}`,
-        ),
-      );
+        );
+        // A failure (the database unreachable, for example) never stops the chain: try again
+        // later, from the start when the first start did not complete.
+        if (!this.timer && !this.stopped) {
+          this.arm(
+            this.clock() + SCHEDULER_RECOVERY_MS,
+            this.booted ? () => this.tick() : () => this.boot(),
+          );
+        }
+      });
     }, delay);
     this.timer.unref?.();
   }
@@ -190,7 +202,9 @@ export class EverStatsSchedulerService
         await this.lease.release();
       }
     }
-    this.arm(await this.firstDue(now));
+    const due = await this.firstDue(now);
+    this.booted = true;
+    this.arm(due);
   }
 
   /** One slot. Exposed for tests; the timer calls it. */

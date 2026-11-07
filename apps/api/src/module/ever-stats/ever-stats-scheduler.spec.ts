@@ -222,4 +222,16 @@ describe('statistics scheduler', () => {
     ).toBeUndefined();
     scheduler.onModuleDestroy();
   });
+  it('a failed slot never stops the chain: it tries again 10 minutes later', async () => {
+    const { scheduler, instance } = process_(firebase, clock, fetch);
+    jest
+      .spyOn(instance, 'isStatsEnabledUi')
+      .mockRejectedValueOnce(new Error('database unreachable'));
+    (scheduler as any).booted = true;
+    (scheduler as any).arm(clock.now, () => scheduler.tick());
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    expect(scheduler.nextAt).toBe(clock.now + 10 * 60 * 1000);
+    expect(calls).toEqual([]);
+    scheduler.onModuleDestroy();
+  });
 });
