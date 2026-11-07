@@ -46,6 +46,7 @@ export const config = {
     '/settings/billing',
     '/settings/drive',
     '/settings/profile',
+    '/settings/ever-platform',
     '/settings/password',
     '/settings/slack',
     '/image/:path*',
