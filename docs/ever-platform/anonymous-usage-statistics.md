@@ -78,7 +78,9 @@ not pass it.
 The counts are kept up to date as things happen (a user, workspace, team, screenshot or video is
 created or deleted), in `ever_stats/counters` in your Realtime Database. Building a report never
 scans your data. The first time the module runs, it counts what already exists once, in the
-background; the operator can run that count again with *Recount now*. `storage_mb` between two
+background (when that count cannot complete, it is tried again later, with growing waits); the
+operator can run that count again with *Recount now*. Changes made while a count runs are kept.
+`storage_mb` between two
 recounts follows the uploads and deletes of the media files themselves, so it can drift slightly
 from the bucket's real size (thumbnails, for example) until the next recount.
 

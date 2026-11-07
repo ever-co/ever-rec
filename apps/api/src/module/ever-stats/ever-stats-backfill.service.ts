@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
 import type * as admin from 'firebase-admin';
 import { randomUUID } from 'node:crypto';
 import { FIREBASE_ADMIN } from '../firebase/firebase.constants';
@@ -19,26 +19,79 @@ const BACKFILL_CLAIM_MS = 30 * 60 * 1000;
 const PAGE = 1000;
 const WORKSPACE_PAGE = 100;
 
+/** After an incomplete first recount, the next tries: 1 minute, 5 minutes, 30 minutes, 2 hours, then every 6 hours. */
+export const BACKFILL_RETRY_DELAYS_MS: ReadonlyArray<number> = Object.freeze([
+  60_000, 300_000, 1_800_000, 7_200_000, 21_600_000,
+]);
+
+const TOTAL_FIELDS: ReadonlyArray<keyof StatsTotals> = Object.freeze([
+  'users',
+  'workspaces',
+  'teams',
+  'storageBytes',
+]);
+
+/** A stored total as a number (0 when absent or not a finite number). */
+function totalOf(value: unknown): number {
+  return typeof value === 'number' && Number.isFinite(value) ? value : 0;
+}
+
+function totalsOf(value: unknown): StatsTotals {
+  const node = (value ?? {}) as Partial<Record<keyof StatsTotals, unknown>>;
+  return {
+    users: totalOf(node.users),
+    workspaces: totalOf(node.workspaces),
+    teams: totalOf(node.teams),
+    storageBytes: totalOf(node.storageBytes),
+  };
+}
+
+function reasonOf(error: unknown): string {
+  return (error as Error)?.name ?? 'error';
+}
+
 /**
- * Counts what already exists, once: the first time the module runs on a project
- * (`ever_stats/counters/backfill` absent), and when the operator asks for a recount. It pages
- * through the Firebase users, the workspaces (100 at a time) and the storage bucket's objects,
- * then writes the totals in one `set`. It never runs on the send path, and it leaves the monthly
- * counters alone.
+ * Counts what already exists: the first time the module runs on a project
+ * (`ever_stats/counters/backfill` without `completedAt`), and when the operator asks for a
+ * recount. It pages through the Firebase users, the workspaces (100 at a time) and the storage
+ * bucket's objects, then applies the difference between what it counted and what was stored when
+ * it started counting, in one transaction: what the counter listeners add or remove while it
+ * counts is kept. It never runs on the send path, and it leaves the monthly counters alone.
+ *
+ * Nothing here may stop the API: every background run is caught, and a first recount that does
+ * not complete is tried again later, with backoff, until one completes (here or in another
+ * process).
  */
 @Injectable()
-export class EverStatsBackfillService {
+export class EverStatsBackfillService implements OnModuleDestroy {
   private readonly logger = new Logger(EverStatsBackfillService.name);
   private readonly podId = randomUUID();
   private running: Promise<StatsTotals | null> | null = null;
+  private retryTimer: NodeJS.Timeout | null = null;
+  private retryAttempt = 0;
+  private stopped = false;
+  /** The waits between two tries of an incomplete first recount (tests shorten them). */
+  retryDelaysMs: ReadonlyArray<number> = BACKFILL_RETRY_DELAYS_MS;
 
   constructor(
     @Inject(FIREBASE_ADMIN) private readonly firebase: admin.app.App,
     @Inject(EVER_STATS_CLOCK) private readonly clock: EverStatsClock,
   ) {}
 
+  onModuleDestroy(): void {
+    this.stopped = true;
+    if (this.retryTimer) {
+      clearTimeout(this.retryTimer);
+      this.retryTimer = null;
+    }
+  }
+
   private ref() {
     return this.firebase.database().ref(STATS_PATHS.backfill);
+  }
+
+  private totalsRef() {
+    return this.firebase.database().ref(STATS_PATHS.totals);
   }
 
   /** Whether a recount has completed on this project. */
@@ -76,44 +129,125 @@ export class EverStatsBackfillService {
     );
   }
 
-  /** Runs the first recount in the background when none has completed yet. */
+  /**
+   * Starts the first recount in the background when none has completed yet. When it does not
+   * complete (an error, or another process holds a claim it never finishes), it is tried again
+   * later, with backoff. Rejects only when the first read fails (the caller retries).
+   */
   async runIfNeeded(): Promise<void> {
     if (await this.isComplete()) {
+      this.retryAttempt = 0;
       return;
     }
-    void this.start(false);
+    void this.start(false).then(() => this.retryUnlessComplete());
   }
 
-  /** Starts a recount (once per process at a time); resolves with the totals, or `null` when another process holds it. */
+  /** After a background recount: tries again later unless a recount has completed. Never rejects. */
+  private async retryUnlessComplete(): Promise<void> {
+    let complete = false;
+    try {
+      complete = await this.isComplete();
+    } catch {
+      complete = false;
+    }
+    if (complete) {
+      this.retryAttempt = 0;
+      return;
+    }
+    this.scheduleRetry();
+  }
+
+  private scheduleRetry(): void {
+    if (this.stopped || this.retryTimer) {
+      return;
+    }
+    const delays = this.retryDelaysMs;
+    const delay = delays[Math.min(this.retryAttempt, delays.length - 1)];
+    this.retryAttempt += 1;
+    this.logger.warn(
+      `ever_stats.recount outcome=incomplete retry_in_s=${Math.round(delay / 1000)}`,
+    );
+    this.retryTimer = setTimeout(() => {
+      this.retryTimer = null;
+      this.runIfNeeded().catch(() => this.scheduleRetry());
+    }, delay);
+    this.retryTimer.unref?.();
+  }
+
+  /**
+   * Starts a recount (once per process at a time); resolves with the totals, or `null` when
+   * another process holds it or it failed. Never rejects: callers may leave it running.
+   */
   start(force: boolean): Promise<StatsTotals | null> {
     if (!this.running) {
-      this.running = this.run(force).finally(() => {
-        this.running = null;
-      });
+      this.running = this.run(force)
+        .catch(() => null)
+        .finally(() => {
+          this.running = null;
+        });
     }
     return this.running;
   }
 
   private async run(force: boolean): Promise<StatsTotals | null> {
-    if (!(await this.claim(force))) {
-      return null;
-    }
+    let claimed = false;
     try {
-      const totals = await this.count();
-      await this.firebase.database().ref(STATS_PATHS.totals).set(totals);
+      claimed = await this.claim(force);
+      if (!claimed) {
+        return null;
+      }
+      const totals = await this.recount();
       await this.ref().set({ completedAt: this.clock(), byPod: this.podId });
       this.logger.log('ever_stats.recount outcome=done');
       return totals;
     } catch (error) {
-      await this.ref()
-        .child('runningUntil')
-        .remove()
-        .catch(() => undefined);
+      if (claimed) {
+        await this.ref()
+          .child('runningUntil')
+          .remove()
+          .catch(() => undefined);
+      }
       this.logger.warn(
-        `ever_stats.recount outcome=failed reason=${(error as Error)?.name ?? 'error'}`,
+        `ever_stats.recount outcome=failed reason=${reasonOf(error)}`,
       );
       return null;
     }
+  }
+
+  /**
+   * Counts each total, noting the stored value just before counting it, then adds the
+   * difference (counted minus noted) to the stored totals in one transaction. A plain `set` of
+   * the counts would erase what the counter listeners changed while the scan ran.
+   */
+  private async recount(): Promise<StatsTotals> {
+    const deltas = totalsOf(null);
+    const measure = async <K extends keyof StatsTotals>(
+      fields: K[],
+      count: () => Promise<Pick<StatsTotals, K>>,
+    ) => {
+      const before = totalsOf((await this.totalsRef().get()).val());
+      const counted = await count();
+      for (const field of fields) {
+        deltas[field] = counted[field] - before[field];
+      }
+    };
+    await measure(['users'], async () => ({ users: await this.countUsers() }));
+    await measure(['workspaces', 'teams'], () =>
+      this.countWorkspacesAndTeams(),
+    );
+    await measure(['storageBytes'], async () => ({
+      storageBytes: await this.countStorageBytes(),
+    }));
+    const result = await this.totalsRef().transaction((current: unknown) => {
+      const stored = totalsOf(current);
+      return Object.fromEntries(
+        TOTAL_FIELDS.map((field) => [
+          field,
+          Math.max(0, stored[field] + deltas[field]),
+        ]),
+      );
+    });
+    return totalsOf(result.snapshot?.val());
   }
 
   /** Counts users, workspaces, teams and stored bytes. */
