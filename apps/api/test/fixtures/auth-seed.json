@@ -1,0 +1,214 @@
+{
+  "users": [
+    {
+      "uid": "seedUid0000x0",
+      "displayName": "Amelia Okonkwo",
+      "email": "amelia.okonkwo0@example.com"
+    },
+    {
+      "uid": "seedUid0001x63z",
+      "displayName": "Bastien Okonkwo",
+      "email": "bastien.okonkwo1@example.org"
+    },
+    {
+      "uid": "seedUid0002xc7y",
+      "displayName": "Chiara Okonkwo",
+      "email": "chiara.okonkwo2@example.net"
+    },
+    {
+      "uid": "seedUid0003xibx",
+      "displayName": "Dmitri Okonkwo",
+      "email": "dmitri.okonkwo3@example.com"
+    },
+    {
+      "uid": "seedUid0004xofw",
+      "displayName": "Elif Okonkwo",
+      "email": "elif.okonkwo4@example.org"
+    },
+    {
+      "uid": "seedUid0005xujv",
+      "displayName": "Farouk Okonkwo",
+      "email": "farouk.okonkwo5@example.net"
+    },
+    {
+      "uid": "seedUid0006x10nu",
+      "displayName": "Greta Okonkwo",
+      "email": "greta.okonkwo6@example.com"
+    },
+    {
+      "uid": "seedUid0007x16rt",
+      "displayName": "Hiroshi Okonkwo",
+      "email": "hiroshi.okonkwo7@example.org"
+    },
+    {
+      "uid": "seedUid0008x1cvs",
+      "displayName": "Ines Okonkwo",
+      "email": "ines.okonkwo8@example.net"
+    },
+    {
+      "uid": "seedUid0009x1izr",
+      "displayName": "Jonas Okonkwo",
+      "email": "jonas.okonkwo9@example.com"
+    },
+    {
+      "uid": "seedUid0010x1p3q",
+      "displayName": "Kalani Okonkwo",
+      "email": "kalani.okonkwo10@example.org"
+    },
+    {
+      "uid": "seedUid0011x1v7p",
+      "displayName": "Lucia Okonkwo",
+      "email": "lucia.okonkwo11@example.net"
+    },
+    {
+      "uid": "seedUid0012x21bo",
+      "displayName": "Mateo Okonkwo",
+      "email": "mateo.okonkwo12@example.com"
+    },
+    {
+      "uid": "seedUid0013x27fn",
+      "displayName": "Nadia Okonkwo",
+      "email": "nadia.okonkwo13@example.org"
+    },
+    {
+      "uid": "seedUid0014x2djm",
+      "displayName": "Amelia Lindqvist",
+      "email": "amelia.lindqvist14@example.net"
+    },
+    {
+      "uid": "seedUid0015x2jnl",
+      "displayName": "Bastien Lindqvist",
+      "email": "bastien.lindqvist15@example.com"
+    },
+    {
+      "uid": "seedUid0016x2prk",
+      "displayName": "Chiara Lindqvist",
+      "email": "chiara.lindqvist16@example.org"
+    },
+    {
+      "uid": "seedUid0017x2vvj",
+      "displayName": "Dmitri Lindqvist",
+      "email": "dmitri.lindqvist17@example.net"
+    },
+    {
+      "uid": "seedUid0018x31zi",
+      "displayName": "Elif Lindqvist",
+      "email": "elif.lindqvist18@example.com"
+    },
+    {
+      "uid": "seedUid0019x383h",
+      "displayName": "Farouk Lindqvist",
+      "email": "farouk.lindqvist19@example.org"
+    },
+    {
+      "uid": "seedUid0020x3e7g",
+      "displayName": "Greta Lindqvist",
+      "email": "greta.lindqvist20@example.net"
+    },
+    {
+      "uid": "seedUid0021x3kbf",
+      "displayName": "Hiroshi Lindqvist",
+      "email": "hiroshi.lindqvist21@example.com"
+    },
+    {
+      "uid": "seedUid0022x3qfe",
+      "displayName": "Ines Lindqvist",
+      "email": "ines.lindqvist22@example.org"
+    },
+    {
+      "uid": "seedUid0023x3wjd",
+      "displayName": "Jonas Lindqvist",
+      "email": "jonas.lindqvist23@example.net"
+    },
+    {
+      "uid": "seedUid0024x42nc",
+      "displayName": "Kalani Lindqvist",
+      "email": "kalani.lindqvist24@example.com"
+    },
+    {
+      "uid": "seedUid0025x48rb",
+      "displayName": "Lucia Lindqvist",
+      "email": "lucia.lindqvist25@example.org"
+    },
+    {
+      "uid": "seedUid0026x4eva",
+      "displayName": "Mateo Lindqvist",
+      "email": "mateo.lindqvist26@example.net"
+    },
+    {
+      "uid": "seedUid0027x4kz9",
+      "displayName": "Nadia Lindqvist",
+      "email": "nadia.lindqvist27@example.com"
+    },
+    {
+      "uid": "seedUid0028x4r38",
+      "displayName": "Amelia Moreau",
+      "email": "amelia.moreau28@example.org"
+    },
+    {
+      "uid": "seedUid0029x4x77",
+      "displayName": "Bastien Moreau",
+      "email": "bastien.moreau29@example.net"
+    },
+    {
+      "uid": "seedUid0030x53b6",
+      "displayName": "Chiara Moreau",
+      "email": "chiara.moreau30@example.com"
+    },
+    {
+      "uid": "seedUid0031x59f5",
+      "displayName": "Dmitri Moreau",
+      "email": "dmitri.moreau31@example.org"
+    },
+    {
+      "uid": "seedUid0032x5fj4",
+      "displayName": "Elif Moreau",
+      "email": "elif.moreau32@example.net"
+    },
+    {
+      "uid": "seedUid0033x5ln3",
+      "displayName": "Farouk Moreau",
+      "email": "farouk.moreau33@example.com"
+    },
+    {
+      "uid": "seedUid0034x5rr2",
+      "displayName": "Greta Moreau",
+      "email": "greta.moreau34@example.org"
+    },
+    {
+      "uid": "seedUid0035x5xv1",
+      "displayName": "Hiroshi Moreau",
+      "email": "hiroshi.moreau35@example.net"
+    },
+    {
+      "uid": "seedUid0036x63z0",
+      "displayName": "Ines Moreau",
+      "email": "ines.moreau36@example.com"
+    },
+    {
+      "uid": "seedUid0037x6a2z",
+      "displayName": "Jonas Moreau",
+      "email": "jonas.moreau37@example.org"
+    },
+    {
+      "uid": "seedUid0038x6g6y",
+      "displayName": "Kalani Moreau",
+      "email": "kalani.moreau38@example.net"
+    },
+    {
+      "uid": "seedUid0039x6max",
+      "displayName": "Lucia Moreau",
+      "email": "lucia.moreau39@example.com"
+    },
+    {
+      "uid": "seedUid0040x6sew",
+      "displayName": "Mateo Moreau",
+      "email": "mateo.moreau40@example.org"
+    },
+    {
+      "uid": "seedUid0041x6yiv",
+      "displayName": "Nadia Moreau",
+      "email": "nadia.moreau41@example.net"
+    }
+  ]
+}

@@ -1,5 +1,7 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import type * as admin from 'firebase-admin';
+import * as http from 'node:http';
+import * as https from 'node:https';
 import { EverInstanceKeyError, signBytes } from '../ever-instance/ever-instance.crypto';
 import { EverInstanceService } from '../ever-instance/ever-instance.service';
 import { FIREBASE_ADMIN } from '../firebase/firebase.constants';
@@ -17,12 +19,48 @@ import {
 } from './ever-stats.constants';
 import { EverStatsCollectorService } from './ever-stats-collector.service';
 
-/** The HTTP client of the module: global `fetch`, replaced in tests. */
-export type StatsFetch = (url: string, init: Record<string, unknown>) => Promise<{ status: number; body?: any }>;
+/**
+ * The HTTP client of the module, replaced in tests: one request, its status, nothing else.
+ */
+export type StatsFetch = (
+  url: string,
+  init: { method: string; headers: Record<string, string>; body: Buffer },
+) => Promise<{ status: number }>;
 
 export const EVER_STATS_FETCH = Symbol('ever stats fetch');
 
-export const defaultStatsFetch: StatsFetch = (url, init) => (globalThis as any).fetch(url, init);
+/**
+ * Posts with Node's own `http`/`https` client: no redirect is ever followed (the client does not
+ * follow them), no cookie jar, no proxy, no connection reuse, and the whole exchange is cut after
+ * 10 seconds. The answer's body is not read.
+ */
+export const defaultStatsFetch: StatsFetch = (url, init) =>
+  new Promise((resolve, reject) => {
+    const target = new URL(url);
+    const client = target.protocol === 'https:' ? https : http;
+    const request = client.request(
+      target,
+      {
+        method: init.method,
+        headers: { ...init.headers, 'Content-Length': String(init.body.length) },
+        agent: false,
+        timeout: STATS_SEND_TIMEOUT_MS,
+      },
+      (response) => {
+        clearTimeout(deadline);
+        response.resume();
+        resolve({ status: response.statusCode ?? 0 });
+      },
+    );
+    const deadline = setTimeout(() => request.destroy(new Error('timeout')), STATS_SEND_TIMEOUT_MS);
+    deadline.unref?.();
+    request.on('timeout', () => request.destroy(new Error('timeout')));
+    request.on('error', (error) => {
+      clearTimeout(deadline);
+      reject(error);
+    });
+    request.end(init.body);
+  });
 
 export type StatsReportStatus = 'pending' | 'sent' | 'rejected' | 'failed';
 
@@ -75,7 +113,7 @@ export function classifyAnswer(httpStatus: number | null): {
  * Signs and sends one report. The report is serialised once; those exact bytes are signed with the
  * installation's statistics key, stored, and posted unchanged: `POST {apiUrl}/v1/stats/reports`,
  * with the public key and the signature in the headers, no cookie, no credential, no redirect
- * followed, within 10 seconds. This is the only request the module makes.
+ * followed, within 10 seconds (see {@link defaultStatsFetch}). This is the only request the module makes.
  */
 @Injectable()
 export class EverStatsSenderService {
@@ -185,17 +223,8 @@ export class EverStatsSenderService {
           [STATS_HEADERS.keyId]: identity.record.statsKeyId,
         },
         body: built.bytes,
-        redirect: 'manual',
-        credentials: 'omit',
-        signal: AbortSignal.timeout(STATS_SEND_TIMEOUT_MS),
       });
       httpStatus = response.status;
-      // The answer's body is not needed; release the connection without reading it.
-      try {
-        await response.body?.cancel?.();
-      } catch {
-        // ignore
-      }
     } catch {
       httpStatus = null;
     }

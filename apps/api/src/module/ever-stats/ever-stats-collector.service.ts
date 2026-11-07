@@ -94,7 +94,7 @@ export class EverStatsCollectorService {
       aggregates: {
         screenshots: count(period.screenshots),
         videos: count(period.videos),
-        storage_mb: count(Math.floor(count(totals.storageBytes) / 1_000_000)),
+        storage_mb: count(Math.floor(Math.max(0, Number(totals.storageBytes) || 0) / 1_000_000)),
       },
     };
   }
