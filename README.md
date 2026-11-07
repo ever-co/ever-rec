@@ -63,6 +63,7 @@ Designed to run discreetly in the background, Ever® Rec™ lets you stay focuse
     -   [Database Configuration](#database-configuration)
     -   [Storage Setup](#storage-setup)
 -   [Google OAuth Configuration](#google-oAuth-configuration)
+-   [Sign in with Ever ID (optional)](#sign-in-with-ever-id-optional)
 -   [Production Build](#production-build)
 
 ## 🌼 Screenshots
@@ -431,6 +432,54 @@ pnpm build:extensions
     - `GOOGLE_CLIENT_ID`
     - `GOOGLE_CLIENT_SECRET`
 5. Configure the OAuth consent screen
+
+## Sign in with Ever ID (optional)
+
+Ever Rec can offer **Continue with Ever ID** next to e-mail/password and Google sign-in. Ever ID is the account of the Ever Platform. The API is a standard OpenID Connect relying party, so any OpenID Connect issuer that supports the authorization code flow with PKCE can be configured the same way.
+
+The provider is **off by default**. While `EVER_ID_ISSUER_URL` is unset, the button is hidden, every `/api/v1/auth/ever-id/*` route except `config` answers `404 provider_disabled`, the API makes no request to any issuer, and the existing sign-in methods behave exactly as before.
+
+### API configuration
+
+| Variable | Default | Meaning |
+| --- | --- | --- |
+| `EVER_ID_ISSUER_URL` | unset | Issuer URL, for example `https://idp.example.com`. Unset keeps the provider off. `EVER_ID_ISSUER` is still read as a deprecated alias. |
+| `EVER_ID_CLIENT_ID` | | Client ID of the confidential web client registered at the issuer. |
+| `EVER_ID_CLIENT_SECRET` | | Its client secret. Provide it from your secret store; it is never sent to a browser or written to a log. |
+| `EVER_ID_REDIRECT_URL` | | `https://<api host>/api/v1/auth/ever-id/callback`, exactly as registered at the issuer. |
+| `EVER_ID_ALLOWED_ISSUERS` | empty | Further accepted token issuers, comma-separated (at most three issuers in total). |
+| `EVER_ID_PLATFORM_PROJECT_ID` | empty | Optional Ever Platform project ID; adds its audience scope to the sign-in request. |
+| `EVER_ID_LINK_MODE` | `explicit` | Only `explicit` is supported: an Ever ID is attached to an existing account from Settings, never by e-mail address. |
+| `EVER_ID_SIGN_UP_ALLOWED` | `true` | Whether a new person may create an account (always after a confirmation screen). `EVER_ID_JIT_SIGNUP` is still read as a deprecated alias. |
+| `EVER_ID_BACKCHANNEL_LOGOUT_ENABLED` | `true` | Accept back-channel logout requests from the issuer. |
+| `EVER_ID_LOGOUT_REVOKE_FIREBASE` | `false` | On a back-channel logout, also revoke every Firebase refresh token of the account (this ends its other sessions too). |
+
+`WEBSITE_URL` must be set (it already is for CORS): the API sends the browser back to the portal there. The portal and the extensions need no new variable; they read `GET /api/v1/auth/ever-id/config` at runtime, so the button appears or disappears without a rebuild.
+
+An issuer on an Ever host (`*.ever.co`) is used only by an Ever-operated install (`EVER_INSTALL_SOURCE=cloud`). A self-hosted install configured with one keeps the provider off and logs one warning, without contacting that host. Any other issuer works as soon as it is configured.
+
+### Registering the client at the issuer
+
+-   Application: web, confidential, authorization code flow with PKCE (`S256`).
+-   Redirect URI: `https://<api host>/api/v1/auth/ever-id/callback`
+-   Back-channel logout URI: `https://<api host>/api/v1/auth/ever-id/backchannel-logout`
+-   Post-logout redirect URI (optional): `https://<portal host>/auth/login`
+-   The ID token must carry `email` and `email_verified`; `sid` and `auth_time` are used when present.
+
+### How it behaves
+
+-   **Linked Ever ID**: signs in to its account, even if its e-mail address changed since it was connected.
+-   **New person**: when no account uses the verified e-mail address, the portal shows **Create your Ever Rec account** with the name and e-mail address from Ever ID. The account is created only when the person confirms; leaving the screen creates nothing.
+-   **Existing e-mail address**: when an account with that address exists but is not linked, nothing is created, linked or opened. The person signs in the usual way and connects Ever ID in **Settings → Profile → Connected sign-in methods**. Connecting asks for a fresh Ever ID sign-in (at most five minutes old) and shows both addresses before anything is saved.
+-   **Disconnecting** is refused while Ever ID is the account's only way to sign in.
+-   **Back-channel logout** ends the Rec sessions opened with that Ever ID session; a logout token is accepted once and only within five minutes of being issued.
+-   **Tokens**: ID tokens are verified locally against the issuer's published keys. No Ever ID token is stored. Redirects carry one-time codes only, never a token or an e-mail address. The browser extensions open the web app's login page; no OpenID Connect code runs in them.
+
+### Outbound connections and data
+
+The only new outbound target is the configured issuer (discovery document, key set and token endpoint), and only while the provider is enabled. When the Gauzy integration (`GAUZY_API_URL`) is configured, an Ever ID sign-in also presents the verified ID token to that Gauzy API to open the mirrored session, as the other sign-in methods do; a failure there never blocks the sign-in.
+
+Links are stored in the Realtime Database under `ever_identities` (keyed by a SHA-256 of issuer and subject) with an index under `ever_identities_by_uid`. Short-lived records (`ever_id_pending`, `ever_id_pending_signup`, `ever_id_pending_connect`, `ever_id_handoff`, `ever_id_sessions`, `ever_id_logout_jti`) are encrypted with a key derived from `REC_JWT_SECRET` and expire on their own. `database.rules.json` closes all of these paths to clients.
 
 ## Production Build
 

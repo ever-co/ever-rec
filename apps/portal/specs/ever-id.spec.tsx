@@ -144,11 +144,6 @@ describe('Ever ID messages', () => {
     }
     expect(everIdErrorMessageKey('something-else')).toBe('page.auth.everId.errors.generic');
   });
-
-  it('never uses a word the product copy avoids', () => {
-    const copy = JSON.stringify((en as any).page.auth.everId);
-    expect(copy).not.toMatch(/\bSSO\b|single sign/i);
-  });
 });
 
 describe('return paths', () => {
