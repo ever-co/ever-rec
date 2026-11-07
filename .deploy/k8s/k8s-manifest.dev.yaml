@@ -69,6 +69,12 @@ spec:
               value: "$FIREBASE_ADMIN_PRIVATE_KEY"
             - name: FIREBASE_ADMIN_CLIENT_EMAIL
               value: "$FIREBASE_ADMIN_CLIENT_EMAIL"
+            # Anonymous usage statistics stay off on this Ever-operated deployment until the
+            # operator turns them on in a later rollout step (docs/ever-platform).
+            - name: EVER_STATS_ENABLED
+              value: "false"
+            - name: EVER_INSTALL_SOURCE
+              value: "cloud"
 
           ports:
             - containerPort: 3000
