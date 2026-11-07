@@ -4,6 +4,9 @@ import { ResStatusEnum } from '../../../enums/ResStatusEnum';
 import { IResponseMetadata } from '../../../interfaces/IResponseMetadata';
 import { IUser } from '../../../interfaces/IUser';
 import { FirebaseAdminService } from '../../firebase/services/firebase-admin.service';
+import { Optional } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { EVER_COUNTER_EVENTS } from '../../../common/events/ever-counters.events';
 
 export interface IUserWithCredentials {
   uid: string;
@@ -27,7 +30,10 @@ export class UserService {
   private readonly logger = new Logger(UserService.name);
   private readonly rootDb = 'users';
 
-  constructor(private readonly firebaseAdminService: FirebaseAdminService) {}
+  constructor(
+    private readonly firebaseAdminService: FirebaseAdminService,
+    @Optional() private readonly eventEmitter?: EventEmitter2,
+  ) {}
 
   /**
    * Parse email to display name
@@ -92,6 +98,7 @@ export class UserService {
         };
 
         await userRef.set(newUser);
+        this.eventEmitter?.emit(EVER_COUNTER_EVENTS.userCreated, {});
         this.logger.log(`User added to database: ${user.uid}`);
 
         return newUser;
@@ -163,6 +170,7 @@ export class UserService {
     try {
       this.logger.log(`Deleting user: ${uid}`);
       await this.firebaseAdminService.deleteUser(uid);
+      this.eventEmitter?.emit(EVER_COUNTER_EVENTS.userDeleted, {});
     } catch (error) {
       this.logger.error(`Failed to delete user: ${uid}`, error);
       throw new BadRequestException('Failed to delete user');
