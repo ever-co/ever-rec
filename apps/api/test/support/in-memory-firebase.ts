@@ -139,9 +139,12 @@ export class FakeReference extends FakeQuery {
   }
 
   push(value?: Json): FakeReference & Promise<FakeReference> {
-    const ref = this.child(this.db.pushId());
-    const promise = value === undefined ? Promise.resolve(ref) : ref.set(value).then(() => ref);
-    return Object.assign(ref, { then: promise.then.bind(promise), catch: promise.catch.bind(promise) }) as never;
+    const key = this.db.pushId();
+    // Like the SDK's ThenableReference: a reference that is also a promise of a plain reference.
+    const plain = this.child(key);
+    const promise = value === undefined ? Promise.resolve(plain) : plain.set(value).then(() => plain);
+    const thenable = this.child(key);
+    return Object.assign(thenable, { then: promise.then.bind(promise), catch: promise.catch.bind(promise) }) as never;
   }
 
   async transaction(update: (current: Json) => Json): Promise<{ committed: boolean; snapshot: FakeSnapshot }> {
