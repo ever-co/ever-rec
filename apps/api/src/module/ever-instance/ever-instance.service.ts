@@ -277,7 +277,9 @@ export class EverInstanceService implements OnModuleInit {
     const auditRef = this.db().ref(EVER_INSTANCE_PATHS.audit);
     await auditRef.push(row);
     const snapshot = await auditRef.get();
-    const keys = Object.keys(snapshot.val() ?? {}).sort();
+    const keys = Object.keys(snapshot.val() ?? {}).sort((a, b) =>
+      a < b ? -1 : a > b ? 1 : 0,
+    );
     const excess = keys.length - EVER_INSTANCE_AUDIT_KEPT;
     if (excess > 0) {
       await auditRef.update(
@@ -291,7 +293,7 @@ export class EverInstanceService implements OnModuleInit {
     const snapshot = await this.db().ref(EVER_INSTANCE_PATHS.audit).get();
     const rows = (snapshot.val() ?? {}) as Record<string, EverInstanceAuditRow>;
     return Object.keys(rows)
-      .sort()
+      .sort((a, b) => (a < b ? -1 : a > b ? 1 : 0))
       .reverse()
       .slice(0, limit)
       .map((key) => rows[key]);

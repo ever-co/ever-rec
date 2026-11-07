@@ -467,7 +467,7 @@ export class InMemoryBucket {
   }
 
   async getFiles(query: { maxResults?: number; pageToken?: string } = {}) {
-    const names = [...this.objects.keys()].sort();
+    const names = [...this.objects.keys()].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
     const start = query.pageToken ? Number(query.pageToken) : 0;
     const max = query.maxResults ?? 1000;
     const files = names

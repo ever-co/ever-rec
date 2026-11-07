@@ -58,9 +58,8 @@ describe('full counts from a one-user installation', () => {
       videos: 1,
       storage_mb: 6,
     });
-    expect(Object.keys(report.features).sort()).toEqual([
-      'gauzy_mirror',
-      'google_login',
-    ]);
+    expect(
+      Object.keys(report.features).sort((a, b) => (a < b ? -1 : a > b ? 1 : 0)),
+    ).toEqual(['gauzy_mirror', 'google_login']);
   });
 });

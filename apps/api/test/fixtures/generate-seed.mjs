@@ -231,7 +231,7 @@ write('storage-seed.json', { objects });
 write('canary-values.json', {
   description:
     'Every identifying string of the seeded project (generate-seed.mjs). No statistics report may contain any of them.',
-  values: [...canary].sort(),
+  values: [...canary].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0)),
 });
 console.log(
   `users ${users.length}, workspaces ${WORKSPACES.length}, teams ${teamCounter}, objects ${objects.length}, canary ${canary.size}`,

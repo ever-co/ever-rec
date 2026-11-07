@@ -65,7 +65,7 @@ describe('sending lease on the Realtime Database emulator', () => {
         new EventEmitter2(),
       );
       const config = readEverStatsConfig(
-        { EVER_STATS_API_URL: 'http://mock-platform:8080' },
+        { EVER_STATS_API_URL: 'http://mock-platform:8080' }, // NOSONAR: a local name; the fetch is a stub
         () => undefined,
         '0.1.0',
       );

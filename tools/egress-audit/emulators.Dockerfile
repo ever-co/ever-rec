@@ -9,14 +9,19 @@ RUN apt-get update \
 
 # firebase-tools 13 is the last line that runs on Java 17.
 RUN npm install -g --ignore-scripts firebase-tools@13.35.1 \
-	&& firebase setup:emulators:database \
+	&& mkdir -p /emulators \
+	&& chown node:node /emulators
+
+# The emulators run as the image's unprivileged user; their binaries are fetched into its home
+# at build time, so nothing is downloaded when they start.
+USER node
+RUN firebase setup:emulators:database \
 	&& firebase setup:emulators:storage
 
 WORKDIR /emulators
-COPY tools/egress-audit/emulators.firebase.json firebase.json
-COPY database.rules.json storage.rules ./
+COPY --chown=node:node tools/egress-audit/emulators.firebase.json firebase.json
+COPY --chown=node:node database.rules.json storage.rules ./
 
-ENV FIREBASE_CLI_EXPERIMENTS=""
 ENV FIREBASE_CLI_DISABLE_UPDATE_CHECK=true
 EXPOSE 9099 9000 9199
 CMD ["firebase", "emulators:start", "--only", "auth,database,storage", "--project", "demo-ever-rec"]

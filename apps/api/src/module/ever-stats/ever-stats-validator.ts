@@ -326,9 +326,11 @@ export class StatsValidator {
     const shared = Object.fromEntries(
       Object.entries(defs).filter(([name]) => !this.products.includes(name)),
     );
-    const { oneOf: _perProduct, $defs: _defs, ...rest } = schema;
-    void _perProduct;
-    void _defs;
+    const rest = Object.fromEntries(
+      Object.entries(schema).filter(
+        ([key]) => key !== 'oneOf' && key !== '$defs',
+      ),
+    );
     this.envelope = ajv.compile({ ...rest, $defs: shared });
     for (const product of this.products) {
       for (const section of ['counts', 'features', 'aggregates']) {

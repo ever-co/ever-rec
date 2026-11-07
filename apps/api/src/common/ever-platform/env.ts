@@ -196,5 +196,7 @@ export function readApiUrl(
     );
     return null;
   }
-  return `${url.origin}${url.pathname.replace(/\/+$/, '')}`;
+  let path = url.pathname;
+  while (path.endsWith('/')) path = path.slice(0, -1);
+  return `${url.origin}${path}`;
 }

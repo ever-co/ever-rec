@@ -21,7 +21,9 @@ const sha256 = (bytes: Buffer) =>
 /** Every vendored JSON file under this folder, relative, with `/` separators. */
 function vendoredFiles(dir = DIR, prefix = ''): string[] {
   const out: string[] = [];
-  for (const name of readdirSync(dir).sort()) {
+  for (const name of readdirSync(dir).sort((a, b) =>
+    a < b ? -1 : a > b ? 1 : 0,
+  )) {
     const rel = prefix ? `${prefix}/${name}` : name;
     if (statSync(join(dir, name)).isDirectory()) {
       out.push(...vendoredFiles(join(dir, name), rel));
@@ -48,9 +50,11 @@ describe('vendored statistics contract', () => {
   });
 
   it('records every vendored file, none of them provisional', () => {
-    expect(vendor.files.map((file) => file.path).sort()).toEqual(
-      vendoredFiles(),
-    );
+    expect(
+      vendor.files
+        .map((file) => file.path)
+        .sort((a, b) => (a < b ? -1 : a > b ? 1 : 0)),
+    ).toEqual(vendoredFiles());
     expect(vendor.files.filter((file) => file.provisional !== false)).toEqual(
       [],
     );

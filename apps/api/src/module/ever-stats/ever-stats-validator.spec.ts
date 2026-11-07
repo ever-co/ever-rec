@@ -8,7 +8,7 @@ const expected = JSON.parse(
 ).fixtures as Record<string, { status: number; path?: string; error?: string }>;
 const invalid = readdirSync(join(FIXTURES, 'invalid'))
   .filter((name) => name.endsWith('.json'))
-  .sort();
+  .sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
 const bytesOf = (rel: string) => readFileSync(join(FIXTURES, rel));
 
 describe('statistics report validator', () => {

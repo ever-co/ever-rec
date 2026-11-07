@@ -152,7 +152,9 @@ export class EverStatsBackfillService {
         string,
         { teams?: unknown }
       >;
-      const keys = Object.keys(page).sort();
+      const keys = Object.keys(page).sort((a, b) =>
+        a < b ? -1 : a > b ? 1 : 0,
+      );
       for (const key of keys) {
         workspaces += 1;
         const list = page[key]?.teams;

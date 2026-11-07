@@ -65,5 +65,5 @@ export function routeTable(srcDir: string): string[] {
     }
   };
   visit(srcDir);
-  return [...routes].sort();
+  return [...routes].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
 }

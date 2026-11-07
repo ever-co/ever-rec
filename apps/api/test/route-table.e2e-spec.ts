@@ -42,7 +42,7 @@ describe('route table', () => {
     );
     const listed = manifest.routes
       .map((r: { method: string; path: string }) => `${r.method} ${r.path}`)
-      .sort();
+      .sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
     expect(added).toEqual(listed);
   });
 

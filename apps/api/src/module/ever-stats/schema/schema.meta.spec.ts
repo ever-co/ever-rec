@@ -61,20 +61,21 @@ describe('ever.stats.v1 schema allow-list rules', () => {
 
   it('keeps the closed product lists for rec', () => {
     const rec = (schema as any).$defs.rec;
-    expect(Object.keys(rec.counts.properties).sort()).toEqual([
-      'teams',
-      'users',
-      'workspaces',
-    ]);
-    expect(Object.keys(rec.features.properties).sort()).toEqual([
-      'gauzy_mirror',
-      'google_login',
-    ]);
-    expect(Object.keys(rec.aggregates.properties).sort()).toEqual([
-      'screenshots',
-      'storage_mb',
-      'videos',
-    ]);
+    expect(
+      Object.keys(rec.counts.properties).sort((a, b) =>
+        a < b ? -1 : a > b ? 1 : 0,
+      ),
+    ).toEqual(['teams', 'users', 'workspaces']);
+    expect(
+      Object.keys(rec.features.properties).sort((a, b) =>
+        a < b ? -1 : a > b ? 1 : 0,
+      ),
+    ).toEqual(['gauzy_mirror', 'google_login']);
+    expect(
+      Object.keys(rec.aggregates.properties).sort((a, b) =>
+        a < b ? -1 : a > b ? 1 : 0,
+      ),
+    ).toEqual(['screenshots', 'storage_mb', 'videos']);
   });
 
   it('fails when one level is opened (control)', () => {
