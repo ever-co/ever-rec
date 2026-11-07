@@ -26,7 +26,11 @@ export interface EverCountEvent {
   count?: number;
 }
 
-/** `ever.counter.media.*`: one screenshot or video, and the bytes of its stored file. */
+/**
+ * `ever.counter.media.*`: one screenshot or video, and the bytes of its stored file. When a whole
+ * account or workspace is deleted, one `media.deleted` per kind carries the bytes of all of its
+ * files of that kind.
+ */
 export interface EverMediaEvent {
   kind: 'screenshot' | 'video';
   bytes: number;
@@ -41,15 +45,16 @@ interface StoredFile {
 }
 
 /**
- * The size of a stored file before it is deleted, read only while a statistics listener exists
- * (0 otherwise, and on any error), so a delete path makes no extra request when the module is
- * not loaded.
+ * The size of a stored file (before it is deleted, or once it is stored), read only while a
+ * statistics listener exists (0 otherwise, and on any error), so the path makes no extra request
+ * when the module is not loaded.
  */
 export async function storedBytes(
   emitter: ListenerAware | undefined,
   file: StoredFile,
+  event: string = EVER_COUNTER_EVENTS.mediaDeleted,
 ): Promise<number> {
-  if (!emitter || !emitter.hasListeners(EVER_COUNTER_EVENTS.mediaDeleted)) {
+  if (!emitter || !emitter.hasListeners(event)) {
     return 0;
   }
   try {
@@ -61,4 +66,71 @@ export async function storedBytes(
   } catch {
     return 0;
   }
+}
+
+/** What `storedMediaUnder` needs of a bucket: one page of the objects under a prefix. */
+interface ListableBucket {
+  getFiles(query: {
+    prefix: string;
+    autoPaginate: boolean;
+    maxResults: number;
+    pageToken?: string;
+  }): Promise<unknown>;
+}
+
+/**
+ * The screenshots and videos stored under `prefix` (an account's `users/{uid}/` or a workspace's
+ * `workspaces/{id}/`), before the whole folder is deleted: one event per kind with the bytes of
+ * the files directly in `screenshots/` and `videos/`, the files the single delete paths count
+ * (thumbnails, originals and chapter images are not). Listed only while a statistics listener
+ * exists; empty otherwise, and on any error.
+ */
+export async function storedMediaUnder(
+  emitter: ListenerAware | undefined,
+  bucket: ListableBucket,
+  prefix: string,
+): Promise<EverMediaEvent[]> {
+  if (!emitter || !emitter.hasListeners(EVER_COUNTER_EVENTS.mediaDeleted)) {
+    return [];
+  }
+  const bytes: Record<EverMediaEvent['kind'], number> = {
+    screenshot: 0,
+    video: 0,
+  };
+  try {
+    let pageToken: string | undefined;
+    do {
+      const [files, next] = (await bucket.getFiles({
+        prefix,
+        autoPaginate: false,
+        maxResults: 1000,
+        ...(pageToken ? { pageToken } : {}),
+      })) as [
+        Array<{ name?: string; metadata?: { size?: string | number } }>,
+        { pageToken?: string } | null | undefined,
+      ];
+      for (const file of files ?? []) {
+        const name = String(file?.name ?? '');
+        if (!name.startsWith(prefix)) continue;
+        const parts = name.slice(prefix.length).split('/');
+        const folder = parts.length === 2 ? parts[0] : '';
+        const kind =
+          folder === 'screenshots'
+            ? 'screenshot'
+            : folder === 'videos'
+              ? 'video'
+              : null;
+        const size = Number(file.metadata?.size);
+        if (kind && Number.isFinite(size) && size > 0) {
+          bytes[kind] += Math.floor(size);
+        }
+      }
+      pageToken = next?.pageToken || undefined;
+    } while (pageToken);
+  } catch {
+    return [];
+  }
+  return (['screenshot', 'video'] as const)
+    .filter((kind) => bytes[kind] > 0)
+    .map((kind) => ({ kind, bytes: bytes[kind] }));
 }

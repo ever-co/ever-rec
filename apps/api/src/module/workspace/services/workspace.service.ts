@@ -21,7 +21,10 @@ import { sendError, sendResponse } from 'src/services/utils/sendResponse';
 import { IFavoriteFolders } from 'src/interfaces/Folders';
 import { Optional } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { EVER_COUNTER_EVENTS } from '../../../common/events/ever-counters.events';
+import {
+  EVER_COUNTER_EVENTS,
+  storedMediaUnder,
+} from '../../../common/events/ever-counters.events';
 
 @Injectable()
 export class WorkspacesService {
@@ -374,9 +377,20 @@ export class WorkspacesService {
       });
     }
 
+    // The bytes of its screenshots and videos, subtracted once the files are gone.
+    const removedMedia = await storedMediaUnder(
+      this.eventEmitter,
+      bucket,
+      `workspaces/${workspaceId}/`,
+    );
     bucket
       .deleteFiles({
         prefix: `workspaces/${workspaceId}/`,
+      })
+      .then(() => {
+        for (const media of removedMedia) {
+          this.eventEmitter?.emit(EVER_COUNTER_EVENTS.mediaDeleted, media);
+        }
       })
       .catch((error) => {
         console.log('Error deleting files from workspace:', error);

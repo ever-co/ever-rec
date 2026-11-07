@@ -379,13 +379,17 @@ export class EverIdFlowService {
     }
 
     try {
-      await this.userService.addUserToDb({
-        uid,
-        email: pending.email,
-        displayName: pending.name ?? undefined,
-        photoURL: undefined,
-        emailVerified: true,
-      });
+      // Counted once the account is linked: a sign-up undone below is never counted.
+      await this.userService.addUserToDb(
+        {
+          uid,
+          email: pending.email,
+          displayName: pending.name ?? undefined,
+          photoURL: undefined,
+          emailVerified: true,
+        },
+        { countCreated: false },
+      );
       await this.links.link({
         issuer: pending.issuer,
         subject: pending.subject,
@@ -410,6 +414,7 @@ export class EverIdFlowService {
       }
       throw error;
     }
+    this.userService.countCreatedUser();
 
     if (acceptance.terms?.length) {
       try {

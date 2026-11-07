@@ -77,10 +77,13 @@ export class UserService {
   }
 
   /**
-   * Add user to database
+   * Add user to database. `countCreated: false` leaves the user out of the instance counters
+   * until the caller's sign-up completes and it calls {@link countCreatedUser} (a sign-up that is
+   * undone afterwards is never counted).
    */
   async addUserToDb(
     user: IUserWithCredentials,
+    options: { countCreated?: boolean } = {},
   ): Promise<IUser | IResponseMetadata> {
     try {
       const userRef = this.firebaseAdminService.getDatabaseRef(
@@ -98,7 +101,9 @@ export class UserService {
         };
 
         await userRef.set(newUser);
-        this.eventEmitter?.emit(EVER_COUNTER_EVENTS.userCreated, {});
+        if (options.countCreated !== false) {
+          this.countCreatedUser();
+        }
         this.logger.log(`User added to database: ${user.uid}`);
 
         return newUser;
@@ -113,6 +118,11 @@ export class UserService {
       this.logger.error(`Failed to add user to database: ${user.uid}`, error);
       throw new BadRequestException('Failed to create user profile');
     }
+  }
+
+  /** Counts one created user (the neutral counter event; nothing listens unless statistics are loaded). */
+  countCreatedUser(): void {
+    this.eventEmitter?.emit(EVER_COUNTER_EVENTS.userCreated, {});
   }
 
   /**

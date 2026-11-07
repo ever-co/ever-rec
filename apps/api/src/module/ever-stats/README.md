@@ -44,9 +44,13 @@ denies by default); the Admin SDK of the API is the only reader and writer.
 
 Producers emit the neutral events of `src/common/events/ever-counters.events.ts` (a leaf file with
 names and payload types only) after a successful write; when this module is not loaded nobody
-listens. The producers are `UserService`, `WorkspacesService`, `WorkspaceTeamsService`,
-`ImageService`, `VideoService` and `WorkspaceFilesService`. A payload is `{count?}` or
-`{kind, bytes}`, never an id, a uid or a path.
+listens. The producers are `UserService` (an Ever ID sign-up is counted by `EverIdFlowService`
+once the account is linked), `UserProfileService` (the media of a deleted account),
+`WorkspacesService` (the media of a deleted workspace too), `WorkspaceTeamsService`,
+`ImageService`, `VideoService` and `WorkspaceFilesService` (uploads, deletes, and copies from
+personal storage). A payload is `{count?}` or `{kind, bytes}`, never an id, a uid or a path; a
+whole account or workspace deleted sends one `media.deleted` per kind with the bytes of all its
+files of that kind.
 
 ## The vendored contract
 

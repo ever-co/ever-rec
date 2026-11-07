@@ -456,6 +456,17 @@ export class FakeStorageFile {
   async delete(): Promise<void> {
     this.bucket.objects.delete(this.name);
   }
+
+  async copy(destination: string): Promise<[FakeStorageFile]> {
+    const bytes = this.bucket.objects.get(this.name);
+    if (!bytes) throw Object.assign(new Error('No such object'), { code: 404 });
+    this.bucket.objects.set(destination, Buffer.from(bytes));
+    return [this.bucket.file(destination)];
+  }
+
+  async getSignedUrl(): Promise<[string]> {
+    return [`https://storage.example.test/${encodeURIComponent(this.name)}`];
+  }
 }
 
 /** A Cloud Storage bucket, enough for the counters and the recount. */
@@ -466,8 +477,17 @@ export class InMemoryBucket {
     return new FakeStorageFile(this, name);
   }
 
-  async getFiles(query: { maxResults?: number; pageToken?: string } = {}) {
-    const names = [...this.objects.keys()].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+  /** The stored names (under `prefix`, when given), sorted. */
+  private names(prefix?: string): string[] {
+    return [...this.objects.keys()]
+      .filter((name) => !prefix || name.startsWith(prefix))
+      .sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+  }
+
+  async getFiles(
+    query: { maxResults?: number; pageToken?: string; prefix?: string } = {},
+  ) {
+    const names = this.names(query.prefix);
     const start = query.pageToken ? Number(query.pageToken) : 0;
     const max = query.maxResults ?? 1000;
     const files = names
@@ -476,6 +496,12 @@ export class InMemoryBucket {
     const next =
       start + max < names.length ? { pageToken: String(start + max) } : null;
     return [files, next];
+  }
+
+  async deleteFiles(query: { prefix?: string } = {}): Promise<void> {
+    for (const name of this.names(query.prefix)) {
+      this.objects.delete(name);
+    }
   }
 }
 

@@ -113,7 +113,7 @@ export class WorkspaceFilesService {
     folderId: string | false,
   ): Promise<IDataResponse<IWorkspaceImage | null>> {
     try {
-      const { thumbnail: uploadedImage } =
+      const { file: storedImage, thumbnail: uploadedImage } =
         await this.utilitiesService.uploadImageInBucket(
           file,
           workspaceId,
@@ -168,9 +168,14 @@ export class WorkspaceFilesService {
           },
         );
 
+        // The stored image, not its thumbnail: the bytes a delete subtracts.
         this.eventEmitter.emit(EVER_COUNTER_EVENTS.mediaCreated, {
           kind: 'screenshot',
-          bytes: Number(metadata.size) || 0,
+          bytes: await storedBytes(
+            this.eventEmitter,
+            storedImage,
+            EVER_COUNTER_EVENTS.mediaCreated,
+          ),
         });
         return sendResponse<IWorkspaceImage>(image);
       } else {
@@ -292,6 +297,12 @@ export class WorkspaceFilesService {
         url,
         dbData: dbData,
       };
+
+      // The workspace now holds its own copy of the file.
+      this.eventEmitter.emit(EVER_COUNTER_EVENTS.mediaCreated, {
+        kind: itemType === 'image' ? 'screenshot' : 'video',
+        bytes: Number(metadata?.size) || 0,
+      });
 
       this.eventEmitter.emit(
         'analytics.track',
