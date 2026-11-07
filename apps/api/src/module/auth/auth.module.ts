@@ -11,7 +11,9 @@ import { AuthenticationService } from './services/authentication.service';
 import { EmailService } from './services/email.service';
 import { GoogleAuthService } from './services/google-auth.service';
 import { LoginChain } from './services/login/login.chain';
+import { EverIdLoginState } from './services/login/state/ever-id-login.state';
 import { FirebaseLoginState } from './services/login/state/firebase-login.state';
+import { GauzyEverIdLoginState } from './services/login/state/gauzy-ever-id-login.state';
 import { GauzyLoginState } from './services/login/state/gauzy-login.state';
 import { FirebasePasswordResetStrategy } from './services/password-reset/firebase-password-reset.strategy';
 import { RequestPasswordChain } from './services/password-reset/password-request.chain';
@@ -107,6 +109,10 @@ import { UserService } from './services/user.service';
     GauzyLoginState,
     LoginChain,
 
+    // Optional Ever ID sign-in (used by EverIdModule)
+    EverIdLoginState,
+    GauzyEverIdLoginState,
+
     // Register State service
     FirebaseRegisterState,
     GauzyRegisterState,
@@ -140,6 +146,7 @@ import { UserService } from './services/user.service';
     UserProfileService,
     TokenService,
     MergeTokenPolicy,
+    EverIdLoginState,
   ],
 })
 export class AuthModule {}
