@@ -1,0 +1,83 @@
+name: Egress audit (portal browser leg)
+
+# On demand only. The browser leg walks every portal page in a real browser inside the sealed setup
+# and fails on any DNS query, connection, request or DOM reference to an Ever host. It is expected
+# to fail today: the portal's web server forwards /fonts/* to a fixed Ever host
+# (apps/portal/next.config.js), a call older than the Ever Platform features that no setting turns
+# off. See tools/egress-audit/README.md.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  egress-browser:
+    name: Egress audit, browser leg
+    runs-on: ${{ vars.RUNNER_LINUX_X64_8 || 'ubuntu-latest' }}
+    timeout-minutes: 180
+    env:
+      AUDIT_CONFIG: tools/egress-audit/egress-audit.web.config.json
+      AUDIT_ARTIFACTS: egress-audit-browser-artifacts
+      REC_API_IMAGE: ever-rec-api:egress-audit
+      REC_EMULATORS_IMAGE: ever-rec-emulators:egress-audit
+      REC_PORTAL_IMAGE: ever-rec-portal:egress-audit
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 26
+      - name: Install the egress audit harness (the version and integrity tools/egress-audit/harness.json pins)
+        run: |
+          name=$(node -p "require('./tools/egress-audit/harness.json').package")
+          version=$(node -p "require('./tools/egress-audit/harness.json').version")
+          expected=$(node -p "require('./tools/egress-audit/harness.json').integrity")
+          mkdir -p "$RUNNER_TEMP/harness"
+          cd "$RUNNER_TEMP/harness"
+          npm pack "${name}@${version}" --registry https://registry.npmjs.org --json > pack.json
+          actual=$(node -p "require('./pack.json')[0].integrity")
+          if [ "$actual" != "$expected" ]; then
+            echo "::error::${name}@${version} does not match the pinned integrity"
+            exit 1
+          fi
+          echo '{"name":"egress-audit-harness","private":true}' > package.json
+          npm install --no-audit --no-fund --ignore-scripts --registry https://registry.npmjs.org ./ever-co-connect-tools-${version}.tgz
+          echo "EGRESS_AUDIT=$RUNNER_TEMP/harness/node_modules/@ever-co/connect-tools/dist/egress-audit/run.mjs" >> "$GITHUB_ENV"
+      - name: The route list is in step with the portal's pages
+        run: node tools/egress-audit/ui-routes-pages.mjs --check
+      - name: Build the images under test
+        run: |
+          docker build -f .deploy/api/Dockerfile -t "$REC_API_IMAGE" .
+          docker build -f tools/egress-audit/emulators.Dockerfile -t "$REC_EMULATORS_IMAGE" .
+          docker build -f .deploy/portal/Dockerfile -t "$REC_PORTAL_IMAGE" \
+            --build-arg NEXT_PUBLIC_API_BASE_URL=http://api:3000 \
+            --build-arg NEXT_PUBLIC_WEBSITE_URL=http://portal:4200 .
+      - name: Secrets of this run
+        run: |
+          secret=$(openssl rand -hex 32)
+          echo "::add-mask::$secret"
+          echo "REC_AUDIT_SECRET=$secret" >> "$GITHUB_ENV"
+          key=$(openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 2>/dev/null)
+          {
+            echo 'REC_AUDIT_FIREBASE_KEY<<REC_AUDIT_KEY_END'
+            echo "$key"
+            echo 'REC_AUDIT_KEY_END'
+          } >> "$GITHUB_ENV"
+      - name: 'off: statistics off'
+        if: ${{ !cancelled() }}
+        run: node "$EGRESS_AUDIT" --config "$AUDIT_CONFIG" --mode off --legs api,browser --artifacts "$AUDIT_ARTIFACTS" --verbose
+      - name: 'loaded_off: loaded, switched off by the operator'
+        if: ${{ !cancelled() }}
+        run: node "$EGRESS_AUDIT" --config "$AUDIT_CONFIG" --mode loaded_off --legs api,browser --artifacts "$AUDIT_ARTIFACTS" --verbose
+      - name: 'positive_stats: the settings page asks the status'
+        if: ${{ !cancelled() }}
+        run: node "$EGRESS_AUDIT" --config "$AUDIT_CONFIG" --mode positive_stats --legs api,browser --artifacts "$AUDIT_ARTIFACTS" --verbose
+      - name: Upload the evidence (pcaps, DNS logs, HAR, DOM references, reports)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: egress-audit-browser
+          path: ${{ env.AUDIT_ARTIFACTS }}
+          retention-days: 14

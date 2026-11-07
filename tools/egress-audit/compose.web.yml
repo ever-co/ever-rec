@@ -1,0 +1,13 @@
+# Egress audit, browser leg only (see README.md): the portal from the image under test, on top of
+# docker-compose.audit.yml. The portal image is built with NEXT_PUBLIC_API_BASE_URL=http://api:3000
+# so the browser, inside the sealed setup, reaches the API by its service name.
+services:
+  portal:
+    image: ${REC_PORTAL_IMAGE:?set REC_PORTAL_IMAGE to the portal image under test}
+    pull_policy: never
+    depends_on:
+      - api
+    environment:
+      PORT: '4200'
+      HOSTNAME: 0.0.0.0
+      DEMO: 'false'

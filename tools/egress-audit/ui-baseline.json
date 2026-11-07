@@ -1,0 +1,6 @@
+{
+  "$schema": "../../node_modules/@ever-co/connect-tools/dist/egress-audit/ui-baseline.schema.json",
+  "description": "DOM references to Ever hosts that the portal rendered before the Ever Platform settings existed (links to rec.so, for example). To be recorded from the first browser-leg run on the base commit below; it may only shrink afterwards.",
+  "base_commit": "31cd5cbf88b5739e053edb4b6c43cf693c06daec",
+  "entries": []
+}

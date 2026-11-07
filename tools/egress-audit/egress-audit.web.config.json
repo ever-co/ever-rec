@@ -1,0 +1,54 @@
+{
+  "product": "rec",
+  "compose": ["docker-compose.audit.yml", "compose.web.yml"],
+  "project": "ever-audit-rec-web",
+  "api_service": "api",
+  "process_services": ["api", "portal"],
+  "services": ["api", "emulators", "portal"],
+  "health_url": "http://api:3000/api/v1/",
+  "health_timeout_s": 600,
+  "module_routes": [
+    "/api/v1/ever-stats/health",
+    "/api/v1/ever-stats/status",
+    "/api/v1/ever-stats/reports",
+    "/api/v1/ever-stats/preview",
+    "/api/v1/ever-stats/send",
+    "/api/v1/ever-stats/enabled",
+    "/api/v1/ever-stats/recount",
+    "/api/v1/ever-stats/reset-identity"
+  ],
+  "adapter": "adapter.mjs",
+  "wait_s": 150,
+  "allowed_external_hosts": [
+    "oauth2.googleapis.com",
+    "www.googleapis.com",
+    "firestore.googleapis.com",
+    "identitytoolkit.googleapis.com",
+    "securetoken.googleapis.com",
+    "storage.googleapis.com",
+    "firebasestorage.googleapis.com",
+    "metadata.google.internal"
+  ],
+  "web_service": "portal",
+  "web_url": "http://portal:4200",
+  "ui_routing": "path",
+  "ui_sign_in_route": "/auth/login",
+  "ui_routes": "ui-routes.json",
+  "route_params": "route-params.json",
+  "ui_baseline": "ui-baseline.json",
+  "idle_pages": ["/settings/ever-platform", "/settings/profile"],
+  "idle_s": 30,
+  "ui_page_timeout_s": 120,
+  "ui_skip_routes": [
+    { "path": "/video/SaveToCloudModal/SaveToCloudModal", "reason": "A component file under pages/, not a page a person opens" },
+    { "path": "/video/ShareItemModal/ShareItemModal", "reason": "A component file under pages/, not a page a person opens" },
+    { "path": "/auth/google-auth", "reason": "Google sign-in hand-off, opened by Google only" },
+    { "path": "/auth/ever-id", "reason": "Ever ID sign-in hand-off, opened by the API only" },
+    { "path": "/oauth", "reason": "Integration OAuth hand-off, opened by a provider only" },
+    { "path": "/integration/slack", "reason": "Slack OAuth hand-off, opened by Slack only" },
+    { "path": "/authorize", "reason": "Integration authorization hand-off, opened by a provider only" }
+  ],
+  "ui_expected_requests": {
+    "positive_stats": ["GET /api/v1/ever-stats/status"]
+  }
+}

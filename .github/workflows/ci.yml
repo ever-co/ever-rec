@@ -132,6 +132,18 @@ jobs:
           echo '{"name":"egress-audit-harness","private":true}' > package.json
           npm install --no-audit --no-fund --ignore-scripts --registry https://registry.npmjs.org ./ever-co-connect-tools-${version}.tgz
           echo "EGRESS_AUDIT=$RUNNER_TEMP/harness/node_modules/@ever-co/connect-tools/dist/egress-audit/run.mjs" >> "$GITHUB_ENV"
+      - name: The portal route list of the browser leg is in step with the pages
+        run: |
+          node tools/egress-audit/ui-routes-pages.mjs --check
+          # Control: a list missing a page must fail the check.
+          cp tools/egress-audit/ui-routes.json "$RUNNER_TEMP/ui-routes.json"
+          node -e 'const f=process.argv[1];const l=JSON.parse(require("fs").readFileSync(f,"utf8"));l.routes=l.routes.filter((r)=>r.path!=="/settings/ever-platform");require("fs").writeFileSync(f,JSON.stringify(l))' tools/egress-audit/ui-routes.json
+          set +e
+          node tools/egress-audit/ui-routes-pages.mjs --check
+          code=$?
+          set -e
+          cp "$RUNNER_TEMP/ui-routes.json" tools/egress-audit/ui-routes.json
+          if [ "$code" -ne 1 ]; then echo "::error::a route list missing a page must fail the check"; exit 1; fi
       - name: 'Static: the statistics code never guesses where it runs'
         run: node "$EGRESS_AUDIT" cloud-inference --dirs apps/api/src/module/ever-stats,apps/api/src/module/ever-instance,apps/api/src/common/ever-platform
       - name: Build the API image under test and the emulators image
