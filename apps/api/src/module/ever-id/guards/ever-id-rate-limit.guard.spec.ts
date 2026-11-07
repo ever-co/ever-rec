@@ -1,4 +1,7 @@
-import { EVER_ID_RATE_LIMIT_PER_MINUTE, EverIdRateLimitGuard } from './ever-id-rate-limit.guard';
+import {
+  EVER_ID_RATE_LIMIT_PER_MINUTE,
+  EverIdRateLimitGuard,
+} from './ever-id-rate-limit.guard';
 
 describe('EverIdRateLimitGuard', () => {
   it('allows 10 requests a minute per route and address, then answers with a wait time', () => {
@@ -18,7 +21,10 @@ describe('EverIdRateLimitGuard', () => {
 
   it('leaves routes without the marker alone', () => {
     const guard = new EverIdRateLimitGuard({ get: () => undefined } as any);
-    const context = { getHandler: () => function config() {}, switchToHttp: () => ({}) };
+    const context = {
+      getHandler: () => function config() {},
+      switchToHttp: () => ({}),
+    };
     expect(guard.canActivate(context as any)).toBe(true);
   });
 });

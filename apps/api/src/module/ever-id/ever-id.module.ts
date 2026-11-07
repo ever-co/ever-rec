@@ -11,7 +11,11 @@ import {
   isEverIdAvailable,
   readEverIdSettings,
 } from './ever-id.config';
-import { EVER_CONNECT_OIDC_CONFIG, EVER_ID_AVAILABLE, EVER_ID_SETTINGS } from './ever-id.tokens';
+import {
+  EVER_CONNECT_OIDC_CONFIG,
+  EVER_ID_AVAILABLE,
+  EVER_ID_SETTINGS,
+} from './ever-id.tokens';
 import { EverIdEnabledGuard } from './guards/ever-id-enabled.guard';
 import { EverIdRateLimitGuard } from './guards/ever-id-rate-limit.guard';
 import { EverIdCryptoService } from './services/ever-id-crypto.service';
@@ -28,8 +32,13 @@ const logger = new Logger('EverIdModule');
 /**
  * Resolves the settings once at boot and logs each warning once. Never contacts the issuer.
  */
-export function everIdSettingsFactory(configService: ConfigService, connect?: EverConnectOidcConfig): EverIdSettings {
-  const env = Object.fromEntries(EVER_ID_ENV_NAMES.map((name) => [name, configService.get<string>(name)]));
+export function everIdSettingsFactory(
+  configService: ConfigService,
+  connect?: EverConnectOidcConfig,
+): EverIdSettings {
+  const env = Object.fromEntries(
+    EVER_ID_ENV_NAMES.map((name) => [name, configService.get<string>(name)]),
+  );
   const settings = readEverIdSettings(env, connect ?? null);
   for (const warning of settings.warnings) {
     logger.warn(warning);
@@ -50,15 +59,24 @@ export function everIdSettingsFactory(configService: ConfigService, connect?: Ev
  * `provider_disabled`, and it makes no outbound request.
  */
 @Module({
-  imports: [HttpModule.register({ timeout: 10_000, maxRedirects: 0, retries: 0 }), AuthModule, TermsModule],
+  imports: [
+    HttpModule.register({ timeout: 10_000, maxRedirects: 0, retries: 0 }),
+    AuthModule,
+    TermsModule,
+  ],
   controllers: [EverIdController],
   providers: [
     {
       provide: EVER_ID_SETTINGS,
-      useFactory: (configService: ConfigService, connect?: EverConnectOidcConfig) =>
-        everIdSettingsFactory(configService, connect),
+      useFactory: (
+        configService: ConfigService,
+        connect?: EverConnectOidcConfig,
+      ) => everIdSettingsFactory(configService, connect),
       // Optional, like `@Optional() @Inject(EVER_CONNECT_OIDC_CONFIG)`: nothing provides it today.
-      inject: [ConfigService, { token: EVER_CONNECT_OIDC_CONFIG, optional: true }],
+      inject: [
+        ConfigService,
+        { token: EVER_CONNECT_OIDC_CONFIG, optional: true },
+      ],
     },
     {
       provide: EVER_ID_AVAILABLE,

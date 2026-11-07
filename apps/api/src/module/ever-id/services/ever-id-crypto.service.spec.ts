@@ -1,4 +1,9 @@
-import { EverIdCryptoService, hashHandle, isHandle, randomHandle } from './ever-id-crypto.service';
+import {
+  EverIdCryptoService,
+  hashHandle,
+  isHandle,
+  randomHandle,
+} from './ever-id-crypto.service';
 
 describe('EverIdCryptoService', () => {
   const crypto = new EverIdCryptoService({ get: () => 'a-test-secret' } as any);
@@ -6,7 +11,9 @@ describe('EverIdCryptoService', () => {
   it('opens what it sealed, for the same purpose only', () => {
     const sealed = crypto.seal('ever_id_handoff', { idToken: 'secret-value' });
     expect(sealed).not.toContain('secret-value');
-    expect(crypto.open('ever_id_handoff', sealed)).toEqual({ idToken: 'secret-value' });
+    expect(crypto.open('ever_id_handoff', sealed)).toEqual({
+      idToken: 'secret-value',
+    });
     expect(crypto.open('ever_id_pending', sealed)).toBeNull();
   });
 
@@ -16,7 +23,9 @@ describe('EverIdCryptoService', () => {
     raw[raw.length - 1] ^= 1;
     expect(crypto.open('p', raw.toString('base64url'))).toBeNull();
 
-    const other = new EverIdCryptoService({ get: () => 'another-secret' } as any);
+    const other = new EverIdCryptoService({
+      get: () => 'another-secret',
+    } as any);
     expect(other.open('p', sealed)).toBeNull();
     expect(crypto.open('p', 'garbage')).toBeNull();
   });

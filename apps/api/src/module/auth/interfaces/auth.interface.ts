@@ -15,5 +15,5 @@ export type AuthContextResult<U = unknown> = Map<AuthProviderId, AuthStateResult
 export enum AuthProviderId {
   FIREBASE = 'firebase',
   GAUZY = 'gauzy',
-  EVER_ID = 'ever-id'
+  EVER_ID = 'ever-id',
 }

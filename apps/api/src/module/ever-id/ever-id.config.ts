@@ -94,7 +94,12 @@ export function stripTrailingSlashes(value: string): string {
 
 /** Whether the host is a loopback name, where plain `http` is accepted (local development and tests). */
 function isLoopback(hostname: string): boolean {
-  return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '[::1]' || hostname === '::1';
+  return (
+    hostname === 'localhost' ||
+    hostname === '127.0.0.1' ||
+    hostname === '[::1]' ||
+    hostname === '::1'
+  );
 }
 
 /**
@@ -110,7 +115,10 @@ export function issuerProblem(issuer: string): string | null {
   } catch {
     return 'is not a URL';
   }
-  if (url.protocol !== 'https:' && !(url.protocol === 'http:' && isLoopback(url.hostname))) {
+  if (
+    url.protocol !== 'https:' &&
+    !(url.protocol === 'http:' && isLoopback(url.hostname))
+  ) {
     return 'must use https';
   }
   if (url.username || url.password || url.search || url.hash) {
@@ -136,7 +144,10 @@ export function isEverHost(value: string): boolean {
  * names a mode Rec does not implement. Every other problem keeps the provider off and is reported
  * in `problems`, so a misconfiguration never takes the rest of the API down.
  */
-export function readEverIdSettings(env: Env, connect?: EverConnectOidcConfig | null): EverIdSettings {
+export function readEverIdSettings(
+  env: Env,
+  connect?: EverConnectOidcConfig | null,
+): EverIdSettings {
   const warnings: string[] = [];
   const problems: string[] = [];
 
@@ -144,9 +155,13 @@ export function readEverIdSettings(env: Env, connect?: EverConnectOidcConfig | n
   const alias = stripTrailingSlashes(text(env, 'EVER_ID_ISSUER'));
   if (!issuer && alias) {
     issuer = alias;
-    warnings.push('EVER_ID_ISSUER is deprecated; set EVER_ID_ISSUER_URL instead.');
+    warnings.push(
+      'EVER_ID_ISSUER is deprecated; set EVER_ID_ISSUER_URL instead.',
+    );
   } else if (issuer && alias && alias !== issuer) {
-    warnings.push('EVER_ID_ISSUER is ignored because EVER_ID_ISSUER_URL is set.');
+    warnings.push(
+      'EVER_ID_ISSUER is ignored because EVER_ID_ISSUER_URL is set.',
+    );
   }
 
   let clientId = text(env, 'EVER_ID_CLIENT_ID');
@@ -170,7 +185,9 @@ export function readEverIdSettings(env: Env, connect?: EverConnectOidcConfig | n
     signUpAllowed = parseSwitch(signUpValue, true);
   } else if (signUpAlias) {
     signUpAllowed = parseSwitch(signUpAlias, true);
-    warnings.push('EVER_ID_JIT_SIGNUP is deprecated; set EVER_ID_SIGN_UP_ALLOWED instead.');
+    warnings.push(
+      'EVER_ID_JIT_SIGNUP is deprecated; set EVER_ID_SIGN_UP_ALLOWED instead.',
+    );
   }
 
   const settings: EverIdSettings = {
@@ -182,8 +199,14 @@ export function readEverIdSettings(env: Env, connect?: EverConnectOidcConfig | n
     platformProjectId: text(env, 'EVER_ID_PLATFORM_PROJECT_ID'),
     linkMode: 'explicit',
     signUpAllowed,
-    backchannelLogoutEnabled: parseSwitch(text(env, 'EVER_ID_BACKCHANNEL_LOGOUT_ENABLED'), true),
-    logoutRevokeFirebase: parseSwitch(text(env, 'EVER_ID_LOGOUT_REVOKE_FIREBASE'), false),
+    backchannelLogoutEnabled: parseSwitch(
+      text(env, 'EVER_ID_BACKCHANNEL_LOGOUT_ENABLED'),
+      true,
+    ),
+    logoutRevokeFirebase: parseSwitch(
+      text(env, 'EVER_ID_LOGOUT_REVOKE_FIREBASE'),
+      false,
+    ),
     installSource,
     portalUrl: stripTrailingSlashes(text(env, 'WEBSITE_URL')),
     warnings,
@@ -197,8 +220,13 @@ export function readEverIdSettings(env: Env, connect?: EverConnectOidcConfig | n
   }
 
   const linkMode = text(env, 'EVER_ID_LINK_MODE');
-  if (linkMode && !(EVER_ID_LINK_MODES as readonly string[]).includes(linkMode)) {
-    throw new Error(`EVER_ID_LINK_MODE accepts only "explicit" (got "${linkMode}").`);
+  if (
+    linkMode &&
+    !(EVER_ID_LINK_MODES as readonly string[]).includes(linkMode)
+  ) {
+    throw new Error(
+      `EVER_ID_LINK_MODE accepts only "explicit" (got "${linkMode}").`,
+    );
   }
 
   const primaryProblem = issuerProblem(issuer);
@@ -217,13 +245,17 @@ export function readEverIdSettings(env: Env, connect?: EverConnectOidcConfig | n
     }
     const problem = issuerProblem(candidate);
     if (problem) {
-      warnings.push(`EVER_ID_ALLOWED_ISSUERS: an entry ${problem} and is ignored.`);
+      warnings.push(
+        `EVER_ID_ALLOWED_ISSUERS: an entry ${problem} and is ignored.`,
+      );
       continue;
     }
     issuers.push(candidate);
   }
   if (issuers.length > EVER_ID_MAX_ISSUERS) {
-    problems.push(`At most ${EVER_ID_MAX_ISSUERS} issuers can be accepted (EVER_ID_ISSUER_URL plus EVER_ID_ALLOWED_ISSUERS).`);
+    problems.push(
+      `At most ${EVER_ID_MAX_ISSUERS} issuers can be accepted (EVER_ID_ISSUER_URL plus EVER_ID_ALLOWED_ISSUERS).`,
+    );
   }
 
   // An Ever-operated issuer is used only by an Ever-operated install, or when a connected-instance
@@ -237,11 +269,15 @@ export function readEverIdSettings(env: Env, connect?: EverConnectOidcConfig | n
     }
     for (const candidate of issuers.slice(1)) {
       if (isEverHost(candidate)) {
-        warnings.push('EVER_ID_ALLOWED_ISSUERS: an Ever-hosted issuer is ignored on this install.');
+        warnings.push(
+          'EVER_ID_ALLOWED_ISSUERS: an Ever-hosted issuer is ignored on this install.',
+        );
       }
     }
   }
-  settings.issuers = issuers.filter((value, index) => index === 0 || everAllowed || !isEverHost(value));
+  settings.issuers = issuers.filter(
+    (value, index) => index === 0 || everAllowed || !isEverHost(value),
+  );
 
   const missing = [
     ['EVER_ID_CLIENT_ID', clientId],

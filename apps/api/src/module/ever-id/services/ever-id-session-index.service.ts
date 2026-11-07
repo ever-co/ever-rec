@@ -2,7 +2,11 @@ import { Injectable, Logger } from '@nestjs/common';
 import type { EverIdSessionIdentity } from '../../auth/services/login/state/ever-id-login.state';
 import { MergeTokenPolicy } from '../../auth/services/tokens/policies/merge-token.policy';
 import { FirebaseAdminService } from '../../firebase/services/firebase-admin.service';
-import { EverIdCryptoService, hashHandle, identityKey } from './ever-id-crypto.service';
+import {
+  EverIdCryptoService,
+  hashHandle,
+  identityKey,
+} from './ever-id-crypto.service';
 import { EverIdStoreService } from './ever-id-store.service';
 
 /** `ever_id_sessions/{sha256(issuer NUL sid)}` → {@link SessionIndexRecord}. */
@@ -38,7 +42,11 @@ export class EverIdSessionIndexService {
   ) {}
 
   /** Records the reference token of a session opened with `identity.sid`. */
-  async record(identity: EverIdSessionIdentity, uid: string, referenceToken: string): Promise<void> {
+  async record(
+    identity: EverIdSessionIdentity,
+    uid: string,
+    referenceToken: string,
+  ): Promise<void> {
     if (!identity.sid) {
       return;
     }
@@ -48,7 +56,9 @@ export class EverIdSessionIndexService {
       subjectKey: identityKey(identity.issuer, identity.subject),
       expiresAt: Date.now() + SESSION_INDEX_TTL_MS,
     });
-    await ref.child('tokens').push(this.crypto.seal(SEAL_PURPOSE, referenceToken));
+    await ref
+      .child('tokens')
+      .push(this.crypto.seal(SEAL_PURPOSE, referenceToken));
     this.store.sweepSoon(EVER_ID_SESSIONS_ROOT);
   }
 
@@ -56,7 +66,11 @@ export class EverIdSessionIndexService {
    * Revokes every Rec session opened with this Ever ID session, or with any session of the subject
    * when the logout token names only the subject. Returns the uids whose sessions ended.
    */
-  async revoke(issuer: string, sid: string | null, subject: string | null): Promise<string[]> {
+  async revoke(
+    issuer: string,
+    sid: string | null,
+    subject: string | null,
+  ): Promise<string[]> {
     const entries: Array<[string, SessionIndexRecord]> = [];
     if (sid) {
       const key = this.sessionKey(issuer, sid);
@@ -96,7 +110,9 @@ export class EverIdSessionIndexService {
       await this.mergeTokenPolicy.revokeToken(token);
     } catch (error) {
       // Already revoked, already rotated by a refresh, or expired: nothing left to end.
-      this.logger.debug(`Reference token not revoked: ${error instanceof Error ? error.message : 'error'}`);
+      this.logger.debug(
+        `Reference token not revoked: ${error instanceof Error ? error.message : 'error'}`,
+      );
     }
   }
 

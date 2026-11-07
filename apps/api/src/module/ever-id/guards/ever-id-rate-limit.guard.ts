@@ -1,4 +1,10 @@
-import { CanActivate, ExecutionContext, HttpStatus, Injectable, SetMetadata } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  HttpStatus,
+  Injectable,
+  SetMetadata,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { everIdHttpError } from '../ever-id.errors';
 
@@ -41,7 +47,11 @@ export class EverIdRateLimitGuard implements CanActivate {
     const retryAfter = this.take(key, this.now());
     if (retryAfter > 0) {
       http.getResponse()?.setHeader?.('Retry-After', String(retryAfter));
-      throw everIdHttpError(HttpStatus.TOO_MANY_REQUESTS, 'rate_limited', 'Too many attempts. Please wait a minute.');
+      throw everIdHttpError(
+        HttpStatus.TOO_MANY_REQUESTS,
+        'rate_limited',
+        'Too many attempts. Please wait a minute.',
+      );
     }
     return true;
   }
@@ -50,8 +60,14 @@ export class EverIdRateLimitGuard implements CanActivate {
   take(key: string, now: number): number {
     const capacity = EVER_ID_RATE_LIMIT_PER_MINUTE;
     const refillPerMs = capacity / 60_000;
-    const bucket = this.buckets.get(key) ?? { tokens: capacity, updatedAt: now };
-    bucket.tokens = Math.min(capacity, bucket.tokens + (now - bucket.updatedAt) * refillPerMs);
+    const bucket = this.buckets.get(key) ?? {
+      tokens: capacity,
+      updatedAt: now,
+    };
+    bucket.tokens = Math.min(
+      capacity,
+      bucket.tokens + (now - bucket.updatedAt) * refillPerMs,
+    );
     bucket.updatedAt = now;
 
     // Re-insert so the map stays ordered by last use, then drop the least recently used.

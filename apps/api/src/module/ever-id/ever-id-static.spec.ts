@@ -5,8 +5,24 @@ import { join } from 'path';
 function sources(): Array<{ file: string; text: string }> {
   const roots = [__dirname];
   const extra = [
-    join(__dirname, '..', 'auth', 'services', 'login', 'state', 'ever-id-login.state.ts'),
-    join(__dirname, '..', 'auth', 'services', 'login', 'state', 'gauzy-ever-id-login.state.ts'),
+    join(
+      __dirname,
+      '..',
+      'auth',
+      'services',
+      'login',
+      'state',
+      'ever-id-login.state.ts',
+    ),
+    join(
+      __dirname,
+      '..',
+      'auth',
+      'services',
+      'login',
+      'state',
+      'gauzy-ever-id-login.state.ts',
+    ),
   ];
   const files: string[] = [...extra];
   while (roots.length) {
@@ -31,15 +47,20 @@ describe('Ever ID provider source rules', () => {
   });
 
   it('never decodes a token without verifying it', () => {
-    const forbidden = /jwt\.decode\(|jwtService\.decode\(|jwt-decode|jwt_decode|decodeJwt\(|decodeProtectedHeader\(/;
-    const offenders = files.filter(({ text }) => forbidden.test(text)).map(({ file }) => file);
+    const forbidden =
+      /jwt\.decode\(|jwtService\.decode\(|jwt-decode|jwt_decode|decodeJwt\(|decodeProtectedHeader\(/;
+    const offenders = files
+      .filter(({ text }) => forbidden.test(text))
+      .map(({ file }) => file);
     expect(offenders).toEqual([]);
   });
 
   it('verifies tokens with the issuer key set only', () => {
-    const oidc = files.find(({ file }) => file.endsWith('ever-id-oidc.service.ts'))!;
+    const oidc = files.find(({ file }) =>
+      file.endsWith('ever-id-oidc.service.ts'),
+    )!;
     expect(oidc.text).toContain('jwtVerify(');
-    expect(oidc.text).toContain("algorithms: [...EVER_ID_SIGNING_ALGORITHMS]");
+    expect(oidc.text).toContain('algorithms: [...EVER_ID_SIGNING_ALGORITHMS]');
   });
 
   it('never sends a login hint or an organization scope', () => {
@@ -64,7 +85,9 @@ describe('Ever ID provider source rules', () => {
   });
 
   it('never stores an Ever ID token on the session', () => {
-    const state = files.find(({ file }) => file.endsWith('ever-id-login.state.ts'))!;
+    const state = files.find(({ file }) =>
+      file.endsWith('ever-id-login.state.ts'),
+    )!;
     expect(state.text).toMatch(/accessToken: '',\s*refreshToken: '',/);
   });
 });

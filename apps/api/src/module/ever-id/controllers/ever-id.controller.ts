@@ -24,7 +24,10 @@ import { EverIdSettings } from '../ever-id.config';
 import { providerDisabled } from '../ever-id.errors';
 import { EVER_ID_AVAILABLE, EVER_ID_SETTINGS } from '../ever-id.tokens';
 import { EverIdEnabledGuard } from '../guards/ever-id-enabled.guard';
-import { EverIdRateLimited, EverIdRateLimitGuard } from '../guards/ever-id-rate-limit.guard';
+import {
+  EverIdRateLimited,
+  EverIdRateLimitGuard,
+} from '../guards/ever-id-rate-limit.guard';
 import {
   EverIdExchangeDto,
   EverIdPendingDto,
@@ -64,7 +67,11 @@ export class EverIdController {
     if (!this.available) {
       return { enabled: false, buttonLabel: 'Ever ID' };
     }
-    return { enabled: true, issuer: this.settings.issuer, buttonLabel: 'Ever ID' };
+    return {
+      enabled: true,
+      issuer: this.settings.issuer,
+      buttonLabel: 'Ever ID',
+    };
   }
 
   /** Starts a sign-in: 302 to the issuer's authorization endpoint. */
@@ -74,7 +81,10 @@ export class EverIdController {
   @Header('Cache-Control', 'no-store')
   @Redirect()
   async start(@Query('return') returnPath?: string) {
-    return { url: await this.flow.startSignIn(returnPath), statusCode: HttpStatus.FOUND };
+    return {
+      url: await this.flow.startSignIn(returnPath),
+      statusCode: HttpStatus.FOUND,
+    };
   }
 
   /** The issuer's redirect back: 302 to the portal with a one-time handle or an error code. */
@@ -83,8 +93,15 @@ export class EverIdController {
   @EverIdRateLimited()
   @Header('Cache-Control', 'no-store')
   @Redirect()
-  async callback(@Query('code') code?: string, @Query('state') state?: string, @Query('error') error?: string) {
-    return { url: await this.flow.callback({ code, state, error }), statusCode: HttpStatus.FOUND };
+  async callback(
+    @Query('code') code?: string,
+    @Query('state') state?: string,
+    @Query('error') error?: string,
+  ) {
+    return {
+      url: await this.flow.callback({ code, state, error }),
+      statusCode: HttpStatus.FOUND,
+    };
   }
 
   /** Exchanges a hand-off code (once) for the session; same answer shape as `POST /auth/login-google`. */
@@ -111,7 +128,10 @@ export class EverIdController {
   @UseGuards(EverIdEnabledGuard, EverIdRateLimitGuard)
   @EverIdRateLimited()
   @Header('Cache-Control', 'no-store')
-  async signUpConfirm(@Body() body: EverIdSignUpConfirmDto, @Req() request: Request) {
+  async signUpConfirm(
+    @Body() body: EverIdSignUpConfirmDto,
+    @Req() request: Request,
+  ) {
     const { code, returnPath } = await this.flow.confirmSignUp(body.pending, {
       terms: body.terms,
       ip: clientIp(request),
@@ -135,7 +155,10 @@ export class EverIdController {
   @UseGuards(EverIdEnabledGuard, EverIdRateLimitGuard, AuthGuard)
   @EverIdRateLimited()
   @Header('Cache-Control', 'no-store')
-  async connectDetails(@User() user: IRequestUser, @Body() body: EverIdPendingDto) {
+  async connectDetails(
+    @User() user: IRequestUser,
+    @Body() body: EverIdPendingDto,
+  ) {
     return this.flow.connectDetails(user.id, body.pending);
   }
 
@@ -144,8 +167,13 @@ export class EverIdController {
   @UseGuards(EverIdEnabledGuard, EverIdRateLimitGuard, AuthGuard)
   @EverIdRateLimited()
   @Header('Cache-Control', 'no-store')
-  async connectConfirm(@User() user: IRequestUser, @Body() body: EverIdPendingDto) {
-    return { identities: await this.flow.confirmConnect(user.id, body.pending) };
+  async connectConfirm(
+    @User() user: IRequestUser,
+    @Body() body: EverIdPendingDto,
+  ) {
+    return {
+      identities: await this.flow.confirmConnect(user.id, body.pending),
+    };
   }
 
   @Get('identities')
@@ -159,7 +187,9 @@ export class EverIdController {
   @UseGuards(EverIdEnabledGuard, AuthGuard)
   @Header('Cache-Control', 'no-store')
   async unlink(@User() user: IRequestUser, @Body() body: EverIdUnlinkDto) {
-    return { identities: await this.flow.unlink(user.id, body.issuer, body.subject) };
+    return {
+      identities: await this.flow.unlink(user.id, body.issuer, body.subject),
+    };
   }
 
   /**
@@ -168,7 +198,10 @@ export class EverIdController {
    */
   @Post('backchannel-logout')
   @UseGuards(EverIdEnabledGuard)
-  async backchannelLogout(@Body() body: Record<string, unknown>, @Res() response: Response) {
+  async backchannelLogout(
+    @Body() body: Record<string, unknown>,
+    @Res() response: Response,
+  ) {
     if (!this.settings.backchannelLogoutEnabled) {
       throw providerDisabled();
     }

@@ -31,7 +31,11 @@
             "tenant_id": "01K6A7R0AAAAAAAAAAAAAAAAAA",
             "identity_tier": "registry",
             "links": [
-              { "instance_id": "01K6A7S1AAAAAAAAAAAAAAAAAA", "product_tenant_id": "6f1c", "product_org_id": "9b2d" }
+              {
+                "instance_id": "01K6A7S1AAAAAAAAAAAAAAAAAA",
+                "product_tenant_id": "6f1c",
+                "product_org_id": "9b2d"
+              }
             ]
           }
         ],

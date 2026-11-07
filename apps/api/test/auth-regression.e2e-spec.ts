@@ -22,14 +22,24 @@ type Recorded = Record<string, { status: number; body: unknown }>;
 function normalise(value: unknown): unknown {
   if (Array.isArray(value)) return value.map(normalise);
   if (value && typeof value === 'object') {
-    return Object.fromEntries(Object.entries(value as Record<string, unknown>).map(([key, v]) => [key, normalise(v)]));
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>).map(([key, v]) => [
+        key,
+        normalise(v),
+      ]),
+    );
   }
   if (typeof value !== 'string') return value;
   if (/^eyJ[\w-]+\.[\w-]+\.[\w-]+$/.test(value)) return '<jwt>';
   if (/^fid\.[^.]+\.[a-f0-9]+$/.test(value)) return '<firebase-id-token>';
   if (/^frt\.[^.]+\.[a-f0-9]+$/.test(value)) return '<firebase-refresh-token>';
   if (/^custom\.[^.]+\.[a-f0-9]+$/.test(value)) return '<custom-token>';
-  if (!Number.isNaN(Date.parse(value)) && /\d{4}/.test(value) && /[:T]/.test(value)) return '<date>';
+  if (
+    !Number.isNaN(Date.parse(value)) &&
+    /\d{4}/.test(value) &&
+    /[:T]/.test(value)
+  )
+    return '<date>';
   return value;
 }
 
@@ -49,47 +59,74 @@ async function scenario(t: TestApp): Promise<Recorded> {
     displayName: 'Password User',
     emailVerified: true,
   });
-  await t.firebase.db.ref(`users/${user.uid}`).set({ email: user.email, displayName: 'Password User' });
+  await t.firebase.db
+    .ref(`users/${user.uid}`)
+    .set({ email: user.email, displayName: 'Password User' });
 
   const login = keep(
     'POST /auth/login (valid)',
-    await request(server).post('/api/v1/auth/login').send({ email: user.email, password: 'Secret-1234' }),
+    await request(server)
+      .post('/api/v1/auth/login')
+      .send({ email: user.email, password: 'Secret-1234' }),
   );
   keep(
     'POST /auth/login (wrong password)',
-    await request(server).post('/api/v1/auth/login').send({ email: user.email, password: 'wrong' }),
+    await request(server)
+      .post('/api/v1/auth/login')
+      .send({ email: user.email, password: 'wrong' }),
   );
 
   keep(
     'POST /auth/register (no terms)',
     await request(server)
       .post('/api/v1/auth/register')
-      .send({ email: 'new.user@example.test', password: 'Secret-1234', username: 'New User' }),
+      .send({
+        email: 'new.user@example.test',
+        password: 'Secret-1234',
+        username: 'New User',
+      }),
   );
 
   keep(
     'POST /auth/login-google (new account)',
     await request(server)
       .post('/api/v1/auth/login-google')
-      .send({ credentials: t.toolkit.googleIdToken('google.user@example.test', 'Google User') }),
+      .send({
+        credentials: t.toolkit.googleIdToken(
+          'google.user@example.test',
+          'Google User',
+        ),
+      }),
   );
   keep(
     'POST /auth/login-google (existing account)',
     await request(server)
       .post('/api/v1/auth/login-google')
-      .send({ credentials: t.toolkit.googleIdToken('google.user@example.test', 'Google User') }),
+      .send({
+        credentials: t.toolkit.googleIdToken(
+          'google.user@example.test',
+          'Google User',
+        ),
+      }),
   );
   keep(
     'POST /auth/login-google (invalid credential)',
-    await request(server).post('/api/v1/auth/login-google').send({ credentials: 'not-a-google-token' }),
+    await request(server)
+      .post('/api/v1/auth/login-google')
+      .send({ credentials: 'not-a-google-token' }),
   );
 
   const referenceToken = login.body?.data?.refreshToken;
   keep(
     'GET /auth/refresh-token (from the password sign-in)',
-    await request(server).get('/api/v1/auth/refresh-token').set('refreshToken', referenceToken ?? ''),
+    await request(server)
+      .get('/api/v1/auth/refresh-token')
+      .set('refreshToken', referenceToken ?? ''),
   );
-  keep('GET /auth/refresh-token (missing)', await request(server).get('/api/v1/auth/refresh-token'));
+  keep(
+    'GET /auth/refresh-token (missing)',
+    await request(server).get('/api/v1/auth/refresh-token'),
+  );
 
   return out;
 }
@@ -105,8 +142,13 @@ describe('existing sign-in routes are unchanged', () => {
       const t = await createTestApp({ everId: false });
       try {
         const recorded = await scenario(t);
-        if (!existsSync(join(__dirname, '__snapshots__'))) mkdirSync(join(__dirname, '__snapshots__'));
-        writeFileSync(SNAPSHOT, `${JSON.stringify(recorded, null, 2)}\n`, 'utf8');
+        if (!existsSync(join(__dirname, '__snapshots__')))
+          mkdirSync(join(__dirname, '__snapshots__'));
+        writeFileSync(
+          SNAPSHOT,
+          `${JSON.stringify(recorded, null, 2)}\n`,
+          'utf8',
+        );
       } finally {
         await t.close();
       }
@@ -130,7 +172,8 @@ describe('existing sign-in routes are unchanged', () => {
                 EVER_ID_ISSUER_URL: 'https://idp.example.test',
                 EVER_ID_CLIENT_ID: 'rec-client',
                 EVER_ID_CLIENT_SECRET: 'rec-secret',
-                EVER_ID_REDIRECT_URL: 'https://api.example.test/api/v1/auth/ever-id/callback',
+                EVER_ID_REDIRECT_URL:
+                  'https://api.example.test/api/v1/auth/ever-id/callback',
               },
             },
           ],

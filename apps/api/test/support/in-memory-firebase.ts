@@ -40,7 +40,9 @@ export class FakeSnapshot {
 
   forEach(callback: (child: FakeSnapshot) => boolean | void): boolean {
     const entries: Array<[string, Json]> =
-      this.value && typeof this.value === 'object' ? (this.value.__ordered ?? Object.entries(this.value)) : [];
+      this.value && typeof this.value === 'object'
+        ? (this.value.__ordered ?? Object.entries(this.value))
+        : [];
     for (const [key, value] of entries) {
       if (callback(new FakeSnapshot(key, value)) === true) {
         return true;
@@ -66,7 +68,10 @@ export class FakeQuery {
   ) {}
 
   orderByChild(child: string): FakeQuery {
-    return new FakeQuery(this.db, this.parts, { ...this.spec, orderByChild: child });
+    return new FakeQuery(this.db, this.parts, {
+      ...this.spec,
+      orderByChild: child,
+    });
   }
 
   equalTo(value: Json): FakeQuery {
@@ -78,7 +83,10 @@ export class FakeQuery {
   }
 
   limitToFirst(limit: number): FakeQuery {
-    return new FakeQuery(this.db, this.parts, { ...this.spec, limitToFirst: limit });
+    return new FakeQuery(this.db, this.parts, {
+      ...this.spec,
+      limitToFirst: limit,
+    });
   }
 
   async once(_event = 'value'): Promise<FakeSnapshot> {
@@ -95,13 +103,22 @@ export class FakeQuery {
       return new FakeSnapshot(this.parts[this.parts.length - 1] ?? null, value);
     }
     const field = this.spec.orderByChild;
-    let entries = Object.entries(value as Record<string, Json>).filter(([, child]) => {
-      const v = child?.[field];
-      if (this.spec.equalTo !== undefined && v !== this.spec.equalTo) return false;
-      if (this.spec.endAt !== undefined && !(v !== undefined && v !== null && v <= this.spec.endAt)) return false;
-      return true;
-    });
-    entries.sort(([, a], [, b]) => (a?.[field] > b?.[field] ? 1 : a?.[field] < b?.[field] ? -1 : 0));
+    let entries = Object.entries(value as Record<string, Json>).filter(
+      ([, child]) => {
+        const v = child?.[field];
+        if (this.spec.equalTo !== undefined && v !== this.spec.equalTo)
+          return false;
+        if (
+          this.spec.endAt !== undefined &&
+          !(v !== undefined && v !== null && v <= this.spec.endAt)
+        )
+          return false;
+        return true;
+      },
+    );
+    entries.sort(([, a], [, b]) =>
+      a?.[field] > b?.[field] ? 1 : a?.[field] < b?.[field] ? -1 : 0,
+    );
     if (this.spec.limitToFirst !== undefined) {
       entries = entries.slice(0, this.spec.limitToFirst);
     }
@@ -109,7 +126,10 @@ export class FakeQuery {
       return new FakeSnapshot(this.parts[this.parts.length - 1] ?? null, null);
     }
     const result: Json = Object.fromEntries(entries);
-    Object.defineProperty(result, '__ordered', { value: entries, enumerable: false });
+    Object.defineProperty(result, '__ordered', {
+      value: entries,
+      enumerable: false,
+    });
     return new FakeSnapshot(this.parts[this.parts.length - 1] ?? null, result);
   }
 }
@@ -142,12 +162,20 @@ export class FakeReference extends FakeQuery {
     const key = this.db.pushId();
     // Like the SDK's ThenableReference: a reference that is also a promise of a plain reference.
     const plain = this.child(key);
-    const promise = value === undefined ? Promise.resolve(plain) : plain.set(value).then(() => plain);
+    const promise =
+      value === undefined
+        ? Promise.resolve(plain)
+        : plain.set(value).then(() => plain);
     const thenable = this.child(key);
-    return Object.assign(thenable, { then: promise.then.bind(promise), catch: promise.catch.bind(promise) }) as never;
+    return Object.assign(thenable, {
+      then: promise.then.bind(promise),
+      catch: promise.catch.bind(promise),
+    }) as never;
   }
 
-  async transaction(update: (current: Json) => Json): Promise<{ committed: boolean; snapshot: FakeSnapshot }> {
+  async transaction(
+    update: (current: Json) => Json,
+  ): Promise<{ committed: boolean; snapshot: FakeSnapshot }> {
     // Mirrors the SDK: the first attempt sees the locally cached value (often null), the retry
     // sees the stored value.
     const stored = this.db.read(this.parts);
@@ -156,7 +184,10 @@ export class FakeReference extends FakeQuery {
     }
     const next = update(clone(stored ?? null));
     if (next === undefined) {
-      return { committed: false, snapshot: new FakeSnapshot(this.key, stored ?? null) };
+      return {
+        committed: false,
+        snapshot: new FakeSnapshot(this.key, stored ?? null),
+      };
     }
     this.db.write(this.parts, clone(next));
     return { committed: true, snapshot: new FakeSnapshot(this.key, next) };
@@ -211,7 +242,8 @@ export class InMemoryDatabase {
   }
 
   private prune(node: Json): boolean {
-    if (!node || typeof node !== 'object') return node === null || node === undefined;
+    if (!node || typeof node !== 'object')
+      return node === null || node === undefined;
     for (const key of Object.keys(node)) {
       if (this.prune(node[key])) delete node[key];
     }
@@ -266,27 +298,45 @@ export class InMemoryAuth {
       photoURL: user.photoURL,
       emailVerified: user.emailVerified,
       customClaims: user.customClaims,
-      providerData: user.providers.map((providerId) => ({ providerId, uid: user.email, email: user.email })),
-      metadata: { creationTime: 'Thu, 01 Jan 2026 00:00:00 GMT', lastSignInTime: user.lastSignInTime },
+      providerData: user.providers.map((providerId) => ({
+        providerId,
+        uid: user.email,
+        email: user.email,
+      })),
+      metadata: {
+        creationTime: 'Thu, 01 Jan 2026 00:00:00 GMT',
+        lastSignInTime: user.lastSignInTime,
+      },
     };
   }
 
   async createUser(request: Partial<FakeUser> & { email: string }) {
     if (this.findByEmail(request.email)) {
-      throw authError('auth/email-already-exists', 'The email address is already in use by another account.');
+      throw authError(
+        'auth/email-already-exists',
+        'The email address is already in use by another account.',
+      );
     }
     return this.toRecord(this.addUser(request));
   }
 
   async getUser(uid: string) {
     const user = this.users.get(uid);
-    if (!user) throw authError('auth/user-not-found', 'There is no user record corresponding to this identifier.');
+    if (!user)
+      throw authError(
+        'auth/user-not-found',
+        'There is no user record corresponding to this identifier.',
+      );
     return this.toRecord(user);
   }
 
   async getUserByEmail(email: string) {
     const user = this.findByEmail(email);
-    if (!user) throw authError('auth/user-not-found', 'There is no user record corresponding to this identifier.');
+    if (!user)
+      throw authError(
+        'auth/user-not-found',
+        'There is no user record corresponding to this identifier.',
+      );
     return this.toRecord(user);
   }
 
@@ -313,7 +363,11 @@ export class InMemoryAuth {
   async verifyIdToken(token: string) {
     const match = /^fid\.([^.]+)\.[a-f0-9]+$/.exec(token ?? '');
     const user = match ? this.users.get(match[1]) : undefined;
-    if (!user) throw authError('auth/argument-error', 'Decoding Firebase ID token failed.');
+    if (!user)
+      throw authError(
+        'auth/argument-error',
+        'Decoding Firebase ID token failed.',
+      );
     return {
       uid: user.uid,
       email: user.email,
@@ -354,8 +408,10 @@ export class InMemoryFirebaseApp {
     const collection = (name: string): Json => ({
       doc: (id: string) => ({
         id,
-        create: async (data: Json) => acceptances.push({ collection: name, id, data }),
-        set: async (data: Json) => acceptances.push({ collection: name, id, data }),
+        create: async (data: Json) =>
+          acceptances.push({ collection: name, id, data }),
+        set: async (data: Json) =>
+          acceptances.push({ collection: name, id, data }),
         get: async () => ({ exists: false, data: () => undefined }),
         collection,
       }),
@@ -403,11 +459,18 @@ export class InMemoryIdentityToolkit {
         const match = /^custom\.([^.]+)\./.exec(body?.token ?? '');
         const user = match ? this.auth.users.get(match[1]) : undefined;
         if (!user) throw restError(400, 'INVALID_CUSTOM_TOKEN');
-        return { data: { kind: 'identitytoolkit#VerifyCustomTokenResponse', ...this.issue(user.uid), isNewUser: false } };
+        return {
+          data: {
+            kind: 'identitytoolkit#VerifyCustomTokenResponse',
+            ...this.issue(user.uid),
+            isNewUser: false,
+          },
+        };
       }
       case 'accounts:signInWithPassword': {
         const user = this.auth.findByEmail(body?.email);
-        if (!user || !user.password || user.password !== body?.password) throw restError(400, 'INVALID_LOGIN_CREDENTIALS');
+        if (!user || !user.password || user.password !== body?.password)
+          throw restError(400, 'INVALID_LOGIN_CREDENTIALS');
         user.lastSignInTime = 'Thu, 01 Jan 2026 00:00:00 GMT';
         return {
           data: {
@@ -432,16 +495,37 @@ export class InMemoryIdentityToolkit {
         };
       }
       case 'accounts:signUp': {
-        if (this.auth.findByEmail(body?.email)) throw restError(400, 'EMAIL_EXISTS');
-        const user = this.auth.addUser({ email: body.email, password: body.password });
-        return { data: { kind: 'identitytoolkit#SignupNewUserResponse', localId: user.uid, email: user.email, ...this.issue(user.uid) } };
+        if (this.auth.findByEmail(body?.email))
+          throw restError(400, 'EMAIL_EXISTS');
+        const user = this.auth.addUser({
+          email: body.email,
+          password: body.password,
+        });
+        return {
+          data: {
+            kind: 'identitytoolkit#SignupNewUserResponse',
+            localId: user.uid,
+            email: user.email,
+            ...this.issue(user.uid),
+          },
+        };
       }
       case 'accounts:signInWithIdp': {
-        const encoded = /id_token=google\.([^&]+)/.exec(body?.postBody ?? '')?.[1];
+        const encoded = /id_token=google\.([^&]+)/.exec(
+          body?.postBody ?? '',
+        )?.[1];
         if (!encoded) throw restError(400, 'INVALID_IDP_RESPONSE');
-        const { email, name } = JSON.parse(Buffer.from(encoded, 'base64url').toString('utf8'));
+        const { email, name } = JSON.parse(
+          Buffer.from(encoded, 'base64url').toString('utf8'),
+        );
         let user = this.auth.findByEmail(email);
-        if (!user) user = this.auth.addUser({ email, displayName: name, emailVerified: true, providers: ['google.com'] });
+        if (!user)
+          user = this.auth.addUser({
+            email,
+            displayName: name,
+            emailVerified: true,
+            providers: ['google.com'],
+          });
         return {
           data: {
             kind: 'identitytoolkit#VerifyAssertionResponse',
@@ -459,7 +543,8 @@ export class InMemoryIdentityToolkit {
       case 'token': {
         const session = this.refreshTokens.get(body?.refresh_token);
         const user = session ? this.auth.users.get(session.uid) : undefined;
-        if (!session || !user || (user.tokensValidAfter ?? 0) > 0) throw restError(400, 'INVALID_REFRESH_TOKEN');
+        if (!session || !user || (user.tokensValidAfter ?? 0) > 0)
+          throw restError(400, 'INVALID_REFRESH_TOKEN');
         const issued = this.issue(user.uid, session.refreshToken);
         return {
           data: {

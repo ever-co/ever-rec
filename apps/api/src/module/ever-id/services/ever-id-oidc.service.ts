@@ -1,6 +1,14 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { createHash } from 'crypto';
-import { errors as joseErrors, importJWK, JWK, JWTPayload, jwtVerify, JWTVerifyGetKey, KeyLike } from 'jose';
+import {
+  errors as joseErrors,
+  importJWK,
+  JWK,
+  JWTPayload,
+  jwtVerify,
+  JWTVerifyGetKey,
+  KeyLike,
+} from 'jose';
 import { HttpService } from 'nestjs-http-promise';
 import { EverIdSettings } from '../ever-id.config';
 import { EverIdTokenError } from '../ever-id.errors';
@@ -27,10 +35,16 @@ export const LOGOUT_TOKEN_MAX_AGE_SECONDS = 300;
  * The event a back-channel logout token must carry (OpenID Connect Back-Channel Logout 1.0). It is
  * an identifier compared as a string, never fetched.
  */
-export const BACKCHANNEL_LOGOUT_EVENT = 'http://schemas.openid.net/event/backchannel-logout';
+export const BACKCHANNEL_LOGOUT_EVENT =
+  'http://schemas.openid.net/event/backchannel-logout';
 
 /** Scopes always requested. `urn:zitadel:iam:user:resourceowner` is ignored by issuers that do not know it. */
-const BASE_SCOPES = ['openid', 'profile', 'email', 'urn:zitadel:iam:user:resourceowner'];
+const BASE_SCOPES = [
+  'openid',
+  'profile',
+  'email',
+  'urn:zitadel:iam:user:resourceowner',
+];
 
 export interface EverIdDiscovery {
   issuer: string;
@@ -90,8 +104,12 @@ export function codeChallenge(verifier: string): string {
 }
 
 /** `client_secret_basic` credential: id and secret are form-encoded before joining (RFC 6749, section 2.3.1). */
-export function basicCredential(clientId: string, clientSecret: string): string {
-  const encode = (value: string) => new URLSearchParams({ v: value }).toString().slice(2);
+export function basicCredential(
+  clientId: string,
+  clientSecret: string,
+): string {
+  const encode = (value: string) =>
+    new URLSearchParams({ v: value }).toString().slice(2);
   return `Basic ${Buffer.from(`${encode(clientId)}:${encode(clientSecret)}`).toString('base64')}`;
 }
 
@@ -113,7 +131,10 @@ function audienceList(payload: JWTPayload): string[] {
 }
 
 function isLoopbackHttp(url: URL): boolean {
-  return url.protocol === 'http:' && ['localhost', '127.0.0.1', '[::1]'].includes(url.hostname);
+  return (
+    url.protocol === 'http:' &&
+    ['localhost', '127.0.0.1', '[::1]'].includes(url.hostname)
+  );
 }
 
 /**
@@ -139,7 +160,9 @@ export class EverIdOidcService {
   scope(): string {
     const scopes = [...BASE_SCOPES];
     if (this.settings.platformProjectId) {
-      scopes.push(`urn:zitadel:iam:org:project:id:${this.settings.platformProjectId}:aud`);
+      scopes.push(
+        `urn:zitadel:iam:org:project:id:${this.settings.platformProjectId}:aud`,
+      );
     }
     return scopes.join(' ');
   }
@@ -175,9 +198,16 @@ export class EverIdOidcService {
    * The raw ID token is returned only so the caller can hand it to an optional downstream system
    * during this request; it is never stored.
    */
-  async exchangeCode(code: string, codeVerifier: string, nonce: string): Promise<{ claims: EverIdClaims; idToken: string }> {
+  async exchangeCode(
+    code: string,
+    codeVerifier: string,
+    nonce: string,
+  ): Promise<{ claims: EverIdClaims; idToken: string }> {
     if (!code || typeof code !== 'string') {
-      throw new EverIdTokenError('provider_error', 'Missing authorization code');
+      throw new EverIdTokenError(
+        'provider_error',
+        'Missing authorization code',
+      );
     }
     const discovery = await this.discovery(this.settings.issuer);
     const form = new URLSearchParams({
@@ -189,20 +219,33 @@ export class EverIdOidcService {
     let status: number;
     let data: unknown;
     try {
-      ({ status, data } = await this.http.post(discovery.token_endpoint, form.toString(), {
-        headers: {
-          Authorization: basicCredential(this.settings.clientId, this.settings.clientSecret),
-          'Content-Type': 'application/x-www-form-urlencoded',
-          Accept: 'application/json',
+      ({ status, data } = await this.http.post(
+        discovery.token_endpoint,
+        form.toString(),
+        {
+          headers: {
+            Authorization: basicCredential(
+              this.settings.clientId,
+              this.settings.clientSecret,
+            ),
+            'Content-Type': 'application/x-www-form-urlencoded',
+            Accept: 'application/json',
+          },
+          validateStatus: () => true,
         },
-        validateStatus: () => true,
-      }));
+      ));
     } catch {
-      throw new EverIdTokenError('provider_error', 'Token endpoint request failed');
+      throw new EverIdTokenError(
+        'provider_error',
+        'Token endpoint request failed',
+      );
     }
     const idToken = (data as Record<string, unknown> | null)?.['id_token'];
     if (status !== 200 || typeof idToken !== 'string') {
-      throw new EverIdTokenError('provider_error', `Token endpoint answered ${status}`);
+      throw new EverIdTokenError(
+        'provider_error',
+        `Token endpoint answered ${status}`,
+      );
     }
     const claims = await this.verifyIdToken(idToken, nonce);
     return { claims, idToken };
@@ -214,25 +257,47 @@ export class EverIdOidcService {
    * `iat`, the expected `nonce`, and `email_verified === true`.
    */
   async verifyIdToken(idToken: string, nonce: string): Promise<EverIdClaims> {
-    const payload = await this.verifyAgainstAcceptedIssuers(idToken, ['sub', 'exp', 'iat']);
+    const payload = await this.verifyAgainstAcceptedIssuers(idToken, [
+      'sub',
+      'exp',
+      'iat',
+    ]);
 
     const audiences = audienceList(payload);
     const azp = stringClaim(payload, 'azp');
     if (audiences.length > 1 && !azp) {
-      throw new EverIdTokenError('audience_rejected', 'A token for several audiences must name its authorized party');
+      throw new EverIdTokenError(
+        'audience_rejected',
+        'A token for several audiences must name its authorized party',
+      );
     }
     if (azp && azp !== this.settings.clientId) {
-      throw new EverIdTokenError('audience_rejected', 'Authorized party is not this client');
+      throw new EverIdTokenError(
+        'audience_rejected',
+        'Authorized party is not this client',
+      );
     }
     const iat = Number(payload.iat);
-    if (!Number.isFinite(iat) || iat > this.nowSeconds() + CLOCK_TOLERANCE_SECONDS) {
-      throw new EverIdTokenError('token_invalid', 'ID token issued in the future');
+    if (
+      !Number.isFinite(iat) ||
+      iat > this.nowSeconds() + CLOCK_TOLERANCE_SECONDS
+    ) {
+      throw new EverIdTokenError(
+        'token_invalid',
+        'ID token issued in the future',
+      );
     }
     if (!nonce || payload['nonce'] !== nonce) {
-      throw new EverIdTokenError('nonce_mismatch', 'ID token nonce does not match');
+      throw new EverIdTokenError(
+        'nonce_mismatch',
+        'ID token nonce does not match',
+      );
     }
     if (payload['email_verified'] !== true) {
-      throw new EverIdTokenError('email_unverified', 'The e-mail address is not verified');
+      throw new EverIdTokenError(
+        'email_unverified',
+        'The e-mail address is not verified',
+      );
     }
 
     return {
@@ -255,14 +320,20 @@ export class EverIdOidcService {
    * and no `nonce`. Replay protection is the caller's job.
    */
   async verifyLogoutToken(token: string): Promise<EverIdLogoutClaims> {
-    const payload = await this.verifyAgainstAcceptedIssuers(token, ['iat', 'jti']);
+    const payload = await this.verifyAgainstAcceptedIssuers(token, [
+      'iat',
+      'jti',
+    ]);
     const now = this.nowSeconds();
     const iat = Number(payload.iat);
     if (!Number.isFinite(iat) || now - iat > LOGOUT_TOKEN_MAX_AGE_SECONDS) {
       throw new EverIdTokenError('expired', 'Logout token is too old');
     }
     if (iat > now + CLOCK_TOLERANCE_SECONDS) {
-      throw new EverIdTokenError('token_invalid', 'Logout token issued in the future');
+      throw new EverIdTokenError(
+        'token_invalid',
+        'Logout token issued in the future',
+      );
     }
     const jti = stringClaim(payload, 'jti');
     if (!jti) {
@@ -274,15 +345,24 @@ export class EverIdOidcService {
         ? (events as Record<string, unknown>)[BACKCHANNEL_LOGOUT_EVENT]
         : undefined;
     if (!event || typeof event !== 'object' || Array.isArray(event)) {
-      throw new EverIdTokenError('token_invalid', 'Logout token carries no back-channel logout event');
+      throw new EverIdTokenError(
+        'token_invalid',
+        'Logout token carries no back-channel logout event',
+      );
     }
     if ('nonce' in payload) {
-      throw new EverIdTokenError('token_invalid', 'A logout token must not carry a nonce');
+      throw new EverIdTokenError(
+        'token_invalid',
+        'A logout token must not carry a nonce',
+      );
     }
     const subject = stringClaim(payload, 'sub');
     const sid = stringClaim(payload, 'sid');
     if (!subject && !sid) {
-      throw new EverIdTokenError('token_invalid', 'Logout token names neither a subject nor a session');
+      throw new EverIdTokenError(
+        'token_invalid',
+        'Logout token names neither a subject nor a session',
+      );
     }
     return { issuer: String(payload.iss), subject, sid, jti, iat };
   }
@@ -308,14 +388,18 @@ export class EverIdOidcService {
    * turn (the primary first). A token is accepted only when one issuer's own key verifies it and its
    * `iss` equals that issuer.
    */
-  private async verifyAgainstAcceptedIssuers(token: string, requiredClaims: string[]): Promise<JWTPayload> {
+  private async verifyAgainstAcceptedIssuers(
+    token: string,
+    requiredClaims: string[],
+  ): Promise<JWTPayload> {
     if (!token || typeof token !== 'string') {
       throw new EverIdTokenError('token_invalid', 'Missing token');
     }
     let lastError: EverIdTokenError | null = null;
     for (const issuer of this.settings.issuers) {
       try {
-        const getKey: JWTVerifyGetKey = (header) => this.key(issuer, header.alg, header.kid);
+        const getKey: JWTVerifyGetKey = (header) =>
+          this.key(issuer, header.alg, header.kid);
         const { payload } = await jwtVerify(token, getKey, {
           issuer,
           audience: this.settings.clientId,
@@ -333,7 +417,10 @@ export class EverIdOidcService {
         }
       }
     }
-    throw lastError ?? new EverIdTokenError('issuer_rejected', 'Token issuer is not accepted');
+    throw (
+      lastError ??
+      new EverIdTokenError('issuer_rejected', 'Token issuer is not accepted')
+    );
   }
 
   private mapVerificationError(error: unknown): EverIdTokenError {
@@ -346,16 +433,29 @@ export class EverIdOidcService {
       return new EverIdTokenError('expired', 'Token expired');
     }
     if (code === 'ERR_JWT_CLAIM_VALIDATION_FAILED' && claim === 'iss') {
-      return new EverIdTokenError('issuer_rejected', 'Token issuer is not accepted', 'issuer_mismatch');
+      return new EverIdTokenError(
+        'issuer_rejected',
+        'Token issuer is not accepted',
+        'issuer_mismatch',
+      );
     }
     if (code === 'ERR_JWT_CLAIM_VALIDATION_FAILED' && claim === 'aud') {
-      return new EverIdTokenError('audience_rejected', 'Token audience is not this client');
+      return new EverIdTokenError(
+        'audience_rejected',
+        'Token audience is not this client',
+      );
     }
-    return new EverIdTokenError('token_invalid', code ? `Token rejected (${code})` : 'Token rejected');
+    return new EverIdTokenError(
+      'token_invalid',
+      code ? `Token rejected (${code})` : 'Token rejected',
+    );
   }
 
   private joinedName(payload: JWTPayload): string | null {
-    const parts = [stringClaim(payload, 'given_name'), stringClaim(payload, 'family_name')].filter(Boolean);
+    const parts = [
+      stringClaim(payload, 'given_name'),
+      stringClaim(payload, 'family_name'),
+    ].filter(Boolean);
     return parts.length ? parts.join(' ') : null;
   }
 
@@ -369,23 +469,39 @@ export class EverIdOidcService {
       let status: number;
       let data: unknown;
       try {
-        ({ status, data } = await this.http.get(`${issuer}/.well-known/openid-configuration`, {
-          headers: { Accept: 'application/json' },
-          validateStatus: () => true,
-        }));
+        ({ status, data } = await this.http.get(
+          `${issuer}/.well-known/openid-configuration`,
+          {
+            headers: { Accept: 'application/json' },
+            validateStatus: () => true,
+          },
+        ));
       } catch {
         if (cached) {
-          this.logger.warn('Discovery refresh failed; using the cached document.');
+          this.logger.warn(
+            'Discovery refresh failed; using the cached document.',
+          );
           return cached.document;
         }
-        throw new EverIdTokenError('provider_error', 'Discovery request failed');
+        throw new EverIdTokenError(
+          'provider_error',
+          'Discovery request failed',
+        );
       }
       const document = data as EverIdDiscovery | null;
-      if (status !== 200 || !document || document.issuer !== issuer || !this.endpointsUsable(issuer, document)) {
+      if (
+        status !== 200 ||
+        !document ||
+        document.issuer !== issuer ||
+        !this.endpointsUsable(issuer, document)
+      ) {
         if (cached) {
           return cached.document;
         }
-        throw new EverIdTokenError('provider_error', `Discovery document unusable (status ${status})`);
+        throw new EverIdTokenError(
+          'provider_error',
+          `Discovery document unusable (status ${status})`,
+        );
       }
       this.discoveries.set(issuer, { document, fetchedAt: this.nowMs() });
       return document;
@@ -395,11 +511,18 @@ export class EverIdOidcService {
   /** Endpoints must use https, or plain http on a loopback host when the issuer itself does. */
   private endpointsUsable(issuer: string, document: EverIdDiscovery): boolean {
     const issuerUrl = new URL(issuer);
-    const endpoints = [document.authorization_endpoint, document.token_endpoint, document.jwks_uri];
+    const endpoints = [
+      document.authorization_endpoint,
+      document.token_endpoint,
+      document.jwks_uri,
+    ];
     return endpoints.every((value) => {
       try {
         const url = new URL(value);
-        return url.protocol === 'https:' || (isLoopbackHttp(issuerUrl) && isLoopbackHttp(url));
+        return (
+          url.protocol === 'https:' ||
+          (isLoopbackHttp(issuerUrl) && isLoopbackHttp(url))
+        );
       } catch {
         return false;
       }
@@ -407,9 +530,19 @@ export class EverIdOidcService {
   }
 
   /** Picks the verification key for a token header from the issuer's key set. */
-  private async key(issuer: string, alg: string | undefined, kid: string | undefined): Promise<KeyLike | Uint8Array> {
-    if (!alg || !(EVER_ID_SIGNING_ALGORITHMS as readonly string[]).includes(alg)) {
-      throw new EverIdTokenError('token_invalid', 'Signature algorithm is not accepted');
+  private async key(
+    issuer: string,
+    alg: string | undefined,
+    kid: string | undefined,
+  ): Promise<KeyLike | Uint8Array> {
+    if (
+      !alg ||
+      !(EVER_ID_SIGNING_ALGORITHMS as readonly string[]).includes(alg)
+    ) {
+      throw new EverIdTokenError(
+        'token_invalid',
+        'Signature algorithm is not accepted',
+      );
     }
     const first = await this.keySet(issuer, false);
     let jwk = this.selectKey(first.keySet.keys, alg as SigningAlgorithm, kid);
@@ -420,20 +553,32 @@ export class EverIdOidcService {
         if (first.fresh) {
           this.lastForcedRefetch.set(issuer, now);
         }
-        throw new EverIdTokenError('token_invalid', 'No matching signing key', 'unknown_key');
+        throw new EverIdTokenError(
+          'token_invalid',
+          'No matching signing key',
+          'unknown_key',
+        );
       }
       this.lastForcedRefetch.set(issuer, now);
       const reloaded = await this.keySet(issuer, true);
       jwk = this.selectKey(reloaded.keySet.keys, alg as SigningAlgorithm, kid);
     }
     if (!jwk) {
-      throw new EverIdTokenError('token_invalid', 'No matching signing key', 'unknown_key');
+      throw new EverIdTokenError(
+        'token_invalid',
+        'No matching signing key',
+        'unknown_key',
+      );
     }
     return importJWK(jwk, alg);
   }
 
   /** A key fits when its type matches the algorithm (no algorithm confusion) and, if given, its `kid`. */
-  private selectKey(keys: JWK[], alg: SigningAlgorithm, kid: string | undefined): JWK | undefined {
+  private selectKey(
+    keys: JWK[],
+    alg: SigningAlgorithm,
+    kid: string | undefined,
+  ): JWK | undefined {
     const candidates = keys.filter((jwk) => {
       if (jwk.use && jwk.use !== 'sig') {
         return false;
@@ -458,21 +603,28 @@ export class EverIdOidcService {
     return candidates.length === 1 ? candidates[0] : undefined;
   }
 
-  private async keySet(issuer: string, force: boolean): Promise<{ keySet: CachedKeySet; fresh: boolean }> {
+  private async keySet(
+    issuer: string,
+    force: boolean,
+  ): Promise<{ keySet: CachedKeySet; fresh: boolean }> {
     const cached = this.keySets.get(issuer);
     const now = this.nowMs();
     if (!force && cached && now - cached.fetchedAt < JWKS_TTL_MS) {
       return { keySet: cached, fresh: false };
     }
     try {
-      const keySet = await this.once(`jwks:${issuer}`, () => this.fetchKeySet(issuer));
+      const keySet = await this.once(`jwks:${issuer}`, () =>
+        this.fetchKeySet(issuer),
+      );
       return { keySet, fresh: true };
     } catch (error) {
       if (cached && now - cached.fetchedAt < JWKS_MAX_STALE_MS) {
         this.logger.warn('Key set refresh failed; using the cached key set.');
         return { keySet: cached, fresh: false };
       }
-      throw error instanceof EverIdTokenError ? error : new EverIdTokenError('provider_error', 'Key set unavailable');
+      throw error instanceof EverIdTokenError
+        ? error
+        : new EverIdTokenError('provider_error', 'Key set unavailable');
     }
   }
 
@@ -490,10 +642,18 @@ export class EverIdOidcService {
     }
     const keys = (data as { keys?: unknown } | null)?.keys;
     if (status !== 200 || !Array.isArray(keys)) {
-      throw new EverIdTokenError('provider_error', `Key set answered ${status}`);
+      throw new EverIdTokenError(
+        'provider_error',
+        `Key set answered ${status}`,
+      );
     }
     const keySet: CachedKeySet = {
-      keys: keys.filter((key): key is JWK => !!key && typeof key === 'object' && typeof (key as JWK).kty === 'string'),
+      keys: keys.filter(
+        (key): key is JWK =>
+          !!key &&
+          typeof key === 'object' &&
+          typeof (key as JWK).kty === 'string',
+      ),
       fetchedAt: this.nowMs(),
     };
     this.keySets.set(issuer, keySet);

@@ -8,7 +8,14 @@
 import { createHash, randomBytes } from 'crypto';
 import { createServer, IncomingMessage, Server, ServerResponse } from 'http';
 import { AddressInfo } from 'net';
-import { exportJWK, generateKeyPair, JWK, JWTPayload, KeyLike, SignJWT } from 'jose';
+import {
+  exportJWK,
+  generateKeyPair,
+  JWK,
+  JWTPayload,
+  KeyLike,
+  SignJWT,
+} from 'jose';
 
 interface PendingCode {
   clientId: string;
@@ -18,7 +25,8 @@ interface PendingCode {
   claims: JWTPayload;
 }
 
-export const BACKCHANNEL_LOGOUT_EVENT = 'http://schemas.openid.net/event/backchannel-logout';
+export const BACKCHANNEL_LOGOUT_EVENT =
+  'http://schemas.openid.net/event/backchannel-logout';
 
 export class MockOidcIssuer {
   issuer = '';
@@ -50,7 +58,9 @@ export class MockOidcIssuer {
         res.end();
       });
     });
-    await new Promise<void>((resolve) => this.server!.listen(0, '127.0.0.1', resolve));
+    await new Promise<void>((resolve) =>
+      this.server!.listen(0, '127.0.0.1', resolve),
+    );
     const { port } = this.server.address() as AddressInfo;
     this.issuer = `http://127.0.0.1:${port}`;
   }
@@ -64,16 +74,30 @@ export class MockOidcIssuer {
 
   /** Replaces the signing key (the key set then publishes only the new one). */
   async rotateKey(kid: string): Promise<void> {
-    const { privateKey, publicKey } = await generateKeyPair('ES256', { extractable: true });
+    const { privateKey, publicKey } = await generateKeyPair('ES256', {
+      extractable: true,
+    });
     this.kid = kid;
     this.privateKey = privateKey;
-    this.publicJwk = { ...(await exportJWK(publicKey)), kid, alg: 'ES256', use: 'sig' };
+    this.publicJwk = {
+      ...(await exportJWK(publicKey)),
+      kid,
+      alg: 'ES256',
+      use: 'sig',
+    };
   }
 
   /** Signs a token with the current key (or with `key`, to forge one). */
-  async sign(claims: JWTPayload, options: { kid?: string; key?: KeyLike } = {}): Promise<string> {
+  async sign(
+    claims: JWTPayload,
+    options: { kid?: string; key?: KeyLike } = {},
+  ): Promise<string> {
     return new SignJWT(claims)
-      .setProtectedHeader({ alg: 'ES256', kid: options.kid ?? this.kid, typ: 'JWT' })
+      .setProtectedHeader({
+        alg: 'ES256',
+        kid: options.kid ?? this.kid,
+        typ: 'JWT',
+      })
       .sign(options.key ?? this.privateKey!);
   }
 
@@ -108,7 +132,10 @@ export class MockOidcIssuer {
     });
   }
 
-  private async handle(req: IncomingMessage, res: ServerResponse): Promise<void> {
+  private async handle(
+    req: IncomingMessage,
+    res: ServerResponse,
+  ): Promise<void> {
     const url = new URL(req.url ?? '/', 'http://127.0.0.1');
     this.requests.push({ method: req.method ?? 'GET', path: url.pathname });
 
@@ -129,10 +156,15 @@ export class MockOidcIssuer {
       case '/oauth/v2/authorize':
         return this.authorize(url.searchParams, res);
       case '/oauth/v2/token':
-        return req.method === 'POST' ? this.token(req, res) : this.json(res, 405, { error: 'method_not_allowed' });
+        return req.method === 'POST'
+          ? this.token(req, res)
+          : this.json(res, 405, { error: 'method_not_allowed' });
       case '/oidc/v1/end_session':
         res.statusCode = 302;
-        res.setHeader('Location', url.searchParams.get('post_logout_redirect_uri') ?? '/');
+        res.setHeader(
+          'Location',
+          url.searchParams.get('post_logout_redirect_uri') ?? '/',
+        );
         res.end();
         return;
       default:
@@ -164,9 +196,13 @@ export class MockOidcIssuer {
     res.end();
   }
 
-  private async token(req: IncomingMessage, res: ServerResponse): Promise<void> {
+  private async token(
+    req: IncomingMessage,
+    res: ServerResponse,
+  ): Promise<void> {
     const body = new URLSearchParams(await this.readBody(req));
-    const encode = (value: string) => new URLSearchParams({ v: value }).toString().slice(2);
+    const encode = (value: string) =>
+      new URLSearchParams({ v: value }).toString().slice(2);
     const expected = `Basic ${Buffer.from(`${encode(this.clientId)}:${encode(this.clientSecret)}`).toString('base64')}`;
     if (req.headers['authorization'] !== expected) {
       return this.json(res, 401, { error: 'invalid_client' });
@@ -187,8 +223,15 @@ export class MockOidcIssuer {
       return this.json(res, 400, { error: 'invalid_grant' });
     }
     const subject = String(pending.claims.sub ?? 'person-1');
-    const idToken = await this.sign(this.idTokenClaims(subject, { nonce: pending.nonce, ...pending.claims }));
-    return this.json(res, 200, { id_token: idToken, access_token: 'opaque-access-token', token_type: 'Bearer', expires_in: 300 });
+    const idToken = await this.sign(
+      this.idTokenClaims(subject, { nonce: pending.nonce, ...pending.claims }),
+    );
+    return this.json(res, 200, {
+      id_token: idToken,
+      access_token: 'opaque-access-token',
+      token_type: 'Bearer',
+      expires_in: 300,
+    });
   }
 
   private readBody(req: IncomingMessage): Promise<string> {

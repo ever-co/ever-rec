@@ -17,7 +17,10 @@ export const LOGOUT_JTI_TTL_MS = 600 * 1000;
 
 export type EverIdLogoutResult =
   | { result: 'ok'; ended: number }
-  | { result: 'rejected'; reason: 'malformed' | 'invalid' | 'replayed' | 'expired' };
+  | {
+      result: 'rejected';
+      reason: 'malformed' | 'invalid' | 'replayed' | 'expired';
+    };
 
 /**
  * OpenID Connect Back-Channel Logout: the issuer posts a signed logout token when the person ends
@@ -38,7 +41,10 @@ export class EverIdLogoutService {
   ) {}
 
   async handle(logoutToken: unknown): Promise<EverIdLogoutResult> {
-    if (typeof logoutToken !== 'string' || !/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(logoutToken)) {
+    if (
+      typeof logoutToken !== 'string' ||
+      !/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(logoutToken)
+    ) {
       this.logger.warn('ever_id.logout result=malformed');
       return { result: 'rejected', reason: 'malformed' };
     }
@@ -47,7 +53,10 @@ export class EverIdLogoutService {
     try {
       claims = await this.oidc.verifyLogoutToken(logoutToken);
     } catch (error) {
-      const reason = error instanceof EverIdTokenError && error.code === 'expired' ? 'expired' : 'invalid';
+      const reason =
+        error instanceof EverIdTokenError && error.code === 'expired'
+          ? 'expired'
+          : 'invalid';
       this.logger.warn(`ever_id.logout result=${reason}`);
       return { result: 'rejected', reason };
     }
@@ -57,7 +66,11 @@ export class EverIdLogoutService {
       return { result: 'rejected', reason: 'replayed' };
     }
 
-    const uids = await this.sessionIndex.revoke(claims.issuer, claims.sid, claims.subject);
+    const uids = await this.sessionIndex.revoke(
+      claims.issuer,
+      claims.sid,
+      claims.subject,
+    );
     if (this.settings.logoutRevokeFirebase) {
       for (const uid of uids) {
         await this.firebaseAuthService.revokeUserSessions(uid);
@@ -69,11 +82,17 @@ export class EverIdLogoutService {
 
   /** Stores the `jti`; `false` when it was already stored (a replay). */
   private async rememberJti(issuer: string, jti: string): Promise<boolean> {
-    const ref = this.firebaseAdminService.getDatabaseRef(`${EVER_ID_LOGOUT_JTI_ROOT}/${hashHandle(`${issuer}\u0000${jti}`)}`);
+    const ref = this.firebaseAdminService.getDatabaseRef(
+      `${EVER_ID_LOGOUT_JTI_ROOT}/${hashHandle(`${issuer}\u0000${jti}`)}`,
+    );
     const now = Date.now();
     let replay = false;
     await ref.transaction((current: { expiresAt?: number } | null) => {
-      if (current && typeof current.expiresAt === 'number' && current.expiresAt > now) {
+      if (
+        current &&
+        typeof current.expiresAt === 'number' &&
+        current.expiresAt > now
+      ) {
         replay = true;
         return undefined;
       }

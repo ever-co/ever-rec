@@ -1,9 +1,15 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { GauzyRestService } from '../../../../gauzy';
-import { GauzyMapper, IAuthResponse } from '../../../../gauzy/interfaces/gauzy.model';
+import {
+  GauzyMapper,
+  IAuthResponse,
+} from '../../../../gauzy/interfaces/gauzy.model';
 import { AuthProviderId, AuthState } from '../../../interfaces/auth.interface';
 import { AuthContext } from '../../auth.context';
-import type { EverIdLoginPayload, EverIdLoginResult } from './ever-id-login.state';
+import type {
+  EverIdLoginPayload,
+  EverIdLoginResult,
+} from './ever-id-login.state';
 
 /**
  * Optional second step of an Ever ID sign-in when the Gauzy mirror is configured: the verified
@@ -15,20 +21,25 @@ import type { EverIdLoginPayload, EverIdLoginResult } from './ever-id-login.stat
  * sign-in continues without a `GAUZY` entry.
  */
 @Injectable()
-export class GauzyEverIdLoginState implements AuthState<AuthContext<EverIdLoginResult>, EverIdLoginPayload> {
+export class GauzyEverIdLoginState
+  implements AuthState<AuthContext<EverIdLoginResult>, EverIdLoginPayload>
+{
   public readonly ID = AuthProviderId.GAUZY;
   private readonly logger = new Logger(GauzyEverIdLoginState.name);
 
   constructor(private readonly gauzyRestService: GauzyRestService) {}
 
-  public async handle(context: AuthContext<EverIdLoginResult>, payload: EverIdLoginPayload): Promise<void> {
+  public async handle(
+    context: AuthContext<EverIdLoginResult>,
+    payload: EverIdLoginPayload,
+  ): Promise<void> {
     if (!payload.idToken) return;
 
     try {
-      const { data } = await this.gauzyRestService.post<{ id_token: string }, Partial<IAuthResponse>>(
-        'auth/zitadel/token',
-        { id_token: payload.idToken },
-      );
+      const { data } = await this.gauzyRestService.post<
+        { id_token: string },
+        Partial<IAuthResponse>
+      >('auth/zitadel/token', { id_token: payload.idToken });
 
       if (!data?.token || !data?.refresh_token || !data?.user) {
         this.logger.warn('ever_id.gauzy_chain_failed reason=no_session');
@@ -38,7 +49,10 @@ export class GauzyEverIdLoginState implements AuthState<AuthContext<EverIdLoginR
       context.setResult(this.ID, {
         refreshToken: data.refresh_token,
         accessToken: data.token,
-        data: GauzyMapper.toUser(data.user) as unknown as Record<string, unknown>,
+        data: GauzyMapper.toUser(data.user) as unknown as Record<
+          string,
+          unknown
+        >,
       });
     } catch (error: any) {
       const status = error?.response?.status ?? 'unreachable';

@@ -56,9 +56,17 @@ export class EverIdTokenError extends Error {
 }
 
 /** A JSON error answer with a stable `code`. */
-export function everIdHttpError(status: HttpStatus, code: string, message: string): HttpException {
+export function everIdHttpError(
+  status: HttpStatus,
+  code: string,
+  message: string,
+): HttpException {
   return new HttpException({ statusCode: status, code, message }, status);
 }
 
 export const providerDisabled = () =>
-  everIdHttpError(HttpStatus.NOT_FOUND, 'provider_disabled', 'Ever ID sign-in is not enabled on this server.');
+  everIdHttpError(
+    HttpStatus.NOT_FOUND,
+    'provider_disabled',
+    'Ever ID sign-in is not enabled on this server.',
+  );

@@ -10,7 +10,10 @@ import { AuthModule } from '../../src/module/auth/auth.module';
 import { FIREBASE_ADMIN } from '../../src/module/firebase/firebase.constants';
 import { FirebaseModule } from '../../src/module/firebase/firebase.module';
 import { FirebaseRestService } from '../../src/module/firebase/services/firebase-rest.service';
-import { InMemoryFirebaseApp, InMemoryIdentityToolkit } from './in-memory-firebase';
+import {
+  InMemoryFirebaseApp,
+  InMemoryIdentityToolkit,
+} from './in-memory-firebase';
 
 /** Variables every test app gets. */
 export const BASE_ENV: Record<string, string> = {
@@ -65,7 +68,9 @@ export function loadEverIdModule(): any | null {
   }
 }
 
-export async function createTestApp(options: TestAppOptions = {}): Promise<TestApp> {
+export async function createTestApp(
+  options: TestAppOptions = {},
+): Promise<TestApp> {
   for (const name of EVER_ID_VARIABLES) {
     delete process.env[name];
   }
@@ -79,7 +84,11 @@ export async function createTestApp(options: TestAppOptions = {}): Promise<TestA
   const everIdModule = options.everId === false ? null : loadEverIdModule();
   const moduleRef = await Test.createTestingModule({
     imports: [
-      ConfigModule.forRoot({ isGlobal: true, ignoreEnvFile: true, load: [() => env] }),
+      ConfigModule.forRoot({
+        isGlobal: true,
+        ignoreEnvFile: true,
+        load: [() => env],
+      }),
       EventEmitterModule.forRoot(),
       FirebaseModule,
       AuthModule,
@@ -91,8 +100,11 @@ export async function createTestApp(options: TestAppOptions = {}): Promise<TestA
     .overrideProvider(FirebaseRestService)
     .useFactory({
       factory: () => {
-        const service = Object.create(FirebaseRestService.prototype) as FirebaseRestService;
-        (service as any).post = (path: string, body: unknown) => toolkit.post(path, body);
+        const service = Object.create(
+          FirebaseRestService.prototype,
+        ) as FirebaseRestService;
+        (service as any).post = (path: string, body: unknown) =>
+          toolkit.post(path, body);
         return service;
       },
     })

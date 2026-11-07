@@ -114,7 +114,11 @@ export class EverIdLinkService {
   }
 
   /** Records a sign-in with the link. */
-  async touch(issuer: string, subject: string, everPersonId?: string | null): Promise<void> {
+  async touch(
+    issuer: string,
+    subject: string,
+    everPersonId?: string | null,
+  ): Promise<void> {
     const update: Partial<EverIdLink> = { lastLoginAt: Date.now() };
     if (everPersonId) {
       update.everPersonId = everPersonId;
@@ -129,17 +133,27 @@ export class EverIdLinkService {
     if (!existing || existing.uid !== uid) {
       return false;
     }
-    await this.firebaseAdminService.getDatabase().ref().update({
-      [`${EVER_ID_LINK_ROOTS.links}/${key}`]: null,
-      [`${EVER_ID_LINK_ROOTS.byUid}/${uid}/${key}`]: null,
-    });
+    await this.firebaseAdminService
+      .getDatabase()
+      .ref()
+      .update({
+        [`${EVER_ID_LINK_ROOTS.links}/${key}`]: null,
+        [`${EVER_ID_LINK_ROOTS.byUid}/${uid}/${key}`]: null,
+      });
     return true;
   }
 
   async listForUser(uid: string): Promise<EverIdIdentitySummary[]> {
-    const index = await this.firebaseAdminService.getDatabaseRef(`${EVER_ID_LINK_ROOTS.byUid}/${uid}`).get();
+    const index = await this.firebaseAdminService
+      .getDatabaseRef(`${EVER_ID_LINK_ROOTS.byUid}/${uid}`)
+      .get();
     const keys = index.exists() ? Object.keys(index.val() ?? {}) : [];
-    const links = await Promise.all(keys.map(async (key) => (await this.linkRef(key).get()).val() as EverIdLink | null));
+    const links = await Promise.all(
+      keys.map(
+        async (key) =>
+          (await this.linkRef(key).get()).val() as EverIdLink | null,
+      ),
+    );
     return links
       .filter((link): link is EverIdLink => !!link && link.uid === uid)
       .map((link) => ({
@@ -154,10 +168,14 @@ export class EverIdLinkService {
   }
 
   private linkRef(key: string) {
-    return this.firebaseAdminService.getDatabaseRef(`${EVER_ID_LINK_ROOTS.links}/${key}`);
+    return this.firebaseAdminService.getDatabaseRef(
+      `${EVER_ID_LINK_ROOTS.links}/${key}`,
+    );
   }
 
   private indexRef(uid: string, key: string) {
-    return this.firebaseAdminService.getDatabaseRef(`${EVER_ID_LINK_ROOTS.byUid}/${uid}/${key}`);
+    return this.firebaseAdminService.getDatabaseRef(
+      `${EVER_ID_LINK_ROOTS.byUid}/${uid}/${key}`,
+    );
   }
 }

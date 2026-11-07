@@ -1,6 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { GAUZY_AVAILABLE } from '../../../../gauzy';
-import { AuthProviderId, AuthState, TokenContainer } from '../../../interfaces/auth.interface';
+import {
+  AuthProviderId,
+  AuthState,
+  TokenContainer,
+} from '../../../interfaces/auth.interface';
 import { AuthContext } from '../../auth.context';
 import { GauzyEverIdLoginState } from './gauzy-ever-id-login.state';
 
@@ -38,7 +42,9 @@ export type EverIdLoginResult = TokenContainer<Record<string, unknown>>;
  * continues with {@link GauzyEverIdLoginState}, whose failure never fails the sign-in.
  */
 @Injectable()
-export class EverIdLoginState implements AuthState<AuthContext<EverIdLoginResult>, EverIdLoginPayload> {
+export class EverIdLoginState
+  implements AuthState<AuthContext<EverIdLoginResult>, EverIdLoginPayload>
+{
   public readonly ID = AuthProviderId.EVER_ID;
 
   constructor(
@@ -47,7 +53,10 @@ export class EverIdLoginState implements AuthState<AuthContext<EverIdLoginResult
     private readonly isGauzyAvailable: boolean,
   ) {}
 
-  public async handle(context: AuthContext<EverIdLoginResult>, payload: EverIdLoginPayload): Promise<void> {
+  public async handle(
+    context: AuthContext<EverIdLoginResult>,
+    payload: EverIdLoginPayload,
+  ): Promise<void> {
     context.setResult(AuthProviderId.FIREBASE, {
       accessToken: payload.firebase.idToken,
       refreshToken: payload.firebase.refreshToken,

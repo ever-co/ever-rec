@@ -1,4 +1,8 @@
-import { isEverHost, isEverIdAvailable, readEverIdSettings } from './ever-id.config';
+import {
+  isEverHost,
+  isEverIdAvailable,
+  readEverIdSettings,
+} from './ever-id.config';
 
 const CLIENT = {
   EVER_ID_CLIENT_ID: 'rec-client',
@@ -17,11 +21,19 @@ describe('Ever ID settings', () => {
   });
 
   it('ignores every other variable while the issuer is unset, including an unknown link mode', () => {
-    expect(() => readEverIdSettings({ EVER_ID_LINK_MODE: 'confirmed', EVER_ID_ALLOWED_ISSUERS: 'not a url' })).not.toThrow();
+    expect(() =>
+      readEverIdSettings({
+        EVER_ID_LINK_MODE: 'confirmed',
+        EVER_ID_ALLOWED_ISSUERS: 'not a url',
+      }),
+    ).not.toThrow();
   });
 
   it('turns on with a non-Ever issuer and a complete client', () => {
-    const settings = readEverIdSettings({ EVER_ID_ISSUER_URL: 'https://idp.example.test/', ...CLIENT });
+    const settings = readEverIdSettings({
+      EVER_ID_ISSUER_URL: 'https://idp.example.test/',
+      ...CLIENT,
+    });
     expect(isEverIdAvailable(settings)).toBe(true);
     expect(settings.issuer).toBe('https://idp.example.test');
     expect(settings.issuers).toEqual(['https://idp.example.test']);
@@ -32,10 +44,15 @@ describe('Ever ID settings', () => {
   });
 
   it('reads the deprecated EVER_ID_ISSUER alias with exactly one warning', () => {
-    const settings = readEverIdSettings({ EVER_ID_ISSUER: 'https://idp.example.test', ...CLIENT });
+    const settings = readEverIdSettings({
+      EVER_ID_ISSUER: 'https://idp.example.test',
+      ...CLIENT,
+    });
     expect(isEverIdAvailable(settings)).toBe(true);
     expect(settings.issuer).toBe('https://idp.example.test');
-    expect(settings.warnings).toEqual(['EVER_ID_ISSUER is deprecated; set EVER_ID_ISSUER_URL instead.']);
+    expect(settings.warnings).toEqual([
+      'EVER_ID_ISSUER is deprecated; set EVER_ID_ISSUER_URL instead.',
+    ]);
   });
 
   it('reads the deprecated EVER_ID_JIT_SIGNUP alias with one warning', () => {
@@ -45,11 +62,16 @@ describe('Ever ID settings', () => {
       ...CLIENT,
     });
     expect(settings.signUpAllowed).toBe(false);
-    expect(settings.warnings).toEqual(['EVER_ID_JIT_SIGNUP is deprecated; set EVER_ID_SIGN_UP_ALLOWED instead.']);
+    expect(settings.warnings).toEqual([
+      'EVER_ID_JIT_SIGNUP is deprecated; set EVER_ID_SIGN_UP_ALLOWED instead.',
+    ]);
   });
 
   it('refuses an Ever-hosted issuer on an install that is not Ever-operated, with one problem line', () => {
-    const settings = readEverIdSettings({ EVER_ID_ISSUER_URL: 'https://auth.ever.co', ...CLIENT });
+    const settings = readEverIdSettings({
+      EVER_ID_ISSUER_URL: 'https://auth.ever.co',
+      ...CLIENT,
+    });
     expect(isEverIdAvailable(settings)).toBe(false);
     expect(settings.problems).toHaveLength(1);
     expect(settings.problems[0]).toContain('EVER_INSTALL_SOURCE=cloud');
@@ -67,7 +89,12 @@ describe('Ever ID settings', () => {
   it('accepts an Ever-hosted issuer handed over by a connected-instance module when the environment sets none', () => {
     const settings = readEverIdSettings(
       { ...CLIENT, EVER_ID_CLIENT_ID: '', EVER_ID_CLIENT_SECRET: '' },
-      { enabled: true, issuer: 'https://auth.ever.co', clientId: 'inst-client', clientSecret: 'inst-secret' },
+      {
+        enabled: true,
+        issuer: 'https://auth.ever.co',
+        clientId: 'inst-client',
+        clientSecret: 'inst-secret',
+      },
     );
     expect(isEverIdAvailable(settings)).toBe(true);
     expect(settings.clientId).toBe('inst-client');
@@ -76,44 +103,78 @@ describe('Ever ID settings', () => {
   it('drops an Ever-hosted extra issuer on a self-hosted install and keeps the rest', () => {
     const settings = readEverIdSettings({
       EVER_ID_ISSUER_URL: 'https://idp.example.test',
-      EVER_ID_ALLOWED_ISSUERS: 'https://auth.ever.co, https://idp2.example.test',
+      EVER_ID_ALLOWED_ISSUERS:
+        'https://auth.ever.co, https://idp2.example.test',
       ...CLIENT,
     });
     expect(isEverIdAvailable(settings)).toBe(true);
-    expect(settings.issuers).toEqual(['https://idp.example.test', 'https://idp2.example.test']);
+    expect(settings.issuers).toEqual([
+      'https://idp.example.test',
+      'https://idp2.example.test',
+    ]);
     expect(settings.warnings).toHaveLength(1);
   });
 
   it('refuses a link mode other than explicit at boot', () => {
     expect(() =>
-      readEverIdSettings({ EVER_ID_ISSUER_URL: 'https://idp.example.test', EVER_ID_LINK_MODE: 'confirmed', ...CLIENT }),
+      readEverIdSettings({
+        EVER_ID_ISSUER_URL: 'https://idp.example.test',
+        EVER_ID_LINK_MODE: 'confirmed',
+        ...CLIENT,
+      }),
     ).toThrow(/EVER_ID_LINK_MODE/);
     expect(() =>
-      readEverIdSettings({ EVER_ID_ISSUER_URL: 'https://idp.example.test', EVER_ID_LINK_MODE: 'explicit', ...CLIENT }),
+      readEverIdSettings({
+        EVER_ID_ISSUER_URL: 'https://idp.example.test',
+        EVER_ID_LINK_MODE: 'explicit',
+        ...CLIENT,
+      }),
     ).not.toThrow();
   });
 
   it('accepts at most three issuers', () => {
     const settings = readEverIdSettings({
       EVER_ID_ISSUER_URL: 'https://a.example.test',
-      EVER_ID_ALLOWED_ISSUERS: 'https://b.example.test,https://c.example.test,https://d.example.test',
+      EVER_ID_ALLOWED_ISSUERS:
+        'https://b.example.test,https://c.example.test,https://d.example.test',
       ...CLIENT,
     });
     expect(isEverIdAvailable(settings)).toBe(false);
   });
 
   it('stays off without a complete client and names what is missing', () => {
-    const settings = readEverIdSettings({ EVER_ID_ISSUER_URL: 'https://idp.example.test' });
+    const settings = readEverIdSettings({
+      EVER_ID_ISSUER_URL: 'https://idp.example.test',
+    });
     expect(isEverIdAvailable(settings)).toBe(false);
     expect(settings.problems[0]).toContain('EVER_ID_CLIENT_ID');
     expect(settings.problems[0]).toContain('EVER_ID_CLIENT_SECRET');
   });
 
   it('requires https, except on a loopback host', () => {
-    expect(isEverIdAvailable(readEverIdSettings({ EVER_ID_ISSUER_URL: 'http://idp.example.test', ...CLIENT }))).toBe(false);
-    expect(isEverIdAvailable(readEverIdSettings({ EVER_ID_ISSUER_URL: 'http://127.0.0.1:8080', ...CLIENT }))).toBe(true);
     expect(
-      isEverIdAvailable(readEverIdSettings({ EVER_ID_ISSUER_URL: 'https://idp.example.test?x=1', ...CLIENT })),
+      isEverIdAvailable(
+        readEverIdSettings({
+          EVER_ID_ISSUER_URL: 'http://idp.example.test',
+          ...CLIENT,
+        }),
+      ),
+    ).toBe(false);
+    expect(
+      isEverIdAvailable(
+        readEverIdSettings({
+          EVER_ID_ISSUER_URL: 'http://127.0.0.1:8080',
+          ...CLIENT,
+        }),
+      ),
+    ).toBe(true);
+    expect(
+      isEverIdAvailable(
+        readEverIdSettings({
+          EVER_ID_ISSUER_URL: 'https://idp.example.test?x=1',
+          ...CLIENT,
+        }),
+      ),
     ).toBe(false);
   });
 

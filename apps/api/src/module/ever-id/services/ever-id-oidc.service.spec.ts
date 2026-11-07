@@ -1,9 +1,21 @@
 import { readFileSync } from 'fs';
-import { exportJWK, generateKeyPair, JWK, JWTPayload, KeyLike, SignJWT } from 'jose';
+import {
+  exportJWK,
+  generateKeyPair,
+  JWK,
+  JWTPayload,
+  KeyLike,
+  SignJWT,
+} from 'jose';
 import { join } from 'path';
 import { EverIdSettings, readEverIdSettings } from '../ever-id.config';
 import { EverIdTokenError } from '../ever-id.errors';
-import { BACKCHANNEL_LOGOUT_EVENT, codeChallenge, EverIdOidcService, JWKS_REFETCH_COOLDOWN_MS } from './ever-id-oidc.service';
+import {
+  BACKCHANNEL_LOGOUT_EVENT,
+  codeChallenge,
+  EverIdOidcService,
+  JWKS_REFETCH_COOLDOWN_MS,
+} from './ever-id-oidc.service';
 
 const ISSUER = 'https://idp.example.test';
 const CLIENT_ID = 'rec-client';
@@ -17,7 +29,11 @@ interface Key {
 
 async function makeKey(kid: string): Promise<Key> {
   const { privateKey, publicKey } = await generateKeyPair('ES256');
-  return { kid, privateKey, jwk: { ...(await exportJWK(publicKey)), kid, alg: 'ES256', use: 'sig' } };
+  return {
+    kid,
+    privateKey,
+    jwk: { ...(await exportJWK(publicKey)), kid, alg: 'ES256', use: 'sig' },
+  };
 }
 
 /** An HttpService double serving discovery and a key set from memory, counting requests. */
@@ -61,7 +77,8 @@ function settings(overrides: Record<string, string> = {}): EverIdSettings {
     EVER_ID_ISSUER_URL: ISSUER,
     EVER_ID_CLIENT_ID: CLIENT_ID,
     EVER_ID_CLIENT_SECRET: 'rec-secret',
-    EVER_ID_REDIRECT_URL: 'https://api.example.test/api/v1/auth/ever-id/callback',
+    EVER_ID_REDIRECT_URL:
+      'https://api.example.test/api/v1/auth/ever-id/callback',
     WEBSITE_URL: 'https://app.example.test',
     ...overrides,
   });
@@ -93,7 +110,9 @@ describe('EverIdOidcService', () => {
   };
 
   const sign = (payload: JWTPayload, signer: Key = key, kid = signer.kid) =>
-    new SignJWT(payload).setProtectedHeader({ alg: 'ES256', kid, typ: 'JWT' }).sign(signer.privateKey);
+    new SignJWT(payload)
+      .setProtectedHeader({ alg: 'ES256', kid, typ: 'JWT' })
+      .sign(signer.privateKey);
 
   const expectCode = async (promise: Promise<unknown>, code: string) => {
     await expect(promise).rejects.toBeInstanceOf(EverIdTokenError);
@@ -109,16 +128,28 @@ describe('EverIdOidcService', () => {
 
   describe('authorization URL', () => {
     it('uses PKCE S256, state and nonce, the client and redirect URI, and never a login hint', async () => {
-      const url = new URL(await service.authorizationUrl({ state: 'state-1', nonce: NONCE, codeVerifier: 'verifier-1' }));
+      const url = new URL(
+        await service.authorizationUrl({
+          state: 'state-1',
+          nonce: NONCE,
+          codeVerifier: 'verifier-1',
+        }),
+      );
       expect(url.origin + url.pathname).toBe(`${ISSUER}/oauth/v2/authorize`);
       expect(url.searchParams.get('response_type')).toBe('code');
       expect(url.searchParams.get('client_id')).toBe(CLIENT_ID);
-      expect(url.searchParams.get('redirect_uri')).toBe('https://api.example.test/api/v1/auth/ever-id/callback');
+      expect(url.searchParams.get('redirect_uri')).toBe(
+        'https://api.example.test/api/v1/auth/ever-id/callback',
+      );
       expect(url.searchParams.get('state')).toBe('state-1');
       expect(url.searchParams.get('nonce')).toBe(NONCE);
       expect(url.searchParams.get('code_challenge_method')).toBe('S256');
-      expect(url.searchParams.get('code_challenge')).toBe(codeChallenge('verifier-1'));
-      expect(url.searchParams.get('scope')).toBe('openid profile email urn:zitadel:iam:user:resourceowner');
+      expect(url.searchParams.get('code_challenge')).toBe(
+        codeChallenge('verifier-1'),
+      );
+      expect(url.searchParams.get('scope')).toBe(
+        'openid profile email urn:zitadel:iam:user:resourceowner',
+      );
       expect(url.searchParams.has('login_hint')).toBe(false);
       expect(url.searchParams.has('prompt')).toBe(false);
       expect(url.toString()).not.toMatch(/urn:zitadel:iam:org:id/);
@@ -126,15 +157,30 @@ describe('EverIdOidcService', () => {
 
     it('forces a fresh authentication for a connection', async () => {
       const url = new URL(
-        await service.authorizationUrl({ state: 's', nonce: NONCE, codeVerifier: 'v', prompt: 'login', maxAge: 300 }),
+        await service.authorizationUrl({
+          state: 's',
+          nonce: NONCE,
+          codeVerifier: 'v',
+          prompt: 'login',
+          maxAge: 300,
+        }),
       );
       expect(url.searchParams.get('prompt')).toBe('login');
       expect(url.searchParams.get('max_age')).toBe('300');
     });
 
     it('adds the platform audience scope when a project id is configured', async () => {
-      service = new TestOidcService(settings({ EVER_ID_PLATFORM_PROJECT_ID: '330011223344550000' }), http.service as any);
-      const url = new URL(await service.authorizationUrl({ state: 's', nonce: NONCE, codeVerifier: 'v' }));
+      service = new TestOidcService(
+        settings({ EVER_ID_PLATFORM_PROJECT_ID: '330011223344550000' }),
+        http.service as any,
+      );
+      const url = new URL(
+        await service.authorizationUrl({
+          state: 's',
+          nonce: NONCE,
+          codeVerifier: 'v',
+        }),
+      );
       expect(url.searchParams.get('scope')).toBe(
         'openid profile email urn:zitadel:iam:user:resourceowner urn:zitadel:iam:org:project:id:330011223344550000:aud',
       );
@@ -152,7 +198,14 @@ describe('EverIdOidcService', () => {
         },
       }));
       service = new TestOidcService(settings(), http.service as any);
-      await expectCode(service.authorizationUrl({ state: 's', nonce: NONCE, codeVerifier: 'v' }), 'provider_error');
+      await expectCode(
+        service.authorizationUrl({
+          state: 's',
+          nonce: NONCE,
+          codeVerifier: 'v',
+        }),
+        'provider_error',
+      );
     });
   });
 
@@ -170,65 +223,115 @@ describe('EverIdOidcService', () => {
     });
 
     it('rejects a token from another issuer', async () => {
-      await expectCode(service.verifyIdToken(await sign(claims({ iss: 'https://evil.example.test' })), NONCE), 'issuer_rejected');
+      await expectCode(
+        service.verifyIdToken(
+          await sign(claims({ iss: 'https://evil.example.test' })),
+          NONCE,
+        ),
+        'issuer_rejected',
+      );
     });
 
     it('rejects a token for another audience', async () => {
       await expectCode(
-        service.verifyIdToken(await sign(claims({ aud: 'another-client', azp: 'another-client' })), NONCE),
+        service.verifyIdToken(
+          await sign(claims({ aud: 'another-client', azp: 'another-client' })),
+          NONCE,
+        ),
         'audience_rejected',
       );
     });
 
     it('rejects a token for several audiences that names another authorized party', async () => {
       await expectCode(
-        service.verifyIdToken(await sign(claims({ aud: [CLIENT_ID, 'x'], azp: 'x' })), NONCE),
+        service.verifyIdToken(
+          await sign(claims({ aud: [CLIENT_ID, 'x'], azp: 'x' })),
+          NONCE,
+        ),
         'audience_rejected',
       );
     });
 
     it('rejects an expired token', async () => {
       const now = Math.floor(service.clock / 1000);
-      await expectCode(service.verifyIdToken(await sign(claims({ iat: now - 900, exp: now - 600 })), NONCE), 'expired');
+      await expectCode(
+        service.verifyIdToken(
+          await sign(claims({ iat: now - 900, exp: now - 600 })),
+          NONCE,
+        ),
+        'expired',
+      );
     });
 
     it('rejects a bad signature', async () => {
       const forger = await makeKey('key-1');
-      await expectCode(service.verifyIdToken(await sign(claims(), forger), NONCE), 'token_invalid');
+      await expectCode(
+        service.verifyIdToken(await sign(claims(), forger), NONCE),
+        'token_invalid',
+      );
     });
 
     it('rejects a nonce mismatch', async () => {
-      await expectCode(service.verifyIdToken(await sign(claims({ nonce: 'other' })), NONCE), 'nonce_mismatch');
+      await expectCode(
+        service.verifyIdToken(await sign(claims({ nonce: 'other' })), NONCE),
+        'nonce_mismatch',
+      );
     });
 
     it('rejects an unverified e-mail address', async () => {
-      await expectCode(service.verifyIdToken(await sign(claims({ email_verified: false })), NONCE), 'email_unverified');
-      await expectCode(service.verifyIdToken(await sign(claims({ email_verified: undefined })), NONCE), 'email_unverified');
+      await expectCode(
+        service.verifyIdToken(
+          await sign(claims({ email_verified: false })),
+          NONCE,
+        ),
+        'email_unverified',
+      );
+      await expectCode(
+        service.verifyIdToken(
+          await sign(claims({ email_verified: undefined })),
+          NONCE,
+        ),
+        'email_unverified',
+      );
     });
 
     it('rejects an unsigned token', async () => {
-      const header = Buffer.from(JSON.stringify({ alg: 'none', typ: 'JWT' })).toString('base64url');
+      const header = Buffer.from(
+        JSON.stringify({ alg: 'none', typ: 'JWT' }),
+      ).toString('base64url');
       const body = Buffer.from(JSON.stringify(claims())).toString('base64url');
-      await expectCode(service.verifyIdToken(`${header}.${body}.`, NONCE), 'token_invalid');
+      await expectCode(
+        service.verifyIdToken(`${header}.${body}.`, NONCE),
+        'token_invalid',
+      );
     });
 
     it('refetches the key set for an unknown key once, then not again within 30 s', async () => {
       await service.verifyIdToken(await sign(claims()), NONCE); // caches discovery and keys
-      const keyFetches = () => http.calls.filter((url) => url.endsWith('/keys')).length;
+      const keyFetches = () =>
+        http.calls.filter((url) => url.endsWith('/keys')).length;
       expect(keyFetches()).toBe(1);
 
       service.clock += 1000;
       const rotated = await makeKey('key-2');
-      await expectCode(service.verifyIdToken(await sign(claims(), rotated), NONCE), 'token_invalid');
+      await expectCode(
+        service.verifyIdToken(await sign(claims(), rotated), NONCE),
+        'token_invalid',
+      );
       expect(keyFetches()).toBe(2); // one refetch for the unknown kid
 
       service.clock += 1000;
-      await expectCode(service.verifyIdToken(await sign(claims(), rotated), NONCE), 'token_invalid');
+      await expectCode(
+        service.verifyIdToken(await sign(claims(), rotated), NONCE),
+        'token_invalid',
+      );
       expect(keyFetches()).toBe(2); // within the cooldown: no request
 
       service.clock += JWKS_REFETCH_COOLDOWN_MS;
       published = [key.jwk, rotated.jwk];
-      await expect(service.verifyIdToken(await sign(claims(), rotated), NONCE)).resolves.toMatchObject({
+      await expect(
+        service.verifyIdToken(await sign(claims(), rotated), NONCE),
+      ).resolves.toMatchObject({
         subject: 'subject-1',
       });
       expect(keyFetches()).toBe(3);
@@ -264,17 +367,29 @@ describe('EverIdOidcService', () => {
         }),
         post: jest.fn(),
       };
-      service = new TestOidcService(settings({ EVER_ID_ALLOWED_ISSUERS: second }), multi as any);
+      service = new TestOidcService(
+        settings({ EVER_ID_ALLOWED_ISSUERS: second }),
+        multi as any,
+      );
       const token = await sign(claims({ iss: second }), secondKey);
-      await expect(service.verifyIdToken(token, NONCE)).resolves.toMatchObject({ issuer: second });
+      await expect(service.verifyIdToken(token, NONCE)).resolves.toMatchObject({
+        issuer: second,
+      });
     });
   });
 
   describe('code exchange', () => {
     it('posts the code with the PKCE verifier and client credential, then verifies the ID token', async () => {
       const idToken = await sign(claims());
-      http.service.post.mockResolvedValue({ status: 200, data: { id_token: idToken, access_token: 'opaque' } });
-      const { claims: verified } = await service.exchangeCode('code-1', 'verifier-1', NONCE);
+      http.service.post.mockResolvedValue({
+        status: 200,
+        data: { id_token: idToken, access_token: 'opaque' },
+      });
+      const { claims: verified } = await service.exchangeCode(
+        'code-1',
+        'verifier-1',
+        NONCE,
+      );
       expect(verified.subject).toBe('subject-1');
 
       const [url, body, config] = http.service.post.mock.calls[0];
@@ -284,12 +399,20 @@ describe('EverIdOidcService', () => {
       expect(form.get('code')).toBe('code-1');
       expect(form.get('code_verifier')).toBe('verifier-1');
       expect(form.has('client_secret')).toBe(false);
-      expect(config.headers.Authorization).toBe(`Basic ${Buffer.from('rec-client:rec-secret').toString('base64')}`);
+      expect(config.headers.Authorization).toBe(
+        `Basic ${Buffer.from('rec-client:rec-secret').toString('base64')}`,
+      );
     });
 
     it('maps a refused code to provider_error', async () => {
-      http.service.post.mockResolvedValue({ status: 400, data: { error: 'invalid_grant' } });
-      await expectCode(service.exchangeCode('code-1', 'verifier-1', NONCE), 'provider_error');
+      http.service.post.mockResolvedValue({
+        status: 400,
+        data: { error: 'invalid_grant' },
+      });
+      await expectCode(
+        service.exchangeCode('code-1', 'verifier-1', NONCE),
+        'provider_error',
+      );
     });
   });
 
@@ -305,7 +428,9 @@ describe('EverIdOidcService', () => {
     });
 
     it('accepts a valid logout token', async () => {
-      await expect(service.verifyLogoutToken(await sign(logoutClaims()))).resolves.toMatchObject({
+      await expect(
+        service.verifyLogoutToken(await sign(logoutClaims())),
+      ).resolves.toMatchObject({
         issuer: ISSUER,
         sid: 'sid-1',
         jti: 'jti-1',
@@ -314,26 +439,49 @@ describe('EverIdOidcService', () => {
 
     it('rejects a logout token older than 300 s', async () => {
       const iat = Math.floor(service.clock / 1000) - 301;
-      await expectCode(service.verifyLogoutToken(await sign(logoutClaims({ iat }))), 'expired');
+      await expectCode(
+        service.verifyLogoutToken(await sign(logoutClaims({ iat }))),
+        'expired',
+      );
     });
 
     it('rejects a logout token without the back-channel event, with a nonce, or without jti', async () => {
-      await expectCode(service.verifyLogoutToken(await sign(logoutClaims({ events: {} }))), 'token_invalid');
-      await expectCode(service.verifyLogoutToken(await sign(logoutClaims({ nonce: 'x' }))), 'token_invalid');
-      await expectCode(service.verifyLogoutToken(await sign(logoutClaims({ jti: undefined }))), 'token_invalid');
+      await expectCode(
+        service.verifyLogoutToken(await sign(logoutClaims({ events: {} }))),
+        'token_invalid',
+      );
+      await expectCode(
+        service.verifyLogoutToken(await sign(logoutClaims({ nonce: 'x' }))),
+        'token_invalid',
+      );
+      await expectCode(
+        service.verifyLogoutToken(await sign(logoutClaims({ jti: undefined }))),
+        'token_invalid',
+      );
     });
 
     it('rejects a logout token naming neither a session nor a subject', async () => {
-      await expectCode(service.verifyLogoutToken(await sign(logoutClaims({ sid: undefined }))), 'token_invalid');
+      await expectCode(
+        service.verifyLogoutToken(await sign(logoutClaims({ sid: undefined }))),
+        'token_invalid',
+      );
     });
 
     it('rejects a logout token for another audience', async () => {
-      await expectCode(service.verifyLogoutToken(await sign(logoutClaims({ aud: 'other' }))), 'audience_rejected');
+      await expectCode(
+        service.verifyLogoutToken(await sign(logoutClaims({ aud: 'other' }))),
+        'audience_rejected',
+      );
     });
   });
 
   describe('claim examples (contract)', () => {
-    const examples = JSON.parse(readFileSync(join(__dirname, '__fixtures__', 'token-claims-examples.json'), 'utf8'));
+    const examples = JSON.parse(
+      readFileSync(
+        join(__dirname, '__fixtures__', 'token-claims-examples.json'),
+        'utf8',
+      ),
+    );
     const withClient = (value: unknown): unknown =>
       JSON.parse(JSON.stringify(value).replace(/\$CLIENT_ID/g, CLIENT_ID));
 
@@ -354,8 +502,14 @@ describe('EverIdOidcService', () => {
     }
 
     it('parses the logout token example', async () => {
-      const payload = { ...(withClient(examples.logoutToken.claims) as JWTPayload), iss: ISSUER, iat: Math.floor(service.clock / 1000) };
-      await expect(service.verifyLogoutToken(await sign(payload))).resolves.toMatchObject({ sid: 'V1_3a9b', jti: 'V1_lo42' });
+      const payload = {
+        ...(withClient(examples.logoutToken.claims) as JWTPayload),
+        iss: ISSUER,
+        iat: Math.floor(service.clock / 1000),
+      };
+      await expect(
+        service.verifyLogoutToken(await sign(payload)),
+      ).resolves.toMatchObject({ sid: 'V1_3a9b', jti: 'V1_lo42' });
     });
   });
 });

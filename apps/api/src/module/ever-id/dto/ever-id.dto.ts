@@ -15,7 +15,9 @@ import {
 const HANDLE = /^[A-Za-z0-9_-]{32,128}$/;
 
 export class EverIdExchangeDto {
-  @ApiProperty({ description: 'One-time hand-off code from the sign-in redirect' })
+  @ApiProperty({
+    description: 'One-time hand-off code from the sign-in redirect',
+  })
   @IsString()
   @Matches(HANDLE)
   code: string;

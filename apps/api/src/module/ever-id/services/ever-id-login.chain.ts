@@ -64,10 +64,15 @@ export class EverIdLoginChain {
     private readonly eventEmitter: EventEmitter2,
   ) {}
 
-  async open(uid: string, identity: EverIdSessionIdentity, options: OpenSessionOptions): Promise<EverIdSession> {
+  async open(
+    uid: string,
+    identity: EverIdSessionIdentity,
+    options: OpenSessionOptions,
+  ): Promise<EverIdSession> {
     const userRecord = await this.firebaseAdminService.getUser(uid);
     const customToken = await this.userService.generateCustomToken(uid);
-    const { data: firebase } = await this.firebaseRestService.signInWithCustomToken(customToken);
+    const { data: firebase } =
+      await this.firebaseRestService.signInWithCustomToken(customToken);
 
     if (!firebase?.idToken || !firebase?.refreshToken) {
       throw new Error('Firebase did not open a session');
@@ -75,7 +80,8 @@ export class EverIdLoginChain {
 
     const expiresIn = Number(firebase.expiresIn ?? 3600);
     const expiresAt = new Date(Date.now() + expiresIn * 1000).toString();
-    const profile = (await this.userProfileService.getUserData(uid))?.data ?? {};
+    const profile =
+      (await this.userProfileService.getUserData(uid))?.data ?? {};
 
     const session: Omit<EverIdSession, 'refreshToken'> = {
       id: userRecord.uid,
@@ -91,12 +97,21 @@ export class EverIdLoginChain {
         isDropBoxIntegrated: !!profile.dropbox?.isDropBoxIntegrated,
         email: profile.dropbox?.email ?? null,
       },
-      jira: { isIntegrated: !!profile.jira?.isIntegrated, email: profile.jira?.email ?? null },
+      jira: {
+        isIntegrated: !!profile.jira?.isIntegrated,
+        email: profile.jira?.email ?? null,
+      },
       isNewUser: options.isNewUser,
-      trello: { isIntegrated: !!profile.trello?.isIntegrated, email: profile.trello?.email ?? null },
+      trello: {
+        isIntegrated: !!profile.trello?.isIntegrated,
+        email: profile.trello?.email ?? null,
+      },
     };
 
-    const context = new AuthContext<EverIdLoginResult>(this.everIdLoginState, this.mergeTokenPolicy);
+    const context = new AuthContext<EverIdLoginResult>(
+      this.everIdLoginState,
+      this.mergeTokenPolicy,
+    );
     await context.request({
       firebase: {
         idToken: firebase.idToken,
@@ -125,7 +140,10 @@ export class EverIdLoginChain {
       name: session.displayName,
       avatar: session.photoURL,
     });
-    this.eventEmitter.emit('analytics.track', 'User Logged', { userId: uid, accountType: 'Ever ID' });
+    this.eventEmitter.emit('analytics.track', 'User Logged', {
+      userId: uid,
+      accountType: 'Ever ID',
+    });
     this.logger.log(`Ever ID sign-in: ${uid}`);
 
     // Same key order as the Google sign-in answer.

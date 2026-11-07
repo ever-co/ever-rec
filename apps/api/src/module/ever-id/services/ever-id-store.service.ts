@@ -51,8 +51,16 @@ export class EverIdStoreService {
   ) {}
 
   /** Stores `value` under `handle` for `ttlMs`. */
-  async put(root: EverIdRoot, handle: string, value: unknown, ttlMs: number): Promise<void> {
-    const record: StoredRecord = { v: this.crypto.seal(root, value), expiresAt: Date.now() + ttlMs };
+  async put(
+    root: EverIdRoot,
+    handle: string,
+    value: unknown,
+    ttlMs: number,
+  ): Promise<void> {
+    const record: StoredRecord = {
+      v: this.crypto.seal(root, value),
+      expiresAt: Date.now() + ttlMs,
+    };
     await this.ref(root, handle).set(record);
     this.sweepSoon(root);
   }
@@ -70,7 +78,10 @@ export class EverIdStoreService {
   /** Reads the record without consuming it; `null` when absent or expired. */
   async peek<T>(root: EverIdRoot, handle: string): Promise<T | null> {
     const snapshot = await this.ref(root, handle).get();
-    return this.openRecord<T>(root, snapshot.exists() ? (snapshot.val() as StoredRecord) : null);
+    return this.openRecord<T>(
+      root,
+      snapshot.exists() ? (snapshot.val() as StoredRecord) : null,
+    );
   }
 
   /** Deletes the record. */
@@ -108,16 +119,27 @@ export class EverIdStoreService {
     }
     this.lastSweep.set(root, now);
     this.sweep(root).catch((error: unknown) =>
-      this.logger.warn(`Sweeping ${root} failed: ${error instanceof Error ? error.message : 'error'}`),
+      this.logger.warn(
+        `Sweeping ${root} failed: ${error instanceof Error ? error.message : 'error'}`,
+      ),
     );
   }
 
   private ref(root: EverIdRoot, handle: string) {
-    return this.firebaseAdminService.getDatabaseRef(`${root}/${hashHandle(handle)}`);
+    return this.firebaseAdminService.getDatabaseRef(
+      `${root}/${hashHandle(handle)}`,
+    );
   }
 
-  private openRecord<T>(root: EverIdRoot, record: StoredRecord | null): T | null {
-    if (!record || typeof record.expiresAt !== 'number' || record.expiresAt <= Date.now()) {
+  private openRecord<T>(
+    root: EverIdRoot,
+    record: StoredRecord | null,
+  ): T | null {
+    if (
+      !record ||
+      typeof record.expiresAt !== 'number' ||
+      record.expiresAt <= Date.now()
+    ) {
       return null;
     }
     return this.crypto.open<T>(root, record.v);
