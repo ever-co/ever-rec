@@ -124,6 +124,41 @@ describe('Ever Platform settings entry', () => {
     expect(container.querySelector('[data-type="ever-platform"]')).not.toBeNull();
     expect(message('navigation.everPlatform')).toBe('Ever Platform');
   });
+
+  it('asks again for the next person who signs in without a reload (the answer is kept per session)', async () => {
+    const member = { idToken: 'member-id-token', refreshToken: 'member-session' };
+    const operator = { idToken: 'operator-id-token', refreshToken: 'operator-session' };
+    api.getStatus.mockImplementationOnce(notFound);
+    mockCookies.getCookies.mockReturnValue(member as any);
+    expect(await loadEverPlatformAvailable()).toBe(false);
+    expect(await loadEverPlatformAvailable()).toBe(false);
+    expect(api.getStatus).toHaveBeenCalledTimes(1);
+
+    // The member signs out and the operator signs in, through client-side navigation.
+    mockCookies.getCookies.mockReturnValue({ idToken: undefined, refreshToken: undefined } as any);
+    expect(await loadEverPlatformAvailable()).toBe(false);
+    mockCookies.getCookies.mockReturnValue(operator as any);
+    expect(await loadEverPlatformAvailable()).toBe(true);
+    expect(api.getStatus).toHaveBeenCalledTimes(2);
+  });
+
+  it('a menu that stays on screen follows the account that is signed in', async () => {
+    const member = { idToken: 'member-id-token', refreshToken: 'member-session' };
+    const operator = { idToken: 'operator-id-token', refreshToken: 'operator-session' };
+    api.getStatus.mockImplementationOnce(notFound);
+    mockCookies.getCookies.mockReturnValue(member as any);
+    await render(<MenuProbe />);
+    expect(container.querySelector('[data-type="ever-platform"]')).toBeNull();
+
+    mockCookies.getCookies.mockReturnValue(operator as any);
+    await render(<MenuProbe />);
+    expect(container.querySelector('[data-type="ever-platform"]')).not.toBeNull();
+
+    api.getStatus.mockImplementationOnce(notFound);
+    mockCookies.getCookies.mockReturnValue({ idToken: 'next-id-token', refreshToken: 'next-session' } as any);
+    await render(<MenuProbe />);
+    expect(container.querySelector('[data-type="ever-platform"]')).toBeNull();
+  });
 });
 
 describe('Statistics page', () => {
@@ -163,7 +198,15 @@ describe('Statistics page', () => {
   });
 
   it('has an English message for every error code the API answers', () => {
-    for (const code of ['generic', 'stats_disabled', 'rate_limited', 'cloud_managed', 'no_destination', 'busy']) {
+    for (const code of [
+      'generic',
+      'stats_disabled',
+      'rate_limited',
+      'cloud_managed',
+      'no_destination',
+      'busy',
+      'refused_until_upgrade',
+    ]) {
       expect(typeof message(`page.everPlatform.errors.${code}`)).toBe('string');
     }
   });
