@@ -119,11 +119,20 @@ export class EverIdLinkService {
     subject: string,
     everPersonId?: string | null,
   ): Promise<void> {
-    const update: Partial<EverIdLink> = { lastLoginAt: Date.now() };
-    if (everPersonId) {
-      update.everPersonId = everPersonId;
-    }
-    await this.linkRef(this.key(issuer, subject)).update(update);
+    const now = Date.now();
+    // A transaction, so a link removed meanwhile is not recreated as a partial record.
+    await this.linkRef(this.key(issuer, subject)).transaction(
+      (current: EverIdLink | null) => {
+        if (!current) {
+          return current;
+        }
+        return {
+          ...current,
+          lastLoginAt: now,
+          ...(everPersonId ? { everPersonId } : {}),
+        };
+      },
+    );
   }
 
   /**

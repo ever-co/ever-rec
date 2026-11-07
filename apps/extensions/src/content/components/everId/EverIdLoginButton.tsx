@@ -34,17 +34,15 @@ const EverIdLoginButton: React.FC<{ className?: string }> = ({ className }) => {
   };
 
   return (
-    <div
-      role="button"
-      tabIndex={0}
+    <button
+      type="button"
       onClick={open}
-      onKeyDown={(event) => (event.key === 'Enter' || event.key === ' ') && open()}
       className={`tw-flex tw-py-2 tw-w-full tw-border tw-items-center tw-justify-center tw-border-app-grey tw-rounded-md tw-cursor-pointer hover:tw-bg-app-grey hover:tw-bg-opacity-10 ${
         className ?? ''
       }`}
     >
-      <div className="tw-font-semibold tw-text-sm tw-text-dark-blue2">Continue with Ever ID</div>
-    </div>
+      <span className="tw-font-semibold tw-text-sm tw-text-dark-blue2">Continue with Ever ID</span>
+    </button>
   );
 };
 

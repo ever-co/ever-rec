@@ -6,7 +6,7 @@ import {
   createHash,
   hkdfSync,
   randomBytes,
-} from 'crypto';
+} from 'node:crypto';
 
 /** Length of every random handle (state, nonce, PKCE verifier, one-time codes), in bytes. */
 export const EVER_ID_RANDOM_BYTES = 32;

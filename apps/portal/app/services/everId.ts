@@ -60,12 +60,12 @@ export const everIdReturnPath = (pathname: string, query: Record<string, string 
     }
   }
   const search = params.toString();
-  const candidate = `${pathname}${search ? `?${search}` : ''}`;
+  const candidate = search ? `${pathname}?${search}` : pathname;
   return safeReturnPath(candidate) ?? pathname;
 };
 
 /** The query of a return path, as a router query object. */
 export const returnPathQuery = (returnPath: string): Record<string, string> => {
-  const url = new URL(returnPath, 'http://portal.invalid');
+  const url = new URL(returnPath, 'https://portal.invalid');
   return Object.fromEntries(url.searchParams.entries());
 };

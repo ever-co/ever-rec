@@ -3,7 +3,7 @@
  * auth and Ever ID code paths use. They keep everything in memory, so the suites run without the
  * Firebase emulators and without reaching any outside service.
  */
-import { randomBytes } from 'crypto';
+import { randomBytes } from 'node:crypto';
 
 type Json = any;
 

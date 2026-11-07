@@ -60,7 +60,7 @@ const EverIdPage: React.FC = () => {
     if (typeof ever_id_error === 'string') {
       fail(ever_id_error);
     } else if (typeof code === 'string') {
-      finish(code, router.query.return);
+      void finish(code, router.query.return);
     } else if (typeof confirm === 'string') {
       Promise.all([getEverIdSignUpDetailsAPI(confirm, readEverIdBinding()), getRequiredTerms()])
         .then(([signUp, documents]) => {
@@ -117,14 +117,20 @@ const EverIdPage: React.FC = () => {
             <h1 className="tw-text-2xl tw-font-bold tw-mb-2">{t('page.auth.everId.createAccountTitle')}</h1>
             <p className="tw-mb-6 tw-text-sm">{t('page.auth.everId.createAccountIntro')}</p>
 
-            <label className="tw-block tw-text-xs tw-text-mid-grey">{t('page.auth.everId.name')}</label>
+            <label htmlFor="ever-id-name" className="tw-block tw-text-xs tw-text-mid-grey">
+              {t('page.auth.everId.name')}
+            </label>
             <input
+              id="ever-id-name"
               readOnly
               value={details.name ?? ''}
               className="tw-w-full tw-mb-4 tw-py-2 tw-border-b tw-border-black tw-bg-transparent"
             />
-            <label className="tw-block tw-text-xs tw-text-mid-grey">{t('page.auth.everId.email')}</label>
+            <label htmlFor="ever-id-email" className="tw-block tw-text-xs tw-text-mid-grey">
+              {t('page.auth.everId.email')}
+            </label>
             <input
+              id="ever-id-email"
               readOnly
               value={details.email}
               className="tw-w-full tw-mb-6 tw-py-2 tw-border-b tw-border-black tw-bg-transparent"
@@ -133,6 +139,7 @@ const EverIdPage: React.FC = () => {
             <div className="tw-flex tw-gap-4">
               {/* @ts-ignore */}
               <Checkbox
+                aria-label={t('page.register.terms.agree')}
                 checked={accepted}
                 disabled={termsDocuments.length === 0}
                 onChange={() => setAccepted((value) => !value)}

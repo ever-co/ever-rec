@@ -7,8 +7,8 @@
  * that recording. Token values and dates differ between runs and are replaced by placeholders;
  * every key, status and stable value is compared.
  */
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
-import { join } from 'path';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 import request from 'supertest';
 import { AuthProviderId } from '../src/module/auth/interfaces/auth.interface';
 import { createTestApp, loadEverIdModule, TestApp } from './support/test-app';
@@ -78,13 +78,11 @@ async function scenario(t: TestApp): Promise<Recorded> {
 
   keep(
     'POST /auth/register (no terms)',
-    await request(server)
-      .post('/api/v1/auth/register')
-      .send({
-        email: 'new.user@example.test',
-        password: 'Secret-1234',
-        username: 'New User',
-      }),
+    await request(server).post('/api/v1/auth/register').send({
+      email: 'new.user@example.test',
+      password: 'Secret-1234',
+      username: 'New User',
+    }),
   );
 
   keep(

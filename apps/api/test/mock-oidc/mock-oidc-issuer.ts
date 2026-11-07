@@ -5,9 +5,14 @@
  * that checks the client credential, the redirect URI and the PKCE verifier, and an end-session
  * endpoint. Signs ID tokens and back-channel logout tokens with a key generated at start.
  */
-import { createHash, randomBytes } from 'crypto';
-import { createServer, IncomingMessage, Server, ServerResponse } from 'http';
-import { AddressInfo } from 'net';
+import { createHash, randomBytes } from 'node:crypto';
+import {
+  createServer,
+  IncomingMessage,
+  Server,
+  ServerResponse,
+} from 'node:http';
+import { AddressInfo } from 'node:net';
 import {
   exportJWK,
   generateKeyPair,
@@ -26,7 +31,7 @@ interface PendingCode {
 }
 
 export const BACKCHANNEL_LOGOUT_EVENT =
-  'http://schemas.openid.net/event/backchannel-logout';
+  'http://schemas.openid.net/event/backchannel-logout'; // NOSONAR: an identifier, never fetched
 
 export class MockOidcIssuer {
   issuer = '';

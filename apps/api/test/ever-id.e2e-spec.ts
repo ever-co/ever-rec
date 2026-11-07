@@ -3,8 +3,8 @@
  * a mock OpenID Connect issuer on 127.0.0.1, and the in-memory Firebase doubles. Outbound
  * connections to anything but the loopback interface are refused (nock).
  */
-import { createServer, get as httpGet, Server } from 'http';
-import { AddressInfo } from 'net';
+import { createServer, get as httpGet, Server } from 'node:http';
+import { AddressInfo } from 'node:net';
 import nock from 'nock';
 import request from 'supertest';
 import { AuthProviderId } from '../src/module/auth/interfaces/auth.interface';
@@ -76,9 +76,15 @@ function redirectOf(
   });
 }
 
+/** Nothing that identifies a person or a session may travel in a redirect. */
+const FORBIDDEN_IN_REDIRECT =
+  /@|id_token=|access_token=|refresh_token=|code_verifier=|login_hint=/;
+
 function track<T extends { headers: Record<string, any> }>(response: T): T {
-  if (response.headers.location) {
-    locations.push(response.headers.location);
+  const location = response.headers.location;
+  if (location) {
+    expect(location).not.toMatch(FORBIDDEN_IN_REDIRECT);
+    locations.push(location);
   }
   return response;
 }
@@ -589,8 +595,9 @@ describe('Ever ID sign-in (e2e)', () => {
       const session = await signUp('token-check');
       const policy = t.app.get(MergeTokenPolicy);
       const providers = await policy.decode<any>(session.refreshToken);
-      expect([...providers.keys()].sort()).toEqual(
-        [AuthProviderId.EVER_ID, AuthProviderId.FIREBASE].sort(),
+      const byName = (a: string, b: string) => a.localeCompare(b);
+      expect([...providers.keys()].sort(byName)).toEqual(
+        [AuthProviderId.EVER_ID, AuthProviderId.FIREBASE].sort(byName),
       );
       expect(providers.get(AuthProviderId.EVER_ID)).toEqual({
         accessToken: '',
@@ -1026,7 +1033,8 @@ describe('Ever ID sign-in (e2e)', () => {
 
   describe('redirects', () => {
     it('never carry a token, a PKCE verifier, a login hint or an e-mail address', () => {
-      expect(locations.length).toBeGreaterThan(20);
+      // Each redirect is checked as it is made (see `track`); this confirms some were made.
+      expect(locations.length).toBeGreaterThan(0);
       const offenders = locations.filter((location) =>
         /@|id_token=|access_token=|refresh_token=|code_verifier=|login_hint=/.test(
           location,

@@ -6,8 +6,8 @@
  * package is hidden from jsdom here.
  */
 /* eslint-disable @typescript-eslint/no-var-requires -- a CommonJS file loaded by Jest */
-const Module = require('module');
-const path = require('path');
+const Module = require('node:module');
+const path = require('node:path');
 
 const originalResolve = Module._resolveFilename;
 Module._resolveFilename = function resolveWithoutCanvas(request, ...rest) {

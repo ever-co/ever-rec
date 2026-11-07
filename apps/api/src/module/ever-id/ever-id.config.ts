@@ -89,7 +89,11 @@ export function parseSwitch(value: string, fallback: boolean): boolean {
 }
 
 export function stripTrailingSlashes(value: string): string {
-  return value.replace(/\/+$/, '');
+  let end = value.length;
+  while (end > 0 && value[end - 1] === '/') {
+    end -= 1;
+  }
+  return value.slice(0, end);
 }
 
 /** Whether the host is a loopback name, where plain `http` is accepted (local development and tests). */

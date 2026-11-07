@@ -60,11 +60,20 @@ export interface TestAppOptions {
 
 /** Loads `EverIdModule` when it exists. */
 export function loadEverIdModule(): any | null {
+  const modulePath = '../../src/module/ever-id/ever-id.module';
   try {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    return require('../../src/module/ever-id/ever-id.module').EverIdModule;
-  } catch {
-    return null;
+    return require(modulePath).EverIdModule;
+  } catch (error: any) {
+    // Only an absent module (the commit the regression answers were recorded on) is tolerated;
+    // a module that exists but fails to load must fail the suite.
+    if (
+      error?.code === 'MODULE_NOT_FOUND' &&
+      String(error?.message).includes('ever-id.module')
+    ) {
+      return null;
+    }
+    throw error;
   }
 }
 

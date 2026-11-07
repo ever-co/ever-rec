@@ -31,7 +31,7 @@ const useEverIdConfig = (): { enabled: boolean; loading: boolean } => {
 
   useEffect(() => {
     let active = true;
-    loadEverIdConfig().then((config) => {
+    void loadEverIdConfig().then((config) => {
       if (active) setState({ enabled: config.enabled, loading: false });
     });
     return () => {

@@ -1,5 +1,5 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { createHash } from 'crypto';
+import { createHash } from 'node:crypto';
 import {
   errors as joseErrors,
   importJWK,
@@ -10,7 +10,11 @@ import {
   KeyLike,
 } from 'jose';
 import { HttpService } from 'nestjs-http-promise';
-import { EverIdSettings, isEverHost } from '../ever-id.config';
+import {
+  EverIdSettings,
+  isEverHost,
+  stripTrailingSlashes,
+} from '../ever-id.config';
 import { EverIdTokenError } from '../ever-id.errors';
 import { EVER_ID_SETTINGS } from '../ever-id.tokens';
 
@@ -36,7 +40,7 @@ export const LOGOUT_TOKEN_MAX_AGE_SECONDS = 300;
  * an identifier compared as a string, never fetched.
  */
 export const BACKCHANNEL_LOGOUT_EVENT =
-  'http://schemas.openid.net/event/backchannel-logout';
+  'http://schemas.openid.net/event/backchannel-logout'; // NOSONAR: an identifier, never fetched
 
 /** Scopes requested from any OpenID Connect issuer. */
 const BASE_SCOPES = ['openid', 'profile', 'email'];
@@ -111,7 +115,8 @@ export function basicCredential(
 ): string {
   const encode = (value: string) =>
     new URLSearchParams({ v: value }).toString().slice(2);
-  return `Basic ${Buffer.from(`${encode(clientId)}:${encode(clientSecret)}`).toString('base64')}`;
+  const pair = `${encode(clientId)}:${encode(clientSecret)}`;
+  return `Basic ${Buffer.from(pair).toString('base64')}`;
 }
 
 function stringClaim(payload: JWTPayload, name: string): string | null {
@@ -483,7 +488,7 @@ export class EverIdOidcService {
       let data: unknown;
       try {
         ({ status, data } = await this.http.get(
-          `${issuer.replace(/\/+$/, '')}/.well-known/openid-configuration`,
+          `${stripTrailingSlashes(issuer)}/.well-known/openid-configuration`,
           {
             headers: { Accept: 'application/json' },
             validateStatus: () => true,
@@ -676,7 +681,7 @@ export class EverIdOidcService {
   /** Joins concurrent fetches of the same resource. */
   private once<T>(key: string, load: () => Promise<T>): Promise<T> {
     const pending = this.inFlight.get(key) as Promise<T> | undefined;
-    if (pending) {
+    if (pending !== undefined) {
       return pending;
     }
     const promise = load().finally(() => this.inFlight.delete(key));

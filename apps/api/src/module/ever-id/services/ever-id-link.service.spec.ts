@@ -1,4 +1,4 @@
-import { createHash } from 'crypto';
+import { createHash } from 'node:crypto';
 import { InMemoryDatabase } from '../../../../test/support/in-memory-firebase';
 import {
   EverIdLinkService,
@@ -118,7 +118,10 @@ describe('EverIdLinkService', () => {
       links.unlink('u', 'i1', 's1', { keepOne: true }),
       links.unlink('u', 'i2', 's2', { keepOne: true }),
     ]);
-    expect(outcomes.sort()).toEqual(['last_link', 'removed']);
+    expect(outcomes.sort((a, b) => a.localeCompare(b))).toEqual([
+      'last_link',
+      'removed',
+    ]);
     await expect(links.listForUser('u')).resolves.toHaveLength(1);
   });
 

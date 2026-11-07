@@ -66,25 +66,42 @@ export class EverIdLogoutService {
       return { result: 'rejected', reason: 'replayed' };
     }
 
-    const uids = await this.sessionIndex.revoke(
-      claims.issuer,
-      claims.sid,
-      claims.subject,
-    );
-    if (this.settings.logoutRevokeFirebase) {
-      for (const uid of uids) {
-        await this.firebaseAuthService.revokeUserSessions(uid);
+    let uids: string[];
+    try {
+      uids = await this.sessionIndex.revoke(
+        claims.issuer,
+        claims.sid,
+        claims.subject,
+      );
+      if (this.settings.logoutRevokeFirebase) {
+        for (const uid of uids) {
+          await this.firebaseAuthService.revokeUserSessions(uid);
+        }
       }
+    } catch (error) {
+      // Not processed: forget the jti so the issuer's retry of this logout is accepted.
+      await this.forgetJti(claims.issuer, claims.jti).catch(() => undefined);
+      this.logger.error('ever_id.logout result=failed');
+      throw error;
     }
     this.logger.log(`ever_id.logout result=ok accounts=${uids.length}`);
     return { result: 'ok', ended: uids.length };
   }
 
+  private jtiRef(issuer: string, jti: string) {
+    const key = hashHandle(`${issuer}\u0000${jti}`);
+    return this.firebaseAdminService.getDatabaseRef(
+      `${EVER_ID_LOGOUT_JTI_ROOT}/${key}`,
+    );
+  }
+
+  private async forgetJti(issuer: string, jti: string): Promise<void> {
+    await this.jtiRef(issuer, jti).remove();
+  }
+
   /** Stores the `jti`; `false` when it was already stored (a replay). */
   private async rememberJti(issuer: string, jti: string): Promise<boolean> {
-    const ref = this.firebaseAdminService.getDatabaseRef(
-      `${EVER_ID_LOGOUT_JTI_ROOT}/${hashHandle(`${issuer}\u0000${jti}`)}`,
-    );
+    const ref = this.jtiRef(issuer, jti);
     const now = Date.now();
     let replay = false;
     await ref.transaction((current: { expiresAt?: number } | null) => {

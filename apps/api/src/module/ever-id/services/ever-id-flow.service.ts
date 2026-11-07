@@ -742,7 +742,8 @@ export class EverIdFlowService {
 
   private portalUrl(path: string, params: Record<string, string>): string {
     const query = new URLSearchParams(params).toString();
-    return `${this.settings.portalUrl}${path}${query ? `?${query}` : ''}`;
+    const suffix = query ? '?' + query : '';
+    return `${this.settings.portalUrl}${path}${suffix}`;
   }
 
   private loginError(code: EverIdRedirectErrorCode): string {

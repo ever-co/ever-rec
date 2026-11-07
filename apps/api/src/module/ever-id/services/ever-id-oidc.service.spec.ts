@@ -1,4 +1,4 @@
-import { readFileSync } from 'fs';
+import { readFileSync } from 'node:fs';
 import {
   exportJWK,
   generateKeyPair,
@@ -7,7 +7,7 @@ import {
   KeyLike,
   SignJWT,
 } from 'jose';
-import { join } from 'path';
+import { join } from 'node:path';
 import { EverIdSettings, readEverIdSettings } from '../ever-id.config';
 import { EverIdTokenError } from '../ever-id.errors';
 import {
