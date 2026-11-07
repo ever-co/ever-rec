@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const nextJest = require('next/jest');
 
 // Uses Next.js' own Jest preset (SWC transform, CSS and asset mocks). The previous configuration
@@ -6,7 +7,7 @@ const createJestConfig = nextJest({ dir: __dirname });
 
 module.exports = createJestConfig({
   displayName: 'portal',
-  testEnvironment: 'jsdom',
+  testEnvironment: '<rootDir>/specs/jsdom-environment.js',
   testMatch: ['<rootDir>/specs/**/*.spec.{ts,tsx}'],
   moduleDirectories: ['node_modules', '<rootDir>/'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],

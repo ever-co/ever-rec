@@ -3,7 +3,7 @@
  * a mock OpenID Connect issuer on 127.0.0.1, and the in-memory Firebase doubles. Outbound
  * connections to anything but the loopback interface are refused (nock).
  */
-import { createServer, Server } from 'http';
+import { createServer, get as httpGet, Server } from 'http';
 import { AddressInfo } from 'net';
 import nock from 'nock';
 import request from 'supertest';
@@ -55,6 +55,21 @@ function onEnv(
   };
 }
 
+/** GET without following redirects (the issuer runs on 127.0.0.1 over plain http). */
+function redirectOf(
+  url: string,
+): Promise<{ status: number; location: string }> {
+  return new Promise((resolve, reject) => {
+    httpGet(url, (response) => {
+      response.resume();
+      resolve({
+        status: response.statusCode ?? 0,
+        location: String(response.headers.location ?? ''),
+      });
+    }).on('error', reject);
+  });
+}
+
 function track<T extends { headers: Record<string, any> }>(response: T): T {
   if (response.headers.location) {
     locations.push(response.headers.location);
@@ -69,30 +84,58 @@ describe('Ever ID sign-in (e2e)', () => {
   const server = () => t.app.getHttpServer();
 
   /** Browser round trip: start (or a given authorization URL) → issuer → API callback. */
+  /** The `name=value` pair of the browser-binding cookie a response sets. */
+  function bindingCookie(response: { headers: Record<string, any> }): string {
+    const cookies: string[] = response.headers['set-cookie'] ?? [];
+    const cookie = cookies.find((value) => value.startsWith('ever_id_flow='));
+    return cookie ? cookie.split(';')[0] : '';
+  }
+
+  /** `GET /start` as the browser does it; returns the authorization URL and the cookie. */
+  async function start(returnPath = '/media/images') {
+    const response = track(
+      await request(server())
+        .get('/api/v1/auth/ever-id/start')
+        .query({ return: returnPath }),
+    );
+    expect(response.status).toBe(302);
+    return {
+      authorizationUrl: response.headers.location as string,
+      cookie: bindingCookie(response),
+      response,
+    };
+  }
+
+  /** The issuer's redirect back to the API for an authorization URL (the query to pass on). */
+  async function atIssuer(authorizationUrl: string) {
+    const response = await redirectOf(authorizationUrl);
+    expect(response.status).toBe(302);
+    const back = new URL(response.location);
+    expect(back.origin + back.pathname).toBe(REDIRECT_URL);
+    return Object.fromEntries(back.searchParams);
+  }
+
+  async function callback(query: Record<string, string>, cookie = '') {
+    const response = track(
+      await request(server())
+        .get('/api/v1/auth/ever-id/callback')
+        .set(cookie ? { Cookie: cookie } : {})
+        .query(query),
+    );
+    expect(response.status).toBe(302);
+    return new URL(response.headers.location as string);
+  }
+
+  /** Browser round trip: start (or a given authorization URL) → issuer → API callback. */
   async function authorize(
     options: { returnPath?: string; authorizationUrl?: string } = {},
   ): Promise<URL> {
     let authorizationUrl = options.authorizationUrl;
+    let cookie = '';
     if (!authorizationUrl) {
-      const start = track(
-        await request(server())
-          .get('/api/v1/auth/ever-id/start')
-          .query({ return: options.returnPath ?? '/media/images' }),
-      );
-      expect(start.status).toBe(302);
-      authorizationUrl = start.headers.location as string;
+      ({ authorizationUrl, cookie } = await start(options.returnPath));
     }
-    const atIssuer = await fetch(authorizationUrl, { redirect: 'manual' });
-    expect(atIssuer.status).toBe(302);
-    const back = new URL(atIssuer.headers.get('location')!);
-    expect(back.origin + back.pathname).toBe(REDIRECT_URL);
-    const callback = track(
-      await request(server())
-        .get('/api/v1/auth/ever-id/callback')
-        .query(Object.fromEntries(back.searchParams)),
-    );
-    expect(callback.status).toBe(302);
-    return new URL(callback.headers.location as string);
+    return callback(await atIssuer(authorizationUrl), cookie);
   }
 
   async function exchange(code: string) {
@@ -408,48 +451,38 @@ describe('Ever ID sign-in (e2e)', () => {
         new URL(unknown.headers.location).searchParams.get('ever_id_error'),
       ).toBe('invalid_state');
 
-      const start = track(
-        await request(server()).get('/api/v1/auth/ever-id/start'),
-      );
-      const atIssuer = await fetch(start.headers.location, {
-        redirect: 'manual',
-      });
-      const back = Object.fromEntries(
-        new URL(atIssuer.headers.get('location')!).searchParams,
-      );
-      track(
-        await request(server())
-          .get('/api/v1/auth/ever-id/callback')
-          .query(back),
-      );
-      const reused = track(
-        await request(server())
-          .get('/api/v1/auth/ever-id/callback')
-          .query(back),
-      );
-      expect(
-        new URL(reused.headers.location).searchParams.get('ever_id_error'),
-      ).toBe('invalid_state');
+      const first = await start();
+      const back = await atIssuer(first.authorizationUrl);
+      const used = await callback(back, first.cookie);
+      expect(used.searchParams.get('confirm')).toBeTruthy();
+      const reused = await callback(back, first.cookie);
+      expect(reused.searchParams.get('ever_id_error')).toBe('invalid_state');
 
-      const late = track(
-        await request(server()).get('/api/v1/auth/ever-id/start'),
-      );
-      const lateAtIssuer = await fetch(late.headers.location, {
-        redirect: 'manual',
-      });
-      const lateBack = Object.fromEntries(
-        new URL(lateAtIssuer.headers.get('location')!).searchParams,
-      );
+      const late = await start();
+      const lateBack = await atIssuer(late.authorizationUrl);
       const realNow = Date.now();
       jest.spyOn(Date, 'now').mockReturnValue(realNow + 11 * 60 * 1000);
-      const expired = track(
-        await request(server())
-          .get('/api/v1/auth/ever-id/callback')
-          .query(lateBack),
-      );
-      expect(
-        new URL(expired.headers.location).searchParams.get('ever_id_error'),
-      ).toBe('invalid_state');
+      const expired = await callback(lateBack, late.cookie);
+      expect(expired.searchParams.get('ever_id_error')).toBe('invalid_state');
+    });
+
+    it('binds a sign-in to the browser that started it', async () => {
+      const started = await start();
+      const setCookie: string = started.response.headers['set-cookie'][0];
+      expect(setCookie).toMatch(/^ever_id_flow=[A-Za-z0-9_-]{43};/);
+      expect(setCookie).toMatch(/HttpOnly/);
+      expect(setCookie).toMatch(/SameSite=Lax/);
+      expect(setCookie).toMatch(/Path=\/api\/v1\/auth\/ever-id\/callback/);
+
+      // A callback URL handed to another browser (no cookie, or another one) is refused.
+      const back = await atIssuer(started.authorizationUrl);
+      const elsewhere = await callback(back, `ever_id_flow=${'x'.repeat(43)}`);
+      expect(elsewhere.searchParams.get('ever_id_error')).toBe('invalid_state');
+      expect(t.firebase.db.dump('ever_id_pending_signup')).toBeNull();
+
+      const again = await start();
+      const noCookie = await callback(await atIssuer(again.authorizationUrl));
+      expect(noCookie.searchParams.get('ever_id_error')).toBe('invalid_state');
     });
 
     it('refuses an absolute or protocol-relative return address', async () => {

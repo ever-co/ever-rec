@@ -473,6 +473,7 @@ An issuer on an Ever host (`*.ever.co`) is used only by an Ever-operated install
 -   **Existing e-mail address**: when an account with that address exists but is not linked, nothing is created, linked or opened. The person signs in the usual way and connects Ever ID in **Settings → Profile → Connected sign-in methods**. Connecting asks for a fresh Ever ID sign-in (at most five minutes old) and shows both addresses before anything is saved.
 -   **Disconnecting** is refused while Ever ID is the account's only way to sign in.
 -   **Back-channel logout** ends the Rec sessions opened with that Ever ID session; a logout token is accepted once and only within five minutes of being issued.
+-   **Browser binding**: `start` sets a short-lived HttpOnly cookie (`ever_id_flow`, SameSite=Lax, limited to the callback path); a callback that arrives without it, for example a sign-in link handed to someone else, is refused.
 -   **Tokens**: ID tokens are verified locally against the issuer's published keys. No Ever ID token is stored. Redirects carry one-time codes only, never a token or an e-mail address. The browser extensions open the web app's login page; no OpenID Connect code runs in them.
 
 ### Outbound connections and data

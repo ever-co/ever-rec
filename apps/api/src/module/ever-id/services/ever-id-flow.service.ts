@@ -12,7 +12,7 @@ import {
   everIdHttpError,
 } from '../ever-id.errors';
 import { EVER_ID_SETTINGS } from '../ever-id.tokens';
-import { randomHandle } from './ever-id-crypto.service';
+import { hashHandle, randomHandle } from './ever-id-crypto.service';
 import {
   EverIdIdentitySummary,
   EverIdLinkService,
@@ -46,7 +46,19 @@ interface PendingAuthorization {
   returnPath: string;
   /** The signed-in account that started a connection. */
   uid?: string;
+  /**
+   * SHA-256 of the value of the browser-binding cookie set by `start`: the callback must come from
+   * the browser that started the sign-in (login CSRF). Connections are bound to `uid` instead.
+   */
+  bindingHash?: string;
   createdAt: number;
+}
+
+/** A sign-in started by `GET /auth/ever-id/start`. */
+export interface EverIdSignInStart {
+  url: string;
+  /** Value of the short-lived browser-binding cookie to set on the redirect. */
+  browserBinding: string;
 }
 
 /** A sign-up waiting for the confirmation screen. */
@@ -109,7 +121,9 @@ export class EverIdFlowService {
   ) {}
 
   /** `GET /auth/ever-id/start`: returns the authorization URL to redirect the browser to. */
-  async startSignIn(returnPath: string | undefined): Promise<string> {
+  async startSignIn(
+    returnPath: string | undefined,
+  ): Promise<EverIdSignInStart> {
     const target = returnPath ?? DEFAULT_RETURN_PATH;
     if (!isSafeReturnPath(target)) {
       throw everIdHttpError(
@@ -118,7 +132,13 @@ export class EverIdFlowService {
         'return must be a relative portal path.',
       );
     }
-    return this.begin({ intent: 'sign-in', returnPath: target });
+    const browserBinding = randomHandle();
+    const url = await this.begin({
+      intent: 'sign-in',
+      returnPath: target,
+      bindingHash: hashHandle(browserBinding),
+    });
+    return { url, browserBinding };
   }
 
   /** `POST /auth/ever-id/connect/start`: the signed-in person re-authenticates at the issuer. */
@@ -131,11 +151,14 @@ export class EverIdFlowService {
   }
 
   /** `GET /auth/ever-id/callback`: returns the portal URL to redirect the browser to. */
-  async callback(query: {
-    code?: unknown;
-    state?: unknown;
-    error?: unknown;
-  }): Promise<string> {
+  async callback(
+    query: {
+      code?: unknown;
+      state?: unknown;
+      error?: unknown;
+    },
+    browserBinding?: string,
+  ): Promise<string> {
     const state = typeof query.state === 'string' ? query.state : '';
     const pending = state
       ? await this.store.take<PendingAuthorization>(
@@ -144,6 +167,13 @@ export class EverIdFlowService {
         )
       : null;
     if (!pending) {
+      return this.loginError('invalid_state');
+    }
+    if (
+      pending.bindingHash &&
+      (!browserBinding || hashHandle(browserBinding) !== pending.bindingHash)
+    ) {
+      this.logger.warn('ever_id.callback result=invalid_state reason=browser');
       return this.loginError('invalid_state');
     }
     const errorTarget = (code: EverIdRedirectErrorCode) =>
@@ -455,6 +485,7 @@ export class EverIdFlowService {
     intent: Intent;
     returnPath: string;
     uid?: string;
+    bindingHash?: string;
   }): Promise<string> {
     const state = randomHandle();
     const pending: PendingAuthorization = {
@@ -463,6 +494,7 @@ export class EverIdFlowService {
       codeVerifier: randomHandle(),
       returnPath: request.returnPath,
       uid: request.uid,
+      bindingHash: request.bindingHash,
       createdAt: Date.now(),
     };
     // Build the URL first: if discovery fails nothing is stored.
