@@ -26,6 +26,7 @@ import { WorkspaceModule } from './module/workspace/workspace.module';
 import { PipelineModule } from './common/pipeline/pipeline.module';
 import { SoundshotModule } from './module/soundshot/soundshot.module';
 import { CamshotModule } from './module/camshot/camshot.module';
+import { everPlatformModules } from './common/ever-platform/modules';
 
 @Module({
   imports: [
@@ -54,7 +55,10 @@ import { CamshotModule } from './module/camshot/camshot.module';
     EditorWebsocketModule,
     PipelineModule,
     SoundshotModule,
-    CamshotModule
+    CamshotModule,
+    // Optional anonymous usage statistics (docs/ever-platform): read after ConfigModule.forRoot()
+    // above has loaded the .env file; EVER_STATS_ENABLED=false leaves them out.
+    ...everPlatformModules(),
   ],
   controllers: [AppController],
   providers: [

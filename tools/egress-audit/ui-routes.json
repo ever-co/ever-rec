@@ -1,0 +1,205 @@
+{
+  "$schema": "../../node_modules/@ever-co/connect-tools/dist/egress-audit/ui-routes.schema.json",
+  "framework": "manual",
+  "entry": "apps/portal/pages",
+  "routes": [
+    {
+      "path": "/404",
+      "file": "apps/portal/pages/404.tsx",
+      "source": "router"
+    },
+    {
+      "path": "/auth",
+      "file": "apps/portal/pages/auth/index.tsx",
+      "source": "router"
+    },
+    {
+      "path": "/auth/ever-id",
+      "file": "apps/portal/pages/auth/ever-id.tsx",
+      "source": "router"
+    },
+    {
+      "path": "/auth/google-auth",
+      "file": "apps/portal/pages/auth/google-auth.tsx",
+      "source": "router"
+    },
+    {
+      "path": "/auth/login",
+      "file": "apps/portal/pages/auth/login.tsx",
+      "source": "router"
+    },
+    {
+      "path": "/auth/new-password",
+      "file": "apps/portal/pages/auth/new-password.tsx",
+      "source": "router"
+    },
+    {
+      "path": "/auth/register",
+      "file": "apps/portal/pages/auth/register.tsx",
+      "source": "router"
+    },
+    {
+      "path": "/auth/reset",
+      "file": "apps/portal/pages/auth/reset.tsx",
+      "source": "router"
+    },
+    {
+      "path": "/authorize",
+      "file": "apps/portal/pages/authorize.tsx",
+      "source": "router"
+    },
+    {
+      "path": "/edit/:id",
+      "file": "apps/portal/pages/edit/[id].tsx",
+      "source": "router"
+    },
+    {
+      "path": "/image/:id",
+      "file": "apps/portal/pages/image/[id].tsx",
+      "source": "router"
+    },
+    {
+      "path": "/image/shared/:id",
+      "file": "apps/portal/pages/image/shared/[id].tsx",
+      "source": "router"
+    },
+    {
+      "path": "/integration/slack",
+      "file": "apps/portal/pages/integration/slack.tsx",
+      "source": "router"
+    },
+    {
+      "path": "/media",
+      "file": "apps/portal/pages/media/index.tsx",
+      "source": "router"
+    },
+    {
+      "path": "/media/favorites",
+      "file": "apps/portal/pages/media/favorites.tsx",
+      "source": "router"
+    },
+    {
+      "path": "/media/images",
+      "file": "apps/portal/pages/media/images.tsx",
+      "source": "router"
+    },
+    {
+      "path": "/media/integrations",
+      "file": "apps/portal/pages/media/integrations.tsx",
+      "source": "router"
+    },
+    {
+      "path": "/media/shared",
+      "file": "apps/portal/pages/media/shared.tsx",
+      "source": "router"
+    },
+    {
+      "path": "/media/trashed",
+      "file": "apps/portal/pages/media/trashed.tsx",
+      "source": "router"
+    },
+    {
+      "path": "/media/videos",
+      "file": "apps/portal/pages/media/videos.tsx",
+      "source": "router"
+    },
+    {
+      "path": "/media/whiteboards",
+      "file": "apps/portal/pages/media/whiteboards.tsx",
+      "source": "router"
+    },
+    {
+      "path": "/media/workspace/:workspaceId",
+      "file": "apps/portal/pages/media/workspace/[workspaceId]/index.tsx",
+      "source": "router"
+    },
+    {
+      "path": "/media/workspace/:workspaceId/image/:imageId",
+      "file": "apps/portal/pages/media/workspace/[workspaceId]/image/[imageId].tsx",
+      "source": "router"
+    },
+    {
+      "path": "/media/workspace/:workspaceId/settings",
+      "file": "apps/portal/pages/media/workspace/[workspaceId]/settings/index.tsx",
+      "source": "router"
+    },
+    {
+      "path": "/media/workspace/:workspaceId/video/:videoId",
+      "file": "apps/portal/pages/media/workspace/[workspaceId]/video/[videoId].tsx",
+      "source": "router"
+    },
+    {
+      "path": "/media/workspaces/manage",
+      "file": "apps/portal/pages/media/workspaces/manage.tsx",
+      "source": "router"
+    },
+    {
+      "path": "/media/workspaces/teams/:workspaceId",
+      "file": "apps/portal/pages/media/workspaces/teams/[workspaceId].tsx",
+      "source": "router"
+    },
+    {
+      "path": "/no-access",
+      "file": "apps/portal/pages/no-access.tsx",
+      "source": "router"
+    },
+    {
+      "path": "/oauth",
+      "file": "apps/portal/pages/oauth.tsx",
+      "source": "router"
+    },
+    {
+      "path": "/preferences",
+      "file": "apps/portal/pages/preferences.tsx",
+      "source": "router"
+    },
+    {
+      "path": "/settings",
+      "file": "apps/portal/pages/settings/index.tsx",
+      "source": "router"
+    },
+    {
+      "path": "/settings/ever-platform",
+      "file": "apps/portal/pages/settings/ever-platform.tsx",
+      "source": "router"
+    },
+    {
+      "path": "/settings/profile",
+      "file": "apps/portal/pages/settings/profile.tsx",
+      "source": "router"
+    },
+    {
+      "path": "/video/:id",
+      "file": "apps/portal/pages/video/[id].tsx",
+      "source": "router"
+    },
+    {
+      "path": "/video/SaveToCloudModal/SaveToCloudModal",
+      "file": "apps/portal/pages/video/SaveToCloudModal/SaveToCloudModal.tsx",
+      "source": "router"
+    },
+    {
+      "path": "/video/ShareItemModal/ShareItemModal",
+      "file": "apps/portal/pages/video/ShareItemModal/ShareItemModal.tsx",
+      "source": "router"
+    },
+    {
+      "path": "/video/shared/:id",
+      "file": "apps/portal/pages/video/shared/[id].tsx",
+      "source": "router"
+    },
+    {
+      "path": "/whiteboard/:whiteboardID",
+      "file": "apps/portal/pages/whiteboard/[whiteboardID].tsx",
+      "source": "router"
+    },
+    {
+      "path": "/workspace/invite/:workspaceInviteId",
+      "file": "apps/portal/pages/workspace/invite/[workspaceInviteId].tsx",
+      "source": "router"
+    }
+  ],
+  "notes": [
+    "Generated from the Next.js pages router by tools/egress-audit/ui-routes-pages.mjs; checked in CI with --check."
+  ]
+}

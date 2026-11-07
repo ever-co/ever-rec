@@ -275,9 +275,59 @@
     "bin": "Trash",
     "back": "Back",
     "profileSettings": "Profile Settings",
+    "everPlatform": "Ever Platform",
     "companyProfile": "Company Profile"
   },
   "page": {
+    "everPlatform": {
+      "title": "Ever Platform",
+      "loading": "Loading…",
+      "unavailable": "This page is not available.",
+      "statistics": {
+        "title": "Anonymous usage statistics",
+        "description": "This installation sends counts and feature flags only, never names, e-mails or files. You can turn it off here or with EVER_STATS_ENABLED=false.",
+        "docs": "What is sent, and how to verify it",
+        "toggle": "Send anonymous usage statistics",
+        "turnedOn": "Anonymous usage statistics are on.",
+        "turnedOff": "Anonymous usage statistics are off: nothing is sent.",
+        "cloudManaged": "Managed by Ever Cloud",
+        "stateOn": "On",
+        "stateOff": "Off",
+        "reason": {
+          "env": "set by the server configuration",
+          "ui": "switched off in Settings",
+          "cloud-managed": "managed by Ever Cloud"
+        },
+        "nextSend": "Next report",
+        "lastSent": "Last report sent",
+        "instanceId": "Instance id",
+        "keyId": "Statistics key id",
+        "installSource": "Install source",
+        "country": "Country",
+        "keyUnreadable": "The statistics key of this installation cannot be read (REC_JWT_SECRET changed?): nothing is sent until you reset the instance identity.",
+        "sendNow": "Send now",
+        "sent": "Done: see the last payload below.",
+        "recount": "Recount now",
+        "recountStarted": "Recount started; the counts update in a few minutes.",
+        "reset": "Reset instance identity",
+        "resetTitle": "Reset the instance identity?",
+        "resetConfirm": "This installation gets a new random instance id and a new statistics key, and the list of past reports is cleared. Ever Platform will see it as a new installation.",
+        "resetDone": "The instance identity was reset.",
+        "resetHint": "Ever Platform knows this instance id with another key: reset the instance identity.",
+        "whatIsSent": "What is sent",
+        "lastPayload": "Last payload",
+        "noReport": "No report has been sent yet."
+      },
+      "errors": {
+        "generic": "That did not work. Please try again.",
+        "stats_disabled": "Anonymous usage statistics are switched off: nothing was sent.",
+        "rate_limited": "Send now can be used once every 10 minutes.",
+        "cloud_managed": "Managed by Ever Cloud: this switch cannot be changed here.",
+        "no_destination": "The statistics address of this server cannot be used: nothing was sent.",
+        "busy": "Another report is being sent right now. Try again in a few minutes.",
+        "refused_until_upgrade": "Ever Platform does not accept the reports of this version: nothing is sent until Rec is upgraded."
+      }
+    },
     "install": {
       "completedGuide": "You have completed this guide!",
       "clickRightSideExtension": "Click the extension icon on the right side of the address bar to start using this tool.",

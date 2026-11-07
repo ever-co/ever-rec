@@ -27,6 +27,10 @@ import { SharedService } from '../../services/shared/shared.service';
 import { fixVideoWithFFMPEG } from '../../services/utils/fixVideoWithFFMPEG';
 import { sendError, sendResponse } from '../../services/utils/sendResponse';
 import { StreamServiceService } from '../video-services/streamService.service';
+import {
+  EVER_COUNTER_EVENTS,
+  storedBytes,
+} from '../../common/events/ever-counters.events';
 
 @Injectable()
 export class VideoService {
@@ -235,6 +239,10 @@ export class VideoService {
         editorVideo.ref = metadata;
         editorVideo.url = downloadUrl;
         editorVideo.dbData = dbData;
+        this.eventEmitter.emit(EVER_COUNTER_EVENTS.mediaCreated, {
+          kind: 'video',
+          bytes: Number(metadata.size) || 0,
+        });
       }
 
       this.eventEmitter.emit('analytics.track', 'Video Uploaded', {
@@ -295,6 +303,10 @@ export class VideoService {
         editorVideo.dbData = dbData;
         editorVideo.ref = metadata;
         editorVideo.url = downloadUrl;
+        this.eventEmitter.emit(EVER_COUNTER_EVENTS.mediaCreated, {
+          kind: 'video',
+          bytes: Number(metadata.size) || 0,
+        });
       }
 
       this.eventEmitter.emit('analytics.track', 'Video Uploaded', {
@@ -685,6 +697,10 @@ export class VideoService {
       });
 
       const storageScreenRef = bucket.file(`users/${uid}/videos/${refName}`);
+      const everStatsBytes = await storedBytes(
+        this.eventEmitter,
+        storageScreenRef,
+      );
       storageScreenRef.delete().catch(() => {
         console.log('Error deleting video from reference: ' + refName);
       });
@@ -698,6 +714,10 @@ export class VideoService {
         });
 
       await videoRef.remove();
+      this.eventEmitter.emit(EVER_COUNTER_EVENTS.mediaDeleted, {
+        kind: 'video',
+        bytes: everStatsBytes,
+      });
 
       this.eventEmitter.emit('analytics.track', 'Video Trashed', {
         userId: uid,

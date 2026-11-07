@@ -38,6 +38,10 @@ import { WorkspaceShareService } from './share.service';
 import sharp from 'sharp';
 import { IUser } from 'src/interfaces/IUser';
 import { EditorGateway } from 'src/module/editor-websocket-module/editor.gateway';
+import {
+  EVER_COUNTER_EVENTS,
+  storedBytes,
+} from '../../../common/events/ever-counters.events';
 
 const typeParser = {
   itemLocation: {
@@ -109,7 +113,7 @@ export class WorkspaceFilesService {
     folderId: string | false,
   ): Promise<IDataResponse<IWorkspaceImage | null>> {
     try {
-      const { thumbnail: uploadedImage } =
+      const { file: storedImage, thumbnail: uploadedImage } =
         await this.utilitiesService.uploadImageInBucket(
           file,
           workspaceId,
@@ -164,6 +168,15 @@ export class WorkspaceFilesService {
           },
         );
 
+        // The stored image, not its thumbnail: the bytes a delete subtracts.
+        this.eventEmitter.emit(EVER_COUNTER_EVENTS.mediaCreated, {
+          kind: 'screenshot',
+          bytes: await storedBytes(
+            this.eventEmitter,
+            storedImage,
+            EVER_COUNTER_EVENTS.mediaCreated,
+          ),
+        });
         return sendResponse<IWorkspaceImage>(image);
       } else {
         return sendError('No screenshot metadata.');
@@ -284,6 +297,12 @@ export class WorkspaceFilesService {
         url,
         dbData: dbData,
       };
+
+      // The workspace now holds its own copy of the file.
+      this.eventEmitter.emit(EVER_COUNTER_EVENTS.mediaCreated, {
+        kind: itemType === 'image' ? 'screenshot' : 'video',
+        bytes: Number(metadata?.size) || 0,
+      });
 
       this.eventEmitter.emit(
         'analytics.track',
@@ -619,6 +638,10 @@ export class WorkspaceFilesService {
         );
 
         // Should decide what to send to the Extension after and IF storageReference is resolved
+        this.eventEmitter.emit(EVER_COUNTER_EVENTS.mediaCreated, {
+          kind: 'video',
+          bytes: Number(metadata.size) || 0,
+        });
         return sendResponse<IWorkspaceVideo>(video);
       } else {
         return sendError('No video metadata');
@@ -655,6 +678,10 @@ export class WorkspaceFilesService {
         `workspaces/${workspaceId}/screenshots/originals/${refName}`,
       );
 
+      const everStatsBytes = await storedBytes(
+        this.eventEmitter,
+        imageStorageRef,
+      );
       this.workspaceShareService.deleteLinkById(workspaceId, imageId);
 
       imageStorageRef.delete().catch(() => {
@@ -671,6 +698,10 @@ export class WorkspaceFilesService {
       });
 
       await imageReference.remove();
+      this.eventEmitter.emit(EVER_COUNTER_EVENTS.mediaDeleted, {
+        kind: 'screenshot',
+        bytes: everStatsBytes,
+      });
 
       const updatedFolders =
         this.utilitiesService.changeFolderItemCountRecursive(
@@ -705,6 +736,7 @@ export class WorkspaceFilesService {
       const fileRef = bucket.file(
         `workspaces/${workspaceId}/videos/${refName}`,
       );
+      const everStatsBytes = await storedBytes(this.eventEmitter, fileRef);
       fileRef.delete().catch(() => {
         console.log('Error deleting video from reference: ' + refName);
       });
@@ -726,6 +758,10 @@ export class WorkspaceFilesService {
       });
 
       await videoRef.remove();
+      this.eventEmitter.emit(EVER_COUNTER_EVENTS.mediaDeleted, {
+        kind: 'video',
+        bytes: everStatsBytes,
+      });
 
       this.eventEmitter.emit(
         'analytics.track',

@@ -2,6 +2,7 @@ import { panelRoutes, preRoutes } from 'components/_routes';
 import AppSvg from 'components/elements/AppSvg';
 import IPageMenuItems from 'app/interfaces/IPageMenuItems';
 import { useTranslation } from 'react-i18next';
+import useEverPlatformAvailable from 'hooks/useEverPlatformAvailable';
 
 type MenuItemTypeId =
   | 'whiteboards'
@@ -13,6 +14,7 @@ type MenuItemTypeId =
   | 'favFolders'
   | 'back'
   | 'profile'
+  | 'ever-platform'
   | 'company-profile'
   | 'company-members'
   | 'company-teams';
@@ -27,6 +29,7 @@ export interface ISettingsMenuItem extends IMainMenuItem {
 
 export const useMenuItems = () => {
   const { t } = useTranslation();
+  const everPlatformAvailable = useEverPlatformAvailable();
   const mainMenuItems: IMainMenuItem[] = [
     {
       type: 'images',
@@ -91,6 +94,16 @@ export const useMenuItems = () => {
       imgName: 'profile.svg',
     },
   ];
+  // Shown to the operator of the installation only, when the API has the statistics loaded.
+  if (everPlatformAvailable) {
+    settingsMenuItems.push({
+      type: 'ever-platform',
+      title: t('navigation.everPlatform'),
+      route: preRoutes.settings + panelRoutes.everPlatform,
+      icon: <AppSvg path="/sidebar/new/integrations.svg" size="18px" />,
+      imgName: '',
+    });
+  }
   const getWorkspaceSettingsMenuItems = (workspaceId: string) => {
     const workspaceSettingsMenuItems: IMainMenuItem[] = [
       {

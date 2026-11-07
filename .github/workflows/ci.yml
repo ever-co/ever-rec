@@ -34,6 +34,8 @@ jobs:
         run: pnpm install --frozen-lockfile --ignore-scripts
       - name: Unit tests
         run: pnpm --filter ever-rec-api exec jest src/module/ever-id
+      - name: Unit tests (anonymous usage statistics)
+        run: pnpm --filter ever-rec-api exec jest src/common src/app.module.ever-platform src/module/ever-instance src/module/ever-stats
 
   api-e2e:
     name: API end-to-end tests (sign-in providers, existing sign-in routes)
@@ -52,6 +54,32 @@ jobs:
         run: pnpm install --frozen-lockfile --ignore-scripts
       - name: End-to-end tests
         run: pnpm --filter ever-rec-api exec jest --config ./test/jest-e2e.json test/ever-id test/auth-regression
+      - name: End-to-end tests (anonymous usage statistics, route table)
+        run: pnpm --filter ever-rec-api exec jest --config ./test/jest-e2e.json test/ever-stats test/route-table
+
+  api-integration:
+    name: API integration tests (Firebase emulators)
+    runs-on: ${{ vars.RUNNER_LINUX_X64_8 || 'ubuntu-latest' }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 26
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Install pnpm and the Firebase CLI
+        run: npm install -g --ignore-scripts pnpm@9.9.0 firebase-tools@13.35.1
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+      - name: Integration tests against the Firebase emulators (demo project, nothing leaves the runner)
+        env:
+          FIREBASE_CLI_DISABLE_UPDATE_CHECK: 'true'
+        run: pnpm --filter ever-rec-api test:integration
 
   portal-unit:
     name: Portal unit tests
@@ -70,3 +98,117 @@ jobs:
         run: pnpm install --frozen-lockfile --ignore-scripts
       - name: Unit tests
         run: pnpm --filter ever-rec-portal test
+
+  egress:
+    name: Egress audit (anonymous usage statistics)
+    # Docker with NET_RAW and NET_ADMIN is needed for the capture.
+    runs-on: ${{ vars.RUNNER_LINUX_X64_8 || 'ubuntu-latest' }}
+    timeout-minutes: 120
+    env:
+      AUDIT_CONFIG: tools/egress-audit/egress-audit.config.json
+      AUDIT_ARTIFACTS: egress-audit-artifacts
+      REC_API_IMAGE: ever-rec-api:egress-audit
+      REC_EMULATORS_IMAGE: ever-rec-emulators:egress-audit
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 26
+      - name: Install the egress audit harness (the version and integrity tools/egress-audit/harness.json pins)
+        run: |
+          name=$(node -p "require('./tools/egress-audit/harness.json').package")
+          version=$(node -p "require('./tools/egress-audit/harness.json').version")
+          expected=$(node -p "require('./tools/egress-audit/harness.json').integrity")
+          mkdir -p "$RUNNER_TEMP/harness"
+          cd "$RUNNER_TEMP/harness"
+          npm pack "${name}@${version}" --registry https://registry.npmjs.org --json > pack.json
+          actual=$(node -p "require('./pack.json')[0].integrity")
+          if [ "$actual" != "$expected" ]; then
+            echo "::error::${name}@${version} does not match the pinned integrity"
+            exit 1
+          fi
+          echo '{"name":"egress-audit-harness","private":true}' > package.json
+          npm install --no-audit --no-fund --ignore-scripts --registry https://registry.npmjs.org ./ever-co-connect-tools-${version}.tgz
+          echo "EGRESS_AUDIT=$RUNNER_TEMP/harness/node_modules/@ever-co/connect-tools/dist/egress-audit/run.mjs" >> "$GITHUB_ENV"
+      - name: The portal route list of the browser leg is in step with the pages
+        run: |
+          node tools/egress-audit/ui-routes-pages.mjs --check
+          # Control: a list missing a page must fail the check.
+          cp tools/egress-audit/ui-routes.json "$RUNNER_TEMP/ui-routes.json"
+          node -e 'const f=process.argv[1];const l=JSON.parse(require("fs").readFileSync(f,"utf8"));l.routes=l.routes.filter((r)=>r.path!=="/settings/ever-platform");require("fs").writeFileSync(f,JSON.stringify(l))' tools/egress-audit/ui-routes.json
+          set +e
+          node tools/egress-audit/ui-routes-pages.mjs --check
+          code=$?
+          set -e
+          cp "$RUNNER_TEMP/ui-routes.json" tools/egress-audit/ui-routes.json
+          if [ "$code" -ne 1 ]; then echo "::error::a route list missing a page must fail the check"; exit 1; fi
+      - name: 'Static: the statistics code never guesses where it runs'
+        run: node "$EGRESS_AUDIT" cloud-inference --dirs apps/api/src/module/ever-stats,apps/api/src/module/ever-instance,apps/api/src/common/ever-platform
+      - name: Build the API image under test and the emulators image
+        run: |
+          docker build -f .deploy/api/Dockerfile -t "$REC_API_IMAGE" .
+          docker build -f tools/egress-audit/emulators.Dockerfile -t "$REC_EMULATORS_IMAGE" .
+      - name: Secrets of this run
+        run: |
+          secret=$(openssl rand -hex 32)
+          echo "::add-mask::$secret"
+          echo "REC_AUDIT_SECRET=$secret" >> "$GITHUB_ENV"
+          key=$(openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 2>/dev/null)
+          {
+            echo 'REC_AUDIT_FIREBASE_KEY<<REC_AUDIT_KEY_END'
+            echo "$key"
+            echo 'REC_AUDIT_KEY_END'
+          } >> "$GITHUB_ENV"
+      - name: 'off: statistics off (EVER_STATS_ENABLED=false)'
+        if: ${{ !cancelled() }}
+        run: node "$EGRESS_AUDIT" --config "$AUDIT_CONFIG" --mode off --legs api --artifacts "$AUDIT_ARTIFACTS" --verbose
+      - name: 'loaded_off: loaded, switched off by the operator'
+        if: ${{ !cancelled() }}
+        run: node "$EGRESS_AUDIT" --config "$AUDIT_CONFIG" --mode loaded_off --legs api --artifacts "$AUDIT_ARTIFACTS" --verbose
+      - name: 'positive_stats: on, against the mock platform'
+        if: ${{ !cancelled() }}
+        run: node "$EGRESS_AUDIT" --config "$AUDIT_CONFIG" --mode positive_stats --legs api --artifacts "$AUDIT_ARTIFACTS" --verbose
+      - name: 'Control: positive_stats without the mock platform must fail'
+        if: ${{ !cancelled() }}
+        run: |
+          set +e
+          node "$EGRESS_AUDIT" --config "$AUDIT_CONFIG" --mode positive_stats --no-mock --legs api --artifacts "$AUDIT_ARTIFACTS" --verbose
+          code=$?
+          set -e
+          if [ "$code" -ne 1 ]; then
+            echo "::error::without the mock platform the audit must report a violation (exit 1); it exited $code"
+            exit 1
+          fi
+          echo "The control failed as it must (exit 1)."
+      - name: 'The scheduler: not loaded in off, and in loaded_off it asked after the switch-off'
+        if: ${{ !cancelled() }}
+        run: |
+          node -e '
+            const fs = require("fs"), path = require("path");
+            const logOf = (mode) => {
+              const dir = path.join(process.env.AUDIT_ARTIFACTS, mode);
+              const file = fs.existsSync(dir) ? fs.readdirSync(dir).find((name) => /^product-api.*\.log$/.test(name)) : null;
+              return file ? fs.readFileSync(path.join(dir, file), "utf8") : null;
+            };
+            let failed = false;
+            const fail = (message) => { console.error(`::error::${message}`); failed = true; };
+            const off = logOf("off");
+            if (off === null) fail("off: the API log is missing");
+            else if (/ever_stats\./.test(off)) fail("off: the statistics module ran");
+            else console.log("off: the statistics module did not run.");
+            const loaded = logOf("loaded_off");
+            if (loaded === null) fail("loaded_off: the API log is missing");
+            else if (!loaded.includes("ever_stats.send outcome=skipped_ui_off")) fail("loaded_off: the scheduler never ran after the switch-off: the run proves nothing");
+            else if (/ever_stats\.send outcome=(sent|rejected|failed)/.test(loaded)) fail("loaded_off: the scheduler tried to send");
+            else console.log("loaded_off: the scheduler ran after the switch-off and sent nothing.");
+            process.exit(failed ? 1 : 0);
+          '
+      - name: Upload the evidence (pcaps, DNS logs, reports)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: egress-audit
+          path: ${{ env.AUDIT_ARTIFACTS }}
+          retention-days: 14

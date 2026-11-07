@@ -1,0 +1,44 @@
+# Egress audit only (see README.md): the Ever Rec API from the image under test and the Firebase
+# Emulator Suite it uses instead of a real Firebase project. Nothing is published to the host:
+# everything runs on the audit's sealed Docker setup, where the API reaches the emulators as
+# `emulators`.
+#
+# - REC_API_IMAGE: the API image under test (built by the workflow from .deploy/api/Dockerfile).
+# - REC_EMULATORS_IMAGE: the emulators image (built from tools/egress-audit/emulators.Dockerfile).
+# - REC_AUDIT_SECRET: a random value the workflow makes per run (never committed): REC_JWT_SECRET.
+# - REC_AUDIT_FIREBASE_KEY: a throwaway RSA key made per run, so the Admin SDK starts; the emulators
+#   never check it, and the project id starts with "demo-", which the emulators keep local.
+#
+# The API runs with its image defaults except what the sealed setup needs. The statistics switches
+# of each mode are set by the audit itself.
+services:
+  api:
+    image: ${REC_API_IMAGE:?set REC_API_IMAGE to the API image under test}
+    pull_policy: never
+    depends_on:
+      - emulators
+    environment:
+      NODE_ENV: production
+      API_PORT: '3000'
+      # The web SDK the API also loads needs an API key to start; the emulators never check it.
+      FIREBASE_API_KEY: egress-audit-not-a-key
+      FIREBASE_AUTH_DOMAIN: demo-ever-rec.firebaseapp.com
+      FIREBASE_PROJECT_ID: demo-ever-rec
+      FIREBASE_ADMIN_CLIENT_EMAIL: egress-audit@demo-ever-rec.iam.gserviceaccount.com
+      FIREBASE_ADMIN_PRIVATE_KEY: ${REC_AUDIT_FIREBASE_KEY:?set REC_AUDIT_FIREBASE_KEY to a throwaway RSA key}
+      FIREBASE_DATABASE_URL: http://emulators:9000?ns=demo-ever-rec
+      FIREBASE_STORAGE_BUCKET: demo-ever-rec.appspot.com
+      FIREBASE_AUTH_EMULATOR_HOST: emulators:9099
+      FIREBASE_DATABASE_EMULATOR_HOST: emulators:9000
+      FIREBASE_STORAGE_EMULATOR_HOST: emulators:9199
+      REC_JWT_SECRET: ${REC_AUDIT_SECRET:?set REC_AUDIT_SECRET to a random value}
+      REC_JWT_EXPIRES_IN: 1h
+      REC_JWT_AUDIENCE: ever-rec
+      REC_JWT_ISSUER: rec-service
+      # The adapter signs in as this uid through the Authentication emulator.
+      SUPER_ADMIN_ACCOUNT_UID: egress-audit-operator
+      WEBSITE_URL: http://portal:4200
+
+  emulators:
+    image: ${REC_EMULATORS_IMAGE:?set REC_EMULATORS_IMAGE to the emulators image}
+    pull_policy: never

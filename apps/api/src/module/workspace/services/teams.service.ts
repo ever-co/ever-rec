@@ -7,10 +7,16 @@ import { IDataResponse } from 'src/interfaces/_types';
 import { sendError, sendResponse } from 'src/services/utils/sendResponse';
 import { promiseAllSettled } from 'src/services/utils/helpers';
 import { IWorkspaceUser } from '../Interfaces/Workspace';
+import { Optional } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { EVER_COUNTER_EVENTS } from '../../../common/events/ever-counters.events';
 
 @Injectable()
 export class WorkspaceTeamsService {
-  constructor(private readonly utilitiesService: WorkspaceUtilitiesService) {}
+  constructor(
+    private readonly utilitiesService: WorkspaceUtilitiesService,
+    @Optional() private readonly eventEmitter?: EventEmitter2,
+  ) {}
 
   async addTeam(uid: string, workspaceId: string, teamName: string) {
     try {
@@ -36,6 +42,7 @@ export class WorkspaceTeamsService {
       };
 
       await workspaceRef.update(newWorkspace);
+      this.eventEmitter?.emit(EVER_COUNTER_EVENTS.teamCreated, {});
 
       return sendResponse(teams);
     } catch (e) {
@@ -162,6 +169,7 @@ export class WorkspaceTeamsService {
       };
 
       await workspaceRef.update(newWorkspace);
+      this.eventEmitter?.emit(EVER_COUNTER_EVENTS.teamDeleted, {});
 
       bucket
         .deleteFiles({

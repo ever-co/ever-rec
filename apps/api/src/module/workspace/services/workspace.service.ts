@@ -19,6 +19,12 @@ import { WorkspaceMembersService } from './members.service';
 import { IWorkspaceFolder } from '../Interfaces/Folders';
 import { sendError, sendResponse } from 'src/services/utils/sendResponse';
 import { IFavoriteFolders } from 'src/interfaces/Folders';
+import { Optional } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import {
+  EVER_COUNTER_EVENTS,
+  storedMediaUnder,
+} from '../../../common/events/ever-counters.events';
 
 @Injectable()
 export class WorkspacesService {
@@ -27,6 +33,7 @@ export class WorkspacesService {
   constructor(
     private readonly utilitiesService: WorkspaceUtilitiesService,
     private readonly workspaceMembersService: WorkspaceMembersService,
+    @Optional() private readonly eventEmitter?: EventEmitter2,
   ) {
     this.config = {
       action: 'read',
@@ -114,6 +121,7 @@ export class WorkspacesService {
           workspaceRef.set(newWorkspace),
           userRef.update({ workspaceIds }),
         ]);
+        this.eventEmitter?.emit(EVER_COUNTER_EVENTS.workspaceCreated, {});
         const workspace: IWorkspace =
           await this.utilitiesService.parseWorkspaceItems(newWorkspace);
 
@@ -360,10 +368,29 @@ export class WorkspacesService {
     }
 
     await workspaceRef.remove();
+    if (workspaceVal) {
+      this.eventEmitter?.emit(EVER_COUNTER_EVENTS.workspaceDeleted, {});
+    }
+    if (workspaceVal?.teams) {
+      this.eventEmitter?.emit(EVER_COUNTER_EVENTS.teamDeleted, {
+        count: Object.keys(workspaceVal.teams).length,
+      });
+    }
 
+    // The bytes of its screenshots and videos, subtracted once the files are gone.
+    const removedMedia = await storedMediaUnder(
+      this.eventEmitter,
+      bucket,
+      `workspaces/${workspaceId}/`,
+    );
     bucket
       .deleteFiles({
         prefix: `workspaces/${workspaceId}/`,
+      })
+      .then(() => {
+        for (const media of removedMedia) {
+          this.eventEmitter?.emit(EVER_COUNTER_EVENTS.mediaDeleted, media);
+        }
       })
       .catch((error) => {
         console.log('Error deleting files from workspace:', error);

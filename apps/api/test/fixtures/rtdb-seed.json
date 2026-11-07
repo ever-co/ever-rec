@@ -1,0 +1,1301 @@
+{
+  "users": {
+    "seedUid0000x0": {
+      "email": "amelia.okonkwo0@example.com",
+      "displayName": "Amelia Okonkwo",
+      "photoURL": null,
+      "googleCredentials": null,
+      "workspaceIds": [
+        "seedWorkspace00AbCdEfGhIjKlMn"
+      ],
+      "screenshots": {
+        "seedShot0001": {
+          "id": "seedShot0001",
+          "uid": "seedUid0000x0",
+          "refName": "Amelia_Okonkwo_screen_0.png",
+          "title": "Invoice dispute for Acme 0",
+          "parentId": false,
+          "created": "2026-10-02T10:01:00.000Z",
+          "trash": false,
+          "views": 0
+        },
+        "seedShot0002": {
+          "id": "seedShot0002",
+          "uid": "seedUid0000x0",
+          "refName": "Amelia_Okonkwo_screen_1.png",
+          "title": "Patient intake form 1",
+          "parentId": false,
+          "created": "2026-10-03T10:02:00.000Z",
+          "trash": false,
+          "views": 0
+        }
+      },
+      "videos": {
+        "seedVideo0003": {
+          "id": "seedVideo0003",
+          "uid": "seedUid0000x0",
+          "refName": "Amelia_Okonkwo_walkthrough.webm",
+          "title": "Salary bands draft (video)",
+          "parentId": false,
+          "created": "2026-10-04T10:03:00.000Z",
+          "trash": false,
+          "views": 0
+        }
+      }
+    },
+    "seedUid0001x63z": {
+      "email": "bastien.okonkwo1@example.org",
+      "displayName": "Bastien Okonkwo",
+      "photoURL": null,
+      "googleCredentials": null,
+      "workspaceIds": [
+        "seedWorkspace01AbCdEfGhIjKlMn"
+      ]
+    },
+    "seedUid0002xc7y": {
+      "email": "chiara.okonkwo2@example.net",
+      "displayName": "Chiara Okonkwo",
+      "photoURL": null,
+      "googleCredentials": null,
+      "workspaceIds": [
+        "seedWorkspace02AbCdEfGhIjKlMn"
+      ]
+    },
+    "seedUid0003xibx": {
+      "email": "dmitri.okonkwo3@example.com",
+      "displayName": "Dmitri Okonkwo",
+      "photoURL": null,
+      "googleCredentials": null,
+      "workspaceIds": [
+        "seedWorkspace03AbCdEfGhIjKlMn"
+      ],
+      "screenshots": {
+        "seedShot0004": {
+          "id": "seedShot0004",
+          "uid": "seedUid0003xibx",
+          "refName": "Dmitri_Okonkwo_screen_0.png",
+          "title": "Board meeting notes 0",
+          "parentId": false,
+          "created": "2026-10-05T10:04:00.000Z",
+          "trash": false,
+          "views": 0
+        },
+        "seedShot0005": {
+          "id": "seedShot0005",
+          "uid": "seedUid0003xibx",
+          "refName": "Dmitri_Okonkwo_screen_1.png",
+          "title": "Login bug repro 1",
+          "parentId": false,
+          "created": "2026-10-06T10:05:00.000Z",
+          "trash": false,
+          "views": 0
+        }
+      }
+    },
+    "seedUid0004xofw": {
+      "email": "elif.okonkwo4@example.org",
+      "displayName": "Elif Okonkwo",
+      "photoURL": null,
+      "googleCredentials": null,
+      "workspaceIds": [
+        "seedWorkspace04AbCdEfGhIjKlMn"
+      ]
+    },
+    "seedUid0005xujv": {
+      "email": "farouk.okonkwo5@example.net",
+      "displayName": "Farouk Okonkwo",
+      "photoURL": null,
+      "googleCredentials": null,
+      "workspaceIds": [
+        "seedWorkspace05AbCdEfGhIjKlMn"
+      ],
+      "videos": {
+        "seedVideo0006": {
+          "id": "seedVideo0006",
+          "uid": "seedUid0005xujv",
+          "refName": "Farouk_Okonkwo_walkthrough.webm",
+          "title": "Quarterly roadmap review (video)",
+          "parentId": false,
+          "created": "2026-10-07T10:06:00.000Z",
+          "trash": false,
+          "views": 0
+        }
+      }
+    },
+    "seedUid0006x10nu": {
+      "email": "greta.okonkwo6@example.com",
+      "displayName": "Greta Okonkwo",
+      "photoURL": null,
+      "googleCredentials": null,
+      "workspaceIds": [
+        "seedWorkspace00AbCdEfGhIjKlMn"
+      ],
+      "screenshots": {
+        "seedShot0007": {
+          "id": "seedShot0007",
+          "uid": "seedUid0006x10nu",
+          "refName": "Greta_Okonkwo_screen_0.png",
+          "title": "Invoice dispute for Acme 0",
+          "parentId": false,
+          "created": "2026-10-08T10:07:00.000Z",
+          "trash": false,
+          "views": 0
+        },
+        "seedShot0008": {
+          "id": "seedShot0008",
+          "uid": "seedUid0006x10nu",
+          "refName": "Greta_Okonkwo_screen_1.png",
+          "title": "Patient intake form 1",
+          "parentId": false,
+          "created": "2026-10-09T10:08:00.000Z",
+          "trash": false,
+          "views": 0
+        }
+      }
+    },
+    "seedUid0007x16rt": {
+      "email": "hiroshi.okonkwo7@example.org",
+      "displayName": "Hiroshi Okonkwo",
+      "photoURL": null,
+      "googleCredentials": null,
+      "workspaceIds": [
+        "seedWorkspace01AbCdEfGhIjKlMn"
+      ]
+    },
+    "seedUid0008x1cvs": {
+      "email": "ines.okonkwo8@example.net",
+      "displayName": "Ines Okonkwo",
+      "photoURL": null,
+      "googleCredentials": null,
+      "workspaceIds": [
+        "seedWorkspace02AbCdEfGhIjKlMn"
+      ]
+    },
+    "seedUid0009x1izr": {
+      "email": "jonas.okonkwo9@example.com",
+      "displayName": "Jonas Okonkwo",
+      "photoURL": null,
+      "googleCredentials": null,
+      "workspaceIds": [
+        "seedWorkspace03AbCdEfGhIjKlMn"
+      ],
+      "screenshots": {
+        "seedShot0009": {
+          "id": "seedShot0009",
+          "uid": "seedUid0009x1izr",
+          "refName": "Jonas_Okonkwo_screen_0.png",
+          "title": "Salary bands draft 0",
+          "parentId": false,
+          "created": "2026-10-10T10:09:00.000Z",
+          "trash": false,
+          "views": 0
+        },
+        "seedShot0010": {
+          "id": "seedShot0010",
+          "uid": "seedUid0009x1izr",
+          "refName": "Jonas_Okonkwo_screen_1.png",
+          "title": "Board meeting notes 1",
+          "parentId": false,
+          "created": "2026-10-11T10:10:00.000Z",
+          "trash": false,
+          "views": 0
+        }
+      }
+    },
+    "seedUid0010x1p3q": {
+      "email": "kalani.okonkwo10@example.org",
+      "displayName": "Kalani Okonkwo",
+      "photoURL": null,
+      "googleCredentials": null,
+      "workspaceIds": [
+        "seedWorkspace04AbCdEfGhIjKlMn"
+      ],
+      "videos": {
+        "seedVideo0011": {
+          "id": "seedVideo0011",
+          "uid": "seedUid0010x1p3q",
+          "refName": "Kalani_Okonkwo_walkthrough.webm",
+          "title": "Login bug repro (video)",
+          "parentId": false,
+          "created": "2026-10-12T10:11:00.000Z",
+          "trash": false,
+          "views": 0
+        }
+      }
+    },
+    "seedUid0011x1v7p": {
+      "email": "lucia.okonkwo11@example.net",
+      "displayName": "Lucia Okonkwo",
+      "photoURL": null,
+      "googleCredentials": null,
+      "workspaceIds": [
+        "seedWorkspace05AbCdEfGhIjKlMn"
+      ]
+    },
+    "seedUid0012x21bo": {
+      "email": "mateo.okonkwo12@example.com",
+      "displayName": "Mateo Okonkwo",
+      "photoURL": null,
+      "googleCredentials": null,
+      "workspaceIds": [
+        "seedWorkspace00AbCdEfGhIjKlMn"
+      ],
+      "screenshots": {
+        "seedShot0012": {
+          "id": "seedShot0012",
+          "uid": "seedUid0012x21bo",
+          "refName": "Mateo_Okonkwo_screen_0.png",
+          "title": "Quarterly roadmap review 0",
+          "parentId": false,
+          "created": "2026-10-13T10:12:00.000Z",
+          "trash": false,
+          "views": 0
+        },
+        "seedShot0013": {
+          "id": "seedShot0013",
+          "uid": "seedUid0012x21bo",
+          "refName": "Mateo_Okonkwo_screen_1.png",
+          "title": "Invoice dispute for Acme 1",
+          "parentId": false,
+          "created": "2026-10-14T10:13:00.000Z",
+          "trash": false,
+          "views": 0
+        }
+      }
+    },
+    "seedUid0013x27fn": {
+      "email": "nadia.okonkwo13@example.org",
+      "displayName": "Nadia Okonkwo",
+      "photoURL": null,
+      "googleCredentials": null,
+      "workspaceIds": [
+        "seedWorkspace01AbCdEfGhIjKlMn"
+      ]
+    },
+    "seedUid0014x2djm": {
+      "email": "amelia.lindqvist14@example.net",
+      "displayName": "Amelia Lindqvist",
+      "photoURL": null,
+      "googleCredentials": null,
+      "workspaceIds": [
+        "seedWorkspace02AbCdEfGhIjKlMn"
+      ]
+    },
+    "seedUid0015x2jnl": {
+      "email": "bastien.lindqvist15@example.com",
+      "displayName": "Bastien Lindqvist",
+      "photoURL": null,
+      "googleCredentials": null,
+      "workspaceIds": [
+        "seedWorkspace03AbCdEfGhIjKlMn"
+      ],
+      "screenshots": {
+        "seedShot0014": {
+          "id": "seedShot0014",
+          "uid": "seedUid0015x2jnl",
+          "refName": "Bastien_Lindqvist_screen_0.png",
+          "title": "Patient intake form 0",
+          "parentId": false,
+          "created": "2026-10-15T10:14:00.000Z",
+          "trash": false,
+          "views": 0
+        },
+        "seedShot0015": {
+          "id": "seedShot0015",
+          "uid": "seedUid0015x2jnl",
+          "refName": "Bastien_Lindqvist_screen_1.png",
+          "title": "Salary bands draft 1",
+          "parentId": false,
+          "created": "2026-10-16T10:15:00.000Z",
+          "trash": false,
+          "views": 0
+        }
+      },
+      "videos": {
+        "seedVideo0016": {
+          "id": "seedVideo0016",
+          "uid": "seedUid0015x2jnl",
+          "refName": "Bastien_Lindqvist_walkthrough.webm",
+          "title": "Board meeting notes (video)",
+          "parentId": false,
+          "created": "2026-10-17T10:16:00.000Z",
+          "trash": false,
+          "views": 0
+        }
+      }
+    },
+    "seedUid0016x2prk": {
+      "email": "chiara.lindqvist16@example.org",
+      "displayName": "Chiara Lindqvist",
+      "photoURL": null,
+      "googleCredentials": null,
+      "workspaceIds": [
+        "seedWorkspace04AbCdEfGhIjKlMn"
+      ]
+    },
+    "seedUid0017x2vvj": {
+      "email": "dmitri.lindqvist17@example.net",
+      "displayName": "Dmitri Lindqvist",
+      "photoURL": null,
+      "googleCredentials": null,
+      "workspaceIds": [
+        "seedWorkspace05AbCdEfGhIjKlMn"
+      ]
+    },
+    "seedUid0018x31zi": {
+      "email": "elif.lindqvist18@example.com",
+      "displayName": "Elif Lindqvist",
+      "photoURL": null,
+      "googleCredentials": null,
+      "workspaceIds": [
+        "seedWorkspace00AbCdEfGhIjKlMn"
+      ],
+      "screenshots": {
+        "seedShot0017": {
+          "id": "seedShot0017",
+          "uid": "seedUid0018x31zi",
+          "refName": "Elif_Lindqvist_screen_0.png",
+          "title": "Login bug repro 0",
+          "parentId": false,
+          "created": "2026-10-18T10:17:00.000Z",
+          "trash": false,
+          "views": 0
+        },
+        "seedShot0018": {
+          "id": "seedShot0018",
+          "uid": "seedUid0018x31zi",
+          "refName": "Elif_Lindqvist_screen_1.png",
+          "title": "Quarterly roadmap review 1",
+          "parentId": false,
+          "created": "2026-10-19T10:18:00.000Z",
+          "trash": false,
+          "views": 0
+        }
+      }
+    },
+    "seedUid0019x383h": {
+      "email": "farouk.lindqvist19@example.org",
+      "displayName": "Farouk Lindqvist",
+      "photoURL": null,
+      "googleCredentials": null,
+      "workspaceIds": [
+        "seedWorkspace01AbCdEfGhIjKlMn"
+      ]
+    },
+    "seedUid0020x3e7g": {
+      "email": "greta.lindqvist20@example.net",
+      "displayName": "Greta Lindqvist",
+      "photoURL": null,
+      "googleCredentials": null,
+      "workspaceIds": [
+        "seedWorkspace02AbCdEfGhIjKlMn"
+      ],
+      "videos": {
+        "seedVideo0019": {
+          "id": "seedVideo0019",
+          "uid": "seedUid0020x3e7g",
+          "refName": "Greta_Lindqvist_walkthrough.webm",
+          "title": "Invoice dispute for Acme (video)",
+          "parentId": false,
+          "created": "2026-10-20T10:19:00.000Z",
+          "trash": false,
+          "views": 0
+        }
+      }
+    },
+    "seedUid0021x3kbf": {
+      "email": "hiroshi.lindqvist21@example.com",
+      "displayName": "Hiroshi Lindqvist",
+      "photoURL": null,
+      "googleCredentials": null,
+      "workspaceIds": [
+        "seedWorkspace03AbCdEfGhIjKlMn"
+      ],
+      "screenshots": {
+        "seedShot0020": {
+          "id": "seedShot0020",
+          "uid": "seedUid0021x3kbf",
+          "refName": "Hiroshi_Lindqvist_screen_0.png",
+          "title": "Patient intake form 0",
+          "parentId": false,
+          "created": "2026-10-21T10:20:00.000Z",
+          "trash": false,
+          "views": 0
+        },
+        "seedShot0021": {
+          "id": "seedShot0021",
+          "uid": "seedUid0021x3kbf",
+          "refName": "Hiroshi_Lindqvist_screen_1.png",
+          "title": "Salary bands draft 1",
+          "parentId": false,
+          "created": "2026-10-22T10:21:00.000Z",
+          "trash": false,
+          "views": 0
+        }
+      }
+    },
+    "seedUid0022x3qfe": {
+      "email": "ines.lindqvist22@example.org",
+      "displayName": "Ines Lindqvist",
+      "photoURL": null,
+      "googleCredentials": null,
+      "workspaceIds": [
+        "seedWorkspace04AbCdEfGhIjKlMn"
+      ]
+    },
+    "seedUid0023x3wjd": {
+      "email": "jonas.lindqvist23@example.net",
+      "displayName": "Jonas Lindqvist",
+      "photoURL": null,
+      "googleCredentials": null,
+      "workspaceIds": [
+        "seedWorkspace05AbCdEfGhIjKlMn"
+      ]
+    },
+    "seedUid0024x42nc": {
+      "email": "kalani.lindqvist24@example.com",
+      "displayName": "Kalani Lindqvist",
+      "photoURL": null,
+      "googleCredentials": null,
+      "workspaceIds": [
+        "seedWorkspace00AbCdEfGhIjKlMn"
+      ],
+      "screenshots": {
+        "seedShot0022": {
+          "id": "seedShot0022",
+          "uid": "seedUid0024x42nc",
+          "refName": "Kalani_Lindqvist_screen_0.png",
+          "title": "Board meeting notes 0",
+          "parentId": false,
+          "created": "2026-10-23T10:22:00.000Z",
+          "trash": false,
+          "views": 0
+        },
+        "seedShot0023": {
+          "id": "seedShot0023",
+          "uid": "seedUid0024x42nc",
+          "refName": "Kalani_Lindqvist_screen_1.png",
+          "title": "Login bug repro 1",
+          "parentId": false,
+          "created": "2026-10-24T10:23:00.000Z",
+          "trash": false,
+          "views": 0
+        }
+      }
+    },
+    "seedUid0025x48rb": {
+      "email": "lucia.lindqvist25@example.org",
+      "displayName": "Lucia Lindqvist",
+      "photoURL": null,
+      "googleCredentials": null,
+      "workspaceIds": [
+        "seedWorkspace01AbCdEfGhIjKlMn"
+      ],
+      "videos": {
+        "seedVideo0024": {
+          "id": "seedVideo0024",
+          "uid": "seedUid0025x48rb",
+          "refName": "Lucia_Lindqvist_walkthrough.webm",
+          "title": "Quarterly roadmap review (video)",
+          "parentId": false,
+          "created": "2026-10-25T10:24:00.000Z",
+          "trash": false,
+          "views": 0
+        }
+      }
+    },
+    "seedUid0026x4eva": {
+      "email": "mateo.lindqvist26@example.net",
+      "displayName": "Mateo Lindqvist",
+      "photoURL": null,
+      "googleCredentials": null,
+      "workspaceIds": [
+        "seedWorkspace02AbCdEfGhIjKlMn"
+      ]
+    },
+    "seedUid0027x4kz9": {
+      "email": "nadia.lindqvist27@example.com",
+      "displayName": "Nadia Lindqvist",
+      "photoURL": null,
+      "googleCredentials": null,
+      "workspaceIds": [
+        "seedWorkspace03AbCdEfGhIjKlMn"
+      ],
+      "screenshots": {
+        "seedShot0025": {
+          "id": "seedShot0025",
+          "uid": "seedUid0027x4kz9",
+          "refName": "Nadia_Lindqvist_screen_0.png",
+          "title": "Invoice dispute for Acme 0",
+          "parentId": false,
+          "created": "2026-10-26T10:25:00.000Z",
+          "trash": false,
+          "views": 0
+        },
+        "seedShot0026": {
+          "id": "seedShot0026",
+          "uid": "seedUid0027x4kz9",
+          "refName": "Nadia_Lindqvist_screen_1.png",
+          "title": "Patient intake form 1",
+          "parentId": false,
+          "created": "2026-10-27T10:26:00.000Z",
+          "trash": false,
+          "views": 0
+        }
+      }
+    },
+    "seedUid0028x4r38": {
+      "email": "amelia.moreau28@example.org",
+      "displayName": "Amelia Moreau",
+      "photoURL": null,
+      "googleCredentials": null,
+      "workspaceIds": [
+        "seedWorkspace04AbCdEfGhIjKlMn"
+      ]
+    },
+    "seedUid0029x4x77": {
+      "email": "bastien.moreau29@example.net",
+      "displayName": "Bastien Moreau",
+      "photoURL": null,
+      "googleCredentials": null,
+      "workspaceIds": [
+        "seedWorkspace05AbCdEfGhIjKlMn"
+      ]
+    },
+    "seedUid0030x53b6": {
+      "email": "chiara.moreau30@example.com",
+      "displayName": "Chiara Moreau",
+      "photoURL": null,
+      "googleCredentials": null,
+      "workspaceIds": [
+        "seedWorkspace00AbCdEfGhIjKlMn"
+      ],
+      "screenshots": {
+        "seedShot0027": {
+          "id": "seedShot0027",
+          "uid": "seedUid0030x53b6",
+          "refName": "Chiara_Moreau_screen_0.png",
+          "title": "Salary bands draft 0",
+          "parentId": false,
+          "created": "2026-10-01T10:27:00.000Z",
+          "trash": false,
+          "views": 0
+        },
+        "seedShot0028": {
+          "id": "seedShot0028",
+          "uid": "seedUid0030x53b6",
+          "refName": "Chiara_Moreau_screen_1.png",
+          "title": "Board meeting notes 1",
+          "parentId": false,
+          "created": "2026-10-02T10:28:00.000Z",
+          "trash": false,
+          "views": 0
+        }
+      },
+      "videos": {
+        "seedVideo0029": {
+          "id": "seedVideo0029",
+          "uid": "seedUid0030x53b6",
+          "refName": "Chiara_Moreau_walkthrough.webm",
+          "title": "Login bug repro (video)",
+          "parentId": false,
+          "created": "2026-10-03T10:29:00.000Z",
+          "trash": false,
+          "views": 0
+        }
+      }
+    },
+    "seedUid0031x59f5": {
+      "email": "dmitri.moreau31@example.org",
+      "displayName": "Dmitri Moreau",
+      "photoURL": null,
+      "googleCredentials": null,
+      "workspaceIds": [
+        "seedWorkspace01AbCdEfGhIjKlMn"
+      ]
+    },
+    "seedUid0032x5fj4": {
+      "email": "elif.moreau32@example.net",
+      "displayName": "Elif Moreau",
+      "photoURL": null,
+      "googleCredentials": null,
+      "workspaceIds": [
+        "seedWorkspace02AbCdEfGhIjKlMn"
+      ]
+    },
+    "seedUid0033x5ln3": {
+      "email": "farouk.moreau33@example.com",
+      "displayName": "Farouk Moreau",
+      "photoURL": null,
+      "googleCredentials": null,
+      "workspaceIds": [
+        "seedWorkspace03AbCdEfGhIjKlMn"
+      ],
+      "screenshots": {
+        "seedShot0030": {
+          "id": "seedShot0030",
+          "uid": "seedUid0033x5ln3",
+          "refName": "Farouk_Moreau_screen_0.png",
+          "title": "Quarterly roadmap review 0",
+          "parentId": false,
+          "created": "2026-10-04T10:30:00.000Z",
+          "trash": false,
+          "views": 0
+        },
+        "seedShot0031": {
+          "id": "seedShot0031",
+          "uid": "seedUid0033x5ln3",
+          "refName": "Farouk_Moreau_screen_1.png",
+          "title": "Invoice dispute for Acme 1",
+          "parentId": false,
+          "created": "2026-10-05T10:31:00.000Z",
+          "trash": false,
+          "views": 0
+        }
+      }
+    },
+    "seedUid0034x5rr2": {
+      "email": "greta.moreau34@example.org",
+      "displayName": "Greta Moreau",
+      "photoURL": null,
+      "googleCredentials": null,
+      "workspaceIds": [
+        "seedWorkspace04AbCdEfGhIjKlMn"
+      ]
+    },
+    "seedUid0035x5xv1": {
+      "email": "hiroshi.moreau35@example.net",
+      "displayName": "Hiroshi Moreau",
+      "photoURL": null,
+      "googleCredentials": null,
+      "workspaceIds": [
+        "seedWorkspace05AbCdEfGhIjKlMn"
+      ],
+      "videos": {
+        "seedVideo0032": {
+          "id": "seedVideo0032",
+          "uid": "seedUid0035x5xv1",
+          "refName": "Hiroshi_Moreau_walkthrough.webm",
+          "title": "Patient intake form (video)",
+          "parentId": false,
+          "created": "2026-10-06T10:32:00.000Z",
+          "trash": false,
+          "views": 0
+        }
+      }
+    },
+    "seedUid0036x63z0": {
+      "email": "ines.moreau36@example.com",
+      "displayName": "Ines Moreau",
+      "photoURL": null,
+      "googleCredentials": null,
+      "workspaceIds": [
+        "seedWorkspace00AbCdEfGhIjKlMn"
+      ],
+      "screenshots": {
+        "seedShot0033": {
+          "id": "seedShot0033",
+          "uid": "seedUid0036x63z0",
+          "refName": "Ines_Moreau_screen_0.png",
+          "title": "Salary bands draft 0",
+          "parentId": false,
+          "created": "2026-10-07T10:33:00.000Z",
+          "trash": false,
+          "views": 0
+        },
+        "seedShot0034": {
+          "id": "seedShot0034",
+          "uid": "seedUid0036x63z0",
+          "refName": "Ines_Moreau_screen_1.png",
+          "title": "Board meeting notes 1",
+          "parentId": false,
+          "created": "2026-10-08T10:34:00.000Z",
+          "trash": false,
+          "views": 0
+        }
+      }
+    },
+    "seedUid0037x6a2z": {
+      "email": "jonas.moreau37@example.org",
+      "displayName": "Jonas Moreau",
+      "photoURL": null,
+      "googleCredentials": null,
+      "workspaceIds": [
+        "seedWorkspace01AbCdEfGhIjKlMn"
+      ]
+    },
+    "seedUid0038x6g6y": {
+      "email": "kalani.moreau38@example.net",
+      "displayName": "Kalani Moreau",
+      "photoURL": null,
+      "googleCredentials": null,
+      "workspaceIds": [
+        "seedWorkspace02AbCdEfGhIjKlMn"
+      ]
+    },
+    "seedUid0039x6max": {
+      "email": "lucia.moreau39@example.com",
+      "displayName": "Lucia Moreau",
+      "photoURL": null,
+      "googleCredentials": null,
+      "workspaceIds": [
+        "seedWorkspace03AbCdEfGhIjKlMn"
+      ],
+      "screenshots": {
+        "seedShot0035": {
+          "id": "seedShot0035",
+          "uid": "seedUid0039x6max",
+          "refName": "Lucia_Moreau_screen_0.png",
+          "title": "Login bug repro 0",
+          "parentId": false,
+          "created": "2026-10-09T10:35:00.000Z",
+          "trash": false,
+          "views": 0
+        },
+        "seedShot0036": {
+          "id": "seedShot0036",
+          "uid": "seedUid0039x6max",
+          "refName": "Lucia_Moreau_screen_1.png",
+          "title": "Quarterly roadmap review 1",
+          "parentId": false,
+          "created": "2026-10-10T10:36:00.000Z",
+          "trash": false,
+          "views": 0
+        }
+      }
+    },
+    "seedUid0040x6sew": {
+      "email": "mateo.moreau40@example.org",
+      "displayName": "Mateo Moreau",
+      "photoURL": null,
+      "googleCredentials": null,
+      "workspaceIds": [
+        "seedWorkspace04AbCdEfGhIjKlMn"
+      ],
+      "videos": {
+        "seedVideo0037": {
+          "id": "seedVideo0037",
+          "uid": "seedUid0040x6sew",
+          "refName": "Mateo_Moreau_walkthrough.webm",
+          "title": "Invoice dispute for Acme (video)",
+          "parentId": false,
+          "created": "2026-10-11T10:37:00.000Z",
+          "trash": false,
+          "views": 0
+        }
+      }
+    },
+    "seedUid0041x6yiv": {
+      "email": "nadia.moreau41@example.net",
+      "displayName": "Nadia Moreau",
+      "photoURL": null,
+      "googleCredentials": null,
+      "workspaceIds": [
+        "seedWorkspace05AbCdEfGhIjKlMn"
+      ]
+    }
+  },
+  "workspaces": {
+    "seedWorkspace00AbCdEfGhIjKlMn": {
+      "id": "seedWorkspace00AbCdEfGhIjKlMn",
+      "admin": "seedUid0000x0",
+      "name": "Northwind Studio",
+      "members": [
+        {
+          "id": "seedUid0000x0"
+        },
+        {
+          "id": "seedUid0006x10nu"
+        },
+        {
+          "id": "seedUid0012x21bo"
+        },
+        {
+          "id": "seedUid0018x31zi"
+        },
+        {
+          "id": "seedUid0024x42nc"
+        },
+        {
+          "id": "seedUid0030x53b6"
+        },
+        {
+          "id": "seedUid0036x63z0"
+        }
+      ],
+      "folders": [],
+      "created": 1788220800000,
+      "screenshots": {
+        "seedWsShot0038": {
+          "id": "seedWsShot0038",
+          "uid": "seedUid0000x0",
+          "refName": "Northwind-Studio-whiteboard.png",
+          "title": "Northwind Studio whiteboard",
+          "parentId": false,
+          "created": "2026-10-12T10:38:00.000Z"
+        }
+      },
+      "teams": [
+        {
+          "id": "seedTeam0001",
+          "admin": "seedUid0000x0",
+          "name": "Design Crew",
+          "members": [
+            {
+              "id": "seedUid0000x0"
+            }
+          ],
+          "workspaceId": "seedWorkspace00AbCdEfGhIjKlMn"
+        },
+        {
+          "id": "seedTeam0002",
+          "admin": "seedUid0000x0",
+          "name": "Night Shift",
+          "members": [
+            {
+              "id": "seedUid0000x0"
+            }
+          ],
+          "workspaceId": "seedWorkspace00AbCdEfGhIjKlMn"
+        },
+        {
+          "id": "seedTeam0003",
+          "admin": "seedUid0000x0",
+          "name": "Field Reporters",
+          "members": [
+            {
+              "id": "seedUid0000x0"
+            }
+          ],
+          "workspaceId": "seedWorkspace00AbCdEfGhIjKlMn"
+        }
+      ]
+    },
+    "seedWorkspace01AbCdEfGhIjKlMn": {
+      "id": "seedWorkspace01AbCdEfGhIjKlMn",
+      "admin": "seedUid0007x16rt",
+      "name": "Bluefin Analytics",
+      "members": [
+        {
+          "id": "seedUid0001x63z"
+        },
+        {
+          "id": "seedUid0007x16rt"
+        },
+        {
+          "id": "seedUid0013x27fn"
+        },
+        {
+          "id": "seedUid0019x383h"
+        },
+        {
+          "id": "seedUid0025x48rb"
+        },
+        {
+          "id": "seedUid0031x59f5"
+        },
+        {
+          "id": "seedUid0037x6a2z"
+        }
+      ],
+      "folders": [],
+      "created": 1788307200000,
+      "screenshots": {
+        "seedWsShot0039": {
+          "id": "seedWsShot0039",
+          "uid": "seedUid0007x16rt",
+          "refName": "Bluefin-Analytics-whiteboard.png",
+          "title": "Bluefin Analytics whiteboard",
+          "parentId": false,
+          "created": "2026-10-13T10:39:00.000Z"
+        }
+      },
+      "teams": [
+        {
+          "id": "seedTeam0004",
+          "admin": "seedUid0007x16rt",
+          "name": "Billing Desk",
+          "members": [
+            {
+              "id": "seedUid0007x16rt"
+            }
+          ],
+          "workspaceId": "seedWorkspace01AbCdEfGhIjKlMn"
+        },
+        {
+          "id": "seedTeam0005",
+          "admin": "seedUid0007x16rt",
+          "name": "Onboarding Squad",
+          "members": [
+            {
+              "id": "seedUid0007x16rt"
+            }
+          ],
+          "workspaceId": "seedWorkspace01AbCdEfGhIjKlMn"
+        }
+      ]
+    },
+    "seedWorkspace02AbCdEfGhIjKlMn": {
+      "id": "seedWorkspace02AbCdEfGhIjKlMn",
+      "admin": "seedUid0014x2djm",
+      "name": "Harbor Lane Clinic",
+      "members": [
+        {
+          "id": "seedUid0002xc7y"
+        },
+        {
+          "id": "seedUid0008x1cvs"
+        },
+        {
+          "id": "seedUid0014x2djm"
+        },
+        {
+          "id": "seedUid0020x3e7g"
+        },
+        {
+          "id": "seedUid0026x4eva"
+        },
+        {
+          "id": "seedUid0032x5fj4"
+        },
+        {
+          "id": "seedUid0038x6g6y"
+        }
+      ],
+      "folders": [],
+      "created": 1788393600000,
+      "screenshots": {
+        "seedWsShot0040": {
+          "id": "seedWsShot0040",
+          "uid": "seedUid0014x2djm",
+          "refName": "Harbor-Lane-Clinic-whiteboard.png",
+          "title": "Harbor Lane Clinic whiteboard",
+          "parentId": false,
+          "created": "2026-10-14T10:40:00.000Z"
+        }
+      },
+      "teams": [
+        {
+          "id": "seedTeam0006",
+          "admin": "seedUid0014x2djm",
+          "name": "Launch Team",
+          "members": [
+            {
+              "id": "seedUid0014x2djm"
+            }
+          ],
+          "workspaceId": "seedWorkspace02AbCdEfGhIjKlMn"
+        }
+      ]
+    },
+    "seedWorkspace03AbCdEfGhIjKlMn": {
+      "id": "seedWorkspace03AbCdEfGhIjKlMn",
+      "admin": "seedUid0021x3kbf",
+      "name": "Quillstone Legal",
+      "members": [
+        {
+          "id": "seedUid0003xibx"
+        },
+        {
+          "id": "seedUid0009x1izr"
+        },
+        {
+          "id": "seedUid0015x2jnl"
+        },
+        {
+          "id": "seedUid0021x3kbf"
+        },
+        {
+          "id": "seedUid0027x4kz9"
+        },
+        {
+          "id": "seedUid0033x5ln3"
+        },
+        {
+          "id": "seedUid0039x6max"
+        }
+      ],
+      "folders": [],
+      "created": 1788480000000,
+      "screenshots": {
+        "seedWsShot0041": {
+          "id": "seedWsShot0041",
+          "uid": "seedUid0021x3kbf",
+          "refName": "Quillstone-Legal-whiteboard.png",
+          "title": "Quillstone Legal whiteboard",
+          "parentId": false,
+          "created": "2026-10-15T10:41:00.000Z"
+        }
+      },
+      "teams": [
+        {
+          "id": "seedTeam0007",
+          "admin": "seedUid0021x3kbf",
+          "name": "Support Heroes",
+          "members": [
+            {
+              "id": "seedUid0021x3kbf"
+            }
+          ],
+          "workspaceId": "seedWorkspace03AbCdEfGhIjKlMn"
+        }
+      ]
+    },
+    "seedWorkspace04AbCdEfGhIjKlMn": {
+      "id": "seedWorkspace04AbCdEfGhIjKlMn",
+      "admin": "seedUid0028x4r38",
+      "name": "Maple Ridge School",
+      "members": [
+        {
+          "id": "seedUid0004xofw"
+        },
+        {
+          "id": "seedUid0010x1p3q"
+        },
+        {
+          "id": "seedUid0016x2prk"
+        },
+        {
+          "id": "seedUid0022x3qfe"
+        },
+        {
+          "id": "seedUid0028x4r38"
+        },
+        {
+          "id": "seedUid0034x5rr2"
+        },
+        {
+          "id": "seedUid0040x6sew"
+        }
+      ],
+      "folders": [],
+      "created": 1788566400000,
+      "screenshots": {
+        "seedWsShot0042": {
+          "id": "seedWsShot0042",
+          "uid": "seedUid0028x4r38",
+          "refName": "Maple-Ridge-School-whiteboard.png",
+          "title": "Maple Ridge School whiteboard",
+          "parentId": false,
+          "created": "2026-10-16T10:42:00.000Z"
+        }
+      },
+      "teams": [
+        {
+          "id": "seedTeam0008",
+          "admin": "seedUid0028x4r38",
+          "name": "Research Guild",
+          "members": [
+            {
+              "id": "seedUid0028x4r38"
+            }
+          ],
+          "workspaceId": "seedWorkspace04AbCdEfGhIjKlMn"
+        },
+        {
+          "id": "seedTeam0009",
+          "admin": "seedUid0028x4r38",
+          "name": "Video Lab",
+          "members": [
+            {
+              "id": "seedUid0028x4r38"
+            }
+          ],
+          "workspaceId": "seedWorkspace04AbCdEfGhIjKlMn"
+        }
+      ]
+    },
+    "seedWorkspace05AbCdEfGhIjKlMn": {
+      "id": "seedWorkspace05AbCdEfGhIjKlMn",
+      "admin": "seedUid0035x5xv1",
+      "name": "Copperleaf Design",
+      "members": [
+        {
+          "id": "seedUid0005xujv"
+        },
+        {
+          "id": "seedUid0011x1v7p"
+        },
+        {
+          "id": "seedUid0017x2vvj"
+        },
+        {
+          "id": "seedUid0023x3wjd"
+        },
+        {
+          "id": "seedUid0029x4x77"
+        },
+        {
+          "id": "seedUid0035x5xv1"
+        },
+        {
+          "id": "seedUid0041x6yiv"
+        }
+      ],
+      "folders": [],
+      "created": 1788652800000,
+      "screenshots": {
+        "seedWsShot0043": {
+          "id": "seedWsShot0043",
+          "uid": "seedUid0035x5xv1",
+          "refName": "Copperleaf-Design-whiteboard.png",
+          "title": "Copperleaf Design whiteboard",
+          "parentId": false,
+          "created": "2026-10-17T10:43:00.000Z"
+        }
+      }
+    }
+  },
+  "shared": {
+    "seedShare0001": {
+      "uid": "seedUid0000x0",
+      "uidImageId": "seedUid0000x0/seedShot0001"
+    },
+    "seedShare0002": {
+      "uid": "seedUid0000x0",
+      "uidImageId": "seedUid0000x0/seedShot0002"
+    },
+    "seedShare0004": {
+      "uid": "seedUid0003xibx",
+      "uidImageId": "seedUid0003xibx/seedShot0004"
+    },
+    "seedShare0005": {
+      "uid": "seedUid0003xibx",
+      "uidImageId": "seedUid0003xibx/seedShot0005"
+    },
+    "seedShare0007": {
+      "uid": "seedUid0006x10nu",
+      "uidImageId": "seedUid0006x10nu/seedShot0007"
+    },
+    "seedShare0008": {
+      "uid": "seedUid0006x10nu",
+      "uidImageId": "seedUid0006x10nu/seedShot0008"
+    },
+    "seedShare0009": {
+      "uid": "seedUid0009x1izr",
+      "uidImageId": "seedUid0009x1izr/seedShot0009"
+    },
+    "seedShare0010": {
+      "uid": "seedUid0009x1izr",
+      "uidImageId": "seedUid0009x1izr/seedShot0010"
+    },
+    "seedShare0012": {
+      "uid": "seedUid0012x21bo",
+      "uidImageId": "seedUid0012x21bo/seedShot0012"
+    },
+    "seedShare0013": {
+      "uid": "seedUid0012x21bo",
+      "uidImageId": "seedUid0012x21bo/seedShot0013"
+    },
+    "seedShare0014": {
+      "uid": "seedUid0015x2jnl",
+      "uidImageId": "seedUid0015x2jnl/seedShot0014"
+    },
+    "seedShare0015": {
+      "uid": "seedUid0015x2jnl",
+      "uidImageId": "seedUid0015x2jnl/seedShot0015"
+    },
+    "seedShare0017": {
+      "uid": "seedUid0018x31zi",
+      "uidImageId": "seedUid0018x31zi/seedShot0017"
+    },
+    "seedShare0018": {
+      "uid": "seedUid0018x31zi",
+      "uidImageId": "seedUid0018x31zi/seedShot0018"
+    },
+    "seedShare0020": {
+      "uid": "seedUid0021x3kbf",
+      "uidImageId": "seedUid0021x3kbf/seedShot0020"
+    },
+    "seedShare0021": {
+      "uid": "seedUid0021x3kbf",
+      "uidImageId": "seedUid0021x3kbf/seedShot0021"
+    },
+    "seedShare0022": {
+      "uid": "seedUid0024x42nc",
+      "uidImageId": "seedUid0024x42nc/seedShot0022"
+    },
+    "seedShare0023": {
+      "uid": "seedUid0024x42nc",
+      "uidImageId": "seedUid0024x42nc/seedShot0023"
+    },
+    "seedShare0025": {
+      "uid": "seedUid0027x4kz9",
+      "uidImageId": "seedUid0027x4kz9/seedShot0025"
+    },
+    "seedShare0026": {
+      "uid": "seedUid0027x4kz9",
+      "uidImageId": "seedUid0027x4kz9/seedShot0026"
+    },
+    "seedShare0027": {
+      "uid": "seedUid0030x53b6",
+      "uidImageId": "seedUid0030x53b6/seedShot0027"
+    },
+    "seedShare0028": {
+      "uid": "seedUid0030x53b6",
+      "uidImageId": "seedUid0030x53b6/seedShot0028"
+    },
+    "seedShare0030": {
+      "uid": "seedUid0033x5ln3",
+      "uidImageId": "seedUid0033x5ln3/seedShot0030"
+    },
+    "seedShare0031": {
+      "uid": "seedUid0033x5ln3",
+      "uidImageId": "seedUid0033x5ln3/seedShot0031"
+    },
+    "seedShare0033": {
+      "uid": "seedUid0036x63z0",
+      "uidImageId": "seedUid0036x63z0/seedShot0033"
+    },
+    "seedShare0034": {
+      "uid": "seedUid0036x63z0",
+      "uidImageId": "seedUid0036x63z0/seedShot0034"
+    },
+    "seedShare0035": {
+      "uid": "seedUid0039x6max",
+      "uidImageId": "seedUid0039x6max/seedShot0035"
+    },
+    "seedShare0036": {
+      "uid": "seedUid0039x6max",
+      "uidImageId": "seedUid0039x6max/seedShot0036"
+    }
+  },
+  "sharedVideos": {
+    "seedVideoShare0003": {
+      "uid": "seedUid0000x0",
+      "uidVideoId": "seedUid0000x0/seedVideo0003"
+    },
+    "seedVideoShare0006": {
+      "uid": "seedUid0005xujv",
+      "uidVideoId": "seedUid0005xujv/seedVideo0006"
+    },
+    "seedVideoShare0011": {
+      "uid": "seedUid0010x1p3q",
+      "uidVideoId": "seedUid0010x1p3q/seedVideo0011"
+    },
+    "seedVideoShare0016": {
+      "uid": "seedUid0015x2jnl",
+      "uidVideoId": "seedUid0015x2jnl/seedVideo0016"
+    },
+    "seedVideoShare0019": {
+      "uid": "seedUid0020x3e7g",
+      "uidVideoId": "seedUid0020x3e7g/seedVideo0019"
+    },
+    "seedVideoShare0024": {
+      "uid": "seedUid0025x48rb",
+      "uidVideoId": "seedUid0025x48rb/seedVideo0024"
+    },
+    "seedVideoShare0029": {
+      "uid": "seedUid0030x53b6",
+      "uidVideoId": "seedUid0030x53b6/seedVideo0029"
+    },
+    "seedVideoShare0032": {
+      "uid": "seedUid0035x5xv1",
+      "uidVideoId": "seedUid0035x5xv1/seedVideo0032"
+    },
+    "seedVideoShare0037": {
+      "uid": "seedUid0040x6sew",
+      "uidVideoId": "seedUid0040x6sew/seedVideo0037"
+    }
+  }
+}

@@ -13,6 +13,9 @@ import {
   hashHandle,
   identityKey,
 } from '../src/module/ever-id/services/ever-id-crypto.service';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { EVER_COUNTER_EVENTS } from '../src/common/events/ever-counters.events';
+import { EverIdLinkService } from '../src/module/ever-id/services/ever-id-link.service';
 import { MockOidcIssuer } from './mock-oidc/mock-oidc-issuer';
 import { createTestApp, TestApp } from './support/test-app';
 
@@ -465,6 +468,37 @@ describe('Ever ID sign-in (e2e)', () => {
       expect(t.firebase.authService.users.size).toBe(0);
       expect(t.firebase.db.dump('users')).toBeNull();
       expect(t.firebase.db.dump('ever_identities')).toBeNull();
+    });
+
+    it('counts a new account once it is linked, never one whose sign-up was undone', async () => {
+      let usersCreated = 0;
+      t.app.get(EventEmitter2).on(EVER_COUNTER_EVENTS.userCreated, () => {
+        usersCreated += 1;
+      });
+      jest
+        .spyOn(EverIdLinkService.prototype, 'link')
+        .mockRejectedValueOnce(new Error('database unreachable'));
+      issuer.nextClaims = {
+        sub: 'undone-person',
+        email: 'undone@example.test',
+      };
+      const landing = await authorize();
+      const confirm = await request(server())
+        .post('/api/v1/auth/ever-id/sign-up/confirm')
+        .send({
+          pending: landing.searchParams.get('confirm'),
+          termsAccepted: true,
+          binding: PORTAL_BINDING,
+        });
+      expect(confirm.status).not.toBe(200);
+      expect(
+        t.firebase.authService.findByEmail('undone@example.test'),
+      ).toBeUndefined();
+      expect(t.firebase.db.dump('users')).toBeNull();
+      expect(usersCreated).toBe(0);
+
+      await signUp('counted-person');
+      expect(usersCreated).toBe(1);
     });
 
     it('never links or opens an account that only shares the e-mail address', async () => {

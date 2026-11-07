@@ -57,6 +57,8 @@ interface QuerySpec {
   equalTo?: Json;
   endAt?: Json;
   limitToFirst?: number;
+  orderByKey?: boolean;
+  startAfter?: string;
 }
 
 /** A query over the children of a location. */
@@ -89,6 +91,20 @@ export class FakeQuery {
     });
   }
 
+  orderByKey(): FakeQuery {
+    return new FakeQuery(this.db, this.parts, {
+      ...this.spec,
+      orderByKey: true,
+    });
+  }
+
+  startAfter(key: string): FakeQuery {
+    return new FakeQuery(this.db, this.parts, {
+      ...this.spec,
+      startAfter: key,
+    });
+  }
+
   async once(_event = 'value'): Promise<FakeSnapshot> {
     return this.snapshot();
   }
@@ -99,6 +115,21 @@ export class FakeQuery {
 
   protected snapshot(): FakeSnapshot {
     const value = this.db.read(this.parts);
+    if (this.spec.orderByKey && value && typeof value === 'object') {
+      let entries = Object.entries(value as Record<string, Json>).sort(
+        ([a], [b]) => (a < b ? -1 : a > b ? 1 : 0),
+      );
+      if (this.spec.startAfter !== undefined) {
+        entries = entries.filter(([key]) => key > this.spec.startAfter);
+      }
+      if (this.spec.limitToFirst !== undefined) {
+        entries = entries.slice(0, this.spec.limitToFirst);
+      }
+      return new FakeSnapshot(
+        this.parts[this.parts.length - 1] ?? null,
+        entries.length ? Object.fromEntries(entries) : null,
+      );
+    }
     if (!this.spec.orderByChild || !value || typeof value !== 'object') {
       return new FakeSnapshot(this.parts[this.parts.length - 1] ?? null, value);
     }
@@ -382,9 +413,106 @@ export class InMemoryAuth {
     if (user) user.tokensValidAfter = Date.now();
   }
 
+  async listUsers(maxResults = 1000, pageToken?: string) {
+    const all = [...this.users.values()].sort((a, b) =>
+      a.uid < b.uid ? -1 : 1,
+    );
+    const start = pageToken ? Number(pageToken) : 0;
+    const page = all.slice(start, start + maxResults);
+    const next =
+      start + maxResults < all.length ? String(start + maxResults) : undefined;
+    return { users: page.map((user) => this.toRecord(user)), pageToken: next };
+  }
+
   findByEmail(email: string): FakeUser | undefined {
     const wanted = (email ?? '').toLowerCase();
     return [...this.users.values()].find((user) => user.email === wanted);
+  }
+}
+
+/** One stored object of the in-memory bucket. */
+export class FakeStorageFile {
+  constructor(
+    private readonly bucket: InMemoryBucket,
+    readonly name: string,
+  ) {}
+
+  get metadata() {
+    const bytes = this.bucket.objects.get(this.name);
+    return bytes ? { name: this.name, size: String(bytes.length) } : undefined;
+  }
+
+  async save(data: Buffer | string): Promise<void> {
+    this.bucket.objects.set(this.name, Buffer.from(data));
+  }
+
+  async getMetadata() {
+    const metadata = this.metadata;
+    if (!metadata)
+      throw Object.assign(new Error('No such object'), { code: 404 });
+    return [metadata];
+  }
+
+  async delete(): Promise<void> {
+    this.bucket.objects.delete(this.name);
+  }
+
+  copy(destination: string): Promise<[FakeStorageFile]> {
+    const bytes = this.bucket.objects.get(this.name);
+    if (!bytes) {
+      return Promise.reject(
+        Object.assign(new Error('No such object'), { code: 404 }),
+      );
+    }
+    this.bucket.objects.set(destination, Buffer.from(bytes));
+    return Promise.resolve([this.bucket.file(destination)]);
+  }
+
+  getSignedUrl(): Promise<[string]> {
+    return Promise.resolve([
+      `https://storage.example.test/${encodeURIComponent(this.name)}`,
+    ]);
+  }
+}
+
+/** A Cloud Storage bucket, enough for the counters and the recount. */
+export class InMemoryBucket {
+  readonly objects = new Map<string, Buffer>();
+
+  file(name: string): FakeStorageFile {
+    return new FakeStorageFile(this, name);
+  }
+
+  /** The stored names (under `prefix`, when given), in code-point order like a bucket listing. */
+  private names(prefix?: string): string[] {
+    const byName = (a: string, b: string) => {
+      if (a === b) return 0;
+      return a < b ? -1 : 1;
+    };
+    return [...this.objects.keys()]
+      .filter((name) => !prefix || name.startsWith(prefix))
+      .sort(byName);
+  }
+
+  async getFiles(
+    query: { maxResults?: number; pageToken?: string; prefix?: string } = {},
+  ) {
+    const names = this.names(query.prefix);
+    const start = query.pageToken ? Number(query.pageToken) : 0;
+    const max = query.maxResults ?? 1000;
+    const files = names
+      .slice(start, start + max)
+      .map((name) => this.file(name));
+    const next =
+      start + max < names.length ? { pageToken: String(start + max) } : null;
+    return [files, next];
+  }
+
+  deleteFiles(query: { prefix?: string } = {}): Promise<void> {
+    for (const name of this.names(query.prefix)) {
+      this.objects.delete(name);
+    }
+    return Promise.resolve();
   }
 }
 
@@ -392,7 +520,12 @@ export class InMemoryAuth {
 export class InMemoryFirebaseApp {
   readonly authService = new InMemoryAuth();
   readonly db = new InMemoryDatabase();
+  readonly bucket = new InMemoryBucket();
   readonly acceptances: Json[] = [];
+
+  storage() {
+    return { bucket: () => this.bucket };
+  }
 
   auth() {
     return this.authService;

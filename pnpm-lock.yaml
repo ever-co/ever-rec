@@ -102,6 +102,9 @@ importers:
       '@types/sharp':
         specifier: ^0.31.1
         version: 0.31.1
+      ajv:
+        specifier: ^8.17.1
+        version: 8.17.1
       analytics-node:
         specifier: ^6.1.0
         version: 6.2.0
