@@ -131,9 +131,7 @@ export class EverIdLoginChain {
     });
     const refreshToken = await context.merge();
 
-    if (identity.sid) {
-      await this.sessionIndex.record(identity, uid, refreshToken);
-    }
+    await this.sessionIndex.record(identity, uid, refreshToken);
 
     this.eventEmitter.emit('analytics.identify', uid, {
       email: session.email,

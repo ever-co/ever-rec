@@ -39,6 +39,7 @@ import {
 } from './services/tokens';
 import { MergeTokenPolicy } from './services/tokens/policies/merge-token.policy';
 import { GauzyRefreshStrategy } from './services/tokens/refresh/gauzy-refresh.strategy';
+import { EverIdRefreshStrategy } from './services/tokens/refresh/ever-id-refresh.strategy';
 import { TokenStorageService } from './services/tokens/token-storage.service';
 import { FirebaseUpdateUserAvatarState } from './services/update-user-profile/state/firebase-update-user-avatar.state';
 import { FirebaseUpdateUserEmailState } from './services/update-user-profile/state/firebase-update-user-email.state';
@@ -103,6 +104,7 @@ import { UserService } from './services/user.service';
     FirebaseRefreshStrategy,
     FirebaseValidateStrategy,
     UserFactory,
+    EverIdRefreshStrategy,
 
     // Login State service
     FirebaseLoginState,

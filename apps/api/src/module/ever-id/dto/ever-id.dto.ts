@@ -21,6 +21,14 @@ export class EverIdExchangeDto {
   @IsString()
   @Matches(HANDLE)
   code: string;
+
+  @ApiPropertyOptional({
+    description: 'The value the portal tab that started the sign-in keeps',
+  })
+  @IsOptional()
+  @IsString()
+  @Matches(HANDLE)
+  binding?: string;
 }
 
 export class EverIdPendingDto {
@@ -28,6 +36,14 @@ export class EverIdPendingDto {
   @IsString()
   @Matches(HANDLE)
   pending: string;
+
+  @ApiPropertyOptional({
+    description: 'The value the portal tab that started the sign-in keeps',
+  })
+  @IsOptional()
+  @IsString()
+  @Matches(HANDLE)
+  binding?: string;
 }
 
 /** A legal document the confirmation screen displayed (same shape as the sign-up form's). */

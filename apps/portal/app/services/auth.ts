@@ -40,6 +40,7 @@ import {
 import { errorMessage, successMessage } from './helpers/toastMessages';
 import { iDataResponseParser } from './helpers/iDataResponseParser';
 import { exchangeEverIdCodeAPI } from './api/everId';
+import { clearEverIdBinding, readEverIdBinding } from './everIdBinding';
 
 const processUserData = (userData: IUserData | null): IUser | null => {
   if (userData?.idToken && userData?.refreshToken) {
@@ -159,12 +160,17 @@ export const googleAuthorization = async (
 
 /**
  * Completes an Ever ID sign-in: exchanges the one-time code from the sign-in redirect for the
- * session, then stores it exactly like a Google sign-in (cookies, extension, welcome e-mail).
+ * session (with the value this tab stored when it started the sign-in), then stores it exactly
+ * like a Google sign-in (cookies, extension, welcome e-mail).
  */
 export const everIdAuthorization = async (
   code: string,
 ): Promise<IDataResponse> => {
-  const response: IDataResponse = await exchangeEverIdCodeAPI(code);
+  const response: IDataResponse = await exchangeEverIdCodeAPI(
+    code,
+    readEverIdBinding(),
+  );
+  clearEverIdBinding();
 
   if (response.status == 'success') {
     const userData = response.data as IUserData;

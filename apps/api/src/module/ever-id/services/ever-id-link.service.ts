@@ -126,21 +126,68 @@ export class EverIdLinkService {
     await this.linkRef(this.key(issuer, subject)).update(update);
   }
 
-  /** Removes the caller's own link; `false` when the caller holds no such link. */
-  async unlink(uid: string, issuer: string, subject: string): Promise<boolean> {
+  /**
+   * Removes one of the account's own links.
+   *
+   * The account's index entry is removed in one transaction with the count check, so two
+   * concurrent requests cannot remove an account's last two links; the link itself is then removed
+   * in a transaction that checks it still belongs to the account, so a stale request can never
+   * remove a link someone else made in the meantime.
+   *
+   * @param options.keepOne refuse to remove the account's only link (`last_link`)
+   */
+  async unlink(
+    uid: string,
+    issuer: string,
+    subject: string,
+    options: { keepOne?: boolean } = {},
+  ): Promise<'removed' | 'not_found' | 'last_link'> {
     const key = this.key(issuer, subject);
-    const existing = await this.resolve(issuer, subject);
-    if (!existing || existing.uid !== uid) {
-      return false;
-    }
+    // Assigned inside the transaction callback.
+    let outcome = 'not_found' as 'removed' | 'not_found' | 'last_link';
     await this.firebaseAdminService
-      .getDatabase()
-      .ref()
-      .update({
-        [`${EVER_ID_LINK_ROOTS.links}/${key}`]: null,
-        [`${EVER_ID_LINK_ROOTS.byUid}/${uid}/${key}`]: null,
+      .getDatabaseRef(`${EVER_ID_LINK_ROOTS.byUid}/${uid}`)
+      .transaction((current: Record<string, boolean> | null) => {
+        // The update function may run first with an empty local cache: answer null (no change)
+        // so the database retries it with the stored value.
+        if (!current) {
+          outcome = 'not_found';
+          return null;
+        }
+        if (!current[key]) {
+          outcome = 'not_found';
+          return undefined;
+        }
+        if (options.keepOne && Object.keys(current).length <= 1) {
+          outcome = 'last_link';
+          return undefined;
+        }
+        outcome = 'removed';
+        const next = { ...current };
+        delete next[key];
+        return Object.keys(next).length ? next : null;
       });
-    return true;
+    if (outcome !== 'removed') {
+      return outcome;
+    }
+    await this.removeIfOwnedBy(key, uid);
+    return 'removed';
+  }
+
+  /** Removes a link whose account no longer exists (deleted since it was made). */
+  async forget(issuer: string, subject: string, uid: string): Promise<void> {
+    const key = this.key(issuer, subject);
+    await this.removeIfOwnedBy(key, uid);
+    await this.indexRef(uid, key).remove();
+  }
+
+  private async removeIfOwnedBy(key: string, uid: string): Promise<void> {
+    await this.linkRef(key).transaction((current: EverIdLink | null) => {
+      if (!current) {
+        return null;
+      }
+      return current.uid === uid ? null : undefined;
+    });
   }
 
   async listForUser(uid: string): Promise<EverIdIdentitySummary[]> {

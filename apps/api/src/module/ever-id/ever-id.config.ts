@@ -151,8 +151,10 @@ export function readEverIdSettings(
   const warnings: string[] = [];
   const problems: string[] = [];
 
-  let issuer = stripTrailingSlashes(text(env, 'EVER_ID_ISSUER_URL'));
-  const alias = stripTrailingSlashes(text(env, 'EVER_ID_ISSUER'));
+  // Issuer identifiers are compared exactly (OpenID Connect Discovery, section 4.3): a trailing
+  // slash is part of the identifier and is kept.
+  let issuer = text(env, 'EVER_ID_ISSUER_URL');
+  const alias = text(env, 'EVER_ID_ISSUER');
   if (!issuer && alias) {
     issuer = alias;
     warnings.push(
@@ -172,7 +174,7 @@ export function readEverIdSettings(
   // The environment wins. A connected-instance module may supply the client only when the
   // environment configures no issuer at all.
   if (!issuer && connect?.enabled && connect.issuer) {
-    issuer = stripTrailingSlashes(connect.issuer.trim());
+    issuer = connect.issuer.trim();
     clientId = clientId || (connect.clientId ?? '').trim();
     clientSecret = clientSecret || (connect.clientSecret ?? '').trim();
     issuerFromConnect = true;
@@ -236,7 +238,7 @@ export function readEverIdSettings(
 
   const extra = text(env, 'EVER_ID_ALLOWED_ISSUERS')
     .split(/[\s,]+/)
-    .map((value) => stripTrailingSlashes(value.trim()))
+    .map((value) => value.trim())
     .filter(Boolean);
   const issuers = [issuer];
   for (const candidate of extra) {

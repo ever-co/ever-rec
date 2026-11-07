@@ -171,6 +171,7 @@ describe('/auth/ever-id page', () => {
 
   it('shows the confirmation screen for a new person and creates the account only on Create', async () => {
     mockRouter.query = { confirm: 'p'.repeat(43), return: '/media/images' };
+    window.sessionStorage.setItem('ever-id.binding', 'tab-binding');
     mockEverIdApi.getEverIdSignUpDetailsAPI.mockResolvedValue({ name: 'New Person', email: 'new@example.test' });
     mockAuth.getRequiredTerms.mockResolvedValue([{ documentId: 'tos', version: '1', sha256: 'a'.repeat(64), locale: 'en' }]);
     await render(<EverIdPage />);
@@ -179,6 +180,7 @@ describe('/auth/ever-id page', () => {
     expect(screen).not.toBeNull();
     expect(screen?.textContent).toContain('page.auth.everId.createAccountTitle');
     expect(message('page.auth.everId.createAccountTitle')).toBe('Create your Ever Rec account');
+    expect(mockEverIdApi.getEverIdSignUpDetailsAPI).toHaveBeenCalledWith('p'.repeat(43), 'tab-binding');
     const inputs = Array.from(container.querySelectorAll('input[readonly]')) as HTMLInputElement[];
     expect(inputs.map((input) => input.value)).toEqual(['New Person', 'new@example.test']);
     expect(mockEverIdApi.confirmEverIdSignUpAPI).not.toHaveBeenCalled();

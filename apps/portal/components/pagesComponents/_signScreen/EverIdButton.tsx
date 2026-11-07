@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import useEverIdConfig from 'hooks/useEverIdConfig';
 import { everIdStartUrl } from 'app/services/api/everId';
 import { everIdErrorMessageKey, everIdReturnPath } from 'app/services/everId';
+import { createEverIdBinding } from 'app/services/everIdBinding';
 
 /**
  * "Continue with Ever ID", shown below the Google button only when the server offers Ever ID
@@ -20,7 +21,7 @@ const EverIdButton: React.FC = () => {
 
   const start = () => {
     const returnPath = everIdReturnPath(router.pathname, router.query);
-    window.location.assign(everIdStartUrl(returnPath));
+    window.location.assign(everIdStartUrl(returnPath, createEverIdBinding()));
   };
 
   useEffect(() => {

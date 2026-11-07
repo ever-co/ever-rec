@@ -464,6 +464,7 @@ An issuer on an Ever host (`*.ever.co`) is used only by an Ever-operated install
 -   Redirect URI: `https://<api host>/api/v1/auth/ever-id/callback`
 -   Back-channel logout URI: `https://<api host>/api/v1/auth/ever-id/backchannel-logout`
 -   Post-logout redirect URI (optional): `https://<portal host>/auth/login`
+-   Scopes requested: `openid profile email`; with an Ever ID issuer also `urn:zitadel:iam:user:resourceowner` and, when `EVER_ID_PLATFORM_PROJECT_ID` is set, that project's audience scope.
 -   The ID token must carry `email` and `email_verified`; `sid` and `auth_time` are used when present.
 
 ### How it behaves
@@ -472,8 +473,9 @@ An issuer on an Ever host (`*.ever.co`) is used only by an Ever-operated install
 -   **New person**: when no account uses the verified e-mail address, the portal shows **Create your Ever Rec account** with the name and e-mail address from Ever ID. The account is created only when the person confirms; leaving the screen creates nothing.
 -   **Existing e-mail address**: when an account with that address exists but is not linked, nothing is created, linked or opened. The person signs in the usual way and connects Ever ID in **Settings → Profile → Connected sign-in methods**. Connecting asks for a fresh Ever ID sign-in (at most five minutes old) and shows both addresses before anything is saved.
 -   **Disconnecting** is refused while Ever ID is the account's only way to sign in.
--   **Back-channel logout** ends the Rec sessions opened with that Ever ID session; a logout token is accepted once and only within five minutes of being issued.
--   **Browser binding**: `start` sets a short-lived HttpOnly cookie (`ever_id_flow`, SameSite=Lax, limited to the callback path); a callback that arrives without it, for example a sign-in link handed to someone else, is refused.
+-   **Back-channel logout** ends the Rec sessions opened with that Ever ID session (or, for a logout naming only the person, all of their Ever ID sessions); a logout token is accepted once and only within five minutes of being issued. Refreshing such a session keeps it revocable: its refresh token stays a reference that the logout removes.
+-   **Bound to the browser and the tab**: `start` sets a short-lived HttpOnly cookie (`ever_id_flow`, SameSite=Lax, limited to the callback path), and the portal tab keeps a random value whose hash it sends with `start`. A callback without the cookie, or a portal sign-in link opened in another tab or browser, is refused, so a sign-in link handed to someone else signs nobody in.
+-   **Rate limits**: `start`, `callback`, `exchange`, sign-up and connect routes accept 10 requests a minute per client address and API replica. `X-Forwarded-For` is used only when the request comes from a private or loopback address (a proxy in front of the API), and then only its last entry.
 -   **Tokens**: ID tokens are verified locally against the issuer's published keys. No Ever ID token is stored. Redirects carry one-time codes only, never a token or an e-mail address. The browser extensions open the web app's login page; no OpenID Connect code runs in them.
 
 ### Outbound connections and data

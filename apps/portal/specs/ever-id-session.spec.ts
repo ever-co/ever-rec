@@ -31,7 +31,10 @@ describe('everIdAuthorization', () => {
     isNewUser: true,
   };
 
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => {
+    jest.clearAllMocks();
+    window.sessionStorage.setItem('ever-id.binding', 'stored-binding-value');
+  });
 
   it('stores the session like a Google sign-in and hands it to the extension', async () => {
     mockEverIdApi.exchangeEverIdCodeAPI.mockResolvedValue({ status: 'success', message: 'Success!', error: null, data: session } as any);
@@ -39,7 +42,9 @@ describe('everIdAuthorization', () => {
     const result = await everIdAuthorization('code-1');
 
     expect(result.status).toBe('success');
-    expect(mockEverIdApi.exchangeEverIdCodeAPI).toHaveBeenCalledWith('code-1');
+    // Redeemed with the value this tab stored when it started the sign-in, which is then dropped.
+    expect(mockEverIdApi.exchangeEverIdCodeAPI).toHaveBeenCalledWith('code-1', 'stored-binding-value');
+    expect(window.sessionStorage.getItem('ever-id.binding')).toBeNull();
     expect(mockHelper.sendExternalMessage).toHaveBeenCalledWith('signIn', session);
     expect(mockHelper.storeUserTokens).toHaveBeenCalledWith(session);
     expect(mockEmail.sendWelcomeEmailAPI).toHaveBeenCalledWith('person@example.test');

@@ -51,7 +51,19 @@ interface PendingAuthorization {
    * the browser that started the sign-in (login CSRF). Connections are bound to `uid` instead.
    */
   bindingHash?: string;
+  /**
+   * SHA-256 of a random value the portal tab that started the sign-in keeps in its session
+   * storage. The hand-off (and a sign-up confirmation) is redeemed only with that value, so a
+   * portal link forwarded to someone else cannot sign them in.
+   */
+  portalBindingHash?: string;
   createdAt: number;
+}
+
+/** A one-time hand-off record: the session, and the portal binding it may be redeemed with. */
+interface HandOff {
+  session: EverIdSession;
+  portalBindingHash?: string;
 }
 
 /** A sign-in started by `GET /auth/ever-id/start`. */
@@ -70,6 +82,7 @@ interface PendingSignup {
   sid: string | null;
   everPersonId: string | null;
   returnPath: string;
+  portalBindingHash?: string;
 }
 
 /** A settings-initiated connection waiting for the both-address confirmation. */
@@ -90,6 +103,27 @@ export function isSafeReturnPath(value: unknown): value is string {
     typeof value === 'string' &&
     value.length <= MAX_RETURN_LENGTH &&
     /^\/(?![/\\])[A-Za-z0-9\-._~/?=&%+,;!*()]*$/.test(value)
+  );
+}
+
+/** A base64url SHA-256 (43 characters), as the portal sends it with `start`. */
+export function isPortalBindingHash(value: unknown): value is string {
+  return typeof value === 'string' && /^[A-Za-z0-9_-]{43}$/.test(value);
+}
+
+/** Whether `binding` is the value whose hash was recorded (records made without one match anything). */
+function portalBindingMatches(
+  expectedHash: string | undefined,
+  binding: string | undefined,
+): boolean {
+  if (!expectedHash) {
+    return true;
+  }
+  return (
+    typeof binding === 'string' &&
+    binding.length > 0 &&
+    binding.length <= 128 &&
+    hashHandle(binding) === expectedHash
   );
 }
 
@@ -123,6 +157,7 @@ export class EverIdFlowService {
   /** `GET /auth/ever-id/start`: returns the authorization URL to redirect the browser to. */
   async startSignIn(
     returnPath: string | undefined,
+    portalBindingHash?: string,
   ): Promise<EverIdSignInStart> {
     const target = returnPath ?? DEFAULT_RETURN_PATH;
     if (!isSafeReturnPath(target)) {
@@ -132,11 +167,19 @@ export class EverIdFlowService {
         'return must be a relative portal path.',
       );
     }
+    if (!isPortalBindingHash(portalBindingHash)) {
+      throw everIdHttpError(
+        HttpStatus.BAD_REQUEST,
+        'invalid_binding',
+        'binding must be the base64url SHA-256 of the value the portal keeps.',
+      );
+    }
     const browserBinding = randomHandle();
     const url = await this.begin({
       intent: 'sign-in',
       returnPath: target,
       bindingHash: hashHandle(browserBinding),
+      portalBindingHash,
     });
     return { url, browserBinding };
   }
@@ -216,11 +259,12 @@ export class EverIdFlowService {
   }
 
   /** `POST /auth/ever-id/exchange`: the session stored under a hand-off code, once. */
-  async exchange(code: string): Promise<EverIdSession> {
-    const session = await this.store.take<EverIdSession>(
-      EVER_ID_ROOTS.handoff,
-      code,
-    );
+  async exchange(code: string, portalBinding?: string): Promise<EverIdSession> {
+    const record = await this.store.take<HandOff>(EVER_ID_ROOTS.handoff, code);
+    const session =
+      record && portalBindingMatches(record.portalBindingHash, portalBinding)
+        ? record.session
+        : null;
     if (!session) {
       throw everIdHttpError(
         HttpStatus.NOT_FOUND,
@@ -234,12 +278,16 @@ export class EverIdFlowService {
   /** `POST /auth/ever-id/sign-up/details`: what the confirmation screen shows (read-only). */
   async signUpDetails(
     pendingKey: string,
+    portalBinding?: string,
   ): Promise<{ name: string | null; email: string }> {
     const pending = await this.store.peek<PendingSignup>(
       EVER_ID_ROOTS.pendingSignup,
       pendingKey,
     );
-    if (!pending) {
+    if (
+      !pending ||
+      !portalBindingMatches(pending.portalBindingHash, portalBinding)
+    ) {
       throw this.pendingExpired();
     }
     return { name: pending.name, email: pending.email };
@@ -255,11 +303,23 @@ export class EverIdFlowService {
       terms?: ITermsAcceptanceClaim[];
       ip?: string | null;
       userAgent?: string | null;
+      portalBinding?: string;
     } = {},
   ): Promise<{ code: string; returnPath: string }> {
     // Checked before the one-time record is used, so a stale form does not burn it.
     if (acceptance.terms?.length) {
       this.termsAcceptanceService.assertClaimsArePublished(acceptance.terms);
+    }
+    // Checked without using the record, so only the starting portal tab can confirm.
+    const peeked = await this.store.peek<PendingSignup>(
+      EVER_ID_ROOTS.pendingSignup,
+      pendingKey,
+    );
+    if (
+      !peeked ||
+      !portalBindingMatches(peeked.portalBindingHash, acceptance.portalBinding)
+    ) {
+      throw this.pendingExpired();
     }
     const pending = await this.store.take<PendingSignup>(
       EVER_ID_ROOTS.pendingSignup,
@@ -275,7 +335,7 @@ export class EverIdFlowService {
     };
 
     // The Ever ID may have been linked meanwhile (a second tab): sign in to that account.
-    const existing = await this.links.resolve(pending.issuer, pending.subject);
+    const existing = await this.liveLink(pending.issuer, pending.subject);
     if (existing) {
       await this.links.touch(
         pending.issuer,
@@ -286,7 +346,7 @@ export class EverIdFlowService {
         isNewUser: false,
       });
       return {
-        code: await this.handOff(session),
+        code: await this.handOff(session, pending.portalBindingHash),
         returnPath: pending.returnPath,
       };
     }
@@ -372,7 +432,7 @@ export class EverIdFlowService {
     });
     this.logger.log('ever_id.callback result=signup_confirmed');
     return {
-      code: await this.handOff(session),
+      code: await this.handOff(session, pending.portalBindingHash),
       returnPath: pending.returnPath,
     };
   }
@@ -469,14 +529,25 @@ export class EverIdFlowService {
     const otherProviders = (user.providerData ?? []).filter(
       (provider) => !!provider?.providerId,
     );
-    if (otherProviders.length === 0 && links.length <= 1) {
+    // Without a password or another provider, one Ever ID link must stay; the link service checks
+    // that atomically with the removal.
+    const outcome = await this.links.unlink(uid, issuer, subject, {
+      keepOne: otherProviders.length === 0,
+    });
+    if (outcome === 'last_link') {
       throw everIdHttpError(
         HttpStatus.CONFLICT,
         'last_sign_in_method',
         'Ever ID is the only way to sign in to this account. Set a password first.',
       );
     }
-    await this.links.unlink(uid, issuer, subject);
+    if (outcome === 'not_found') {
+      throw everIdHttpError(
+        HttpStatus.NOT_FOUND,
+        'link_not_found',
+        'This Ever ID is not connected to your account.',
+      );
+    }
     this.logger.log('ever_id.unlink result=ok');
     return this.links.listForUser(uid);
   }
@@ -486,6 +557,7 @@ export class EverIdFlowService {
     returnPath: string;
     uid?: string;
     bindingHash?: string;
+    portalBindingHash?: string;
   }): Promise<string> {
     const state = randomHandle();
     const pending: PendingAuthorization = {
@@ -495,6 +567,7 @@ export class EverIdFlowService {
       returnPath: request.returnPath,
       uid: request.uid,
       bindingHash: request.bindingHash,
+      portalBindingHash: request.portalBindingHash,
       createdAt: Date.now(),
     };
     // Build the URL first: if discovery fails nothing is stored.
@@ -526,7 +599,7 @@ export class EverIdFlowService {
       sid: claims.sid,
     };
 
-    const link = await this.links.resolve(claims.issuer, claims.subject);
+    const link = await this.liveLink(claims.issuer, claims.subject);
     if (link) {
       await this.links.touch(
         claims.issuer,
@@ -537,7 +610,7 @@ export class EverIdFlowService {
         isNewUser: false,
         idToken,
       });
-      const code = await this.handOff(session);
+      const code = await this.handOff(session, pending.portalBindingHash);
       this.logger.log('ever_id.callback result=signed_in');
       return this.portalUrl('/auth/ever-id', {
         code,
@@ -566,6 +639,7 @@ export class EverIdFlowService {
       sid: claims.sid,
       everPersonId: claims.everPersonId,
       returnPath: pending.returnPath,
+      portalBindingHash: pending.portalBindingHash,
     };
     await this.store.put(
       EVER_ID_ROOTS.pendingSignup,
@@ -616,12 +690,38 @@ export class EverIdFlowService {
     return this.portalUrl(SETTINGS_RETURN_PATH, { ever_id_connect: key });
   }
 
-  private async handOff(session: EverIdSession): Promise<string> {
+  /**
+   * The link of an Ever ID, or `null`. A link whose account was deleted since it was made is
+   * removed here, so the person can sign up again instead of being refused.
+   */
+  private async liveLink(issuer: string, subject: string) {
+    const link = await this.links.resolve(issuer, subject);
+    if (!link) {
+      return null;
+    }
+    try {
+      await this.firebaseAdminService.getUser(link.uid);
+      return link;
+    } catch (error: any) {
+      if (error?.code !== 'auth/user-not-found') {
+        throw error;
+      }
+      await this.links.forget(issuer, subject, link.uid);
+      this.logger.log('ever_id.link result=removed_for_deleted_account');
+      return null;
+    }
+  }
+
+  private async handOff(
+    session: EverIdSession,
+    portalBindingHash?: string,
+  ): Promise<string> {
     const code = randomHandle();
+    const record: HandOff = { session, portalBindingHash };
     await this.store.put(
       EVER_ID_ROOTS.handoff,
       code,
-      session,
+      record,
       EVER_ID_TTL.handoff,
     );
     return code;

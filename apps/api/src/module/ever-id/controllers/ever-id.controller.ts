@@ -85,9 +85,13 @@ export class EverIdController {
   @Redirect()
   async start(
     @Query('return') returnPath: string | undefined,
+    @Query('binding') portalBindingHash: string | undefined,
     @Res({ passthrough: true }) response: Response,
   ) {
-    const { url, browserBinding } = await this.flow.startSignIn(returnPath);
+    const { url, browserBinding } = await this.flow.startSignIn(
+      returnPath,
+      portalBindingHash,
+    );
     response.cookie(BROWSER_BINDING_COOKIE, browserBinding, {
       ...this.bindingCookieOptions(),
       maxAge: BROWSER_BINDING_MAX_AGE_MS,
@@ -136,7 +140,7 @@ export class EverIdController {
   @EverIdRateLimited()
   @Header('Cache-Control', 'no-store')
   async exchange(@Body() body: EverIdExchangeDto) {
-    return sendResponse(await this.flow.exchange(body.code));
+    return sendResponse(await this.flow.exchange(body.code, body.binding));
   }
 
   @Post('sign-up/details')
@@ -145,7 +149,7 @@ export class EverIdController {
   @EverIdRateLimited()
   @Header('Cache-Control', 'no-store')
   async signUpDetails(@Body() body: EverIdPendingDto) {
-    return this.flow.signUpDetails(body.pending);
+    return this.flow.signUpDetails(body.pending, body.binding);
   }
 
   /** Creates the account the person confirmed and answers a hand-off code for its session. */
@@ -162,6 +166,7 @@ export class EverIdController {
       terms: body.terms,
       ip: clientIp(request),
       userAgent: request?.headers?.['user-agent'] ?? null,
+      portalBinding: body.binding,
     });
     return { code, return: returnPath };
   }

@@ -98,9 +98,55 @@ describe('EverIdLinkService', () => {
       emailAtLink: 'a@example.test',
       linkMethod: 'jit',
     });
-    await expect(links.unlink('someone-else', 'i', 's')).resolves.toBe(false);
-    await expect(links.unlink('u', 'i', 's')).resolves.toBe(true);
+    await expect(links.unlink('someone-else', 'i', 's')).resolves.toBe(
+      'not_found',
+    );
+    await expect(links.unlink('u', 'i', 's')).resolves.toBe('removed');
     await expect(links.resolve('i', 's')).resolves.toBeNull();
     expect(db.dump('ever_identities_by_uid/u')).toBeNull();
+  });
+
+  it('keeps the last link when asked to, even for concurrent requests', async () => {
+    const base = {
+      uid: 'u',
+      emailAtLink: 'a@example.test',
+      linkMethod: 'jit' as const,
+    };
+    await links.link({ ...base, issuer: 'i1', subject: 's1' });
+    await links.link({ ...base, issuer: 'i2', subject: 's2' });
+    const outcomes = await Promise.all([
+      links.unlink('u', 'i1', 's1', { keepOne: true }),
+      links.unlink('u', 'i2', 's2', { keepOne: true }),
+    ]);
+    expect(outcomes.sort()).toEqual(['last_link', 'removed']);
+    await expect(links.listForUser('u')).resolves.toHaveLength(1);
+  });
+
+  it('never removes a link that another account made meanwhile', async () => {
+    const base = {
+      issuer: 'i',
+      subject: 's',
+      emailAtLink: 'a@example.test',
+      linkMethod: 'explicit' as const,
+    };
+    await links.link({ ...base, uid: 'a' });
+    await links.unlink('a', 'i', 's');
+    await links.link({ ...base, uid: 'b' });
+    // A late duplicate request of account a finds nothing of its own to remove.
+    await expect(links.unlink('a', 'i', 's')).resolves.toBe('not_found');
+    await expect(links.resolve('i', 's')).resolves.toMatchObject({ uid: 'b' });
+  });
+
+  it('forgets the link of a deleted account', async () => {
+    await links.link({
+      issuer: 'i',
+      subject: 's',
+      uid: 'gone',
+      emailAtLink: 'a@example.test',
+      linkMethod: 'jit',
+    });
+    await links.forget('i', 's', 'gone');
+    await expect(links.resolve('i', 's')).resolves.toBeNull();
+    expect(db.dump('ever_identities_by_uid/gone')).toBeNull();
   });
 });

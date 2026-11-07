@@ -10,6 +10,7 @@ import { everIdAuthorization, getRequiredTerms } from 'app/services/auth';
 import { confirmEverIdSignUpAPI, getEverIdSignUpDetailsAPI } from 'app/services/api/everId';
 import { everIdErrorCode, everIdErrorMessageKey, EverIdErrorMessageKey } from 'app/services/everId';
 import { ITermsAcceptanceDocument } from 'app/interfaces/ITermsAcceptance';
+import { readEverIdBinding } from 'app/services/everIdBinding';
 import { panelRoutes, preRoutes } from 'components/_routes';
 
 type Mode = 'working' | 'confirm' | 'error';
@@ -61,7 +62,7 @@ const EverIdPage: React.FC = () => {
     } else if (typeof code === 'string') {
       finish(code, router.query.return);
     } else if (typeof confirm === 'string') {
-      Promise.all([getEverIdSignUpDetailsAPI(confirm), getRequiredTerms()])
+      Promise.all([getEverIdSignUpDetailsAPI(confirm, readEverIdBinding()), getRequiredTerms()])
         .then(([signUp, documents]) => {
           setDetails(signUp);
           setTermsDocuments(documents);
@@ -82,6 +83,7 @@ const EverIdPage: React.FC = () => {
       const { code, return: returnPath } = await confirmEverIdSignUpAPI(
         pending,
         termsDocuments.map(({ documentId, version, sha256, locale }) => ({ documentId, version, sha256, locale })),
+        readEverIdBinding(),
       );
       await finish(code, returnPath);
     } catch (error) {

@@ -19,6 +19,26 @@ describe('EverIdRateLimitGuard', () => {
     expect(guard.take('start|1.2.3.4', now + 6_000)).toBeGreaterThan(0);
   });
 
+  it('trusts a forwarding header only from a proxy, and only its last entry', () => {
+    const guard = new EverIdRateLimitGuard({} as any);
+    const from = (remoteAddress: string, forwarded?: string) => ({
+      socket: { remoteAddress },
+      headers: forwarded ? { 'x-forwarded-for': forwarded } : {},
+    });
+    // Exposed directly: the header is ignored, whatever it says.
+    expect(guard.clientAddress(from('203.0.113.7', '198.51.100.1'))).toBe(
+      '203.0.113.7',
+    );
+    // Behind a proxy on a private address: the entry that proxy appended.
+    expect(guard.clientAddress(from('10.0.0.5', 'spoofed, 198.51.100.1'))).toBe(
+      '198.51.100.1',
+    );
+    expect(guard.clientAddress(from('::ffff:127.0.0.1', '198.51.100.2'))).toBe(
+      '198.51.100.2',
+    );
+    expect(guard.clientAddress(from('10.0.0.5'))).toBe('10.0.0.5');
+  });
+
   it('leaves routes without the marker alone', () => {
     const guard = new EverIdRateLimitGuard({ get: () => undefined } as any);
     const context = {

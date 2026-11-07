@@ -41,16 +41,20 @@ export class EverIdSessionIndexService {
     private readonly mergeTokenPolicy: MergeTokenPolicy,
   ) {}
 
-  /** Records the reference token of a session opened with `identity.sid`. */
+  /**
+   * Records the reference token of a session, under the Ever ID session id, or under the subject
+   * when the ID token named no session (a subject-only logout then still finds it).
+   */
   async record(
     identity: EverIdSessionIdentity,
     uid: string,
     referenceToken: string,
   ): Promise<void> {
-    if (!identity.sid) {
-      return;
-    }
-    const ref = this.sessionRef(identity.issuer, identity.sid);
+    const ref = this.root().child(
+      identity.sid
+        ? this.sessionKey(identity.issuer, identity.sid)
+        : hashHandle(`${identity.issuer}\u0000sub\u0000${identity.subject}`),
+    );
     await ref.update({
       uid,
       subjectKey: identityKey(identity.issuer, identity.subject),
@@ -122,9 +126,5 @@ export class EverIdSessionIndexService {
 
   private sessionKey(issuer: string, sid: string): string {
     return hashHandle(`${issuer}\u0000${sid}`);
-  }
-
-  private sessionRef(issuer: string, sid: string) {
-    return this.root().child(this.sessionKey(issuer, sid));
   }
 }

@@ -28,8 +28,7 @@ interface Bucket {
  *
  * Scoped to the Ever ID controller; it adds no dependency and changes nothing for other routes.
  * Each API replica keeps its own buckets, so N replicas allow N times the limit, which is
- * acceptable for these routes. The address is the first `x-forwarded-for` hop when present (the
- * same rule the sign-up audit uses), else the socket address.
+ * acceptable for these routes. See {@link EverIdRateLimitGuard.clientAddress} for the address.
  */
 @Injectable()
 export class EverIdRateLimitGuard implements CanActivate {
@@ -88,12 +87,35 @@ export class EverIdRateLimitGuard implements CanActivate {
     return Date.now();
   }
 
-  private clientAddress(request: any): string {
-    const forwarded = request?.headers?.['x-forwarded-for'];
-    const first = Array.isArray(forwarded) ? forwarded[0] : forwarded;
-    if (typeof first === 'string' && first.trim()) {
-      return first.split(',')[0].trim();
+  /**
+   * The address the limit applies to. A forwarding header is trusted only when the request comes
+   * from a private or loopback address (a proxy or ingress in front of the API), and then only its
+   * last entry, the one that proxy added: a caller cannot pick a fresh bucket by sending its own
+   * header, whether the API is behind a proxy or exposed directly.
+   */
+  clientAddress(request: any): string {
+    const peer = String(
+      request?.socket?.remoteAddress ?? request?.ip ?? 'unknown',
+    ).replace(/^::ffff:/, '');
+    const header = request?.headers?.['x-forwarded-for'];
+    const forwarded = (
+      Array.isArray(header) ? header.join(',') : (header ?? '')
+    )
+      .split(',')
+      .map((value: string) => value.trim())
+      .filter(Boolean);
+    if (forwarded.length && isPrivateAddress(peer)) {
+      return forwarded[forwarded.length - 1].replace(/^::ffff:/, '');
     }
-    return request?.ip ?? request?.socket?.remoteAddress ?? 'unknown';
+    return peer;
   }
+}
+
+/** Loopback, private (RFC 1918, RFC 4193) and link-local addresses. */
+export function isPrivateAddress(address: string): boolean {
+  if (address === '::1' || address.startsWith('127.')) return true;
+  if (/^10\./.test(address) || /^192\.168\./.test(address)) return true;
+  if (/^172\.(1[6-9]|2\d|3[01])\./.test(address)) return true;
+  if (/^169\.254\./.test(address)) return true;
+  return /^f[cd][0-9a-f]{2}:/i.test(address) || /^fe80:/i.test(address);
 }

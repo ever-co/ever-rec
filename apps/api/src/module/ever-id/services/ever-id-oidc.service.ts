@@ -10,7 +10,7 @@ import {
   KeyLike,
 } from 'jose';
 import { HttpService } from 'nestjs-http-promise';
-import { EverIdSettings } from '../ever-id.config';
+import { EverIdSettings, isEverHost } from '../ever-id.config';
 import { EverIdTokenError } from '../ever-id.errors';
 import { EVER_ID_SETTINGS } from '../ever-id.tokens';
 
@@ -38,13 +38,14 @@ export const LOGOUT_TOKEN_MAX_AGE_SECONDS = 300;
 export const BACKCHANNEL_LOGOUT_EVENT =
   'http://schemas.openid.net/event/backchannel-logout';
 
-/** Scopes always requested. `urn:zitadel:iam:user:resourceowner` is ignored by issuers that do not know it. */
-const BASE_SCOPES = [
-  'openid',
-  'profile',
-  'email',
-  'urn:zitadel:iam:user:resourceowner',
-];
+/** Scopes requested from any OpenID Connect issuer. */
+const BASE_SCOPES = ['openid', 'profile', 'email'];
+
+/**
+ * Added for Ever ID only (an Ever-hosted issuer, or a configured platform project), whose issuer
+ * understands them; a generic issuer gets the standard scopes alone.
+ */
+const EVER_ID_SCOPES = ['urn:zitadel:iam:user:resourceowner'];
 
 export interface EverIdDiscovery {
   issuer: string;
@@ -159,6 +160,9 @@ export class EverIdOidcService {
   /** The scope string sent with every authorization request. */
   scope(): string {
     const scopes = [...BASE_SCOPES];
+    if (isEverHost(this.settings.issuer) || this.settings.platformProjectId) {
+      scopes.push(...EVER_ID_SCOPES);
+    }
     if (this.settings.platformProjectId) {
       scopes.push(
         `urn:zitadel:iam:org:project:id:${this.settings.platformProjectId}:aud`,
@@ -411,7 +415,9 @@ export class EverIdOidcService {
         return payload;
       } catch (error) {
         lastError = this.mapVerificationError(error);
-        // Another accepted issuer may own the token only when this one's key or `iss` did not match.
+        // Another accepted issuer may own the token when this one's key did not verify it or its
+        // `iss` names another issuer. A token whose signature verified but whose claims failed
+        // belongs to this issuer: that answer is final.
         if (!lastError.mismatch) {
           throw lastError;
         }
@@ -429,6 +435,13 @@ export class EverIdOidcService {
     }
     const code = String((error as { code?: string })?.code ?? '');
     const claim = String((error as { claim?: string })?.claim ?? '');
+    if (code === 'ERR_JWS_SIGNATURE_VERIFICATION_FAILED') {
+      return new EverIdTokenError(
+        'token_invalid',
+        'Token signature does not verify',
+        'bad_signature',
+      );
+    }
     if (error instanceof joseErrors.JWTExpired || code === 'ERR_JWT_EXPIRED') {
       return new EverIdTokenError('expired', 'Token expired');
     }
@@ -470,7 +483,7 @@ export class EverIdOidcService {
       let data: unknown;
       try {
         ({ status, data } = await this.http.get(
-          `${issuer}/.well-known/openid-configuration`,
+          `${issuer.replace(/\/+$/, '')}/.well-known/openid-configuration`,
           {
             headers: { Accept: 'application/json' },
             validateStatus: () => true,

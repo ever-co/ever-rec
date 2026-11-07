@@ -27,9 +27,13 @@ export type EverIdTokenErrorCode =
 
 /**
  * Why a token did not verify against one accepted issuer although another accepted issuer may still
- * own it: its `iss` names another issuer, or the issuer publishes no key for its `kid`.
+ * own it: its `iss` names another issuer, the issuer publishes no key for its `kid`, or the
+ * issuer's key does not verify its signature.
  */
-export type EverIdIssuerMismatch = 'issuer_mismatch' | 'unknown_key';
+export type EverIdIssuerMismatch =
+  | 'issuer_mismatch'
+  | 'unknown_key'
+  | 'bad_signature';
 
 /** A validation or protocol failure inside the OpenID Connect client. */
 export class EverIdTokenError extends Error {

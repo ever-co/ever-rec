@@ -35,8 +35,9 @@ describe('Ever ID settings', () => {
       ...CLIENT,
     });
     expect(isEverIdAvailable(settings)).toBe(true);
-    expect(settings.issuer).toBe('https://idp.example.test');
-    expect(settings.issuers).toEqual(['https://idp.example.test']);
+    // The issuer identifier is kept exactly, trailing slash included.
+    expect(settings.issuer).toBe('https://idp.example.test/');
+    expect(settings.issuers).toEqual(['https://idp.example.test/']);
     expect(settings.signUpAllowed).toBe(true);
     expect(settings.backchannelLogoutEnabled).toBe(true);
     expect(settings.logoutRevokeFirebase).toBe(false);

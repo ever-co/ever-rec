@@ -147,9 +147,7 @@ describe('EverIdOidcService', () => {
       expect(url.searchParams.get('code_challenge')).toBe(
         codeChallenge('verifier-1'),
       );
-      expect(url.searchParams.get('scope')).toBe(
-        'openid profile email urn:zitadel:iam:user:resourceowner',
-      );
+      expect(url.searchParams.get('scope')).toBe('openid profile email');
       expect(url.searchParams.has('login_hint')).toBe(false);
       expect(url.searchParams.has('prompt')).toBe(false);
       expect(url.toString()).not.toMatch(/urn:zitadel:iam:org:id/);
@@ -206,6 +204,55 @@ describe('EverIdOidcService', () => {
         }),
         'provider_error',
       );
+    });
+  });
+
+  describe('scopes', () => {
+    it('asks a generic issuer for the standard scopes only', () => {
+      expect(service.scope()).toBe('openid profile email');
+    });
+
+    it('adds the Ever ID scope for an Ever-hosted issuer', () => {
+      const everHosted = new TestOidcService(
+        settings({
+          EVER_ID_ISSUER_URL: 'https://auth.ever.co',
+          EVER_INSTALL_SOURCE: 'cloud',
+        }),
+        http.service as any,
+      );
+      expect(everHosted.scope()).toBe(
+        'openid profile email urn:zitadel:iam:user:resourceowner',
+      );
+    });
+
+    it('fetches discovery from an issuer with a trailing slash and keeps it exact', async () => {
+      const slashed = `${ISSUER}/`;
+      const calls: string[] = [];
+      const slashedHttp = {
+        get: jest.fn(async (url: string) => {
+          calls.push(url);
+          return {
+            status: 200,
+            data: {
+              issuer: slashed,
+              authorization_endpoint: `${ISSUER}/oauth/v2/authorize`,
+              token_endpoint: `${ISSUER}/oauth/v2/token`,
+              jwks_uri: `${ISSUER}/oauth/v2/keys`,
+            },
+          };
+        }),
+        post: jest.fn(),
+      };
+      const withSlash = new TestOidcService(
+        settings({ EVER_ID_ISSUER_URL: slashed }),
+        slashedHttp as any,
+      );
+      await withSlash.authorizationUrl({
+        state: 's',
+        nonce: NONCE,
+        codeVerifier: 'v',
+      });
+      expect(calls).toEqual([`${ISSUER}/.well-known/openid-configuration`]);
     });
   });
 
@@ -335,6 +382,51 @@ describe('EverIdOidcService', () => {
         subject: 'subject-1',
       });
       expect(keyFetches()).toBe(3);
+    });
+
+    it('tries the next accepted issuer when a key with the same kid does not verify', async () => {
+      const second = 'https://idp2.example.test';
+      const secondKey = await makeKey('key-1'); // same kid as the primary issuer's key
+      const multi = {
+        get: jest.fn(async (url: string) => {
+          for (const [issuer, jwk] of [
+            [ISSUER, key.jwk],
+            [second, secondKey.jwk],
+          ] as const) {
+            if (url === `${issuer}/.well-known/openid-configuration`) {
+              return {
+                status: 200,
+                data: {
+                  issuer,
+                  authorization_endpoint: `${issuer}/a`,
+                  token_endpoint: `${issuer}/t`,
+                  jwks_uri: `${issuer}/keys`,
+                },
+              };
+            }
+            if (url === `${issuer}/keys`) {
+              return { status: 200, data: { keys: [jwk] } };
+            }
+          }
+          return { status: 404, data: {} };
+        }),
+        post: jest.fn(),
+      };
+      service = new TestOidcService(
+        settings({ EVER_ID_ALLOWED_ISSUERS: second }),
+        multi as any,
+      );
+      await expect(
+        service.verifyIdToken(
+          await sign(claims({ iss: second }), secondKey),
+          NONCE,
+        ),
+      ).resolves.toMatchObject({ issuer: second });
+      // A token claiming the second issuer but signed with the primary's key is still refused.
+      await expectCode(
+        service.verifyIdToken(await sign(claims({ iss: second }), key), NONCE),
+        'token_invalid',
+      );
     });
 
     it('accepts a token from an additional accepted issuer', async () => {

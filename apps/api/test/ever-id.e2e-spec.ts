@@ -9,7 +9,10 @@ import nock from 'nock';
 import request from 'supertest';
 import { AuthProviderId } from '../src/module/auth/interfaces/auth.interface';
 import { MergeTokenPolicy } from '../src/module/auth/services/tokens/policies/merge-token.policy';
-import { identityKey } from '../src/module/ever-id/services/ever-id-crypto.service';
+import {
+  hashHandle,
+  identityKey,
+} from '../src/module/ever-id/services/ever-id-crypto.service';
 import { MockOidcIssuer } from './mock-oidc/mock-oidc-issuer';
 import { createTestApp, TestApp } from './support/test-app';
 
@@ -17,6 +20,9 @@ const CLIENT_ID = 'rec-test-client';
 const CLIENT_SECRET = 'rec-test-secret';
 const REDIRECT_URL = 'http://api.example.test/api/v1/auth/ever-id/callback';
 const PORTAL = 'http://portal.example.test';
+/** The value the portal tab keeps in session storage, and its hash sent with `start`. */
+const PORTAL_BINDING = 'b'.repeat(43);
+const PORTAL_BINDING_HASH = hashHandle(PORTAL_BINDING);
 const LOOPBACK = /^(127\.0\.0\.1|localhost|\[::1\])(:\d+)?$/;
 
 /** Field list of the `POST /auth/login-google` answer. */
@@ -96,7 +102,7 @@ describe('Ever ID sign-in (e2e)', () => {
     const response = track(
       await request(server())
         .get('/api/v1/auth/ever-id/start')
-        .query({ return: returnPath }),
+        .query({ return: returnPath, binding: PORTAL_BINDING_HASH }),
     );
     expect(response.status).toBe(302);
     return {
@@ -141,7 +147,7 @@ describe('Ever ID sign-in (e2e)', () => {
   async function exchange(code: string) {
     return request(server())
       .post('/api/v1/auth/ever-id/exchange')
-      .send({ code });
+      .send({ code, binding: PORTAL_BINDING });
   }
 
   /** A signed-in Rec account with a password, and its Firebase ID token. */
@@ -168,7 +174,7 @@ describe('Ever ID sign-in (e2e)', () => {
     const pending = landing.searchParams.get('confirm')!;
     const confirm = await request(server())
       .post('/api/v1/auth/ever-id/sign-up/confirm')
-      .send({ pending, termsAccepted: true });
+      .send({ pending, termsAccepted: true, binding: PORTAL_BINDING });
     expect(confirm.status).toBe(200);
     const session = await exchange(confirm.body.code);
     expect(session.status).toBe(201);
@@ -294,7 +300,7 @@ describe('Ever ID sign-in (e2e)', () => {
       const start = track(
         await request(server())
           .get('/api/v1/auth/ever-id/start')
-          .query({ return: '/media/images' }),
+          .query({ return: '/media/images', binding: PORTAL_BINDING_HASH }),
       );
       expect(start.status).toBe(302);
       expect(start.headers['cache-control']).toBe('no-store');
@@ -303,9 +309,7 @@ describe('Ever ID sign-in (e2e)', () => {
       expect(url.searchParams.get('state')).toMatch(/^[A-Za-z0-9_-]{43}$/);
       expect(url.searchParams.get('nonce')).toMatch(/^[A-Za-z0-9_-]{43}$/);
       expect(url.searchParams.has('login_hint')).toBe(false);
-      expect(url.searchParams.get('scope')).toBe(
-        'openid profile email urn:zitadel:iam:user:resourceowner',
-      );
+      expect(url.searchParams.get('scope')).toBe('openid profile email');
     });
 
     it('lets a new person create an account only after confirming it', async () => {
@@ -330,7 +334,7 @@ describe('Ever ID sign-in (e2e)', () => {
 
       const details = await request(server())
         .post('/api/v1/auth/ever-id/sign-up/details')
-        .send({ pending });
+        .send({ pending, binding: PORTAL_BINDING });
       expect(details.status).toBe(200);
       expect(details.body).toEqual({
         name: 'New Person',
@@ -340,7 +344,7 @@ describe('Ever ID sign-in (e2e)', () => {
       // The terms box must be ticked; the refusal does not use up the confirmation.
       const unticked = await request(server())
         .post('/api/v1/auth/ever-id/sign-up/confirm')
-        .send({ pending, termsAccepted: false });
+        .send({ pending, termsAccepted: false, binding: PORTAL_BINDING });
       expect(unticked.status).toBe(400);
       expect(
         t.firebase.authService.findByEmail('new.person@example.test'),
@@ -348,7 +352,7 @@ describe('Ever ID sign-in (e2e)', () => {
 
       const confirm = await request(server())
         .post('/api/v1/auth/ever-id/sign-up/confirm')
-        .send({ pending, termsAccepted: true });
+        .send({ pending, termsAccepted: true, binding: PORTAL_BINDING });
       expect(confirm.status).toBe(200);
       expect(confirm.body.return).toBe('/media/videos');
 
@@ -385,8 +389,67 @@ describe('Ever ID sign-in (e2e)', () => {
       expect((await exchange(confirm.body.code)).status).toBe(404);
       const again = await request(server())
         .post('/api/v1/auth/ever-id/sign-up/confirm')
-        .send({ pending, termsAccepted: true });
+        .send({ pending, termsAccepted: true, binding: PORTAL_BINDING });
       expect(again.status).toBe(404);
+    });
+
+    it('requires the portal binding to start, and redeems a hand-off only with it', async () => {
+      const missing = await request(server())
+        .get('/api/v1/auth/ever-id/start')
+        .query({ return: '/media/images' });
+      expect(missing.status).toBe(400);
+      expect(missing.body.code).toBe('invalid_binding');
+
+      // A portal link forwarded to another browser (no or another stored value) is refused.
+      await signUp('bound-person');
+      issuer.nextClaims = { sub: 'bound-person' };
+      const landing = await authorize();
+      const code = landing.searchParams.get('code')!;
+      const forwarded = await request(server())
+        .post('/api/v1/auth/ever-id/exchange')
+        .send({ code, binding: 'x'.repeat(43) });
+      expect(forwarded.status).toBe(404);
+      // The code is used up by the refused attempt.
+      expect((await exchange(code)).status).toBe(404);
+
+      issuer.nextClaims = { sub: 'bound-new', email: 'bound.new@example.test' };
+      const confirmLanding = await authorize();
+      const pending = confirmLanding.searchParams.get('confirm')!;
+      for (const binding of [undefined, 'x'.repeat(43)]) {
+        const details = await request(server())
+          .post('/api/v1/auth/ever-id/sign-up/details')
+          .send({ pending, binding });
+        expect(details.status).toBe(404);
+        const confirm = await request(server())
+          .post('/api/v1/auth/ever-id/sign-up/confirm')
+          .send({ pending, termsAccepted: true, binding });
+        expect(confirm.status).toBe(404);
+      }
+      expect(
+        t.firebase.authService.findByEmail('bound.new@example.test'),
+      ).toBeUndefined();
+      // The rightful tab can still confirm.
+      const confirm = await request(server())
+        .post('/api/v1/auth/ever-id/sign-up/confirm')
+        .send({ pending, termsAccepted: true, binding: PORTAL_BINDING });
+      expect(confirm.status).toBe(200);
+    });
+
+    it('lets a person sign up again after their account was deleted', async () => {
+      const first = await signUp('returning-person');
+      await t.firebase.authService.deleteUser(first.id);
+
+      issuer.nextClaims = { sub: 'returning-person' };
+      const landing = await authorize();
+      expect(landing.searchParams.get('confirm')).toBeTruthy();
+      expect(
+        t.firebase.db.dump(
+          `ever_identities/${identityKey(issuer.issuer, 'returning-person')}`,
+        ),
+      ).toBeNull();
+      expect(
+        t.firebase.db.dump(`ever_identities_by_uid/${first.id}`),
+      ).toBeNull();
     });
 
     it('creates nothing when the person closes the confirmation screen', async () => {
@@ -695,6 +758,46 @@ describe('Ever ID sign-in (e2e)', () => {
 
       // The same logout token is accepted once.
       expect((await logout(token)).status).toBe(400);
+    });
+
+    it('keeps a refreshed session revocable by the logout', async () => {
+      const session = await signUp('refreshing-person');
+      const first = await refresh(session.refreshToken);
+      expect(first.status).toBe(200);
+      // A reference token again, never the bare Firebase refresh token.
+      expect(first.body.refreshToken).toMatch(/^eyJ/);
+      const second = await refresh(first.body.refreshToken);
+      expect(second.status).toBe(200);
+
+      const token = await issuer.logoutToken({ sid: 'sid-refreshing-person' });
+      expect((await logout(token)).status).toBe(200);
+      for (const reference of [
+        session.refreshToken,
+        first.body.refreshToken,
+        second.body.refreshToken,
+      ]) {
+        expect((await refresh(reference)).status).toBeGreaterThanOrEqual(400);
+      }
+    });
+
+    it('ends a session without a session id on a subject-only logout', async () => {
+      issuer.nextClaims = { sub: 'no-sid-person', sid: undefined };
+      const landing = await authorize();
+      const confirm = await request(server())
+        .post('/api/v1/auth/ever-id/sign-up/confirm')
+        .send({
+          pending: landing.searchParams.get('confirm'),
+          termsAccepted: true,
+          binding: PORTAL_BINDING,
+        });
+      const session = (await exchange(confirm.body.code)).body.data;
+      expect((await refresh(session.refreshToken)).status).toBe(200);
+
+      const token = await issuer.logoutToken({ sub: 'no-sid-person' });
+      expect((await logout(token)).status).toBe(200);
+      expect(
+        (await refresh(session.refreshToken)).status,
+      ).toBeGreaterThanOrEqual(400);
     });
 
     it('rejects a logout token older than 300 s and a malformed request', async () => {
