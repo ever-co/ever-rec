@@ -18,7 +18,7 @@ permissions:
 jobs:
   api-unit:
     name: API unit tests (sign-in providers)
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.RUNNER_LINUX_X64_8 || 'ubuntu-latest' }}
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
@@ -35,7 +35,7 @@ jobs:
 
   api-e2e:
     name: API end-to-end tests (sign-in providers, existing sign-in routes)
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.RUNNER_LINUX_X64_8 || 'ubuntu-latest' }}
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
@@ -51,7 +51,7 @@ jobs:
 
   portal-unit:
     name: Portal unit tests
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.RUNNER_LINUX_X64_8 || 'ubuntu-latest' }}
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
