@@ -1,0 +1,176 @@
+{
+  "POST /auth/login (valid)": {
+    "status": 201,
+    "body": {
+      "status": "success",
+      "message": "Success!",
+      "error": null,
+      "data": {
+        "id": "uid-password",
+        "refreshToken": "<jwt>",
+        "expiresAt": "<date>",
+        "idToken": "<firebase-id-token>",
+        "photoURL": null,
+        "displayName": "Password User",
+        "email": "password.user@example.test",
+        "isVerified": true,
+        "isSlackIntegrate": false,
+        "dropbox": {
+          "isDropBoxIntegrated": false,
+          "email": null
+        },
+        "trello": {
+          "isIntegrated": false,
+          "email": null
+        },
+        "jira": {
+          "isIntegrated": false,
+          "email": null
+        }
+      }
+    }
+  },
+  "POST /auth/login (wrong password)": {
+    "status": 201,
+    "body": {
+      "status": "error",
+      "message": "There was a problem, please try again later...",
+      "error": {
+        "response": {
+          "message": "There was a problem, please try again later...",
+          "error": "Bad Request",
+          "statusCode": 400
+        },
+        "status": 400,
+        "options": {},
+        "message": "There was a problem, please try again later...",
+        "name": "BadRequestException"
+      },
+      "data": null
+    }
+  },
+  "POST /auth/register (no terms)": {
+    "status": 201,
+    "body": {
+      "status": "success",
+      "message": "Success!",
+      "error": null,
+      "data": {
+        "id": "uid-0002",
+        "customToken": "<custom-token>",
+        "idToken": "<firebase-id-token>",
+        "refreshToken": "<jwt>",
+        "expiresAt": "<date>",
+        "isVerified": false,
+        "photoURL": null,
+        "displayName": "New User",
+        "email": "new.user@example.test"
+      }
+    }
+  },
+  "POST /auth/login-google (new account)": {
+    "status": 201,
+    "body": {
+      "status": "success",
+      "message": "Success!",
+      "error": null,
+      "data": {
+        "id": "uid-0003",
+        "customToken": "<custom-token>",
+        "isVerified": true,
+        "idToken": "<firebase-id-token>",
+        "refreshToken": "<firebase-refresh-token>",
+        "expiresAt": "<date>",
+        "photoURL": null,
+        "displayName": "Google User",
+        "email": "google.user@example.test",
+        "isSlackIntegrate": false,
+        "dropbox": {
+          "isDropBoxIntegrated": false,
+          "email": null
+        },
+        "jira": {
+          "isIntegrated": false,
+          "email": null
+        },
+        "isNewUser": true,
+        "trello": {
+          "isIntegrated": false,
+          "email": null
+        }
+      }
+    }
+  },
+  "POST /auth/login-google (existing account)": {
+    "status": 201,
+    "body": {
+      "status": "success",
+      "message": "Success!",
+      "error": null,
+      "data": {
+        "id": "uid-0003",
+        "customToken": "<custom-token>",
+        "isVerified": true,
+        "idToken": "<firebase-id-token>",
+        "refreshToken": "<firebase-refresh-token>",
+        "expiresAt": "<date>",
+        "photoURL": null,
+        "displayName": "Google User",
+        "email": "google.user@example.test",
+        "isSlackIntegrate": false,
+        "dropbox": {
+          "isDropBoxIntegrated": false,
+          "email": null
+        },
+        "jira": {
+          "isIntegrated": false,
+          "email": null
+        },
+        "isNewUser": true,
+        "trello": {
+          "isIntegrated": false,
+          "email": null
+        }
+      }
+    }
+  },
+  "POST /auth/login-google (invalid credential)": {
+    "status": 201,
+    "body": {
+      "status": "error",
+      "message": "Google login failed",
+      "error": {
+        "code": "EXCHANGE_GOOGLE_ID_TOKEN_ERROR",
+        "message": "Request failed with status code 400",
+        "details": {
+          "response": {
+            "status": 400,
+            "data": {
+              "error": {
+                "code": 400,
+                "message": "INVALID_IDP_RESPONSE"
+              }
+            }
+          }
+        }
+      },
+      "data": null
+    }
+  },
+  "GET /auth/refresh-token (from the password sign-in)": {
+    "status": 200,
+    "body": {
+      "idToken": "<firebase-id-token>",
+      "refreshToken": "<firebase-refresh-token>",
+      "expiresAt": "<date>"
+    }
+  },
+  "GET /auth/refresh-token (missing)": {
+    "status": 401,
+    "body": {
+      "message": "Missing refresh token",
+      "error": "Unauthorized",
+      "statusCode": 401
+    }
+  }
+}

@@ -11,7 +11,9 @@ import { AuthenticationService } from './services/authentication.service';
 import { EmailService } from './services/email.service';
 import { GoogleAuthService } from './services/google-auth.service';
 import { LoginChain } from './services/login/login.chain';
+import { EverIdLoginState } from './services/login/state/ever-id-login.state';
 import { FirebaseLoginState } from './services/login/state/firebase-login.state';
+import { GauzyEverIdLoginState } from './services/login/state/gauzy-ever-id-login.state';
 import { GauzyLoginState } from './services/login/state/gauzy-login.state';
 import { FirebasePasswordResetStrategy } from './services/password-reset/firebase-password-reset.strategy';
 import { RequestPasswordChain } from './services/password-reset/password-request.chain';
@@ -37,6 +39,7 @@ import {
 } from './services/tokens';
 import { MergeTokenPolicy } from './services/tokens/policies/merge-token.policy';
 import { GauzyRefreshStrategy } from './services/tokens/refresh/gauzy-refresh.strategy';
+import { EverIdRefreshStrategy } from './services/tokens/refresh/ever-id-refresh.strategy';
 import { TokenStorageService } from './services/tokens/token-storage.service';
 import { FirebaseUpdateUserAvatarState } from './services/update-user-profile/state/firebase-update-user-avatar.state';
 import { FirebaseUpdateUserEmailState } from './services/update-user-profile/state/firebase-update-user-email.state';
@@ -101,11 +104,16 @@ import { UserService } from './services/user.service';
     FirebaseRefreshStrategy,
     FirebaseValidateStrategy,
     UserFactory,
+    EverIdRefreshStrategy,
 
     // Login State service
     FirebaseLoginState,
     GauzyLoginState,
     LoginChain,
+
+    // Optional Ever ID sign-in (used by EverIdModule)
+    EverIdLoginState,
+    GauzyEverIdLoginState,
 
     // Register State service
     FirebaseRegisterState,
@@ -140,6 +148,7 @@ import { UserService } from './services/user.service';
     UserProfileService,
     TokenService,
     MergeTokenPolicy,
+    EverIdLoginState,
   ],
 })
 export class AuthModule {}

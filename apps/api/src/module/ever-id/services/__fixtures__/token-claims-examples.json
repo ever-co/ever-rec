@@ -1,0 +1,83 @@
+{
+  "description": "Example ID token claim sets an Ever ID issuer sends to a product client. Illustrative values; iss, aud, azp, nonce, iat, exp and auth_time are replaced by the test. Claims under urn:ever: and urn:zitadel: are hints: their absence must never refuse a sign-in.",
+  "idTokens": [
+    {
+      "name": "personal identity with organization hints",
+      "claims": {
+        "sub": "312918273645019283",
+        "aud": ["$CLIENT_ID", "330011223344550000"],
+        "azp": "$CLIENT_ID",
+        "sid": "V1_3a9b",
+        "amr": ["user", "mfa"],
+        "at_hash": "x4Q2",
+        "email": "alice@example.com",
+        "email_verified": true,
+        "name": "Alice Example",
+        "given_name": "Alice",
+        "family_name": "Example",
+        "preferred_username": "alice@example.com",
+        "locale": "en",
+        "updated_at": 1789990000,
+        "urn:zitadel:iam:user:resourceowner:id": "329900000000000001",
+        "urn:zitadel:iam:user:resourceowner:name": "example-people",
+        "urn:zitadel:iam:user:resourceowner:primary_domain": "example-people.idp.example.test",
+        "urn:ever:person_id": "01K6A7Q3ZV9J8X2M4N5P6R7S8T",
+        "urn:ever:identity_kind": "personal",
+        "urn:ever:orgs": [
+          {
+            "id": "01K6A7R9AAAAAAAAAAAAAAAAAA",
+            "handle": "acme",
+            "role": "owner",
+            "tenant_id": "01K6A7R0AAAAAAAAAAAAAAAAAA",
+            "identity_tier": "registry",
+            "links": [
+              {
+                "instance_id": "01K6A7S1AAAAAAAAAAAAAAAAAA",
+                "product_tenant_id": "6f1c",
+                "product_org_id": "9b2d"
+              }
+            ]
+          }
+        ],
+        "urn:ever:orgs_filtered": [],
+        "urn:ever:orgs_truncated": false,
+        "urn:ever:claims_ver": 1
+      },
+      "expect": {
+        "subject": "312918273645019283",
+        "email": "alice@example.com",
+        "name": "Alice Example",
+        "sid": "V1_3a9b",
+        "everPersonId": "01K6A7Q3ZV9J8X2M4N5P6R7S8T"
+      }
+    },
+    {
+      "name": "minimal identity without any hint claims",
+      "claims": {
+        "sub": "412918273645019284",
+        "aud": "$CLIENT_ID",
+        "email": "bob@example.com",
+        "email_verified": true,
+        "given_name": "Bob",
+        "family_name": "Example"
+      },
+      "expect": {
+        "subject": "412918273645019284",
+        "email": "bob@example.com",
+        "name": "Bob Example",
+        "sid": null,
+        "everPersonId": null
+      }
+    }
+  ],
+  "logoutToken": {
+    "name": "back-channel logout token",
+    "claims": {
+      "sub": "312918273645019283",
+      "aud": "$CLIENT_ID",
+      "jti": "V1_lo42",
+      "sid": "V1_3a9b",
+      "events": { "http://schemas.openid.net/event/backchannel-logout": {} }
+    }
+  }
+}

@@ -48,6 +48,44 @@
       ".indexOn": "queryField",
       ".read": "auth != null",
       ".write": "auth != null"
+    },
+    "ever_identities": {
+      ".read": false,
+      ".write": false
+    },
+    "ever_identities_by_uid": {
+      ".read": false,
+      ".write": false
+    },
+    "ever_id_pending": {
+      ".indexOn": ["expiresAt"],
+      ".read": false,
+      ".write": false
+    },
+    "ever_id_pending_signup": {
+      ".indexOn": ["expiresAt"],
+      ".read": false,
+      ".write": false
+    },
+    "ever_id_pending_connect": {
+      ".indexOn": ["expiresAt"],
+      ".read": false,
+      ".write": false
+    },
+    "ever_id_handoff": {
+      ".indexOn": ["expiresAt"],
+      ".read": false,
+      ".write": false
+    },
+    "ever_id_sessions": {
+      ".indexOn": ["expiresAt", "subjectKey"],
+      ".read": false,
+      ".write": false
+    },
+    "ever_id_logout_jti": {
+      ".indexOn": ["expiresAt"],
+      ".read": false,
+      ".write": false
     }
   }
 }

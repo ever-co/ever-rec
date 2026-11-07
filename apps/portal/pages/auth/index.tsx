@@ -5,6 +5,7 @@ import { useRouter } from 'next/router';
 import { panelRoutes, preRoutes } from '../../components/_routes';
 import Layout from 'antd/lib/layout/layout';
 import GoogleBtn from 'components/pagesComponents/_signScreen/GoogleBtn';
+import EverIdButton from 'components/pagesComponents/_signScreen/EverIdButton';
 import AppLink from 'components/controls/AppLink';
 import LinksDivider from 'components/pagesComponents/_signScreen/LinksDivider';
 import Image from 'next/legacy/image';
@@ -153,6 +154,9 @@ const Auth: React.FC<SignFlowComponent> = ({ children, componentType }) => {
                       )}
 
                       <GoogleBtn onSuccess={googleSubmit} />
+
+                      {(componentType === 'login' ||
+                        componentType === 'register') && <EverIdButton />}
 
                       <div className="tw-flex tw-justify-center tw-mt-7">
                         {filteredLinks().map((link, index, arr) => (

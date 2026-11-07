@@ -13,6 +13,7 @@ import { DropboxModule } from './module/dropbox/dropbox.module';
 import { EditorWebsocketModule } from './module/editor-websocket-module/editor-websocket.module';
 import { EditorGateway } from './module/editor-websocket-module/editor.gateway';
 import { EmailModule } from './module/email/email.module';
+import { EverIdModule } from './module/ever-id/ever-id.module';
 import { FirebaseModule } from './module/firebase/firebase.module';
 import { ImageModule } from './module/image/image.module';
 import { LogModule } from './module/log/log.module';
@@ -37,6 +38,7 @@ import { CamshotModule } from './module/camshot/camshot.module';
     FirebaseModule,
     AdminModule,
     AuthModule,
+    EverIdModule,
     TermsModule,
     ImageModule,
     VideoModule,

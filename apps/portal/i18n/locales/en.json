@@ -550,6 +550,45 @@
         "newPasswordColon": "New Password:",
         "newPasswordConfirm": "Confirm New Password *",
         "setNewPassword": "Set New Password"
+      },
+      "everId": {
+        "continue": "Continue with Ever ID",
+        "createAccountTitle": "Create your Ever Rec account",
+        "createAccountIntro": "You will sign in to this account with your Ever ID. Check your details, accept the terms and confirm.",
+        "name": "Name",
+        "email": "E-mail",
+        "create": "Create account",
+        "cancel": "Cancel",
+        "errors": {
+          "generic": "Ever ID sign-in did not work. Please try again.",
+          "invalid_state": "This sign-in took too long or was already used. Please try again.",
+          "token_invalid": "Your Ever ID sign-in could not be verified. Please try again.",
+          "email_unverified": "Please verify your e-mail address in Ever ID first, then try again.",
+          "reauth_required": "Please sign in to Ever ID again to connect it to this account.",
+          "account_exists": "An Ever Rec account with this e-mail already exists. Sign in the usual way, then connect Ever ID in Settings.",
+          "signup_disabled": "New accounts cannot be created with Ever ID here. Create an account with your e-mail first, then connect Ever ID in Settings.",
+          "provider_error": "Ever ID cannot be reached right now. Please try again later.",
+          "pending_expired": "This confirmation has expired. Please start again.",
+          "invalid_code": "This sign-in link has expired. Please sign in again.",
+          "subject_linked": "This Ever ID is already connected to another Ever Rec account.",
+          "last_sign_in_method": "Ever ID is the only way to sign in to this account. Set a password first, then disconnect it.",
+          "wrong_account": "This confirmation belongs to another account.",
+          "rate_limited": "Too many attempts. Please wait a minute and try again."
+        },
+        "settings": {
+          "title": "Connected sign-in methods",
+          "description": "Sign in to Ever Rec with your Ever ID.",
+          "connect": "Connect Ever ID",
+          "disconnect": "Disconnect",
+          "connectedAs": "Ever ID: {{email}}",
+          "none": "No Ever ID is connected to this account.",
+          "confirmTitle": "Connect this Ever ID to your account?",
+          "accountEmail": "Your Ever Rec account",
+          "everIdEmail": "Your Ever ID",
+          "confirm": "Connect",
+          "connected": "Ever ID connected.",
+          "disconnected": "Ever ID disconnected."
+        }
       }
     },
     "register": {

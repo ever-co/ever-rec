@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [develop, main]
+  push:
+    branches: [develop]
+
+concurrency:
+  group: ${{ github.ref }}-${{ github.workflow }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+# No secret is used: the suites run against in-memory Firebase doubles and a mock OpenID Connect
+# issuer on 127.0.0.1, with every other outbound connection refused.
+jobs:
+  api-unit:
+    name: API unit tests (sign-in providers)
+    runs-on: ${{ vars.RUNNER_LINUX_X64_8 || 'ubuntu-latest' }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 26
+      - name: Install pnpm
+        run: npm install -g --ignore-scripts pnpm@9.9.0
+      - name: Install dependencies
+        # Install scripts are skipped: no suite here needs a native build.
+        run: pnpm install --frozen-lockfile --ignore-scripts
+      - name: Unit tests
+        run: pnpm --filter ever-rec-api exec jest src/module/ever-id
+
+  api-e2e:
+    name: API end-to-end tests (sign-in providers, existing sign-in routes)
+    runs-on: ${{ vars.RUNNER_LINUX_X64_8 || 'ubuntu-latest' }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 26
+      - name: Install pnpm
+        run: npm install -g --ignore-scripts pnpm@9.9.0
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+      - name: End-to-end tests
+        run: pnpm --filter ever-rec-api exec jest --config ./test/jest-e2e.json test/ever-id test/auth-regression
+
+  portal-unit:
+    name: Portal unit tests
+    runs-on: ${{ vars.RUNNER_LINUX_X64_8 || 'ubuntu-latest' }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 26
+      - name: Install pnpm
+        run: npm install -g --ignore-scripts pnpm@9.9.0
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+      - name: Unit tests
+        run: pnpm --filter ever-rec-portal test

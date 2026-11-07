@@ -28,6 +28,7 @@ import ChangeEmailModal from 'components/pagesComponents/profileScreen/ChangeEma
 import ChangeNameModal from 'components/pagesComponents/profileScreen/ChangeNameModal';
 import ChangePasswordModal from 'components/pagesComponents/profileScreen/ChangePassword';
 import DeleteAccountModal from 'components/pagesComponents/profileScreen/DeleteAccountModal';
+import ConnectedSignInMethods from 'components/pagesComponents/profileScreen/ConnectedSignInMethods';
 import { preRoutes, panelRoutes } from 'components/_routes';
 import { useRouter } from 'next/router';
 import { errorHandler } from 'app/services/helpers/errors';
@@ -251,6 +252,8 @@ const Profile: React.FC = () => {
               />
             </div>
           </div>
+
+          <ConnectedSignInMethods />
 
           <div className={styles.profileDeleteAccount}>
             <ProfileDetail

@@ -5,6 +5,7 @@ import { AuthScreenType } from './AuthScreen';
 import IAppControl from '@/app/interfaces/IAppControl';
 import AppButton from '@/content/components/controls/appButton/AppButton';
 import AppInput from '@/content/components/controls/appInput/AppInput';
+import EverIdLoginButton from '@/content/components/everId/EverIdLoginButton';
 
 interface ILoginProps {
   changeAuthScreen: (screen: AuthScreenType) => void;
@@ -98,6 +99,7 @@ const Login: React.FC<ILoginProps> = ({ changeAuthScreen }) => {
           Login
         </AppButton>
       </div>
+      <EverIdLoginButton className="tw-mb-4" />
       <div className="tw-flex tw-justify-center">
         <AppButton
           onClick={() => changeScreenHandler(AuthScreenType.register)}
