@@ -26,19 +26,18 @@ const jest = [
 let result;
 if (process.env.FIREBASE_DATABASE_EMULATOR_HOST) {
   // The developer's own tools (npx, the Firebase CLI), from their PATH: a test runner, not the API.
-  result = spawnSync('npx', jest, {
-    // NOSONAR
+  const options = {
     cwd: api,
     stdio: 'inherit',
     shell: process.platform === 'win32',
-  });
+  };
+  result = spawnSync('npx', jest, options); // NOSONAR: the developer's own npx, from their PATH
 } else {
   const quoted = jest
     .map((part) => (/^[\w./:=@-]+$/.test(part) ? part : JSON.stringify(part)))
     .join(' ');
   result = spawnSync(
-    // NOSONAR: the developer's Firebase CLI, from their PATH
-    'firebase',
+    'firebase', // NOSONAR: the developer's Firebase CLI, from their PATH
     [
       'emulators:exec',
       '--config',
