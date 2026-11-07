@@ -54,7 +54,7 @@ export async function storedBytes(
   file: StoredFile,
   event: string = EVER_COUNTER_EVENTS.mediaDeleted,
 ): Promise<number> {
-  if (!emitter || !emitter.hasListeners(event)) {
+  if (!emitter?.hasListeners(event)) {
     return 0;
   }
   try {
@@ -78,6 +78,56 @@ interface ListableBucket {
   }): Promise<unknown>;
 }
 
+/** One listed object: its name and its size. */
+interface ListedFile {
+  name?: string;
+  metadata?: { size?: string | number };
+}
+
+/** The media folders directly under an account or a workspace. */
+const MEDIA_FOLDERS = new Map<string, EverMediaEvent['kind']>([
+  ['screenshots', 'screenshot'],
+  ['videos', 'video'],
+]);
+
+/** The kind of a file directly in `<prefix>screenshots/` or `<prefix>videos/`, else `undefined`. */
+function mediaKindOf(
+  name: string,
+  prefix: string,
+): EverMediaEvent['kind'] | undefined {
+  if (!name.startsWith(prefix)) return undefined;
+  const parts = name.slice(prefix.length).split('/');
+  return parts.length === 2 ? MEDIA_FOLDERS.get(parts[0]) : undefined;
+}
+
+/** A listed object's size: a positive whole number, else 0. */
+function listedBytes(file: ListedFile | undefined): number {
+  const size = Number(file?.metadata?.size);
+  return Number.isFinite(size) && size > 0 ? Math.floor(size) : 0;
+}
+
+/** Adds the media of one page under `prefix` to `bytes`, then the next pages. */
+async function addPages(
+  bucket: ListableBucket,
+  prefix: string,
+  bytes: Record<EverMediaEvent['kind'], number>,
+  pageToken?: string,
+): Promise<void> {
+  const [files, next] = (await bucket.getFiles({
+    prefix,
+    autoPaginate: false,
+    maxResults: 1000,
+    ...(pageToken ? { pageToken } : {}),
+  })) as [ListedFile[] | undefined, { pageToken?: string } | null | undefined];
+  for (const file of files ?? []) {
+    const kind = mediaKindOf(String(file?.name ?? ''), prefix);
+    if (kind) bytes[kind] += listedBytes(file);
+  }
+  if (next?.pageToken) {
+    await addPages(bucket, prefix, bytes, next.pageToken);
+  }
+}
+
 /**
  * The screenshots and videos stored under `prefix` (an account's `users/{uid}/` or a workspace's
  * `workspaces/{id}/`), before the whole folder is deleted: one event per kind with the bytes of
@@ -90,7 +140,7 @@ export async function storedMediaUnder(
   bucket: ListableBucket,
   prefix: string,
 ): Promise<EverMediaEvent[]> {
-  if (!emitter || !emitter.hasListeners(EVER_COUNTER_EVENTS.mediaDeleted)) {
+  if (!emitter?.hasListeners(EVER_COUNTER_EVENTS.mediaDeleted)) {
     return [];
   }
   const bytes: Record<EverMediaEvent['kind'], number> = {
@@ -98,35 +148,7 @@ export async function storedMediaUnder(
     video: 0,
   };
   try {
-    let pageToken: string | undefined;
-    do {
-      const [files, next] = (await bucket.getFiles({
-        prefix,
-        autoPaginate: false,
-        maxResults: 1000,
-        ...(pageToken ? { pageToken } : {}),
-      })) as [
-        Array<{ name?: string; metadata?: { size?: string | number } }>,
-        { pageToken?: string } | null | undefined,
-      ];
-      for (const file of files ?? []) {
-        const name = String(file?.name ?? '');
-        if (!name.startsWith(prefix)) continue;
-        const parts = name.slice(prefix.length).split('/');
-        const folder = parts.length === 2 ? parts[0] : '';
-        const kind =
-          folder === 'screenshots'
-            ? 'screenshot'
-            : folder === 'videos'
-              ? 'video'
-              : null;
-        const size = Number(file.metadata?.size);
-        if (kind && Number.isFinite(size) && size > 0) {
-          bytes[kind] += Math.floor(size);
-        }
-      }
-      pageToken = next?.pageToken || undefined;
-    } while (pageToken);
+    await addPages(bucket, prefix, bytes);
   } catch {
     return [];
   }

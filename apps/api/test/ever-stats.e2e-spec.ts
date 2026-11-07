@@ -251,10 +251,14 @@ describe('ever-stats routes', () => {
       });
       const operator = await t.signIn(OPERATOR_UID);
       const sending = call('post', '/api/v1/ever-stats/send', operator);
-      const deadline = Date.now() + 2_000;
-      while (posted === 0 && Date.now() < deadline) {
-        await new Promise((resolve) => setTimeout(resolve, 2));
-      }
+      await new Promise<void>((resolve) => {
+        const deadline = Date.now() + 2_000;
+        const look = () => {
+          if (posted > 0 || Date.now() > deadline) resolve();
+          else setTimeout(look, 2);
+        };
+        look();
+      });
       expect(posted).toBe(1);
       let answered = false;
       const off = call('put', '/api/v1/ever-stats/enabled', operator, {

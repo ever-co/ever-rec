@@ -49,11 +49,13 @@ export class EverStatsLease {
     pollMs = 250,
   ): Promise<boolean> {
     const deadline = Date.now() + waitMs;
-    for (;;) {
+    const attempt = async (): Promise<boolean> => {
       if (await this.acquire(now())) return true;
       if (Date.now() >= deadline) return false;
       await new Promise((resolve) => setTimeout(resolve, pollMs));
-    }
+      return attempt();
+    };
+    return attempt();
   }
 
   /** Gives the lease back, if this process still holds it. */

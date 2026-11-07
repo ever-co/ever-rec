@@ -457,15 +457,21 @@ export class FakeStorageFile {
     this.bucket.objects.delete(this.name);
   }
 
-  async copy(destination: string): Promise<[FakeStorageFile]> {
+  copy(destination: string): Promise<[FakeStorageFile]> {
     const bytes = this.bucket.objects.get(this.name);
-    if (!bytes) throw Object.assign(new Error('No such object'), { code: 404 });
+    if (!bytes) {
+      return Promise.reject(
+        Object.assign(new Error('No such object'), { code: 404 }),
+      );
+    }
     this.bucket.objects.set(destination, Buffer.from(bytes));
-    return [this.bucket.file(destination)];
+    return Promise.resolve([this.bucket.file(destination)]);
   }
 
-  async getSignedUrl(): Promise<[string]> {
-    return [`https://storage.example.test/${encodeURIComponent(this.name)}`];
+  getSignedUrl(): Promise<[string]> {
+    return Promise.resolve([
+      `https://storage.example.test/${encodeURIComponent(this.name)}`,
+    ]);
   }
 }
 
@@ -477,11 +483,15 @@ export class InMemoryBucket {
     return new FakeStorageFile(this, name);
   }
 
-  /** The stored names (under `prefix`, when given), sorted. */
+  /** The stored names (under `prefix`, when given), in code-point order like a bucket listing. */
   private names(prefix?: string): string[] {
+    const byName = (a: string, b: string) => {
+      if (a === b) return 0;
+      return a < b ? -1 : 1;
+    };
     return [...this.objects.keys()]
       .filter((name) => !prefix || name.startsWith(prefix))
-      .sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+      .sort(byName);
   }
 
   async getFiles(
@@ -498,10 +508,11 @@ export class InMemoryBucket {
     return [files, next];
   }
 
-  async deleteFiles(query: { prefix?: string } = {}): Promise<void> {
+  deleteFiles(query: { prefix?: string } = {}): Promise<void> {
     for (const name of this.names(query.prefix)) {
       this.objects.delete(name);
     }
+    return Promise.resolve();
   }
 }
 
