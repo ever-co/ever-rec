@@ -18,7 +18,7 @@ interface Received {
   body: Buffer;
 }
 
-/** A local HTTP stub of the report endpoint (no network, no extra dependency). */
+/** A local HTTP stub of the report endpoint (on 127.0.0.1, no extra dependency). */
 async function stub(answer: (req: Received) => { status: number; headers?: Record<string, string> }) {
   const received: Received[] = [];
   const server: Server = createServer((req: IncomingMessage, res: ServerResponse) => {
