@@ -374,6 +374,8 @@
       "copyToClipboard": "Copy to Clipboard",
       "generateShareableLink": "Generate a Shareable Link",
       "shareableLink": "Shareable link:",
+      "copyEmbedCode": "Copy embed code",
+      "embedCodeCopied": "Embed code copied",
       "remove": "Remove",
       "copy": "Copy",
       "processing": "Processing...",
