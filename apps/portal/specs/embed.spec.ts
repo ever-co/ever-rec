@@ -46,6 +46,8 @@ describe('buildVideoEmbedCode', () => {
     expect(code).toContain('title="Demo"');
     expect(code).toContain('allowfullscreen');
     expect(code).toContain('loading="lazy"');
+    // height follows the width, so a narrow container does not leave empty space
+    expect(code).toContain('height:auto;aspect-ratio:16/9');
     expect(code.startsWith('<iframe ')).toBe(true);
     expect(code.endsWith('</iframe>')).toBe(true);
   });

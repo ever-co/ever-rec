@@ -46,7 +46,7 @@ export const buildVideoEmbedCode = (
 
   return (
     `<iframe src="${escapeAttribute(embedUrl)}" title="${escapeAttribute(safeTitle)}" ` +
-    'width="640" height="360" style="border:0;max-width:100%;aspect-ratio:16/9" ' +
+    'width="640" height="360" style="border:0;max-width:100%;height:auto;aspect-ratio:16/9"' +
     'allow="fullscreen" allowfullscreen loading="lazy"></iframe>'
   );
 };
