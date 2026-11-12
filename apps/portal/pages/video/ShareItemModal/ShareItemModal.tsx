@@ -69,7 +69,7 @@ const ShareItemModal: FC<IProps> = ({
       await window.navigator.clipboard.writeText(embedCode);
       successMessage(t('page.image.embedCodeCopied'));
     } catch (e) {
-      errorHandler(t('hooks.toasts.shareLinkCopyError'));
+      errorHandler(new Error(t('hooks.toasts.shareLinkCopyError')));
     }
   };
 

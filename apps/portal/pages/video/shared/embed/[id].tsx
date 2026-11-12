@@ -7,7 +7,6 @@ import 'plyr/dist/plyr.css';
 import { getVideoForPublicPage } from 'app/services/videos';
 import { PlaybackStatusEnum } from 'app/enums/StreamingServicesEnums';
 import useRenderVideo from 'hooks/useRenderVideo';
-import useStreamState from 'hooks/useStreamState';
 import { fallbackVideoURL } from 'misc/fallbackVideoURL';
 import { useTranslation } from 'react-i18next';
 
@@ -32,7 +31,6 @@ const EmbeddedSharedVideo: FC<{ ip?: string }> = ({ ip = '' }) => {
   const [urlLink, setUrlLink] = useState('');
   const [notFound, setNotFound] = useState(false);
   const { renderVideo } = useRenderVideo({ urlLink });
-  const { streamState, setStreamState } = useStreamState(video);
 
   useEffect(() => {
     if (!router.isReady) return;
@@ -68,31 +66,31 @@ const EmbeddedSharedVideo: FC<{ ip?: string }> = ({ ip = '' }) => {
     ).catch(() => undefined);
   }, [video, user, ip, router.query.ws]);
 
-  useEffect(() => {
-    if (!video) return;
-
-    const streamData = video.dbData?.streamData;
-    if (streamData) {
-      setStreamState({
-        service: streamData.serviceType,
-        assetId: streamData.assetId,
-        playbackStatus: streamData.playbackStatus,
-        downloadStatus: streamData.downloadStatus,
-        downloadUrl: streamData.downloadUrl,
-      });
-    } else if (video.url) {
-      setUrlLink(video.url);
-    }
-  }, [video, setStreamState]);
+  // The stream data is read once. The status endpoints need a signed-in user, so an
+  // embedded (usually anonymous) viewer must never poll them.
+  const streamData = video?.dbData?.streamData;
+  const isProcessing =
+    Boolean(streamData) &&
+    streamData.playbackStatus !== PlaybackStatusEnum.READY;
 
   useEffect(() => {
-    if (streamState?.playbackStatus !== PlaybackStatusEnum.READY) return;
     if (!video?.url) return;
 
-    fallbackVideoURL(video.url, video.dbData?.streamData?.downloadUrl || '')
-      .then(setUrlLink)
-      .catch(() => setUrlLink(video.url));
-  }, [video, streamState?.playbackStatus]);
+    if (!streamData) {
+      setUrlLink(video.url);
+      return;
+    }
+    if (streamData.playbackStatus !== PlaybackStatusEnum.READY) return;
+
+    let cancelled = false;
+    fallbackVideoURL(video.url, streamData.downloadUrl || '')
+      .then((url) => !cancelled && setUrlLink(url))
+      .catch(() => !cancelled && setUrlLink(video.url));
+
+    return () => {
+      cancelled = true;
+    };
+  }, [video, streamData]);
 
   return (
     <div
@@ -108,6 +106,8 @@ const EmbeddedSharedVideo: FC<{ ip?: string }> = ({ ip = '' }) => {
     >
       {notFound ? (
         t('page.video.noAccess')
+      ) : isProcessing ? (
+        t('page.image.processing')
       ) : (
         // Largest 16:9 box that fits the frame in both directions, centered,
         // so narrow or tall embeds do not stretch or crop the player.

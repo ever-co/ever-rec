@@ -2,9 +2,9 @@ import { buildVideoEmbedCode, getVideoEmbedUrl } from 'app/utilities/embed';
 
 describe('getVideoEmbedUrl', () => {
   it('maps a public video share link to the embed page', () => {
-    expect(getVideoEmbedUrl('https://rec.example.com/video/shared/abc123')).toBe(
-      'https://rec.example.com/video/shared/embed/abc123',
-    );
+    expect(
+      getVideoEmbedUrl('https://rec.example.com/video/shared/abc123'),
+    ).toBe('https://rec.example.com/video/shared/embed/abc123');
   });
 
   it('keeps the workspace flag, and only that flag', () => {
@@ -48,6 +48,8 @@ describe('buildVideoEmbedCode', () => {
     expect(code).toContain('loading="lazy"');
     // height follows the width, so a narrow container does not leave empty space
     expect(code).toContain('height:auto;aspect-ratio:16/9');
+    // attributes must be separated by a space
+    expect(code).toContain('aspect-ratio:16/9" allow="fullscreen"');
     expect(code.startsWith('<iframe ')).toBe(true);
     expect(code.endsWith('</iframe>')).toBe(true);
   });
@@ -58,7 +60,9 @@ describe('buildVideoEmbedCode', () => {
       `"><script>alert('x')</script>`,
     );
     expect(code).not.toContain('<script>');
-    expect(code).toContain('src="https://rec.example.com/x?a=1&amp;b=&quot;2&quot;"');
+    expect(code).toContain(
+      'src="https://rec.example.com/x?a=1&amp;b=&quot;2&quot;"',
+    );
     expect(code).toContain(
       'title="&quot;&gt;&lt;script&gt;alert(&#39;x&#39;)&lt;/script&gt;"',
     );
