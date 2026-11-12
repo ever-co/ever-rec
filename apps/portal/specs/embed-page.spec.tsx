@@ -116,39 +116,18 @@ describe('embedded shared video page', () => {
     expect(player()).toBeNull();
   });
 
-  it('refreshes through the public fetch while playback is preparing, then stops at READY', async () => {
-    mockFetch
-      .mockResolvedValueOnce(videoWith({ playbackStatus: 'preparing' }))
-      .mockResolvedValueOnce(videoWith({ playbackStatus: 'preparing' }))
-      .mockResolvedValue(videoWith({ playbackStatus: 'ready' }));
+  it('shows the processing text while playback is preparing and polls nothing', async () => {
+    mockFetch.mockResolvedValue(videoWith({ playbackStatus: 'preparing' }));
     await render();
 
     expect(container.textContent).toContain('page.image.processing');
     expect(player()).toBeNull();
+
+    await act(async () => {
+      jest.advanceTimersByTime(60000);
+    });
+    await settle();
     expect(mockFetch).toHaveBeenCalledTimes(1);
-
-    await act(async () => {
-      jest.advanceTimersByTime(5000);
-    });
-    await settle();
-    expect(mockFetch).toHaveBeenCalledTimes(2);
-    expect(container.textContent).toContain('page.image.processing');
-
-    await act(async () => {
-      jest.advanceTimersByTime(5000);
-    });
-    await settle();
-    await settle();
-    expect(mockFetch).toHaveBeenCalledTimes(3);
-    expect(container.textContent).not.toContain('page.image.processing');
-    expect(player()).not.toBeNull();
-
-    // READY: no further refreshes.
-    await act(async () => {
-      jest.advanceTimersByTime(30000);
-    });
-    expect(mockFetch).toHaveBeenCalledTimes(3);
-    expect(mockFetch.mock.calls.every((call) => call[0] === 'abc')).toBe(true);
   });
 
   it('does not refresh when playback is already READY', async () => {
@@ -159,20 +138,5 @@ describe('embedded shared video page', () => {
       jest.advanceTimersByTime(30000);
     });
     expect(mockFetch).toHaveBeenCalledTimes(1);
-  });
-
-  it('keeps the processing message when a refresh fails', async () => {
-    mockFetch
-      .mockResolvedValueOnce(videoWith({ playbackStatus: 'preparing' }))
-      .mockRejectedValueOnce(new Error('offline'));
-    await render();
-
-    await act(async () => {
-      jest.advanceTimersByTime(5000);
-    });
-    await settle();
-
-    expect(container.textContent).toContain('page.image.processing');
-    expect(container.textContent).not.toContain('page.video.noAccess');
   });
 });

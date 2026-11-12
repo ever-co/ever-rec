@@ -21,8 +21,6 @@ export const getServerSideProps: GetServerSideProps = async (
   return { props: { ip } };
 };
 
-const PROCESSING_REFRESH_MS = 5000;
-
 const EmbeddedSharedVideo: FC<{ ip?: string }> = ({ ip = '' }) => {
   const router = useRouter();
   const { t } = useTranslation();
@@ -69,34 +67,12 @@ const EmbeddedSharedVideo: FC<{ ip?: string }> = ({ ip = '' }) => {
     ).catch(() => undefined);
   }, [video, ip, router.query.ws]);
 
-  // The status endpoints need a signed-in user, so an embedded (usually anonymous)
-  // viewer must never call them. While playback is preparing, the page re-reads the
-  // public shared-video data instead, and stops as soon as the status is READY.
+  // The stream data is read once. The status endpoints need a signed-in user, so an
+  // embedded (usually anonymous) viewer must never poll them.
   const streamData = video?.dbData?.streamData;
   const isProcessing =
     Boolean(streamData) &&
     streamData.playbackStatus !== PlaybackStatusEnum.READY;
-
-  useEffect(() => {
-    if (!isProcessing) return;
-
-    const { id, ws } = router.query;
-    if (!id || typeof id !== 'string') return;
-
-    let cancelled = false;
-    const timer = setInterval(() => {
-      getVideoForPublicPage(id, Boolean(ws))
-        .then((data) => {
-          if (!cancelled && data?.video) setVideo(data.video);
-        })
-        .catch(() => undefined);
-    }, PROCESSING_REFRESH_MS);
-
-    return () => {
-      cancelled = true;
-      clearInterval(timer);
-    };
-  }, [isProcessing, router.query]);
 
   useEffect(() => {
     if (!video?.url) return;
