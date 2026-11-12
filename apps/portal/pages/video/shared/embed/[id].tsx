@@ -1,7 +1,6 @@
 import { FC, useEffect, useRef, useState } from 'react';
 import { GetServerSideProps, GetServerSidePropsContext } from 'next';
 import { useRouter } from 'next/router';
-import useAuthenticateUser from 'hooks/useAuthenticateUser';
 import { addUniqueView } from 'app/services/imageandvideo';
 import 'plyr/dist/plyr.css';
 import { getVideoForPublicPage } from 'app/services/videos';
@@ -22,10 +21,11 @@ export const getServerSideProps: GetServerSideProps = async (
   return { props: { ip } };
 };
 
+const PROCESSING_REFRESH_MS = 5000;
+
 const EmbeddedSharedVideo: FC<{ ip?: string }> = ({ ip = '' }) => {
   const router = useRouter();
   const { t } = useTranslation();
-  const user = useAuthenticateUser();
   const addedUniqueView = useRef(false);
   const [video, setVideo] = useState<any>(null);
   const [urlLink, setUrlLink] = useState('');
@@ -53,25 +53,50 @@ const EmbeddedSharedVideo: FC<{ ip?: string }> = ({ ip = '' }) => {
   }, [router.isReady, router.query]);
 
   // Embedded plays count as views, the same way the regular shared page counts them.
+  // The viewer is always recorded as anonymous: inside another site the Rec sign-in
+  // cookies cannot be read, and restoring sign-in here (useAuthenticateUser) would tell
+  // the browser extension to sign out.
   useEffect(() => {
     if (!video?.dbData || addedUniqueView.current) return;
 
     addedUniqueView.current = true;
     addUniqueView(
-      user,
+      null,
       ip,
       video.dbData,
       'video',
       Boolean(router.query.ws),
     ).catch(() => undefined);
-  }, [video, user, ip, router.query.ws]);
+  }, [video, ip, router.query.ws]);
 
-  // The stream data is read once. The status endpoints need a signed-in user, so an
-  // embedded (usually anonymous) viewer must never poll them.
+  // The status endpoints need a signed-in user, so an embedded (usually anonymous)
+  // viewer must never call them. While playback is preparing, the page re-reads the
+  // public shared-video data instead, and stops as soon as the status is READY.
   const streamData = video?.dbData?.streamData;
   const isProcessing =
     Boolean(streamData) &&
     streamData.playbackStatus !== PlaybackStatusEnum.READY;
+
+  useEffect(() => {
+    if (!isProcessing) return;
+
+    const { id, ws } = router.query;
+    if (!id || typeof id !== 'string') return;
+
+    let cancelled = false;
+    const timer = setInterval(() => {
+      getVideoForPublicPage(id, Boolean(ws))
+        .then((data) => {
+          if (!cancelled && data?.video) setVideo(data.video);
+        })
+        .catch(() => undefined);
+    }, PROCESSING_REFRESH_MS);
+
+    return () => {
+      cancelled = true;
+      clearInterval(timer);
+    };
+  }, [isProcessing, router.query]);
 
   useEffect(() => {
     if (!video?.url) return;
