@@ -80,15 +80,22 @@ export class WorkspaceMembersService {
       endIndex = +limit;
     }
 
-    const usersToParse = workspace.members.slice(startIndex, endIndex);
+    // A workspace without members is stored without the key, and Firebase can return a sparse
+    // array as an object, so normalise before slicing.
+    const members = parseCollectionToArray<IWorkspaceUser>(
+      workspace?.members,
+    ).filter((member) => member?.id);
+    const usersToParse = members.slice(startIndex, endIndex);
     const result = usersToParse.map((workspaceUser) => {
+      // A member whose user record no longer exists (e.g. a deleted account) must not break the
+      // list for everyone else: show them with the same placeholders used for empty profiles.
       const userFomDB = parsedUsers.find((y) => y.id === workspaceUser.id);
 
       return {
         id: workspaceUser.id,
-        displayName: userFomDB.displayName || 'Anonymous',
-        email: userFomDB.email || 'No Email',
-        photoURL: userFomDB.photoURL,
+        displayName: userFomDB?.displayName || 'Anonymous',
+        email: userFomDB?.email || 'No Email',
+        photoURL: userFomDB?.photoURL,
       };
     });
 
