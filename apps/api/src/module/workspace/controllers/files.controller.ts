@@ -27,6 +27,9 @@ import {
   CanAccessItem,
   ItemByFileName,
 } from '../decorators/CanAccessItem.decorator';
+import { NamedImageWrite } from '../decorators/NamedImageWrite.decorator';
+import { NamedImageWriteInterceptor } from '../interceptors/NamedImageWrite.interceptor';
+import { getPersonalImageFileName } from '../guards/utils';
 import { WorkspaceSharedService } from '../services/shared.service';
 import { AuthGuard, IRequestUser } from '../../auth/guards/auth.guard';
 import { CanAccessWorkspaceGuard } from '../guards/CanAccessWorkspace.guard';
@@ -68,8 +71,13 @@ export class WorkspaceFilesController {
     );
   }
 
+  // The copy is stored under the personal image's file name: refused when that name already
+  // belongs to a workspace image the caller may not write. A folder id in the query is read by
+  // the folder guard.
   @Post('image/add-from-personal')
   @CanAccessFolder(PermissionAccessEnum.WRITE)
+  @NamedImageWrite({ fileName: getPersonalImageFileName, nameOptional: true })
+  @UseInterceptors(NamedImageWriteInterceptor)
   async addImageToWorkspaceFromPersonal(
     @Param('workspaceId', ValidateId) workspaceId: string,
     @User() user: IRequestUser,
@@ -133,9 +141,16 @@ export class WorkspaceFilesController {
     );
   }
 
+  // Writes the file and its original under `fullFileName`: refused when that name already belongs
+  // to a workspace image the caller may not write. The body (multipart) is only parsed by the file
+  // interceptor, so the folder in the body is checked by the interceptor after it.
   @Post('image')
   @CanAccessFolder(PermissionAccessEnum.WRITE)
-  @UseInterceptors(FileInterceptor('file'))
+  @NamedImageWrite({
+    fileName: (req) => req.body?.fullFileName,
+    checkBodyFolder: true,
+  })
+  @UseInterceptors(FileInterceptor('file'), NamedImageWriteInterceptor)
   async uploadNewImageFromFile(
     @Param('workspaceId', ValidateId) workspaceId: string,
     @Body() updateImage: UploadImageDto,
@@ -234,9 +249,15 @@ export class WorkspaceFilesController {
     );
   }
 
+  // Replaces the file of the image stored under `refName` (or `location`). The image is resolved
+  // from that name only, never from an id in the query, and must exist in this workspace.
   @Put('image')
-  @CanAccessItem(PermissionAccessEnum.WRITE, 'image')
-  @UseInterceptors(FileInterceptor('blob'))
+  @NamedImageWrite({
+    fileName: (req) =>
+      req.body?.refName ? req.body.refName : req.body?.location,
+    mustExist: true,
+  })
+  @UseInterceptors(FileInterceptor('blob'), NamedImageWriteInterceptor)
   async updateWorkspaceImage(
     @Param('workspaceId', ValidateId) workspaceId: string,
     @Body() body: UpdateImageDto,
