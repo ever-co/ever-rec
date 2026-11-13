@@ -9,8 +9,8 @@ import {
 } from '@nestjs/common';
 import { IDataResponse } from 'src/interfaces/_types';
 import { WorkspaceShareService } from '../services/share.service';
-import { PermissionAccessEnum } from '../Interfaces/Workspace';
-import { CanAccessItem } from '../decorators/CanAccessItem.decorator';
+import { CanDeleteShareLinkGuard } from '../guards/CanDeleteShareLink.guard';
+import { CanShareItemGuard } from '../guards/CanShareItem.guard';
 import { User } from '../../auth/decorators/user.decorator';
 import { AuthGuard, IRequestUser } from '../../auth/guards/auth.guard';
 import { ValidateId } from '../pipes/validate-id.pipe';
@@ -26,7 +26,11 @@ export class WorkspaceShareController {
     // left blank intentionally
   }
 
-  @CanAccessItem(PermissionAccessEnum.WRITE, 'shared')
+  // An id that is in no item of the workspace must not get a share link record. The item is read
+  // from the path only: a `?itemId=` in the query must neither stand in for a missing item nor
+  // move the permission check to another item. The guard checks existence, WRITE on the item and
+  // WRITE on its folder, so the query-reading item decorators are not used here.
+  @UseGuards(CanShareItemGuard)
   @Get(':workspaceId/:itemId')
   async share(
     @Param('workspaceId', ValidateId) workspaceId: string,
@@ -36,13 +40,19 @@ export class WorkspaceShareController {
     return await this.shareService.getShareLink(workspaceId, itemId, user.id);
   }
 
-  @CanAccessItem(PermissionAccessEnum.WRITE, 'shared')
+  // The clients send the share link id in the `:itemId` slot, so this route checks the link (it must
+  // belong to the workspace in the path) and then its item, not an item with that id.
+  @UseGuards(CanDeleteShareLinkGuard)
   @Delete('deleteLink/:workspaceId/:itemId')
   async delete(
     @Param('workspaceId', ValidateId) workspaceId: string,
-    @Param('itemId', ValidateId) itemId: string,
+    @Param('itemId', ValidateId) linkId: string,
     @User() user: IRequestUser,
   ): Promise<IDataResponse<string>> {
-    return await this.shareService.deleteShareLink(user.id, itemId);
+    return await this.shareService.deleteShareLink(
+      user.id,
+      linkId,
+      workspaceId,
+    );
   }
 }

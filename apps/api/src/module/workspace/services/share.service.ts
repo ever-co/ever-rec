@@ -72,6 +72,7 @@ export class WorkspaceShareService {
   async deleteShareLink(
     uid: string,
     linkId: string,
+    workspaceId: string,
   ): Promise<IDataResponse<string>> {
     try {
       const db = admin.database();
@@ -79,6 +80,11 @@ export class WorkspaceShareService {
       const shareSnapshot = await sharedRef.get();
 
       if (!shareSnapshot.exists()) {
+        throw new Error(`There is no data for linkId: ${linkId}`);
+      }
+
+      // Only a link of this workspace may be removed through it.
+      if (shareSnapshot.val()?.workspaceId !== workspaceId) {
         throw new Error(`There is no data for linkId: ${linkId}`);
       }
 
