@@ -49,6 +49,7 @@ import { DeleteImageDto } from '../dto/files/delete-image.dto';
 import { DeleteVideoDto } from '../dto/files/delete-video.dto';
 import { UpdateFileMemberPermissionsDto } from '../dto/files/update-member-permissions.dto';
 import { ValidateId } from '../pipes/validate-id.pipe';
+import { WorkspaceVideoWriteInterceptor } from '../interceptors/video-write.interceptor';
 
 @Controller('workspace/:workspaceId/files')
 @UseGuards(AuthGuard, CanAccessWorkspaceGuard)
@@ -134,6 +135,8 @@ export class WorkspaceFilesController {
         },
       }),
     }),
+    // After the file interceptor: it needs the parsed multipart body.
+    WorkspaceVideoWriteInterceptor,
   )
   async uploadNewVideoFromFile(
     @Param('workspaceId', ValidateId) workspaceId: string,
@@ -212,9 +215,11 @@ export class WorkspaceFilesController {
   @CanAccessItem(PermissionAccessEnum.WRITE, 'video')
   async deleteVideo(
     @Param('workspaceId', ValidateId) workspaceId: string,
-    @Query() { videoId, refName }: DeleteVideoDto,
+    @Query() { videoId }: DeleteVideoDto,
   ) {
-    return await this.filesService.deleteVideo(workspaceId, videoId, refName);
+    // `refName` in the query is accepted for older clients but not used: the files to delete are
+    // the ones recorded for `videoId`, the video the guard checked.
+    return await this.filesService.deleteVideo(workspaceId, videoId);
   }
 
   @Put('image/:imageId/single-data')
