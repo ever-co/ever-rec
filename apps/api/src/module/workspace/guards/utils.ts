@@ -99,6 +99,78 @@ export function getItemData(
   return items.find((x) => x.id === itemId);
 }
 
+/**
+ * True when `user` has `requiredAccessLevel` on the folder `folderId`. No folder (`false`, `'false'`
+ * or missing) is the workspace root: allowed. A folder that does not exist is refused, and so is
+ * any error while evaluating.
+ */
+export function canAccessFolderById(
+  workspace: IWorkspace,
+  user: IUser,
+  folderId: unknown,
+  requiredAccessLevel: PermissionAccessEnum,
+): boolean {
+  try {
+    if (!folderId || folderId === 'false') {
+      return true;
+    }
+    if (user.id === workspace.admin) {
+      return true;
+    }
+    const folder: IWorkspaceFolder = parseCollectionToArray(
+      workspace.folders,
+    ).find((x: IWorkspaceFolder) => x?.id === folderId);
+    if (!folder) {
+      return false;
+    }
+    return folder.access
+      ? !!evaluateAccess(folder, workspace, user, requiredAccessLevel)
+      : true;
+  } catch (e) {
+    console.log(e);
+    return false;
+  }
+}
+
+/**
+ * True when `user` may write a workspace video file named `fileName`: no video of the workspace
+ * uses that name, or the user has WRITE on every video that does (on the video itself and on the
+ * folder it is in). The workspace admin may always. Writing a file under a name owned by another
+ * video replaces that video's file, so the check is on the name, not on any id sent with the request.
+ */
+export function canWriteVideoByName(
+  workspace: IWorkspace,
+  user: IUser,
+  fileName: string,
+): boolean {
+  try {
+    if (user.id === workspace.admin) {
+      return true;
+    }
+    return parseCollectionToArray(workspace.videos)
+      .filter((video: IDbWorkspaceVideoData) => video?.refName === fileName)
+      .every(
+        (video: IDbWorkspaceVideoData) =>
+          (!video.access ||
+            !!evaluateAccess(
+              video,
+              workspace,
+              user,
+              PermissionAccessEnum.WRITE,
+            )) &&
+          canAccessFolderById(
+            workspace,
+            user,
+            video.parentId,
+            PermissionAccessEnum.WRITE,
+          ),
+      );
+  } catch (e) {
+    console.log(e);
+    return false;
+  }
+}
+
 export const evaluateAccess = (
   item: IDbWorkspaceImageData | IDbWorkspaceVideoData | IWorkspaceFolder,
   workspace: IWorkspace,

@@ -1,5 +1,12 @@
 import { join } from 'path';
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  HttpException,
+  Injectable,
+} from '@nestjs/common';
+import { canWriteVideoByName } from '../guards/utils';
+import { is_video_filename } from '../validators/video-filename.validator';
 import { StreamServiceService } from 'src/module/video-services/streamService.service';
 import {
   IDataResponse,
@@ -209,6 +216,23 @@ export class WorkspaceFilesService {
         throw new Error('There is no data for item with path: ' + refPath);
       }
 
+      if (itemType === 'video') {
+        // The copy below stores the file under the personal record's name, replacing any video of
+        // the workspace that has the same name. Allow it only for a plain file name that no video
+        // the user may not write already uses.
+        const refName: unknown = itemVal.refName;
+        if (typeof refName !== 'string' || !is_video_filename(refName)) {
+          throw new BadRequestException('The video has no valid file name');
+        }
+        const { workspaceVal } =
+          await this.utilitiesService.getWorkspaceById(workspaceId);
+        if (!canWriteVideoByName(workspaceVal, { id: uid } as IUser, refName)) {
+          throw new ForbiddenException(
+            'You are not allowed to add this video to the workspace',
+          );
+        }
+      }
+
       // Copy original file
       const [file] = await bucket
         .file(`users/${uid}/${itemLocation}/${itemVal.refName}`)
@@ -224,19 +248,22 @@ export class WorkspaceFilesService {
 
       let url = downloadUrl;
 
-      await bucket
-        .file(`users/${uid}/screenshots/originals/${itemVal.refName}`)
-        .copy(
+      // Only an image has an original. A video's name must not reach the image originals: that
+      // would overwrite the original of an image that has the same file name.
+      let originalImageURL: string | undefined;
+      if (itemType === 'image') {
+        await bucket
+          .file(`users/${uid}/screenshots/originals/${itemVal.refName}`)
+          .copy(
+            `workspaces/${workspaceId}/screenshots/originals/${itemVal.refName}`,
+          );
+
+        const originalFile = await bucket.file(
           `workspaces/${workspaceId}/screenshots/originals/${itemVal.refName}`,
         );
 
-      const originalFile = await bucket.file(
-        `workspaces/${workspaceId}/screenshots/originals/${itemVal.refName}`,
-      );
-
-      const originalImageURL = (
-        await originalFile.getSignedUrl(this.config)
-      )[0];
+        originalImageURL = (await originalFile.getSignedUrl(this.config))[0];
+      }
 
       // Copy asset in streaming service and create new streamData
       const streamData = itemVal?.streamData;
@@ -323,6 +350,9 @@ export class WorkspaceFilesService {
 
       return sendResponse<IWorkspaceImage | IWorkspaceVideo>(item);
     } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
       console.log(error);
       return sendError('There was a problem moving an item to a workspace.');
     }
@@ -729,27 +759,39 @@ export class WorkspaceFilesService {
   }
 
   // TODO: Delete poster(thumbnail) if video is sent by email and poster is created.
+  /**
+   * Deletes the video `videoId` and the stored file of that video. The storage name comes from the
+   * video's own record, never from the request: the route's permission check is made on `videoId`,
+   * so a client-supplied file name could otherwise delete another video's file.
+   */
   async deleteVideo(
     workspaceId: string,
     videoId: string,
-    refName: string,
   ): Promise<IDataResponse<string | null>> {
     try {
       const db = admin.database();
       const bucket = admin.storage().bucket();
 
-      this.workspaceShareService.deleteLinkById(workspaceId, videoId);
-
       const videoRef = db.ref(`workspaces/${workspaceId}/videos/${videoId}`);
       const videoData = (await videoRef.get()).val();
+      if (!videoData) {
+        // No such video in this workspace: there is nothing of it to delete.
+        return sendError('Error while trying to delete a video', 'Not found');
+      }
 
-      const fileRef = bucket.file(
-        `workspaces/${workspaceId}/videos/${refName}`,
-      );
-      const everStatsBytes = await storedBytes(this.eventEmitter, fileRef);
-      fileRef.delete().catch(() => {
-        console.log('Error deleting video from reference: ' + refName);
-      });
+      this.workspaceShareService.deleteLinkById(workspaceId, videoId);
+
+      const refName: unknown = videoData.refName;
+      let everStatsBytes = 0;
+      if (typeof refName === 'string' && refName !== '') {
+        const fileRef = bucket.file(
+          `workspaces/${workspaceId}/videos/${refName}`,
+        );
+        everStatsBytes = await storedBytes(this.eventEmitter, fileRef);
+        fileRef.delete().catch(() => {
+          console.log('Error deleting video from reference: ' + refName);
+        });
+      }
 
       bucket
         .deleteFiles({
