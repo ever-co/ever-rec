@@ -193,6 +193,9 @@ export class WorkspaceFilesService {
     itemId: string,
     itemType: ItemType,
     folderId: string | false,
+    // Images only: the file name the permission check was made for (null: none was found). The
+    // copy is refused if the personal image has another name by now. Undefined: no such check.
+    checkedRefName?: string | null,
   ): Promise<IDataResponse<IWorkspaceImage | IWorkspaceVideo>> {
     // TODO validate folderId exists
     try {
@@ -207,6 +210,13 @@ export class WorkspaceFilesService {
 
       if (!itemVal) {
         throw new Error('There is no data for item with path: ' + refPath);
+      }
+
+      if (
+        checkedRefName !== undefined &&
+        (itemVal.refName ?? null) !== checkedRefName
+      ) {
+        throw new Error('The item changed name while it was being moved.');
       }
 
       // Copy original file
@@ -652,10 +662,14 @@ export class WorkspaceFilesService {
     }
   }
 
+  /**
+   * Deletes the image `imageId` and the stored files of that image. The storage names come from
+   * the image's own record, never from the request: the route's permission check is made on
+   * `imageId`, so a client-supplied file name could otherwise delete another image's file.
+   */
   async deleteImage(
     workspaceId: string,
     imageId: string,
-    refName: string,
     folderId: string | false,
   ): Promise<IDataResponse<string | null>> {
     try {
@@ -667,6 +681,12 @@ export class WorkspaceFilesService {
       const imageReference = db.ref(
         `workspaces/${workspaceId}/screenshots/${imageId}`,
       );
+      const refName: unknown = (await imageReference.get()).val()?.refName;
+      if (typeof refName !== 'string' || refName === '') {
+        // No such image in this workspace: there is nothing of it to delete.
+        return sendError('Error while trying to delete an image', 'Not found');
+      }
+
       const imageStorageRef = bucket.file(
         `workspaces/${workspaceId}/screenshots/${refName}`,
       );

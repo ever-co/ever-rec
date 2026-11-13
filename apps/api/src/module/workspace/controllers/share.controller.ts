@@ -14,9 +14,12 @@ import { CanAccessItem } from '../decorators/CanAccessItem.decorator';
 import { User } from '../../auth/decorators/user.decorator';
 import { AuthGuard, IRequestUser } from '../../auth/guards/auth.guard';
 import { ValidateId } from '../pipes/validate-id.pipe';
+import { CanAccessWorkspaceGuard } from '../guards/CanAccessWorkspace.guard';
 
+// Membership is checked first: grants left on an item for someone who has since been removed from
+// the workspace must not let them create or delete share links.
 @Controller('workspace/share')
-@UseGuards(AuthGuard)
+@UseGuards(AuthGuard, CanAccessWorkspaceGuard)
 @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
 export class WorkspaceShareController {
   constructor(private readonly shareService: WorkspaceShareService) {
