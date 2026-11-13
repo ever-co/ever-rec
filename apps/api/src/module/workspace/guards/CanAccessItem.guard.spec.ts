@@ -50,6 +50,7 @@ describe('save-original item permission', () => {
   const updateItemData = jest.fn();
   const getImage = jest.fn();
   const getVideo = jest.fn();
+  const deleteImage = jest.fn();
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -72,6 +73,7 @@ describe('save-original item permission', () => {
             updateItemData,
             getImage,
             getVideo,
+            deleteImage,
           },
         },
         { provide: WorkspaceSharedService, useValue: {} },
@@ -128,6 +130,7 @@ describe('save-original item permission', () => {
     updateItemData.mockReset().mockResolvedValue({ status: true });
     getImage.mockReset().mockResolvedValue({ status: true });
     getVideo.mockReset().mockResolvedValue({ status: true });
+    deleteImage.mockReset().mockResolvedValue({ status: true });
   });
 
   afterEach(() => {
@@ -246,7 +249,10 @@ describe('save-original item permission', () => {
         ...(mockDb.data['workspaces/ws1'] as object),
         members: [{ id: 'uid-admin' }, { id: 'uid-none' }],
       };
-      await get('uid-none', '/workspace/ws1/files/image/img1?imageId=img2').expect(403);
+      await get(
+        'uid-none',
+        '/workspace/ws1/files/image/img1?imageId=img2',
+      ).expect(403);
       expect(getImage).not.toHaveBeenCalled();
     });
 
@@ -255,31 +261,61 @@ describe('save-original item permission', () => {
         ...(mockDb.data['workspaces/ws1'] as object),
         members: [{ id: 'uid-admin' }, { id: 'uid-none' }],
       };
-      await get('uid-none', '/workspace/ws1/files/video/vid1?videoId=vid2').expect(403);
+      await get(
+        'uid-none',
+        '/workspace/ws1/files/video/vid1?videoId=vid2',
+      ).expect(403);
       expect(getVideo).not.toHaveBeenCalled();
     });
 
     it('refuses writing a restricted image or video with an open id in the query', async () => {
-      await put('uid-reader', '/workspace/ws1/files/image/img1/single-data?imageId=img2').expect(403);
-      await put('uid-reader', '/workspace/ws1/files/video/vid1/single-data?videoId=vid2').expect(403);
+      await put(
+        'uid-reader',
+        '/workspace/ws1/files/image/img1/single-data?imageId=img2',
+      ).expect(403);
+      await put(
+        'uid-reader',
+        '/workspace/ws1/files/video/vid1/single-data?videoId=vid2',
+      ).expect(403);
       expect(updateItemData).not.toHaveBeenCalled();
     });
 
     it('still checks the path item when the query id names an item the caller may write', async () => {
       // img2 is open to everyone; the reader may only read img1.
-      await put('uid-reader', '/workspace/ws1/files/image/img1/single-data?imageId=img2').expect(403);
-      await put('uid-reader', '/workspace/ws1/files/image/img2/single-data?imageId=img1').expect(200);
+      await put(
+        'uid-reader',
+        '/workspace/ws1/files/image/img1/single-data?imageId=img2',
+      ).expect(403);
+      await put(
+        'uid-reader',
+        '/workspace/ws1/files/image/img2/single-data?imageId=img1',
+      ).expect(200);
       expect(updateItemData).toHaveBeenCalledTimes(1);
       // (userId, workspaceId, type, itemId, ...): the item acted on is the path id.
       expect(updateItemData.mock.calls[0][3]).toBe('img2');
     });
 
     it('lets a writer and the admin through with the path id, whatever the query holds', async () => {
-      await get('uid-writer', '/workspace/ws1/files/image/img1?imageId=img2').expect(200);
-      await get('uid-admin', '/workspace/ws1/files/video/vid1?videoId=vid2').expect(200);
-      await put('uid-writer', '/workspace/ws1/files/image/img1/single-data').expect(200);
-      await put('uid-writer', '/workspace/ws1/files/video/vid1/single-data?videoId=vid2').expect(200);
-      await put('uid-admin', '/workspace/ws1/files/video/vid1/single-data?videoId=vid2').expect(200);
+      await get(
+        'uid-writer',
+        '/workspace/ws1/files/image/img1?imageId=img2',
+      ).expect(200);
+      await get(
+        'uid-admin',
+        '/workspace/ws1/files/video/vid1?videoId=vid2',
+      ).expect(200);
+      await put(
+        'uid-writer',
+        '/workspace/ws1/files/image/img1/single-data',
+      ).expect(200);
+      await put(
+        'uid-writer',
+        '/workspace/ws1/files/video/vid1/single-data?videoId=vid2',
+      ).expect(200);
+      await put(
+        'uid-admin',
+        '/workspace/ws1/files/video/vid1/single-data?videoId=vid2',
+      ).expect(200);
       expect(getImage).toHaveBeenCalledWith('ws1', 'img1');
       expect(getVideo).toHaveBeenCalledWith('ws1', 'vid1');
     });
@@ -289,8 +325,12 @@ describe('save-original item permission', () => {
         request(app.getHttpServer())
           .delete(`/workspace/ws1/files/image/single?${query}`)
           .set(as(uid));
-      // No path id: the query id is checked, so the reader is refused on the restricted image.
+      // No path id: the query id is checked, so the reader is refused on the restricted image...
       await remove('uid-reader', 'imageId=img1').expect(403);
+      expect(deleteImage).not.toHaveBeenCalled();
+      // ...and the writer gets through, with that same id reaching the handler.
+      await remove('uid-writer', 'imageId=img1').expect(200);
+      expect(deleteImage).toHaveBeenCalledWith('ws1', 'img1', false);
     });
   });
 });
