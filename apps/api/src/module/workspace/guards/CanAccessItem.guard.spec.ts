@@ -270,7 +270,8 @@ describe('save-original item permission', () => {
       await put('uid-reader', '/workspace/ws1/files/image/img1/single-data?imageId=img2').expect(403);
       await put('uid-reader', '/workspace/ws1/files/image/img2/single-data?imageId=img1').expect(200);
       expect(updateItemData).toHaveBeenCalledTimes(1);
-      expect(updateItemData.mock.calls[0][4]).toBe('img2');
+      // (userId, workspaceId, type, itemId, ...): the item acted on is the path id.
+      expect(updateItemData.mock.calls[0][3]).toBe('img2');
     });
 
     it('lets a writer and the admin through with the path id, whatever the query holds', async () => {
