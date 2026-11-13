@@ -109,6 +109,12 @@ export const evaluateAccess = (
   let hasAccessByMember: boolean;
   const workspaceUser = workspace.members.find((x) => x.id === user.id);
 
+  // Someone who is no longer in the workspace (and is not its admin) gets nothing from grants
+  // left behind on items or folders.
+  if (!workspaceUser && user.id !== workspace.admin) {
+    return false;
+  }
+
   if (item.access.teams) {
     hasAccessByTeam = parseCollectionToArray(workspaceUser?.teams).some(
       (workspaceTeam: IWorkspaceTeam) =>

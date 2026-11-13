@@ -88,6 +88,25 @@ describe('evaluateAccess', () => {
     });
   });
 
+  describe('someone who is no longer a member of the workspace', () => {
+    it.each([
+      ['a leftover member grant', { members: [{ uid: 'gone', access: WRITE }] }],
+      ['a leftover team grant', { teams: [{ teamId: 't1', access: WRITE }] }],
+      [
+        'leftover team and member grants',
+        {
+          teams: [{ teamId: 't1', access: WRITE }],
+          members: [{ uid: 'gone', access: WRITE }],
+        },
+      ],
+      ['no grants', {}],
+    ])('gets nothing from %s', (_label: any, access: any) => {
+      expect(
+        !!evaluateAccess(item(access), workspace, asUser('gone'), READ),
+      ).toBe(false);
+    });
+  });
+
   describe('permissions that list teams and members', () => {
     const both = item({
       teams: [{ teamId: 't1', access: READ }],
