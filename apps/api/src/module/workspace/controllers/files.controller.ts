@@ -22,6 +22,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { TMP_PATH } from '../../../enums/tmpPathsEnums';
 import { WorkspaceFilesService } from '../services/files.service';
 import { CanAccessFolder } from '../decorators/CanAccessFolder.decorator';
+import { CanChangePermissions } from '../decorators/CanChangePermissions.decorator';
 import { PermissionAccessEnum } from '../Interfaces/Workspace';
 import {
   CanAccessItem,
@@ -258,7 +259,7 @@ export class WorkspaceFilesController {
   }
 
   @Post(':itemId/permissions')
-  @CanAccessFolder(PermissionAccessEnum.ADMIN)
+  @CanChangePermissions('item')
   async updateFilePermissions(
     @Param('workspaceId', ValidateId) workspaceId: string,
     @Param('itemId', ValidateId) itemId: string,
