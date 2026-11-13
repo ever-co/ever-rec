@@ -5,7 +5,10 @@ import { ItemType } from 'app/interfaces/ItemType';
 import AppSvg from 'components/elements/AppSvg';
 import AppButton from 'components/controls/AppButton';
 import IEditorImage from 'app/interfaces/IEditorImage';
-import { errorMessage, successMessage } from 'app/services/helpers/toastMessages';
+import {
+  errorMessage,
+  successMessage,
+} from 'app/services/helpers/toastMessages';
 import { useTranslation } from 'react-i18next';
 
 interface IShareItemModalProps {
