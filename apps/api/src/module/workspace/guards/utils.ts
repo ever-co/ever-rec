@@ -18,7 +18,10 @@ import { IAccessTeam, IWorkspaceTeam } from '../Interfaces/Teams';
 import { IWorkspaceFolder } from '../Interfaces/Folders';
 import { IUser } from '../../../interfaces/IUser';
 import { CanAccessWorkspaceItemType } from 'src/interfaces/_types';
-import { ITEM_TYPE_METADATA } from '../decorators/CanAccessItem.decorator';
+import {
+  ITEM_BY_FILE_NAME_METADATA,
+  ITEM_TYPE_METADATA,
+} from '../decorators/CanAccessItem.decorator';
 
 // HIGHLY NON-reusable. Depends on Request to have user (attached before, with AuthGuard or some guard
 // Also requires that the param name is :workspaceId.
@@ -36,6 +39,14 @@ export const getUserAndWorkspace = async (
 
   return { user, workspace: workspaceVal, req };
 };
+
+// True for routes marked with `@ItemByFileName()`: the item is named by `fullFileName` in the body.
+export function isItemByFileName(context: ExecutionContext, that: any) {
+  return (
+    that.reflector.get(ITEM_BY_FILE_NAME_METADATA, context.getHandler()) ===
+    true
+  );
+}
 
 export function getItemData(
   context: ExecutionContext,
@@ -74,13 +85,15 @@ export function getItemData(
   const items: (IDbWorkspaceImageData | IDbWorkspaceVideoData)[] =
     parseCollectionToArray(collection);
 
-  if (itemId === undefined && itemType === 'image') {
-    // Some image routes (save-original) name the image by its stored file name in the body,
-    // not by id. Without this the item stays unresolved and its own permissions are skipped.
+  if (isItemByFileName(context, that)) {
+    // The route acts on the image named by its stored file name in the body. Any id in the
+    // query or params is ignored here: otherwise a caller could point the check at another,
+    // unrestricted image while the handler still acts on the file name.
     const fullFileName = req.body?.fullFileName;
-    if (typeof fullFileName === 'string' && fullFileName !== '') {
-      return items.find((x) => x?.refName === fullFileName);
+    if (typeof fullFileName !== 'string' || fullFileName === '') {
+      return undefined;
     }
+    return items.find((x) => x?.refName === fullFileName);
   }
 
   return items.find((x) => x.id === itemId);

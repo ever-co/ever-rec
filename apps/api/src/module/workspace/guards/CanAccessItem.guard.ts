@@ -1,7 +1,12 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { PermissionAccessEnum } from '../Interfaces/Workspace';
-import { evaluateAccess, getItemData, getUserAndWorkspace } from './utils';
+import {
+  evaluateAccess,
+  getItemData,
+  getUserAndWorkspace,
+  isItemByFileName,
+} from './utils';
 import { REQUIRED_ITEM_ACCESS_METADATA } from '../decorators/CanAccessItem.decorator';
 
 // Chain with CanAccessWorkspace.
@@ -20,6 +25,11 @@ export class CanAccessItemGuard implements CanActivate {
 
       if (user.id === workspace.admin) {
         return true;
+      }
+
+      // A route that names its item by file name must find that item; no item, no access.
+      if (!item && isItemByFileName(context, this)) {
+        return false;
       }
 
       if (item?.access) {

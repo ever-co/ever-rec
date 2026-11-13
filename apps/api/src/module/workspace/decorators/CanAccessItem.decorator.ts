@@ -7,6 +7,13 @@ import { CanAccessFolder } from './CanAccessFolder.decorator';
 export const REQUIRED_ITEM_ACCESS_METADATA = 'requiredItemAccess';
 export const ITEM_TYPE_METADATA = 'itemType';
 
+export const ITEM_BY_FILE_NAME_METADATA = 'itemByFileName';
+
+// Marks a route whose item is named by `fullFileName` in the body, not by an id. The item guard
+// then resolves the item only from that name, and refuses a request whose item cannot be found.
+export const ItemByFileName = () =>
+  SetMetadata(ITEM_BY_FILE_NAME_METADATA, true);
+
 export const ItemAccess = (requiredAccess: PermissionAccessEnum) =>
   SetMetadata(REQUIRED_ITEM_ACCESS_METADATA, requiredAccess);
 

@@ -152,6 +152,29 @@ describe('save-original item permission', () => {
     expect(saveOriginalWSImage).toHaveBeenCalledWith('ws1', 'open.png');
   });
 
+  it('ignores an image id in the query: it cannot redirect the check to another image', async () => {
+    await request(app.getHttpServer())
+      .post(`${SAVE_ORIGINAL_URL}?imageId=img2`)
+      .set(as('uid-reader'))
+      .send({ fullFileName: 'restricted.png' })
+      .expect(403);
+    expect(saveOriginalWSImage).not.toHaveBeenCalled();
+  });
+
+  it('refuses a file name that matches no image of the workspace', async () => {
+    await save('uid-reader', 'missing.png').expect(403);
+    expect(saveOriginalWSImage).not.toHaveBeenCalled();
+  });
+
+  it('refuses a request without a file name', async () => {
+    await request(app.getHttpServer())
+      .post(SAVE_ORIGINAL_URL)
+      .set(as('uid-reader'))
+      .send({})
+      .expect(403);
+    expect(saveOriginalWSImage).not.toHaveBeenCalled();
+  });
+
   it('keeps the id-based image routes checking the same permission', async () => {
     await request(app.getHttpServer())
       .put('/workspace/ws1/files/image/img1/single-data')
@@ -166,5 +189,14 @@ describe('save-original item permission', () => {
       .send({ title: 'new title' })
       .expect(200);
     expect(updateItemData).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not let a body file name redirect the check of an id-based route', async () => {
+    await request(app.getHttpServer())
+      .put('/workspace/ws1/files/image/img1/single-data')
+      .set(as('uid-reader'))
+      .send({ title: 'new title', fullFileName: 'open.png' })
+      .expect(403);
+    expect(updateItemData).not.toHaveBeenCalled();
   });
 });
