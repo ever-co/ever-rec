@@ -67,9 +67,9 @@ export class WorkspaceVideoWriteInterceptor implements NestInterceptor {
         const { user, workspace } = await getUserAndWorkspace(context);
         allowed =
           canAccessFolderById(
+            folderId,
             workspace,
             user,
-            folderId,
             PermissionAccessEnum.WRITE,
           ) && canWriteVideoByName(workspace, user, fileName);
       } catch (e) {

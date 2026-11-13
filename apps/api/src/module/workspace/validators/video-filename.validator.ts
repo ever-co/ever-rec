@@ -25,5 +25,5 @@ export function is_plain_file_name(value: unknown): value is string {
   );
 }
 
-export const IsVideoFilename =(validationOptions?: ValidationOptions) =>
+export const IsVideoFilename = (validationOptions?: ValidationOptions) =>
   Matches(VIDEO_FILENAME_REGEX, validationOptions);

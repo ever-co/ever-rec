@@ -227,6 +227,24 @@ export class WorkspaceFilesService {
         throw new Error('The item changed name while it was being moved.');
       }
 
+      if (itemType === 'video') {
+        // The copy below stores the file under the personal record's name, replacing any video of
+        // the workspace that has the same name. Allow it only for a plain file name (a personal
+        // video can have any extension, so only path tricks are refused) that no video the user
+        // may not write already uses.
+        const refName: unknown = itemVal.refName;
+        if (!is_plain_file_name(refName)) {
+          throw new BadRequestException('The video has no valid file name');
+        }
+        const { workspaceVal } =
+          await this.utilitiesService.getWorkspaceById(workspaceId);
+        if (!canWriteVideoByName(workspaceVal, { id: uid } as IUser, refName)) {
+          throw new ForbiddenException(
+            'You are not allowed to add this video to the workspace',
+          );
+        }
+      }
+
       // Copy original file
       const [file] = await bucket
         .file(`users/${uid}/${itemLocation}/${itemVal.refName}`)

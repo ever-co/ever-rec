@@ -1,7 +1,6 @@
 import { ExecutionContext } from '@nestjs/common';
 import * as admin from 'firebase-admin';
 import {
-  IAccess,
   IAccessMember,
   IWorkspace,
   IWorkspaceUser,
@@ -113,6 +112,16 @@ export function findImagesByFileName(
   ).filter((x) => x?.refName === fileName);
 }
 
+// Every video of the workspace stored under this file name.
+export function findVideosByFileName(
+  workspace: IWorkspace,
+  fileName: string,
+): IDbWorkspaceVideoData[] {
+  return parseCollectionToArray<IDbWorkspaceVideoData>(workspace.videos).filter(
+    (x) => x?.refName === fileName,
+  );
+}
+
 // The stored file name of the caller's own personal image named by `itemId` in the query, which
 // `add-from-personal` copies into the workspace under that same name. Undefined when the query
 // has no plain id or the caller has no such image (nothing is copied then).
@@ -169,6 +178,31 @@ export function canAccessFolderById(
     return !!evaluateAccess(folder, workspace, user, requiredAccessLevel);
   }
   return true;
+}
+
+/**
+ * True when `user` may write a workspace video file named `fileName`: no video of the workspace
+ * uses that name, or the user has WRITE on every video that does and on the folder it is in (the
+ * rule `NamedImageWriteInterceptor` applies to images). Writing a file under a name owned by
+ * another video replaces that video's file, so the check is on the name, not on any id sent with
+ * the request. Any error is a refusal.
+ */
+export function canWriteVideoByName(
+  workspace: IWorkspace,
+  user: IUser,
+  fileName: string,
+): boolean {
+  try {
+    const write = PermissionAccessEnum.WRITE;
+    return findVideosByFileName(workspace, fileName).every(
+      (video) =>
+        canAccessItemData(video, workspace, user, write) &&
+        canAccessFolderById(video.parentId, workspace, user, write),
+    );
+  } catch (e) {
+    console.log(e);
+    return false;
+  }
 }
 
 export const evaluateAccess = (
