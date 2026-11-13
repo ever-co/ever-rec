@@ -22,7 +22,7 @@ import {
 } from '../Interfaces/Files';
 import { equal } from 'assert';
 import { WorkspaceSharedService } from './shared.service';
-import { evaluateAccess } from '../guards/utils';
+import { canAccessFolderById, evaluateAccess } from '../guards/utils';
 import { IUser } from 'src/interfaces/IUser';
 
 @Injectable()
@@ -89,7 +89,7 @@ export class WorkspaceFoldersService {
     uid: string,
     workspaceId: string,
     folderId: string,
-    changes: Pick<Partial<IWorkspaceFolder>, 'name' | 'color' | 'items'>,
+    changes: Pick<Partial<IWorkspaceFolder>, 'name' | 'color'>,
   ): Promise<
     IDataResponse<{ folders: IWorkspaceFolder[]; favFolders } | null>
   > {
@@ -107,9 +107,9 @@ export class WorkspaceFoldersService {
       }
 
       // Only the approved fields change; the stored folder keeps everything else, `access`
-      // included (permissions are changed on their own route).
+      // included (permissions are changed on their own route) and the item count the server keeps.
       const updatedFolder: IWorkspaceFolder = { ...folders[folderIndex] };
-      for (const key of ['name', 'color', 'items'] as const) {
+      for (const key of ['name', 'color'] as const) {
         if (changes?.[key] !== undefined && changes[key] !== null) {
           (updatedFolder as any)[key] = changes[key];
         }
@@ -277,6 +277,21 @@ export class WorkspaceFoldersService {
           );
         }
 
+        // Moving an item out of a folder changes that folder: the user needs WRITE on the folder
+        // the item is in now (its stored `parentId`, not `fromFolderId` from the body), as on the
+        // single-data route. The destination is checked by the folder guard on the route.
+        if (
+          hasAccess &&
+          !canAccessFolderById(
+            item?.parentId,
+            workspaceVal,
+            user,
+            PermissionAccessEnum.WRITE,
+          )
+        ) {
+          hasAccess = false;
+        }
+
         if (hasAccess) {
           collection[itemId] = {
             ...item,
@@ -310,9 +325,8 @@ export class WorkspaceFoldersService {
 
       await workspaceRef.update(updatedWorkspace);
 
-      const parsedWorkspace = await this.utilitiesService.parseWorkspaceItems(
-        updatedWorkspace,
-      );
+      const parsedWorkspace =
+        await this.utilitiesService.parseWorkspaceItems(updatedWorkspace);
 
       return sendResponse(parsedWorkspace);
     } catch (e) {

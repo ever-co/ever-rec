@@ -5,7 +5,8 @@
  *   `?folderId=false` skipped the check, so a member with only READ on a folder could rename it,
  *   delete it or move items into it. Only the folder in the path decides now.
  * - The update route replaced the whole stored folder with the body, `access` included, so any
- *   member could rewrite who may use a folder. It now writes only name, colour and item count.
+ *   member could rewrite who may use a folder. It now writes only name and colour.
+ * - Moving items out of a folder needs WRITE on the folder they are in now, as on single-data.
  *
  * The routes are the real controller and the real update handler behind the real guards; only the
  * database, the token check and the delete and move handlers are replaced.
@@ -186,37 +187,46 @@ describe('workspace folder routes: update, delete and move-items', () => {
   });
 
   describe('a member with a grant on another folder only', () => {
-    it.each(queries)('is refused on all three routes (query %p)', async (query) => {
-      await rename('uid-ungranted', query).expect(403);
-      await remove('uid-ungranted', query).expect(403);
-      await move('uid-ungranted', query).expect(403);
-      expect(storedFolder().name).toBe('Original');
-    });
+    it.each(queries)(
+      'is refused on all three routes (query %p)',
+      async (query) => {
+        await rename('uid-ungranted', query).expect(403);
+        await remove('uid-ungranted', query).expect(403);
+        await move('uid-ungranted', query).expect(403);
+        expect(storedFolder().name).toBe('Original');
+      },
+    );
   });
 
   describe('someone outside the workspace', () => {
-    it.each(queries)('is refused on all three routes (query %p)', async (query) => {
-      await rename('uid-stranger', query).expect(403);
-      await remove('uid-stranger', query).expect(403);
-      await move('uid-stranger', query).expect(403);
-      expect(storedFolder().name).toBe('Original');
-      expect(deleteFolder).not.toHaveBeenCalled();
-      expect(moveItemsToFolder).not.toHaveBeenCalled();
-    });
+    it.each(queries)(
+      'is refused on all three routes (query %p)',
+      async (query) => {
+        await rename('uid-stranger', query).expect(403);
+        await remove('uid-stranger', query).expect(403);
+        await move('uid-stranger', query).expect(403);
+        expect(storedFolder().name).toBe('Original');
+        expect(deleteFolder).not.toHaveBeenCalled();
+        expect(moveItemsToFolder).not.toHaveBeenCalled();
+      },
+    );
   });
 
   describe('a member with write on the folder', () => {
-    it.each(['', '?folderId=false'])('can rename it (query %p)', async (query) => {
-      await rename('uid-writer', query, { color: 'green', items: 3 }).expect(
-        200,
-      );
-      expect(storedFolder()).toMatchObject({
-        id: 'fold1',
-        name: 'Renamed',
-        color: 'green',
-        items: 3,
-      });
-    });
+    it.each(['', '?folderId=false'])(
+      'can rename it (query %p)',
+      async (query) => {
+        await rename('uid-writer', query, { color: 'green', items: 3 }).expect(
+          200,
+        );
+        expect(storedFolder()).toMatchObject({
+          id: 'fold1',
+          name: 'Renamed',
+          color: 'green',
+          items: 2,
+        });
+      },
+    );
 
     it('can delete it', async () => {
       await remove('uid-writer').expect(200);
@@ -232,12 +242,15 @@ describe('workspace folder routes: update, delete and move-items', () => {
   });
 
   describe('the workspace admin', () => {
-    it.each(['', '?folderId=false'])('can use all three routes (query %p)', async (query) => {
-      await rename('uid-admin', query).expect(200);
-      await remove('uid-admin', query).expect(200);
-      await move('uid-admin', query).expect(200);
-      expect(storedFolder().name).toBe('Renamed');
-    });
+    it.each(['', '?folderId=false'])(
+      'can use all three routes (query %p)',
+      async (query) => {
+        await rename('uid-admin', query).expect(200);
+        await remove('uid-admin', query).expect(200);
+        await move('uid-admin', query).expect(200);
+        expect(storedFolder().name).toBe('Renamed');
+      },
+    );
   });
 
   describe('the update body', () => {
@@ -291,14 +304,24 @@ describe('workspace folder routes: update, delete and move-items', () => {
       expect(storedFolder().access).toEqual(ORIGINAL_ACCESS);
     });
 
+    it('ignores the item count a client sends back, a negative one included', async () => {
+      // Counts can drift below zero; the clients send the stored folder back on rename and recolour.
+      storedFolder().items = -1;
+      await request(app.getHttpServer())
+        .put(FOLDER_URL)
+        .set(as('uid-writer'))
+        .send({ folder: { ...storedFolder(), name: 'Renamed' } })
+        .expect(200);
+      expect(storedFolder()).toMatchObject({ name: 'Renamed', items: -1 });
+
+      await rename('uid-writer', '', { items: 5 }).expect(200);
+      expect(storedFolder().items).toBe(-1);
+    });
+
     it.each([
       { name: 'x'.repeat(257) },
       { name: 5 },
       { color: 'c'.repeat(65) },
-      { items: -1 },
-      { items: 1_000_001 },
-      { items: 1.5 },
-      { items: '3' },
     ])('refuses an invalid value %p', async (folder) => {
       await rename('uid-writer', '', folder).expect(400);
       expect(storedFolder().name).toBe('Original');
@@ -311,5 +334,134 @@ describe('workspace folder routes: update, delete and move-items', () => {
         .send({ folder: 'Renamed' })
         .expect(400);
     });
+  });
+});
+
+describe('moving items out of a folder (the real move handler)', () => {
+  let workspace: Record<string, any>;
+  let service: WorkspaceFoldersService;
+  const user = (id: string) => ({ id }) as any;
+  const parentOf = (itemId: string) => workspace.screenshots[itemId].parentId;
+
+  beforeEach(() => {
+    jest.spyOn(console, 'log').mockImplementation(() => undefined);
+    workspace = {
+      admin: 'uid-admin',
+      members: [
+        { id: 'uid-admin' },
+        { id: 'uid-reader' },
+        { id: 'uid-writer' },
+      ],
+      folders: {
+        fold1: {
+          id: 'fold1',
+          items: 3,
+          parentId: false,
+          access: JSON.parse(JSON.stringify(ORIGINAL_ACCESS)),
+        },
+        fold2: { id: 'fold2', items: 0, parentId: false },
+      },
+      screenshots: {
+        // The reader's own image, in the folder the reader may only read.
+        own: { id: 'own', uid: 'uid-reader', parentId: 'fold1' },
+        // Its own permissions give the reader WRITE; its folder gives only READ.
+        granted: {
+          id: 'granted',
+          uid: 'uid-admin',
+          parentId: 'fold1',
+          access: { members: [{ uid: 'uid-reader', access: 'WRITE' }] },
+        },
+        // The writer's own image, in the same folder.
+        writers: { id: 'writers', uid: 'uid-writer', parentId: 'fold1' },
+      },
+      videos: {},
+    };
+    const utilities = {
+      getWorkspaceById: async () => ({
+        workspaceVal: workspace,
+        workspaceRef: {
+          update: async (patch: Record<string, unknown>) => {
+            Object.assign(workspace, patch);
+          },
+        },
+      }),
+      changeFolderItemCountRecursive: (folders: unknown) => folders,
+      parseWorkspaceItems: async (value: unknown) => value,
+    };
+    service = new WorkspaceFoldersService(utilities as any, {} as any);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it.each([
+    ['own', 'fold2'],
+    ['own', false],
+    ['granted', 'fold2'],
+    ['granted', false],
+  ])(
+    'refuses a member with only read on the folder the item is in (%s to %p)',
+    async (itemId, to) => {
+      const res = await service.moveItemsToFolder(
+        user('uid-reader'),
+        'ws1',
+        [itemId as string],
+        to as string | false,
+        'fold1',
+      );
+      expect(res.status).toBe('error');
+      expect(parentOf(itemId as string)).toBe('fold1');
+    },
+  );
+
+  it('checks the folder the item is in, not the fromFolderId in the body', async () => {
+    const res = await service.moveItemsToFolder(
+      user('uid-reader'),
+      'ws1',
+      ['own'],
+      'fold2',
+      false,
+    );
+    expect(res.status).toBe('error');
+    expect(parentOf('own')).toBe('fold1');
+  });
+
+  it('lets the reader move their own item when it is not in that folder', async () => {
+    workspace.screenshots.own.parentId = false;
+    const res = await service.moveItemsToFolder(
+      user('uid-reader'),
+      'ws1',
+      ['own'],
+      'fold2',
+      false,
+    );
+    expect(res.status).toBe('success');
+    expect(parentOf('own')).toBe('fold2');
+  });
+
+  it('lets a member with write on the folder move their own item out of it', async () => {
+    const res = await service.moveItemsToFolder(
+      user('uid-writer'),
+      'ws1',
+      ['writers'],
+      'fold2',
+      'fold1',
+    );
+    expect(res.status).toBe('success');
+    expect(parentOf('writers')).toBe('fold2');
+  });
+
+  it('lets the workspace admin move any item out of it', async () => {
+    const res = await service.moveItemsToFolder(
+      user('uid-admin'),
+      'ws1',
+      ['own', 'granted'],
+      false,
+      'fold1',
+    );
+    expect(res.status).toBe('success');
+    expect(parentOf('own')).toBe(false);
+    expect(parentOf('granted')).toBe(false);
   });
 });
