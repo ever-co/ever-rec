@@ -227,5 +227,11 @@ describe('share link routes', () => {
       .set(as('uid-reader'))
       .expect(403);
     expect(getShareLink).not.toHaveBeenCalled();
+    // A valid path item is still shared when the query names something else.
+    await request(app.getHttpServer())
+      .get('/workspace/share/ws1/restricted?itemId=nope')
+      .set(as('uid-writer'))
+      .expect(200);
+    expect(getShareLink).toHaveBeenCalledWith('ws1', 'restricted', 'uid-writer');
   });
 });
