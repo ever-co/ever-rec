@@ -210,4 +210,22 @@ describe('share link routes', () => {
     await share('uid-admin', 'theirs').expect(403);
     expect(getShareLink).not.toHaveBeenCalled();
   });
+
+  it('checks the item in the path, not a same-named value in the query', async () => {
+    // An unknown path id must not be rescued by an existing id in the query...
+    await request(app.getHttpServer())
+      .get('/workspace/share/ws1/nope?itemId=open')
+      .set(as('uid-admin'))
+      .expect(403);
+    await request(app.getHttpServer())
+      .get('/workspace/share/ws1/nope?itemId=open')
+      .set(as('uid-writer'))
+      .expect(403);
+    // ...and a restricted path item is not checked as the open item named in the query.
+    await request(app.getHttpServer())
+      .get('/workspace/share/ws1/restricted?itemId=open')
+      .set(as('uid-reader'))
+      .expect(403);
+    expect(getShareLink).not.toHaveBeenCalled();
+  });
 });

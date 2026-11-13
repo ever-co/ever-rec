@@ -15,6 +15,7 @@ import {
   ItemMustExist,
 } from '../decorators/CanAccessItem.decorator';
 import { CanDeleteShareLinkGuard } from '../guards/CanDeleteShareLink.guard';
+import { CanShareItemGuard } from '../guards/CanShareItem.guard';
 import { User } from '../../auth/decorators/user.decorator';
 import { AuthGuard, IRequestUser } from '../../auth/guards/auth.guard';
 import { ValidateId } from '../pipes/validate-id.pipe';
@@ -30,7 +31,10 @@ export class WorkspaceShareController {
     // left blank intentionally
   }
 
-  // An id that is in no item of the workspace must not get a share link record.
+  // An id that is in no item of the workspace must not get a share link record. The item is read
+  // from the path only: a `?itemId=` in the query must neither stand in for a missing item nor
+  // move the permission check to another item.
+  @UseGuards(CanShareItemGuard)
   @ItemMustExist()
   @CanAccessItem(PermissionAccessEnum.WRITE, 'shared')
   @Get(':workspaceId/:itemId')
