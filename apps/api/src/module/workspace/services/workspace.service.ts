@@ -262,9 +262,8 @@ export class WorkspacesService {
   ): Promise<IDataResponse<IWorkspace[] | null>> {
     try {
       const db = admin.database();
-      const { workspaceVal } = await this.utilitiesService.getWorkspaceById(
-        workspaceId,
-      );
+      const { workspaceVal } =
+        await this.utilitiesService.getWorkspaceById(workspaceId);
       const userRef = db.ref(`users/${uid}`);
       const userSnap = await userRef.get();
       const userVal: IUserData = userSnap.val();

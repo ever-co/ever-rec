@@ -43,9 +43,7 @@ export class CanAccessWorkspaceGuard implements CanActivate {
         db.ref(`workspaces/${workspaceId}/admin`).get(),
         db.ref(`workspaces/${workspaceId}/members`).get(),
       ]);
-      const members = parseCollectionToArray<IWorkspaceUser>(
-        membersSnap.val(),
-      );
+      const members = parseCollectionToArray<IWorkspaceUser>(membersSnap.val());
       isAllowed =
         adminSnap.val() === userId ||
         members.some((member) => member?.id === userId);
