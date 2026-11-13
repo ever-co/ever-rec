@@ -68,7 +68,11 @@ describe('share link routes', () => {
     mockDb.data = {
       'workspaces/ws1': {
         admin: 'uid-admin',
-        members: [{ id: 'uid-admin' }, { id: 'uid-writer' }],
+        members: [
+          { id: 'uid-admin' },
+          { id: 'uid-writer' },
+          { id: 'uid-reader' },
+        ],
         screenshots: {
           // `uid-removed` was a member once; its grant is still on the item.
           restricted: {
@@ -76,12 +80,39 @@ describe('share link routes', () => {
             access: {
               members: [
                 { uid: 'uid-writer', access: 'WRITE' },
+                { uid: 'uid-reader', access: 'READ' },
                 { uid: 'uid-removed', access: 'WRITE' },
               ],
             },
           },
           open: { id: 'open' },
         },
+      },
+      'workspaces/ws2': {
+        admin: 'uid-other',
+        members: [{ id: 'uid-other' }],
+        screenshots: { theirs: { id: 'theirs' } },
+      },
+      // The link ids are what the clients send in the `:itemId` slot of the delete route.
+      'sharedWorkspaceItems/linkRestricted': {
+        id: 'linkRestricted',
+        workspaceId: 'ws1',
+        itemId: 'restricted',
+      },
+      'sharedWorkspaceItems/linkOpen': {
+        id: 'linkOpen',
+        workspaceId: 'ws1',
+        itemId: 'open',
+      },
+      'sharedWorkspaceItems/linkDangling': {
+        id: 'linkDangling',
+        workspaceId: 'ws1',
+        itemId: 'gone',
+      },
+      'sharedWorkspaceItems/linkTheirs': {
+        id: 'linkTheirs',
+        workspaceId: 'ws2',
+        itemId: 'theirs',
       },
     };
     getShareLink.mockReset().mockResolvedValue({ status: true });
@@ -102,24 +133,81 @@ describe('share link routes', () => {
 
   it('refuses a removed member with a leftover grant, on create and on delete', async () => {
     await share('uid-removed', 'restricted').expect(403);
-    await unshare('uid-removed', 'restricted').expect(403);
+    await unshare('uid-removed', 'linkRestricted').expect(403);
     expect(getShareLink).not.toHaveBeenCalled();
     expect(deleteShareLink).not.toHaveBeenCalled();
   });
 
   it('refuses a user who was never a member, even for an item with no permissions', async () => {
     await share('uid-stranger', 'open').expect(403);
-    await unshare('uid-stranger', 'open').expect(403);
+    await unshare('uid-stranger', 'linkOpen').expect(403);
     expect(getShareLink).not.toHaveBeenCalled();
     expect(deleteShareLink).not.toHaveBeenCalled();
   });
 
-  it('keeps letting a member with write permission share', async () => {
+  it('keeps letting a member with write permission share and unshare', async () => {
     await share('uid-writer', 'restricted').expect(200);
-    await unshare('uid-writer', 'restricted').expect(200);
+    await unshare('uid-writer', 'linkRestricted').expect(200);
+    expect(deleteShareLink).toHaveBeenCalledWith(
+      'uid-writer',
+      'linkRestricted',
+      'ws1',
+    );
   });
 
-  it('keeps letting the workspace admin share', async () => {
+  it('keeps letting the workspace admin share and unshare', async () => {
     await share('uid-admin', 'restricted').expect(200);
+    await unshare('uid-admin', 'linkRestricted').expect(200);
+    expect(deleteShareLink).toHaveBeenCalledWith(
+      'uid-admin',
+      'linkRestricted',
+      'ws1',
+    );
+  });
+
+  it('lets a member unshare a link whose item has no permissions of its own', async () => {
+    await unshare('uid-reader', 'linkOpen').expect(200);
+  });
+
+  it('refuses a member with READ only, on create and on delete', async () => {
+    await share('uid-reader', 'restricted').expect(403);
+    await unshare('uid-reader', 'linkRestricted').expect(403);
+    expect(getShareLink).not.toHaveBeenCalled();
+    expect(deleteShareLink).not.toHaveBeenCalled();
+  });
+
+  it('refuses a member of another workspace deleting a link of this one', async () => {
+    // A member of ws2 on the path of ws2, with the id of a ws1 link.
+    await request(app.getHttpServer())
+      .delete('/workspace/share/deleteLink/ws2/linkRestricted')
+      .set(as('uid-other'))
+      .expect(403);
+    // A ws1 member naming a ws2 link on the ws1 path.
+    await unshare('uid-writer', 'linkTheirs').expect(403);
+    await unshare('uid-admin', 'linkTheirs').expect(403);
+    // A member of ws2 on the ws1 path.
+    await unshare('uid-other', 'linkRestricted').expect(403);
+    expect(deleteShareLink).not.toHaveBeenCalled();
+  });
+
+  it('refuses an unknown link id and a malformed one', async () => {
+    await unshare('uid-admin', 'nope').expect(403);
+    await unshare('uid-writer', 'nope').expect(403);
+    await unshare('uid-admin', 'a.b').expect(403);
+    expect(deleteShareLink).not.toHaveBeenCalled();
+  });
+
+  it('lets only the admin delete a link whose item no longer exists', async () => {
+    await unshare('uid-writer', 'linkDangling').expect(403);
+    expect(deleteShareLink).not.toHaveBeenCalled();
+    await unshare('uid-admin', 'linkDangling').expect(200);
+  });
+
+  it('refuses to create a link for an item that is in no workspace, admin included', async () => {
+    await share('uid-admin', 'nope').expect(403);
+    await share('uid-writer', 'nope').expect(403);
+    // An item of another workspace is no item of this one.
+    await share('uid-admin', 'theirs').expect(403);
+    expect(getShareLink).not.toHaveBeenCalled();
   });
 });

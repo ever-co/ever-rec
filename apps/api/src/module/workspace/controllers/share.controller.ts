@@ -10,7 +10,11 @@ import {
 import { IDataResponse } from 'src/interfaces/_types';
 import { WorkspaceShareService } from '../services/share.service';
 import { PermissionAccessEnum } from '../Interfaces/Workspace';
-import { CanAccessItem } from '../decorators/CanAccessItem.decorator';
+import {
+  CanAccessItem,
+  ItemMustExist,
+} from '../decorators/CanAccessItem.decorator';
+import { CanDeleteShareLinkGuard } from '../guards/CanDeleteShareLink.guard';
 import { User } from '../../auth/decorators/user.decorator';
 import { AuthGuard, IRequestUser } from '../../auth/guards/auth.guard';
 import { ValidateId } from '../pipes/validate-id.pipe';
@@ -26,6 +30,8 @@ export class WorkspaceShareController {
     // left blank intentionally
   }
 
+  // An id that is in no item of the workspace must not get a share link record.
+  @ItemMustExist()
   @CanAccessItem(PermissionAccessEnum.WRITE, 'shared')
   @Get(':workspaceId/:itemId')
   async share(
@@ -36,13 +42,15 @@ export class WorkspaceShareController {
     return await this.shareService.getShareLink(workspaceId, itemId, user.id);
   }
 
-  @CanAccessItem(PermissionAccessEnum.WRITE, 'shared')
+  // The clients send the share link id in the `:itemId` slot, so this route checks the link (it must
+  // belong to the workspace in the path) and then its item, not an item with that id.
+  @UseGuards(CanDeleteShareLinkGuard)
   @Delete('deleteLink/:workspaceId/:itemId')
   async delete(
     @Param('workspaceId', ValidateId) workspaceId: string,
-    @Param('itemId', ValidateId) itemId: string,
+    @Param('itemId', ValidateId) linkId: string,
     @User() user: IRequestUser,
   ): Promise<IDataResponse<string>> {
-    return await this.shareService.deleteShareLink(user.id, itemId);
+    return await this.shareService.deleteShareLink(user.id, linkId, workspaceId);
   }
 }
