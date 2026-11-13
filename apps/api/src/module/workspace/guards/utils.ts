@@ -71,12 +71,19 @@ export function getItemData(
     default:
   }
 
-  const item: IDbWorkspaceImageData | IDbWorkspaceVideoData =
-    parseCollectionToArray(collection).find(
-      (x: IDbWorkspaceImageData | IDbWorkspaceVideoData) => x.id === itemId,
-    );
+  const items: (IDbWorkspaceImageData | IDbWorkspaceVideoData)[] =
+    parseCollectionToArray(collection);
 
-  return item;
+  if (itemId === undefined && itemType === 'image') {
+    // Some image routes (save-original) name the image by its stored file name in the body,
+    // not by id. Without this the item stays unresolved and its own permissions are skipped.
+    const fullFileName = req.body?.fullFileName;
+    if (typeof fullFileName === 'string' && fullFileName !== '') {
+      return items.find((x) => x?.refName === fullFileName);
+    }
+  }
+
+  return items.find((x) => x.id === itemId);
 }
 
 export const evaluateAccess = (
