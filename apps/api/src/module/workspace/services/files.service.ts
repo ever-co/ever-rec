@@ -19,6 +19,7 @@ import { TMP_PATH_FIXED } from '../../../enums/tmpPathsEnums';
 import { fixVideoWithFFMPEG } from '../../../services/utils/fixVideoWithFFMPEG';
 import { uploadVideoToBucket } from '../../../services/utils/uploadVideoToBucket';
 import { WorkspaceUtilitiesService } from './utilities.service';
+import { updateExistingItem } from './update-existing-item';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
   IDbWorkspaceImageData,
@@ -200,6 +201,9 @@ export class WorkspaceFilesService {
     itemId: string,
     itemType: ItemType,
     folderId: string | false,
+    // Images only: the file name the permission check was made for (null: none was found). The
+    // copy is refused if the personal image has another name by now. Undefined: no such check.
+    checkedRefName?: string | null,
   ): Promise<IDataResponse<IWorkspaceImage | IWorkspaceVideo>> {
     // TODO validate folderId exists
     try {
@@ -216,22 +220,11 @@ export class WorkspaceFilesService {
         throw new Error('There is no data for item with path: ' + refPath);
       }
 
-      if (itemType === 'video') {
-        // The copy below stores the file under the personal record's name, replacing any video of
-        // the workspace that has the same name. Allow it only for a plain file name (a personal
-        // video can have any extension, so only path tricks are refused) that no video the user
-        // may not write already uses.
-        const refName: unknown = itemVal.refName;
-        if (!is_plain_file_name(refName)) {
-          throw new BadRequestException('The video has no valid file name');
-        }
-        const { workspaceVal } =
-          await this.utilitiesService.getWorkspaceById(workspaceId);
-        if (!canWriteVideoByName(workspaceVal, { id: uid } as IUser, refName)) {
-          throw new ForbiddenException(
-            'You are not allowed to add this video to the workspace',
-          );
-        }
+      if (
+        checkedRefName !== undefined &&
+        (itemVal.refName ?? null) !== checkedRefName
+      ) {
+        throw new Error('The item changed name while it was being moved.');
       }
 
       // Copy original file
@@ -576,7 +569,8 @@ export class WorkspaceFilesService {
 
     // TODO validate likes didn't add any anallowed
 
-    await dbItemRef.update({
+    // Never create a record from here, even if the item is deleted after the guard ran.
+    const updated = await updateExistingItem(dbItemRef, {
       ...(title !== undefined ? { title } : {}),
       ...(parentId !== undefined ? { parentId } : {}),
       ...(trash !== undefined ? { trash } : {}),
@@ -585,6 +579,10 @@ export class WorkspaceFilesService {
       ...(originalImage !== undefined ? { originalImage } : {}),
       ...(markers !== undefined ? { markers } : {}),
     });
+
+    if (!updated) {
+      return sendError('Item not found', 'Not found');
+    }
 
     if (markers !== undefined) {
       this.editorGateway.emitMarkerUpdate(uid, id, markers);

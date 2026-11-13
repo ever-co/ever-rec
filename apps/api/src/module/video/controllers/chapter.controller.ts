@@ -12,13 +12,19 @@ import {
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { AuthGuard } from 'src/module/auth/guards/auth.guard';
+import {
+  CanAccessWorkspaceQueryGuard,
+  WorkspaceVideoAccess,
+} from 'src/module/workspace/guards/CanAccessWorkspaceQuery.guard';
+import { PermissionAccessEnum } from 'src/module/workspace/Interfaces/Workspace';
 import { VideoChapterService } from '../services/chapter.service';
 
 @Controller('video/chapter')
 export class VideoChapterController {
   constructor(private videoChapterService: VideoChapterService) {}
 
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, CanAccessWorkspaceQueryGuard)
+  @WorkspaceVideoAccess(PermissionAccessEnum.READ)
   @Get('/:videoId')
   async getChapters(
     @Req() request,
@@ -32,7 +38,8 @@ export class VideoChapterController {
     );
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, CanAccessWorkspaceQueryGuard)
+  @WorkspaceVideoAccess(PermissionAccessEnum.WRITE)
   @UseInterceptors(FilesInterceptor('blobs'))
   @Post('save-changes/:videoId')
   async saveChapters(
@@ -55,7 +62,8 @@ export class VideoChapterController {
     );
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, CanAccessWorkspaceQueryGuard)
+  @WorkspaceVideoAccess(PermissionAccessEnum.WRITE)
   @Post('enable-chapters/:videoId')
   async enableChapters(
     @Req() request,

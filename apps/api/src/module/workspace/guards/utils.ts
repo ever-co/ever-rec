@@ -20,6 +20,7 @@ import { IAccessTeam, IWorkspaceTeam } from '../Interfaces/Teams';
 import { IWorkspaceFolder } from '../Interfaces/Folders';
 import { IUser } from '../../../interfaces/IUser';
 import { CanAccessWorkspaceItemType } from 'src/interfaces/_types';
+import { is_id } from '../validators/id.validator';
 import {
   ITEM_BY_FILE_NAME_METADATA,
   ITEM_TYPE_METADATA,
@@ -101,110 +102,73 @@ export function getItemData(
   return items.find((x) => x.id === itemId);
 }
 
-/**
- * True when the permissions on `item` give `user` `requiredAccessLevel`, by the user's own entry or
- * by a team of the user. An item without permissions is open to every member. Unlike
- * `evaluateAccess`, an item that lists only teams is not open to everyone: a user who is in none of
- * its teams (or whose team has a lower level) gets nothing.
- */
-export function hasStrictAccess(
-  item: { access?: IAccess },
+// Every image of the workspace stored under this file name. More than one is possible, because an
+// upload under an existing name adds a record next to the old one.
+export function findImagesByFileName(
   workspace: IWorkspace,
-  user: IUser,
-  requiredAccessLevel: PermissionAccessEnum,
-): boolean {
-  const access = item.access;
-  if (!access) {
-    return true;
-  }
-  const byMember = parseCollectionToArray<IAccessMember>(access.members).some(
-    (member) =>
-      member?.uid === user.id &&
-      evaluateAccessType(member.access, requiredAccessLevel),
-  );
-  if (byMember) {
-    return true;
-  }
-  const workspaceUser = parseCollectionToArray<IWorkspaceUser>(
-    workspace.members,
-  ).find((member) => member?.id === user.id);
-  const teamIds = parseCollectionToArray<IWorkspaceTeam>(
-    workspaceUser?.teams,
-  ).map((team) => team?.id);
-  return parseCollectionToArray<IAccessTeam>(access.teams).some(
-    (team) =>
-      teamIds.includes(team?.teamId) &&
-      evaluateAccessType(team.access, requiredAccessLevel),
-  );
-}
-
-/**
- * True when `user` has `requiredAccessLevel` on the folder `folderId`. No folder (`false`, `'false'`
- * or missing) is the workspace root: allowed. A folder that does not exist is refused, and so is
- * any error while evaluating.
- */
-export function canAccessFolderById(
-  workspace: IWorkspace,
-  user: IUser,
-  folderId: unknown,
-  requiredAccessLevel: PermissionAccessEnum,
-): boolean {
-  try {
-    if (!folderId || folderId === 'false') {
-      return true;
-    }
-    if (user.id === workspace.admin) {
-      return true;
-    }
-    const folder: IWorkspaceFolder = parseCollectionToArray(
-      workspace.folders,
-    ).find((x: IWorkspaceFolder) => x?.id === folderId);
-    if (!folder) {
-      return false;
-    }
-    return hasStrictAccess(folder, workspace, user, requiredAccessLevel);
-  } catch (e) {
-    console.log(e);
-    return false;
-  }
-}
-
-/**
- * True when `user` may write a workspace video file named `fileName`: no video of the workspace
- * uses that name, or the user has WRITE on every video that does (on the video itself and on the
- * folder it is in). The workspace admin may always. Writing a file under a name owned by another
- * video replaces that video's file, so the check is on the name, not on any id sent with the request.
- */
-export function canWriteVideoByName(
-  workspace: IWorkspace,
-  user: IUser,
   fileName: string,
+): IDbWorkspaceImageData[] {
+  return parseCollectionToArray<IDbWorkspaceImageData>(
+    workspace.screenshots,
+  ).filter((x) => x?.refName === fileName);
+}
+
+// The stored file name of the caller's own personal image named by `itemId` in the query, which
+// `add-from-personal` copies into the workspace under that same name. Undefined when the query
+// has no plain id or the caller has no such image (nothing is copied then).
+export async function getPersonalImageFileName(
+  req: any,
+): Promise<string | undefined> {
+  const itemId = req.query?.itemId;
+  const uid = req.user?.id;
+  if (typeof itemId !== 'string' || !is_id(itemId) || !uid) {
+    return undefined;
+  }
+  const snap = await admin
+    .database()
+    .ref(`users/${uid}/screenshots/${itemId}`)
+    .get();
+  const refName = snap.val()?.refName;
+  return typeof refName === 'string' && refName !== '' ? refName : undefined;
+}
+
+// Same rule as `CanAccessItemGuard`: the admin and items without their own permissions pass.
+export function canAccessItemData(
+  item: IDbWorkspaceImageData | IDbWorkspaceVideoData,
+  workspace: IWorkspace,
+  user: IUser,
+  requiredAccessLevel: PermissionAccessEnum,
 ): boolean {
-  try {
-    if (user.id === workspace.admin) {
-      return true;
-    }
-    return parseCollectionToArray(workspace.videos)
-      .filter((video: IDbWorkspaceVideoData) => video?.refName === fileName)
-      .every(
-        (video: IDbWorkspaceVideoData) =>
-          hasStrictAccess(
-            video,
-            workspace,
-            user,
-            PermissionAccessEnum.WRITE,
-          ) &&
-          canAccessFolderById(
-            workspace,
-            user,
-            video.parentId,
-            PermissionAccessEnum.WRITE,
-          ),
-      );
-  } catch (e) {
-    console.log(e);
+  if (user.id === workspace.admin) {
+    return true;
+  }
+  if (item?.access) {
+    return !!evaluateAccess(item, workspace, user, requiredAccessLevel);
+  }
+  return true;
+}
+
+// Same rule as `CanAccessFolderGuard`: no folder, the admin and folders without their own
+// permissions pass; a folder id that matches no folder does not.
+export function canAccessFolderById(
+  folderId: unknown,
+  workspace: IWorkspace,
+  user: IUser,
+  requiredAccessLevel: PermissionAccessEnum,
+): boolean {
+  if (!folderId || folderId === 'false' || user.id === workspace.admin) {
+    return true;
+  }
+  const folder: IWorkspaceFolder | undefined = parseCollectionToArray(
+    workspace.folders,
+  ).find((x: IWorkspaceFolder) => x?.id === folderId);
+  if (!folder) {
     return false;
   }
+  if (folder.access) {
+    return !!evaluateAccess(folder, workspace, user, requiredAccessLevel);
+  }
+  return true;
 }
 
 export const evaluateAccess = (
@@ -217,21 +181,37 @@ export const evaluateAccess = (
   let hasAccessByMember: boolean;
   const workspaceUser = workspace.members.find((x) => x.id === user.id);
 
+  // Someone who is no longer in the workspace (and is not its admin) gets nothing from grants
+  // left behind on items or folders.
+  if (!workspaceUser && user.id !== workspace.admin) {
+    return false;
+  }
+
   if (item.access.teams) {
-    hasAccessByTeam = parseCollectionToArray(workspaceUser.teams).some(
-      (workspaceTeam: IWorkspaceTeam) =>
-        item.access.teams.some((accessTeam: IAccessTeam) => {
-          const givenAccess =
-            requiredAccessLevel === PermissionAccessEnum.ADMIN
-              ? user.id === workspace.admin
-                ? PermissionAccessEnum.ADMIN
-                : accessTeam.access
-              : accessTeam.access;
-          return (
-            accessTeam.teamId === workspaceTeam.id &&
-            evaluateAccessType(givenAccess, requiredAccessLevel)
-          );
-        }),
+    // Team membership is stored on the team (`workspace.teams[].members`); a `teams` list on the
+    // member entry is read too.
+    const userTeams: IWorkspaceTeam[] = [
+      ...parseCollectionToArray<IWorkspaceTeam>(workspace.teams).filter(
+        (team) =>
+          parseCollectionToArray<IWorkspaceUser>(team?.members).some(
+            (member) => member?.id === user.id,
+          ),
+      ),
+      ...parseCollectionToArray<IWorkspaceTeam>(workspaceUser?.teams),
+    ];
+    hasAccessByTeam = userTeams.some((workspaceTeam: IWorkspaceTeam) =>
+      item.access.teams.some((accessTeam: IAccessTeam) => {
+        const givenAccess =
+          requiredAccessLevel === PermissionAccessEnum.ADMIN
+            ? user.id === workspace.admin
+              ? PermissionAccessEnum.ADMIN
+              : accessTeam.access
+            : accessTeam.access;
+        return (
+          accessTeam.teamId === workspaceTeam.id &&
+          evaluateAccessType(givenAccess, requiredAccessLevel)
+        );
+      }),
     );
   }
 
@@ -253,17 +233,17 @@ export const evaluateAccess = (
     );
   }
 
-  if (
-    hasAccessByMember === undefined &&
-    parseCollectionToArray(workspace.teams).length > 0
-  ) {
-    return true;
+  const workspaceHasTeams = parseCollectionToArray(workspace.teams).length > 0;
+  const teamsListed = parseCollectionToArray(item.access.teams).length > 0;
+
+  // Permissions that list teams only: only members of a listed team (with a sufficient level)
+  // and the workspace admin get in. Other workspace members must not.
+  if (hasAccessByMember === undefined && teamsListed) {
+    return hasAccessByTeam || user.id === workspace.admin;
   }
 
-  if (
-    hasAccessByMember === undefined &&
-    parseCollectionToArray(workspace.teams).length > 0
-  ) {
+  // Permissions that list neither teams nor members keep the previous result.
+  if (hasAccessByMember === undefined && workspaceHasTeams) {
     return true;
   }
 
