@@ -543,6 +543,11 @@ export class WorkspaceFilesService {
     const items = itemType === 'image' ? 'screenshots' : 'videos';
     const dbItemRef = db.ref(`workspaces/${workspaceId}/${items}/${id}`);
 
+    // Never create a record from here: `update` on a missing path would write one.
+    if (!(await dbItemRef.get()).exists()) {
+      return sendError('Item not found', 'Not found');
+    }
+
     // TODO validate likes didn't add any anallowed
 
     await dbItemRef.update({

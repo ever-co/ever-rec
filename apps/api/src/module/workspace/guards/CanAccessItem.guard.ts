@@ -7,7 +7,10 @@ import {
   getUserAndWorkspace,
   isItemByFileName,
 } from './utils';
-import { REQUIRED_ITEM_ACCESS_METADATA } from '../decorators/CanAccessItem.decorator';
+import {
+  ITEM_MUST_EXIST_METADATA,
+  REQUIRED_ITEM_ACCESS_METADATA,
+} from '../decorators/CanAccessItem.decorator';
 
 // Chain with CanAccessWorkspace.
 @Injectable()
@@ -22,6 +25,15 @@ export class CanAccessItemGuard implements CanActivate {
       );
       const { user, workspace, req } = await getUserAndWorkspace(context);
       const item = getItemData(context, req, workspace, this);
+
+      // A route that updates an existing item must find it, for the admin too.
+      if (
+        !item &&
+        this.reflector.get(ITEM_MUST_EXIST_METADATA, context.getHandler()) ===
+          true
+      ) {
+        return false;
+      }
 
       if (user.id === workspace.admin) {
         return true;

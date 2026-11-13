@@ -26,7 +26,9 @@ import { PermissionAccessEnum } from '../Interfaces/Workspace';
 import {
   CanAccessItem,
   ItemByFileName,
+  ItemMustExist,
 } from '../decorators/CanAccessItem.decorator';
+import { CanAccessDestinationFolder } from '../decorators/CanAccessDestinationFolder.decorator';
 import { WorkspaceSharedService } from '../services/shared.service';
 import { AuthGuard, IRequestUser } from '../../auth/guards/auth.guard';
 import { CanAccessWorkspaceGuard } from '../guards/CanAccessWorkspace.guard';
@@ -194,6 +196,8 @@ export class WorkspaceFilesController {
 
   @Put('image/:imageId/single-data')
   @CanAccessItem(PermissionAccessEnum.WRITE, 'image')
+  @ItemMustExist()
+  @CanAccessDestinationFolder(PermissionAccessEnum.WRITE)
   async updateItemDataImage(
     @Req() req,
     @Param('workspaceId', ValidateId) workspaceId: string,
@@ -217,6 +221,8 @@ export class WorkspaceFilesController {
 
   @Put('video/:videoId/single-data')
   @CanAccessItem(PermissionAccessEnum.WRITE, 'video')
+  @ItemMustExist()
+  @CanAccessDestinationFolder(PermissionAccessEnum.WRITE)
   async updateItemDataVideo(
     @Req() req,
     @Param('workspaceId', ValidateId) workspaceId: string,

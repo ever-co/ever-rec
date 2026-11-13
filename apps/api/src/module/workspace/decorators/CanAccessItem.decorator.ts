@@ -14,7 +14,13 @@ export const ITEM_BY_FILE_NAME_METADATA = 'itemByFileName';
 export const ItemByFileName = () =>
   SetMetadata(ITEM_BY_FILE_NAME_METADATA, true);
 
-export const ItemAccess = (requiredAccess: PermissionAccessEnum) =>
+export const ITEM_MUST_EXIST_METADATA = 'itemMustExist';
+
+// Marks a route that updates an existing item. The item guard then refuses an id that matches no
+// item (admin included) instead of falling back to workspace membership.
+export const ItemMustExist = () => SetMetadata(ITEM_MUST_EXIST_METADATA, true);
+
+export const ItemAccess =(requiredAccess: PermissionAccessEnum) =>
   SetMetadata(REQUIRED_ITEM_ACCESS_METADATA, requiredAccess);
 
 export const ItemType = (itemType: CanAccessWorkspaceItemType) =>
