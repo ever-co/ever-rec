@@ -6,6 +6,7 @@
 import { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
+import { UserGuard } from '../auth/guards/user.guard';
 import { TokenService } from '../auth/services/tokens';
 import { SharedService } from '../../services/shared/shared.service';
 import { FoldersSharedService } from '../../services/shared/folders.shared.service';
@@ -36,7 +37,8 @@ jest.mock('firebase-admin', () => ({
       get: async () => {
         const [root, id, child] = path.split('/');
         const workspace = mockDb.data[`${root}/${id}`] as
-          Record<string, unknown> | undefined;
+          | Record<string, unknown>
+          | undefined;
         const value = child ? workspace?.[child] : workspace;
         return { val: () => value ?? null };
       },
@@ -67,7 +69,11 @@ describe('POST video/:videoId/like-own', () => {
         { provide: UniqueViewsSharedService, useValue: {} },
         { provide: ContextUploader, useValue: {} },
       ],
-    }).compile();
+    })
+      // Another route of this controller uses UserGuard, whose own dependencies are not needed here.
+      .overrideGuard(UserGuard)
+      .useValue({ canActivate: () => true })
+      .compile();
 
     app = moduleRef.createNestApplication({ logger: false });
     await app.init();
@@ -122,7 +128,7 @@ describe('POST video/:videoId/like-own', () => {
     );
   });
 
-  it('keeps liking the caller\'s own video when no workspace is sent', async () => {
+  it("keeps liking the caller's own video when no workspace is sent", async () => {
     await like('uid-stranger', {}).expect(201);
     await like('uid-stranger', { workspaceId: '' }).expect(201);
     expect(likeItem).toHaveBeenNthCalledWith(

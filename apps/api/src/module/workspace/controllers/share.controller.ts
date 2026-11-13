@@ -49,6 +49,10 @@ export class WorkspaceShareController {
     @Param('itemId', ValidateId) linkId: string,
     @User() user: IRequestUser,
   ): Promise<IDataResponse<string>> {
-    return await this.shareService.deleteShareLink(user.id, linkId, workspaceId);
+    return await this.shareService.deleteShareLink(
+      user.id,
+      linkId,
+      workspaceId,
+    );
   }
 }

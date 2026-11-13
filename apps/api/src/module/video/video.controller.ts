@@ -52,7 +52,7 @@ export class VideoController {
     private readonly foldersSharedService: FoldersSharedService,
     private readonly uniqueViewsSharedService: UniqueViewsSharedService,
     private readonly contextUploader: ContextUploader,
-  ) { }
+  ) {}
 
   @UseGuards(AuthGuard)
   @Get('share/:id')

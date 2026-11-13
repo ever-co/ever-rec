@@ -22,7 +22,8 @@ jest.mock('firebase-admin', () => ({
       get: async () => {
         const [root, id, child] = path.split('/');
         const workspace = mockDb.data[`${root}/${id}`] as
-          Record<string, unknown> | undefined;
+          | Record<string, unknown>
+          | undefined;
         const value = child ? workspace?.[child] : workspace;
         return { val: () => value ?? null };
       },
@@ -232,6 +233,10 @@ describe('share link routes', () => {
       .get('/workspace/share/ws1/restricted?itemId=nope')
       .set(as('uid-writer'))
       .expect(200);
-    expect(getShareLink).toHaveBeenCalledWith('ws1', 'restricted', 'uid-writer');
+    expect(getShareLink).toHaveBeenCalledWith(
+      'ws1',
+      'restricted',
+      'uid-writer',
+    );
   });
 });
