@@ -32,8 +32,7 @@ jest.mock('firebase-admin', () => ({
       get: async () => {
         const [root, id, child] = path.split('/');
         const workspace = mockDb.data[`${root}/${id}`] as
-          | Record<string, unknown>
-          | undefined;
+          Record<string, unknown> | undefined;
         const value = child ? workspace?.[child] : workspace;
         return { val: () => value ?? null };
       },
@@ -104,7 +103,11 @@ describe('item routes: folder and team permissions', () => {
         },
         screenshots: {
           // No permissions of its own; sits in a folder the reader can only read.
-          inFolder: { id: 'inFolder', refName: 'in-folder.png', parentId: 'fold1' },
+          inFolder: {
+            id: 'inFolder',
+            refName: 'in-folder.png',
+            parentId: 'fold1',
+          },
           // Permissions list one team only.
           teamOnly: {
             id: 'teamOnly',
@@ -159,7 +162,9 @@ describe('item routes: folder and team permissions', () => {
 
     it('refuses a read-only folder member on the delete route too', async () => {
       await request(app.getHttpServer())
-        .delete(`${IMAGE_URL}/single?imageId=inFolder&refName=in-folder.png&folderId=false`)
+        .delete(
+          `${IMAGE_URL}/single?imageId=inFolder&refName=in-folder.png&folderId=false`,
+        )
         .set(as('uid-reader'))
         .expect(403);
     });
@@ -192,6 +197,17 @@ describe('item routes: folder and team permissions', () => {
 
     it('lets the workspace admin in', async () => {
       await putData('uid-admin', 'teamOnly').expect(200);
+    });
+
+    it('lets in a member of the listed team when the membership is stored on the team', async () => {
+      const ws: any = mockDb.data['workspaces/ws1'];
+      ws.members.push({ id: 'uid-onteam' });
+      ws.teams = [
+        { id: 't1', members: [{ id: 'uid-onteam' }] },
+        { id: 't2', members: [] },
+      ];
+      await putData('uid-onteam', 'teamOnly').expect(200);
+      await putData('uid-outsider', 'teamOnly').expect(403);
     });
   });
 });

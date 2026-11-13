@@ -32,7 +32,12 @@ describe('evaluateAccess', () => {
     it.each([
       ['a member of the listed team', 'in-t1', WRITE, true],
       ['a member of the listed team, lower level asked', 'in-t1', READ, true],
-      ['a member of the listed team, higher level asked', 'in-t1', ADMIN, false],
+      [
+        'a member of the listed team, higher level asked',
+        'in-t1',
+        ADMIN,
+        false,
+      ],
       ['a member of another team', 'in-t2', READ, false],
       ['a member with no teams', 'no-team', READ, false],
       ['a member with an empty team list', 'empty-teams', READ, false],
@@ -47,9 +52,9 @@ describe('evaluateAccess', () => {
 
     it('does not let a listed team with NONE in', () => {
       const denied = item({ teams: [{ teamId: 't1', access: NONE }] });
-      expect(
-        !!evaluateAccess(denied, workspace, asUser('in-t1'), READ),
-      ).toBe(false);
+      expect(!!evaluateAccess(denied, workspace, asUser('in-t1'), READ)).toBe(
+        false,
+      );
     });
 
     it('lets a member of any one of several listed teams in', () => {
@@ -90,7 +95,10 @@ describe('evaluateAccess', () => {
 
   describe('someone who is no longer a member of the workspace', () => {
     it.each([
-      ['a leftover member grant', { members: [{ uid: 'gone', access: WRITE }] }],
+      [
+        'a leftover member grant',
+        { members: [{ uid: 'gone', access: WRITE }] },
+      ],
       ['a leftover team grant', { teams: [{ teamId: 't1', access: WRITE }] }],
       [
         'leftover team and member grants',
@@ -122,6 +130,34 @@ describe('evaluateAccess', () => {
       );
       expect(!!evaluateAccess(both, workspace, asUser('in-t2'), READ)).toBe(
         false,
+      );
+    });
+  });
+
+  describe('team membership stored on the team (workspace.teams[].members)', () => {
+    const stored: any = {
+      admin: 'admin',
+      teams: [
+        { id: 't1', members: [{ id: 'admin' }, { id: 'in-t1' }] },
+        { id: 't2', members: [{ id: 'in-t2' }] },
+      ],
+      members: [
+        { id: 'admin' },
+        { id: 'in-t1' },
+        { id: 'in-t2' },
+        { id: 'no-team' },
+      ],
+    };
+    const teamOnly = item({ teams: [{ teamId: 't1', access: WRITE }] });
+
+    it.each([
+      ['a member of the listed team', 'in-t1', WRITE, true],
+      ['a member of the listed team, read', 'in-t1', READ, true],
+      ['a member of another team', 'in-t2', READ, false],
+      ['a member with no team', 'no-team', READ, false],
+    ])('%s -> %s', (_label: any, uid: any, level: any, expected: any) => {
+      expect(!!evaluateAccess(teamOnly, stored, asUser(uid), level)).toBe(
+        expected,
       );
     });
   });

@@ -3,6 +3,7 @@ import * as admin from 'firebase-admin';
 import {
   IAccessMember,
   IWorkspace,
+  IWorkspaceUser,
   PermissionAccessEnum,
 } from '../Interfaces/Workspace';
 import { IRequestUser } from '../../auth/guards/auth.guard';
@@ -116,20 +117,30 @@ export const evaluateAccess = (
   }
 
   if (item.access.teams) {
-    hasAccessByTeam = parseCollectionToArray(workspaceUser?.teams).some(
-      (workspaceTeam: IWorkspaceTeam) =>
-        item.access.teams.some((accessTeam: IAccessTeam) => {
-          const givenAccess =
-            requiredAccessLevel === PermissionAccessEnum.ADMIN
-              ? user.id === workspace.admin
-                ? PermissionAccessEnum.ADMIN
-                : accessTeam.access
-              : accessTeam.access;
-          return (
-            accessTeam.teamId === workspaceTeam.id &&
-            evaluateAccessType(givenAccess, requiredAccessLevel)
-          );
-        }),
+    // Team membership is stored on the team (`workspace.teams[].members`); a `teams` list on the
+    // member entry is read too.
+    const userTeams: IWorkspaceTeam[] = [
+      ...parseCollectionToArray<IWorkspaceTeam>(workspace.teams).filter(
+        (team) =>
+          parseCollectionToArray<IWorkspaceUser>(team?.members).some(
+            (member) => member?.id === user.id,
+          ),
+      ),
+      ...parseCollectionToArray<IWorkspaceTeam>(workspaceUser?.teams),
+    ];
+    hasAccessByTeam = userTeams.some((workspaceTeam: IWorkspaceTeam) =>
+      item.access.teams.some((accessTeam: IAccessTeam) => {
+        const givenAccess =
+          requiredAccessLevel === PermissionAccessEnum.ADMIN
+            ? user.id === workspace.admin
+              ? PermissionAccessEnum.ADMIN
+              : accessTeam.access
+            : accessTeam.access;
+        return (
+          accessTeam.teamId === workspaceTeam.id &&
+          evaluateAccessType(givenAccess, requiredAccessLevel)
+        );
+      }),
     );
   }
 
