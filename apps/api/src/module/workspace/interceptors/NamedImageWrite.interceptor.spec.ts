@@ -350,6 +350,29 @@ describe('writing an image by name', () => {
       expect(files['ws1/restricted.png']).toBe('personal copy');
     });
 
+    it('hands the checked file name to the copy, so it cannot change after the check', async () => {
+      await addFromPersonal('uid-writer', 'itemId=p1').expect(201);
+      expect(filesService.moveItemFromPersonalToWorkspace).toHaveBeenCalledWith(
+        'uid-writer',
+        'ws1',
+        'p1',
+        'image',
+        false,
+        'restricted.png',
+      );
+
+      filesService.moveItemFromPersonalToWorkspace.mockClear();
+      await addFromPersonal('uid-writer', 'itemId=missing').expect(201);
+      expect(filesService.moveItemFromPersonalToWorkspace).toHaveBeenCalledWith(
+        'uid-writer',
+        'ws1',
+        'missing',
+        'image',
+        false,
+        null,
+      );
+    });
+
     it('refuses a member with only read permission, and the file and its original are unchanged', async () => {
       await addFromPersonal('uid-reader', 'itemId=p1').expect(403);
       expect(files['ws1/restricted.png']).toBe(OLD);

@@ -28,7 +28,10 @@ import {
   ItemByFileName,
 } from '../decorators/CanAccessItem.decorator';
 import { NamedImageWrite } from '../decorators/NamedImageWrite.decorator';
-import { NamedImageWriteInterceptor } from '../interceptors/NamedImageWrite.interceptor';
+import {
+  CHECKED_IMAGE_FILE_NAME,
+  NamedImageWriteInterceptor,
+} from '../interceptors/NamedImageWrite.interceptor';
 import { getPersonalImageFileName } from '../guards/utils';
 import { WorkspaceSharedService } from '../services/shared.service';
 import { AuthGuard, IRequestUser } from '../../auth/guards/auth.guard';
@@ -79,16 +82,20 @@ export class WorkspaceFilesController {
   @NamedImageWrite({ fileName: getPersonalImageFileName, nameOptional: true })
   @UseInterceptors(NamedImageWriteInterceptor)
   async addImageToWorkspaceFromPersonal(
+    @Req() req,
     @Param('workspaceId', ValidateId) workspaceId: string,
     @User() user: IRequestUser,
     @Query() { itemId, folderId }: MovePersonalItemDto,
   ) {
+    // The personal image's name was read and checked before the handler ran; the copy must use
+    // that same name, or the check would not apply to what is written.
     return this.filesService.moveItemFromPersonalToWorkspace(
       user.id,
       workspaceId,
       itemId,
       'image',
       folderId,
+      req[CHECKED_IMAGE_FILE_NAME] ?? null,
     );
   }
 

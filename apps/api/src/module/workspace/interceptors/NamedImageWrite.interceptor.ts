@@ -19,6 +19,9 @@ import {
   getUserAndWorkspace,
 } from '../guards/utils';
 
+// Request property holding the file name the interceptor checked (a string, or null for none).
+export const CHECKED_IMAGE_FILE_NAME = 'checkedImageFileName';
+
 /**
  * Applies the per-image WRITE rule (the one `CanAccessItemGuard` applies to routes that name the
  * image by id) to routes that write an image under a name from the request. It must be listed
@@ -69,6 +72,11 @@ export class NamedImageWriteInterceptor implements NestInterceptor {
     }
 
     const fileName = await options.fileName(req);
+    // The name that was checked. A handler whose name comes from stored data (not from the
+    // request itself) must write under exactly this name, so a change between the check and the
+    // write cannot swap in another one.
+    req[CHECKED_IMAGE_FILE_NAME] =
+      typeof fileName === 'string' && fileName !== '' ? fileName : null;
     if (typeof fileName !== 'string' || fileName === '') {
       return !!options.nameOptional && fileName === undefined;
     }
