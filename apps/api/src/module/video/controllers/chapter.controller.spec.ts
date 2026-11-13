@@ -79,7 +79,39 @@ describe('VideoChapterController workspace access', () => {
     mockDb.data = {
       'workspaces/ws1': {
         admin: 'uid-admin',
-        members: [{ id: 'uid-admin' }, { id: 'uid-member' }],
+        members: [
+          { id: 'uid-admin' },
+          { id: 'uid-member' },
+          { id: 'uid-reader' },
+          { id: 'uid-teamer' },
+        ],
+        teams: [{ id: 'team1', members: [{ id: 'uid-teamer' }] }],
+        folders: [
+          {
+            id: 'folderRead',
+            access: { members: [{ uid: 'uid-member', access: 'READ' }] },
+          },
+        ],
+        videos: {
+          v1: { id: 'v1' },
+          // The reader may only read it.
+          vRead: {
+            id: 'vRead',
+            access: {
+              members: [
+                { uid: 'uid-reader', access: 'READ' },
+                { uid: 'uid-member', access: 'WRITE' },
+              ],
+            },
+          },
+          // Restricted to a team the member is not in.
+          vTeam: {
+            id: 'vTeam',
+            access: { teams: [{ teamId: 'team1', access: 'WRITE' }] },
+          },
+          // In a folder the member may only read.
+          vInFolder: { id: 'vInFolder', parentId: 'folderRead' },
+        },
       },
     };
     getChapters.mockReset().mockResolvedValue({ status: true, data: [] });
@@ -92,19 +124,19 @@ describe('VideoChapterController workspace access', () => {
   });
 
   const as = (uid: string) => ({ Authorization: `Bearer ${uid}` });
-  const get = (uid: string, query: string) =>
+  const get = (uid: string, query: string, videoId = 'v1') =>
     request(app.getHttpServer())
-      .get(`/video/chapter/v1${query}`)
+      .get(`/video/chapter/${videoId}${query}`)
       .set(as(uid));
-  const save = (uid: string, query: string) =>
+  const save = (uid: string, query: string, videoId = 'v1') =>
     request(app.getHttpServer())
-      .post(`/video/chapter/save-changes/v1${query}`)
+      .post(`/video/chapter/save-changes/${videoId}${query}`)
       .set(as(uid))
       .field('chapters', '[]')
       .field('chaptersBlobs', '[]');
-  const enable = (uid: string, query: string) =>
+  const enable = (uid: string, query: string, videoId = 'v1') =>
     request(app.getHttpServer())
-      .post(`/video/chapter/enable-chapters/v1${query}`)
+      .post(`/video/chapter/enable-chapters/${videoId}${query}`)
       .set(as(uid))
       .send({ chaptersEnabled: false });
 
@@ -159,6 +191,54 @@ describe('VideoChapterController workspace access', () => {
         false,
         'ws1',
       );
+    });
+  });
+
+  describe('the permissions of the video itself', () => {
+    it('let a member who may only read the video read its chapters', async () => {
+      await get('uid-reader', '?workspaceId=ws1', 'vRead').expect(200);
+      expect(getChapters).toHaveBeenCalledTimes(1);
+    });
+
+    it('refuse to save or switch chapters for a member who may only read the video', async () => {
+      await save('uid-reader', '?workspaceId=ws1', 'vRead').expect(403);
+      await enable('uid-reader', '?workspaceId=ws1', 'vRead').expect(403);
+      expect(saveChapters).not.toHaveBeenCalled();
+      expect(enableChapters).not.toHaveBeenCalled();
+    });
+
+    it('let a member who may write the video save its chapters', async () => {
+      await save('uid-member', '?workspaceId=ws1', 'vRead').expect(201);
+      expect(saveChapters).toHaveBeenCalledTimes(1);
+    });
+
+    it('refuse a member who is in none of the teams the video lists', async () => {
+      await get('uid-member', '?workspaceId=ws1', 'vTeam').expect(403);
+      await save('uid-member', '?workspaceId=ws1', 'vTeam').expect(403);
+      expect(getChapters).not.toHaveBeenCalled();
+      expect(saveChapters).not.toHaveBeenCalled();
+    });
+
+    it('let a member of a listed team with WRITE save its chapters', async () => {
+      await save('uid-teamer', '?workspaceId=ws1', 'vTeam').expect(201);
+      expect(saveChapters).toHaveBeenCalledTimes(1);
+    });
+
+    it('refuse to save chapters of a video in a folder the member may only read', async () => {
+      await save('uid-member', '?workspaceId=ws1', 'vInFolder').expect(403);
+      expect(saveChapters).not.toHaveBeenCalled();
+    });
+
+    it('refuse a video id that matches no video of the workspace, for the admin too', async () => {
+      await get('uid-admin', '?workspaceId=ws1', 'missing').expect(403);
+      await enable('uid-admin', '?workspaceId=ws1', 'missing').expect(403);
+      expect(getChapters).not.toHaveBeenCalled();
+      expect(enableChapters).not.toHaveBeenCalled();
+    });
+
+    it('let the workspace admin save chapters of any video', async () => {
+      await save('uid-admin', '?workspaceId=ws1', 'vTeam').expect(201);
+      expect(saveChapters).toHaveBeenCalledTimes(1);
     });
   });
 
