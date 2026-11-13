@@ -35,26 +35,37 @@ export class CanAccessWorkspaceGuard implements CanActivate {
       throw new ForbiddenException('Access to this workspace is not allowed');
     }
 
-    let isAllowed = false;
-    try {
-      // Only `admin` and `members` are read, not the whole workspace (its media collections can be large).
-      const db = admin.database();
-      const [adminSnap, membersSnap] = await Promise.all([
-        db.ref(`workspaces/${workspaceId}/admin`).get(),
-        db.ref(`workspaces/${workspaceId}/members`).get(),
-      ]);
-      const members = parseCollectionToArray<IWorkspaceUser>(membersSnap.val());
-      isAllowed =
-        adminSnap.val() === userId ||
-        members.some((member) => member?.id === userId);
-    } catch (e) {
-      console.log(e);
-    }
-
-    if (!isAllowed) {
+    if (!(await isWorkspaceMember(userId, workspaceId))) {
       throw new ForbiddenException('Access to this workspace is not allowed');
     }
 
     return true;
   }
 }
+
+/**
+ * True when the user is the admin or a member of the workspace. Fails closed: any error while
+ * loading the workspace is "no". The id goes straight into a database path, so the caller must
+ * have checked it with `is_id` first.
+ */
+export const isWorkspaceMember = async (
+  userId: string,
+  workspaceId: string,
+): Promise<boolean> => {
+  try {
+    // Only `admin` and `members` are read, not the whole workspace (its media collections can be large).
+    const db = admin.database();
+    const [adminSnap, membersSnap] = await Promise.all([
+      db.ref(`workspaces/${workspaceId}/admin`).get(),
+      db.ref(`workspaces/${workspaceId}/members`).get(),
+    ]);
+    const members = parseCollectionToArray<IWorkspaceUser>(membersSnap.val());
+    return (
+      adminSnap.val() === userId ||
+      members.some((member) => member?.id === userId)
+    );
+  } catch (e) {
+    console.log(e);
+    return false;
+  }
+};
