@@ -737,15 +737,88 @@ describe('workspace video routes', () => {
       expect(stored()).toHaveLength(3);
     });
 
-    it.each(['../two.webm', 'a/mp4', 'a/b.webm'])(
-      'still refuses the file name %s, before the handler',
+    describe('with a video stored under another extension', () => {
+      const ACCESS = {
+        members: [
+          { uid: 'uid-writer', access: 'WRITE' },
+          { uid: 'uid-reader', access: 'READ' },
+        ],
+      };
+
+      beforeEach(async () => {
+        for (const [id, refName] of [
+          ['vidAvi', 'clip.avi'],
+          ['vidWmv', 'my clip.wmv'],
+        ]) {
+          await mockFirebase.db
+            .ref(`workspaces/ws1/videos/${id}`)
+            .set({ id, refName, access: ACCESS });
+          mockFirebase.bucket.objects.set(
+            `${PREFIX}/${refName}`,
+            Buffer.from(`${id}-bytes`),
+          );
+        }
+      });
+
+      it.each([
+        ['vidAvi', 'clip.avi'],
+        ['vidWmv', 'my clip.wmv'],
+      ])(
+        'deletes %s and its own file for a member who may write it',
+        async (id, refName) => {
+          const res = await remove(
+            'uid-writer',
+            `videoId=${id}&refName=${encodeURIComponent(refName)}`,
+          );
+          expect(res.status).toBe(200);
+          expect(res.body.status).toBe('success');
+
+          expect(await recorded(id)).toBeNull();
+          expect(stored()).not.toContain(`${PREFIX}/${refName}`);
+          expect(stored()).toHaveLength(5);
+        },
+      );
+
+      it('deletes it when the request sends no file name at all', async () => {
+        await remove('uid-writer', 'videoId=vidAvi').expect(200);
+        expect(await recorded('vidAvi')).toBeNull();
+        expect(stored()).not.toContain(`${PREFIX}/clip.avi`);
+      });
+
+      it('still refuses a member with only read permission', async () => {
+        await remove('uid-reader', 'videoId=vidAvi&refName=clip.avi').expect(
+          403,
+        );
+        expect(await recorded('vidAvi')).not.toBeNull();
+        expect(stored()).toHaveLength(6);
+      });
+
+      it("does not let a mismatched file name delete another video's file", async () => {
+        // The writer may delete vidAvi, but not vid2, whose file is two.webm.
+        await remove('uid-writer', 'videoId=vidAvi&refName=two.webm').expect(
+          200,
+        );
+
+        expect(await recorded('vidAvi')).toBeNull();
+        expect(await recorded('vid2')).not.toBeNull();
+        expect(stored()).toContain(`${PREFIX}/two.webm`);
+        expect(stored()).not.toContain(`${PREFIX}/clip.avi`);
+        expect(stored()).toHaveLength(5);
+      });
+    });
+
+    it.each(['../two.webm', 'a/mp4', 'a/b.webm', 'noextension'])(
+      'ignores the file name %s: only the video own file is deleted',
       async (refName) => {
         await remove(
           'uid-writer',
           `videoId=vid1&refName=${encodeURIComponent(refName)}`,
-        ).expect(400);
-        expect(stored()).toHaveLength(4);
-        expect(await recorded('vid1')).not.toBeNull();
+        ).expect(200);
+        expect(await recorded('vid1')).toBeNull();
+        expect(await recorded('vid2')).not.toBeNull();
+        expect(stored()).toEqual(
+          ['two', 'three', 'four'].map((n) => `${PREFIX}/${n}.webm`).sort(),
+        );
       },
     );
   });
