@@ -262,7 +262,7 @@ export class WorkspacesService {
   ): Promise<IDataResponse<IWorkspace[] | null>> {
     try {
       const db = admin.database();
-      const { workspaceRef, workspaceVal } =
+      const { workspaceVal } =
         await this.utilitiesService.getWorkspaceById(workspaceId);
       const userRef = db.ref(`users/${uid}`);
       const userSnap = await userRef.get();
@@ -297,12 +297,14 @@ export class WorkspacesService {
 
         //TODO: should be decided if user images/videos/folders should be removed from workspace
 
-        await workspaceRef.update({
-          members: filteredWorkspaceMembers,
-          teams: newWorkspaceTeams,
-          folders: updatedWorkspaceFolders,
+        // One multi-path write: the membership and the user's workspace list change together, so a
+        // failure cannot leave a non-member (who the workspace guard turns away) with a stale entry.
+        await db.ref().update({
+          [`workspaces/${workspaceId}/members`]: filteredWorkspaceMembers,
+          [`workspaces/${workspaceId}/teams`]: newWorkspaceTeams,
+          [`workspaces/${workspaceId}/folders`]: updatedWorkspaceFolders,
+          [`users/${uid}/workspaceIds`]: newUserWorkspaces,
         });
-        await userRef.update({ workspaceIds: newUserWorkspaces });
         return await this.getUserWorkspaces(uid);
       } else {
         return sendError('No such workspace or user');
