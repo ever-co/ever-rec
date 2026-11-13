@@ -110,7 +110,7 @@ export const evaluateAccess = (
   const workspaceUser = workspace.members.find((x) => x.id === user.id);
 
   if (item.access.teams) {
-    hasAccessByTeam = parseCollectionToArray(workspaceUser.teams).some(
+    hasAccessByTeam = parseCollectionToArray(workspaceUser?.teams).some(
       (workspaceTeam: IWorkspaceTeam) =>
         item.access.teams.some((accessTeam: IAccessTeam) => {
           const givenAccess =
@@ -145,17 +145,17 @@ export const evaluateAccess = (
     );
   }
 
-  if (
-    hasAccessByMember === undefined &&
-    parseCollectionToArray(workspace.teams).length > 0
-  ) {
-    return true;
+  const workspaceHasTeams = parseCollectionToArray(workspace.teams).length > 0;
+  const teamsListed = parseCollectionToArray(item.access.teams).length > 0;
+
+  // Permissions that list teams only: only members of a listed team (with a sufficient level)
+  // and the workspace admin get in. Other workspace members must not.
+  if (hasAccessByMember === undefined && teamsListed) {
+    return hasAccessByTeam || user.id === workspace.admin;
   }
 
-  if (
-    hasAccessByMember === undefined &&
-    parseCollectionToArray(workspace.teams).length > 0
-  ) {
+  // Permissions that list neither teams nor members keep the previous result.
+  if (hasAccessByMember === undefined && workspaceHasTeams) {
     return true;
   }
 
