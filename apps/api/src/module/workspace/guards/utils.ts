@@ -65,19 +65,21 @@ export function getItemData(
   const screenshots = parseCollectionToArray(workspace.screenshots);
   const videos = parseCollectionToArray(workspace.videos);
 
+  // The id in the path is the one the handler acts on, so it is the one checked; a value of the same
+  // name in the query is read only by routes that have no such id in the path.
   switch (itemType) {
     case 'shared': {
-      itemId = req.query?.itemId || req.params?.itemId;
+      itemId = req.params?.itemId || req.query?.itemId;
       collection = [...screenshots, ...videos];
       break;
     }
     case 'image': {
-      itemId = req.query?.imageId || req.params?.imageId;
+      itemId = req.params?.imageId || req.query?.imageId;
       collection = screenshots;
       break;
     }
     case 'video':
-      itemId = req.query?.videoId || req.params?.videoId;
+      itemId = req.params?.videoId || req.query?.videoId;
       collection = videos;
       break;
 

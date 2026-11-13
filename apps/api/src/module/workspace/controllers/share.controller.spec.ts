@@ -22,7 +22,8 @@ jest.mock('firebase-admin', () => ({
       get: async () => {
         const [root, id, child] = path.split('/');
         const workspace = mockDb.data[`${root}/${id}`] as
-          Record<string, unknown> | undefined;
+          | Record<string, unknown>
+          | undefined;
         const value = child ? workspace?.[child] : workspace;
         return { val: () => value ?? null };
       },
@@ -121,5 +122,44 @@ describe('share link routes', () => {
 
   it('keeps letting the workspace admin share', async () => {
     await share('uid-admin', 'restricted').expect(200);
+  });
+
+  describe('an item id in the query never overrides the id in the path', () => {
+    beforeEach(() => {
+      // A member with no grant on the restricted image.
+      const ws = mockDb.data['workspaces/ws1'] as { members: unknown[] };
+      ws.members = [...ws.members, { id: 'uid-none' }];
+    });
+
+    it('refuses creating and deleting the link of a restricted item with an open id in the query', async () => {
+      await request(app.getHttpServer())
+        .get('/workspace/share/ws1/restricted?itemId=open')
+        .set(as('uid-none'))
+        .expect(403);
+      await request(app.getHttpServer())
+        .delete('/workspace/share/deleteLink/ws1/restricted?itemId=open')
+        .set(as('uid-none'))
+        .expect(403);
+      expect(getShareLink).not.toHaveBeenCalled();
+      expect(deleteShareLink).not.toHaveBeenCalled();
+    });
+
+    it('checks the path item, which is also the one the handler acts on', async () => {
+      await request(app.getHttpServer())
+        .get('/workspace/share/ws1/open?itemId=restricted')
+        .set(as('uid-none'))
+        .expect(200);
+      expect(getShareLink).toHaveBeenCalledWith('ws1', 'open', 'uid-none');
+
+      await request(app.getHttpServer())
+        .get('/workspace/share/ws1/restricted?itemId=open')
+        .set(as('uid-writer'))
+        .expect(200);
+      expect(getShareLink).toHaveBeenLastCalledWith(
+        'ws1',
+        'restricted',
+        'uid-writer',
+      );
+    });
   });
 });

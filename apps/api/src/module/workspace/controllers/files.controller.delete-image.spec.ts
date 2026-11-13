@@ -220,8 +220,33 @@ describe('DELETE workspace image/single', () => {
     expect(stored()).toEqual([...files('one.png'), ...files('two.png')].sort());
   });
 
-  it('still refuses a file name that is not a plain image file name, before the handler', async () => {
-    await remove('uid-writer', 'imageId=img1&refName=../two.png').expect(400);
-    expect(stored()).toHaveLength(9);
+  it('does not validate the unused file name: an image stored under any extension can be deleted', async () => {
+    await mockFirebase.db
+      .ref('workspaces/ws1/screenshots/img5')
+      .set({ id: 'img5', refName: 'five.webp' });
+    for (const path of files('five.webp')) {
+      mockFirebase.bucket.objects.set(path, Buffer.from('five'));
+    }
+
+    await remove('uid-writer', 'imageId=img5&refName=five.webp').expect(200);
+    expect(await recorded('img5')).toBeNull();
+
+    // A file name that is not a plain image file name no longer fails the request, and is still
+    // not used to pick files: only img1's own files go.
+    await remove('uid-writer', 'imageId=img1&refName=../two.png').expect(200);
+    expect(await recorded('img1')).toBeNull();
+    expect(await recorded('img2')).not.toBeNull();
+    expect(stored()).toEqual(
+      [...files('two.png'), ...files('three.png')].sort(),
+    );
+  });
+
+  it('works without a file name, and still validates the image id', async () => {
+    await remove('uid-writer', 'imageId=img1').expect(200);
+    expect(await recorded('img1')).toBeNull();
+
+    await remove('uid-writer', 'refName=two.png').expect(400);
+    await remove('uid-admin', 'imageId=../img2&refName=two.png').expect(400);
+    expect(await recorded('img2')).not.toBeNull();
   });
 });
