@@ -34,6 +34,8 @@ describe('isPublicSharedPath', () => {
     '/video/shared/abc123/',
     '/image/shared/abc123',
     '/image/shared/abc-123_XYZ',
+    '/video/shared/embed/abc123',
+    '/video/shared/embed/abc123/',
   ])('allows the public share page %s', (path) => {
     expect(isPublicSharedPath(path)).toBe(true);
   });
@@ -51,6 +53,10 @@ describe('isPublicSharedPath', () => {
     '/edit/shared/abc',
     '/video/abc/shared/def',
     '/foo/video/shared/abc',
+    '/image/shared/embed/abc123',
+    '/video/shared/embed/abc123/extra',
+    '/video/embed/abc123',
+    '/foo/video/shared/embed/abc123',
   ])('does not allow %s without sign-in', (path) => {
     expect(isPublicSharedPath(path)).toBe(false);
   });
@@ -70,6 +76,12 @@ describe('middleware', () => {
       expect(middleware(makeRequest(path))).toEqual({ kind: 'redirect', pathname: '/auth/login' });
     },
   );
+
+  it('lets the embed player page through when signed out', () => {
+    expect(middleware(makeRequest('/video/shared/embed/abc'))).toEqual({
+      kind: 'next',
+    });
+  });
 
   it('lets a signed-in user reach /media/shared', () => {
     const res = middleware(makeRequest('/media/shared', { refreshToken: 'r', idToken: 'ok' }));
