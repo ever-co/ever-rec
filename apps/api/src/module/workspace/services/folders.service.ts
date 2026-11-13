@@ -89,7 +89,7 @@ export class WorkspaceFoldersService {
     uid: string,
     workspaceId: string,
     folderId: string,
-    updatedFolder: IWorkspaceFolder,
+    changes: Pick<Partial<IWorkspaceFolder>, 'name' | 'color' | 'items'>,
   ): Promise<
     IDataResponse<{ folders: IWorkspaceFolder[]; favFolders } | null>
   > {
@@ -106,9 +106,15 @@ export class WorkspaceFoldersService {
         return sendError('Folder not found.');
       }
 
+      // Only the approved fields change; the stored folder keeps everything else, `access`
+      // included (permissions are changed on their own route).
+      const updatedFolder: IWorkspaceFolder = { ...folders[folderIndex] };
+      for (const key of ['name', 'color', 'items'] as const) {
+        if (changes?.[key] !== undefined && changes[key] !== null) {
+          (updatedFolder as any)[key] = changes[key];
+        }
+      }
       folders[folderIndex] = updatedFolder;
-      // TODO make sure updatedFolder only changes a set approved values
-      //  think about ADMIN, permissions etc
 
       const parsedFavWorkspaceFolders = favFolders?.workspaces
         ? parseCollectionToArray(favFolders.workspaces[workspaceId])

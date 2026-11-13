@@ -21,11 +21,17 @@ export class CanAccessFolderGuard implements CanActivate {
       const item = getItemData(context, req, workspace, this);
       // When the route acts on an existing item, the item's own folder decides: a folder id in the
       // URL (for example `?folderId=false`) must not redirect or skip that check. Routes without
-      // an item (uploads, moves from personal) check the folder named in the request.
-      const folderId =
-        item || isItemByFileName(context, this)
-          ? item?.parentId
-          : req.query?.folderId || req.params?.folderId;
+      // an item (uploads, moves from personal) check the folder named in the request. A route that
+      // names its folder in the path (`:folderId`) is checked on that folder only: `?folderId=` in
+      // the query never replaces it and `?folderId=false` never skips the check.
+      let folderId: unknown;
+      if (item || isItemByFileName(context, this)) {
+        folderId = item?.parentId;
+      } else if (typeof req.params?.folderId === 'string') {
+        folderId = req.params.folderId;
+      } else {
+        folderId = req.query?.folderId;
+      }
 
       const requiredAccessLevel = this.reflector.get<PermissionAccessEnum>(
         REQUIRED_FOLDER_ACCESS_METADATA,

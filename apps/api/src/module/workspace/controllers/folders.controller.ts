@@ -66,7 +66,7 @@ export class WorkspaceFoldersController {
       user.id,
       workspaceId,
       folderId,
-      folder,
+      { name: folder.name, color: folder.color, items: folder.items },
     );
   }
 
