@@ -9,10 +9,13 @@
 import { ExecutionContext, INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
-import { AuthGuard } from '../../auth/guards/auth.guard';
 import { TokenService } from '../../auth/services/tokens';
 import { WorkspaceFoldersController } from '../controllers/folders.controller';
 import { WorkspaceMembersController } from '../controllers/members.controller';
+import { WorkspacesController } from '../controllers/workspaces.controller';
+import { WorkspaceTeamsController } from '../controllers/teams.controller';
+import { WorkspacesService } from '../services/workspace.service';
+import { WorkspaceTeamsService } from '../services/teams.service';
 import { FoldersSharedService } from '../../../services/shared/folders.shared.service';
 import { WorkspaceFoldersService } from '../services/folders.service';
 import { WorkspaceMembersService } from '../services/members.service';
@@ -29,6 +32,12 @@ jest.mock('../services/members.service', () => ({
 }));
 jest.mock('../services/shared.service', () => ({
   WorkspaceSharedService: class {},
+}));
+jest.mock('../services/workspace.service', () => ({
+  WorkspacesService: class {},
+}));
+jest.mock('../services/teams.service', () => ({
+  WorkspaceTeamsService: class {},
 }));
 jest.mock('../../../services/shared/folders.shared.service', () => ({
   FoldersSharedService: class {},
@@ -62,10 +71,17 @@ describe('CanAccessWorkspaceGuard', () => {
   let app: INestApplication;
   const getPopulatedMembers = jest.fn();
   const createWorkspaceFolder = jest.fn();
+  const getSingleWorkspace = jest.fn();
+  const getTeamsMembers = jest.fn();
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
-      controllers: [WorkspaceMembersController, WorkspaceFoldersController],
+      controllers: [
+        WorkspaceMembersController,
+        WorkspaceFoldersController,
+        WorkspacesController,
+        WorkspaceTeamsController,
+      ],
       providers: [
         {
           // "Bearer uid-<name>" signs in <name>; anything else is a bad token.
@@ -85,6 +101,8 @@ describe('CanAccessWorkspaceGuard', () => {
           provide: WorkspaceFoldersService,
           useValue: { createWorkspaceFolder },
         },
+        { provide: WorkspacesService, useValue: { getSingleWorkspace } },
+        { provide: WorkspaceTeamsService, useValue: { getTeamsMembers } },
         { provide: FoldersSharedService, useValue: {} },
         { provide: WorkspaceSharedService, useValue: {} },
       ],
@@ -117,6 +135,8 @@ describe('CanAccessWorkspaceGuard', () => {
     };
     getPopulatedMembers.mockReset().mockResolvedValue({ data: [] });
     createWorkspaceFolder.mockReset().mockResolvedValue({ status: true });
+    getSingleWorkspace.mockReset().mockResolvedValue({ data: {} });
+    getTeamsMembers.mockReset().mockResolvedValue({ data: {} });
   });
 
   afterEach(() => {
@@ -206,6 +226,49 @@ describe('CanAccessWorkspaceGuard', () => {
         .set(as('uid-member'))
         .expect(403);
       expect(mockDb.reads).toEqual([]);
+    });
+  });
+
+  describe('the workspace data and team members routes', () => {
+    it('give a member 200 on the full workspace data', async () => {
+      await request(app.getHttpServer())
+        .get('/workspace/single/ws1')
+        .set(as('uid-member'))
+        .expect(200);
+      expect(getSingleWorkspace).toHaveBeenCalledTimes(1);
+    });
+
+    it('give a non-member 403 on the full workspace data', async () => {
+      await request(app.getHttpServer())
+        .get('/workspace/single/ws1')
+        .set(as('uid-stranger'))
+        .expect(403);
+      expect(getSingleWorkspace).not.toHaveBeenCalled();
+    });
+
+    it('give a member 200 on the team members list', async () => {
+      await request(app.getHttpServer())
+        .get('/workspace/ws1/teams/teams-members')
+        .set(as('uid-member'))
+        .expect(200);
+      expect(getTeamsMembers).toHaveBeenCalledTimes(1);
+    });
+
+    it('give a non-member 403 on the team members list', async () => {
+      await request(app.getHttpServer())
+        .get('/workspace/ws1/teams/teams-members')
+        .set(as('uid-stranger'))
+        .expect(403);
+      expect(getTeamsMembers).not.toHaveBeenCalled();
+    });
+
+    it('give an anonymous request 401 on both', async () => {
+      await request(app.getHttpServer())
+        .get('/workspace/single/ws1')
+        .expect(401);
+      await request(app.getHttpServer())
+        .get('/workspace/ws1/teams/teams-members')
+        .expect(401);
     });
   });
 
