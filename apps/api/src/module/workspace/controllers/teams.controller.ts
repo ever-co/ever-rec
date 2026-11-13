@@ -47,7 +47,9 @@ export class WorkspaceTeamsController {
     return this.teamsService.getTeams(workspaceId);
   }
 
+  // Same rule as the other routes that change a team: only the workspace admin.
   @Put(':teamId')
+  @UseGuards(IsWorkspaceAdminGuard)
   @UseInterceptors(
     FileFieldsInterceptor([
       { name: 'avatar', maxCount: 1 },
