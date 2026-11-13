@@ -23,7 +23,10 @@ import { TMP_PATH } from '../../../enums/tmpPathsEnums';
 import { WorkspaceFilesService } from '../services/files.service';
 import { CanAccessFolder } from '../decorators/CanAccessFolder.decorator';
 import { PermissionAccessEnum } from '../Interfaces/Workspace';
-import { CanAccessItem } from '../decorators/CanAccessItem.decorator';
+import {
+  CanAccessItem,
+  ItemByFileName,
+} from '../decorators/CanAccessItem.decorator';
 import { WorkspaceSharedService } from '../services/shared.service';
 import { AuthGuard, IRequestUser } from '../../auth/guards/auth.guard';
 import { CanAccessWorkspaceGuard } from '../guards/CanAccessWorkspace.guard';
@@ -150,6 +153,7 @@ export class WorkspaceFilesController {
   }
 
   @CanAccessItem(PermissionAccessEnum.WRITE, 'image')
+  @ItemByFileName()
   @Post(':workspaceId/save-original')
   async saveOriginalWorkspaceImage(
     @Param('workspaceId') workspaceId: string,

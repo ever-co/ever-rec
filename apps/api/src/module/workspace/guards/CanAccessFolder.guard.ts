@@ -1,6 +1,11 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { evaluateAccess, getItemData, getUserAndWorkspace } from './utils';
+import {
+  evaluateAccess,
+  getItemData,
+  getUserAndWorkspace,
+  isItemByFileName,
+} from './utils';
 import { parseCollectionToArray } from '../../../services/utils/helpers';
 import { IWorkspaceFolder } from '../Interfaces/Folders';
 import { PermissionAccessEnum } from '../Interfaces/Workspace';
@@ -16,8 +21,11 @@ export class CanAccessFolderGuard implements CanActivate {
     try {
       const { user, workspace, req } = await getUserAndWorkspace(context);
       const item = getItemData(context, req, workspace, this);
-      const folderId =
-        req.query?.folderId || req.params?.folderId || item?.parentId;
+      // A route that acts on an item named in the body checks the item's own folder; a folder id
+      // in the URL must not redirect that check.
+      const folderId = isItemByFileName(context, this)
+        ? item?.parentId
+        : req.query?.folderId || req.params?.folderId || item?.parentId;
 
       if (!folderId || folderId === 'false' || user.id === workspace.admin) {
         return true;
