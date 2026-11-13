@@ -69,7 +69,8 @@ describe('writing an image by name', () => {
     ),
     moveItemFromPersonalToWorkspace: jest.fn(
       async (uid: string, ws: string, itemId: string) => {
-        const refName = mockDb.data.users?.[uid]?.screenshots?.[itemId]?.refName;
+        const refName =
+          mockDb.data.users?.[uid]?.screenshots?.[itemId]?.refName;
         if (!refName) return { status: false };
         files[`${ws}/${refName}`] = 'personal copy';
         files[`${ws}/originals/${refName}`] = 'personal copy';
@@ -166,7 +167,11 @@ describe('writing an image by name', () => {
 
   const as = (uid: string) => ({ Authorization: `Bearer ${uid}` });
 
-  const put = (uid: string | null, fields: Record<string, string>, url = BASE + '/image') => {
+  const put = (
+    uid: string | null,
+    fields: Record<string, string>,
+    url = BASE + '/image',
+  ) => {
     let req = request(app.getHttpServer()).put(url);
     if (uid) req = req.set(as(uid));
     for (const [k, v] of Object.entries(fields)) req = req.field(k, v);
@@ -263,12 +268,16 @@ describe('writing an image by name', () => {
 
   describe('POST image (upload)', () => {
     it('lets a member with write permission overwrite the image under its name', async () => {
-      await upload('uid-writer', { fullFileName: 'restricted.png' }).expect(201);
+      await upload('uid-writer', { fullFileName: 'restricted.png' }).expect(
+        201,
+      );
       expect(files['ws1/restricted.png']).toBe(NEW);
     });
 
     it('refuses a member with only read permission, and the file and its original are unchanged', async () => {
-      await upload('uid-reader', { fullFileName: 'restricted.png' }).expect(403);
+      await upload('uid-reader', { fullFileName: 'restricted.png' }).expect(
+        403,
+      );
       expect(files['ws1/restricted.png']).toBe(OLD);
       expect(files['ws1/originals/restricted.png']).toBe(OLD);
       expect(filesService.addImageFromFile).not.toHaveBeenCalled();
@@ -345,6 +354,20 @@ describe('writing an image by name', () => {
   });
 
   describe('POST image/add-from-personal', () => {
+    it.each(['originals/restricted.png', 'thumbnails/restricted.png'])(
+      'refuses a personal image whose name has a path separator (%s)',
+      async (refName) => {
+        mockDb.data.users['uid-reader'].screenshots = {
+          p9: { id: 'p9', refName },
+        };
+        await addFromPersonal('uid-reader', 'itemId=p9').expect(403);
+        expect(files['ws1/originals/restricted.png']).toBe(OLD);
+        expect(
+          filesService.moveItemFromPersonalToWorkspace,
+        ).not.toHaveBeenCalled();
+      },
+    );
+
     it('lets a member with write permission copy a personal image over the one with that name', async () => {
       await addFromPersonal('uid-writer', 'itemId=p1').expect(201);
       expect(files['ws1/restricted.png']).toBe('personal copy');
@@ -377,7 +400,9 @@ describe('writing an image by name', () => {
       await addFromPersonal('uid-reader', 'itemId=p1').expect(403);
       expect(files['ws1/restricted.png']).toBe(OLD);
       expect(files['ws1/originals/restricted.png']).toBe(OLD);
-      expect(filesService.moveItemFromPersonalToWorkspace).not.toHaveBeenCalled();
+      expect(
+        filesService.moveItemFromPersonalToWorkspace,
+      ).not.toHaveBeenCalled();
     });
 
     it('lets the workspace admin copy it', async () => {
@@ -386,12 +411,16 @@ describe('writing an image by name', () => {
 
     it('refuses a user who is not a member of the workspace', async () => {
       await addFromPersonal('uid-stranger', 'itemId=p1').expect(403);
-      expect(filesService.moveItemFromPersonalToWorkspace).not.toHaveBeenCalled();
+      expect(
+        filesService.moveItemFromPersonalToWorkspace,
+      ).not.toHaveBeenCalled();
     });
 
     it('refuses an anonymous request', async () => {
       await addFromPersonal(null, 'itemId=p1').expect(401);
-      expect(filesService.moveItemFromPersonalToWorkspace).not.toHaveBeenCalled();
+      expect(
+        filesService.moveItemFromPersonalToWorkspace,
+      ).not.toHaveBeenCalled();
     });
 
     it('keeps letting a member copy a personal image under a new name', async () => {
@@ -406,7 +435,9 @@ describe('writing an image by name', () => {
 
     it('still checks the folder id in the query', async () => {
       await addFromPersonal('uid-reader', 'itemId=p2&folderId=f1').expect(403);
-      expect(filesService.moveItemFromPersonalToWorkspace).not.toHaveBeenCalled();
+      expect(
+        filesService.moveItemFromPersonalToWorkspace,
+      ).not.toHaveBeenCalled();
     });
   });
 });

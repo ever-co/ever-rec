@@ -80,6 +80,10 @@ export class NamedImageWriteInterceptor implements NestInterceptor {
     if (typeof fileName !== 'string' || fileName === '') {
       return !!options.nameOptional && fileName === undefined;
     }
+    // A name with a path separator is written under another image's thumbnail or original.
+    if (fileName.includes('/')) {
+      return false;
+    }
 
     const images = findImagesByFileName(workspace, fileName);
     if (images.length === 0) {
@@ -101,12 +105,7 @@ export class NamedImageWriteInterceptor implements NestInterceptor {
     }
     return (
       typeof folderId === 'string' &&
-      canAccessFolderById(
-        folderId,
-        workspace,
-        user,
-        PermissionAccessEnum.WRITE,
-      )
+      canAccessFolderById(folderId, workspace, user, PermissionAccessEnum.WRITE)
     );
   }
 }

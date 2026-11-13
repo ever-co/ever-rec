@@ -55,7 +55,9 @@ describe('moving a personal image into a workspace under the checked name', () =
       Buffer.alloc(10, 1),
     );
     service = new WorkspaceFilesService(
-      { addImageToDb: jest.fn(async (props: any) => ({ id: props.id })) } as any,
+      {
+        addImageToDb: jest.fn(async (props: any) => ({ id: props.id })),
+      } as any,
       {} as any,
       {} as any,
       {} as any,
