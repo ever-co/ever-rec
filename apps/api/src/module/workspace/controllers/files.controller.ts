@@ -169,15 +169,16 @@ export class WorkspaceFilesController {
   @CanAccessItem(PermissionAccessEnum.WRITE, 'image')
   async deleteImage(
     @Param('workspaceId', ValidateId) workspaceId: string,
-    @Query() { imageId, refName: filename, folderId }: DeleteImageDto,
+    @Query() { imageId, folderId }: DeleteImageDto,
   ) {
     const parentFolderId =
       folderId === 'false' || folderId === undefined ? false : folderId;
 
+    // `refName` in the query is accepted for older clients but not used: the files to delete are
+    // the ones recorded for `imageId`, the image the guard checked.
     return await this.filesService.deleteImage(
       workspaceId,
       imageId,
-      filename,
       parentFolderId,
     );
   }
