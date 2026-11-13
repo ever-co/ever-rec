@@ -164,7 +164,11 @@ describe('permissions routes', () => {
       .post(`/workspace/ws1/files/${itemId}/permissions`)
       .set(as(uid))
       .send(body);
-  const postFolder = (uid: string, folderId: string, body: object = folderGrant()) =>
+  const postFolder = (
+    uid: string,
+    folderId: string,
+    body: object = folderGrant(),
+  ) =>
     request(app.getHttpServer())
       .post(`/workspace/ws1/folders/${folderId}/permissions`)
       .set(as(uid))
@@ -296,17 +300,23 @@ describe('permissions routes', () => {
     });
 
     it('refuses a member with only WRITE on the folder, and changes nothing', async () => {
-      await postFolder('uid-writer', 'fold1', folderGrant('uid-writer')).expect(403);
+      await postFolder('uid-writer', 'fold1', folderGrant('uid-writer')).expect(
+        403,
+      );
       expect(updatePermissions).not.toHaveBeenCalled();
     });
 
     it('refuses a member with only READ on the folder, and changes nothing', async () => {
-      await postFolder('uid-reader', 'fold1', folderGrant('uid-reader')).expect(403);
+      await postFolder('uid-reader', 'fold1', folderGrant('uid-reader')).expect(
+        403,
+      );
       expect(updatePermissions).not.toHaveBeenCalled();
     });
 
     it('refuses a plain member on a folder with no permissions of its own', async () => {
-      await postFolder('uid-reader', 'fold2', folderGrant('uid-reader')).expect(403);
+      await postFolder('uid-reader', 'fold2', folderGrant('uid-reader')).expect(
+        403,
+      );
       expect(updatePermissions).not.toHaveBeenCalled();
     });
 
@@ -316,7 +326,11 @@ describe('permissions routes', () => {
     });
 
     it('refuses a user who is not a member of the workspace', async () => {
-      await postFolder('uid-stranger', 'fold1', folderGrant('uid-stranger')).expect(403);
+      await postFolder(
+        'uid-stranger',
+        'fold1',
+        folderGrant('uid-stranger'),
+      ).expect(403);
       expect(updatePermissions).not.toHaveBeenCalled();
     });
 
