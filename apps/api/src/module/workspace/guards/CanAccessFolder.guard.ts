@@ -1,13 +1,11 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import {
-  evaluateAccess,
+  canAccessFolderById,
   getItemData,
   getUserAndWorkspace,
   isItemByFileName,
 } from './utils';
-import { parseCollectionToArray } from '../../../services/utils/helpers';
-import { IWorkspaceFolder } from '../Interfaces/Folders';
 import { PermissionAccessEnum } from '../Interfaces/Workspace';
 import { REQUIRED_FOLDER_ACCESS_METADATA } from '../decorators/CanAccessFolder.decorator';
 
@@ -29,22 +27,17 @@ export class CanAccessFolderGuard implements CanActivate {
           ? item?.parentId
           : req.query?.folderId || req.params?.folderId;
 
-      if (!folderId || folderId === 'false' || user.id === workspace.admin) {
-        return true;
-      }
-
-      const folders = parseCollectionToArray(workspace.folders);
-      const folder: IWorkspaceFolder = folders.find((x) => x.id === folderId);
       const requiredAccessLevel = this.reflector.get<PermissionAccessEnum>(
         REQUIRED_FOLDER_ACCESS_METADATA,
         context.getHandler(),
       );
 
-      if (folder.access) {
-        return evaluateAccess(folder, workspace, user, requiredAccessLevel);
-      }
-
-      return true;
+      return canAccessFolderById(
+        folderId,
+        workspace,
+        user,
+        requiredAccessLevel,
+      );
     } catch (e) {
       console.log(e);
       return false;
