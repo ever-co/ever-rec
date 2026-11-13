@@ -194,6 +194,9 @@ export class WorkspaceFilesService {
     itemId: string,
     itemType: ItemType,
     folderId: string | false,
+    // Images only: the file name the permission check was made for (null: none was found). The
+    // copy is refused if the personal image has another name by now. Undefined: no such check.
+    checkedRefName?: string | null,
   ): Promise<IDataResponse<IWorkspaceImage | IWorkspaceVideo>> {
     // TODO validate folderId exists
     try {
@@ -208,6 +211,13 @@ export class WorkspaceFilesService {
 
       if (!itemVal) {
         throw new Error('There is no data for item with path: ' + refPath);
+      }
+
+      if (
+        checkedRefName !== undefined &&
+        (itemVal.refName ?? null) !== checkedRefName
+      ) {
+        throw new Error('The item changed name while it was being moved.');
       }
 
       // Copy original file

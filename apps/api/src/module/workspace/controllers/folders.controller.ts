@@ -16,6 +16,7 @@ import { CanAccessWorkspaceGuard } from '../guards/CanAccessWorkspace.guard';
 import { FoldersSharedService } from '../../../services/shared/folders.shared.service';
 import { PermissionAccessEnum } from '../Interfaces/Workspace';
 import { CanAccessFolder } from '../decorators/CanAccessFolder.decorator';
+import { CanChangePermissions } from '../decorators/CanChangePermissions.decorator';
 import { WorkspaceSharedService } from '../services/shared.service';
 import { User } from '../../auth/decorators/user.decorator';
 import { CreateFolderDto } from '../dto/folders/create-folder.dto';
@@ -118,7 +119,7 @@ export class WorkspaceFoldersController {
   }
 
   @Post(':folderId/permissions')
-  @CanAccessFolder(PermissionAccessEnum.ADMIN)
+  @CanChangePermissions('folder')
   async changeFolderMemberPermission(
     @Param('workspaceId', ValidateId) workspaceId: string,
     @Param('folderId', ValidateId) folderId: string,
