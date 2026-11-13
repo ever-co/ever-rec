@@ -1,8 +1,10 @@
 import { ExecutionContext } from '@nestjs/common';
 import * as admin from 'firebase-admin';
 import {
+  IAccess,
   IAccessMember,
   IWorkspace,
+  IWorkspaceUser,
   PermissionAccessEnum,
 } from '../Interfaces/Workspace';
 import { IRequestUser } from '../../auth/guards/auth.guard';
@@ -100,6 +102,43 @@ export function getItemData(
 }
 
 /**
+ * True when the permissions on `item` give `user` `requiredAccessLevel`, by the user's own entry or
+ * by a team of the user. An item without permissions is open to every member. Unlike
+ * `evaluateAccess`, an item that lists only teams is not open to everyone: a user who is in none of
+ * its teams (or whose team has a lower level) gets nothing.
+ */
+export function hasStrictAccess(
+  item: { access?: IAccess },
+  workspace: IWorkspace,
+  user: IUser,
+  requiredAccessLevel: PermissionAccessEnum,
+): boolean {
+  const access = item.access;
+  if (!access) {
+    return true;
+  }
+  const byMember = parseCollectionToArray<IAccessMember>(access.members).some(
+    (member) =>
+      member?.uid === user.id &&
+      evaluateAccessType(member.access, requiredAccessLevel),
+  );
+  if (byMember) {
+    return true;
+  }
+  const workspaceUser = parseCollectionToArray<IWorkspaceUser>(
+    workspace.members,
+  ).find((member) => member?.id === user.id);
+  const teamIds = parseCollectionToArray<IWorkspaceTeam>(
+    workspaceUser?.teams,
+  ).map((team) => team?.id);
+  return parseCollectionToArray<IAccessTeam>(access.teams).some(
+    (team) =>
+      teamIds.includes(team?.teamId) &&
+      evaluateAccessType(team.access, requiredAccessLevel),
+  );
+}
+
+/**
  * True when `user` has `requiredAccessLevel` on the folder `folderId`. No folder (`false`, `'false'`
  * or missing) is the workspace root: allowed. A folder that does not exist is refused, and so is
  * any error while evaluating.
@@ -123,9 +162,7 @@ export function canAccessFolderById(
     if (!folder) {
       return false;
     }
-    return folder.access
-      ? !!evaluateAccess(folder, workspace, user, requiredAccessLevel)
-      : true;
+    return hasStrictAccess(folder, workspace, user, requiredAccessLevel);
   } catch (e) {
     console.log(e);
     return false;
@@ -151,13 +188,12 @@ export function canWriteVideoByName(
       .filter((video: IDbWorkspaceVideoData) => video?.refName === fileName)
       .every(
         (video: IDbWorkspaceVideoData) =>
-          (!video.access ||
-            !!evaluateAccess(
-              video,
-              workspace,
-              user,
-              PermissionAccessEnum.WRITE,
-            )) &&
+          hasStrictAccess(
+            video,
+            workspace,
+            user,
+            PermissionAccessEnum.WRITE,
+          ) &&
           canAccessFolderById(
             workspace,
             user,

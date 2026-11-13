@@ -7,5 +7,23 @@ export function is_video_filename(value: string) {
   return matches(value, VIDEO_FILENAME_REGEX);
 }
 
-export const IsVideoFilename = (validationOptions?: ValidationOptions) =>
+/**
+ * True for a value that is safe as one storage path segment: 1 to 256 characters, no `/`, no `\`,
+ * no control character, and not `.` or `..`. It does not restrict the extension: a personal video
+ * can have any extension the upload route maps a media type to (for example `.avi` or `.wmv`),
+ * and copying it into a workspace must keep working.
+ */
+export function is_plain_file_name(value: unknown): value is string {
+  return (
+    typeof value === 'string' &&
+    value.length >= 1 &&
+    value.length <= 256 &&
+    value !== '.' &&
+    value !== '..' &&
+    // eslint-disable-next-line no-control-regex
+    !/[/\\\u0000-\u001f\u007f]/.test(value)
+  );
+}
+
+export const IsVideoFilename =(validationOptions?: ValidationOptions) =>
   Matches(VIDEO_FILENAME_REGEX, validationOptions);

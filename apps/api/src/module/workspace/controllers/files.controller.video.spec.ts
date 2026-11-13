@@ -293,6 +293,40 @@ describe('workspace video routes', () => {
       expect(addVideoFromFile).toHaveBeenCalledTimes(1);
     });
 
+    it('checks a video that only lists teams by the caller\'s teams, not by its member list', async () => {
+      await mockFirebase.db.ref('workspaces/ws1').update({
+        teams: [{ id: 't1' }],
+        members: [
+          { id: 'uid-admin' },
+          { id: 'uid-writer', teams: [{ id: 't1' }] },
+          { id: 'uid-reader' },
+        ],
+      });
+      await mockFirebase.db.ref('workspaces/ws1/videos').update({
+        vidT1: {
+          id: 'vidT1',
+          refName: 'team-write.webm',
+          access: { teams: [{ teamId: 't1', access: 'WRITE' }] },
+        },
+        vidT2: {
+          id: 'vidT2',
+          refName: 'team-read.webm',
+          access: { teams: [{ teamId: 't1', access: 'READ' }] },
+        },
+      });
+
+      await upload('uid-writer', { fullFileName: 'team-write.webm' }).expect(
+        201,
+      );
+      await upload('uid-writer', { fullFileName: 'team-read.webm' }).expect(
+        403,
+      );
+      await upload('uid-reader', { fullFileName: 'team-write.webm' }).expect(
+        403,
+      );
+      expect(addVideoFromFile).toHaveBeenCalledTimes(1);
+    });
+
     it('lets the workspace admin write any name and folder', async () => {
       await upload('uid-admin', {
         fullFileName: 'two.webm',
@@ -414,15 +448,94 @@ describe('workspace video routes', () => {
       expect(content(`${PREFIX}/one.webm`)).toBe('replacement');
     });
 
-    it('refuses a personal record whose file name is not a plain video file name', async () => {
+    it.each(['clip.avi', 'CLIP.IVF', 'clip.mpv2', 'my clip.wmv'])(
+      'copies a personal video with the extension or name %s',
+      async (refName) => {
+        mockFirebase.bucket.objects.set(
+          `users/uid-writer/videos/${refName}`,
+          Buffer.from('clip-bytes'),
+        );
+        await personal('p7', refName);
+
+        const res = await move('uid-writer', 'p7').expect(201);
+
+        expect(res.body.status).toBe('success');
+        expect(content(`${PREFIX}/${refName}`)).toBe('clip-bytes');
+      },
+    );
+
+    it('refuses a personal record whose file name is not a single path segment', async () => {
       await personal('p4', '../../escape.webm');
       await personal('p5', 'a/mp4');
+      await personal('p8', '..');
+      await personal('p9', 'a\\b.webm');
       await mockFirebase.db.ref('users/uid-writer/videos/p6').set({ title: 'x' });
 
-      await move('uid-writer', 'p4').expect(400);
-      await move('uid-writer', 'p5').expect(400);
-      await move('uid-writer', 'p6').expect(400);
+      for (const id of ['p4', 'p5', 'p6', 'p8', 'p9']) {
+        await move('uid-writer', id).expect(400);
+      }
       expect(stored()).toHaveLength(5);
+    });
+
+    describe('with a video that only lists teams', () => {
+      beforeEach(async () => {
+        await mockFirebase.db.ref('workspaces/ws1').update({
+          teams: [{ id: 't1' }],
+          // Only the writer is in the team.
+          members: [
+            { id: 'uid-admin' },
+            { id: 'uid-writer', teams: [{ id: 't1' }] },
+            { id: 'uid-reader' },
+          ],
+        });
+        await mockFirebase.db.ref('workspaces/ws1/videos').update({
+          vidT1: {
+            id: 'vidT1',
+            refName: 'team-write.webm',
+            access: { teams: [{ teamId: 't1', access: 'WRITE' }] },
+          },
+          vidT2: {
+            id: 'vidT2',
+            refName: 'team-read.webm',
+            access: { teams: [{ teamId: 't1', access: 'READ' }] },
+          },
+        });
+        for (const name of ['team-write.webm', 'team-read.webm']) {
+          mockFirebase.bucket.objects.set(
+            `${PREFIX}/${name}`,
+            Buffer.from('team-bytes'),
+          );
+          mockFirebase.bucket.objects.set(
+            `users/uid-writer/videos/${name}`,
+            Buffer.from('replacement'),
+          );
+        }
+        await personal('pt1', 'team-write.webm');
+        await personal('pt2', 'team-read.webm');
+      });
+
+      it('lets a member of the team with WRITE copy over its name', async () => {
+        await move('uid-writer', 'pt1').expect(201);
+        expect(content(`${PREFIX}/team-write.webm`)).toBe('replacement');
+      });
+
+      it('refuses a member whose team only has READ', async () => {
+        await move('uid-writer', 'pt2').expect(403);
+        expect(content(`${PREFIX}/team-read.webm`)).toBe('team-bytes');
+      });
+
+      it('refuses a member who is in none of the listed teams', async () => {
+        await mockFirebase.db
+          .ref('users/uid-reader/videos/pt3')
+          .set({ refName: 'team-write.webm', title: 'x' });
+        mockFirebase.bucket.objects.set(
+          'users/uid-reader/videos/team-write.webm',
+          Buffer.from('replacement'),
+        );
+
+        await move('uid-reader', 'pt3').expect(403);
+        expect(content(`${PREFIX}/team-write.webm`)).toBe('team-bytes');
+      });
     });
 
     it('refuses a destination folder the member may only read', async () => {

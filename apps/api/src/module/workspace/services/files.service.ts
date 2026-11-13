@@ -6,7 +6,7 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { canWriteVideoByName } from '../guards/utils';
-import { is_video_filename } from '../validators/video-filename.validator';
+import { is_plain_file_name } from '../validators/video-filename.validator';
 import { StreamServiceService } from 'src/module/video-services/streamService.service';
 import {
   IDataResponse,
@@ -218,10 +218,11 @@ export class WorkspaceFilesService {
 
       if (itemType === 'video') {
         // The copy below stores the file under the personal record's name, replacing any video of
-        // the workspace that has the same name. Allow it only for a plain file name that no video
-        // the user may not write already uses.
+        // the workspace that has the same name. Allow it only for a plain file name (a personal
+        // video can have any extension, so only path tricks are refused) that no video the user
+        // may not write already uses.
         const refName: unknown = itemVal.refName;
-        if (typeof refName !== 'string' || !is_video_filename(refName)) {
+        if (!is_plain_file_name(refName)) {
           throw new BadRequestException('The video has no valid file name');
         }
         const { workspaceVal } =
