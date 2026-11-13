@@ -12,6 +12,7 @@ import { TMP_PATH_FIXED } from '../../../enums/tmpPathsEnums';
 import { fixVideoWithFFMPEG } from '../../../services/utils/fixVideoWithFFMPEG';
 import { uploadVideoToBucket } from '../../../services/utils/uploadVideoToBucket';
 import { WorkspaceUtilitiesService } from './utilities.service';
+import { updateExistingItem } from './update-existing-item';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
   IDbWorkspaceImageData,
@@ -543,14 +544,10 @@ export class WorkspaceFilesService {
     const items = itemType === 'image' ? 'screenshots' : 'videos';
     const dbItemRef = db.ref(`workspaces/${workspaceId}/${items}/${id}`);
 
-    // Never create a record from here: `update` on a missing path would write one.
-    if (!(await dbItemRef.get()).exists()) {
-      return sendError('Item not found', 'Not found');
-    }
-
     // TODO validate likes didn't add any anallowed
 
-    await dbItemRef.update({
+    // Never create a record from here, even if the item is deleted after the guard ran.
+    const updated = await updateExistingItem(dbItemRef, {
       ...(title !== undefined ? { title } : {}),
       ...(parentId !== undefined ? { parentId } : {}),
       ...(trash !== undefined ? { trash } : {}),
@@ -559,6 +556,10 @@ export class WorkspaceFilesService {
       ...(originalImage !== undefined ? { originalImage } : {}),
       ...(markers !== undefined ? { markers } : {}),
     });
+
+    if (!updated) {
+      return sendError('Item not found', 'Not found');
+    }
 
     if (markers !== undefined) {
       this.editorGateway.emitMarkerUpdate(uid, id, markers);

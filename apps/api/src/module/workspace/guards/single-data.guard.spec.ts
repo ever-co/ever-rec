@@ -107,7 +107,11 @@ describe('single-data routes', () => {
     it('lets a writer update the title', async () => {
       await put('uid-writer', `${type}/${id}`, { title: 'new' }).expect(200);
       expect(updateItemData).toHaveBeenCalledTimes(1);
-      expect(updateItemData.mock.calls[0][4]).toBe(id);
+      // updateItemData(uid, workspaceId, itemType, id, parentId, trash, likes, title, ...)
+      const args = updateItemData.mock.calls[0];
+      expect(args[2]).toBe(type);
+      expect(args[3]).toBe(id);
+      expect(args[7]).toBe('new');
     });
 
     it('refuses an id that matches no item, and changes nothing', async () => {
