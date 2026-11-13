@@ -5,7 +5,7 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { getUserAndWorkspace } from './utils';
+import * as admin from 'firebase-admin';
 import { parseCollectionToArray } from '../../../services/utils/helpers';
 import { IWorkspaceUser } from '../Interfaces/Workspace';
 import { is_id } from '../validators/id.validator';
@@ -16,8 +16,8 @@ import { is_id } from '../validators/id.validator';
  * exist, or an id that is not a valid id) gets 403, so the answer does not reveal which
  * workspaces exist. The guard fails closed: any error while loading the workspace is a 403.
  *
- * Must run after `AuthGuard`, which attaches the user to the request. Look getUserAndWorkspace
- * for details.
+ * Must run after `AuthGuard`, which attaches the user to the request. The workspace id must be the
+ * route param named `:workspaceId`.
  */
 @Injectable()
 export class CanAccessWorkspaceGuard implements CanActivate {
@@ -37,15 +37,18 @@ export class CanAccessWorkspaceGuard implements CanActivate {
 
     let isAllowed = false;
     try {
-      const { workspace } = await getUserAndWorkspace(context);
-      if (workspace) {
-        const members = parseCollectionToArray<IWorkspaceUser>(
-          workspace.members,
-        );
-        isAllowed =
-          workspace.admin === userId ||
-          members.some((member) => member?.id === userId);
-      }
+      // Only `admin` and `members` are read, not the whole workspace (its media collections can be large).
+      const db = admin.database();
+      const [adminSnap, membersSnap] = await Promise.all([
+        db.ref(`workspaces/${workspaceId}/admin`).get(),
+        db.ref(`workspaces/${workspaceId}/members`).get(),
+      ]);
+      const members = parseCollectionToArray<IWorkspaceUser>(
+        membersSnap.val(),
+      );
+      isAllowed =
+        adminSnap.val() === userId ||
+        members.some((member) => member?.id === userId);
     } catch (e) {
       console.log(e);
     }

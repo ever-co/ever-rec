@@ -55,7 +55,13 @@ jest.mock('firebase-admin', () => ({
       get: async () => {
         mockDb.reads.push(path);
         if (mockDb.fail) throw new Error('database unavailable');
-        return { val: () => mockDb.data[path] ?? null };
+        // `workspaces/<id>` is stored whole; `workspaces/<id>/<child>` reads one child of it.
+        const [root, id, child] = path.split('/');
+        const workspace = mockDb.data[`${root}/${id}`] as
+          | Record<string, unknown>
+          | undefined;
+        const value = child ? workspace?.[child] : workspace;
+        return { val: () => value ?? null };
       },
     }),
   }),
@@ -270,6 +276,17 @@ describe('CanAccessWorkspaceGuard', () => {
         .get('/workspace/ws1/teams/teams-members')
         .expect(401);
     });
+  });
+
+  it('reads only the admin and the members of the workspace', async () => {
+    await request(app.getHttpServer())
+      .get(MEMBERS_URL('ws1'))
+      .set(as('uid-member'))
+      .expect(200);
+    expect([...mockDb.reads].sort()).toEqual([
+      'workspaces/ws1/admin',
+      'workspaces/ws1/members',
+    ]);
   });
 
   describe('an anonymous request', () => {
