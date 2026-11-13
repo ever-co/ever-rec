@@ -1,7 +1,7 @@
 import * as admin from 'firebase-admin';
 import sharp from 'sharp';
 import moment from 'moment';
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { nanoid } from 'nanoid';
 import { Reference } from '@firebase/database-types';
 import { SharedService } from '../../services/shared/shared.service';
@@ -58,6 +58,17 @@ export class ImageService {
       : bucket.file(`users/${uid}/screenshots/${refName}`);
 
     return imgRef;
+  }
+
+  // 404 unless `imageId` is an image of this user. The id must already be a plain id.
+  async assertOwnImageExists(uid: string, imageId: string): Promise<void> {
+    const snap = await admin
+      .database()
+      .ref(`users/${uid}/screenshots/${imageId}`)
+      .get();
+    if (!snap.exists()) {
+      throw new NotFoundException('Image not found');
+    }
   }
 
   async share(uid: string, imageId: string): Promise<string> {

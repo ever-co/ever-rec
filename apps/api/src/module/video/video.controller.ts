@@ -40,6 +40,12 @@ import { VideoService } from './video.service';
 import { sendResponse } from 'src/services/utils/sendResponse';
 import { IVideoPayload } from './view.models/video.model';
 import IEditorVideo from 'src/interfaces/IEditorVideo';
+import {
+  CanAccessWorkspaceBodyGuard,
+  WorkspaceVideoAccess,
+} from '../workspace/guards/CanAccessWorkspaceQuery.guard';
+import { PermissionAccessEnum } from '../workspace/Interfaces/Workspace';
+import { ValidateId } from '../workspace/pipes/validate-id.pipe';
 
 @Controller('video')
 export class VideoController {
@@ -53,14 +59,18 @@ export class VideoController {
 
   @UseGuards(AuthGuard)
   @Get('share/:id')
-  async share(@Param('id') id: string, @Req() request): Promise<string> {
+  async share(
+    @Param('id', ValidateId) id: string,
+    @Req() request,
+  ): Promise<string> {
+    await this.videoService.assertOwnVideoExists(request.user?.id, id);
     return await this.videoService.share(request.user?.id, id);
   }
 
   @UseGuards(AuthGuard)
   @Delete('deleteLink/:link')
   async delete(
-    @Param('link') link: string,
+    @Param('link', ValidateId) link: string,
     @Req() request,
   ): Promise<void | { message: string }> {
     try {
@@ -72,13 +82,19 @@ export class VideoController {
 
   @UseGuards(AuthGuard)
   @Delete('deleteLinkById/:id')
-  async deleteById(@Param('id') id: string, @Req() request): Promise<void> {
+  async deleteById(
+    @Param('id', ValidateId) id: string,
+    @Req() request,
+  ): Promise<void> {
     await this.videoService.deleteLinkById(request.user?.id, id);
   }
 
   @UseGuards(AuthGuard)
   @Get('/api/:link')
-  async getVideoAPI(@Param('link') link: string, @Req() request): Promise<any> {
+  async getVideoAPI(
+    @Param('link', ValidateId) link: string,
+    @Req() request,
+  ): Promise<any> {
     return await this.sharedService.getItemById(
       'video',
       link,
@@ -91,9 +107,9 @@ export class VideoController {
   @UseGuards(AuthGuard)
   @Delete('/user/:ownerId/:itemId/comments/:commentId')
   async deleteComment(
-    @Param('itemId') itemId: string,
-    @Param('commentId') commentId: string,
-    @Param('ownerId') ownerId: string,
+    @Param('itemId', ValidateId) itemId: string,
+    @Param('commentId', ValidateId) commentId: string,
+    @Param('ownerId', ValidateId) ownerId: string,
     @Query('limit') limit: string,
     @Query('isPublic') isPublicQuery: string,
     @Req() request,
@@ -121,7 +137,7 @@ export class VideoController {
   @Post('/:ownerId/comment')
   @UseInterceptors(FileFieldsInterceptor([{ name: 'comment', maxCount: 1 }]))
   async postNewComment(
-    @Param('ownerId') ownerId: string,
+    @Param('ownerId', ValidateId) ownerId: string,
     @Req() request,
     @Body() body,
   ) {
@@ -148,9 +164,9 @@ export class VideoController {
   @UseGuards(AuthGuard)
   @Put('/user/:ownerId/:itemId/comment/:commentId')
   async updateComment(
-    @Param('itemId') itemId: string,
-    @Param('commentId') commentId: string,
-    @Param('ownerId') ownerId: string,
+    @Param('itemId', ValidateId) itemId: string,
+    @Param('commentId', ValidateId) commentId: string,
+    @Param('ownerId', ValidateId) ownerId: string,
     @Req() req,
     @Body() body,
     @Res() res,
@@ -177,7 +193,7 @@ export class VideoController {
   @UseGuards(UserGuard)
   @Post('/:link/comments')
   async getUpdatedComments(
-    @Param('link') itemId: string,
+    @Param('link', ValidateId) itemId: string,
     @Body() body,
     @Req() req,
     @Res() res,
@@ -201,11 +217,14 @@ export class VideoController {
     return res.send(result);
   }
 
-  @UseGuards(AuthGuard)
+  // A workspace video needs READ on the video and on its folder; no workspace id is the caller's
+  // own library.
+  @UseGuards(AuthGuard, CanAccessWorkspaceBodyGuard)
+  @WorkspaceVideoAccess(PermissionAccessEnum.READ)
   @Post(':videoId/like-own')
   async likeOwn(
     @Req() request,
-    @Param('videoId') videoId: string,
+    @Param('videoId', ValidateId) videoId: string,
     @Body() body: { workspaceId?: string },
   ) {
     const userId = request.user?.id;
@@ -226,7 +245,7 @@ export class VideoController {
   @Post(':sharedId/like')
   async like(
     @Req() request,
-    @Param('sharedId') sharedId: string,
+    @Param('sharedId', ValidateId) sharedId: string,
     @Query('isWorkspace') isWorkspace: boolean,
   ) {
     const sharedVideo = await this.sharedService.getSharedItemBySharedId(
@@ -351,13 +370,16 @@ export class VideoController {
 
   @UseGuards(AuthGuard)
   @Get('folder/:folderId')
-  async getFolderById(@Req() req, @Param('folderId') folderId: string) {
+  async getFolderById(
+    @Req() req,
+    @Param('folderId', ValidateId) folderId: string,
+  ) {
     return await this.videoService.getFolderById(req.user?.id, folderId);
   }
 
   @UseGuards(AuthGuard)
   @Get('single/:id')
-  async getVideoByIdPrivate(@Req() req, @Param('id') id: string) {
+  async getVideoByIdPrivate(@Req() req, @Param('id', ValidateId) id: string) {
     return await this.videoService.getVideoByIdPrivate(req.user?.id, id, 'get');
   }
 
@@ -414,7 +436,7 @@ export class VideoController {
   @Get('shared/single/:sharedId')
   async getSharedImageBySharedId(
     @Req() req,
-    @Param('sharedId') sharedId: string,
+    @Param('sharedId', ValidateId) sharedId: string,
     @Query('isWorkspace') isWorkspace: boolean,
   ) {
     return await this.videoService.getVideoBySharedId(sharedId, isWorkspace);
@@ -481,7 +503,7 @@ export class VideoController {
   @UseGuards(AuthGuard)
   @Get('getPosterRef/:id')
   async poster(
-    @Param('id') id: string,
+    @Param('id', ValidateId) id: string,
     @Req() request,
   ): Promise<string | false> {
     return await this.videoService.getPoster(request.user?.id, id);
@@ -505,12 +527,12 @@ export class VideoController {
   @Post('folders/:folderId/favorite')
   async addFolderToFavorites(
     @Req() req,
-    @Param() param,
+    @Param('folderId', ValidateId) folderId: string,
     @Body() body: { forceRemove?: boolean },
   ) {
     return await this.foldersSharedService.addRemoveFavFolder(
       req.user.id,
-      param.folderId,
+      folderId,
       'video',
       undefined,
       body?.forceRemove,

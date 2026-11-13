@@ -34,6 +34,7 @@ import { UserGuard } from '../auth/guards/user.guard';
 import { ImageService } from './image.service';
 import { ContextUploader } from './uploader/context.uploader';
 import { IImagePayload } from './view.models/image.model';
+import { ValidateId } from '../workspace/pipes/validate-id.pipe';
 
 // TODO: add return type on all endpoints
 
@@ -58,14 +59,18 @@ export class ImageController {
 
   @UseGuards(AuthGuard)
   @Get('share/:id')
-  async share(@Param('id') id: string, @Req() request): Promise<string> {
+  async share(
+    @Param('id', ValidateId) id: string,
+    @Req() request,
+  ): Promise<string> {
+    await this.imageService.assertOwnImageExists(request.user.id, id);
     return await this.imageService.share(request.user.id, id);
   }
 
   @UseGuards(AuthGuard)
   @Delete('deleteLink/:link')
   async delete(
-    @Param('link') link: string,
+    @Param('link', ValidateId) link: string,
     @Req() request,
   ): Promise<void | { message: string }> {
     try {
@@ -77,14 +82,17 @@ export class ImageController {
 
   @UseGuards(AuthGuard)
   @Delete('deleteLinkById/:id')
-  async deleteById(@Param('id') id: string, @Req() request): Promise<void> {
+  async deleteById(
+    @Param('id', ValidateId) id: string,
+    @Req() request,
+  ): Promise<void> {
     await this.imageService.deleteSharedImageByImageId(request.user.id, id);
   }
 
   @UseGuards(AuthGuard)
   @Get('/api/:link')
   async getImageREST(
-    @Param('link') link: string,
+    @Param('link', ValidateId) link: string,
     @Req() request,
     @Res() res,
   ): Promise<queryReturnType> {
@@ -102,9 +110,9 @@ export class ImageController {
   @UseGuards(AuthGuard)
   @Delete('/user/:ownerId/:link/comments/:commentId')
   async deleteComment(
-    @Param('link') link: string,
-    @Param('commentId') commentId: string,
-    @Param('ownerId') ownerId: string,
+    @Param('link', ValidateId) link: string,
+    @Param('commentId', ValidateId) commentId: string,
+    @Param('ownerId', ValidateId) ownerId: string,
     @Query('limit') limit: string,
     @Query('isPublic') isPublicQuery: string,
     @Req() request,
@@ -131,7 +139,7 @@ export class ImageController {
   @UseGuards(AuthGuard)
   @Post('/:userId/comment')
   async postNewComment(
-    @Param('userId') userId: string,
+    @Param('userId', ValidateId) userId: string,
     @Req() request,
     @Body() body,
   ) {
@@ -155,9 +163,9 @@ export class ImageController {
   @UseGuards(AuthGuard)
   @Put('/user/:ownerId/:itemId/comment/:commentId')
   async updateComment(
-    @Param('itemId') itemId: string,
-    @Param('commentId') commentId: string,
-    @Param('ownerId') ownerId: string,
+    @Param('itemId', ValidateId) itemId: string,
+    @Param('commentId', ValidateId) commentId: string,
+    @Param('ownerId', ValidateId) ownerId: string,
     @Req() req,
     @Body() body,
     @Res() res,
@@ -184,7 +192,7 @@ export class ImageController {
   @UseGuards(UserGuard)
   @Post('/:link/comments')
   async getUpdatedComments(
-    @Param('link') itemId: string,
+    @Param('link', ValidateId) itemId: string,
     @Body() body,
     @Req() req,
     @Res() res,
@@ -212,7 +220,7 @@ export class ImageController {
   async like(
     @Req() request,
     @Res() res,
-    @Param('linkId') linkId: string,
+    @Param('linkId', ValidateId) linkId: string,
     @Query('isWorkspace') isWorkspace: boolean,
   ) {
     const sharedImage = await this.sharedService.getSharedItemBySharedId(
@@ -258,7 +266,7 @@ export class ImageController {
 
   @UseGuards(AuthGuard)
   @Get('editor/:id')
-  async getEditorImage(@Req() req, @Param('id') id: string) {
+  async getEditorImage(@Req() req, @Param('id', ValidateId) id: string) {
     return await this.imageService.getUploadedFileByDbId(req.user?.id, id);
   }
 
@@ -308,14 +316,14 @@ export class ImageController {
   @Get('folder/:folderId')
   async getFolderById(
     @Req() req,
-    @Param('folderId') folderId: string,
+    @Param('folderId', ValidateId) folderId: string,
   ): Promise<IDataResponse<IDbFolder | null>> {
     return await this.imageService.getFolderById(req.user?.id, folderId);
   }
 
   @UseGuards(AuthGuard)
   @Get('single/:id')
-  async getImageByIdPrivate(@Req() req, @Param('id') id: string) {
+  async getImageByIdPrivate(@Req() req, @Param('id', ValidateId) id: string) {
     return await this.imageService.getImageByIdPrivate(req.user?.id, id, 'get');
   }
 
@@ -375,7 +383,7 @@ export class ImageController {
   @Get('shared/single/:sharedId')
   async getSharedImageBySharedId(
     @Req() req,
-    @Param('sharedId') sharedId: string,
+    @Param('sharedId', ValidateId) sharedId: string,
     @Query('isWorkspace') isWorkspace: boolean,
   ) {
     return await this.imageService.getImageBySharedId(sharedId, isWorkspace);
@@ -443,12 +451,12 @@ export class ImageController {
   @Post('folders/:folderId/favorite')
   async addFolderToFavorites(
     @Req() req,
-    @Param() param,
+    @Param('folderId', ValidateId) folderId: string,
     @Body() body: { forceRemove?: boolean },
   ) {
     return await this.foldersSharedService.addRemoveFavFolder(
       req.user.id,
-      param.folderId,
+      folderId,
       'image',
       undefined,
       body?.forceRemove,

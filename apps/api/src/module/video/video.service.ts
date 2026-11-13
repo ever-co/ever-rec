@@ -1,6 +1,6 @@
 import { Reference } from '@firebase/database-types';
 import type { FullMetadata } from '@firebase/storage';
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import * as admin from 'firebase-admin';
 import moment from 'moment';
@@ -46,6 +46,17 @@ export class VideoService {
       action: 'read',
       expires: '03-01-2500', // this probaby should be calculated differently 😄
     };
+  }
+
+  // 404 unless `videoId` is a video of this user. The id must already be a plain id.
+  async assertOwnVideoExists(uid: string, videoId: string): Promise<void> {
+    const snap = await admin
+      .database()
+      .ref(`users/${uid}/videos/${videoId}`)
+      .get();
+    if (!snap.exists()) {
+      throw new NotFoundException('Video not found');
+    }
   }
 
   async share(uid: string, videoId: string): Promise<string> {
