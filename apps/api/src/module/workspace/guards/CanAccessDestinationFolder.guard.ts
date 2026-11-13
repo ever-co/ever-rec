@@ -21,7 +21,11 @@ export class CanAccessDestinationFolderGuard implements CanActivate {
       const { user, workspace, req } = await getUserAndWorkspace(context);
       const parentId = req.body?.parentId;
 
-      if (parentId === undefined || parentId === false || parentId === 'false') {
+      if (
+        parentId === undefined ||
+        parentId === false ||
+        parentId === 'false'
+      ) {
         return true;
       }
 

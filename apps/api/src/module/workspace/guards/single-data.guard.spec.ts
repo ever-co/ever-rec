@@ -79,11 +79,16 @@ describe('single-data routes', () => {
         admin: 'uid-admin',
         members: [{ id: 'uid-admin' }, { id: 'uid-writer' }],
         folders: [
-          { id: 'folderRead', access: { members: [{ uid: 'uid-writer', access: 'READ' }] } },
+          {
+            id: 'folderRead',
+            access: { members: [{ uid: 'uid-writer', access: 'READ' }] },
+          },
           { id: 'folderWrite', access: writeAccess('uid-writer') },
           { id: 'folderOpen' },
         ],
-        screenshots: { img1: { id: 'img1', access: writeAccess('uid-writer') } },
+        screenshots: {
+          img1: { id: 'img1', access: writeAccess('uid-writer') },
+        },
         videos: { vid1: { id: 'vid1', access: writeAccess('uid-writer') } },
       },
     };
@@ -150,7 +155,9 @@ describe('single-data routes', () => {
 
     it('keeps the workspace root allowed as a destination', async () => {
       await put('uid-writer', `${type}/${id}`, { parentId: false }).expect(200);
-      await put('uid-writer', `${type}/${id}`, { parentId: 'false' }).expect(200);
+      await put('uid-writer', `${type}/${id}`, { parentId: 'false' }).expect(
+        200,
+      );
       expect(updateItemData).toHaveBeenCalledTimes(2);
     });
 

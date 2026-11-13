@@ -35,7 +35,11 @@ describe('updateExistingItem', () => {
   it('returns false and creates nothing for a missing record', async () => {
     const ref = fakeRef(null);
     expect(
-      await updateExistingItem(ref, { title: 'x', parentId: 'f1', originalImage: 'y' }),
+      await updateExistingItem(ref, {
+        title: 'x',
+        parentId: 'f1',
+        originalImage: 'y',
+      }),
     ).toBe(false);
     expect(ref.state.record).toBeNull();
   });

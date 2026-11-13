@@ -35,6 +35,7 @@ import {
   NamedImageWriteInterceptor,
 } from '../interceptors/NamedImageWrite.interceptor';
 import { getPersonalImageFileName } from '../guards/utils';
+import { CanAccessDestinationFolder } from '../decorators/CanAccessDestinationFolder.decorator';
 import { WorkspaceSharedService } from '../services/shared.service';
 import { AuthGuard, IRequestUser } from '../../auth/guards/auth.guard';
 import { CanAccessWorkspaceGuard } from '../guards/CanAccessWorkspace.guard';

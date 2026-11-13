@@ -20,7 +20,7 @@ export const ITEM_MUST_EXIST_METADATA = 'itemMustExist';
 // item (admin included) instead of falling back to workspace membership.
 export const ItemMustExist = () => SetMetadata(ITEM_MUST_EXIST_METADATA, true);
 
-export const ItemAccess =(requiredAccess: PermissionAccessEnum) =>
+export const ItemAccess = (requiredAccess: PermissionAccessEnum) =>
   SetMetadata(REQUIRED_ITEM_ACCESS_METADATA, requiredAccess);
 
 export const ItemType = (itemType: CanAccessWorkspaceItemType) =>
