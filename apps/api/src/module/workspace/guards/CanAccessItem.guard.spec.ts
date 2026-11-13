@@ -161,6 +161,15 @@ describe('save-original item permission', () => {
     expect(saveOriginalWSImage).not.toHaveBeenCalled();
   });
 
+  it('ignores an image id in the query that matches no image', async () => {
+    await request(app.getHttpServer())
+      .post(`${SAVE_ORIGINAL_URL}?imageId=missing`)
+      .set(as('uid-reader'))
+      .send({ fullFileName: 'restricted.png' })
+      .expect(403);
+    expect(saveOriginalWSImage).not.toHaveBeenCalled();
+  });
+
   it('refuses a file name that matches no image of the workspace', async () => {
     await save('uid-reader', 'missing.png').expect(403);
     expect(saveOriginalWSImage).not.toHaveBeenCalled();
