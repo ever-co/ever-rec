@@ -1,4 +1,7 @@
-import { FC, useEffect, useState } from 'react';
+import { FC, useEffect, useMemo, useState } from 'react';
+import { buildVideoEmbedCode, getVideoEmbedUrl } from 'app/utilities/embed';
+import { errorHandler } from 'app/services/helpers/errors';
+import { successMessage } from 'app/services/helpers/toastMessages';
 import styles from './ShareItemModal.module.scss';
 import AppSpinnerLocal from 'components/containers/appSpinnerLocal/AppSpinnerLocal';
 import AppButton from 'components/controls/AppButton';
@@ -52,6 +55,22 @@ const ShareItemModal: FC<IProps> = ({
     setShareLoadingState(true);
     await getShareableLinkHandler();
     setShareLoadingState(false);
+  };
+
+  const embedCode = useMemo(() => {
+    const embedUrl = sharedLink ? getVideoEmbedUrl(sharedLink) : null;
+    return embedUrl ? buildVideoEmbedCode(embedUrl, item?.dbData?.title) : null;
+  }, [sharedLink, item?.dbData?.title]);
+
+  const copyEmbedCode = async () => {
+    if (!embedCode) return;
+
+    try {
+      await window.navigator.clipboard.writeText(embedCode);
+      successMessage(t('page.image.embedCodeCopied'));
+    } catch (e) {
+      errorHandler(new Error(t('hooks.toasts.shareLinkCopyError')));
+    }
   };
 
   const removeSharedLink = async () => {
@@ -110,6 +129,16 @@ const ShareItemModal: FC<IProps> = ({
               </>
             )}
           </AppButton>
+
+          {embedCode && (
+            <AppButton
+              full
+              className={`${styles.generateLink} tw-mt-3`}
+              onClick={copyEmbedCode}
+            >
+              {t('page.image.copyEmbedCode')}
+            </AppButton>
+          )}
         </div>
       ) : (
         <div className="tw-pb-4">

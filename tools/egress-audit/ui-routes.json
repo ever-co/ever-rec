@@ -189,6 +189,11 @@
       "source": "router"
     },
     {
+      "path": "/video/shared/embed/:id",
+      "file": "apps/portal/pages/video/shared/embed/[id].tsx",
+      "source": "router"
+    },
+    {
       "path": "/whiteboard/:whiteboardID",
       "file": "apps/portal/pages/whiteboard/[whiteboardID].tsx",
       "source": "router"
