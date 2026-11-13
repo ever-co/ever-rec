@@ -226,9 +226,12 @@ export const saveOriginalWSImageAPI = async (
   fullFileName: string,
   workspaceId: string,
 ): Promise<string> => {
-  return api.post(`/api/v1/workspace/${workspaceId}/save-original`, {
-    fullFileName,
-  });
+  // The API declares this route as `workspace/:workspaceId/files/:workspaceId/save-original`
+  // (the same param name twice), so the handler reads the workspace id from the last segment.
+  return api.post(
+    `/api/v1/workspace/${workspaceId}/files/${workspaceId}/save-original`,
+    { fullFileName },
+  );
 };
 
 export const deleteWorkspaceImageAPI = async (
