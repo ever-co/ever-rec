@@ -535,7 +535,7 @@ const SingleVideoPage: FC<IProps> = ({
           </div>
         )}
 
-        {!isWorkspace && (
+        {!isWorkspace && !isPublicWorkspace && (
           <div className={styles.videoCommentsWrapper}>
             <VideoComments
               userId={user?.id}

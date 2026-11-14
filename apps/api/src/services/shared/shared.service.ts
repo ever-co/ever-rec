@@ -218,7 +218,7 @@ export class SharedService {
     content: string,
     isPublic: boolean,
     limit?: string,
-  ): Promise<IDataResponse<DbCommentIntF>> {
+  ): Promise<IDataResponse<ICommentResponse>> {
     try {
       // All three ids go into a database path: a nested path or a wildcard must never get through.
       if (

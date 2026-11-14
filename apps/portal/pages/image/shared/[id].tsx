@@ -66,7 +66,8 @@ const SharedImage: React.FC<ISharedItem> = ({ user, ip }) => {
   const [imageHeight, setImageHeight] = useState(0);
   const { commentsTemplate } = useEnableComments({
     itemType: 'image',
-    item: image as any,
+    // Workspace items have no comment storage: nothing is requested for them.
+    item: (isWorkspace ? null : image) as any,
     isPublic: true,
     user: user as any,
     isWorkspace,
@@ -263,13 +264,21 @@ tw-items-center tw-justify-center tw-bg-blue-grey tw-h-500px"
                   </div>
                 </Col>
 
-                <Col xs={8} lg={8} xl={7} md={8} className="mx-lg:tw-my-30px">
-                  <div className="tw-bg-blue-grey tw-rounded-2lg tw-py-6 tw-px-4 tw-shadow-md">
-                    <div className="tw-bg-white tw-flex tw-flex-col tw-justify-between tw-rounded-b-md tw-rounded-tl-md tw-p-3">
-                      {commentsTemplate}
+                {!isWorkspace && (
+                  <Col
+                    xs={8}
+                    lg={8}
+                    xl={7}
+                    md={8}
+                    className="mx-lg:tw-my-30px"
+                  >
+                    <div className="tw-bg-blue-grey tw-rounded-2lg tw-py-6 tw-px-4 tw-shadow-md">
+                      <div className="tw-bg-white tw-flex tw-flex-col tw-justify-between tw-rounded-b-md tw-rounded-tl-md tw-p-3">
+                        {commentsTemplate}
+                      </div>
                     </div>
-                  </div>
-                </Col>
+                  </Col>
+                )}
               </Row>
             </AppContainer>
           </>
