@@ -201,12 +201,16 @@ export class VideoService {
 
         const allViews = formatDataToArray(videoData.views);
         const chapters = parseCollectionToArray(videoData.chapters);
+        // Anyone with the link reads this answer: the viewers (names, emails) go to the owner
+        // only, through `shared/get-view-info`.
+        const publicData: any = { ...videoData };
+        delete publicData.uniqueViews;
 
         return sendResponse({
           video: {
             owner,
             dbData: {
-              ...videoData,
+              ...publicData,
               id: videoData.id,
               views: allViews.length,
               link: sharedLink,

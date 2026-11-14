@@ -208,17 +208,15 @@ export class UniqueViewsSharedService {
     itemRef: admin.database.Reference,
     ip: string,
   ): Promise<number> {
-    const { snapshot } = await itemRef
-      .child('views')
-      .transaction((current) => {
-        const list: IView[] = formatDataToArray(current);
+    const { snapshot } = await itemRef.child('views').transaction((current) => {
+      const list: IView[] = formatDataToArray(current);
 
-        if (list.some((view) => view.ip === ip)) {
-          return; // this address already counted
-        }
+      if (list.some((view) => view.ip === ip)) {
+        return; // this address already counted
+      }
 
-        return [...list, { ip, timestamp: Date.now() }];
-      });
+      return [...list, { ip, timestamp: Date.now() }];
+    });
 
     return formatDataToArray(snapshot.val()).length;
   }

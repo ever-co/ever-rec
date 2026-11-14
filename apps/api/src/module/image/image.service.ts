@@ -207,12 +207,17 @@ export class ImageService {
           ? imageData.views.length
           : 0;
 
+        // Anyone with the link reads this answer: the viewers (names, emails) go to the owner
+        // only, through `shared/get-view-info`.
+        const publicData = { ...imageSnapshot.val() };
+        delete publicData.uniqueViews;
+
         return {
           image: {
             owner,
             dbData: {
               id: shared.imageId,
-              ...imageSnapshot.val(),
+              ...publicData,
               views,
               link: sharedLink[0],
               commentsLength: imageData.comments?.length || 0,

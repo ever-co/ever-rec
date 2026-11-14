@@ -296,13 +296,16 @@ describe('UniqueViewsSharedService', () => {
     it.each([
       ['an anonymous caller', null],
       ['a signed-in stranger', 'uid-guest'],
-    ])('gives %s the count only, with no email in it', async (_name, userId) => {
-      const res = await get({ userId });
+    ])(
+      'gives %s the count only, with no email in it',
+      async (_name, userId) => {
+        const res = await get({ userId });
 
-      expect(res.data).toEqual({ uniqueViewsDb: [], views: 2 });
-      expect(JSON.stringify(res)).not.toContain('guest@example.com');
-      expect(JSON.stringify(res)).not.toContain('Guest Person');
-    });
+        expect(res.data).toEqual({ uniqueViewsDb: [], views: 2 });
+        expect(JSON.stringify(res)).not.toContain('guest@example.com');
+        expect(JSON.stringify(res)).not.toContain('Guest Person');
+      },
+    );
 
     it('finds the caller’s own item by id', async () => {
       const res = await get({

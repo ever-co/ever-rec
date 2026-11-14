@@ -76,12 +76,7 @@ describe('SharedService.likeItem', () => {
   });
 
   it('adds the like, and takes it back on the second call', async () => {
-    const liked = await service.likeItem(
-      'video',
-      'vid1',
-      'uid-owner',
-      'uid-a',
-    );
+    const liked = await service.likeItem('video', 'vid1', 'uid-owner', 'uid-a');
     expect(liked.data?.map((like) => like.uid)).toEqual(['uid-a']);
 
     const unliked = await service.likeItem(

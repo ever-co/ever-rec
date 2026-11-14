@@ -59,9 +59,7 @@ const EmbeddedSharedVideo: FC = () => {
     }
 
     addedUniqueView.current = true;
-    addUniqueView(id, 'video', Boolean(router.query.ws)).catch(
-      () => undefined,
-    );
+    addUniqueView(id, 'video', Boolean(router.query.ws)).catch(() => undefined);
   }, [video, router.query]);
 
   // The stream data is read once. The status endpoints need a signed-in user, so an

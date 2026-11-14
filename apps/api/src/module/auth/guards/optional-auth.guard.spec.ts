@@ -71,9 +71,9 @@ describe('OptionalAuthGuard', () => {
       req.user = { id: 'uid-c' };
     });
 
-    expect((await run({ idtoken: 'old', 'x-refresh-token': 'r2' })).user).toEqual(
-      { id: 'uid-c' },
-    );
+    expect(
+      (await run({ idtoken: 'old', 'x-refresh-token': 'r2' })).user,
+    ).toEqual({ id: 'uid-c' });
     expect(refreshToken).toHaveBeenCalledWith('r2', expect.anything());
   });
 
