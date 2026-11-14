@@ -2,6 +2,15 @@ import { Controller, Get, Param, Query, Req, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '../../auth/guards/auth.guard';
 import { MuxService } from './mux.service';
 import { PlaybackStatusEnum } from '../../../enums/StreamingServicesEnums';
+import {
+  CanAccessWorkspaceQueryGuard,
+  WorkspaceVideoAccess,
+} from '../../workspace/guards/CanAccessWorkspaceQuery.guard';
+import { PermissionAccessEnum } from '../../workspace/Interfaces/Workspace';
+import {
+  IPlaybackStatusTarget,
+  PlaybackStatusGuard,
+} from '../guards/playback-status.guard';
 
 @Controller('mux')
 export class MuxController {
@@ -19,7 +28,8 @@ export class MuxController {
     return this.muxService.getUploadedAsset(uploadId);
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, CanAccessWorkspaceQueryGuard, PlaybackStatusGuard)
+  @WorkspaceVideoAccess(PermissionAccessEnum.READ)
   @Get('/get-status/:videoId/:assetId')
   async getPlaybackStatus(
     @Req() request,
@@ -29,12 +39,14 @@ export class MuxController {
   ): Promise<{
     data: PlaybackStatusEnum;
   }> {
-    const uid = request.user?.id;
+    // Set by PlaybackStatusGuard: the record the status belongs to (a shared video's owner, not
+    // the viewer).
+    const target: IPlaybackStatusTarget = request.playbackStatusTarget;
     return this.muxService.getPlaybackStatus(
-      uid,
+      target.uid,
       videoId,
       assetId,
-      workspaceId,
+      target.workspaceId ?? workspaceId,
     );
   }
 
