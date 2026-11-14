@@ -108,6 +108,16 @@ describe('comment box item type', () => {
     );
   });
 
+  // Workspace items have no comment storage: the box is not shown and asks the API for nothing.
+  it('shows no comment box and requests nothing for a workspace item', async () => {
+    await render({ itemType: 'image', isWorkspace: true });
+
+    expect(container.querySelector('input')).toBeNull();
+    expect(container.textContent).toBe('');
+    expect(mockGetUpdatedComments).not.toHaveBeenCalled();
+    expect(mockAddComment).not.toHaveBeenCalled();
+  });
+
   it('keeps treating the item as a video by default', async () => {
     await render();
     await typeAndPost('hi');

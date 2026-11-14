@@ -228,6 +228,8 @@ tw-items-center tw-justify-center tw-bg-blue-grey tw-h-500px"
                   itemId={image?.dbData?.id as string}
                   userId={user?.id}
                   itemOwnerId={imageOwner?.id as string}
+                  itemType="image"
+                  isWorkspace
                 />
               </Col>
 

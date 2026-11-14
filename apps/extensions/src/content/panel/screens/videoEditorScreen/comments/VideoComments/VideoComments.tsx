@@ -21,9 +21,12 @@ interface IProps {
   itemOwnerId: string;
   itemId: string;
   itemType?: ItemType;
+  // Comments are stored under a user's own item; workspace items have no comment storage, so
+  // the box is not shown (and nothing is requested) for them.
+  isWorkspace?: boolean;
 }
 
-const VideoComments: FC<IProps> = ({
+const VideoCommentsBox: FC<Omit<IProps, 'isWorkspace'>> = ({
   userId,
   itemOwnerId,
   itemId,
@@ -210,5 +213,8 @@ const VideoComments: FC<IProps> = ({
     </div>
   );
 };
+
+const VideoComments: FC<IProps> = ({ isWorkspace, ...props }) =>
+  isWorkspace ? null : <VideoCommentsBox {...props} />;
 
 export default VideoComments;
