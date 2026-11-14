@@ -107,25 +107,25 @@ describe('SharedService.addComment', () => {
 
   it('refuses an item of another owner than the one in the path', async () => {
     mockDb.data.users['uid-guest'].videos = { mine: { id: 'mine' } };
-    expect((await comment('video', 'uid-guest', 'uid-owner', 'vid1')).status).not.toBe(
-      'success',
-    );
-    expect((await comment('video', 'uid-guest', 'uid-guest', 'vid1')).status).not.toBe(
-      'success',
-    );
+    expect(
+      (await comment('video', 'uid-guest', 'uid-owner', 'vid1')).status,
+    ).not.toBe('success');
+    expect(
+      (await comment('video', 'uid-guest', 'uid-guest', 'vid1')).status,
+    ).not.toBe('success');
     expect(mockDb.writes).toEqual([]);
   });
 
   it('writes nothing for an item that does not exist', async () => {
-    expect((await comment('video', 'uid-owner', 'uid-owner', 'gone')).status).not.toBe(
-      'success',
-    );
+    expect(
+      (await comment('video', 'uid-owner', 'uid-owner', 'gone')).status,
+    ).not.toBe('success');
     expect(
       (await comment('video', 'uid-owner', 'uid-guest', 'gone', true)).status,
     ).not.toBe('success');
-    expect((await comment('image', 'uid-owner', 'uid-owner', 'vid1')).status).not.toBe(
-      'success',
-    );
+    expect(
+      (await comment('image', 'uid-owner', 'uid-owner', 'vid1')).status,
+    ).not.toBe('success');
     expect(mockDb.writes).toEqual([]);
   });
 

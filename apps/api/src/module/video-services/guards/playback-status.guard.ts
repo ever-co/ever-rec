@@ -99,7 +99,11 @@ const findSharedVideo = async (
     const db = admin.database();
 
     const links = (
-      await db.ref('sharedVideos').orderByChild('videoId').equalTo(videoId).get()
+      await db
+        .ref('sharedVideos')
+        .orderByChild('videoId')
+        .equalTo(videoId)
+        .get()
     ).val();
     for (const link of Object.values<any>(links ?? {})) {
       const ownerId = link?.uid;

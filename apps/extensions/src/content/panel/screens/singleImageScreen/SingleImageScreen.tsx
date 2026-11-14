@@ -217,6 +217,7 @@ const SingleImageScreen: React.FC = () => {
                 </div>
 
                 <VideoComments
+                  itemType="image"
                   itemId={image?.dbData?.id || ''}
                   userId={user?.id}
                   itemOwnerId={user?.id}

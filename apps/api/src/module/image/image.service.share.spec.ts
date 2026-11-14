@@ -42,7 +42,9 @@ jest.mock('firebase-admin', () => {
             get: async () => {
               const all = read(path) ?? {};
               const found = Object.fromEntries(
-                Object.entries<any>(all).filter(([, v]) => v?.[child] === wanted),
+                Object.entries<any>(all).filter(
+                  ([, v]) => v?.[child] === wanted,
+                ),
               );
               return {
                 val: () => (Object.keys(found).length ? found : null),
@@ -61,13 +63,22 @@ describe('ImageService.share', () => {
 
   beforeEach(() => {
     jest.spyOn(console, 'log').mockImplementation(() => undefined);
-    service = new ImageService({} as any, {} as any, { emit } as any, {} as any);
+    service = new ImageService(
+      {} as any,
+      {} as any,
+      { emit } as any,
+      {} as any,
+    );
     emit.mockReset();
     mockDb.writes = [];
     mockDb.data = {
       users: { 'uid-owner': { screenshots: { img1: { id: 'img1' } } } },
       shared: {
-        existing: { uid: 'uid-owner', imageId: 'img1', uidImageId: 'uid-owner|img1' },
+        existing: {
+          uid: 'uid-owner',
+          imageId: 'img1',
+          uidImageId: 'uid-owner|img1',
+        },
       },
     };
   });
@@ -101,9 +112,9 @@ describe('ImageService.share', () => {
 
   it('refuses ids that are not plain ids', async () => {
     for (const id of ['img1/x', '', 'a.b', '$x', undefined, null, { a: 1 }]) {
-      await expect(service.share('uid-owner', id as any)).rejects.toBeInstanceOf(
-        ForbiddenException,
-      );
+      await expect(
+        service.share('uid-owner', id as any),
+      ).rejects.toBeInstanceOf(ForbiddenException);
     }
     await expect(service.share('', 'img1')).rejects.toBeInstanceOf(
       ForbiddenException,

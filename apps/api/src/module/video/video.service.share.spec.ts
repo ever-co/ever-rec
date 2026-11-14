@@ -48,7 +48,9 @@ jest.mock('firebase-admin', () => {
             get: async () => {
               const all = read(path) ?? {};
               const found = Object.fromEntries(
-                Object.entries<any>(all).filter(([, v]) => v?.[child] === wanted),
+                Object.entries<any>(all).filter(
+                  ([, v]) => v?.[child] === wanted,
+                ),
               );
               return {
                 val: () => (Object.keys(found).length ? found : null),
@@ -66,13 +68,22 @@ describe('VideoService.share', () => {
   let service: VideoService;
 
   beforeEach(() => {
-    service = new VideoService({} as any, { emit } as any, {} as any, {} as any);
+    service = new VideoService(
+      {} as any,
+      { emit } as any,
+      {} as any,
+      {} as any,
+    );
     emit.mockReset();
     mockDb.writes = [];
     mockDb.data = {
       users: { 'uid-owner': { videos: { vid1: { id: 'vid1' } } } },
       sharedVideos: {
-        existing: { uid: 'uid-owner', videoId: 'vid1', uidVideoId: 'uid-owner|vid1' },
+        existing: {
+          uid: 'uid-owner',
+          videoId: 'vid1',
+          uidVideoId: 'uid-owner|vid1',
+        },
       },
     };
   });
@@ -102,9 +113,9 @@ describe('VideoService.share', () => {
 
   it('refuses ids that are not plain ids', async () => {
     for (const id of ['vid1/x', '', 'a.b', '$x', undefined, null, { a: 1 }]) {
-      await expect(service.share('uid-owner', id as any)).rejects.toBeInstanceOf(
-        ForbiddenException,
-      );
+      await expect(
+        service.share('uid-owner', id as any),
+      ).rejects.toBeInstanceOf(ForbiddenException);
     }
     await expect(service.share('', 'vid1')).rejects.toBeInstanceOf(
       ForbiddenException,

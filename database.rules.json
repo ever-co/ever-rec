@@ -39,13 +39,17 @@
     "sharedVideos": {
       ".indexOn": [
         "uidVideoId",
-        "uid"
+        "uid",
+        "videoId"
       ],
       ".read": "auth != null",
       ".write": "auth != null"
     },
     "sharedWorkspaceItems": {
-      ".indexOn": "queryField",
+      ".indexOn": [
+        "queryField",
+        "itemId"
+      ],
       ".read": "auth != null",
       ".write": "auth != null"
     },
