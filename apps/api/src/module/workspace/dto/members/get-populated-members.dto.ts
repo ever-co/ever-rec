@@ -10,10 +10,15 @@ export class GetPopulatedMembersDto {
   @IsInt()
   @Min(1)
   @Max(MAX_POPULATED_MEMBERS_LIMIT)
-  // The transform runs before the validators, so the check has to be on the number. Anything that
-  // is not plain digits is left as it is and fails `IsInt`.
-  @Transform(({ value }) =>
-    typeof value === 'string' && /^\d+$/.test(value) ? Number(value) : value,
-  )
+  // The transform runs before the validators, so the check has to be on the number. A string that
+  // is not a whole number of 1 or more (`0`, `-5`, `abc`, `1.5`) becomes `undefined`, so the
+  // service lists the default first window. A value that is not a string, such as a repeated
+  // `limit`, is left as it is and fails `IsInt`. A number above the maximum fails `Max`.
+  @Transform(({ value }) => {
+    if (typeof value !== 'string') return value;
+    if (!/^\d+$/.test(value)) return undefined;
+    const parsed = Number(value);
+    return parsed >= 1 ? parsed : undefined;
+  })
   limit?: number;
 }

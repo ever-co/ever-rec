@@ -30,19 +30,17 @@ describe('GetPopulatedMembersDto', () => {
     expect((await parse({ limit: raw })).limit).toBe(expected);
   });
 
-  it.each([
-    '0',
-    '-5',
-    '1.5',
-    '12abc',
-    'abc',
-    '',
-    ' 20',
-    String(MAX_POPULATED_MEMBERS_LIMIT + 1),
-  ])('rejects limit %p', async (raw) => {
-    await expect(parse({ limit: raw })).rejects.toBeInstanceOf(
-      BadRequestException,
-    );
+  it.each(['0', '-5', '1.5', '12abc', 'abc', '', ' 20'])(
+    'ignores limit %p, so the default window is listed',
+    async (raw) => {
+      expect((await parse({ limit: raw })).limit).toBeUndefined();
+    },
+  );
+
+  it('rejects a limit above the maximum', async () => {
+    await expect(
+      parse({ limit: String(MAX_POPULATED_MEMBERS_LIMIT + 1) }),
+    ).rejects.toBeInstanceOf(BadRequestException);
   });
 
   it('rejects a limit sent twice', async () => {
