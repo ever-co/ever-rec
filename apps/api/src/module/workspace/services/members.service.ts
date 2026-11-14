@@ -75,9 +75,12 @@ export class WorkspaceMembersService {
     let startIndex = 0;
     let endIndex = 20;
 
-    if (limit) {
-      startIndex = +limit - 20;
-      endIndex = +limit;
+    // `limit` is the end of the window. A start below zero would make `slice` count from the end
+    // of the list and return nothing for a short limit, so the window never starts before 0.
+    const limitNumber = Math.floor(Number(limit));
+    if (Number.isFinite(limitNumber) && limitNumber > 0) {
+      startIndex = Math.max(0, limitNumber - 20);
+      endIndex = limitNumber;
     }
 
     // A workspace without members is stored without the key, and Firebase can return a sparse
