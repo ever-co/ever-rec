@@ -30,6 +30,7 @@ import { DatabaseService } from 'firebase-admin/lib/database/database';
 import { Database } from 'firebase-admin/lib/database';
 import { IUser } from 'src/interfaces/IUser';
 import { parseCollectionToArray } from '../utils/helpers';
+import { is_id } from '../../module/workspace/validators/id.validator';
 
 export type queryReturnType =
   | ImageViewModel
@@ -61,6 +62,21 @@ export const dbEndpoints = {
     image: 'folders',
     video: 'videoFolders',
   },
+};
+
+export const COMMENT_MAX_LENGTH = 2000;
+
+/** Why a comment's content cannot be stored, or null when it can. */
+export const commentContentError = (content: unknown): string | null => {
+  if (typeof content !== 'string' || !content.trim()) {
+    return 'Comment cannot be empty.';
+  }
+
+  if (content.length > COMMENT_MAX_LENGTH) {
+    return `Comment cannot be longer than ${COMMENT_MAX_LENGTH} characters.`;
+  }
+
+  return null;
 };
 
 export type PermissionCollectionType =
@@ -170,6 +186,38 @@ export class SharedService {
     }
   }
 
+  /**
+   * Comments live under the owner's item (`users/<owner>/<collection>/<item>/comments`), so the
+   * caller may use them only when the item exists and is theirs, or is shared. The `isPublic` flag
+   * and the owner id of a request are never trusted: the shared record decides, not the caller.
+   */
+  async canViewItemComments(
+    itemType: ItemType,
+    ownerId: string,
+    itemId: string,
+    callerId?: string,
+  ): Promise<boolean> {
+    if (!is_id(ownerId) || !is_id(itemId)) {
+      return false;
+    }
+
+    const db = admin.database();
+    const userCollectionName = dbEndpoints.userCollections[itemType];
+    const itemSnap = await db
+      .ref(`users/${ownerId}/${userCollectionName}/${itemId}`)
+      .get();
+
+    if (!itemSnap.exists()) {
+      return false;
+    }
+
+    if (callerId && callerId === ownerId) {
+      return true;
+    }
+
+    return !!(await this.getSharedItemById(ownerId, itemId, itemType));
+  }
+
   // TODO: Fix types for interfaces for ID and stuff.
   async addComment(
     itemType: ItemType,
@@ -181,16 +229,15 @@ export class SharedService {
     limit?: string,
   ): Promise<IDataResponse<DbCommentIntF>> {
     try {
-      if (isPublic) {
-        const sharedItem = await this.getSharedItemById(
+      if (
+        !(await this.canViewItemComments(
+          itemType,
           itemOwnerId,
           itemId,
-          itemType,
-        );
-
-        if (!sharedItem) {
-          return sendError('Shared item not found.');
-        }
+          currentUserId,
+        ))
+      ) {
+        return sendError('Shared item not found.');
       }
 
       const db = admin.database();
@@ -202,8 +249,10 @@ export class SharedService {
         return sendError('Could not find user.');
       }
 
-      if (!content) {
-        return sendError('Comment cannot be empty.');
+      const contentError = commentContentError(content);
+
+      if (contentError) {
+        return sendError(contentError);
       }
 
       const id = nanoid(12);
@@ -241,8 +290,10 @@ export class SharedService {
     }
   }
 
+  // Only the author of a comment may edit it (the apps offer edit only on one's own comments).
   async updateCommentAPI(
     itemType: ItemType,
+    userId: string,
     ownerId: string,
     itemId: string,
     commentId: string,
@@ -251,15 +302,20 @@ export class SharedService {
     limit?: string | number,
   ): Promise<IDataResponse<queryReturnType>> {
     try {
-      if (isPublic) {
-        const sharedItem = await this.getSharedItemById(
-          ownerId,
-          itemId,
-          itemType,
-        );
-        if (!sharedItem) {
-          return sendError('Shared item not found.');
-        }
+      if (!userId || !is_id(commentId)) {
+        return sendError('Comment does not exist.');
+      }
+
+      if (
+        !(await this.canViewItemComments(itemType, ownerId, itemId, userId))
+      ) {
+        return sendError('Shared item not found.');
+      }
+
+      const contentError = commentContentError(content);
+
+      if (contentError) {
+        return sendError(contentError);
       }
 
       const db = admin.database();
@@ -271,6 +327,10 @@ export class SharedService {
 
       if (!commentSnapshot.exists()) {
         return sendError('Comment does not exist.');
+      }
+
+      if (commentSnapshot.val()?.uid !== userId) {
+        return sendError('You can only change your own comments.');
       }
 
       const newComment = { ...commentSnapshot.val(), content, isEdited: true };
@@ -284,7 +344,7 @@ export class SharedService {
     }
   }
 
-  // TODO: check for comment owner, maybe guard, maybe not. not complex, just a simple id check against token id.
+  // Only the author of a comment may delete it (the apps offer delete only on one's own comments).
   async deleteComment(
     itemType: ItemType,
     userId: string,
@@ -295,15 +355,14 @@ export class SharedService {
     limit?: string | number,
   ): Promise<IDataResponse<queryReturnType>> {
     try {
-      if (isPublic) {
-        const sharedItem = await this.getSharedItemById(
-          ownerId,
-          itemId,
-          itemType,
-        );
-        if (!sharedItem) {
-          return sendError('Shared item not found.');
-        }
+      if (!userId || !is_id(commentId)) {
+        return sendError('Comment does not exist.');
+      }
+
+      if (
+        !(await this.canViewItemComments(itemType, ownerId, itemId, userId))
+      ) {
+        return sendError('Shared item not found.');
       }
 
       const db = admin.database();
@@ -316,6 +375,10 @@ export class SharedService {
 
       if (!commentSnapshot.exists()) {
         return sendError('Comment does not exist.');
+      }
+
+      if (commentSnapshot.val()?.uid !== userId) {
+        return sendError('You can only change your own comments.');
       }
 
       await commentRef.remove();
@@ -373,7 +436,8 @@ export class SharedService {
   }
 
   // TODO: check if you can limit the number of comments taken on the query instead later, less comments pulled from the DB
-  // TODO: this should have a guard to see if the item is shared. If not, it shouldn't work.
+  // The comments of an item are returned only to its owner, or to anyone when the item is shared.
+  // An item the caller may not view looks the same as one that does not exist: no comments.
   async getCommentsById(
     itemType: ItemType,
     itemId: string,
@@ -388,7 +452,10 @@ export class SharedService {
     const db = admin.database();
     const uid = ownerId ? ownerId : userId;
 
-    if (!uid) {
+    if (
+      !uid ||
+      !(await this.canViewItemComments(itemType, uid, itemId, userId))
+    ) {
       return { comments: [], commentsLength: 0 };
     }
 
