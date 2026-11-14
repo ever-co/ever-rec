@@ -9,21 +9,41 @@ const mockDb: { data: Record<string, any>; reads: string[] } = {
   data: {},
   reads: [],
 };
-jest.mock('firebase-admin', () => ({
-  database: () => ({
-    ref: (path: string) => ({
-      get: async () => {
-        mockDb.reads.push(path.replace(/^\//, ''));
-        let value: any = mockDb.data;
-        for (const segment of path.split('/').filter(Boolean)) {
-          value = value?.[segment];
-        }
-        return { val: () => value ?? null, exists: () => value != null };
-      },
-      set: async () => undefined,
+jest.mock('firebase-admin', () => {
+  const snapshot = (value: any) => ({
+    val: () => value ?? null,
+    exists: () => value != null,
+  });
+  const valueAt = (path: string) => {
+    mockDb.reads.push(path.replace(/^\//, ''));
+    let value: any = mockDb.data;
+    for (const segment of path.split('/').filter(Boolean)) {
+      value = value?.[segment];
+    }
+    return value;
+  };
+  return {
+    database: () => ({
+      ref: (path: string) => ({
+        get: async () => snapshot(valueAt(path)),
+        // The indexed lookup of an item's share record (`<uid>|<item id>`).
+        orderByChild: (child: string) => ({
+          equalTo: (expected: unknown) => ({
+            get: async () => {
+              const matches = Object.entries(valueAt(path) ?? {}).filter(
+                ([, record]: [string, any]) => record?.[child] === expected,
+              );
+              return snapshot(
+                matches.length ? Object.fromEntries(matches) : null,
+              );
+            },
+          }),
+        }),
+        set: async () => undefined,
+      }),
     }),
-  }),
-}));
+  };
+});
 
 const RAW_UIDS = ['uid-owner', 'uid-guest', 'uid-planted'];
 
@@ -77,7 +97,13 @@ describe('comment responses', () => {
           photoUrl: 'https://img.example/guest.png',
         },
       },
-      sharedVideos: { link1: { uid: 'uid-owner', videoId: 'vid1' } },
+      sharedVideos: {
+        link1: {
+          uid: 'uid-owner',
+          videoId: 'vid1',
+          uidVideoId: 'uid-owner|vid1',
+        },
+      },
     };
   });
 
@@ -226,6 +252,7 @@ describe('comment responses', () => {
   it('answers an edit without the uid', async () => {
     const result: any = await service.updateCommentAPI(
       'video',
+      'uid-guest',
       'uid-owner',
       'vid1',
       'c2',
