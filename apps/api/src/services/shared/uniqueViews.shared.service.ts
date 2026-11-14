@@ -100,14 +100,24 @@ export class UniqueViewsSharedService {
         ? ip.trim().slice(0, MAX_IP_LENGTH)
         : null;
 
-    if (!isOwnItem) {
-      // A signed-in viewer counts once as a person. Only the first visit also counts as a view.
-      const isNewViewer = viewer
-        ? await this.addUniqueViewer(item.ref, viewer)
-        : true;
+    // A signed-in viewer counts once as a person; only the first visit also counts as a view.
+    const isKnownViewer = Boolean(
+      viewer &&
+        (formatDataToArray(item.data.uniqueViews) as IUniqueView[]).some(
+          (known) => known.id === viewer.id,
+        ),
+    );
 
-      if (isNewViewer && address) {
+    if (!isOwnItem && !isKnownViewer) {
+      // The view is written before the person, so a retry after a failed second write still
+      // counts the person: the first write ignores an address that is already counted, and a
+      // person is only "known" once their own record exists.
+      if (address) {
         views = await this.addViewOfAddress(item.ref, address);
+      }
+
+      if (viewer) {
+        await this.addUniqueViewer(item.ref, viewer);
       }
     }
 

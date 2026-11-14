@@ -154,6 +154,20 @@ describe('UniqueViewsSharedService', () => {
       expect(stored.views).toHaveLength(1);
     });
 
+    it('still records the viewer when an earlier attempt counted the view but not the person', async () => {
+      // A first attempt wrote the view of this address and failed before writing the person.
+      mockDb.data.users['uid-owner'].screenshots.img1.views = [
+        { ip: '1.1.1.1', timestamp: 1 },
+      ];
+
+      const res = await add({ viewer: guest });
+
+      const stored = mockDb.data.users['uid-owner'].screenshots.img1;
+      expect(stored.uniqueViews.map((v: any) => v.id)).toEqual(['uid-guest']);
+      expect(stored.views).toHaveLength(1);
+      expect(res.data?.views).toBe(1);
+    });
+
     it('does not return the viewers to whoever opened the link', async () => {
       await add({ viewer: guest });
       const res = await add({ viewer: { id: 'uid-third', email: 't@x.test' } });

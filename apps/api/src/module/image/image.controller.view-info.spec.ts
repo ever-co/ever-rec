@@ -15,7 +15,7 @@ import request from 'supertest';
 import { FoldersSharedService } from '../../services/shared/folders.shared.service';
 import { SharedService } from '../../services/shared/shared.service';
 import { UniqueViewsSharedService } from '../../services/shared/uniqueViews.shared.service';
-import { UserGuard } from '../auth/guards/user.guard';
+import { OptionalAuthGuard } from '../auth/guards/optional-auth.guard';
 import { TokenService } from '../auth/services/tokens';
 import { ImageController } from './image.controller';
 import { ImageService } from './image.service';
@@ -75,7 +75,7 @@ describe('ImageController view-info routes', () => {
       ],
     })
       // The optional sign-in: the test says who is calling with the `x-user` header.
-      .overrideGuard(UserGuard)
+      .overrideGuard(OptionalAuthGuard)
       .useValue({
         canActivate: (context: any) => {
           const req = context.switchToHttp().getRequest();
@@ -225,7 +225,7 @@ describe('ImageController view-info routes', () => {
       await request(app.getHttpServer())
         .post('/image/link1/like?isWorkspace=false')
         .set('Authorization', 'Bearer uid-member')
-        .expect(200);
+        .expect(201);
 
       expect(getSharedItemBySharedId).toHaveBeenCalledWith(
         'image',
@@ -239,7 +239,7 @@ describe('ImageController view-info routes', () => {
       await request(app.getHttpServer())
         .post('/image/link1/like?isWorkspace=true')
         .set('Authorization', 'Bearer uid-member')
-        .expect(200);
+        .expect(201);
 
       expect(getSharedItemBySharedId).toHaveBeenCalledWith(
         'image',

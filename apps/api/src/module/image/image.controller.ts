@@ -34,6 +34,7 @@ import {
 import { RefreshToken } from '../auth/decorators/refresh-token.decorator';
 import { User } from '../auth/decorators/user.decorator';
 import { AuthGuard, IRequestUser } from '../auth/guards/auth.guard';
+import { OptionalAuthGuard } from '../auth/guards/optional-auth.guard';
 import { UserGuard } from '../auth/guards/user.guard';
 import { ImageService } from './image.service';
 import { ContextUploader } from './uploader/context.uploader';
@@ -402,7 +403,7 @@ export class ImageController {
 
   // Counts a view of a shared image. The body only names the share link; the item, the viewer
   // (the optional sign-in) and the address all come from the server.
-  @UseGuards(UserGuard)
+  @UseGuards(OptionalAuthGuard)
   @Post('shared/view-info')
   async addUniqueViewInfo(
     @Req() req,
@@ -418,7 +419,7 @@ export class ImageController {
   }
 
   // The viewers of an image go to its owner (or a workspace member) only; anyone else gets the count.
-  @UseGuards(UserGuard)
+  @UseGuards(OptionalAuthGuard)
   @Post('shared/get-view-info')
   async getUniqueViewInfo(
     @Req() req,
