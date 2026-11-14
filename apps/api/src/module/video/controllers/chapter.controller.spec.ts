@@ -252,6 +252,19 @@ describe('VideoChapterController workspace access', () => {
         expect(mockDb.reads).toEqual([]);
       },
     );
+
+    // The video id goes into a database path, so it must be a plain id here too.
+    it.each(['a%2Fb', 'v1%2Fchapters', 'a.b'])(
+      'refuses the video id %s with 400',
+      async (videoId) => {
+        await get('uid-member', '', videoId).expect(400);
+        await save('uid-member', '', videoId).expect(400);
+        await enable('uid-member', '', videoId).expect(400);
+        expect(getChapters).not.toHaveBeenCalled();
+        expect(saveChapters).not.toHaveBeenCalled();
+        expect(enableChapters).not.toHaveBeenCalled();
+      },
+    );
   });
 
   it('gives an anonymous request 401', async () => {

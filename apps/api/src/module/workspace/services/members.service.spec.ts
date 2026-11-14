@@ -120,4 +120,48 @@ describe('WorkspaceMembersService.populateWorkspaceMembers', () => {
     expect(second[0].id).toBe('u20');
     expect(second[19].id).toBe('u39');
   });
+
+  describe('a limit that does not fall on a page boundary', () => {
+    const workspace = workspaceWith(
+      Array.from({ length: 45 }, (_, i) => ({ id: `u${i}` })),
+    );
+    const ids = (limit: number | string | undefined) =>
+      service
+        .populateWorkspaceMembers(workspace, usersByUid({}), limit)
+        .map((m) => m.id);
+
+    it('lists the first members for a limit under 20, not an empty page', () => {
+      expect(ids(5)).toEqual(['u0', 'u1', 'u2', 'u3', 'u4']);
+      expect(ids(1)).toEqual(['u0']);
+      expect(ids(19)).toHaveLength(19);
+    });
+
+    it('keeps the first 20 members for a limit of exactly 20', () => {
+      expect(ids(20)).toHaveLength(20);
+      expect(ids(20)[0]).toBe('u0');
+    });
+
+    it('keeps the window of the 20 before the limit, as before, for 21 to 45', () => {
+      expect(ids(30)[0]).toBe('u10');
+      expect(ids(30)).toHaveLength(20);
+      expect(ids(45)[0]).toBe('u25');
+      expect(ids('40')[0]).toBe('u20');
+    });
+
+    it('returns the last members and then nothing once the limit is past the list', () => {
+      expect(ids(60)).toEqual(
+        Array.from({ length: 5 }, (_, i) => `u${40 + i}`),
+      );
+      expect(ids(100)).toEqual([]);
+    });
+
+    it.each([0, -5, -40, NaN, 'abc', undefined])(
+      'falls back to the first 20 members for %p',
+      (limit) => {
+        const result = ids(limit as number | string | undefined);
+        expect(result).toHaveLength(20);
+        expect(result[0]).toBe('u0');
+      },
+    );
+  });
 });

@@ -78,6 +78,61 @@ export class CanAccessWorkspaceQueryGuard implements CanActivate {
   }
 }
 
+/**
+ * Same rule as `CanAccessWorkspaceQueryGuard`, for routes that name the workspace in the request
+ * body (`{ workspaceId }`). No workspace id (absent, null or empty) means the caller's own library.
+ * Any other value must be a plain id of a workspace the user administers or belongs to, otherwise
+ * 403. A route marked with `@WorkspaceVideoAccess(level)` also needs that level on the workspace
+ * video `:videoId` and on its folder; a video id that matches no video is refused.
+ *
+ * Must run after `AuthGuard`.
+ */
+@Injectable()
+export class CanAccessWorkspaceBodyGuard implements CanActivate {
+  constructor(private reflector: Reflector) {}
+
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const req = context.switchToHttp().getRequest();
+    const workspaceId = req.body?.workspaceId;
+
+    if (
+      workspaceId === undefined ||
+      workspaceId === null ||
+      workspaceId === ''
+    ) {
+      return true;
+    }
+
+    const userId = req.user?.id;
+    if (
+      !userId ||
+      typeof workspaceId !== 'string' ||
+      !is_id(workspaceId) ||
+      !(await isWorkspaceMember(userId, workspaceId))
+    ) {
+      throw new ForbiddenException('Access to this workspace is not allowed');
+    }
+
+    const requiredAccess = this.reflector.get<PermissionAccessEnum>(
+      WORKSPACE_VIDEO_ACCESS_METADATA,
+      context.getHandler(),
+    );
+    if (
+      requiredAccess &&
+      !(await canAccessWorkspaceVideo(
+        req.user,
+        workspaceId,
+        req.params?.videoId,
+        requiredAccess,
+      ))
+    ) {
+      throw new ForbiddenException('Access to this video is not allowed');
+    }
+
+    return true;
+  }
+}
+
 // Fails closed: a missing video, a malformed id or any error is "no".
 const canAccessWorkspaceVideo = async (
   user: any,

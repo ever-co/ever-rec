@@ -89,6 +89,8 @@ describe('POST video/:videoId/like-own', () => {
       'workspaces/ws1': {
         admin: 'uid-admin',
         members: [{ id: 'uid-admin' }, { id: 'uid-member' }],
+        // The route also needs READ on the video (see video.controller.path-ids.spec.ts).
+        videos: { vid1: { id: 'vid1' } },
       },
     };
     likeItem.mockReset().mockResolvedValue({ status: 'success', data: [] });

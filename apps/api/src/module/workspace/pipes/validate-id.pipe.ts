@@ -4,10 +4,10 @@ import { is_id } from '../validators/id.validator';
 @Injectable()
 export class ValidateId implements PipeTransform<string> {
   transform(value: string): string {
-    if (is_id(value)) {
+    if (typeof value === 'string' && is_id(value)) {
       return value;
     }
-    throw new BadRequestException('Invalid folder id');
+    throw new BadRequestException('Invalid id');
   }
 }
 
