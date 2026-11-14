@@ -50,6 +50,33 @@ describe('OptionalAuthGuard', () => {
     expect(refreshToken).toHaveBeenCalledWith('r', expect.anything());
   });
 
+  it('hands a merged (non-Firebase) refresh token to the token service untouched, so the viewer is kept', async () => {
+    const merged = 'merged.reference.token_123';
+    processToken.mockRejectedValue(new Error('auth/id-token-expired'));
+    refreshToken.mockImplementation(async (token, req) => {
+      // Only the token service knows how to resolve a merged token.
+      if (token !== merged) throw new Error('unknown token');
+      req.user = { id: 'uid-merged' };
+    });
+
+    expect(await run({ idtoken: 'expired', refreshtoken: merged })).toEqual({
+      allowed: true,
+      user: { id: 'uid-merged' },
+    });
+  });
+
+  it('reads the refresh token from x-refresh-token too', async () => {
+    processToken.mockRejectedValue(new Error('expired'));
+    refreshToken.mockImplementation(async (_t, req) => {
+      req.user = { id: 'uid-c' };
+    });
+
+    expect((await run({ idtoken: 'old', 'x-refresh-token': 'r2' })).user).toEqual(
+      { id: 'uid-c' },
+    );
+    expect(refreshToken).toHaveBeenCalledWith('r2', expect.anything());
+  });
+
   it('reads a bearer token too', async () => {
     processToken.mockImplementation(async (_t, req) => {
       req.user = { id: 'uid-b' };
