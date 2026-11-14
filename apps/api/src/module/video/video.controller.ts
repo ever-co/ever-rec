@@ -14,6 +14,7 @@ import {
   UseGuards,
   UseInterceptors,
   BadRequestException,
+  ForbiddenException,
   UnsupportedMediaTypeException,
 } from '@nestjs/common';
 import {
@@ -46,6 +47,8 @@ import {
 } from '../workspace/guards/CanAccessWorkspaceQuery.guard';
 import { PermissionAccessEnum } from '../workspace/Interfaces/Workspace';
 import { ValidateId } from '../workspace/pipes/validate-id.pipe';
+import { isWorkspaceMember } from '../workspace/guards/CanAccessWorkspace.guard';
+import { is_id } from '../workspace/validators/id.validator';
 
 @Controller('video')
 export class VideoController {
@@ -229,6 +232,22 @@ export class VideoController {
   ) {
     const userId = request.user?.id;
     const workspaceId = body?.workspaceId;
+
+    // The workspace id comes from the body and goes into a database path: it must be a plain id of
+    // a workspace the caller belongs to. Without one, the like goes to the caller's own video.
+    if (
+      workspaceId !== undefined &&
+      workspaceId !== null &&
+      workspaceId !== ''
+    ) {
+      if (
+        typeof workspaceId !== 'string' ||
+        !is_id(workspaceId) ||
+        !(await isWorkspaceMember(userId, workspaceId))
+      ) {
+        throw new ForbiddenException('Access to this workspace is not allowed');
+      }
+    }
 
     const result = await this.sharedService.likeItem(
       'video',
