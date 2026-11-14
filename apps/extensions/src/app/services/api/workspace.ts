@@ -178,17 +178,8 @@ export const updateItemDataWorkspaceAPI = async (
   data: IDbWorkspaceVideoData | IDbWorkspaceImageData,
   itemType: ItemType,
 ): Promise<IDataResponse<IWorkspaceVideo | null>> => {
-  const {
-    id,
-    title,
-    parentId,
-    trash,
-    likes,
-    views,
-    stage,
-    originalImage,
-    markers,
-  } = data;
+  const { id, title, parentId, trash, views, stage, originalImage, markers } =
+    data;
 
   return api.put(
     `/api/v1/workspace/${workspaceId}/files/${itemType}/${id}/single-data`,
@@ -196,7 +187,6 @@ export const updateItemDataWorkspaceAPI = async (
       title,
       parentId,
       trash,
-      likes,
       views,
       stage,
       originalImage,

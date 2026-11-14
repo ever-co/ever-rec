@@ -33,8 +33,8 @@ async function loadRules(rules: string) {
   expect(answer.status).toBe(200);
 }
 
-/** A signed-in client: an ID token from the Authentication emulator. */
-async function clientToken(): Promise<string> {
+/** A signed-in client: its ID token and uid from the Authentication emulator. */
+async function clientAccount(): Promise<{ token: string; uid: string }> {
   const answer = await httpRequest(
     'POST',
     `${authHost()}/identitytoolkit.googleapis.com/v1/accounts:signUp?key=demo-key`,
@@ -48,7 +48,11 @@ async function clientToken(): Promise<string> {
     },
   );
   expect(answer.status).toBe(200);
-  return answer.json().idToken;
+  return { token: answer.json().idToken, uid: answer.json().localId };
+}
+
+async function clientToken(): Promise<string> {
+  return (await clientAccount()).token;
 }
 
 const IDENTITY_AND_STATS_ROOTS = [
@@ -170,5 +174,136 @@ describe('database rules for the new roots', () => {
     expect(statuses.every((status) => status === 401 || status === 403)).toBe(
       false,
     );
+  });
+});
+
+/**
+ * A user's items, `uid`, `likes` and `whiteboardIds` are written by the API only. A `.validate` rule
+ * does not run when a value is deleted, so the owner could still erase likes; the write grant on the
+ * user's record is therefore gone, and only the profile stays client-writable.
+ */
+describe('database rules for the owner-written item fields', () => {
+  let app: admin.app.App;
+  let token: string;
+  let uid: string;
+  const ITEM_PATHS = [
+    (owner: string) => `users/${owner}/screenshots/item1`,
+    (owner: string) => `users/${owner}/videos/item1`,
+  ];
+
+  const clientWrite = (path: string, value: unknown) =>
+    httpRequest(
+      'PUT',
+      `${db()}/${path}.json?ns=${EMULATOR_PROJECT}&auth=${token}`,
+      { body: JSON.stringify(value) },
+    ).then((answer) => answer.status);
+  const refused = (status: number) => status === 401 || status === 403;
+
+  beforeAll(async () => {
+    app = emulatorApp();
+    await clearEmulators(app);
+    ({ token, uid } = await clientAccount());
+  });
+
+  beforeEach(async () => {
+    await app.database().ref().set(null);
+    for (const path of ITEM_PATHS) {
+      await app
+        .database()
+        .ref(path(uid))
+        .set({ title: 'Original', uid, likes: [{ uid: 'u1', timestamp: 1 }] });
+    }
+    await app.database().ref(`users/${uid}/whiteboardIds`).set(['wb1']);
+  });
+
+  afterAll(async () => {
+    await loadRules(RULES);
+    await app.delete();
+  });
+
+  it('refuses every write to uid, likes or whiteboardIds, including deleting them, and changes nothing', async () => {
+    await loadRules(RULES);
+    const statuses: number[] = [];
+    for (const path of ITEM_PATHS) {
+      statuses.push(await clientWrite(`${path(uid)}/uid`, 'someone-else'));
+      statuses.push(await clientWrite(`${path(uid)}/uid`, null));
+      statuses.push(
+        await clientWrite(`${path(uid)}/likes`, [
+          { uid: 'planted', timestamp: 2 },
+        ]),
+      );
+      // Erasing the likes, alone or by rewriting the item without them.
+      statuses.push(await clientWrite(`${path(uid)}/likes`, null));
+      statuses.push(await clientWrite(path(uid), { title: 'Original', uid }));
+      statuses.push(await clientWrite(path(uid), null));
+    }
+    statuses.push(
+      await clientWrite(`users/${uid}/whiteboardIds`, ['wb1', 'wb2']),
+    );
+    statuses.push(await clientWrite(`users/${uid}/whiteboardIds`, null));
+    statuses.push(
+      await clientWrite(`users/${uid}`, { whiteboardIds: ['wb1', 'wb2'] }),
+    );
+    statuses.push(await clientWrite(`users/${uid}`, null));
+
+    expect(statuses.every(refused)).toBe(true);
+    for (const path of ITEM_PATHS) {
+      expect((await app.database().ref(path(uid)).get()).val()).toEqual({
+        title: 'Original',
+        uid,
+        likes: [{ uid: 'u1', timestamp: 1 }],
+      });
+    }
+    expect(
+      (await app.database().ref(`users/${uid}/whiteboardIds`).get()).val(),
+    ).toEqual(['wb1']);
+  });
+
+  it('refuses writes to the other fields of an item too: items are changed through the API only', async () => {
+    await loadRules(RULES);
+    for (const path of ITEM_PATHS) {
+      expect(refused(await clientWrite(`${path(uid)}/title`, 'Renamed'))).toBe(
+        true,
+      );
+      expect(
+        (
+          await app
+            .database()
+            .ref(`${path(uid)}/title`)
+            .get()
+        ).val(),
+      ).toBe('Original');
+    }
+  });
+
+  it('still lets the owner read their own items and write their profile', async () => {
+    await loadRules(RULES);
+    const read = await httpRequest(
+      'GET',
+      `${db()}/${ITEM_PATHS[0](uid)}.json?ns=${EMULATOR_PROJECT}&auth=${token}`,
+    );
+    expect(read.status).toBe(200);
+    expect(await clientWrite(`users/${uid}/profile`, { bio: 'hi' })).toBe(200);
+  });
+
+  it('still refuses writes to another user’s items', async () => {
+    await loadRules(RULES);
+    const status = await clientWrite(
+      'users/someone-else/screenshots/item1/title',
+      'x',
+    );
+    expect(refused(status)).toBe(true);
+  });
+
+  it('a rules file that lets the owner write their record lets the writes through (control)', async () => {
+    const open = JSON.parse(RULES);
+    open.rules.users.$userId['.write'] = '$userId === auth.uid';
+    await loadRules(JSON.stringify(open));
+
+    expect(await clientWrite(`${ITEM_PATHS[0](uid)}/uid`, 'someone-else')).toBe(
+      200,
+    );
+    expect(await clientWrite(`${ITEM_PATHS[1](uid)}/likes`, null)).toBe(200);
+    expect(await clientWrite(`users/${uid}/whiteboardIds`, ['wb2'])).toBe(200);
   });
 });
