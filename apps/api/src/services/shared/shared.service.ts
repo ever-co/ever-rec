@@ -64,6 +64,12 @@ export const dbEndpoints = {
   },
 };
 
+// The indexed child of a share record that holds `<uid>|<item id>`.
+const sharedItemKeyName = {
+  image: 'uidImageId',
+  video: 'uidVideoId',
+};
+
 export const COMMENT_MAX_LENGTH = 2000;
 
 /** Why a comment's content cannot be stored, or null when it can. */
@@ -163,27 +169,34 @@ export class SharedService {
     const collectionName = dbEndpoints.userCollections[itemType];
     const sharedCollectionName = dbEndpoints.sharedCollections[itemType];
     const sharedItemRefName = dbEndpoints.shareItemRefs[itemType];
-    const sharedRef = db.ref(`${sharedCollectionName}`);
-    const sharedSnap = await sharedRef.get();
-    const sharedVal = sharedSnap.val();
     const itemRef = db.ref(`users/${uid}/${collectionName}/${itemId}`);
     const itemSnap = await itemRef.get();
-    const itemVal = itemSnap.val();
+
+    if (!itemSnap.val()) {
+      return undefined;
+    }
+
+    // The share record of one item is read through the indexed `<uid>|<item id>` key, the way the
+    // share and unshare routes find it: the whole share collection is never loaded.
+    const sharedSnap = await db
+      .ref(`${sharedCollectionName}`)
+      .orderByChild(sharedItemKeyName[itemType])
+      .equalTo(`${uid}|${itemId}`)
+      .get();
+    const sharedVal = sharedSnap.val();
     let sharedItem = null;
 
-    if (sharedVal && itemVal) {
-      Object.entries(sharedVal).forEach(
-        ([_, item]: [
-          any,
-          { imageId: string; uid: string; uidImageId: string },
-        ]) => {
-          if (item[sharedItemRefName] == itemId && item.uid == uid) {
+    if (sharedVal) {
+      Object.values(sharedVal).forEach(
+        (item: { imageId: string; uid: string; uidImageId: string }) => {
+          if (item?.[sharedItemRefName] == itemId && item.uid == uid) {
             sharedItem = item;
           }
         },
       );
-      return sharedItem;
     }
+
+    return sharedItem;
   }
 
   /**

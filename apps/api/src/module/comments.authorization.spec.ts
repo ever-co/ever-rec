@@ -66,6 +66,22 @@ jest.mock('firebase-admin', () => {
   return {
     database: () => ({
       ref: (path: string) => ({
+        // `orderByChild(key).equalTo(value)`: the children whose `key` equals `value`.
+        orderByChild: (key: string) => ({
+          equalTo: (wanted: any) => ({
+            get: async () => {
+              const out: Record<string, any> = {};
+              for (const [id, child] of Object.entries(read(path) ?? {})) {
+                if ((child as any)?.[key] === wanted) out[id] = child;
+              }
+              const found = Object.keys(out).length > 0;
+              return {
+                val: () => (found ? out : null),
+                exists: () => found,
+              };
+            },
+          }),
+        }),
         get: async () => {
           const value = read(path);
           return {
@@ -103,6 +119,7 @@ const KINDS = [
     collection: 'screenshots',
     sharedRoot: 'shared',
     refKey: 'imageId',
+    uidKey: 'uidImageId',
     sharedItem: 'item-shared',
     privateItem: 'item-private',
   },
@@ -111,6 +128,7 @@ const KINDS = [
     collection: 'videos',
     sharedRoot: 'sharedVideos',
     refKey: 'videoId',
+    uidKey: 'uidVideoId',
     sharedItem: 'item-shared',
     privateItem: 'item-private',
   },
@@ -190,6 +208,13 @@ describe.each(KINDS)('comments of a $type', (kind) => {
         link1: {
           [kind.refKey]: kind.sharedItem,
           uid: 'uid-owner',
+          [kind.uidKey]: `uid-owner|${kind.sharedItem}`,
+        },
+        // A record of someone else's item with the same item id must not count.
+        link2: {
+          [kind.refKey]: kind.privateItem,
+          uid: 'uid-other',
+          [kind.uidKey]: `uid-other|${kind.privateItem}`,
         },
       },
     };
