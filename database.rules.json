@@ -43,8 +43,8 @@
         "uidImageId",
         "uid"
       ],
-      ".read": "auth != null",
-      ".write": "auth != null"
+      ".read": false,
+      ".write": false
     },
     "sharedVideos": {
       ".indexOn": [
@@ -52,16 +52,16 @@
         "uid",
         "videoId"
       ],
-      ".read": "auth != null",
-      ".write": "auth != null"
+      ".read": false,
+      ".write": false
     },
     "sharedWorkspaceItems": {
       ".indexOn": [
         "queryField",
         "itemId"
       ],
-      ".read": "auth != null",
-      ".write": "auth != null"
+      ".read": false,
+      ".write": false
     },
     "ever_identities": {
       ".read": false,

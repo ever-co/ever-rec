@@ -182,6 +182,7 @@ export class VideoController {
 
     const result = await this.sharedService.updateCommentAPI(
       'video',
+      req.user?.id,
       ownerId,
       itemId,
       commentId,

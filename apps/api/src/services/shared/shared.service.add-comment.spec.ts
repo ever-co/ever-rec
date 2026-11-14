@@ -10,16 +10,33 @@ const mockDb: { data: Record<string, any>; writes: string[] } = {
   data: {},
   writes: [],
 };
+const mockRead = (path: string) => {
+  let value: any = mockDb.data;
+  for (const segment of path.split('/').filter(Boolean)) {
+    value = value?.[segment];
+  }
+  return value;
+};
 jest.mock('firebase-admin', () => ({
   database: () => ({
     ref: (path: string) => ({
       get: async () => {
-        let value: any = mockDb.data;
-        for (const segment of path.split('/').filter(Boolean)) {
-          value = value?.[segment];
-        }
+        const value = mockRead(path);
         return { val: () => value ?? null };
       },
+      // `orderByChild(key).equalTo(value)`: the share record lookup by `<uid>|<item id>`.
+      orderByChild: (key: string) => ({
+        equalTo: (wanted: string) => ({
+          get: async () => {
+            const found = Object.entries(mockRead(path) ?? {}).filter(
+              ([, child]: [string, any]) => child?.[key] === wanted,
+            );
+            return {
+              val: () => (found.length ? Object.fromEntries(found) : null),
+            };
+          },
+        }),
+      }),
       set: async () => {
         mockDb.writes.push(path);
       },
@@ -47,10 +64,18 @@ describe('SharedService.addComment', () => {
         'uid-noemail': {},
       },
       sharedVideos: {
-        link1: { uid: 'uid-owner', videoId: 'vid1' },
+        link1: {
+          uid: 'uid-owner',
+          videoId: 'vid1',
+          uidVideoId: 'uid-owner|vid1',
+        },
       },
       shared: {
-        link2: { uid: 'uid-owner', imageId: 'img1' },
+        link2: {
+          uid: 'uid-owner',
+          imageId: 'img1',
+          uidImageId: 'uid-owner|img1',
+        },
       },
     };
   });
