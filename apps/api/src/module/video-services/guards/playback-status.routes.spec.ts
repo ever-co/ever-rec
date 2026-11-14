@@ -20,19 +20,36 @@ jest.mock('../api-video/api-video.service', () => ({
 }));
 
 const mockDb: { data: Record<string, any> } = { data: {} };
-jest.mock('firebase-admin', () => ({
-  database: () => ({
-    ref: (path: string) => ({
-      get: async () => {
-        let value: any = mockDb.data;
-        for (const segment of path.split('/').filter(Boolean)) {
-          value = value?.[segment];
-        }
-        return { val: () => value ?? null };
-      },
+jest.mock('firebase-admin', () => {
+  const read = (path: string) => {
+    let value: any = mockDb.data;
+    for (const segment of path.split('/').filter(Boolean)) {
+      value = value?.[segment];
+    }
+    return value ?? null;
+  };
+  return {
+    database: () => ({
+      ref: (path: string) => ({
+        get: async () => ({ val: () => read(path) }),
+        orderByChild: (child: string) => ({
+          equalTo: (wanted: string) => ({
+            get: async () => {
+              const found = Object.fromEntries(
+                Object.entries<any>(read(path) ?? {}).filter(
+                  ([, v]) => v?.[child] === wanted,
+                ),
+              );
+              return {
+                val: () => (Object.keys(found).length ? found : null),
+              };
+            },
+          }),
+        }),
+      }),
     }),
-  }),
-}));
+  };
+});
 
 describe.each([
   ['mux', '/mux', MuxController, MuxService],
@@ -70,7 +87,23 @@ describe.each([
     jest.spyOn(console, 'log').mockImplementation(() => undefined);
     mockDb.data = {
       users: {
-        'uid-owner': { videos: { vid1: { id: 'vid1' } } },
+        'uid-owner': {
+          videos: {
+            vid1: { id: 'vid1' },
+            // Shared by a link, and not shared.
+            vid2: { id: 'vid2', streamData: { assetId: 'a1' } },
+            vid3: { id: 'vid3', streamData: { assetId: 'a1' } },
+          },
+        },
+      },
+      sharedVideos: {
+        link2: { uid: 'uid-owner', videoId: 'vid2' },
+        // A link whose owner has no such video.
+        linkGone: { uid: 'uid-owner', videoId: 'gone' },
+      },
+      sharedWorkspaceItems: {
+        linkWs: { workspaceId: 'ws1', itemId: 'sharedVideo' },
+        linkWsOther: { workspaceId: 'ws1', itemId: 'open' },
       },
       workspaces: {
         ws1: {
@@ -82,6 +115,7 @@ describe.each([
           ],
           videos: {
             open: { id: 'open' },
+            sharedVideo: { id: 'sharedVideo', streamData: { assetId: 'a1' } },
             restricted: {
               id: 'restricted',
               access: {
@@ -126,6 +160,36 @@ describe.each([
   it("refuses another user's video and a video that does not exist", async () => {
     await status('uid-stranger', 'vid1').expect(403);
     await status('uid-owner', 'nope').expect(403);
+    expect(getPlaybackStatus).not.toHaveBeenCalled();
+  });
+
+  it("lets a signed-in viewer of a shared video poll, writing to the owner's record", async () => {
+    await status('uid-stranger', 'vid2').expect(200);
+    expect(getPlaybackStatus).toHaveBeenCalledWith(
+      'uid-owner',
+      'vid2',
+      'a1',
+      undefined,
+    );
+  });
+
+  it("lets a signed-in viewer of a shared workspace video poll, writing to the workspace's record", async () => {
+    await status('uid-stranger', 'sharedVideo', '?workspaceId=').expect(200);
+    expect(getPlaybackStatus).toHaveBeenCalledWith(
+      'uid-stranger',
+      'sharedVideo',
+      'a1',
+      'ws1',
+    );
+  });
+
+  it('refuses a viewer for a video that is not shared, or with another asset', async () => {
+    await status('uid-stranger', 'vid3').expect(403);
+    await status('uid-stranger', 'vid2', '', 'other').expect(403);
+    await status('uid-stranger', 'gone').expect(403);
+    await status('uid-stranger', 'sharedVideo', '', 'other').expect(403);
+    // Shared by a link, but its record has no stream data of that asset.
+    await status('uid-stranger', 'open').expect(403);
     expect(getPlaybackStatus).not.toHaveBeenCalled();
   });
 

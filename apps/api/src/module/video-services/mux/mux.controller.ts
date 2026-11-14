@@ -7,7 +7,10 @@ import {
   WorkspaceVideoAccess,
 } from '../../workspace/guards/CanAccessWorkspaceQuery.guard';
 import { PermissionAccessEnum } from '../../workspace/Interfaces/Workspace';
-import { PlaybackStatusGuard } from '../guards/playback-status.guard';
+import {
+  IPlaybackStatusTarget,
+  PlaybackStatusGuard,
+} from '../guards/playback-status.guard';
 
 @Controller('mux')
 export class MuxController {
@@ -36,12 +39,14 @@ export class MuxController {
   ): Promise<{
     data: PlaybackStatusEnum;
   }> {
-    const uid = request.user?.id;
+    // Set by PlaybackStatusGuard: the record the status belongs to (a shared video's owner, not
+    // the viewer).
+    const target: IPlaybackStatusTarget = request.playbackStatusTarget;
     return this.muxService.getPlaybackStatus(
-      uid,
+      target.uid,
       videoId,
       assetId,
-      workspaceId,
+      target.workspaceId ?? workspaceId,
     );
   }
 
