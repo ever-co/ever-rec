@@ -1,8 +1,5 @@
 import api from './api';
 import { ItemType } from '@/app/interfaces/ItemTypes';
-import { IUser } from '@/app/interfaces/IUserData';
-import { DbImgData } from '@/app/interfaces/IEditorImage';
-import { DbVideoData } from '@/app/interfaces/IEditorVideo';
 import { UniqueView } from '@/app/interfaces/IUniqueView';
 import { IDataResponse } from '@/app/interfaces/IDataResponse';
 
@@ -106,17 +103,15 @@ const removeSharedUserItems = (): Promise<any> => {
   return api.delete<any>(`/api/v1/image/remove-shared`);
 };
 
+// The item is named by its id (and its workspace). The viewers are only returned to its owner.
 const getItemUniqueViewsAPI = async (
-  user: IUser,
-  itemData: DbImgData | DbVideoData,
+  itemId: string,
   itemType: ItemType,
-  isWorkspace: boolean,
-): Promise<IDataResponse<UniqueView[]>> => {
+  workspaceId?: string,
+): Promise<IDataResponse<{ uniqueViewsDb: UniqueView[]; views: number }>> => {
   return api.post(`/api/v1/${itemType}/shared/get-view-info`, {
-    user,
-    itemData,
-    itemType,
-    isWorkspace,
+    itemId,
+    workspaceId,
   });
 };
 

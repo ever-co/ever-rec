@@ -6,14 +6,8 @@ import { updateMessage } from './helpers/toastMessages';
 import { ItemType } from 'app/interfaces/ItemType';
 import { IUser } from '../interfaces/IUserData';
 import { Id } from 'react-toastify';
-import { DbVideoData } from 'app/interfaces/IEditorVideo';
-import { DbImgData } from 'app/interfaces/IEditorImage';
 import { addUniqueViewAPI, getItemUniqueViewsAPI } from './api/imageandvideo';
 import { iDataResponseParser } from './helpers/iDataResponseParser';
-import {
-  IDbWorkspaceImageData,
-  IDbWorkspaceVideoData,
-} from 'app/interfaces/IWorkspace';
 
 export const sendItem = async (
   emails: string[],
@@ -51,35 +45,22 @@ export const sendItem = async (
 };
 
 export const addUniqueView = async (
-  user: IUser | null,
-  ip: string,
-  videoData: IDbWorkspaceImageData | IDbWorkspaceVideoData,
+  sharedId: string,
   itemType: ItemType,
   isWorkspace: boolean,
 ) => {
-  const res = await addUniqueViewAPI(
-    user,
-    ip,
-    videoData,
-    itemType,
-    isWorkspace,
-  );
+  const res = await addUniqueViewAPI(sharedId, itemType, isWorkspace);
   const data = iDataResponseParser<typeof res.data>(res);
   return data;
 };
 
+// The viewers come back for the owner of the item only; the count is for everybody.
 export const getItemUniqueViews = async (
-  user: IUser,
-  itemData: DbImgData | DbVideoData,
+  itemId: string,
   itemType: ItemType,
-  isWorkspace: boolean,
+  workspaceId?: string,
 ) => {
-  const res = await getItemUniqueViewsAPI(
-    user,
-    itemData,
-    itemType,
-    isWorkspace,
-  );
+  const res = await getItemUniqueViewsAPI(itemId, itemType, workspaceId);
   const data = iDataResponseParser(res);
   return data;
 };

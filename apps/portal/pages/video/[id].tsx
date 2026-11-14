@@ -66,14 +66,12 @@ import WorkspaceItemsFolderModal from 'components/pagesComponents/_imagesScreen/
 import { useTranslation } from 'react-i18next';
 
 interface IProps {
-  ip?: string;
   isPublic?: boolean;
   isWorkspace?: boolean;
   activeWorkspace?: IWorkspace;
 }
 
 const SingleVideoPage: FC<IProps> = ({
-  ip = '',
   isPublic = false,
   isWorkspace = false,
   activeWorkspace,
@@ -285,11 +283,19 @@ const SingleVideoPage: FC<IProps> = ({
   }, [video, streamState, setUrlLink, dispatch]);
 
   useEffect(() => {
-    if (!video?.dbData || !isPublic || addedUniqueView.current) return;
+    const { id } = router.query;
+    if (
+      !video?.dbData ||
+      !isPublic ||
+      typeof id !== 'string' ||
+      addedUniqueView.current
+    )
+      return;
 
-    addUniqueView(user, ip, video.dbData as any, 'video', isPublicWorkspace);
+    // Only the share link is sent: the API knows the viewer and the address.
+    addUniqueView(id, 'video', isPublicWorkspace).catch(() => undefined);
     addedUniqueView.current = true;
-  }, [ip, isPublic, isPublicWorkspace, user, video]);
+  }, [isPublic, isPublicWorkspace, router.query, video]);
 
   useEffect(() => {
     if (showLogInNotification) return;

@@ -13,8 +13,6 @@ export const getServerSideProps: GetServerSideProps = async (
   context: GetServerSidePropsContext,
 ) => {
   const { refreshToken, idToken } = context.req.cookies;
-  const ip =
-    context.req.headers['x-real-ip'] || context.req.socket.remoteAddress;
 
   if (refreshToken && idToken) {
     const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -25,17 +23,17 @@ export const getServerSideProps: GetServerSideProps = async (
       baseURL || '',
     );
     if (user) {
-      return { props: { user, ip } };
+      return { props: { user } };
     } else {
-      return { props: { user: null, ip } };
+      return { props: { user: null } };
     }
   } else {
-    return { props: { user: null, ip } };
+    return { props: { user: null } };
   }
 };
 
-const SharedVideo: FC<ISharedItem> = ({ user, ip }) => {
-  return <SingleVideoPage isPublic ip={ip} />;
+const SharedVideo: FC<ISharedItem> = () => {
+  return <SingleVideoPage isPublic />;
 };
 
 export default SharedVideo;

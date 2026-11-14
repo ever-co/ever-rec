@@ -2,6 +2,7 @@ import * as admin from 'firebase-admin';
 import sharp from 'sharp';
 import moment from 'moment';
 import {
+  BadRequestException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -724,6 +725,13 @@ export class ImageService {
     originalImage?: string,
     markers?: string,
   ): Promise<IEditorImage> {
+    // The id goes into a database path, and an update of an image that does not exist would
+    // create a partial record: a plain id of an existing image of the caller, or nothing happens.
+    if (typeof id !== 'string' || !is_id(id)) {
+      throw new BadRequestException('Invalid id');
+    }
+    await this.assertOwnImageExists(uid, id);
+
     const db = admin.database();
     const dbImageRef = db.ref(`users/${uid}/screenshots/${id}`);
 

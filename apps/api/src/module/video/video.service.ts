@@ -1,6 +1,7 @@
 import { Reference } from '@firebase/database-types';
 import type { FullMetadata } from '@firebase/storage';
 import {
+  BadRequestException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -667,6 +668,13 @@ export class VideoService {
     likes: { uid: string; timestamp: number }[],
     title?: string,
   ): Promise<void> {
+    // The id goes into a database path, and an update of a video that does not exist would
+    // create a partial record: a plain id of an existing video of the caller, or nothing happens.
+    if (typeof id !== 'string' || !is_id(id)) {
+      throw new BadRequestException('Invalid id');
+    }
+    await this.assertOwnVideoExists(uid, id);
+
     const db = admin.database();
     const dbVideoRef = db.ref(`users/${uid}/videos/${id}`);
     await dbVideoRef.update({

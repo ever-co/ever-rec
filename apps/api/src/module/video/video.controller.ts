@@ -25,9 +25,13 @@ import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
 import { diskStorage } from 'multer';
 import { IDataResponse } from 'src/interfaces/_types';
-import { UniqueViewsSharedService } from 'src/services/shared/uniqueViews.shared.service';
+import {
+  IViewInfo,
+  UniqueViewsSharedService,
+} from 'src/services/shared/uniqueViews.shared.service';
+import { getClientIp } from 'src/services/utils/clientIp';
 import { fileExtensionMap } from 'src/services/utils/fileExtensionMap';
-import { IUniqueView } from 'src/services/utils/models/shared.model';
+import { parseBooleanFlag } from 'src/services/utils/parseBooleanFlag';
 import { v4 as uuidv4 } from 'uuid';
 import { TMP_PATH } from '../../enums/tmpPathsEnums';
 import { FoldersSharedService } from '../../services/shared/folders.shared.service';
@@ -266,8 +270,9 @@ export class VideoController {
   async like(
     @Req() request,
     @Param('sharedId', ValidateId) sharedId: string,
-    @Query('isWorkspace') isWorkspace: boolean,
+    @Query('isWorkspace') isWorkspaceQuery: string,
   ) {
+    const isWorkspace = parseBooleanFlag(isWorkspaceQuery);
     const sharedVideo = await this.sharedService.getSharedItemBySharedId(
       'video',
       sharedId,
@@ -457,23 +462,52 @@ export class VideoController {
   async getSharedImageBySharedId(
     @Req() req,
     @Param('sharedId', ValidateId) sharedId: string,
-    @Query('isWorkspace') isWorkspace: boolean,
+    @Query('isWorkspace') isWorkspace: string,
   ) {
-    return await this.videoService.getVideoBySharedId(sharedId, isWorkspace);
+    return await this.videoService.getVideoBySharedId(
+      sharedId,
+      parseBooleanFlag(isWorkspace),
+    );
   }
 
+  // Counts a view of a shared video. The body only names the share link; the item, the viewer
+  // (the optional sign-in) and the address all come from the server.
+  @UseGuards(UserGuard)
   @Post('shared/view-info')
   async addUniqueViewInfo(
-    @Body() reqBody,
-  ): Promise<IDataResponse<{ uniqueViewsDb: IUniqueView[]; views: number }>> {
-    return await this.uniqueViewsSharedService.addUniqueView({ ...reqBody });
+    @Req() req,
+    @Body() body: { sharedId?: unknown; isWorkspace?: unknown },
+  ): Promise<IDataResponse<IViewInfo>> {
+    return await this.uniqueViewsSharedService.addUniqueView({
+      sharedId: body?.sharedId,
+      itemType: 'video',
+      isWorkspace: parseBooleanFlag(body?.isWorkspace),
+      viewer: req.user ?? null,
+      ip: getClientIp(req),
+    });
   }
 
+  // The viewers of a video go to its owner (or a workspace member) only; anyone else gets the count.
+  @UseGuards(UserGuard)
   @Post('shared/get-view-info')
   async getUniqueViewInfo(
-    @Body() reqBody,
-  ): Promise<IDataResponse<IUniqueView[]>> {
-    return await this.uniqueViewsSharedService.getUniqueView({ ...reqBody });
+    @Req() req,
+    @Body()
+    body: {
+      sharedId?: unknown;
+      itemId?: unknown;
+      workspaceId?: unknown;
+      isWorkspace?: unknown;
+    },
+  ): Promise<IDataResponse<IViewInfo>> {
+    return await this.uniqueViewsSharedService.getUniqueView({
+      itemType: 'video',
+      sharedId: body?.sharedId,
+      itemId: body?.itemId,
+      workspaceId: body?.workspaceId,
+      isWorkspace: parseBooleanFlag(body?.isWorkspace),
+      userId: req.user?.id ?? null,
+    });
   }
 
   @UseGuards(AuthGuard)
