@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import { errorHandler } from './helpers/errors';
+import { errorHandler, requestErrorHandler } from './helpers/errors';
 import IEditorVideo, {
   DbVideoData,
   IDbFolderData,
@@ -442,16 +442,25 @@ const createVideoTemplate = async (url: string): Promise<Blob | null> => {
   });
 };
 
+// The API answers 400 or 404 when the item cannot be liked (a broken link, a deleted item).
 const likeVideo = async (sharedLinkId: string, isWorkspace: boolean) => {
-  const response = await likeVideoAPI(sharedLinkId, isWorkspace);
-  const data = iDataResponseParser(response);
-  return data;
+  try {
+    const response = await likeVideoAPI(sharedLinkId, isWorkspace);
+    return iDataResponseParser(response);
+  } catch (error: any) {
+    requestErrorHandler(error);
+    return null;
+  }
 };
 
 const likeVideoOwn = async (videoId: string, workspaceId?: string) => {
-  const response = await likeVideoOwnAPI(videoId, workspaceId);
-  const data = iDataResponseParser(response);
-  return data;
+  try {
+    const response = await likeVideoOwnAPI(videoId, workspaceId);
+    return iDataResponseParser(response);
+  } catch (error: any) {
+    requestErrorHandler(error);
+    return null;
+  }
 };
 
 export {

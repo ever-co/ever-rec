@@ -239,7 +239,6 @@ export class WorkspaceFilesController {
       imageId,
       body.parentId,
       body.trash,
-      body.likes,
       body.title,
       body.stage,
       body.originalImage,
@@ -264,7 +263,6 @@ export class WorkspaceFilesController {
       videoId,
       body.parentId,
       body.trash,
-      body.likes,
       body.title,
     );
   }

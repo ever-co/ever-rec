@@ -78,11 +78,17 @@ export class WhiteboardService {
       };
 
       const whiteboardIds = await this.checkUserWhiteboards(db, uid);
-      whiteboardIds.push(whiteboardId);
+      if (!whiteboardIds.includes(whiteboardId)) {
+        whiteboardIds.push(whiteboardId);
+      }
 
-      // The whiteboard record (with its admin) is what grants access; the list is a copy.
-      await whiteboardRef.set(newWhiteboard);
-      await userRef.update({ whiteboardIds });
+      // The whiteboard record (with its admin) is what grants access; the list is a copy. Both are
+      // written in one multi-location update, so a failure leaves neither or both: a retry cannot
+      // find a list entry without its record, or the other way round.
+      await db.ref().update({
+        [`${this.rootDb}/${whiteboardId}`]: newWhiteboard,
+        [`users/${uid}/whiteboardIds`]: whiteboardIds,
+      });
 
       return sendResponse<IWhiteboard>(newWhiteboard);
     } catch (e) {
@@ -139,11 +145,17 @@ export class WhiteboardService {
 
       await db.ref(`${this.rootDb}/${whiteboardId}`).remove();
 
-      // Keep the user's own list in step; it grants nothing.
-      const whiteboardIds = await this.checkUserWhiteboards(db, uid);
+      // Keep the user's own list in step; it grants nothing. The id is taken out inside a
+      // transaction, so two deletes at the same moment both take effect. The function may first run
+      // against a value the client guessed (null), so anything that is not a list is returned as it
+      // is: the database then checks the guess and runs the function again with the real value.
       await db
         .ref(`users/${uid}/whiteboardIds`)
-        .set(whiteboardIds.filter((y) => y !== whiteboardId));
+        .transaction((current: unknown) =>
+          Array.isArray(current)
+            ? current.filter((id) => id !== whiteboardId)
+            : current,
+        );
 
       return sendResponse<IWhiteboard>(whiteboardVal);
     } catch (e) {

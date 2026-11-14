@@ -1,5 +1,9 @@
 import * as admin from 'firebase-admin';
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Reference } from '@firebase/database-types';
 import { ImageViewModel } from '../../module/image/view.models/image.view.model';
 import { nanoid } from 'nanoid';
@@ -596,37 +600,36 @@ export class SharedService {
     userId: string,
     workspaceId?: string,
   ): Promise<IDataResponse<LikeIntF[]>> {
+    // A link that resolves to no item has nothing to like.
+    if (!itemId) {
+      throw new NotFoundException('Item not found');
+    }
+
+    const rootDb = workspaceId ? '/workspaces' : '/users';
+    const parentCollection = workspaceId ? workspaceId : ownerUid;
+    const collection = workspaceId
+      ? dbEndpoints.workspaceCollections[itemType]
+      : dbEndpoints.userCollections[itemType];
+
+    // The ids go into a database path: nothing but plain ids may reach it.
+    if (
+      typeof parentCollection !== 'string' ||
+      !is_id(parentCollection) ||
+      typeof itemId !== 'string' ||
+      !is_id(itemId)
+    ) {
+      throw new BadRequestException('Invalid item path');
+    }
+
     try {
-      if (!itemId) {
-        throw new Error(`Item id is missing`);
-      }
-
       const db = admin.database();
-      const rootDb = workspaceId ? '/workspaces' : '/users';
-      const parentCollection = workspaceId ? workspaceId : ownerUid;
-      const collection = workspaceId
-        ? dbEndpoints.workspaceCollections[itemType]
-        : dbEndpoints.userCollections[itemType];
-
-      // The ids go into a database path: nothing but plain ids may reach it.
-      if (
-        typeof parentCollection !== 'string' ||
-        !is_id(parentCollection) ||
-        typeof itemId !== 'string' ||
-        !is_id(itemId)
-      ) {
-        throw new Error('Invalid item path');
-      }
-
       const itemRef = db.ref(
         `${rootDb}/${parentCollection}/${collection}/${itemId}`,
       );
       const itemSnapshot = await itemRef.get();
 
       if (!itemSnapshot.exists()) {
-        throw new Error(
-          `Item doesn't exit for /${rootDb}/${ownerUid}/${collection}/${itemId}`,
-        );
+        throw new NotFoundException('Item not found');
       }
 
       // Read, change and write of the likes happens in one transaction: two people liking at the
@@ -652,6 +655,10 @@ export class SharedService {
         toPublicLikes(formatDataToArray(snapshot.val()), userId),
       );
     } catch (e) {
+      // A missing item is the caller's answer (404), not a failed write.
+      if (e instanceof NotFoundException) {
+        throw e;
+      }
       console.log(e);
       return sendError('Could not register a Like...', e.message);
     }

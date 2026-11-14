@@ -112,11 +112,22 @@ describe('single-data routes', () => {
     it('lets a writer update the title', async () => {
       await put('uid-writer', `${type}/${id}`, { title: 'new' }).expect(200);
       expect(updateItemData).toHaveBeenCalledTimes(1);
-      // updateItemData(uid, workspaceId, itemType, id, parentId, trash, likes, title, ...)
+      // updateItemData(uid, workspaceId, itemType, id, parentId, trash, title, ...)
       const args = updateItemData.mock.calls[0];
       expect(args[2]).toBe(type);
       expect(args[3]).toBe(id);
-      expect(args[7]).toBe('new');
+      expect(args[6]).toBe('new');
+    });
+
+    it('accepts a likes field from an older client and does not pass it on', async () => {
+      await put('uid-writer', `${type}/${id}`, {
+        title: 'new',
+        likes: [{ uid: 'uid-writer', timestamp: 1 }],
+      }).expect(200);
+      const args = updateItemData.mock.calls[0];
+      expect(args).toHaveLength(type === 'image' ? 10 : 7);
+      expect(args[6]).toBe('new');
+      expect(JSON.stringify(args)).not.toContain('timestamp');
     });
 
     it('refuses an id that matches no item, and changes nothing', async () => {
