@@ -210,7 +210,11 @@ describe('ImageController view-info routes', () => {
         .get(`/image/shared/single/link1?isWorkspace=${sent}`)
         .expect(200);
 
-      expect(getImageBySharedId).toHaveBeenCalledWith('link1', expected);
+      expect(getImageBySharedId).toHaveBeenCalledWith(
+        'link1',
+        expected,
+        undefined,
+      );
     });
 
     it('GET shared/single: no flag is false', async () => {
@@ -218,7 +222,11 @@ describe('ImageController view-info routes', () => {
         .get('/image/shared/single/link1')
         .expect(200);
 
-      expect(getImageBySharedId).toHaveBeenCalledWith('link1', false);
+      expect(getImageBySharedId).toHaveBeenCalledWith(
+        'link1',
+        false,
+        undefined,
+      );
     });
 
     it('POST :linkId/like: ?isWorkspace=false likes the personal image, not the workspace one', async () => {

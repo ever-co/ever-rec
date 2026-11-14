@@ -1,8 +1,9 @@
 /**
  * The comments of an item are written by the API (Admin SDK, which bypasses the rules) and nobody
  * else: the owner of an item may not rewrite, delete or plant comments under it with their own
- * client credentials, or the API would show a planted comment under another user's name. The rest
- * of the owner's item stays writable and readable for them.
+ * client credentials, or the API would show a planted comment under another user's name. The owner
+ * can still read the whole item; since the item `uid` and `likes` lock, no field of an item is
+ * client-writable (items change through the API only).
  */
 import type * as admin from 'firebase-admin';
 import { randomUUID } from 'node:crypto';
@@ -123,16 +124,18 @@ describe('database rules for the comments of an item', () => {
     },
   );
 
-  it('the owner can still read and edit the other fields of their item', async () => {
+  it('the owner can still read their item; its other fields change through the API only', async () => {
     for (const collection of ['videos', 'screenshots']) {
       const base = `users/${owner.uid}/${collection}/item1`;
 
       expect((await send('GET', base, owner.token)).status).toBe(200);
       expect(
-        (await send('PUT', `${base}/title`, owner.token, 'second')).status,
-      ).toBe(200);
+        denied(
+          (await send('PUT', `${base}/title`, owner.token, 'second')).status,
+        ),
+      ).toBe(true);
       expect((await app.database().ref(`${base}/title`).get()).val()).toBe(
-        'second',
+        'first',
       );
     }
   });

@@ -211,7 +211,11 @@ describe('VideoController view-info routes', () => {
         .get(`/video/shared/single/link1?isWorkspace=${sent}`)
         .expect(200);
 
-      expect(getVideoBySharedId).toHaveBeenCalledWith('link1', expected);
+      expect(getVideoBySharedId).toHaveBeenCalledWith(
+        'link1',
+        expected,
+        undefined,
+      );
     });
 
     it('GET shared/single: no flag is false', async () => {
@@ -219,7 +223,11 @@ describe('VideoController view-info routes', () => {
         .get('/video/shared/single/link1')
         .expect(200);
 
-      expect(getVideoBySharedId).toHaveBeenCalledWith('link1', false);
+      expect(getVideoBySharedId).toHaveBeenCalledWith(
+        'link1',
+        false,
+        undefined,
+      );
     });
 
     it('POST :sharedId/like: ?isWorkspace=false likes the personal video, not the workspace one', async () => {

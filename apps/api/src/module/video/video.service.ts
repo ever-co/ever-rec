@@ -33,6 +33,7 @@ import { fixVideoWithFFMPEG } from '../../services/utils/fixVideoWithFFMPEG';
 import { sendError, sendResponse } from '../../services/utils/sendResponse';
 import { StreamServiceService } from '../video-services/streamService.service';
 import { is_id } from '../workspace/validators/id.validator';
+import { toPublicLikes } from '../../services/utils/likes';
 import {
   EVER_COUNTER_EVENTS,
   storedBytes,
@@ -143,9 +144,14 @@ export class VideoService {
   async getVideoBySharedId(
     link: string,
     isWorkspace: boolean,
+    viewerUid?: string,
   ): Promise<
     IDataResponse<{
-      video: { owner: IUserShort; dbData: DbVideoData; url: string };
+      video: {
+        owner: Omit<IUserShort, 'email'>;
+        dbData: DbVideoData;
+        url: string;
+      };
     }>
   > {
     try {
@@ -189,11 +195,14 @@ export class VideoService {
           sharedLink = fileResponse[0];
         }
 
-        const uid = videoData?.uid ? videoData?.uid : sharedData?.uid;
+        // A personal share belongs to the user the share record names: the item's own `uid` field
+        // can be written by its owner and says nothing about who owns the link. A workspace item is
+        // only ever written by the API, so its `uid` (the uploader) is trusted.
+        const uid = isWorkspace ? videoData.uid : sharedData.uid;
         const ownerRef = db.ref(`users/${uid}`);
         const ownerData = (await ownerRef.get()).val();
+        // No email: anyone with the link can read this.
         const owner = {
-          email: ownerData.email,
           displayName: ownerData.displayName,
           photoURL: ownerData.photoURL,
           id: uid,
@@ -217,6 +226,7 @@ export class VideoService {
               commentsLength: videoData.comments?.length || 0,
               comments: null,
               chapters,
+              likes: toPublicLikes(videoData.likes, viewerUid),
               uid,
             },
             url: sharedLink,
@@ -669,14 +679,17 @@ export class VideoService {
     id: string,
     parentId: string | false,
     trash: boolean,
-    likes: { uid: string; timestamp: number }[],
+    // Not written: likes are only changed by the like route, one caller toggling their own.
+    // Kept so the position of the other arguments does not change.
+    _likes: unknown,
     title?: string,
   ): Promise<void> {
-    // The id goes into a database path, and an update of a video that does not exist would
-    // create a partial record: a plain id of an existing video of the caller, or nothing happens.
+    // The id goes into a database path: a sub-path such as `<id>/likes` would let this update
+    // write inside the likes or comments of the video.
     if (typeof id !== 'string' || !is_id(id)) {
-      throw new BadRequestException('Invalid id');
+      throw new BadRequestException('Invalid video id');
     }
+    // An update of a video that does not exist would create a partial record: 404 instead.
     await this.assertOwnVideoExists(uid, id);
 
     const db = admin.database();
@@ -685,7 +698,6 @@ export class VideoService {
       ...(title !== undefined ? { title } : {}),
       ...(parentId !== undefined ? { parentId } : {}),
       ...(trash !== undefined ? { trash } : {}),
-      ...(likes !== undefined ? { likes } : { likes: 0 }),
     });
 
     return this.getVideoByIdPrivate(uid, id);

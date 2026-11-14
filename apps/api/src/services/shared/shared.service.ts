@@ -30,6 +30,7 @@ import { DatabaseService } from 'firebase-admin/lib/database/database';
 import { Database } from 'firebase-admin/lib/database';
 import { IUser } from 'src/interfaces/IUser';
 import { formatDataToArray, parseCollectionToArray } from '../utils/helpers';
+import { toPublicLikes } from '../utils/likes';
 import { is_id } from '../../module/workspace/validators/id.validator';
 
 export type queryReturnType =
@@ -629,12 +630,13 @@ export class SharedService {
       }
 
       // Read, change and write of the likes happens in one transaction: two people liking at the
-      // same moment both end up in the list.
+      // same moment both end up in the list. A legacy value (the number 0) or anything else that
+      // is not a list counts as no likes.
       const { snapshot } = await itemRef
         .child('likes')
         .transaction((current): LikeIntF[] => {
           const likes: LikeIntF[] = formatDataToArray(current);
-          const isLikedIndex = likes.findIndex((x) => x.uid === userId);
+          const isLikedIndex = likes.findIndex((x) => x?.uid === userId);
 
           if (isLikedIndex === -1) {
             likes.push({ uid: userId, timestamp: Date.now() });
@@ -645,7 +647,10 @@ export class SharedService {
           return likes;
         });
 
-      return sendResponse(formatDataToArray(snapshot.val()) as LikeIntF[]);
+      // The caller gets the count and their own like back, not the uids of the other likers.
+      return sendResponse(
+        toPublicLikes(formatDataToArray(snapshot.val()), userId),
+      );
     } catch (e) {
       console.log(e);
       return sendError('Could not register a Like...', e.message);

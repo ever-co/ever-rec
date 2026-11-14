@@ -459,6 +459,8 @@ export class VideoController {
     return await this.videoService.getAllShared(req.user?.id);
   }
 
+  // Open to anyone with the link; a signed-in viewer is only read to mark their own like.
+  @UseGuards(UserGuard)
   @Get('shared/single/:sharedId')
   async getSharedImageBySharedId(
     @Req() req,
@@ -468,6 +470,7 @@ export class VideoController {
     return await this.videoService.getVideoBySharedId(
       sharedId,
       parseBooleanFlag(isWorkspace),
+      req.user?.id,
     );
   }
 

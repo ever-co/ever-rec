@@ -81,10 +81,9 @@ const updateVideoData = async ({
   parentId,
   trash,
   views,
-  likes,
 }: DbVideoData): Promise<IEditorVideo | null> => {
   try {
-    return await updateVideoDataAPI(id, title, parentId, trash, likes, views);
+    return await updateVideoDataAPI(id, title, parentId, trash, views);
   } catch (error: any) {
     errorHandler(error);
   }

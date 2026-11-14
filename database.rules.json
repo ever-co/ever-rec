@@ -10,31 +10,18 @@
             "parentId",
             "trash"
           ],
-          ".read": "$userId === auth.uid",
-          "$itemId": {
-            "$field": {
-              ".write": "$userId === auth.uid && $field !== 'comments'"
-            }
-          }
+          ".read": "$userId === auth.uid"
         },
         "videos": {
           ".indexOn": [
             "parentId",
             "trash"
           ],
-          ".read": "$userId === auth.uid",
-          "$itemId": {
-            "$field": {
-              ".write": "$userId === auth.uid && $field !== 'comments'"
-            }
-          }
+          ".read": "$userId === auth.uid"
         },
         "profile": {
           ".read": true,
           ".write": "$userId === auth.uid"
-        },
-        "$other": {
-          ".write": "$userId === auth.uid && $other !== 'screenshots' && $other !== 'videos'"
         }
       }
     },
@@ -60,6 +47,13 @@
         "queryField",
         "itemId"
       ],
+      ".read": false,
+      ".write": false
+    },
+    "whiteboards": {
+      "mainCollection": {
+        ".indexOn": ["admin"]
+      },
       ".read": false,
       ".write": false
     },

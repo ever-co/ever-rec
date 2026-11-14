@@ -1,10 +1,10 @@
 import * as admin from 'firebase-admin';
 import { sendError, sendResponse } from 'src/services/utils/sendResponse';
-import { promiseAllSettled } from '../../../services/utils/helpers';
 import { IDataResponse } from '../../../interfaces/_types';
 import { IUser } from '../../../interfaces/IUser';
 import { Injectable } from '@nestjs/common';
 import { IWhiteboard } from '../interfaces/Whiteboard';
+import { is_id } from '../../workspace/validators/id.validator';
 import { nanoid } from 'nanoid';
 import { Database } from 'firebase-admin/database';
 
@@ -12,11 +12,34 @@ import { Database } from 'firebase-admin/database';
 export class WhiteboardService {
   private readonly rootDb = 'whiteboards/mainCollection';
 
-  async checkUserWhiteboards(db: Database, uid: string) {
+  /**
+   * The ids in the user's own list. A convenience copy only: a user can write to their own record,
+   * so it never decides who may read or change a whiteboard. That is the `admin` of the whiteboard
+   * record, which only the API writes.
+   */
+  async checkUserWhiteboards(db: Database, uid: string): Promise<string[]> {
     const userRef = db.ref(`users/${uid}/whiteboardIds`);
     const userSnap = await userRef.get();
-    const userVal: string[] = userSnap.val() || [];
-    return userVal;
+    const userVal = userSnap.val();
+    return Array.isArray(userVal)
+      ? userVal.filter((id) => typeof id === 'string')
+      : [];
+  }
+
+  /** The whiteboard when `uid` is its admin; null for an unknown id, a malformed id or another user's. */
+  private async getOwnWhiteboard(
+    db: Database,
+    uid: string,
+    whiteboardId: string,
+  ): Promise<IWhiteboard | null> {
+    if (!uid || typeof whiteboardId !== 'string' || !is_id(whiteboardId)) {
+      return null;
+    }
+
+    const snap = await db.ref(`${this.rootDb}/${whiteboardId}`).get();
+    const val: IWhiteboard | null = snap.val();
+
+    return val && val.admin === uid ? val : null;
   }
 
   async createNewWhiteboard(
@@ -54,14 +77,12 @@ export class WhiteboardService {
         isPublic: false,
       };
 
-      const whiteboardIds = userVal.whiteboardIds || [];
+      const whiteboardIds = await this.checkUserWhiteboards(db, uid);
       whiteboardIds.push(whiteboardId);
 
-      await Promise.all([
-        whiteboardRef.set(newWhiteboard).then(() => {
-          userRef.update({ whiteboardIds });
-        }),
-      ]);
+      // The whiteboard record (with its admin) is what grants access; the list is a copy.
+      await whiteboardRef.set(newWhiteboard);
+      await userRef.update({ whiteboardIds });
 
       return sendResponse<IWhiteboard>(newWhiteboard);
     } catch (e) {
@@ -74,21 +95,23 @@ export class WhiteboardService {
     uid: string,
   ): Promise<IDataResponse<IWhiteboard[] | null>> {
     try {
+      if (!uid) {
+        return sendError('User is missing');
+      }
+
+      // The user's whiteboards are the records they are the admin of, not the ids in a list the
+      // user can write to themselves.
       const db = admin.database();
-      const whiteboardIds = await this.checkUserWhiteboards(db, uid);
-      if (!whiteboardIds) return;
-
-      // Iterate over whiteboardIds as keys and get data
-      const whiteboardPromises = whiteboardIds.map(async (id) => {
-        const whiteboardsRef = db.ref(`${this.rootDb}/${id}`);
-        const whiteboardsSnap = await whiteboardsRef.get();
-        const whiteboardsVal: IWhiteboard = whiteboardsSnap.val();
-
-        return whiteboardsVal;
-      });
-
-      const whiteboards =
-        await promiseAllSettled<IWhiteboard>(whiteboardPromises);
+      const snap = await db
+        .ref(this.rootDb)
+        .orderByChild('admin')
+        .equalTo(uid)
+        .get();
+      const found: Record<string, IWhiteboard> | null = snap.val();
+      // Oldest first, as the list used to come back.
+      const whiteboards = Object.values(found || {})
+        .filter((whiteboard) => whiteboard?.admin === uid)
+        .sort((a, b) => (a.created || 0) - (b.created || 0));
 
       return sendResponse<IWhiteboard[]>(whiteboards);
     } catch (e) {
@@ -105,23 +128,22 @@ export class WhiteboardService {
   ): Promise<IDataResponse<IWhiteboard | null>> {
     try {
       const db = admin.database();
-      const userRef = db.ref(`users/${uid}/whiteboardIds`);
-      const whiteboardIds = await this.checkUserWhiteboards(db, uid);
-      if (!whiteboardIds.includes(whiteboardId))
-        return sendError(`Whiteboard doesn't belong to this user.`);
-
-      const whiteboardRef = db.ref(`${this.rootDb}/${whiteboardId}`);
-      const whiteboardSnap = await whiteboardRef.get();
-      const whiteboardVal: IWhiteboard = whiteboardSnap.val();
-
       if (whiteboardId === ':whiteboardId') {
         return sendError('Undefined whiteboard');
       }
 
-      const newWhiteboardIds = whiteboardIds.filter((y) => y !== whiteboardId);
-      await userRef.set(newWhiteboardIds);
+      const whiteboardVal = await this.getOwnWhiteboard(db, uid, whiteboardId);
+      if (!whiteboardVal) {
+        return sendError(`Whiteboard doesn't belong to this user.`);
+      }
 
-      await whiteboardRef.remove();
+      await db.ref(`${this.rootDb}/${whiteboardId}`).remove();
+
+      // Keep the user's own list in step; it grants nothing.
+      const whiteboardIds = await this.checkUserWhiteboards(db, uid);
+      await db
+        .ref(`users/${uid}/whiteboardIds`)
+        .set(whiteboardIds.filter((y) => y !== whiteboardId));
 
       return sendResponse<IWhiteboard>(whiteboardVal);
     } catch (e) {
@@ -144,9 +166,9 @@ export class WhiteboardService {
       }
 
       const db = admin.database();
-      const whiteboardIds = await this.checkUserWhiteboards(db, uid);
-      if (!whiteboardIds.includes(whiteboardId))
+      if (!(await this.getOwnWhiteboard(db, uid, whiteboardId))) {
         return sendError(`Whiteboard doesn't belong to this user.`);
+      }
 
       const whiteboardRef = db.ref(`${this.rootDb}/${whiteboardId}`);
       await whiteboardRef.update({
@@ -173,17 +195,10 @@ export class WhiteboardService {
   ): Promise<IDataResponse<IWhiteboard | null>> {
     try {
       const db = admin.database();
-      const whiteboardIds = await this.checkUserWhiteboards(db, uid);
-
-      if (!whiteboardIds.includes(whiteboardId))
-        return sendError(`Whiteboard doesn't belong to this user.`);
-
-      const whiteboardRef = db.ref(`${this.rootDb}/${whiteboardId}`);
-      const whiteboardSnap = await whiteboardRef.get();
-      const whiteboardVal: IWhiteboard = whiteboardSnap.val();
+      const whiteboardVal = await this.getOwnWhiteboard(db, uid, whiteboardId);
 
       if (!whiteboardVal) {
-        return sendError(`Whiteboard doesn't exist`);
+        return sendError(`Whiteboard doesn't belong to this user.`);
       }
 
       return sendResponse<IWhiteboard>(whiteboardVal);
@@ -196,6 +211,10 @@ export class WhiteboardService {
     whiteboardId: string,
   ): Promise<IDataResponse<IWhiteboard | null>> {
     try {
+      if (typeof whiteboardId !== 'string' || !is_id(whiteboardId)) {
+        return sendError(`Whiteboard doesn't exist.`);
+      }
+
       const db = admin.database();
       const whiteboardRef = db.ref(`${this.rootDb}/${whiteboardId}`);
       const whiteboardSnap = await whiteboardRef.get();
