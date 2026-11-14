@@ -110,12 +110,46 @@ export class SharedService {
     return result;
   }
 
+  /**
+   * A stored comment as a viewer may see it: only known fields, never the stored `uid`. The
+   * author's id is shown (as `user.id`) to that author alone, so a client can tell the viewer's
+   * own comments apart through `isOwn`.
+   */
+  toResponseComment(
+    comment: DbCommentIntF,
+    author: { name?: string | null; photoURL?: string | null } | null,
+    viewerId?: string | null,
+  ): ResponseComment {
+    const isOwn = !!viewerId && comment.uid === viewerId;
+    const response: ResponseComment = {
+      id: comment.id,
+      content: comment.content,
+      timestamp: comment.timestamp,
+      isEdited: comment.isEdited,
+      isOwn,
+      user: {
+        photoURL: author?.photoURL || null,
+        name: author?.name || null,
+      },
+    };
+
+    if (comment.updatedTimestamp !== undefined) {
+      response.updatedTimestamp = comment.updatedTimestamp;
+    }
+    if (isOwn) {
+      response.user.id = comment.uid;
+    }
+
+    return response;
+  }
+
   async parseCommentsForResponse(
     itemType: ItemType,
     userId: string,
     itemId: string,
     initialComments: DbCommentIntF[],
     limit: string | number = '10',
+    viewerId?: string | null,
   ): Promise<ResponseComment[]> {
     try {
       const db = admin.database();
@@ -136,19 +170,23 @@ export class SharedService {
 
       await Promise.allSettled(
         comments.map(async (x) => {
-          const userRef = db.ref(`users/${x.uid}`);
-          const userVal = await userRef.get();
-          const user = userVal.val();
+          // The stored uid goes into a database path: a stored value that is not a plain id
+          // (a planted one) is not looked up.
+          const user =
+            typeof x.uid === 'string' && is_id(x.uid)
+              ? (await db.ref(`users/${x.uid}`).get()).val()
+              : null;
 
-          commentsResult.push({
-            ...x,
-
-            user: {
-              id: x.uid,
-              photoURL: user?.photoUrl || user?.photoURL,
-              name: user?.displayName || null,
-            },
-          });
+          commentsResult.push(
+            this.toResponseComment(
+              x,
+              {
+                photoURL: user?.photoUrl || user?.photoURL,
+                name: user?.displayName,
+              },
+              viewerId,
+            ),
+          );
         }),
       );
 
@@ -242,7 +280,7 @@ export class SharedService {
     content: string,
     isPublic: boolean,
     limit?: string,
-  ): Promise<IDataResponse<DbCommentIntF>> {
+  ): Promise<IDataResponse<ICommentResponse>> {
     try {
       // All three ids go into a database path: a nested path or a wildcard must never get through.
       if (
@@ -306,13 +344,11 @@ export class SharedService {
 
       await newCommentRef.set(newComment);
 
-      const user = {
-        id: currentUserId,
-        name: userData.displayName,
-        photoURL: userData.photoURL,
-      };
-
-      const newCommentWithUser: ICommentResponse = { ...newComment, user };
+      const newCommentWithUser: ICommentResponse = this.toResponseComment(
+        newComment,
+        { name: userData.displayName, photoURL: userData.photoURL },
+        currentUserId,
+      );
 
       this.eventEmitter.emit(
         'analytics.track',
@@ -374,7 +410,12 @@ export class SharedService {
 
       await commentRef.set(newComment);
 
-      return sendResponse(newComment);
+      // The stored uid of the author is not sent back: the client keeps the comment it already
+      // has (author, `isOwn`) and takes the new content from this.
+      const commentWithoutUid = { ...newComment };
+      delete commentWithoutUid.uid;
+
+      return sendResponse(commentWithoutUid);
     } catch (e) {
       console.log(e);
       return sendError('Error while trying to update the comment.');
@@ -455,6 +496,8 @@ export class SharedService {
           userId,
           itemId,
           item.comments,
+          undefined,
+          userId,
         );
 
         return {
@@ -513,6 +556,7 @@ export class SharedService {
           itemId,
           commentsFromDB,
           limit,
+          userId,
         );
 
         return { comments, commentsLength: commentsFromDB.length };

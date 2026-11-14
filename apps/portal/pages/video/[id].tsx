@@ -535,13 +535,15 @@ const SingleVideoPage: FC<IProps> = ({
           </div>
         )}
 
-        <div className={styles.videoCommentsWrapper}>
-          <VideoComments
-            userId={user?.id}
-            itemOwnerId={(isPublic ? videoOwner?.id : user?.id) || ''}
-            itemId={video?.dbData?.id || ''}
-          />
-        </div>
+        {!isWorkspace && !isPublicWorkspace && (
+          <div className={styles.videoCommentsWrapper}>
+            <VideoComments
+              userId={user?.id}
+              itemOwnerId={(isPublic ? videoOwner?.id : user?.id) || ''}
+              itemId={video?.dbData?.id || ''}
+            />
+          </div>
+        )}
       </div>
 
       <RenameItemModal

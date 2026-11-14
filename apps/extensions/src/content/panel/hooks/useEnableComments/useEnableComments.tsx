@@ -520,7 +520,7 @@ const useEnableComments = ({
                   >
                     {comment.timestamp}
                   </div>
-                  {comment.user?.id === user?.id && (
+                  {comment.isOwn && user?.id && (
                     <div
                       className={classNames(
                         styles.editDeleteWrapper,

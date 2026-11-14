@@ -12,7 +12,8 @@ export type IComment = {
   id: string;
   content: string;
   timestamp: number;
-  uid: string;
+  // Set by the API: true for the viewer's own comments (the API does not send author ids).
+  isOwn?: boolean;
   isEdited: boolean;
   user?: {
     name: string;
@@ -111,7 +112,7 @@ const CommentElement: FC<IProps> = ({
             <div className={styles.commentContent}>
               <p>{comment.content}</p>
 
-              {comment.uid === user?.id && (
+              {comment.isOwn && user?.id && (
                 <Dropdown
                   trigger={['click']}
                   placement="bottomRight"
