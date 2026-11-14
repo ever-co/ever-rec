@@ -178,6 +178,7 @@ export class ImageController {
 
     const result = await this.sharedService.updateCommentAPI(
       'image',
+      req.user?.id,
       ownerId,
       itemId,
       commentId,
