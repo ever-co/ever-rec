@@ -224,6 +224,8 @@ tw-items-center tw-justify-center tw-bg-blue-grey tw-h-500px"
                   itemId={image?.dbData?.id || ''}
                   userId={user?.id}
                   itemOwnerId={user?.id}
+                  itemType="image"
+                  isWorkspace
                 />
               </Col>
 

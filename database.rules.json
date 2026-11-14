@@ -5,14 +5,17 @@
     "users": {
       "$userId": {
         ".read": "$userId === auth.uid",
-        ".write": "$userId === auth.uid",
         "screenshots": {
           ".indexOn": [
             "parentId",
             "trash"
           ],
           ".read": "$userId === auth.uid",
-          ".write": "$userId === auth.uid"
+          "$itemId": {
+            "$field": {
+              ".write": "$userId === auth.uid && $field !== 'comments'"
+            }
+          }
         },
         "videos": {
           ".indexOn": [
@@ -20,11 +23,18 @@
             "trash"
           ],
           ".read": "$userId === auth.uid",
-          ".write": "$userId === auth.uid"
+          "$itemId": {
+            "$field": {
+              ".write": "$userId === auth.uid && $field !== 'comments'"
+            }
+          }
         },
         "profile": {
           ".read": true,
           ".write": "$userId === auth.uid"
+        },
+        "$other": {
+          ".write": "$userId === auth.uid && $other !== 'screenshots' && $other !== 'videos'"
         }
       }
     },
