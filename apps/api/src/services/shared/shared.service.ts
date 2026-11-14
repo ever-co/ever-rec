@@ -160,21 +160,18 @@ export class SharedService {
     }
   }
 
+  /**
+   * The share record of an item, or null. It does not check that the item exists: the caller has
+   * to (`canViewItemComments` does), so the item is read once.
+   */
   async getSharedItemById(
     uid: string,
     itemId: string,
     itemType: ItemType,
   ): Promise<{ imageId: string; uid: string; uidImageId: string } | null> {
     const db = admin.database();
-    const collectionName = dbEndpoints.userCollections[itemType];
     const sharedCollectionName = dbEndpoints.sharedCollections[itemType];
     const sharedItemRefName = dbEndpoints.shareItemRefs[itemType];
-    const itemRef = db.ref(`users/${uid}/${collectionName}/${itemId}`);
-    const itemSnap = await itemRef.get();
-
-    if (!itemSnap.val()) {
-      return undefined;
-    }
 
     // The share record of one item is read through the indexed `<uid>|<item id>` key, the way the
     // share and unshare routes find it: the whole share collection is never loaded.
