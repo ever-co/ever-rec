@@ -61,7 +61,7 @@ const settle = () =>
 
 const render = async () => {
   await act(async () => {
-    root.render(<EmbeddedSharedVideo ip="1.2.3.4" />);
+    root.render(<EmbeddedSharedVideo />);
   });
   await settle();
 };
@@ -96,9 +96,8 @@ describe('embedded shared video page', () => {
 
     expect(player()?.dataset.url).toBe('https://cdn.test/video.mp4');
     expect(mockAddView).toHaveBeenCalledTimes(1);
-    expect(mockAddView.mock.calls[0][0]).toBeNull();
-    expect(mockAddView.mock.calls[0][1]).toBe('1.2.3.4');
-    expect(mockAddView.mock.calls[0][3]).toBe('video');
+    // Only the share link is sent: no viewer, address or item data (the API knows them).
+    expect(mockAddView.mock.calls[0]).toEqual(['abc', 'video', false]);
   });
 
   it('never restores sign-in, which would sign the extension out', async () => {

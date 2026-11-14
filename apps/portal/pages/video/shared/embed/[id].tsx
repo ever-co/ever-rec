@@ -11,17 +11,15 @@ import { useTranslation } from 'react-i18next';
 
 // Player-only page of a publicly shared video. It is meant to be used inside an <iframe>,
 // so it renders nothing but the player (no menu, comments or chapters).
+// The page is still rendered on request: the address of the viewer is no longer read here, the
+// API takes it from the call itself.
 export const getServerSideProps: GetServerSideProps = async (
-  context: GetServerSidePropsContext,
+  _context: GetServerSidePropsContext,
 ) => {
-  const forwarded =
-    context.req.headers['x-real-ip'] || context.req.socket.remoteAddress;
-  const ip = (Array.isArray(forwarded) ? forwarded[0] : forwarded) || '';
-
-  return { props: { ip } };
+  return { props: {} };
 };
 
-const EmbeddedSharedVideo: FC<{ ip?: string }> = ({ ip = '' }) => {
+const EmbeddedSharedVideo: FC = () => {
   const router = useRouter();
   const { t } = useTranslation();
   const addedUniqueView = useRef(false);
@@ -51,21 +49,20 @@ const EmbeddedSharedVideo: FC<{ ip?: string }> = ({ ip = '' }) => {
   }, [router.isReady, router.query]);
 
   // Embedded plays count as views, the same way the regular shared page counts them.
-  // The viewer is always recorded as anonymous: inside another site the Rec sign-in
-  // cookies cannot be read, and restoring sign-in here (useAuthenticateUser) would tell
-  // the browser extension to sign out.
+  // Inside another site the Rec sign-in cookies cannot be read, so the viewer is recorded
+  // as anonymous. Opened on the Rec site itself, a signed-in viewer is recorded the same
+  // way the regular shared page records them (only the owner can read the viewer list).
+  // Sign-in is not restored here (useAuthenticateUser), because that would tell the
+  // browser extension to sign out.
   useEffect(() => {
-    if (!video?.dbData || addedUniqueView.current) return;
+    const { id } = router.query;
+    if (!video?.dbData || typeof id !== 'string' || addedUniqueView.current) {
+      return;
+    }
 
     addedUniqueView.current = true;
-    addUniqueView(
-      null,
-      ip,
-      video.dbData,
-      'video',
-      Boolean(router.query.ws),
-    ).catch(() => undefined);
-  }, [video, ip, router.query.ws]);
+    addUniqueView(id, 'video', Boolean(router.query.ws)).catch(() => undefined);
+  }, [video, router.query]);
 
   // The stream data is read once. The status endpoints need a signed-in user, so an
   // embedded (usually anonymous) viewer must never poll them.

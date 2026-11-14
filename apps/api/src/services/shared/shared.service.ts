@@ -29,7 +29,7 @@ import { IWorkspaceFolder } from '../../module/workspace/Interfaces/Folders';
 import { DatabaseService } from 'firebase-admin/lib/database/database';
 import { Database } from 'firebase-admin/lib/database';
 import { IUser } from 'src/interfaces/IUser';
-import { parseCollectionToArray } from '../utils/helpers';
+import { formatDataToArray, parseCollectionToArray } from '../utils/helpers';
 import { toPublicLikes } from '../utils/likes';
 import { is_id } from '../../module/workspace/validators/id.validator';
 
@@ -608,6 +608,16 @@ export class SharedService {
         ? dbEndpoints.workspaceCollections[itemType]
         : dbEndpoints.userCollections[itemType];
 
+      // The ids go into a database path: nothing but plain ids may reach it.
+      if (
+        typeof parentCollection !== 'string' ||
+        !is_id(parentCollection) ||
+        typeof itemId !== 'string' ||
+        !is_id(itemId)
+      ) {
+        throw new Error('Invalid item path');
+      }
+
       const itemRef = db.ref(
         `${rootDb}/${parentCollection}/${collection}/${itemId}`,
       );
@@ -619,23 +629,28 @@ export class SharedService {
         );
       }
 
-      const itemData: ImageViewModel | VideoViewModel = itemSnapshot.val();
-      // A legacy value (the number 0) or anything else that is not a list counts as no likes.
-      const likes: LikeIntF[] = Array.isArray(itemData?.likes)
-        ? itemData.likes
-        : [];
-      const isLikedIndex = likes.findIndex((x) => x?.uid === userId);
+      // Read, change and write of the likes happens in one transaction: two people liking at the
+      // same moment both end up in the list. A legacy value (the number 0) or anything else that
+      // is not a list counts as no likes.
+      const { snapshot } = await itemRef
+        .child('likes')
+        .transaction((current): LikeIntF[] => {
+          const likes: LikeIntF[] = formatDataToArray(current);
+          const isLikedIndex = likes.findIndex((x) => x?.uid === userId);
 
-      if (isLikedIndex === -1) {
-        likes.push({ uid: userId, timestamp: Date.now() });
-      } else {
-        likes.splice(isLikedIndex, 1);
-      }
+          if (isLikedIndex === -1) {
+            likes.push({ uid: userId, timestamp: Date.now() });
+          } else {
+            likes.splice(isLikedIndex, 1);
+          }
 
-      await itemRef.update({ likes });
+          return likes;
+        });
 
       // The caller gets the count and their own like back, not the uids of the other likers.
-      return sendResponse(toPublicLikes(likes, userId));
+      return sendResponse(
+        toPublicLikes(formatDataToArray(snapshot.val()), userId),
+      );
     } catch (e) {
       console.log(e);
       return sendError('Could not register a Like...', e.message);

@@ -210,12 +210,16 @@ export class VideoService {
 
         const allViews = formatDataToArray(videoData.views);
         const chapters = parseCollectionToArray(videoData.chapters);
+        // Anyone with the link reads this answer: the viewers (names, emails) go to the owner
+        // only, through `shared/get-view-info`.
+        const publicData: any = { ...videoData };
+        delete publicData.uniqueViews;
 
         return sendResponse({
           video: {
             owner,
             dbData: {
-              ...videoData,
+              ...publicData,
               id: videoData.id,
               views: allViews.length,
               link: sharedLink,
@@ -685,6 +689,8 @@ export class VideoService {
     if (typeof id !== 'string' || !is_id(id)) {
       throw new BadRequestException('Invalid video id');
     }
+    // An update of a video that does not exist would create a partial record: 404 instead.
+    await this.assertOwnVideoExists(uid, id);
 
     const db = admin.database();
     const dbVideoRef = db.ref(`users/${uid}/videos/${id}`);

@@ -26,6 +26,15 @@ jest.mock('firebase-admin', () => ({
       update: async (data: any) => {
         mockDb.updates[path] = data;
       },
+      // The likes are toggled in a transaction on the `likes` child: the write is recorded on the
+      // item, as an update of that one field.
+      child: (name: string) => ({
+        transaction: async (update: (current: any) => any) => {
+          const next = update(mockRead(`${path}/${name}`) ?? null);
+          mockDb.updates[path] = { [name]: next };
+          return { committed: true, snapshot: { val: () => next } };
+        },
+      }),
     }),
   }),
 }));

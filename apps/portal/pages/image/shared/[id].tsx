@@ -27,12 +27,6 @@ export const getServerSideProps: GetServerSideProps = async (
   context: GetServerSidePropsContext,
 ) => {
   const { refreshToken, idToken } = context.req.cookies;
-  const forwarded = context.req.headers['x-forwarded-for'];
-
-  const ip =
-    typeof forwarded === 'string'
-      ? forwarded.split(/, /)[0]
-      : context.req.socket.remoteAddress;
 
   if (refreshToken && idToken) {
     const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -43,16 +37,16 @@ export const getServerSideProps: GetServerSideProps = async (
       baseURL as any,
     );
     if (user) {
-      return { props: { user, ip } };
+      return { props: { user } };
     } else {
-      return { props: { user: null, ip } };
+      return { props: { user: null } };
     }
   } else {
-    return { props: { user: null, ip } };
+    return { props: { user: null } };
   }
 };
 
-const SharedImage: React.FC<ISharedItem> = ({ user, ip }) => {
+const SharedImage: React.FC<ISharedItem> = ({ user }) => {
   const router = useRouter();
   const [param, setParam] = useState('');
   const [image, setImage] = useState<IWorkspaceImage | null>(null);
@@ -115,9 +109,11 @@ const SharedImage: React.FC<ISharedItem> = ({ user, ip }) => {
   }, [image, likes, user?.id]);
 
   useEffect(() => {
-    if (!image?.dbData) return;
+    const { id } = router.query;
+    if (!image?.dbData || typeof id !== 'string') return;
 
-    addUniqueView(user, ip, image.dbData, 'image', isWorkspace);
+    // Only the share link is sent: the API knows the viewer and the address.
+    addUniqueView(id, 'image', isWorkspace).catch(() => undefined);
   }, [image]);
 
   const onItemLike = async () => {

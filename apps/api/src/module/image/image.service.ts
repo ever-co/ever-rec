@@ -213,12 +213,17 @@ export class ImageService {
           ? imageData.views.length
           : 0;
 
+        // Anyone with the link reads this answer: the viewers (names, emails) go to the owner
+        // only, through `shared/get-view-info`.
+        const publicData = { ...imageSnapshot.val() };
+        delete publicData.uniqueViews;
+
         return {
           image: {
             owner,
             dbData: {
               id: shared.imageId,
-              ...imageSnapshot.val(),
+              ...publicData,
               views,
               link: sharedLink[0],
               commentsLength: imageData.comments?.length || 0,
@@ -741,6 +746,8 @@ export class ImageService {
     if (typeof id !== 'string' || !is_id(id)) {
       throw new BadRequestException('Invalid image id');
     }
+    // An update of an image that does not exist would create a partial record: 404 instead.
+    await this.assertOwnImageExists(uid, id);
 
     const db = admin.database();
     const dbImageRef = db.ref(`users/${uid}/screenshots/${id}`);

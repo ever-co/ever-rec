@@ -1,14 +1,7 @@
 import api from './api';
 import { ItemType } from 'app/interfaces/ItemType';
-import { IUser } from 'app/interfaces/IUserData';
-import { DbVideoData } from 'app/interfaces/IEditorVideo';
 import { UniqueView } from 'app/interfaces/IUniqueView';
 import { IDataResponse } from '../../interfaces/IApiResponse';
-import { DbImgData } from 'app/interfaces/IEditorImage';
-import {
-  IDbWorkspaceImageData,
-  IDbWorkspaceVideoData,
-} from 'app/interfaces/IWorkspace';
 
 const getShareLinkAPI = (itemId: string, type: ItemType): Promise<string> => {
   return api.get(`/api/v1/${type}/share/${itemId}`);
@@ -89,33 +82,28 @@ const removeSharedUserItems = (): Promise<any> => {
   return api.delete<any>(`/api/v1/auth/remove-shared`);
 };
 
+// Only the share link is sent: the API finds the item, the viewer (from the sign-in) and the
+// address by itself.
 const addUniqueViewAPI = async (
-  user: IUser | null,
-  ip: string,
-  itemData: IDbWorkspaceImageData | IDbWorkspaceVideoData,
+  sharedId: string,
   itemType: ItemType,
   isWorkspace: boolean,
 ): Promise<IDataResponse<{ uniqueViewsDb: UniqueView[]; views: number }>> => {
   return api.post(`/api/v1/${itemType}/shared/view-info`, {
-    user,
-    ip,
-    itemData,
-    itemType,
+    sharedId,
     isWorkspace,
   });
 };
 
+// The item is named by its id (and its workspace). The viewers are only returned to its owner.
 const getItemUniqueViewsAPI = async (
-  user: IUser,
-  itemData: DbImgData | DbVideoData,
+  itemId: string,
   itemType: ItemType,
-  isWorkspace: boolean,
-): Promise<IDataResponse<UniqueView[]>> => {
+  workspaceId?: string,
+): Promise<IDataResponse<{ uniqueViewsDb: UniqueView[]; views: number }>> => {
   return api.post(`/api/v1/${itemType}/shared/get-view-info`, {
-    user,
-    itemData,
-    itemType,
-    isWorkspace,
+    itemId,
+    workspaceId,
   });
 };
 
