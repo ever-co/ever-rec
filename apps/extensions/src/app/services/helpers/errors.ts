@@ -105,6 +105,18 @@ export const errorHandler = (error: any) => {
   errorMsg && errorMessage(errorMsg);
 };
 
+/**
+ * A request the API answered with an HTTP error (400, 404, ...): shows the API's own message.
+ * 401 and 403 are left to the API client, which already signs in again or shows its own message.
+ */
+export const requestErrorHandler = (error: any) => {
+  const status = error?.response?.status;
+  if (status === 401 || status === 403) return;
+
+  const message = error?.response?.data?.message;
+  errorHandler(typeof message === 'string' ? { message } : error);
+};
+
 const customMessageErrors: Record<string, string> = {
   'The user did not approve access.': 'Login with Google to use this Feature',
 };
