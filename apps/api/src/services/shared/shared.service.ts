@@ -30,6 +30,7 @@ import { DatabaseService } from 'firebase-admin/lib/database/database';
 import { Database } from 'firebase-admin/lib/database';
 import { IUser } from 'src/interfaces/IUser';
 import { parseCollectionToArray } from '../utils/helpers';
+import { toPublicLikes } from '../utils/likes';
 import { is_id } from '../../module/workspace/validators/id.validator';
 
 export type queryReturnType =
@@ -575,8 +576,11 @@ export class SharedService {
       }
 
       const itemData: ImageViewModel | VideoViewModel = itemSnapshot.val();
-      const likes = itemData?.likes || [];
-      const isLikedIndex = likes.findIndex((x) => x.uid === userId);
+      // A legacy value (the number 0) or anything else that is not a list counts as no likes.
+      const likes: LikeIntF[] = Array.isArray(itemData?.likes)
+        ? itemData.likes
+        : [];
+      const isLikedIndex = likes.findIndex((x) => x?.uid === userId);
 
       if (isLikedIndex === -1) {
         likes.push({ uid: userId, timestamp: Date.now() });
@@ -586,7 +590,8 @@ export class SharedService {
 
       await itemRef.update({ likes });
 
-      return sendResponse(likes);
+      // The caller gets the count and their own like back, not the uids of the other likers.
+      return sendResponse(toPublicLikes(likes, userId));
     } catch (e) {
       console.log(e);
       return sendError('Could not register a Like...', e.message);

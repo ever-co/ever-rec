@@ -26,6 +26,7 @@ import {
 import { FoldersSharedService } from '../../services/shared/folders.shared.service';
 import { IFavoriteFolders } from '../../interfaces/Folders';
 import { sendError, sendResponse } from 'src/services/utils/sendResponse';
+import { toPublicLikes } from '../../services/utils/likes';
 import { EditorGateway } from '../editor-websocket-module/editor.gateway';
 import { is_id } from '../workspace/validators/id.validator';
 import {
@@ -159,6 +160,7 @@ export class ImageService {
   async getImageBySharedId(
     link: string,
     isWorkspace: boolean,
+    viewerUid?: string,
   ): Promise<{ image: { owner: any; dbData: DbImgData } }> {
     try {
       const db = admin.database();
@@ -192,14 +194,18 @@ export class ImageService {
         /*  const views = imageData.views ? imageData.views + 1 : 1;
         imgDataRef.update({ views }); */
 
-        const ownerRef = db.ref(`users/${imageData.uid}`);
+        // A personal share belongs to the user the share record names: the item's own `uid` field
+        // can be written by its owner and says nothing about who owns the link. A workspace item is
+        // only ever written by the API, so its `uid` (the uploader) is trusted.
+        const ownerUid = isWorkspace ? imageData.uid : shared.uid;
+        const ownerRef = db.ref(`users/${ownerUid}`);
         const ownerSnap = await ownerRef.get();
         const ownerVal = ownerSnap.val();
+        // No email: anyone with the link can read this.
         const owner = {
-          email: ownerVal.email,
           displayName: ownerVal.displayName,
           photoURL: ownerVal.photoURL,
-          id: imageData.uid,
+          id: ownerUid,
         };
 
         const views = Array.isArray(imageData.views)
@@ -216,7 +222,8 @@ export class ImageService {
               link: sharedLink[0],
               commentsLength: imageData.comments?.length || 0,
               comments: null,
-              uid: imageData.uid,
+              likes: toPublicLikes(imageData.likes, viewerUid),
+              uid: ownerUid,
             },
           },
         };
@@ -439,7 +446,7 @@ export class ImageService {
                 originalImage,
                 markers,
               } = value;
-              const comments = db.ref(`users/${uid}/videos/${id}/comments`);
+              const comments = db.ref(`users/${uid}/screenshots/${id}/comments`);
               const newComments = await comments.get();
               const retrievedComments = newComments.val();
 
@@ -718,7 +725,9 @@ export class ImageService {
     id: string,
     parentId: string | false,
     trash: boolean,
-    likes: { uid: string; timestamp: number }[],
+    // Not written: likes are only changed by the like route, one caller toggling their own.
+    // Kept so the position of the other arguments does not change.
+    _likes: unknown,
     title?: string,
     stage?: any,
     originalImage?: string,
@@ -731,7 +740,6 @@ export class ImageService {
       ...(title !== undefined ? { title } : {}),
       ...(parentId !== undefined ? { parentId } : {}),
       ...(trash !== undefined ? { trash } : {}),
-      ...(likes !== undefined ? { likes } : { likes: 0 }),
       ...(stage !== undefined ? { stage } : {}),
       ...(originalImage !== undefined ? { originalImage } : {}),
       ...(markers !== undefined ? { markers } : {}),

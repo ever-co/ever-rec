@@ -585,14 +585,15 @@ export class WorkspaceFilesService {
     const items = itemType === 'image' ? 'screenshots' : 'videos';
     const dbItemRef = db.ref(`workspaces/${workspaceId}/${items}/${id}`);
 
-    // TODO validate likes didn't add any anallowed
+    // `likes` from the request is not written: only the like route changes likes, one caller
+    // toggling their own. The parameter stays so the other arguments keep their position.
+    void likes;
 
     // Never create a record from here, even if the item is deleted after the guard ran.
     const updated = await updateExistingItem(dbItemRef, {
       ...(title !== undefined ? { title } : {}),
       ...(parentId !== undefined ? { parentId } : {}),
       ...(trash !== undefined ? { trash } : {}),
-      ...(likes !== undefined ? { likes } : {}),
       ...(stage !== undefined ? { stage } : {}),
       ...(originalImage !== undefined ? { originalImage } : {}),
       ...(markers !== undefined ? { markers } : {}),

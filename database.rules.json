@@ -6,13 +6,24 @@
       "$userId": {
         ".read": "$userId === auth.uid",
         ".write": "$userId === auth.uid",
+        "whiteboardIds": {
+          ".validate": false
+        },
         "screenshots": {
           ".indexOn": [
             "parentId",
             "trash"
           ],
           ".read": "$userId === auth.uid",
-          ".write": "$userId === auth.uid"
+          ".write": "$userId === auth.uid",
+          "$itemId": {
+            "uid": {
+              ".validate": false
+            },
+            "likes": {
+              ".validate": false
+            }
+          }
         },
         "videos": {
           ".indexOn": [
@@ -20,7 +31,15 @@
             "trash"
           ],
           ".read": "$userId === auth.uid",
-          ".write": "$userId === auth.uid"
+          ".write": "$userId === auth.uid",
+          "$itemId": {
+            "uid": {
+              ".validate": false
+            },
+            "likes": {
+              ".validate": false
+            }
+          }
         },
         "profile": {
           ".read": true,
@@ -50,6 +69,13 @@
         "queryField",
         "itemId"
       ],
+      ".read": false,
+      ".write": false
+    },
+    "whiteboards": {
+      "mainCollection": {
+        ".indexOn": ["admin"]
+      },
       ".read": false,
       ".write": false
     },
