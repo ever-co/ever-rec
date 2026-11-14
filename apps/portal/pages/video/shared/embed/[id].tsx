@@ -49,9 +49,11 @@ const EmbeddedSharedVideo: FC = () => {
   }, [router.isReady, router.query]);
 
   // Embedded plays count as views, the same way the regular shared page counts them.
-  // The viewer is always recorded as anonymous: inside another site the Rec sign-in
-  // cookies cannot be read, and restoring sign-in here (useAuthenticateUser) would tell
-  // the browser extension to sign out.
+  // Inside another site the Rec sign-in cookies cannot be read, so the viewer is recorded
+  // as anonymous. Opened on the Rec site itself, a signed-in viewer is recorded the same
+  // way the regular shared page records them (only the owner can read the viewer list).
+  // Sign-in is not restored here (useAuthenticateUser), because that would tell the
+  // browser extension to sign out.
   useEffect(() => {
     const { id } = router.query;
     if (!video?.dbData || typeof id !== 'string' || addedUniqueView.current) {

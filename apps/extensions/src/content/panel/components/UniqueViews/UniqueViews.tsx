@@ -57,9 +57,15 @@ const UniqueViews: React.FC<IUniqueViewsProps> = ({
           workspaceId,
         );
 
-        viewInfo && setUniqueViews(viewInfo.uniqueViewsDb || []);
+        if (viewInfo) {
+          setUniqueViews(viewInfo.uniqueViewsDb || []);
+        } else {
+          // Let a later change of user or item ask again.
+          shouldFetch.current = true;
+        }
       } catch (e) {
         console.log(e);
+        shouldFetch.current = true;
       } finally {
         setLoading(false);
       }
