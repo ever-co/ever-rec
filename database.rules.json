@@ -5,41 +5,19 @@
     "users": {
       "$userId": {
         ".read": "$userId === auth.uid",
-        ".write": "$userId === auth.uid",
-        "whiteboardIds": {
-          ".validate": false
-        },
         "screenshots": {
           ".indexOn": [
             "parentId",
             "trash"
           ],
-          ".read": "$userId === auth.uid",
-          ".write": "$userId === auth.uid",
-          "$itemId": {
-            "uid": {
-              ".validate": false
-            },
-            "likes": {
-              ".validate": false
-            }
-          }
+          ".read": "$userId === auth.uid"
         },
         "videos": {
           ".indexOn": [
             "parentId",
             "trash"
           ],
-          ".read": "$userId === auth.uid",
-          ".write": "$userId === auth.uid",
-          "$itemId": {
-            "uid": {
-              ".validate": false
-            },
-            "likes": {
-              ".validate": false
-            }
-          }
+          ".read": "$userId === auth.uid"
         },
         "profile": {
           ".read": true,

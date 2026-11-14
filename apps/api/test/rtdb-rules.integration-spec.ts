@@ -178,8 +178,9 @@ describe('database rules for the new roots', () => {
 });
 
 /**
- * An owner may edit their own items, but not the fields the API decides: the item's `uid` (the share
- * pages used to show whoever it named), its `likes`, and the list of whiteboards the user may open.
+ * A user's items, `uid`, `likes` and `whiteboardIds` are written by the API only. A `.validate` rule
+ * does not run when a value is deleted, so the owner could still erase likes; the write grant on the
+ * user's record is therefore gone, and only the profile stays client-writable.
  */
 describe('database rules for the owner-written item fields', () => {
   let app: admin.app.App;
@@ -220,30 +221,30 @@ describe('database rules for the owner-written item fields', () => {
     await app.delete();
   });
 
-  it('refuses a write of uid, likes or whiteboardIds and changes nothing', async () => {
+  it('refuses every write to uid, likes or whiteboardIds, including deleting them, and changes nothing', async () => {
     await loadRules(RULES);
     const statuses: number[] = [];
     for (const path of ITEM_PATHS) {
       statuses.push(await clientWrite(`${path(uid)}/uid`, 'someone-else'));
+      statuses.push(await clientWrite(`${path(uid)}/uid`, null));
       statuses.push(
         await clientWrite(`${path(uid)}/likes`, [
           { uid: 'planted', timestamp: 2 },
         ]),
       );
-      // The same fields inside a write of the whole item.
-      statuses.push(
-        await clientWrite(path(uid), {
-          title: 'Original',
-          uid: 'someone-else',
-        }),
-      );
+      // Erasing the likes, alone or by rewriting the item without them.
+      statuses.push(await clientWrite(`${path(uid)}/likes`, null));
+      statuses.push(await clientWrite(path(uid), { title: 'Original', uid }));
+      statuses.push(await clientWrite(path(uid), null));
     }
     statuses.push(
       await clientWrite(`users/${uid}/whiteboardIds`, ['wb1', 'wb2']),
     );
+    statuses.push(await clientWrite(`users/${uid}/whiteboardIds`, null));
     statuses.push(
       await clientWrite(`users/${uid}`, { whiteboardIds: ['wb1', 'wb2'] }),
     );
+    statuses.push(await clientWrite(`users/${uid}`, null));
 
     expect(statuses.every(refused)).toBe(true);
     for (const path of ITEM_PATHS) {
@@ -258,15 +259,26 @@ describe('database rules for the owner-written item fields', () => {
     ).toEqual(['wb1']);
   });
 
-  it('still lets the owner edit the other fields of their own item', async () => {
+  it('refuses writes to the other fields of an item too: items are changed through the API only', async () => {
     await loadRules(RULES);
     for (const path of ITEM_PATHS) {
-      expect(await clientWrite(`${path(uid)}/title`, 'Renamed')).toBe(200);
-      expect(await clientWrite(`${path(uid)}/trash`, true)).toBe(200);
+      expect(refused(await clientWrite(`${path(uid)}/title`, 'Renamed'))).toBe(
+        true,
+      );
       expect(
         (await app.database().ref(`${path(uid)}/title`).get()).val(),
-      ).toBe('Renamed');
+      ).toBe('Original');
     }
+  });
+
+  it('still lets the owner read their own items and write their profile', async () => {
+    await loadRules(RULES);
+    const read = await httpRequest(
+      'GET',
+      `${db()}/${ITEM_PATHS[0](uid)}.json?ns=${EMULATOR_PROJECT}&auth=${token}`,
+    );
+    expect(read.status).toBe(200);
+    expect(await clientWrite(`users/${uid}/profile`, { bio: 'hi' })).toBe(200);
   });
 
   it('still refuses writes to another user’s items', async () => {
@@ -278,17 +290,15 @@ describe('database rules for the owner-written item fields', () => {
     expect(refused(status)).toBe(true);
   });
 
-  it('a rules file without these checks lets the writes through (control)', async () => {
+  it('a rules file that lets the owner write their record lets the writes through (control)', async () => {
     const open = JSON.parse(RULES);
-    delete open.rules.users.$userId.whiteboardIds;
-    delete open.rules.users.$userId.screenshots.$itemId;
-    delete open.rules.users.$userId.videos.$itemId;
+    open.rules.users.$userId['.write'] = '$userId === auth.uid';
     await loadRules(JSON.stringify(open));
 
     expect(
       await clientWrite(`${ITEM_PATHS[0](uid)}/uid`, 'someone-else'),
     ).toBe(200);
-    expect(await clientWrite(`${ITEM_PATHS[1](uid)}/likes`, [])).toBe(200);
+    expect(await clientWrite(`${ITEM_PATHS[1](uid)}/likes`, null)).toBe(200);
     expect(await clientWrite(`users/${uid}/whiteboardIds`, ['wb2'])).toBe(200);
   });
 });
