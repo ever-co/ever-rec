@@ -1,6 +1,15 @@
 import { Controller, Get, Param, Query, Req, UseGuards } from '@nestjs/common';
 import { AuthGuard } from 'src/module/auth/guards/auth.guard';
 import { ApiVideoService } from './api-video.service';
+import {
+  CanAccessWorkspaceQueryGuard,
+  WorkspaceVideoAccess,
+} from '../../workspace/guards/CanAccessWorkspaceQuery.guard';
+import { PermissionAccessEnum } from '../../workspace/Interfaces/Workspace';
+import {
+  IPlaybackStatusTarget,
+  PlaybackStatusGuard,
+} from '../guards/playback-status.guard';
 
 @Controller('api.video')
 export class ApiVideoController {
@@ -12,7 +21,8 @@ export class ApiVideoController {
     return this.apiVideoService.getDirectUpload();
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, CanAccessWorkspaceQueryGuard, PlaybackStatusGuard)
+  @WorkspaceVideoAccess(PermissionAccessEnum.READ)
   @Get('/get-status/:videoId/:assetId')
   async getPlaybackStatus(
     @Req() request,
@@ -20,12 +30,14 @@ export class ApiVideoController {
     @Param('assetId') assetId: string,
     @Query('workspaceId') workspaceId: string,
   ) {
-    const uid = request.user?.id;
+    // Set by PlaybackStatusGuard: the record the status belongs to (a shared video's owner, not
+    // the viewer).
+    const target: IPlaybackStatusTarget = request.playbackStatusTarget;
     return this.apiVideoService.getPlaybackStatus(
-      uid,
+      target.uid,
       videoId,
       assetId,
-      workspaceId,
+      target.workspaceId ?? workspaceId,
     );
   }
 

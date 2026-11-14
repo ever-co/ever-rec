@@ -30,6 +30,7 @@ import { DatabaseService } from 'firebase-admin/lib/database/database';
 import { Database } from 'firebase-admin/lib/database';
 import { IUser } from 'src/interfaces/IUser';
 import { parseCollectionToArray } from '../utils/helpers';
+import { is_id } from '../../module/workspace/validators/id.validator';
 
 export type queryReturnType =
   | ImageViewModel
@@ -181,7 +182,30 @@ export class SharedService {
     limit?: string,
   ): Promise<IDataResponse<DbCommentIntF>> {
     try {
-      if (isPublic) {
+      // All three ids go into a database path: a nested path or a wildcard must never get through.
+      if (
+        ![itemOwnerId, currentUserId, itemId].every(
+          (id) => typeof id === 'string' && is_id(id),
+        )
+      ) {
+        return sendError('Invalid item or user id.');
+      }
+
+      const db = admin.database();
+      const userCollectionName = dbEndpoints.userCollections[itemType];
+
+      // The client-sent `isPublic` flag is not trusted: the owner may comment on an item that
+      // exists; anybody else only on an item its owner has shared with a link. Nothing is created
+      // for an item that does not exist.
+      if (itemOwnerId === currentUserId) {
+        const itemSnap = await db
+          .ref(`users/${itemOwnerId}/${userCollectionName}/${itemId}`)
+          .get();
+
+        if (itemSnap.val() == null) {
+          return sendError('Item not found.');
+        }
+      } else {
         const sharedItem = await this.getSharedItemById(
           itemOwnerId,
           itemId,
@@ -193,8 +217,6 @@ export class SharedService {
         }
       }
 
-      const db = admin.database();
-      const userCollectionName = dbEndpoints.userCollections[itemType];
       const userRef: Reference = db.ref(`users/${currentUserId}`);
       const userData: IUser = (await userRef.get()).val();
 
