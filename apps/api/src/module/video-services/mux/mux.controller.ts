@@ -2,6 +2,12 @@ import { Controller, Get, Param, Query, Req, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '../../auth/guards/auth.guard';
 import { MuxService } from './mux.service';
 import { PlaybackStatusEnum } from '../../../enums/StreamingServicesEnums';
+import {
+  CanAccessWorkspaceQueryGuard,
+  WorkspaceVideoAccess,
+} from '../../workspace/guards/CanAccessWorkspaceQuery.guard';
+import { PermissionAccessEnum } from '../../workspace/Interfaces/Workspace';
+import { PlaybackStatusGuard } from '../guards/playback-status.guard';
 
 @Controller('mux')
 export class MuxController {
@@ -19,7 +25,8 @@ export class MuxController {
     return this.muxService.getUploadedAsset(uploadId);
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, CanAccessWorkspaceQueryGuard, PlaybackStatusGuard)
+  @WorkspaceVideoAccess(PermissionAccessEnum.READ)
   @Get('/get-status/:videoId/:assetId')
   async getPlaybackStatus(
     @Req() request,

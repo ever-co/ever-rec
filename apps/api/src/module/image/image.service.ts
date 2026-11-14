@@ -1,7 +1,7 @@
 import * as admin from 'firebase-admin';
 import sharp from 'sharp';
 import moment from 'moment';
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { nanoid } from 'nanoid';
 import { Reference } from '@firebase/database-types';
 import { SharedService } from '../../services/shared/shared.service';
@@ -23,6 +23,7 @@ import { FoldersSharedService } from '../../services/shared/folders.shared.servi
 import { IFavoriteFolders } from '../../interfaces/Folders';
 import { sendError, sendResponse } from 'src/services/utils/sendResponse';
 import { EditorGateway } from '../editor-websocket-module/editor.gateway';
+import { is_id } from '../workspace/validators/id.validator';
 import {
   EVER_COUNTER_EVENTS,
   storedBytes,
@@ -61,6 +62,19 @@ export class ImageService {
   }
 
   async share(uid: string, imageId: string): Promise<string> {
+    // A link is only made for an image the caller owns: no record for an unknown or foreign id.
+    // Checked outside the try block below, which swallows errors.
+    if (
+      !uid ||
+      typeof imageId !== 'string' ||
+      !is_id(imageId) ||
+      (
+        await admin.database().ref(`users/${uid}/screenshots/${imageId}`).get()
+      ).val() == null
+    ) {
+      throw new ForbiddenException('Access to this image is not allowed');
+    }
+
     try {
       const db = admin.database();
       const query = `${uid}|${imageId}`;

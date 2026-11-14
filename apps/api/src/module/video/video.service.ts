@@ -1,6 +1,6 @@
 import { Reference } from '@firebase/database-types';
 import type { FullMetadata } from '@firebase/storage';
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import * as admin from 'firebase-admin';
 import moment from 'moment';
@@ -27,6 +27,7 @@ import { SharedService } from '../../services/shared/shared.service';
 import { fixVideoWithFFMPEG } from '../../services/utils/fixVideoWithFFMPEG';
 import { sendError, sendResponse } from '../../services/utils/sendResponse';
 import { StreamServiceService } from '../video-services/streamService.service';
+import { is_id } from '../workspace/validators/id.validator';
 import {
   EVER_COUNTER_EVENTS,
   storedBytes,
@@ -51,6 +52,17 @@ export class VideoService {
   async share(uid: string, videoId: string): Promise<string> {
     let link = '';
     const db = admin.database();
+
+    // A link is only made for a video the caller owns: no record for an unknown or foreign id.
+    if (
+      !uid ||
+      typeof videoId !== 'string' ||
+      !is_id(videoId) ||
+      (await db.ref(`users/${uid}/videos/${videoId}`).get()).val() == null
+    ) {
+      throw new ForbiddenException('Access to this video is not allowed');
+    }
+
     const sharedRef: Reference = db.ref('sharedVideos');
     // TODO: types
     const sharedData: any = (
