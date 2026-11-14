@@ -5,6 +5,7 @@
  * of the owner's item stays writable and readable for them.
  */
 import type * as admin from 'firebase-admin';
+import { randomUUID } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { httpRequest } from './support/http';
@@ -38,7 +39,7 @@ async function signUp(): Promise<{ token: string; uid: string }> {
     {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        email: `client-${Date.now()}-${Math.random()}@example.test`,
+        email: `client-${randomUUID()}@example.test`,
         password: 'Secret-1234',
         returnSecureToken: true,
       }),
@@ -58,12 +59,7 @@ describe('database rules for the comments of an item', () => {
 
   const url = (path: string, token: string) =>
     `${db()}/${path}.json?ns=${EMULATOR_PROJECT}&auth=${token}`;
-  const send = (
-    method: string,
-    path: string,
-    token: string,
-    body?: unknown,
-  ) =>
+  const send = (method: string, path: string, token: string, body?: unknown) =>
     httpRequest(method, url(path, token), {
       body: body === undefined ? undefined : JSON.stringify(body),
     });
@@ -135,9 +131,9 @@ describe('database rules for the comments of an item', () => {
       expect(
         (await send('PUT', `${base}/title`, owner.token, 'second')).status,
       ).toBe(200);
-      expect(
-        (await app.database().ref(`${base}/title`).get()).val(),
-      ).toBe('second');
+      expect((await app.database().ref(`${base}/title`).get()).val()).toBe(
+        'second',
+      );
     }
   });
 

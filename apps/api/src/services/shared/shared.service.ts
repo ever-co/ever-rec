@@ -337,7 +337,8 @@ export class SharedService {
 
       // The stored uid of the author is not sent back: the client keeps the comment it already
       // has (author, `isOwn`) and takes the new content from this.
-      const { uid: _authorId, ...commentWithoutUid } = newComment;
+      const commentWithoutUid = { ...newComment };
+      delete commentWithoutUid.uid;
 
       return sendResponse(commentWithoutUid);
     } catch (e) {

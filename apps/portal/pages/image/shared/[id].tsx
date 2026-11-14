@@ -265,13 +265,7 @@ tw-items-center tw-justify-center tw-bg-blue-grey tw-h-500px"
                 </Col>
 
                 {!isWorkspace && (
-                  <Col
-                    xs={8}
-                    lg={8}
-                    xl={7}
-                    md={8}
-                    className="mx-lg:tw-my-30px"
-                  >
+                  <Col xs={8} lg={8} xl={7} md={8} className="mx-lg:tw-my-30px">
                     <div className="tw-bg-blue-grey tw-rounded-2lg tw-py-6 tw-px-4 tw-shadow-md">
                       <div className="tw-bg-white tw-flex tw-flex-col tw-justify-between tw-rounded-b-md tw-rounded-tl-md tw-p-3">
                         {commentsTemplate}
