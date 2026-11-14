@@ -161,8 +161,8 @@ export class SharedService {
   }
 
   /**
-   * The share record of an item, or null. It does not check that the item exists: the caller has
-   * to (`canViewItemComments` does), so the item is read once.
+   * The share record of an item that exists, or null: a link left behind by a deleted item opens
+   * nothing.
    */
   async getSharedItemById(
     uid: string,
@@ -170,8 +170,16 @@ export class SharedService {
     itemType: ItemType,
   ): Promise<{ imageId: string; uid: string; uidImageId: string } | null> {
     const db = admin.database();
+    const collectionName = dbEndpoints.userCollections[itemType];
     const sharedCollectionName = dbEndpoints.sharedCollections[itemType];
     const sharedItemRefName = dbEndpoints.shareItemRefs[itemType];
+    const itemSnap = await db
+      .ref(`users/${uid}/${collectionName}/${itemId}`)
+      .get();
+
+    if (itemSnap.val() == null) {
+      return null;
+    }
 
     // The share record of one item is read through the indexed `<uid>|<item id>` key, the way the
     // share and unshare routes find it: the whole share collection is never loaded.
@@ -211,18 +219,14 @@ export class SharedService {
       return false;
     }
 
-    const db = admin.database();
-    const userCollectionName = dbEndpoints.userCollections[itemType];
-    const itemSnap = await db
-      .ref(`users/${ownerId}/${userCollectionName}/${itemId}`)
-      .get();
-
-    if (!itemSnap.exists()) {
-      return false;
-    }
-
     if (callerId && callerId === ownerId) {
-      return true;
+      const userCollectionName = dbEndpoints.userCollections[itemType];
+      const itemSnap = await admin
+        .database()
+        .ref(`users/${ownerId}/${userCollectionName}/${itemId}`)
+        .get();
+
+      return itemSnap.val() != null;
     }
 
     return !!(await this.getSharedItemById(ownerId, itemId, itemType));
@@ -239,19 +243,41 @@ export class SharedService {
     limit?: string,
   ): Promise<IDataResponse<DbCommentIntF>> {
     try {
+      // All three ids go into a database path: a nested path or a wildcard must never get through.
       if (
-        !(await this.canViewItemComments(
-          itemType,
-          itemOwnerId,
-          itemId,
-          currentUserId,
-        ))
+        ![itemOwnerId, currentUserId, itemId].every(
+          (id) => typeof id === 'string' && is_id(id),
+        )
       ) {
-        return sendError('Shared item not found.');
+        return sendError('Invalid item or user id.');
       }
 
       const db = admin.database();
       const userCollectionName = dbEndpoints.userCollections[itemType];
+
+      // The client-sent `isPublic` flag is not trusted: the owner may comment on an item that
+      // exists; anybody else only on an item its owner has shared with a link. Nothing is created
+      // for an item that does not exist.
+      if (itemOwnerId === currentUserId) {
+        const itemSnap = await db
+          .ref(`users/${itemOwnerId}/${userCollectionName}/${itemId}`)
+          .get();
+
+        if (itemSnap.val() == null) {
+          return sendError('Item not found.');
+        }
+      } else {
+        const sharedItem = await this.getSharedItemById(
+          itemOwnerId,
+          itemId,
+          itemType,
+        );
+
+        if (!sharedItem) {
+          return sendError('Shared item not found.');
+        }
+      }
+
       const userRef: Reference = db.ref(`users/${currentUserId}`);
       const userData: IUser = (await userRef.get()).val();
 

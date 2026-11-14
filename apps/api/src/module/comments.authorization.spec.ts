@@ -216,6 +216,12 @@ describe.each(KINDS)('comments of a $type', (kind) => {
           uid: 'uid-other',
           [kind.uidKey]: `uid-other|${kind.privateItem}`,
         },
+        // A link left behind by an item that was deleted opens nothing.
+        link3: {
+          [kind.refKey]: 'item-gone',
+          uid: 'uid-owner',
+          [kind.uidKey]: 'uid-owner|item-gone',
+        },
       },
     };
   });
@@ -323,9 +329,7 @@ describe.each(KINDS)('comments of a $type', (kind) => {
     it('is refused without a signed-in user', async () => {
       const before = snapshot();
       await request(app.getHttpServer())
-        .put(
-          `/${kind.type}/user/uid-owner/${kind.sharedItem}/comment/byAuthor`,
-        )
+        .put(`/${kind.type}/user/uid-owner/${kind.sharedItem}/comment/byAuthor`)
         .send({ comment: 'x' })
         .expect(401);
       expect(snapshot()).toBe(before);
@@ -428,7 +432,7 @@ describe.each(KINDS)('comments of a $type', (kind) => {
         kind.privateItem,
         { ownerId: 'uid-owner', isPublic: true },
         'uid-stranger',
-      ).expect(200);
+      ).expect(201);
       expect(res.body).toEqual({ comments: [], commentsLength: 0 });
     });
 
@@ -436,7 +440,7 @@ describe.each(KINDS)('comments of a $type', (kind) => {
       const res = await read(kind.privateItem, {
         ownerId: 'uid-owner',
         isPublic: false,
-      }).expect(200);
+      }).expect(201);
       expect(res.body).toEqual({ comments: [], commentsLength: 0 });
     });
 
@@ -445,7 +449,7 @@ describe.each(KINDS)('comments of a $type', (kind) => {
         kind.privateItem,
         { ownerId: 'uid-owner', isPublic: false },
         'uid-stranger',
-      ).expect(200);
+      ).expect(201);
       expect(res.body.comments).toEqual([]);
     });
 
@@ -454,7 +458,7 @@ describe.each(KINDS)('comments of a $type', (kind) => {
         kind.sharedItem,
         { ownerId: 'uid-owner/other', isPublic: true },
         'uid-stranger',
-      ).expect(200);
+      ).expect(201);
       expect(res.body).toEqual({ comments: [], commentsLength: 0 });
     });
 
@@ -463,7 +467,7 @@ describe.each(KINDS)('comments of a $type', (kind) => {
         kind.sharedItem,
         { ownerId: { a: 1 }, isPublic: true },
         'uid-stranger',
-      ).expect(200);
+      ).expect(201);
       expect(res.body).toEqual({ comments: [], commentsLength: 0 });
     });
 
@@ -473,7 +477,7 @@ describe.each(KINDS)('comments of a $type', (kind) => {
           kind.sharedItem,
           { ownerId: 'uid-owner', isPublic: true },
           uid,
-        ).expect(200);
+        ).expect(201);
         expect(res.body.commentsLength).toBe(2);
         expect(res.body.comments.map((c: any) => c.id).sort()).toEqual([
           'byAuthor',
@@ -487,7 +491,7 @@ describe.each(KINDS)('comments of a $type', (kind) => {
         kind.privateItem,
         { ownerId: null, isPublic: false },
         'uid-owner',
-      ).expect(200);
+      ).expect(201);
       expect(res.body.commentsLength).toBe(2);
     });
   });
@@ -510,6 +514,22 @@ describe.each(KINDS)('comments of a $type', (kind) => {
         isPublic: false,
       }).expect(201);
       expect(snapshot()).toBe(before);
+    });
+
+    it('is refused, and reads nothing, through a link whose item was deleted', async () => {
+      const before = snapshot();
+      const res = await add('uid-stranger', 'item-gone', {
+        comment: 'hello',
+        isPublic: true,
+      }).expect(201);
+      expect(res.body.status).toBe('error');
+      expect(snapshot()).toBe(before);
+      const comments = await read(
+        'item-gone',
+        { ownerId: 'uid-owner', isPublic: true },
+        'uid-stranger',
+      ).expect(201);
+      expect(comments.body).toEqual({ comments: [], commentsLength: 0 });
     });
 
     it('is refused for an item id that is not a plain id', async () => {
@@ -550,9 +570,7 @@ describe.each(KINDS)('comments of a $type', (kind) => {
       expect(res.body.status).toBe('success');
       const stored = Object.values(commentsOf(kind.sharedItem)) as any[];
       expect(stored).toHaveLength(3);
-      expect(stored.find((c) => c.content === 'nice').uid).toBe(
-        'uid-stranger',
-      );
+      expect(stored.find((c) => c.content === 'nice').uid).toBe('uid-stranger');
     });
 
     it('lets the owner comment on their own unshared item', async () => {
