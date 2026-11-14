@@ -55,7 +55,7 @@ export class VideoController {
     private readonly foldersSharedService: FoldersSharedService,
     private readonly uniqueViewsSharedService: UniqueViewsSharedService,
     private readonly contextUploader: ContextUploader,
-  ) { }
+  ) {}
 
   @UseGuards(AuthGuard)
   @Get('share/:id')
@@ -235,7 +235,7 @@ export class VideoController {
       videoId,
       userId,
       userId,
-      workspaceId,
+      workspaceId || undefined,
     );
 
     return result;

@@ -46,7 +46,7 @@ export class ImageController {
     private readonly foldersSharedService: FoldersSharedService,
     private readonly uniqueViewsSharedService: UniqueViewsSharedService,
     private readonly contextUploader: ContextUploader,
-  ) { }
+  ) {}
 
   // This one is for deleting shared Images AND videos from user when he delets account.
   // Probably can be in a better place but for now will be here.
@@ -272,7 +272,9 @@ export class ImageController {
 
   @UseGuards(AuthGuard)
   @Post('upload/file')
-  @UseInterceptors(FileInterceptor('file', { limits: { fileSize: 10 * 1024 * 1024 } }))
+  @UseInterceptors(
+    FileInterceptor('file', { limits: { fileSize: 10 * 1024 * 1024 } }),
+  )
   async uploadFile(
     @User() user: IRequestUser,
     @Body() body: IImagePayload,

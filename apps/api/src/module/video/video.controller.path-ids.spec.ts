@@ -202,9 +202,7 @@ describe('VideoController path ids', () => {
     });
 
     it('is refused for a video id that matches no video of the workspace', async () => {
-      await likeOwn('uid-admin', 'missing', { workspaceId: 'ws1' }).expect(
-        403,
-      );
+      await likeOwn('uid-admin', 'missing', { workspaceId: 'ws1' }).expect(403);
       expect(likeItem).not.toHaveBeenCalled();
     });
 
@@ -271,7 +269,7 @@ describe('VideoController path ids', () => {
           'v1',
           'uid-stranger',
           'uid-stranger',
-          workspaceId,
+          undefined,
         );
         expect(mockDb.reads).toEqual([]);
       },

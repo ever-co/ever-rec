@@ -17,6 +17,7 @@ import {
   WorkspaceVideoAccess,
 } from 'src/module/workspace/guards/CanAccessWorkspaceQuery.guard';
 import { PermissionAccessEnum } from 'src/module/workspace/Interfaces/Workspace';
+import { ValidateId } from 'src/module/workspace/pipes/validate-id.pipe';
 import { VideoChapterService } from '../services/chapter.service';
 
 @Controller('video/chapter')
@@ -28,7 +29,7 @@ export class VideoChapterController {
   @Get('/:videoId')
   async getChapters(
     @Req() request,
-    @Param('videoId') videoId: string,
+    @Param('videoId', ValidateId) videoId: string,
     @Query('workspaceId') workspaceId: string,
   ) {
     return await this.videoChapterService.getChapters(
@@ -44,7 +45,7 @@ export class VideoChapterController {
   @Post('save-changes/:videoId')
   async saveChapters(
     @Req() request,
-    @Param('videoId') videoId: string,
+    @Param('videoId', ValidateId) videoId: string,
     @Query('workspaceId') workspaceId: string,
     @Body() body: { chapters: string; chaptersBlobs: string },
     @UploadedFiles() thumbnailFiles: Array<Express.Multer.File>,
@@ -68,7 +69,7 @@ export class VideoChapterController {
   async enableChapters(
     @Req() request,
     @Body() body: { chaptersEnabled: boolean },
-    @Param('videoId') videoId: string,
+    @Param('videoId', ValidateId) videoId: string,
     @Query('workspaceId') workspaceId: string,
   ) {
     return await this.videoChapterService.enableChapters(
