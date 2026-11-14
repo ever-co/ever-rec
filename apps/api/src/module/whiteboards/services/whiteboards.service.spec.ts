@@ -6,9 +6,21 @@
  */
 import { WhiteboardService } from './whiteboards.service';
 
-const mockDb: { data: Record<string, any>; writes: string[] } = {
+const mockDb: {
+  data: Record<string, any>;
+  writes: string[];
+  // The values passed to multi-location updates, by the path of the ref they were called on.
+  updates: Record<string, Record<string, any>>;
+  // What a transaction on a path committed, and the values its function was called with.
+  transactions: Record<string, { calledWith: any[]; committed: any }>;
+  // What the database really holds at the path of a transaction, once the first guess is refused.
+  transactionRealValue?: any;
+  failUpdate?: boolean;
+} = {
   data: {},
   writes: [],
+  updates: {},
+  transactions: {},
 };
 jest.mock('firebase-admin', () => {
   const read = (path: string) => {
@@ -25,8 +37,27 @@ jest.mock('firebase-admin', () => {
         set: async () => {
           mockDb.writes.push(`set ${path}`);
         },
-        update: async () => {
-          mockDb.writes.push(`update ${path}`);
+        update: async (values: Record<string, any>) => {
+          if (mockDb.failUpdate) {
+            throw new Error('write failed');
+          }
+          mockDb.writes.push(`update ${path ?? ''}`);
+          mockDb.updates[path ?? ''] = values;
+        },
+        // Like the real client: the function is first called with the value the client has cached
+        // (null here), then again with the real value when the database refuses that guess.
+        transaction: async (update: (current: any) => any) => {
+          const calledWith: any[] = [];
+          const run = (current: any) => {
+            calledWith.push(current);
+            return update(current);
+          };
+          run(null);
+          const real = mockDb.transactionRealValue ?? read(path);
+          const committed = run(real);
+          mockDb.writes.push(`transaction ${path}`);
+          mockDb.transactions[path] = { calledWith, committed };
+          return { committed: true };
         },
         remove: async () => {
           mockDb.writes.push(`remove ${path}`);
@@ -69,6 +100,10 @@ describe('WhiteboardService authorization', () => {
     jest.spyOn(console, 'log').mockImplementation(() => undefined);
     service = new WhiteboardService();
     mockDb.writes = [];
+    mockDb.updates = {};
+    mockDb.transactions = {};
+    mockDb.transactionRealValue = undefined;
+    mockDb.failUpdate = false;
     mockDb.data = {
       users: {
         'uid-owner': { whiteboardIds: ['wbOwned1'] },
@@ -166,8 +201,31 @@ describe('WhiteboardService authorization', () => {
       expect(result.data).toEqual(whiteboard('wbOwned1', 'uid-owner'));
       expect(mockDb.writes).toEqual([
         `remove ${MAIN}/wbOwned1`,
-        'set users/uid-owner/whiteboardIds',
+        'transaction users/uid-owner/whiteboardIds',
       ]);
+    });
+
+    it('takes only that id out of the list, and keeps the others from the real value', async () => {
+      // The list changed since the service last looked: a second whiteboard was added.
+      mockDb.transactionRealValue = ['wbOwned1', 'wbNew'];
+
+      await service.deleteWhiteboard('uid-owner', 'wbOwned1');
+
+      const { calledWith, committed } =
+        mockDb.transactions['users/uid-owner/whiteboardIds'];
+      // The first guess (null) is passed through untouched, so the database refuses it and retries.
+      expect(calledWith).toEqual([null, ['wbOwned1', 'wbNew']]);
+      expect(committed).toEqual(['wbNew']);
+    });
+
+    it('leaves a damaged list as it is when deleting', async () => {
+      mockDb.transactionRealValue = 'x';
+
+      await service.deleteWhiteboard('uid-owner', 'wbOwned1');
+
+      expect(
+        mockDb.transactions['users/uid-owner/whiteboardIds'].committed,
+      ).toBe('x');
     });
 
     it('keeps their whiteboards when their own list is empty or damaged', async () => {
@@ -231,10 +289,42 @@ describe('WhiteboardService authorization', () => {
       );
 
       expect(result.data.admin).toBe('uid-damaged-list');
-      expect(mockDb.writes).toEqual([
-        `set ${MAIN}/${result.data.id}`,
-        'update users/uid-damaged-list',
+      // One write for both places: the record and the list.
+      expect(mockDb.writes).toEqual(['update ']);
+      expect(mockDb.updates['']).toEqual({
+        [`${MAIN}/${result.data.id}`]: result.data,
+        'users/uid-damaged-list/whiteboardIds': [result.data.id],
+      });
+    });
+
+    it('appends to the list the user already has', async () => {
+      const result = await service.createNewWhiteboard(
+        'uid-owner',
+        'Name',
+        'a@example.test',
+        'Fresh',
+      );
+
+      expect(mockDb.updates['']['users/uid-owner/whiteboardIds']).toEqual([
+        'wbOwned1',
+        result.data.id,
       ]);
+    });
+
+    it('leaves neither the record nor the list entry behind when the write fails', async () => {
+      mockDb.failUpdate = true;
+
+      const result = await service.createNewWhiteboard(
+        'uid-owner',
+        'Name',
+        'a@example.test',
+        'Fresh',
+      );
+
+      expect(result.data).toBeNull();
+      // Nothing was written to the record or the list on their own.
+      expect(mockDb.writes).toEqual([]);
+      expect(mockDb.updates).toEqual({});
     });
 
     it('refuses an unknown user', async () => {

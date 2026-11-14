@@ -575,7 +575,6 @@ export class WorkspaceFilesService {
     id: string,
     parentId?: string | false,
     trash?: boolean,
-    likes?: { uid: string; timestamp: number }[],
     title?: string,
     stage?: any,
     originalImage?: string,
@@ -584,10 +583,6 @@ export class WorkspaceFilesService {
     const db = admin.database();
     const items = itemType === 'image' ? 'screenshots' : 'videos';
     const dbItemRef = db.ref(`workspaces/${workspaceId}/${items}/${id}`);
-
-    // `likes` from the request is not written: only the like route changes likes, one caller
-    // toggling their own. The parameter stays so the other arguments keep their position.
-    void likes;
 
     // Never create a record from here, even if the item is deleted after the guard ran.
     const updated = await updateExistingItem(dbItemRef, {

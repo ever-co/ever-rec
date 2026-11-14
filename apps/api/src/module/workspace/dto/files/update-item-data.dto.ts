@@ -19,6 +19,7 @@ export class UpdateItemDataDto {
   @IsBoolean()
   trash?: boolean;
 
+  // Still accepted so older clients keep working, but ignored: only the like route changes likes.
   @CanBe(undefined)
   @ValidateNested({ each: true })
   @IsNonPrimitiveArray()

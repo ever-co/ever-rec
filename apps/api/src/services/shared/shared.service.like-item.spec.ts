@@ -3,9 +3,14 @@
  * so two people liking at the same moment both end up in the list, and nothing is created for an
  * item that does not exist or for an id that is not a plain id.
  */
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { SharedService } from './shared.service';
 
-const mockDb: { data: Record<string, any>; writes: string[] } = {
+const mockDb: {
+  data: Record<string, any>;
+  writes: string[];
+  runTransaction?: (update: (current: any) => any) => any;
+} = {
   data: {},
   writes: [],
 };
@@ -43,7 +48,10 @@ jest.mock('firebase-admin', () => {
     // and the write.
     transaction: async (update: (current: any) => any) => {
       await Promise.resolve();
-      const next = update(read(path));
+      // A test can replace how the update function is called, to model a retry.
+      const next = mockDb.runTransaction
+        ? mockDb.runTransaction(update)
+        : update(read(path));
       write(path, next);
       return { committed: true, snapshot: snapshot(next) };
     },
@@ -58,6 +66,7 @@ describe('SharedService.likeItem', () => {
     jest.spyOn(console, 'log').mockImplementation(() => undefined);
     service = new SharedService({ emit: jest.fn() } as any);
     mockDb.writes = [];
+    mockDb.runTransaction = undefined;
     mockDb.data = {
       users: {
         'uid-owner': {
@@ -126,28 +135,53 @@ describe('SharedService.likeItem', () => {
     expect(mockDb.data.workspaces.ws1.videos.wvid1.likes).toHaveLength(1);
   });
 
-  it('writes nothing for an item that does not exist', async () => {
-    const res = await service.likeItem('video', 'gone', 'uid-owner', 'uid-a');
+  it('answers 404 and writes nothing for an item that does not exist', async () => {
+    const attempt = service.likeItem('video', 'gone', 'uid-owner', 'uid-a');
 
-    expect(res.data).toBeNull();
+    await expect(attempt).rejects.toBeInstanceOf(NotFoundException);
     expect(mockDb.writes).toEqual([]);
   });
 
-  it('writes nothing when an id is not a plain id', async () => {
+  it('answers 404 when the link resolved to no item id', async () => {
+    for (const itemId of ['', undefined]) {
+      await expect(
+        service.likeItem('video', itemId as string, 'uid-owner', 'uid-a'),
+      ).rejects.toBeInstanceOf(NotFoundException);
+    }
+    expect(mockDb.writes).toEqual([]);
+  });
+
+  it('answers 400 and writes nothing when an id is not a plain id', async () => {
     for (const [itemId, ownerUid] of [
       ['vid1/likes', 'uid-owner'],
       ['vid1', 'uid-owner/videos'],
       ['vid1', undefined],
-      ['', 'uid-owner'],
     ]) {
-      const res = await service.likeItem(
-        'video',
-        itemId as string,
-        ownerUid as string,
-        'uid-a',
-      );
-      expect(res.data).toBeNull();
+      await expect(
+        service.likeItem(
+          'video',
+          itemId as string,
+          ownerUid as string,
+          'uid-a',
+        ),
+      ).rejects.toBeInstanceOf(BadRequestException);
     }
     expect(mockDb.writes).toEqual([]);
+  });
+
+  it('keeps the other likes when the transaction is retried against a newer value', async () => {
+    // The database may call the update function first with nothing cached locally, then again
+    // with the value it really holds. Only the last call counts, and it must keep uid-b's like.
+    mockDb.runTransaction = (update) => {
+      update(null); // first attempt: discarded
+      return update([{ uid: 'uid-b', timestamp: 1 }]);
+    };
+
+    const res = await service.likeItem('video', 'vid1', 'uid-owner', 'uid-a');
+
+    const stored = mockDb.data.users['uid-owner'].videos.vid1.likes;
+    expect(stored.map((like: any) => like.uid)).toEqual(['uid-b', 'uid-a']);
+    expect(stored[0]).toEqual({ uid: 'uid-b', timestamp: 1 });
+    expect(res.data).toHaveLength(2);
   });
 });
