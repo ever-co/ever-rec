@@ -1,6 +1,7 @@
 import { Reference } from '@firebase/database-types';
 import type { FullMetadata } from '@firebase/storage';
 import {
+  BadRequestException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -146,7 +147,11 @@ export class VideoService {
     viewerUid?: string,
   ): Promise<
     IDataResponse<{
-      video: { owner: Omit<IUserShort, 'email'>; dbData: DbVideoData; url: string };
+      video: {
+        owner: Omit<IUserShort, 'email'>;
+        dbData: DbVideoData;
+        url: string;
+      };
     }>
   > {
     try {
@@ -675,6 +680,12 @@ export class VideoService {
     _likes: unknown,
     title?: string,
   ): Promise<void> {
+    // The id goes into a database path: a sub-path such as `<id>/likes` would let this update
+    // write inside the likes or comments of the video.
+    if (typeof id !== 'string' || !is_id(id)) {
+      throw new BadRequestException('Invalid video id');
+    }
+
     const db = admin.database();
     const dbVideoRef = db.ref(`users/${uid}/videos/${id}`);
     await dbVideoRef.update({

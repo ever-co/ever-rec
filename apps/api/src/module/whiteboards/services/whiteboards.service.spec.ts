@@ -215,7 +215,9 @@ describe('WhiteboardService authorization', () => {
       expect((await service.getWhiteboardByIdShared('wbOwned2')).data.id).toBe(
         'wbOwned2',
       );
-      expect((await service.getWhiteboardByIdShared('wbOwned1')).data).toBeNull();
+      expect(
+        (await service.getWhiteboardByIdShared('wbOwned1')).data,
+      ).toBeNull();
     });
   });
 

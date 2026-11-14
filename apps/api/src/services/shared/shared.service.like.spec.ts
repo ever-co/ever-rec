@@ -88,7 +88,9 @@ describe('SharedService.likeItem', () => {
       'uid-a',
     );
 
-    expect(mockDb.updates[path].likes).toEqual([{ uid: 'uid-b', timestamp: 2 }]);
+    expect(mockDb.updates[path].likes).toEqual([
+      { uid: 'uid-b', timestamp: 2 },
+    ]);
     expect(result.data).toEqual([{ uid: '', timestamp: 2 }]);
   });
 

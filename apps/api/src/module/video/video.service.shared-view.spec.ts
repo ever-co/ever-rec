@@ -182,15 +182,15 @@ describe('VideoService shared view and update', () => {
         photoURL: 'uploader.png',
         id: 'uid-uploader',
       });
-      expect(result.data.video.url).toBe(
-        'signed:workspaces/ws1/videos/w.webm',
-      );
+      expect(result.data.video.url).toBe('signed:workspaces/ws1/videos/w.webm');
     });
 
     it('keeps serving the video file of the share record’s user', async () => {
       const result = await service.getVideoBySharedId('link1', false);
 
-      expect(result.data.video.url).toBe('signed:users/uid-owner/videos/a.webm');
+      expect(result.data.video.url).toBe(
+        'signed:users/uid-owner/videos/a.webm',
+      );
     });
   });
 
@@ -228,6 +228,22 @@ describe('VideoService shared view and update', () => {
       expect(mockDb.updates['users/uid-owner/videos/vid1']).toEqual({
         trash: true,
       });
+    });
+
+    it('refuses an id that is not a plain id, so nothing is written inside the likes', async () => {
+      for (const id of ['vid1/likes', 'vid1/comments/c1', '', undefined]) {
+        await expect(
+          service.updateVideoData(
+            'uid-owner',
+            id as any,
+            undefined,
+            undefined,
+            undefined,
+            'x',
+          ),
+        ).rejects.toThrow('Invalid video id');
+      }
+      expect(mockDb.updates).toEqual({});
     });
   });
 });

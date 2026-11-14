@@ -236,6 +236,22 @@ describe('ImageService shared view, update and list', () => {
         trash: true,
       });
     });
+
+    it('refuses an id that is not a plain id, so nothing is written inside the likes', async () => {
+      for (const id of ['img1/likes', 'img1/comments/c1', '', undefined]) {
+        await expect(
+          service.updateImageData(
+            'uid-owner',
+            id as any,
+            undefined,
+            undefined,
+            undefined,
+            'x',
+          ),
+        ).rejects.toThrow('Invalid image id');
+      }
+      expect(mockDb.updates).toEqual({});
+    });
   });
 
   describe('getFiles', () => {

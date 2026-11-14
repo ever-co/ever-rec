@@ -266,7 +266,12 @@ describe('database rules for the owner-written item fields', () => {
         true,
       );
       expect(
-        (await app.database().ref(`${path(uid)}/title`).get()).val(),
+        (
+          await app
+            .database()
+            .ref(`${path(uid)}/title`)
+            .get()
+        ).val(),
       ).toBe('Original');
     }
   });
@@ -295,9 +300,9 @@ describe('database rules for the owner-written item fields', () => {
     open.rules.users.$userId['.write'] = '$userId === auth.uid';
     await loadRules(JSON.stringify(open));
 
-    expect(
-      await clientWrite(`${ITEM_PATHS[0](uid)}/uid`, 'someone-else'),
-    ).toBe(200);
+    expect(await clientWrite(`${ITEM_PATHS[0](uid)}/uid`, 'someone-else')).toBe(
+      200,
+    );
     expect(await clientWrite(`${ITEM_PATHS[1](uid)}/likes`, null)).toBe(200);
     expect(await clientWrite(`users/${uid}/whiteboardIds`, ['wb2'])).toBe(200);
   });

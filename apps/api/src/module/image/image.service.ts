@@ -2,6 +2,7 @@ import * as admin from 'firebase-admin';
 import sharp from 'sharp';
 import moment from 'moment';
 import {
+  BadRequestException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -446,7 +447,9 @@ export class ImageService {
                 originalImage,
                 markers,
               } = value;
-              const comments = db.ref(`users/${uid}/screenshots/${id}/comments`);
+              const comments = db.ref(
+                `users/${uid}/screenshots/${id}/comments`,
+              );
               const newComments = await comments.get();
               const retrievedComments = newComments.val();
 
@@ -733,6 +736,12 @@ export class ImageService {
     originalImage?: string,
     markers?: string,
   ): Promise<IEditorImage> {
+    // The id goes into a database path: a sub-path such as `<id>/likes` would let this update
+    // write inside the likes or comments of the image.
+    if (typeof id !== 'string' || !is_id(id)) {
+      throw new BadRequestException('Invalid image id');
+    }
+
     const db = admin.database();
     const dbImageRef = db.ref(`users/${uid}/screenshots/${id}`);
 
