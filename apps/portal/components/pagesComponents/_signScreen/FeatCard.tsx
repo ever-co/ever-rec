@@ -1,6 +1,5 @@
 import Image from 'next/legacy/image';
 import AppSvg from 'components/elements/AppSvg';
-import AppButton from 'components/controls/AppButton';
 import { useTranslation } from 'react-i18next';
 
 export interface IFeatureCard {
@@ -114,14 +113,15 @@ const FeatCard: React.FC<IFeatureCard> = ({
             </div>
           </div>
           <p className="tw-my-4">{description}</p>
-          <a href={extensionLink} target="_blank" rel="noopener noreferrer">
-            <AppButton
-              twTextColor="tw-text-black hover:!tw-text-primary-purple tw-font-extralight !tw-text-base  tw-transition-all tw-duration-300"
-              className="!tw-border-primary-purple tw-mb-6 tw-bg-white"
-              onClick={() => void 0}
-            >
-              {buttonText}
-            </AppButton>
+          {/* The link is the only interactive element: it is styled like a button instead of
+              nesting a focusable AppButton (two tab stops, a button inside a link). */}
+          <a
+            href={extensionLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="tw-block tw-w-max tw-mb-6 tw-py-2 tw-px-5 tw-rounded-md tw-border !tw-border-primary-purple tw-bg-white tw-cursor-pointer tw-select-none tw-text-base tw-text-black hover:!tw-text-primary-purple tw-font-extralight tw-transition-all tw-duration-300 focus-visible:!tw-outline focus-visible:!tw-outline-2 focus-visible:!tw-outline-offset-2 focus-visible:!tw-outline-primary-purple"
+          >
+            {buttonText}
           </a>
         </div>
       </div>
