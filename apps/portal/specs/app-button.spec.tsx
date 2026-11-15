@@ -21,11 +21,17 @@ const render = (element: React.ReactElement) =>
 
 const button = () => container.querySelector('[role="button"]') as HTMLElement;
 
+const keyEvent = (
+  type: 'keydown' | 'keyup',
+  key: string,
+  repeat = false,
+) => new KeyboardEvent(type, { key, repeat, bubbles: true, cancelable: true });
+
+// A full key stroke: key down, then key up.
 const press = (target: Element, key: string) =>
   act(async () => {
-    target.dispatchEvent(
-      new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true }),
-    );
+    target.dispatchEvent(keyEvent('keydown', key));
+    target.dispatchEvent(keyEvent('keyup', key));
   });
 
 beforeAll(() => {
@@ -77,30 +83,52 @@ describe('AppButton keyboard support', () => {
     expect(event.defaultPrevented).toBe(true);
   });
 
-  it('fires once when a key is held down', async () => {
+  it('activates Space on key up, not on key down', async () => {
     const onClick = jest.fn();
     await render(<AppButton onClick={onClick}>Save</AppButton>);
 
-    for (const key of ['Enter', ' ']) {
-      onClick.mockClear();
-      await act(async () => {
-        button().dispatchEvent(
-          new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true }),
-        );
-        for (let i = 0; i < 3; i++) {
-          button().dispatchEvent(
-            new KeyboardEvent('keydown', {
-              key,
-              repeat: true,
-              bubbles: true,
-              cancelable: true,
-            }),
-          );
-        }
-      });
+    await act(async () => {
+      button().dispatchEvent(keyEvent('keydown', ' '));
+    });
+    expect(onClick).not.toHaveBeenCalled();
 
-      expect(onClick).toHaveBeenCalledTimes(1);
-    }
+    await act(async () => {
+      button().dispatchEvent(keyEvent('keyup', ' '));
+    });
+    expect(onClick).toHaveBeenCalledTimes(1);
+  });
+
+  it('fires once when Space is held down and then released', async () => {
+    const onClick = jest.fn();
+    await render(<AppButton onClick={onClick}>Save</AppButton>);
+
+    await act(async () => {
+      button().dispatchEvent(keyEvent('keydown', ' '));
+      for (let i = 0; i < 3; i++) {
+        button().dispatchEvent(keyEvent('keydown', ' ', true));
+      }
+    });
+    expect(onClick).not.toHaveBeenCalled();
+
+    await act(async () => {
+      button().dispatchEvent(keyEvent('keyup', ' '));
+    });
+    expect(onClick).toHaveBeenCalledTimes(1);
+  });
+
+  it('fires once when Enter is held down', async () => {
+    const onClick = jest.fn();
+    await render(<AppButton onClick={onClick}>Save</AppButton>);
+
+    await act(async () => {
+      button().dispatchEvent(keyEvent('keydown', 'Enter'));
+      for (let i = 0; i < 3; i++) {
+        button().dispatchEvent(keyEvent('keydown', 'Enter', true));
+      }
+      button().dispatchEvent(keyEvent('keyup', 'Enter'));
+    });
+
+    expect(onClick).toHaveBeenCalledTimes(1);
   });
 
   it('ignores other keys', async () => {

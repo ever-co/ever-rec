@@ -64,16 +64,26 @@ const AppButton: React.FC<AppInputProps> = ({
     !disabled && onClick(e);
   };
 
-  // The control is a div, so keyboard activation has to be added by hand: Enter and Space press
-  // it like a native button. Only react to keys pressed on the button itself, not on controls
-  // nested inside it. Re-using the native click keeps the handler's event type unchanged.
+  // The control is a div, so keyboard activation has to be added by hand and mirror a native
+  // button: Enter activates on key down, Space on key up. Neither repeats while the key is held
+  // (a held key must not send a request again and again). Only react to keys pressed on the
+  // button itself, not on controls nested inside it. Re-using the native click keeps the
+  // handler's event type unchanged.
   const keyDownHandler = (e: KeyboardEvent<HTMLDivElement>): void => {
     if (e.target !== e.currentTarget) return;
-    if (e.key !== 'Enter' && e.key !== ' ') return;
 
-    e.preventDefault(); // stops Space from scrolling the page
-    // Holding the key down must not fire the action again and again (e.g. repeated deletes).
-    if (e.repeat) return;
+    if (e.key === ' ') {
+      e.preventDefault(); // stops Space from scrolling the page; activation waits for key up
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (!e.repeat) e.currentTarget.click();
+    }
+  };
+
+  const keyUpHandler = (e: KeyboardEvent<HTMLDivElement>): void => {
+    if (e.target !== e.currentTarget || e.key !== ' ') return;
+
+    e.preventDefault();
     e.currentTarget.click();
   };
 
@@ -100,6 +110,7 @@ const AppButton: React.FC<AppInputProps> = ({
       aria-label={ariaLabel}
       onClick={clickHandler}
       onKeyDown={keyDownHandler}
+      onKeyUp={keyUpHandler}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
