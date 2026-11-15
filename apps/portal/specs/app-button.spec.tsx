@@ -77,6 +77,32 @@ describe('AppButton keyboard support', () => {
     expect(event.defaultPrevented).toBe(true);
   });
 
+  it('fires once when a key is held down', async () => {
+    const onClick = jest.fn();
+    await render(<AppButton onClick={onClick}>Save</AppButton>);
+
+    for (const key of ['Enter', ' ']) {
+      onClick.mockClear();
+      await act(async () => {
+        button().dispatchEvent(
+          new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true }),
+        );
+        for (let i = 0; i < 3; i++) {
+          button().dispatchEvent(
+            new KeyboardEvent('keydown', {
+              key,
+              repeat: true,
+              bubbles: true,
+              cancelable: true,
+            }),
+          );
+        }
+      });
+
+      expect(onClick).toHaveBeenCalledTimes(1);
+    }
+  });
+
   it('ignores other keys', async () => {
     const onClick = jest.fn();
     await render(<AppButton onClick={onClick}>Save</AppButton>);

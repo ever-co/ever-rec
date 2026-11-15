@@ -72,6 +72,8 @@ const AppButton: React.FC<AppInputProps> = ({
     if (e.key !== 'Enter' && e.key !== ' ') return;
 
     e.preventDefault(); // stops Space from scrolling the page
+    // Holding the key down must not fire the action again and again (e.g. repeated deletes).
+    if (e.repeat) return;
     e.currentTarget.click();
   };
 
