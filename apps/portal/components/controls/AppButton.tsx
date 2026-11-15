@@ -1,5 +1,5 @@
 import { cn } from 'app/utilities/cn';
-import React, { MouseEvent, ReactNode } from 'react';
+import React, { KeyboardEvent, MouseEvent, ReactNode } from 'react';
 
 const DEFAULT_BG_COLOR = 'tw-bg-primary-purple';
 
@@ -19,6 +19,8 @@ interface AppInputProps {
   onMouseEnter?: (e: any) => void;
   onMouseLeave?: (e: any) => void;
   id?: any;
+  /** Accessible name for buttons that only contain an icon. */
+  ariaLabel?: string;
 }
 
 const AppButton: React.FC<AppInputProps> = ({
@@ -37,6 +39,7 @@ const AppButton: React.FC<AppInputProps> = ({
   twRounded,
   onMouseLeave,
   id,
+  ariaLabel,
 }) => {
   const calculateBorderColor = () => {
     const border = `tw-border`;
@@ -61,6 +64,29 @@ const AppButton: React.FC<AppInputProps> = ({
     !disabled && onClick(e);
   };
 
+  // The control is a div, so keyboard activation has to be added by hand and mirror a native
+  // button: Enter activates on key down, Space on key up. Neither repeats while the key is held
+  // (a held key must not send a request again and again). Only react to keys pressed on the
+  // button itself, not on controls nested inside it. Re-using the native click keeps the
+  // handler's event type unchanged.
+  const keyDownHandler = (e: KeyboardEvent<HTMLDivElement>): void => {
+    if (e.target !== e.currentTarget) return;
+
+    if (e.key === ' ') {
+      e.preventDefault(); // stops Space from scrolling the page; activation waits for key up
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (!e.repeat) e.currentTarget.click();
+    }
+  };
+
+  const keyUpHandler = (e: KeyboardEvent<HTMLDivElement>): void => {
+    if (e.target !== e.currentTarget || e.key !== ' ') return;
+
+    e.preventDefault();
+    e.currentTarget.click();
+  };
+
   const textColor =
     bgColor === DEFAULT_BG_COLOR && !outlined && 'tw-text-white';
 
@@ -69,6 +95,9 @@ const AppButton: React.FC<AppInputProps> = ({
       id={id}
       className={cn(
         'tw-cursor-pointer tw-select-none tw-text-base',
+        // styles.scss sets `.rec-next div:focus { outline: none }` on every div, which hides the
+        // browser's focus ring. Keyboard focus needs its own outline, marked important to win.
+        'focus-visible:!tw-outline focus-visible:!tw-outline-2 focus-visible:!tw-outline-offset-2 focus-visible:!tw-outline-primary-purple',
         full ? 'tw-w-full' : 'tw-w-max',
         outlined ? 'tw-bg-app-grey' : bgColor,
         darkBgColor,
@@ -78,7 +107,13 @@ const AppButton: React.FC<AppInputProps> = ({
         calculateBorderColor(),
         calculateDisabledClasses(),
       )}
+      role="button"
+      tabIndex={disabled ? -1 : 0}
+      aria-disabled={disabled || undefined}
+      aria-label={ariaLabel}
       onClick={clickHandler}
+      onKeyDown={keyDownHandler}
+      onKeyUp={keyUpHandler}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
