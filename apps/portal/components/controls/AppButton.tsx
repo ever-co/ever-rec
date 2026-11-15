@@ -1,5 +1,5 @@
 import { cn } from 'app/utilities/cn';
-import React, { MouseEvent, ReactNode } from 'react';
+import React, { KeyboardEvent, MouseEvent, ReactNode } from 'react';
 
 const DEFAULT_BG_COLOR = 'tw-bg-primary-purple';
 
@@ -19,6 +19,8 @@ interface AppInputProps {
   onMouseEnter?: (e: any) => void;
   onMouseLeave?: (e: any) => void;
   id?: any;
+  /** Accessible name for buttons that only contain an icon. */
+  ariaLabel?: string;
 }
 
 const AppButton: React.FC<AppInputProps> = ({
@@ -37,6 +39,7 @@ const AppButton: React.FC<AppInputProps> = ({
   twRounded,
   onMouseLeave,
   id,
+  ariaLabel,
 }) => {
   const calculateBorderColor = () => {
     const border = `tw-border`;
@@ -61,6 +64,17 @@ const AppButton: React.FC<AppInputProps> = ({
     !disabled && onClick(e);
   };
 
+  // The control is a div, so keyboard activation has to be added by hand: Enter and Space press
+  // it like a native button. Only react to keys pressed on the button itself, not on controls
+  // nested inside it. Re-using the native click keeps the handler's event type unchanged.
+  const keyDownHandler = (e: KeyboardEvent<HTMLDivElement>): void => {
+    if (e.target !== e.currentTarget) return;
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+
+    e.preventDefault(); // stops Space from scrolling the page
+    e.currentTarget.click();
+  };
+
   const textColor =
     bgColor === DEFAULT_BG_COLOR && !outlined && 'tw-text-white';
 
@@ -78,7 +92,12 @@ const AppButton: React.FC<AppInputProps> = ({
         calculateBorderColor(),
         calculateDisabledClasses(),
       )}
+      role="button"
+      tabIndex={disabled ? -1 : 0}
+      aria-disabled={disabled || undefined}
+      aria-label={ariaLabel}
       onClick={clickHandler}
+      onKeyDown={keyDownHandler}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
