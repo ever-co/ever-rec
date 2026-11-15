@@ -95,6 +95,9 @@ const AppButton: React.FC<AppInputProps> = ({
       id={id}
       className={cn(
         'tw-cursor-pointer tw-select-none tw-text-base',
+        // styles.scss sets `.rec-next div:focus { outline: none }` on every div, which hides the
+        // browser's focus ring. Keyboard focus needs its own outline, marked important to win.
+        'focus-visible:!tw-outline focus-visible:!tw-outline-2 focus-visible:!tw-outline-offset-2 focus-visible:!tw-outline-primary-purple',
         full ? 'tw-w-full' : 'tw-w-max',
         outlined ? 'tw-bg-app-grey' : bgColor,
         darkBgColor,

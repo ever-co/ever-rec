@@ -21,11 +21,8 @@ const render = (element: React.ReactElement) =>
 
 const button = () => container.querySelector('[role="button"]') as HTMLElement;
 
-const keyEvent = (
-  type: 'keydown' | 'keyup',
-  key: string,
-  repeat = false,
-) => new KeyboardEvent(type, { key, repeat, bubbles: true, cancelable: true });
+const keyEvent = (type: 'keydown' | 'keyup', key: string, repeat = false) =>
+  new KeyboardEvent(type, { key, repeat, bubbles: true, cancelable: true });
 
 // A full key stroke: key down, then key up.
 const press = (target: Element, key: string) =>
@@ -192,5 +189,19 @@ describe('AppButton keyboard support', () => {
     );
 
     expect(button().getAttribute('aria-label')).toBe('Restore');
+  });
+
+  it('keeps a visible keyboard focus ring despite the global div:focus reset', async () => {
+    await render(<AppButton onClick={jest.fn()}>Save</AppButton>);
+
+    // `.rec-next div:focus { outline: none }` (styles.scss) applies to every page, so only an
+    // important focus-visible outline is shown.
+    for (const cls of [
+      'focus-visible:!tw-outline',
+      'focus-visible:!tw-outline-2',
+      'focus-visible:!tw-outline-primary-purple',
+    ]) {
+      expect(button().classList.contains(cls)).toBe(true);
+    }
   });
 });
