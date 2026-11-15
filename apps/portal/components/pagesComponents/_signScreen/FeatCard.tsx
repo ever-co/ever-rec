@@ -114,12 +114,14 @@ const FeatCard: React.FC<IFeatureCard> = ({
           </div>
           <p className="tw-my-4">{description}</p>
           {/* The link is the only interactive element: it is styled like a button instead of
-              nesting a focusable AppButton (two tab stops, a button inside a link). */}
+              nesting a focusable AppButton (two tab stops, a button inside a link). The classes
+              match what that AppButton rendered: its text was semibold, and only colours animate
+              so the focus ring shows at once. */}
           <a
             href={extensionLink}
             target="_blank"
             rel="noopener noreferrer"
-            className="tw-block tw-w-max tw-mb-6 tw-py-2 tw-px-5 tw-rounded-md tw-border !tw-border-primary-purple tw-bg-white tw-cursor-pointer tw-select-none tw-text-base tw-text-black hover:!tw-text-primary-purple tw-font-extralight tw-transition-all tw-duration-300 focus-visible:!tw-outline focus-visible:!tw-outline-2 focus-visible:!tw-outline-offset-2 focus-visible:!tw-outline-primary-purple"
+            className="tw-block tw-w-max tw-mb-6 tw-py-2 tw-px-5 tw-rounded-md tw-border !tw-border-primary-purple tw-bg-white tw-cursor-pointer tw-select-none tw-text-base tw-text-black hover:!tw-text-primary-purple tw-font-semibold tw-transition-colors tw-duration-300 focus-visible:!tw-outline focus-visible:!tw-outline-2 focus-visible:!tw-outline-offset-2 focus-visible:!tw-outline-primary-purple"
           >
             {buttonText}
           </a>
