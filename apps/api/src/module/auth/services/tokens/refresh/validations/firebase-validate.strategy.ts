@@ -13,9 +13,11 @@ export class FirebaseValidateStrategy extends ValidateStrategyState {
     super();
   }
 
+  // `checkRevoked`: the token of a deleted, disabled or signed-out account is refused, so the
+  // guards fall back to the refresh token, which fails for such an account too.
   async supports(token: string): Promise<boolean> {
     try {
-      await this.firebaseAdmin.verifyIdToken(token);
+      await this.firebaseAdmin.verifyIdToken(token, true);
       return true;
     } catch {
       return false;
@@ -23,7 +25,7 @@ export class FirebaseValidateStrategy extends ValidateStrategyState {
   }
 
   async handle({ token, request }: IRefreshTokenContext): Promise<void> {
-    const decoded = await this.firebaseAdmin.verifyIdToken(token);
+    const decoded = await this.firebaseAdmin.verifyIdToken(token, true);
     request.user = this.userFactory.create(decoded);
   }
 }
