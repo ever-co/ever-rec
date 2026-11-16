@@ -108,6 +108,7 @@
     "dropFiles": "将文件拖放到此处...",
     "logoDescription": "为您的工作区上传徽标或头像。仅支持JPG或PNG格式。最大文件大小为30 KB。",
     "invitedToJoin": "邀请您加入",
+    "joinWorkspaceOnRec": "Rec 上的工作区 <1>{{workspaceName}}</1>。",
     "workspaceMembers": "工作区成员",
     "teamMembers": "团队成员",
     "teams": "团队",

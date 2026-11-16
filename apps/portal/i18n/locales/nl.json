@@ -108,6 +108,7 @@
     "dropFiles": "Sleep de bestanden hierheen...",
     "logoDescription": "Upload een logo of avatar voor uw werkruimte. Alleen JPG- of PNG-formaat. De maximale bestandsgrootte is 30 KB.",
     "invitedToJoin": "heeft u uitgenodigd om lid te worden van",
+    "joinWorkspaceOnRec": "de werkruimte <1>{{workspaceName}}</1> op Rec.",
     "workspaceMembers": "Leden van de werkruimte",
     "teamMembers": "Teamleden",
     "teams": "Teams",

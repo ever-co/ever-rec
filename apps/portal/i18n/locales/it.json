@@ -108,6 +108,7 @@
     "dropFiles": "Trascina i file qui...",
     "logoDescription": "Carica un logo o un avatar per la tua area di lavoro. Solo formato JPG o PNG. La dimensione massima del file è 30 KB.",
     "invitedToJoin": "ti ha invitato a unirti a",
+    "joinWorkspaceOnRec": "area di lavoro <1>{{workspaceName}}</1> su Rec.",
     "workspaceMembers": "Membri dell'area di lavoro",
     "teamMembers": "Membri del team",
     "teams": "Team",
