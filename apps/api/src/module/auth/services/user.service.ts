@@ -188,6 +188,23 @@ export class UserService {
   }
 
   /**
+   * Delete the user's database record `users/<uid>`: the email, the display name, the screenshot
+   * and video records and the stored OAuth tokens (Google Drive, Dropbox, Jira). Workspaces,
+   * shares and other users' data are not touched.
+   */
+  async deleteUserRecord(uid: string): Promise<void> {
+    try {
+      this.logger.log(`Deleting user record: ${uid}`);
+      await this.firebaseAdminService
+        .getDatabaseRef(`${this.rootDb}/${uid}`)
+        .remove();
+    } catch (error) {
+      this.logger.error(`Failed to delete user record: ${uid}`, error);
+      throw new BadRequestException('Failed to delete user data');
+    }
+  }
+
+  /**
    * Set custom claims for user
    */
   async setCustomClaims(uid: string, claims: any): Promise<void> {

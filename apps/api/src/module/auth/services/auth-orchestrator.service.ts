@@ -170,6 +170,9 @@ export class AuthOrchestratorService {
         this.userService.deleteUser(uid),
       ]);
 
+      // Only once the sign-in account is gone: a failed deletion keeps the record intact.
+      await this.userService.deleteUserRecord(uid);
+
       this.eventEmitter.emit(
         'analytics.track',
         'User deleted! All user files deleted!',
