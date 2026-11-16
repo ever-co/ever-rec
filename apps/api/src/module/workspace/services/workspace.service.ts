@@ -163,7 +163,10 @@ export class WorkspacesService {
       const memberPromises = memberIds.map((memberObj) =>
         this.utilitiesService.getShortUserData(memberObj.id),
       );
-      const members = await promiseAllSettled(memberPromises);
+      // A member whose account was deleted has no record any more: leave it out.
+      const members = (await promiseAllSettled(memberPromises)).filter(
+        (member) => !!member,
+      );
 
       const parsedFolderId = folderId || false;
 
@@ -220,7 +223,8 @@ export class WorkspacesService {
         notFoundMembersPromises,
       );
       notFoundMembers.forEach((member, index) => {
-        if (member.id !== outsideWorkspaceMembers[index].id) return;
+        // No record (a deleted account): the item keeps no owner.
+        if (member.id !== outsideWorkspaceMembers[index]?.id) return;
 
         if (member.itemType === 'image') {
           screenshots[member.index] = {
