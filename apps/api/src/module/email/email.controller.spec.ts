@@ -115,6 +115,11 @@ describe('email routes', () => {
       sharedVideos: {
         vidLink: { uid: 'uid-a', videoId: 'vid1' },
         vidStream: { uid: 'uid-a', videoId: 'vid2' },
+        vidEvil: { uid: 'uid-a', videoId: 'vid3' },
+        vidLookalike: { uid: 'uid-a', videoId: 'vid4' },
+        vidHttp: { uid: 'uid-a', videoId: 'vid5' },
+        vidThumb: { uid: 'uid-a', videoId: 'vid6' },
+        vidPath: { uid: 'uid-a', videoId: 'vid7' },
         vidOther: { uid: 'uid-b', videoId: 'vid9' },
       },
       users: {
@@ -128,10 +133,37 @@ describe('email routes', () => {
             vid2: {
               id: 'vid2',
               streamData: {
-                playbackUrl: 'https://stream.test/vid2.m3u8',
-                thumbnailUrl: 'https://stream.test/vid2.jpg',
+                playbackUrl: 'https://stream.mux.com/abc.m3u8',
+                thumbnailUrl: 'https://image.mux.com/abc/thumbnail.png',
               },
             },
+            // Stream data planted by the owner: a foreign host, a look-alike host, a plain
+            // http URL and a missing thumbnail.
+            vid3: {
+              id: 'vid3',
+              streamData: {
+                playbackUrl: 'https://evil.test/login',
+                thumbnailUrl: 'https://image.mux.com/abc/thumbnail.png',
+              },
+            },
+            vid4: {
+              id: 'vid4',
+              streamData: {
+                playbackUrl: 'https://stream.mux.com.evil.test/x.m3u8',
+              },
+            },
+            vid5: {
+              id: 'vid5',
+              streamData: { playbackUrl: 'http://stream.mux.com/abc.m3u8' },
+            },
+            vid6: {
+              id: 'vid6',
+              streamData: {
+                playbackUrl: 'https://stream.mux.com/abc.m3u8',
+                thumbnailUrl: 'https://evil.test/pixel.png',
+              },
+            },
+            vid7: { id: 'vid7', refName: '../uid-b/videos/nine.webm' },
           },
         },
         'uid-b': {
@@ -230,10 +262,31 @@ describe('email routes', () => {
       ).expect(201);
       expect(sentMessages()[0].TemplateModel).toEqual(
         expect.objectContaining({
-          itemPublicLink: 'https://stream.test/vid2.m3u8',
-          templateUrl: 'https://stream.test/vid2.jpg',
+          itemPublicLink: 'https://stream.mux.com/abc.m3u8',
+          templateUrl: 'https://image.mux.com/abc/thumbnail.png',
         }),
       );
+    });
+
+    it('never mails stream URLs saved by the owner that are not a provider host', async () => {
+      const video = (itemLink: string) =>
+        post('send-item', body({ itemType: 'video', itemLink }), 'uid-a');
+
+      await video('vidEvil').expect(403);
+      await video('vidLookalike').expect(403);
+      await video('vidHttp').expect(403);
+      await video('vidPath').expect(403);
+      expect(mockSendBatch).not.toHaveBeenCalled();
+
+      // A foreign thumbnail is left out; the video itself is still mailed.
+      await video('vidThumb').expect(201);
+      expect(sentMessages()[0].TemplateModel).toEqual(
+        expect.objectContaining({
+          itemPublicLink: 'https://stream.mux.com/abc.m3u8',
+          templateUrl: false,
+        }),
+      );
+      expect(JSON.stringify(sentMessages())).not.toContain('evil.test');
     });
 
     it('never mails the sender name or the links of the body', async () => {

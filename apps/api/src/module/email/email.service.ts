@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { URL } from 'url';
 import * as postmark from 'postmark';
 import { ConfigService } from '@nestjs/config';
 import { PostmarkTemplate } from 'src/config/email';
@@ -23,6 +24,41 @@ const SIGNED_URL_CONFIG = {
   action: 'read' as const,
   expires: '03-01-2500',
 };
+
+// The hosts the streaming providers serve playback and thumbnails from.
+const STREAM_HOSTS = [
+  'stream.mux.com',
+  'image.mux.com',
+  'vod.api.video',
+  'cdn.api.video',
+];
+
+/** The URL when it is a plain https URL on a streaming provider's host, else null. */
+const trustedStreamUrl = (value: unknown): string | null => {
+  if (typeof value !== 'string') {
+    return null;
+  }
+
+  try {
+    const url = new URL(value);
+
+    return url.protocol === 'https:' &&
+      !url.username &&
+      !url.password &&
+      !url.port &&
+      STREAM_HOSTS.includes(url.hostname)
+      ? url.href
+      : null;
+  } catch {
+    return null;
+  }
+};
+
+/** A stored file name: text that cannot step out of the owner's folder. */
+const isStoredFileName = (value: unknown): value is string =>
+  typeof value === 'string' &&
+  value.length > 0 &&
+  !value.split('/').some((part) => part === '..' || part === '');
 
 enum ResStatusEnum {
   error = 'error',
@@ -208,23 +244,41 @@ export class EmailService {
       (await bucket.file(path).getSignedUrl(SIGNED_URL_CONFIG))[0];
 
     if (isImage) {
-      return {
-        itemPublicLink: await sign(`users/${uid}/screenshots/${item.refName}`),
-        templateUrl: false,
-      };
+      return isStoredFileName(item.refName)
+        ? {
+            itemPublicLink: await sign(
+              `users/${uid}/screenshots/${item.refName}`,
+            ),
+            templateUrl: false,
+          }
+        : null;
     }
 
+    // The URLs saved with a streamed video are written by its owner, so they are mailed only when
+    // they point at a streaming provider's own host.
     const streamData = item.streamData;
-    const itemPublicLink: string = streamData
-      ? streamData.playbackUrl
-      : await sign(`users/${uid}/videos/${item.refName}`);
-    const templateUrl: string | false = streamData
-      ? streamData.thumbnailUrl || false
-      : item.posterRef
-      ? await sign(`users/${uid}/videoPosters/${item.posterRef}`)
-      : false;
 
-    return { itemPublicLink, templateUrl };
+    if (streamData) {
+      const playbackUrl = trustedStreamUrl(streamData.playbackUrl);
+
+      return playbackUrl
+        ? {
+            itemPublicLink: playbackUrl,
+            templateUrl: trustedStreamUrl(streamData.thumbnailUrl) || false,
+          }
+        : null;
+    }
+
+    if (!isStoredFileName(item.refName)) {
+      return null;
+    }
+
+    return {
+      itemPublicLink: await sign(`users/${uid}/videos/${item.refName}`),
+      templateUrl: isStoredFileName(item.posterRef)
+        ? await sign(`users/${uid}/videoPosters/${item.posterRef}`)
+        : false,
+    };
   }
 
   async sendItems({
