@@ -2,7 +2,8 @@ import { Injectable } from '@nestjs/common';
 import * as postmark from 'postmark';
 import { ConfigService } from '@nestjs/config';
 import { PostmarkTemplate } from 'src/config/email';
-import { IDataResponse, ItemType } from '../../interfaces/_types';
+import { IDataResponse } from '../../interfaces/_types';
+import { is_id } from '../workspace/validators/id.validator';
 import * as admin from 'firebase-admin';
 import { getAuth } from 'firebase-admin/auth';
 import {
@@ -14,6 +15,14 @@ import { FirebaseClient } from 'src/services/firebase/firebase.client';
 import { sendError, sendResponse } from 'src/services/utils/sendResponse';
 import { IWorkspaceInvite } from '../workspace/Interfaces/Invites';
 import { IWorkspace } from '../workspace/Interfaces/Workspace';
+
+/** The kinds of item that can be mailed as a link. */
+export type SendableItemType = 'image' | 'video';
+
+const SIGNED_URL_CONFIG = {
+  action: 'read' as const,
+  expires: '03-01-2500',
+};
 
 enum ResStatusEnum {
   error = 'error',
@@ -147,6 +156,77 @@ export class EmailService {
     }
   }
 
+  /**
+   * The links of a shared item for the mail, read from the item itself, or null when `itemLink` is
+   * not a share record of `uid` (or its item is gone or in the trash). Nothing a caller sends
+   * decides what the mail links to. The links are signed with the same long expiry the owner's own
+   * lists use, so the mail keeps working after the day a shared-page link lasts.
+   */
+  async resolveSharedItem(
+    uid: string,
+    itemType: SendableItemType,
+    itemLink: string,
+  ): Promise<{ itemPublicLink: string; templateUrl: string | false } | null> {
+    if (
+      typeof uid !== 'string' ||
+      !is_id(uid) ||
+      typeof itemLink !== 'string' ||
+      !is_id(itemLink)
+    ) {
+      return null;
+    }
+
+    const db = admin.database();
+    const isImage = itemType === 'image';
+    const sharedSnap = await db
+      .ref(`${isImage ? 'shared' : 'sharedVideos'}/${itemLink}`)
+      .get();
+    const shared = sharedSnap.val();
+    const itemId = shared?.[isImage ? 'imageId' : 'videoId'];
+
+    if (
+      !shared ||
+      shared.uid !== uid ||
+      typeof itemId !== 'string' ||
+      !is_id(itemId)
+    ) {
+      return null;
+    }
+
+    const item = (
+      await db
+        .ref(`users/${uid}/${isImage ? 'screenshots' : 'videos'}/${itemId}`)
+        .get()
+    ).val();
+
+    if (!item || item.trash) {
+      return null;
+    }
+
+    const bucket = admin.storage().bucket();
+    const sign = async (path: string): Promise<string> =>
+      (await bucket.file(path).getSignedUrl(SIGNED_URL_CONFIG))[0];
+
+    if (isImage) {
+      return {
+        itemPublicLink: await sign(`users/${uid}/screenshots/${item.refName}`),
+        templateUrl: false,
+      };
+    }
+
+    const streamData = item.streamData;
+    const itemPublicLink: string = streamData
+      ? streamData.playbackUrl
+      : await sign(`users/${uid}/videos/${item.refName}`);
+    const templateUrl: string | false = streamData
+      ? streamData.thumbnailUrl || false
+      : item.posterRef
+      ? await sign(`users/${uid}/videoPosters/${item.posterRef}`)
+      : false;
+
+    return { itemPublicLink, templateUrl };
+  }
+
   async sendItems({
     emails,
     itemLink,
@@ -158,7 +238,7 @@ export class EmailService {
   }: {
     emails: string[];
     itemLink: string;
-    itemType: ItemType;
+    itemType: SendableItemType;
     itemPublicLink: string;
     message: string | undefined;
     userDisplayName: string | null;
