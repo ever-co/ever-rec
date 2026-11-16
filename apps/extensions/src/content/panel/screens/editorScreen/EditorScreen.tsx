@@ -659,20 +659,36 @@ const EditorScreen: React.FC = () => {
     }
   };
 
+  const editorImageId = editorImage?.dbData?.id;
+
   useEffect(() => {
     const allComments = markers.flatMap((marker) => marker.comments);
     setComments(allComments);
-    // Connect to your server
-    const socket = io('http://localhost:3000', { transports: ['websocket'] });
+
+    // The API accepts signed-in sockets only, and sends each user the marker updates of their
+    // own images and of their workspaces' images.
+    if (!user?.id || !editorImageId) return;
+
+    // Connect to the API, with the sign-in token read on each (re)connect.
+    const socket = io(process.env.API_BASE_URL || '', {
+      transports: ['websocket'],
+      auth: (cb) => {
+        chrome.storage.local
+          .get(['idToken'])
+          .then(({ idToken }) => cb({ token: idToken }))
+          .catch(() => cb({}));
+      },
+    });
 
     // Listen for 'connect' event
     socket.on('connect', () => {
       console.info('Successfully connected to the websocket');
     });
 
-    // Listen for 'markers-updated' event
+    // Listen for 'markers-updated' event: only updates of the image open in this editor,
+    // saved by someone else.
     socket.on('markers-updated', (data: any) => {
-      console.log(data);
+      if (data?.imageId !== editorImageId) return;
       if (data?.uid !== user?.id) {
         data.markers && setMarkers(JSON.parse(data.markers));
       }
@@ -682,7 +698,7 @@ const EditorScreen: React.FC = () => {
     return () => {
       socket.disconnect();
     };
-  }, [user]);
+  }, [user, editorImageId]);
 
   useEffect(() => {
     const allComments = markers?.flatMap((marker) => marker.comments);

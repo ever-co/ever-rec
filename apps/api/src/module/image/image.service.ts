@@ -761,8 +761,9 @@ export class ImageService {
       ...(markers !== undefined ? { markers } : {}),
     });
 
+    // A personal image: only its owner (the caller, checked above) receives the update.
     if (markers !== undefined) {
-      this.editorGateway.emitMarkerUpdate(uid, id, markers);
+      this.editorGateway.emitMarkerUpdate([uid], uid, id, markers);
     }
 
     return this.getImageByIdPrivate(uid, id);

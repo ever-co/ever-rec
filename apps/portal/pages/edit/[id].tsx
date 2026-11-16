@@ -105,6 +105,7 @@ import { EditorService } from 'app/services/editor/editor';
 import { MarkerAPI } from 'app/services/api/markers';
 import { IMarker } from 'app/interfaces/IMarker';
 import { io } from 'socket.io-client';
+import { getCookies } from 'app/services/helpers/getCookies';
 //Editor
 
 export interface ISize {
@@ -888,10 +889,18 @@ const EditorScreen: React.FC = () => {
     }
   };
 
+  const editorImageId = editorImage?.dbData?.id;
+
   useEffect(() => {
+    // The API accepts signed-in sockets only, and sends each user the marker updates of their
+    // own images and of their workspaces' images.
+    if (!user?.id || !editorImageId || !getCookies().idToken) return;
+
     // Connect to your server
     const socket = io(process.env.NEXT_PUBLIC_API_BASE_URL || '', {
       transports: ['websocket'],
+      // Read on each (re)connect, so a refreshed token is used.
+      auth: (cb) => cb({ token: getCookies().idToken }),
     });
 
     // Listen for 'connect' event
@@ -899,9 +908,10 @@ const EditorScreen: React.FC = () => {
       console.info('Successfully connected to the websocket');
     });
 
-    // Listen for 'markers-updated' event
+    // Listen for 'markers-updated' event: only updates of the image open in this editor,
+    // saved by someone else.
     socket.on('markers-updated', (data) => {
-      console.log(data);
+      if (data?.imageId !== editorImageId) return;
       if (data?.uid !== user?.id) {
         data.markers && setMarkers(JSON.parse(data.markers));
       }
@@ -911,7 +921,7 @@ const EditorScreen: React.FC = () => {
     return () => {
       socket.disconnect();
     };
-  }, [user]);
+  }, [user, editorImageId]);
 
   useEffect(() => {
     const allComments = markers?.flatMap((marker) => marker.comments);

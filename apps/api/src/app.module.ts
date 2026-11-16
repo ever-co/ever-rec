@@ -11,7 +11,6 @@ import { AuthModule } from './module/auth/auth.module';
 import { DriveModule } from './module/drive/drive.module';
 import { DropboxModule } from './module/dropbox/dropbox.module';
 import { EditorWebsocketModule } from './module/editor-websocket-module/editor-websocket.module';
-import { EditorGateway } from './module/editor-websocket-module/editor.gateway';
 import { EmailModule } from './module/email/email.module';
 import { EverIdModule } from './module/ever-id/ever-id.module';
 import { FirebaseModule } from './module/firebase/firebase.module';
@@ -63,7 +62,6 @@ import { everPlatformModules } from './common/ever-platform/modules';
   controllers: [AppController],
   providers: [
     AppService,
-    EditorGateway,
     {
       provide: APP_FILTER,
       useClass: SentryGlobalFilter,
