@@ -261,6 +261,8 @@ export class WorkspaceTeamsService {
           const memberRef = db.ref(`users/${member.id}`);
           const memberPromise = memberRef.get().then((userSnapshotData) => {
             const userData = userSnapshotData.val();
+            // A member whose account was deleted has no record any more: leave it out.
+            if (!userData) return;
             const { displayName, photoURL, email } = userData;
             const newMember: IWorkspaceUser = {
               id: member.id,
@@ -297,6 +299,9 @@ export class WorkspaceTeamsService {
             break;
           }
         }
+
+        // Not fetched: no record (a deleted account).
+        if (!memberToAdd) return;
 
         if (!teamMemberMap[esc.teamId]) {
           teamMemberMap[esc.teamId] = [memberToAdd];

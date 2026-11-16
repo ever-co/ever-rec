@@ -7,6 +7,7 @@
  */
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InMemoryFirebaseApp } from '../../../../test/support/in-memory-firebase';
+import { EVER_COUNTER_EVENTS } from '../../../common/events/ever-counters.events';
 import { ResStatusEnum } from '../../../enums/ResStatusEnum';
 import { AuthOrchestratorService } from './auth-orchestrator.service';
 import { UserProfileService } from './user-profile.service';
@@ -16,14 +17,27 @@ describe('deleting an account', () => {
   let firebase: InMemoryFirebaseApp;
   let events: EventEmitter2;
   let failAuthDeletion: boolean;
+  let failRecordRemoval: boolean;
 
   const firebaseAdmin = () =>
     ({
-      getDatabaseRef: (path: string) => firebase.db.ref(path),
+      getDatabaseRef: (path: string) => {
+        const ref = firebase.db.ref(path);
+        if (failRecordRemoval && path === 'users/uid-1') {
+          ref.remove = () => Promise.reject(new Error('database/unavailable'));
+        }
+        return ref;
+      },
       getStorageBucket: () => firebase.bucket,
       deleteUser: async (uid: string) => {
         if (failAuthDeletion) {
           throw new Error('auth/internal-error');
+        }
+        // As the Admin SDK does for an account that is already gone.
+        if (!firebase.authService.users.has(uid)) {
+          throw Object.assign(new Error('There is no user record.'), {
+            code: 'auth/user-not-found',
+          });
         }
         await firebase.authService.deleteUser(uid);
       },
@@ -51,6 +65,7 @@ describe('deleting an account', () => {
     firebase = new InMemoryFirebaseApp();
     events = new EventEmitter2();
     failAuthDeletion = false;
+    failRecordRemoval = false;
     removeShared.mockClear();
 
     firebase.authService.addUser({ uid: 'uid-1', email: 'one@example.test' });
@@ -131,5 +146,26 @@ describe('deleting an account', () => {
         credentials: { refresh_token: 'refresh-one' },
       },
     });
+  });
+
+  it('a retry removes the record when the first attempt deleted only the sign-in account', async () => {
+    const deletedEvents: unknown[] = [];
+    events.on(EVER_COUNTER_EVENTS.userDeleted, (event) =>
+      deletedEvents.push(event),
+    );
+
+    failRecordRemoval = true;
+    const first = await orchestrator().deleteUser('uid-1');
+
+    expect(first.status).toBe(ResStatusEnum.error);
+    expect(firebase.authService.users.has('uid-1')).toBe(false);
+    expect(firebase.db.dump('users/uid-1')).not.toBeNull();
+
+    failRecordRemoval = false;
+    const retry = await orchestrator().deleteUser('uid-1');
+
+    expect(retry.status).toBe(ResStatusEnum.success);
+    expect(firebase.db.dump('users/uid-1')).toBeNull();
+    expect(deletedEvents).toHaveLength(1);
   });
 });

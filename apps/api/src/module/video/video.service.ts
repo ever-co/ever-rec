@@ -201,10 +201,10 @@ export class VideoService {
         const uid = isWorkspace ? videoData.uid : sharedData.uid;
         const ownerRef = db.ref(`users/${uid}`);
         const ownerData = (await ownerRef.get()).val();
-        // No email: anyone with the link can read this.
+        // No email: anyone with the link can read this. A deleted account has no record any more.
         const owner = {
-          displayName: ownerData.displayName,
-          photoURL: ownerData.photoURL,
+          displayName: ownerData?.displayName,
+          photoURL: ownerData?.photoURL,
           id: uid,
         };
 

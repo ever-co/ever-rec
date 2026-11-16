@@ -202,10 +202,10 @@ export class ImageService {
         const ownerRef = db.ref(`users/${ownerUid}`);
         const ownerSnap = await ownerRef.get();
         const ownerVal = ownerSnap.val();
-        // No email: anyone with the link can read this.
+        // No email: anyone with the link can read this. A deleted account has no record any more.
         const owner = {
-          displayName: ownerVal.displayName,
-          photoURL: ownerVal.photoURL,
+          displayName: ownerVal?.displayName,
+          photoURL: ownerVal?.photoURL,
           id: ownerUid,
         };
 
