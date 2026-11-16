@@ -8,12 +8,22 @@ import { setDriveUser } from '../app/services/google/user';
 import { sendExternalMessage } from '../misc/_helper';
 import { ResStatusEnum } from '../app/interfaces/IApiResponse';
 
-/** A path on this site. `//host` and `/\host` are read by browsers as another site. */
+/** A tab, a line break or another control character, or a backslash. */
+const isUnsafePathChar = (ch: string) => {
+  const code = ch.charCodeAt(0);
+  return ch === '\\' || code < 0x20 || code === 0x7f;
+};
+
+/**
+ * A path on this site. `//host` and `/\host` are read by browsers as another site, and so is
+ * `/<tab>/host`: URL parsing drops tabs and line breaks. So a backslash or a control character is
+ * refused anywhere in the path.
+ */
 const isLocalPath = (value: unknown): value is string =>
   typeof value === 'string' &&
   value.startsWith('/') &&
   !value.startsWith('//') &&
-  !value.startsWith('/\\');
+  !Array.from(value).some(isUnsafePathChar);
 
 /**
  * The `state` Google sends back: `{ origin, nonce }` as JSON. Anything else gives no origin and no

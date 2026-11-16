@@ -119,8 +119,12 @@ describe('the /oauth page', () => {
     'https://evil.example',
     '//evil',
     '/\\evil.example',
+    // URL parsing drops tabs and line breaks, so these are `//evil.example` to the browser.
+    '/\t/evil.example',
+    '/\n/evil.example',
+    '/\r\\evil.example',
     'javascript:alert(1)',
-  ])('does not follow %s', async (origin) => {
+  ])('does not follow %j', async (origin) => {
     await openCallback(JSON.stringify({ origin, nonce }));
 
     expect(mockRouter.push).not.toHaveBeenCalled();
