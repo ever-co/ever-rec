@@ -669,13 +669,17 @@ const EditorScreen: React.FC = () => {
     // own images and of their workspaces' images.
     if (!user?.id || !editorImageId) return;
 
-    // Connect to the API, with the sign-in token read on each (re)connect.
+    // Connect to the API, with the sign-in tokens read on each (re)connect. The stored ID token is
+    // the one of the sign-in and expires after an hour; the API then accepts the refresh token, as
+    // it does for the HTTP calls.
     const socket = io(process.env.API_BASE_URL || '', {
       transports: ['websocket'],
       auth: (cb) => {
         chrome.storage.local
-          .get(['idToken'])
-          .then(({ idToken }) => cb({ token: idToken }))
+          .get(['idToken', 'refreshToken'])
+          .then(({ idToken, refreshToken }) =>
+            cb({ token: idToken, refreshToken }),
+          )
           .catch(() => cb({}));
       },
     });

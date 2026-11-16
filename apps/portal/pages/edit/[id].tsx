@@ -899,8 +899,12 @@ const EditorScreen: React.FC = () => {
     // Connect to your server
     const socket = io(process.env.NEXT_PUBLIC_API_BASE_URL || '', {
       transports: ['websocket'],
-      // Read on each (re)connect, so a refreshed token is used.
-      auth: (cb) => cb({ token: getCookies().idToken }),
+      // Read on each (re)connect. The ID token cookie is the one of the sign-in and expires after an
+      // hour; the API then accepts the refresh token, as it does for the HTTP calls.
+      auth: (cb) => {
+        const { idToken, refreshToken } = getCookies();
+        cb({ token: idToken, refreshToken });
+      },
     });
 
     // Listen for 'connect' event

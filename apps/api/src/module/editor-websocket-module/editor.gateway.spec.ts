@@ -8,6 +8,7 @@ import { EditorGateway } from './editor.gateway';
 
 describe('EditorGateway', () => {
   const processToken = jest.fn();
+  const refreshToken = jest.fn();
   let gateway: EditorGateway;
   let roomEmit: jest.Mock;
   let server: { emit: jest.Mock; to: jest.Mock };
@@ -35,9 +36,18 @@ describe('EditorGateway', () => {
       }
       throw new Error('invalid token');
     });
+    refreshToken.mockReset();
+    // Like the real TokenService: a valid refresh token attaches the user to the request object.
+    refreshToken.mockImplementation(async (token: string, request: any) => {
+      if (token === 'good-refresh-token') {
+        request.user = { id: 'uid-2' };
+        return { idToken: 'new-id-token', refreshToken: token };
+      }
+      throw new Error('invalid refresh token');
+    });
     roomEmit = jest.fn();
     server = { emit: jest.fn(), to: jest.fn(() => ({ emit: roomEmit })) };
-    gateway = new EditorGateway({ processToken } as any);
+    gateway = new EditorGateway({ processToken, refreshToken } as any);
     gateway.server = server as any;
   });
 
@@ -104,6 +114,71 @@ describe('EditorGateway', () => {
 
       expect(socket.join).toHaveBeenCalledWith('user:uid-1');
       expect(socket.disconnect).not.toHaveBeenCalled();
+    });
+
+    // The clients keep the ID token of the sign-in, which expires after an hour; the HTTP routes
+    // (AuthGuard) then accept the refresh token, so the socket must as well.
+    it('falls back to the refresh token when the ID token is refused, like AuthGuard', async () => {
+      const socket = client({
+        auth: { token: 'expired-token', refreshToken: 'good-refresh-token' },
+      });
+      await gateway.handleConnection(socket as any);
+
+      expect(refreshToken).toHaveBeenCalledWith(
+        'good-refresh-token',
+        expect.any(Object),
+      );
+      expect(socket.join).toHaveBeenCalledTimes(1);
+      expect(socket.join).toHaveBeenCalledWith('user:uid-2');
+      expect(socket.disconnect).not.toHaveBeenCalled();
+    });
+
+    it('accepts the refresh token from the refreshtoken header', async () => {
+      const socket = client({
+        headers: {
+          idtoken: 'expired-token',
+          refreshtoken: 'good-refresh-token',
+        },
+      });
+      await gateway.handleConnection(socket as any);
+
+      expect(socket.join).toHaveBeenCalledWith('user:uid-2');
+      expect(socket.disconnect).not.toHaveBeenCalled();
+    });
+
+    it('does not use the refresh token when the ID token is valid', async () => {
+      const socket = client({
+        auth: { token: 'good-token', refreshToken: 'good-refresh-token' },
+      });
+      await gateway.handleConnection(socket as any);
+
+      expect(refreshToken).not.toHaveBeenCalled();
+      expect(socket.join).toHaveBeenCalledWith('user:uid-1');
+    });
+
+    it('disconnects when both the ID token and the refresh token are refused', async () => {
+      const socket = client({
+        auth: { token: 'forged-token', refreshToken: 'forged-refresh-token' },
+      });
+      await gateway.handleConnection(socket as any);
+
+      expect(refreshToken).toHaveBeenCalledWith(
+        'forged-refresh-token',
+        expect.any(Object),
+      );
+      expect(socket.disconnect).toHaveBeenCalledWith(true);
+      expect(socket.join).not.toHaveBeenCalled();
+    });
+
+    it('disconnects when the refresh token resolves to no user', async () => {
+      refreshToken.mockResolvedValue({});
+      const socket = client({
+        auth: { token: 'forged-token', refreshToken: 'good-refresh-token' },
+      });
+      await gateway.handleConnection(socket as any);
+
+      expect(socket.disconnect).toHaveBeenCalledWith(true);
+      expect(socket.join).not.toHaveBeenCalled();
     });
   });
 
