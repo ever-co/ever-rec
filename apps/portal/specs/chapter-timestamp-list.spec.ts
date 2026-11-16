@@ -16,15 +16,27 @@ const chapter = (
 });
 
 describe('buildChapterTimestampList', () => {
+  const short = [
+    chapter('a', '00:00', 0, 'Introduction'),
+    chapter('b', '00:45', 45, 'Setup'),
+    chapter('c', '59:59', 3599, 'Wrap up'),
+  ];
+
   const ready = [
     chapter('a', '00:00', 0, 'Introduction'),
     chapter('b', '00:45', 45, 'Setup'),
     chapter('c', '01:30:05', 5405, 'Wrap up'),
   ];
 
-  it('writes one "timestamp title" line per chapter', () => {
+  it('writes one "mm:ss title" line per chapter when every chapter starts before one hour', () => {
+    expect(buildChapterTimestampList(short)).toBe(
+      '00:00 Introduction\n00:45 Setup\n59:59 Wrap up',
+    );
+  });
+
+  it('writes "h:mm:ss" on every line once a chapter starts at one hour or later', () => {
     expect(buildChapterTimestampList(ready)).toBe(
-      '00:00 Introduction\n00:45 Setup\n01:30:05 Wrap up',
+      '0:00:00 Introduction\n0:00:45 Setup\n1:30:05 Wrap up',
     );
   });
 
@@ -33,22 +45,32 @@ describe('buildChapterTimestampList', () => {
     const snapshot = [...shuffled];
 
     expect(buildChapterTimestampList(shuffled)).toBe(
-      '00:00 Introduction\n00:45 Setup\n01:30:05 Wrap up',
+      '0:00:00 Introduction\n0:00:45 Setup\n1:30:05 Wrap up',
     );
     expect(shuffled).toEqual(snapshot);
+  });
+
+  it('takes the time from timestampSeconds and drops fractions of a second', () => {
+    expect(
+      buildChapterTimestampList([
+        chapter('a', '00:00', 0, 'Intro'),
+        chapter('b', '9:9', 69.9, 'Middle'),
+        chapter('c', '', 600, 'End'),
+      ]),
+    ).toBe('00:00 Intro\n01:09 Middle\n10:00 End');
   });
 
   it('keeps each title on a single line', () => {
     const list = buildChapterTimestampList([
       chapter('a', '00:00', 0, '  Intro\nand   welcome '),
-      ready[1],
-      ready[2],
+      short[1],
+      short[2],
     ]);
 
     expect(list?.split('\n')).toEqual([
       '00:00 Intro and welcome',
       '00:45 Setup',
-      '01:30:05 Wrap up',
+      '59:59 Wrap up',
     ]);
   });
 
@@ -67,6 +89,20 @@ describe('buildChapterTimestampList', () => {
       buildChapterTimestampList([
         chapter('a', '00:05', 5, 'Intro'),
         ready[1],
+        ready[2],
+      ]),
+    ).toBeNull();
+  });
+
+  it.each([
+    ['missing', undefined],
+    ['not a number', Number.NaN],
+    ['negative', -5],
+  ])('returns null when a start time is %s', (_name, seconds) => {
+    expect(
+      buildChapterTimestampList([
+        ready[0],
+        chapter('b', '00:45', seconds as number, 'Setup'),
         ready[2],
       ]),
     ).toBeNull();
