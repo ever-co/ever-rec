@@ -46,7 +46,13 @@ jest.mock('firebase-admin', () => {
   return {
     database: () => ({
       ref: (path: string) => ({
-        get: async () => ({ val: () => read(path) }),
+        // A copy, like a real snapshot: a later update must not change a value already read.
+        get: async () => ({
+          val: () => {
+            const value = read(path);
+            return value === null ? null : JSON.parse(JSON.stringify(value));
+          },
+        }),
         update: async (payload: Record<string, any>) => {
           mockDb.writes.push({ op: 'update', path });
           mockDb.payloads.push({ path, payload });
