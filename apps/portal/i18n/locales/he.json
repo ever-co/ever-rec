@@ -108,6 +108,7 @@
     "dropFiles": "גרור קבצים לכאן...",
     "logoDescription": "העלה לוגו או תמונת פרופיל לסביבת העבודה שלך. פורמט JPG או PNG בלבד. גודל הקובץ המרבי הוא 30KB.",
     "invitedToJoin": "הזמין אותך להצטרף ל-",
+    "joinWorkspaceOnRec": "סביבת העבודה <1>{{workspaceName}}</1> ב-Rec.",
     "workspaceMembers": "חברי סביבת העבודה",
     "teamMembers": "חברי הצוות",
     "teams": "צוותים",

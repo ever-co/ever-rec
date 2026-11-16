@@ -108,6 +108,7 @@
     "dropFiles": "اسحب الملفات وأفلتها هنا...",
     "logoDescription": "ارفع شعاراً أو صورة رمزية لمساحة عملك. صيغة JPG أو PNG فقط. الحد الأقصى لحجم الملف هو 30 كيلوبايت.",
     "invitedToJoin": "دعاك للانضمام",
+    "joinWorkspaceOnRec": "إلى مساحة العمل <1>{{workspaceName}}</1> على Rec.",
     "workspaceMembers": "أعضاء مساحة العمل",
     "teamMembers": "أعضاء الفريق",
     "teams": "الفرق",
