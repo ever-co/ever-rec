@@ -3,7 +3,7 @@ import * as admin from 'firebase-admin';
 import { createHash, timingSafeEqual } from 'crypto';
 import { nanoid } from 'nanoid';
 
-export type OAuthStateProvider = 'slack' | 'jira' | 'dropbox';
+export type OAuthStateProvider = 'slack' | 'jira' | 'dropbox' | 'drive';
 
 export const OAUTH_STATE_TTL_MS = 10 * 60 * 1000;
 

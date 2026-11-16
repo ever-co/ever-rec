@@ -100,8 +100,24 @@ const logout = (): Promise<void> => {
   return api.delete('/api/v1/auth/logout');
 };
 
-const completeOAuth = async (code): Promise<any> => {
-  return await api.get(`/api/v1/drive/complete-oauth?code=${code}`);
+/**
+ * A one-time nonce for connecting Google Drive. The API also sets a cookie that ties it to this
+ * browser, so the request is made with credentials.
+ */
+const getDriveOAuthState = async (): Promise<string> => {
+  // The response interceptor of `api` returns the body: here the nonce itself.
+  return await api.get<string, string>(`/api/v1/drive/oauth-state`, {
+    withCredentials: true,
+  });
+};
+
+/** Exchanges the code Google sent back, with the nonce from `getDriveOAuthState` and its cookie. */
+const completeOAuth = async (code: string, nonce?: string): Promise<any> => {
+  const state = nonce ? `&state=${encodeURIComponent(nonce)}` : '';
+  return await api.get(
+    `/api/v1/drive/complete-oauth?code=${encodeURIComponent(code)}${state}`,
+    { withCredentials: true },
+  );
 };
 
 const getUserServerSideProps = async (
@@ -140,6 +156,7 @@ export {
   getUserDataAPI,
   signInWithGoogleAPI,
   completeOAuth,
+  getDriveOAuthState,
   logout,
   getUserServerSideProps,
 };
