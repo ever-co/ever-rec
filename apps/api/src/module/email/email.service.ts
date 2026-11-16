@@ -2,7 +2,8 @@ import { Injectable } from '@nestjs/common';
 import * as postmark from 'postmark';
 import { ConfigService } from '@nestjs/config';
 import { PostmarkTemplate } from 'src/config/email';
-import { IDataResponse, ItemType } from '../../interfaces/_types';
+import { IDataResponse } from '../../interfaces/_types';
+import { is_id } from '../workspace/validators/id.validator';
 import * as admin from 'firebase-admin';
 import { getAuth } from 'firebase-admin/auth';
 import {
@@ -14,6 +15,21 @@ import { FirebaseClient } from 'src/services/firebase/firebase.client';
 import { sendError, sendResponse } from 'src/services/utils/sendResponse';
 import { IWorkspaceInvite } from '../workspace/Interfaces/Invites';
 import { IWorkspace } from '../workspace/Interfaces/Workspace';
+import { StreamServiceService } from '../video-services/streamService.service';
+
+/** The kinds of item that can be mailed as a link. */
+export type SendableItemType = 'image' | 'video';
+
+const SIGNED_URL_CONFIG = {
+  action: 'read' as const,
+  expires: '03-01-2500',
+};
+
+/** A stored file name: text that cannot step out of the owner's folder. */
+const isStoredFileName = (value: unknown): value is string =>
+  typeof value === 'string' &&
+  value.length > 0 &&
+  !value.split('/').some((part) => part === '..' || part === '');
 
 enum ResStatusEnum {
   error = 'error',
@@ -25,6 +41,7 @@ export class EmailService {
   constructor(
     private readonly firebaseClient: FirebaseClient,
     private readonly configService: ConfigService,
+    private readonly streamService: StreamServiceService,
   ) {}
 
   async sendWelcomeEmail({ email }: { email: string }): Promise<any> {
@@ -147,6 +164,105 @@ export class EmailService {
     }
   }
 
+  /**
+   * The links of a shared item for the mail, read from the item itself, or null when `itemLink` is
+   * not a share record of `uid` (or its item is gone or in the trash). Nothing a caller sends
+   * decides what the mail links to. The links are signed with the same long expiry the owner's own
+   * lists use, so the mail keeps working after the day a shared-page link lasts.
+   */
+  async resolveSharedItem(
+    uid: string,
+    itemType: SendableItemType,
+    itemLink: string,
+  ): Promise<{ itemPublicLink: string; templateUrl: string | false } | null> {
+    if (
+      typeof uid !== 'string' ||
+      !is_id(uid) ||
+      typeof itemLink !== 'string' ||
+      !is_id(itemLink)
+    ) {
+      return null;
+    }
+
+    const db = admin.database();
+    const isImage = itemType === 'image';
+    const sharedSnap = await db
+      .ref(`${isImage ? 'shared' : 'sharedVideos'}/${itemLink}`)
+      .get();
+    const shared = sharedSnap.val();
+    const itemId = shared?.[isImage ? 'imageId' : 'videoId'];
+
+    if (
+      !shared ||
+      shared.uid !== uid ||
+      typeof itemId !== 'string' ||
+      !is_id(itemId)
+    ) {
+      return null;
+    }
+
+    const item = (
+      await db
+        .ref(`users/${uid}/${isImage ? 'screenshots' : 'videos'}/${itemId}`)
+        .get()
+    ).val();
+
+    if (!item || item.trash) {
+      return null;
+    }
+
+    const bucket = admin.storage().bucket();
+    const sign = async (path: string): Promise<string> =>
+      (await bucket.file(path).getSignedUrl(SIGNED_URL_CONFIG))[0];
+
+    if (isImage) {
+      return isStoredFileName(item.refName)
+        ? {
+            itemPublicLink: await sign(
+              `users/${uid}/screenshots/${item.refName}`,
+            ),
+            templateUrl: false,
+          }
+        : null;
+    }
+
+    // The URLs saved with a streamed video are written by its owner (the save route stores what
+    // the client sends), so they are never mailed. The links are asked of the streaming provider
+    // for the saved asset id, which must name an asset the provider knows.
+    const streamData = item.streamData;
+
+    if (streamData) {
+      const { assetId, serviceType } = streamData;
+
+      if (typeof assetId !== 'string' || !is_id(assetId)) {
+        return null;
+      }
+
+      const links = await this.streamService.getStreamLinks(
+        assetId,
+        serviceType,
+      );
+
+      return links?.playbackUrl
+        ? {
+            itemPublicLink: links.playbackUrl,
+            templateUrl: links.thumbnailUrl || false,
+          }
+        : null;
+    }
+
+    if (!isStoredFileName(item.refName)) {
+      return null;
+    }
+
+    return {
+      itemPublicLink: await sign(`users/${uid}/videos/${item.refName}`),
+      templateUrl: isStoredFileName(item.posterRef)
+        ? await sign(`users/${uid}/videoPosters/${item.posterRef}`)
+        : false,
+    };
+  }
+
   async sendItems({
     emails,
     itemLink,
@@ -158,7 +274,7 @@ export class EmailService {
   }: {
     emails: string[];
     itemLink: string;
-    itemType: ItemType;
+    itemType: SendableItemType;
     itemPublicLink: string;
     message: string | undefined;
     userDisplayName: string | null;

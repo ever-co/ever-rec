@@ -147,6 +147,29 @@ export class MuxService {
     }
   }
 
+  /**
+   * The playback and thumbnail URLs of an asset, built from what Mux reports for it, or null when
+   * Mux has no such asset or it has no public playback id.
+   */
+  async getStreamLinks(
+    assetId: string,
+  ): Promise<{ playbackUrl: string; thumbnailUrl: string } | null> {
+    try {
+      const asset = await this.Video.Assets.get(assetId);
+      const playbackId = asset?.playback_ids?.[0]?.id;
+
+      return playbackId
+        ? {
+            playbackUrl: createPlaybackUrl(playbackId),
+            thumbnailUrl: createThumbnailUrl(playbackId),
+          }
+        : null;
+    } catch (error) {
+      console.log(error);
+      return null;
+    }
+  }
+
   /** The uid the asset was created for (its passthrough), or null when it has none. */
   async getAssetOwner(assetId: string): Promise<string | null> {
     const asset = await this.Video.Assets.get(assetId);
