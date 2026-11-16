@@ -4,9 +4,15 @@ import {
   Post,
   Redirect,
   Req,
+  Res,
   UseGuards,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import {
+  newOAuthBinding,
+  readOAuthBinding,
+  setOAuthBindingCookie,
+} from '../../services/shared/oauth-state.service';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { SlackService } from './slack.service';
 
@@ -19,16 +25,36 @@ export class SlackController {
 
   @UseGuards(AuthGuard)
   @Get('login-url')
-  async loginUrl(@Req() req) {
-    return this.slackService.getSlackLoginUrl(req.user?.id);
+  async loginUrl(@Req() req, @Res({ passthrough: true }) res) {
+    const binding = newOAuthBinding();
+    const result = await this.slackService.getSlackLoginUrl(
+      req.user?.id,
+      binding,
+    );
+    if (typeof result === 'string') {
+      setOAuthBindingCookie(
+        res,
+        'slack',
+        binding,
+        this.configService.get<string>('API_BASE_URL'),
+      );
+    }
+    return result;
   }
 
   @Get('installation')
   @Redirect()
   async slackInstallation(@Req() req): Promise<{ url: string }> {
-    await this.slackService.storeInstallationInformation(req.query);
+    const stored = await this.slackService.storeInstallationInformation(
+      req.query,
+      readOAuthBinding(req, 'slack'),
+    );
+    const integrationsUrl = `${this.configService.get<string>('WEBSITE_URL')}/integrations`;
     return {
-      url: `${this.configService.get<string>('WEBSITE_URL')}/integrations`,
+      url:
+        stored === null
+          ? `${integrationsUrl}?error=invalid_state`
+          : integrationsUrl,
     };
   }
 

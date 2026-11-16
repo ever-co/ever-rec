@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { HttpModule } from 'nestjs-http-promise';
 import { FirebaseClient } from '../../services/firebase/firebase.client';
 import { SharedService } from '../../services/shared/shared.service';
+import { OAuthStateService } from '../../services/shared/oauth-state.service';
 import { ImageService } from '../image/image.service';
 import { VideoModule } from '../video/video.module';
 import { DropboxController } from './dropbox.controller';
@@ -18,6 +19,7 @@ import { AuthModule } from '../auth/auth.module';
     FirebaseClient,
     SharedService,
     FoldersSharedService,
+    OAuthStateService,
   ],
   controllers: [DropboxController],
 })

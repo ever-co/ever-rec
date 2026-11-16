@@ -30,7 +30,8 @@ const saveSegmentEventData = async (
 };
 
 const dropBoxLoginUrl = (): Promise<any> => {
-  return api.get(`api/v1/dropbox/sign-in`);
+  // The API sets a cookie that ties the connection to this browser.
+  return api.get(`api/v1/dropbox/sign-in`, { withCredentials: true });
 };
 
 const dropboxDisconnect = (): Promise<any> => {
@@ -84,7 +85,10 @@ const getTrelloProjectsData = (): Promise<any> => {
 };
 
 const jiraOauthUrl = (): Promise<any> => {
-  return api.get(`${API_ATLASSIAN_PREFIX}/jira/sign-in`);
+  // The API sets a cookie that ties the connection to this browser.
+  return api.get(`${API_ATLASSIAN_PREFIX}/jira/sign-in`, {
+    withCredentials: true,
+  });
 };
 
 const jiraDisconnect = (): Promise<any> => {
