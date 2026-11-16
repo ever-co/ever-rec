@@ -5,7 +5,11 @@ import {
   HttpException,
   Injectable,
 } from '@nestjs/common';
-import { canWriteVideoByName } from '../guards/utils';
+import {
+  canAccessFolderById,
+  canAccessItemData,
+  canWriteVideoByName,
+} from '../guards/utils';
 import { is_plain_file_name } from '../validators/video-filename.validator';
 import { StreamServiceService } from 'src/module/video-services/streamService.service';
 import {
@@ -33,7 +37,11 @@ import {
   parseCollectionToIdValueObj,
 } from '../../../services/utils/helpers';
 import { IWorkspaceFolder } from '../Interfaces/Folders';
-import { IWorkspaceUser } from '../Interfaces/Workspace';
+import {
+  IWorkspace,
+  IWorkspaceUser,
+  PermissionAccessEnum,
+} from '../Interfaces/Workspace';
 import {
   dbEndpoints,
   SharedService,
@@ -570,24 +578,56 @@ export class WorkspaceFilesService {
   }
 
   /**
-   * The ids of the workspace admin and members: the users who receive marker updates of the
-   * workspace's items. Fails closed: nobody when the workspace cannot be read. The id goes into a
-   * database path, so the caller must have checked it (the routes use `ValidateId`).
+   * The ids of the workspace admin and members who may read the item at `itemRef` and the folder
+   * it is in now: the users who receive its marker updates. The rules are the READ checks of the
+   * HTTP routes (`canAccessItemData` and `canAccessFolderById`), so a member left out of the
+   * item's or the folder's access list gets nothing. Fails closed: nobody when the item or the
+   * workspace cannot be read. The id goes into a database path, so the caller must have checked it
+   * (the routes use `ValidateId`).
    */
-  private async workspaceMemberIds(workspaceId: string): Promise<string[]> {
+  private async markerRecipientIds(
+    workspaceId: string,
+    itemRef: admin.database.Reference,
+  ): Promise<string[]> {
     try {
-      // Only `admin` and `members` are read, not the whole workspace.
+      // The stored item (with the parentId of this save) and only the parts of the workspace the
+      // rules read, not the whole workspace.
       const db = admin.database();
-      const [adminSnap, membersSnap] = await Promise.all([
-        db.ref(`workspaces/${workspaceId}/admin`).get(),
-        db.ref(`workspaces/${workspaceId}/members`).get(),
-      ]);
-      const memberIds = parseCollectionToArray<IWorkspaceUser>(
+      const [itemSnap, adminSnap, membersSnap, teamsSnap, foldersSnap] =
+        await Promise.all([
+          itemRef.get(),
+          db.ref(`workspaces/${workspaceId}/admin`).get(),
+          db.ref(`workspaces/${workspaceId}/members`).get(),
+          db.ref(`workspaces/${workspaceId}/teams`).get(),
+          db.ref(`workspaces/${workspaceId}/folders`).get(),
+        ]);
+      const item: IDbWorkspaceImageData | IDbWorkspaceVideoData | null =
+        itemSnap.val();
+      if (!item) {
+        return [];
+      }
+      const members = parseCollectionToArray<IWorkspaceUser>(
         membersSnap.val(),
-      ).map((member) => member?.id);
-      return [...new Set([adminSnap.val(), ...memberIds])].filter(
-        (id): id is string => typeof id === 'string' && id !== '',
-      );
+      ).filter((member) => !!member);
+      const workspace = {
+        admin: adminSnap.val(),
+        members,
+        teams: teamsSnap.val(),
+        folders: foldersSnap.val(),
+      } as IWorkspace;
+      const read = PermissionAccessEnum.READ;
+
+      return [
+        ...new Set([workspace.admin, ...members.map((member) => member.id)]),
+      ]
+        .filter((id): id is string => typeof id === 'string' && id !== '')
+        .filter((id) => {
+          const user: IUser = { id };
+          return (
+            canAccessItemData(item, workspace, user, read) &&
+            canAccessFolderById(item.parentId, workspace, user, read)
+          );
+        });
     } catch (e) {
       console.log(e);
       return [];
@@ -626,7 +666,7 @@ export class WorkspaceFilesService {
 
     if (markers !== undefined) {
       this.editorGateway.emitMarkerUpdate(
-        await this.workspaceMemberIds(workspaceId),
+        await this.markerRecipientIds(workspaceId, dbItemRef),
         uid,
         id,
         markers,
