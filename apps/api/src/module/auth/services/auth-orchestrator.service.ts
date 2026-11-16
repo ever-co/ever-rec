@@ -220,8 +220,11 @@ export class AuthOrchestratorService {
   /**
    * Generate email verification link
    */
-  async generateEmailVerificationLink(email: string): Promise<IDataResponse> {
-    return this.emailService.generateEmailVerificationLink(email);
+  async generateEmailVerificationLink(
+    email: string,
+    idToken: string,
+  ): Promise<IDataResponse> {
+    return this.emailService.generateEmailVerificationLink(email, idToken);
   }
 
   /**
@@ -234,8 +237,11 @@ export class AuthOrchestratorService {
   /**
    * Resend verification email
    */
-  async resendVerificationEmail(email: string): Promise<IDataResponse> {
-    return this.emailService.resendVerificationEmail(email);
+  async resendVerificationEmail(
+    email: string,
+    idToken: string,
+  ): Promise<IDataResponse> {
+    return this.emailService.resendVerificationEmail(email, idToken);
   }
 
   // ==================== UTILITY METHODS ====================

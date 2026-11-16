@@ -18,8 +18,8 @@ export class MuxController {
 
   @UseGuards(AuthGuard)
   @Get('/direct-upload')
-  async getDirectUpload() {
-    return this.muxService.getDirectUpload();
+  async getDirectUpload(@Req() request) {
+    return this.muxService.getDirectUpload(request.user?.id);
   }
 
   @UseGuards(AuthGuard)

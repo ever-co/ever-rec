@@ -3,6 +3,7 @@ import { HttpModule } from 'nestjs-http-promise';
 import { AtlassianApiService } from 'src/services/atlassian/atlassian.api.service';
 import { FirebaseClient } from 'src/services/firebase/firebase.client';
 import { SharedService } from 'src/services/shared/shared.service';
+import { OAuthStateService } from 'src/services/shared/oauth-state.service';
 import { ImageService } from '../image/image.service';
 import { ApiVideoService } from '../video-services/api-video/api-video.service';
 import { MuxService } from '../video-services/mux/mux.service';
@@ -28,6 +29,7 @@ import { AuthModule } from '../auth/auth.module';
     ApiVideoService,
     FoldersSharedService,
     StreamServiceService,
+    OAuthStateService,
   ],
   controllers: [AtlassianController],
 })
