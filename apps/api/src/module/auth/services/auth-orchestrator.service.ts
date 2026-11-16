@@ -1,5 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import {
+  ACCOUNT_EVENTS,
+  AccountDeletedEvent,
+} from '../../../common/events/account.events';
 import { IDataResponse } from '../../../interfaces/_types';
 import { SharedService } from '../../../services/shared/shared.service';
 import { sendError, sendResponse } from '../../../services/utils/sendResponse';
@@ -170,6 +174,10 @@ export class AuthOrchestratorService {
         this.userService.deleteUser(uid),
       ]);
 
+      // The sign-in account is gone: the other modules remove what they keep for it (such as the
+      // Ever ID links), awaited here.
+      await this.emitAccountDeleted(uid);
+
       // Only once the sign-in account is gone: a failed deletion keeps the record intact.
       await this.userService.deleteUserRecord(uid);
 
@@ -186,6 +194,19 @@ export class AuthOrchestratorService {
       this.logger.error(`Failed to delete user: ${uid}`, error);
       return sendError(
         'Error while trying to delete user or user files!',
+        error,
+      );
+    }
+  }
+
+  /** Runs the handlers of {@link ACCOUNT_EVENTS.deleted}; a failure is logged, not thrown. */
+  private async emitAccountDeleted(uid: string): Promise<void> {
+    const event: AccountDeletedEvent = { uid };
+    try {
+      await this.eventEmitter.emitAsync(ACCOUNT_EVENTS.deleted, event);
+    } catch (error: any) {
+      this.logger.error(
+        `Failed to remove the data other modules keep for user: ${uid}`,
         error,
       );
     }

@@ -3,12 +3,19 @@
  * its database record `users/<uid>`, which holds the email, the display name, the screenshot and
  * video records and the stored OAuth tokens (Google Drive, Dropbox, Jira). The record goes only
  * once the shares, the files and the sign-in account are gone, and workspaces, shares and the
- * data of other users stay as they are.
+ * data of other users stay as they are. The Ever ID links of the account (`ever_identities/<key>`,
+ * which holds the e-mail, the Ever ID subject and the person id, and `ever_identities_by_uid/<uid>`)
+ * go too, removed by the Ever ID module's handler of the deleted-account event.
  */
-import { EventEmitter2 } from '@nestjs/event-emitter';
+import { Logger } from '@nestjs/common';
+import { EventEmitter2, EventEmitterModule } from '@nestjs/event-emitter';
+import { Test, TestingModule } from '@nestjs/testing';
 import { InMemoryFirebaseApp } from '../../../../test/support/in-memory-firebase';
 import { EVER_COUNTER_EVENTS } from '../../../common/events/ever-counters.events';
 import { ResStatusEnum } from '../../../enums/ResStatusEnum';
+import { EverIdAccountDeletedListener } from '../../ever-id/services/ever-id-account-deleted.listener';
+import { EverIdLinkService } from '../../ever-id/services/ever-id-link.service';
+import { FirebaseAdminService } from '../../firebase/services/firebase-admin.service';
 import { AuthOrchestratorService } from './auth-orchestrator.service';
 import { UserProfileService } from './user-profile.service';
 import { UserService } from './user.service';
@@ -16,8 +23,11 @@ import { UserService } from './user.service';
 describe('deleting an account', () => {
   let firebase: InMemoryFirebaseApp;
   let events: EventEmitter2;
+  let everId: TestingModule;
+  let links: EverIdLinkService;
   let failAuthDeletion: boolean;
   let failRecordRemoval: boolean;
+  let failLinkLookup: boolean;
 
   const firebaseAdmin = () =>
     ({
@@ -25,6 +35,9 @@ describe('deleting an account', () => {
         const ref = firebase.db.ref(path);
         if (failRecordRemoval && path === 'users/uid-1') {
           ref.remove = () => Promise.reject(new Error('database/unavailable'));
+        }
+        if (failLinkLookup && path === 'ever_identities_by_uid/uid-1') {
+          ref.get = () => Promise.reject(new Error('database/unavailable'));
         }
         return ref;
       },
@@ -63,9 +76,21 @@ describe('deleting an account', () => {
 
   beforeEach(async () => {
     firebase = new InMemoryFirebaseApp();
-    events = new EventEmitter2();
+    // The app's event bus with the Ever ID module's handler of a deleted account, as wired by Nest.
+    everId = await Test.createTestingModule({
+      imports: [EventEmitterModule.forRoot()],
+      providers: [
+        { provide: FirebaseAdminService, useValue: firebaseAdmin() },
+        EverIdLinkService,
+        EverIdAccountDeletedListener,
+      ],
+    }).compile();
+    await everId.init();
+    events = everId.get(EventEmitter2);
+    links = everId.get(EverIdLinkService);
     failAuthDeletion = false;
     failRecordRemoval = false;
+    failLinkLookup = false;
     removeShared.mockClear();
 
     firebase.authService.addUser({ uid: 'uid-1', email: 'one@example.test' });
@@ -104,6 +129,35 @@ describe('deleting an account', () => {
       'users/uid-2/screenshots/b.png',
       Buffer.alloc(10, 1),
     );
+    // uid-1 signs in with two Ever IDs, uid-2 with one.
+    await links.link({
+      issuer: 'https://id.example.test',
+      subject: 'subject-one',
+      uid: 'uid-1',
+      everPersonId: 'person-one',
+      emailAtLink: 'one@example.test',
+      linkMethod: 'jit',
+    });
+    await links.link({
+      issuer: 'https://other-id.example.test',
+      subject: 'subject-one',
+      uid: 'uid-1',
+      emailAtLink: 'one@example.test',
+      linkMethod: 'explicit',
+    });
+    await links.link({
+      issuer: 'https://id.example.test',
+      subject: 'subject-two',
+      uid: 'uid-2',
+      everPersonId: 'person-two',
+      emailAtLink: 'two@example.test',
+      linkMethod: 'jit',
+    });
+  });
+
+  afterEach(async () => {
+    jest.restoreAllMocks();
+    await everId.close();
   });
 
   it('removes the record users/<uid> with its stored OAuth tokens', async () => {
@@ -116,6 +170,44 @@ describe('deleting an account', () => {
       'users/uid-2/screenshots/b.png',
     ]);
     expect(firebase.db.dump('users/uid-1')).toBeNull();
+  });
+
+  it('removes the Ever ID links of the account and keeps those of other users', async () => {
+    const result = await orchestrator().deleteUser('uid-1');
+
+    expect(result.status).toBe(ResStatusEnum.success);
+    const remaining = Object.values(
+      (firebase.db.dump('ever_identities') ?? {}) as Record<
+        string,
+        { uid: string }
+      >,
+    );
+    expect(remaining.map((link) => link.uid)).toEqual(['uid-2']);
+    expect(firebase.db.dump('ever_identities_by_uid/uid-1')).toBeNull();
+    await expect(links.listForUser('uid-2')).resolves.toEqual([
+      expect.objectContaining({ subject: 'subject-two' }),
+    ]);
+    // Nothing in the database holds the e-mail address of the deleted account any more.
+    expect(JSON.stringify(firebase.db.dump())).not.toContain(
+      'one@example.test',
+    );
+  });
+
+  it('logs a failure to remove the Ever ID links and still deletes the account', async () => {
+    const logged = jest
+      .spyOn(Logger.prototype, 'error')
+      .mockImplementation(() => undefined);
+    failLinkLookup = true;
+
+    const result = await orchestrator().deleteUser('uid-1');
+
+    expect(result.status).toBe(ResStatusEnum.success);
+    expect(firebase.authService.users.has('uid-1')).toBe(false);
+    expect(firebase.db.dump('users/uid-1')).toBeNull();
+    expect(logged).toHaveBeenCalledWith(
+      expect.stringContaining('ever_id.link result=removal_failed'),
+      expect.anything(),
+    );
   });
 
   it('leaves workspaces, shares and the data of other users unchanged', async () => {
@@ -146,6 +238,8 @@ describe('deleting an account', () => {
         credentials: { refresh_token: 'refresh-one' },
       },
     });
+    // The account can still sign in with its Ever IDs.
+    await expect(links.listForUser('uid-1')).resolves.toHaveLength(2);
   });
 
   it('a retry removes the record when the first attempt deleted only the sign-in account', async () => {

@@ -461,6 +461,26 @@ describe('Ever ID sign-in (e2e)', () => {
       ).toBeNull();
     });
 
+    it('removes the links of an account deleted with DELETE /auth/user', async () => {
+      const person = await signUp('leaving-person');
+      const key = identityKey(issuer.issuer, 'leaving-person');
+      expect(t.firebase.db.dump(`ever_identities/${key}`)).toMatchObject({
+        uid: person.id,
+      });
+
+      const deleted = await request(server())
+        .delete('/api/v1/auth/user')
+        .set('idToken', person.idToken);
+      expect(deleted.status).toBe(200);
+      expect(deleted.body.status).toBe('success');
+
+      // Gone at once, not only when the same Ever ID signs in again.
+      expect(t.firebase.db.dump(`ever_identities/${key}`)).toBeNull();
+      expect(
+        t.firebase.db.dump(`ever_identities_by_uid/${person.id}`),
+      ).toBeNull();
+    });
+
     it('creates nothing when the person closes the confirmation screen', async () => {
       issuer.nextClaims = { sub: 'closer', email: 'closer@example.test' };
       const landing = await authorize();

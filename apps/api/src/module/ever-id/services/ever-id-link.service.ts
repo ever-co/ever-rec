@@ -190,6 +190,23 @@ export class EverIdLinkService {
     await this.indexRef(uid, key).remove();
   }
 
+  /**
+   * Removes every link of an account that is being deleted, then its index
+   * `ever_identities_by_uid/{uid}`. A link that names another account by now is left alone.
+   *
+   * @returns how many links the index listed
+   */
+  async forgetAllForUser(uid: string): Promise<number> {
+    const index = this.firebaseAdminService.getDatabaseRef(
+      `${EVER_ID_LINK_ROOTS.byUid}/${uid}`,
+    );
+    const snapshot = await index.get();
+    const keys = snapshot.exists() ? Object.keys(snapshot.val() ?? {}) : [];
+    await Promise.all(keys.map((key) => this.removeIfOwnedBy(key, uid)));
+    await index.remove();
+    return keys.length;
+  }
+
   private async removeIfOwnedBy(key: string, uid: string): Promise<void> {
     await this.linkRef(key).transaction((current: EverIdLink | null) => {
       if (!current) {

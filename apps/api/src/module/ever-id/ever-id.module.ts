@@ -18,6 +18,7 @@ import {
 } from './ever-id.tokens';
 import { EverIdEnabledGuard } from './guards/ever-id-enabled.guard';
 import { EverIdRateLimitGuard } from './guards/ever-id-rate-limit.guard';
+import { EverIdAccountDeletedListener } from './services/ever-id-account-deleted.listener';
 import { EverIdCryptoService } from './services/ever-id-crypto.service';
 import { EverIdFlowService } from './services/ever-id-flow.service';
 import { EverIdLinkService } from './services/ever-id-link.service';
@@ -87,6 +88,7 @@ export function everIdSettingsFactory(
     EverIdStoreService,
     EverIdOidcService,
     EverIdLinkService,
+    EverIdAccountDeletedListener,
     EverIdSessionIndexService,
     EverIdLoginChain,
     EverIdFlowService,
