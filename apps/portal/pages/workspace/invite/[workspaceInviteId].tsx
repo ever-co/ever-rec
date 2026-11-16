@@ -92,11 +92,14 @@ const WorkspaceInvite: FC<any> = () => {
           'tw-h-full tw-pt-32',
         )}
       >
-        {workspaceInviter && workspaceName && (
+        {/* The inviter is empty when that account was deleted: the invite still works. */}
+        {workspaceName && (
           <div className="tw-flex tw-flex-col tw-items-center">
-            <h1 className="tw-font-semibold tw-text-3xl tw-tracking-wide tw-text-center">
-              {workspaceInviter} {t('workspace.invitedToJoin')}
-            </h1>
+            {workspaceInviter && (
+              <h1 className="tw-font-semibold tw-text-3xl tw-tracking-wide tw-text-center">
+                {workspaceInviter} {t('workspace.invitedToJoin')}
+              </h1>
+            )}
             <h1 className="tw-font-extrabold tw-text-3xl tw-tracking-wide tw-text-center">
               {t('workspace.workspace')}
               <span className="tw-text-primary-purple">
