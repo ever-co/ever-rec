@@ -1,7 +1,8 @@
 /**
- * The Dropbox callback with the real controller, service and one-time state. The token exchange and
+ * Connecting Dropbox with the real controller, service and one-time state. The token exchange and
  * the database are mocked. A state that is not a nonce we issued, such as a raw user id, must
- * exchange no code and write nothing; a nonce is good once and only for the user it was issued for.
+ * exchange no code and write nothing; a nonce is good once, only for the user it was issued for and
+ * only for the browser that asked for it (it holds a cookie that is set with the Connect URL).
  */
 import { INestApplication } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -9,7 +10,10 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Test } from '@nestjs/testing';
 import { HttpService } from 'nestjs-http-promise';
 import request from 'supertest';
-import { OAuthStateService } from '../../services/shared/oauth-state.service';
+import {
+  newOAuthBinding,
+  OAuthStateService,
+} from '../../services/shared/oauth-state.service';
 import { createFakeRealtimeDb } from '../../services/shared/fake-realtime-db';
 import { TokenService } from '../auth/services/tokens';
 import { ImageService } from '../image/image.service';
@@ -25,12 +29,13 @@ const mockGetToken = jest.fn();
 jest.mock('dropbox-v2-api', () => ({
   __esModule: true,
   default: {
-    authenticate: () => {
+    authenticate: (options: { state?: string }) => {
       const client: any = (_req: unknown, cb: (...args: any[]) => void) =>
         cb(null, { email: 'a@example.com' });
       client.getToken = (code: string, cb: (...args: any[]) => void) =>
         mockGetToken(code, cb);
-      client.generateAuthUrl = () => 'https://dropbox.test/authorize';
+      client.generateAuthUrl = () =>
+        `https://dropbox.test/authorize?state=${options.state}`;
       return client;
     },
   },
@@ -44,8 +49,9 @@ jest.mock('firebase-admin', () => ({
 const website = 'https://web.test';
 const done = `${website}/media/integrations`;
 const invalidState = `${done}?error=invalid_state`;
+const cookieName = 'ever_rec_oauth_dropbox';
 
-describe('Dropbox complete-oauth callback', () => {
+describe('Dropbox connection', () => {
   let app: INestApplication;
   let oauthState: OAuthStateService;
 
@@ -55,7 +61,14 @@ describe('Dropbox complete-oauth callback', () => {
       providers: [
         DropboxService,
         OAuthStateService,
-        { provide: TokenService, useValue: {} },
+        {
+          provide: TokenService,
+          useValue: {
+            processToken: async (token: string, req: any) => {
+              req.user = { id: token };
+            },
+          },
+        },
         { provide: HttpService, useValue: {} },
         { provide: ImageService, useValue: {} },
         { provide: VideoService, useValue: {} },
@@ -83,6 +96,7 @@ describe('Dropbox complete-oauth callback', () => {
       },
     };
     mockDb.writes = [];
+    mockDb.staleReads = {};
     mockGetToken.mockReset();
     let call = 0;
     mockGetToken.mockImplementation((_code, cb) =>
@@ -97,10 +111,45 @@ describe('Dropbox complete-oauth callback', () => {
   const userWrites = () =>
     mockDb.writes.filter((path) => path.startsWith('users/'));
 
-  it('writes nothing when the state is a raw user id', async () => {
-    const res = await request(app.getHttpServer())
+  const callback = (query: Record<string, string>, binding?: string) => {
+    const req = request(app.getHttpServer())
       .get('/dropbox/complete-oauth')
-      .query({ code: 'attacker-code', state: 'uid-victim' });
+      .query(query);
+    return binding ? req.set('Cookie', `${cookieName}=${binding}`) : req;
+  };
+
+  it('sets the browser secret in an HttpOnly cookie with the Connect URL', async () => {
+    const res = await request(app.getHttpServer())
+      .get('/dropbox/sign-in')
+      .set('Authorization', 'Bearer uid-a');
+
+    expect(res.status).toBe(200);
+    const state = new URL(res.text).searchParams.get('state');
+    expect(state).toMatch(/^[A-Za-z0-9_-]{32}$/);
+    const setCookie = (res.headers['set-cookie'] as unknown as string[]).find(
+      (cookie) => cookie.startsWith(`${cookieName}=`),
+    );
+    expect(setCookie).toContain('HttpOnly');
+    expect(setCookie).toContain('Path=/api/v1');
+    const binding = setCookie!.split(';')[0].split('=')[1];
+
+    // The browser that got the cookie completes the connection...
+    const completed = await callback(
+      { code: 'good-code', state: state! },
+      binding,
+    );
+    expect(completed.headers.location).toBe(done);
+    expect(
+      mockDb.data.users['uid-a'].dropboxAPISCredentials.credentials
+        .access_token,
+    ).toBe('access-1');
+  });
+
+  it('writes nothing when the state is a raw user id', async () => {
+    const res = await callback(
+      { code: 'attacker-code', state: 'uid-victim' },
+      newOAuthBinding(),
+    );
 
     expect(res.status).toBe(302);
     expect(res.headers.location).toBe(invalidState);
@@ -113,11 +162,10 @@ describe('Dropbox complete-oauth callback', () => {
   });
 
   it('stores the credentials only on the user the nonce was issued for', async () => {
-    const state = await oauthState.issue('uid-a', 'dropbox');
+    const binding = newOAuthBinding();
+    const state = await oauthState.issue('uid-a', 'dropbox', binding);
 
-    const res = await request(app.getHttpServer())
-      .get('/dropbox/complete-oauth')
-      .query({ code: 'good-code', state });
+    const res = await callback({ code: 'good-code', state }, binding);
 
     expect(res.status).toBe(302);
     expect(res.headers.location).toBe(done);
@@ -136,16 +184,29 @@ describe('Dropbox complete-oauth callback', () => {
     ).toBe('victim');
   });
 
+  it('writes nothing when the Connect link of another user is opened without their cookie', async () => {
+    // The attacker asks for a Connect link and sends it to the victim.
+    const state = await oauthState.issue('uid-a', 'dropbox', newOAuthBinding());
+
+    const withoutCookie = await callback({ code: 'victim-code', state });
+    const withOtherCookie = await callback(
+      { code: 'victim-code', state },
+      newOAuthBinding(),
+    );
+
+    expect(withoutCookie.headers.location).toBe(invalidState);
+    expect(withOtherCookie.headers.location).toBe(invalidState);
+    expect(mockGetToken).not.toHaveBeenCalled();
+    expect(userWrites()).toEqual([]);
+  });
+
   it('writes nothing when the nonce is replayed', async () => {
-    const state = await oauthState.issue('uid-a', 'dropbox');
-    await request(app.getHttpServer())
-      .get('/dropbox/complete-oauth')
-      .query({ code: 'good-code', state });
+    const binding = newOAuthBinding();
+    const state = await oauthState.issue('uid-a', 'dropbox', binding);
+    await callback({ code: 'good-code', state }, binding);
     mockDb.writes = [];
 
-    const res = await request(app.getHttpServer())
-      .get('/dropbox/complete-oauth')
-      .query({ code: 'second-code', state });
+    const res = await callback({ code: 'second-code', state }, binding);
 
     expect(res.headers.location).toBe(invalidState);
     expect(mockGetToken).toHaveBeenCalledTimes(1);
@@ -157,21 +218,18 @@ describe('Dropbox complete-oauth callback', () => {
   });
 
   it('exchanges the code once when two callbacks race with the same nonce', async () => {
-    const state = await oauthState.issue('uid-a', 'dropbox');
+    const binding = newOAuthBinding();
+    const state = await oauthState.issue('uid-a', 'dropbox', binding);
 
     const responses = await Promise.all([
-      request(app.getHttpServer())
-        .get('/dropbox/complete-oauth')
-        .query({ code: 'code-1', state }),
-      request(app.getHttpServer())
-        .get('/dropbox/complete-oauth')
-        .query({ code: 'code-2', state }),
+      callback({ code: 'code-1', state }, binding),
+      callback({ code: 'code-2', state }, binding),
     ]);
 
     expect(mockGetToken).toHaveBeenCalledTimes(1);
-    expect(
-      responses.map((res) => res.headers.location).sort(),
-    ).toEqual([done, invalidState].sort());
+    expect(responses.map((res) => res.headers.location).sort()).toEqual(
+      [done, invalidState].sort(),
+    );
     expect(
       userWrites().filter(
         (path) => path === 'users/uid-a/dropboxAPISCredentials',
@@ -180,11 +238,10 @@ describe('Dropbox complete-oauth callback', () => {
   });
 
   it('writes nothing for a nonce issued for another provider', async () => {
-    const state = await oauthState.issue('uid-a', 'jira');
+    const binding = newOAuthBinding();
+    const state = await oauthState.issue('uid-a', 'jira', binding);
 
-    const res = await request(app.getHttpServer())
-      .get('/dropbox/complete-oauth')
-      .query({ code: 'good-code', state });
+    const res = await callback({ code: 'good-code', state }, binding);
 
     expect(res.headers.location).toBe(invalidState);
     expect(mockGetToken).not.toHaveBeenCalled();

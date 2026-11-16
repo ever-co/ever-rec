@@ -8,6 +8,12 @@ export interface FakeRealtimeDb {
   data: Record<string, any>;
   /** Every path that was written to or removed, in order. */
   writes: string[];
+  /**
+   * Values a transaction on a path is first called with, before it is called with the real value.
+   * Like the real database, which calls the update function with its local guess (a stale value or
+   * null) and calls it again when the server holds something else.
+   */
+  staleReads: Record<string, any[]>;
   admin: { database: () => { ref: (path: string) => any } };
 }
 
@@ -17,6 +23,7 @@ export function createFakeRealtimeDb(): FakeRealtimeDb {
   const db: FakeRealtimeDb = {
     data: {},
     writes: [],
+    staleReads: {},
     admin: undefined as any,
   };
 
@@ -65,6 +72,10 @@ export function createFakeRealtimeDb(): FakeRealtimeDb {
     transaction: async (update: (current: any) => any) => {
       // Yield first so that two callers really are in flight together.
       await Promise.resolve();
+      for (const stale of db.staleReads[segments(path).join('/')] ?? []) {
+        // The first attempt is made against a stale value and is thrown away.
+        update(stale === null ? null : JSON.parse(JSON.stringify(stale)));
+      }
       const current = read(path);
       const next = update(
         current === null ? null : JSON.parse(JSON.stringify(current)),
@@ -72,7 +83,10 @@ export function createFakeRealtimeDb(): FakeRealtimeDb {
       if (next === undefined) {
         return { committed: false };
       }
-      write(path, next);
+      // Removing what is not there changes nothing.
+      if (!(next === null && current === null)) {
+        write(path, next);
+      }
       return { committed: true };
     },
   });

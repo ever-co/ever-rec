@@ -6,9 +6,15 @@ import {
   Query,
   Redirect,
   Req,
+  Res,
   UseGuards,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import {
+  newOAuthBinding,
+  readOAuthBinding,
+  setOAuthBindingCookie,
+} from '../../services/shared/oauth-state.service';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { AtlassianService } from './atlassian.service';
 
@@ -27,16 +33,30 @@ export class AtlassianController {
 
   @UseGuards(AuthGuard)
   @Get('jira/sign-in')
-  async generateAuthUrl(@Req() req) {
-    return this.atlassianService.generateJiraAuthUrl(req.user?.id);
+  async generateAuthUrl(@Req() req, @Res({ passthrough: true }) res) {
+    const binding = newOAuthBinding();
+    const result = await this.atlassianService.generateJiraAuthUrl(
+      req.user?.id,
+      binding,
+    );
+    if (typeof result === 'string') {
+      setOAuthBindingCookie(
+        res,
+        'jira',
+        binding,
+        this.configService.get<string>('API_BASE_URL'),
+      );
+    }
+    return result;
   }
 
   @Get('jira/complete-oauth')
   @Redirect()
-  async completeOAuth(@Query() query) {
+  async completeOAuth(@Req() req, @Query() query) {
     const completed = await this.atlassianService.completeJiraOAuth(
       query.state,
       query.code,
+      readOAuthBinding(req, 'jira'),
     );
     const integrationsUrl = `${this.configService.get<string>('WEBSITE_URL')}/media/integrations`;
     return {

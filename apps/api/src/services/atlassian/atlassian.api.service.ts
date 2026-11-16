@@ -126,8 +126,8 @@ export class AtlassianApiService {
     return `https://trello.com/1/authorize?expiration=never&name=Rec&scope=read,write,account&response_type=fragment&key=${this.trelloKey}&callback_method=fragment&return_url=${this.oauthTrelloRedirect}`;
   }
 
-  async generateOauthLink(uid: string) {
-    const state = await this.oauthStateService.issue(uid, 'jira');
+  async generateOauthLink(uid: string, binding: string) {
+    const state = await this.oauthStateService.issue(uid, 'jira', binding);
     const url = `https://auth.atlassian.com/authorize?audience=api.atlassian.com&client_id=${this.clientId}&scope=${this.jiraScope}&redirect_uri=${this.oauthRedirect}&state=${state}&response_type=code&prompt=consent`;
     return encodeURI(url);
   }

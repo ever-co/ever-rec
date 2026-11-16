@@ -32,7 +32,7 @@ export class DropboxService {
     this.redirectURI = `${this.baseURL}${this.redirectUriPath}`;
   }
 
-  async generateAuthUrl(uid): Promise<any> {
+  async generateAuthUrl(uid, binding: string): Promise<any> {
     const userData = await this.getUserData(uid);
 
     if (userData && userData.dropboxAPISCredentials) {
@@ -47,7 +47,7 @@ export class DropboxService {
         client_secret: this.apiSecrete,
         redirect_uri: this.redirectURI,
         token_access_type: 'offline', // if you need an offline long-living refresh token
-        state: await this.oauthStateService.issue(uid, 'dropbox'),
+        state: await this.oauthStateService.issue(uid, 'dropbox', binding),
       });
       return dropbox.generateAuthUrl();
     }
@@ -61,10 +61,14 @@ export class DropboxService {
     return userData;
   }
 
-  async completeOAuth(state: string, code: string): Promise<any> {
-    // The state is a one-time value issued for a signed-in user. Anything else: no exchange, no
-    // write.
-    const uid = await this.oauthStateService.consume(state, 'dropbox');
+  async completeOAuth(
+    state: string,
+    code: string,
+    binding?: string,
+  ): Promise<any> {
+    // The state is a one-time value issued for a signed-in user to the browser that asked for it
+    // (`binding`). Anything else: no exchange, no write.
+    const uid = await this.oauthStateService.consume(state, 'dropbox', binding);
     if (!uid) {
       return null;
     }

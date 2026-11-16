@@ -153,7 +153,7 @@ export class AtlassianService {
     ).filter((i) => i !== fail);
   }
 
-  async generateJiraAuthUrl(uid): Promise<any> {
+  async generateJiraAuthUrl(uid, binding: string): Promise<any> {
     const userData = await this.getUserData(uid);
     if (userData && userData.jiraAPISCredentials) {
       return {
@@ -162,14 +162,18 @@ export class AtlassianService {
           'You have already Jira integrated. Please refresh the page and try again.',
       };
     } else {
-      return this.atlassianApiService.generateOauthLink(uid);
+      return this.atlassianApiService.generateOauthLink(uid, binding);
     }
   }
 
-  async completeJiraOAuth(state: string, code: string): Promise<any> {
-    // The state is a one-time value issued for a signed-in user. Anything else: no exchange, no
-    // write.
-    const uid = await this.oauthStateService.consume(state, 'jira');
+  async completeJiraOAuth(
+    state: string,
+    code: string,
+    binding?: string,
+  ): Promise<any> {
+    // The state is a one-time value issued for a signed-in user to the browser that asked for it
+    // (`binding`). Anything else: no exchange, no write.
+    const uid = await this.oauthStateService.consume(state, 'jira', binding);
     if (!uid) {
       return null;
     }

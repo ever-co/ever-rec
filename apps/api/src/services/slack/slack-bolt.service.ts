@@ -43,8 +43,8 @@ export class SlackBoltService {
     }
   }
 
-  public async slackLoginUrl(uid: string) {
-    const state = await this.oauthStateService.issue(uid, 'slack');
+  public async slackLoginUrl(uid: string, binding: string) {
+    const state = await this.oauthStateService.issue(uid, 'slack', binding);
     const sharableURL = `https://slack.com/oauth/v2/authorize?client_id=${this.clientId}&scope=channels:read,commands,groups:read,mpim:read,im:read&user_scope=channels:read,chat:write,users:read&redirect_uri=${this.oauthRedirect}&state=${state}&type=web`;
 
     return sharableURL;
