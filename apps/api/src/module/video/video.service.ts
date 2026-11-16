@@ -39,6 +39,15 @@ import {
   storedBytes,
 } from '../../common/events/ever-counters.events';
 
+// One file name inside the owner's folder: the stored-file-name rule of the email service, with
+// no folder part at all.
+const isPlainFileName = (value: unknown): value is string =>
+  typeof value === 'string' &&
+  value.length > 0 &&
+  value !== '.' &&
+  value !== '..' &&
+  !/[\\/]/.test(value);
+
 @Injectable()
 export class VideoService {
   private readonly config;
@@ -1031,35 +1040,42 @@ export class VideoService {
     return link;
   }
 
+  // Saves the frame a client captured as the poster of a video of the caller: the thumbnail of
+  // the video's emails. Clients send the name as `fullFileName`; `fullFilename` is also taken.
   async setPoster(
     uid: string,
-    templateBase64: any,
-    { fullFilename, videoId }: { fullFilename: string; videoId: string },
-  ): Promise<string | false> {
-    let link: string | false = false;
-
-    if (templateBase64 && fullFilename) {
-      const res = await uploadVideoToBucket({
-        uid,
-        fullFilepath: templateBase64,
-        fullFilename,
-        itemTypePath: 'videoPosters',
-      });
-      const downloadUrl = (await res.getSignedUrl(this.config))[0];
-
-      if (downloadUrl) {
-        const db = admin.database();
-        const dbImageRef = db.ref(`users/${uid}/videos/${videoId}`);
-
-        await dbImageRef.update({
-          ...(fullFilename && { posterRef: fullFilename }),
-        });
-
-        link = downloadUrl;
-      }
-      return link;
-    } else {
-      return link;
+    poster: Express.Multer.File | undefined,
+    {
+      fullFileName,
+      fullFilename,
+      videoId,
+    }: { fullFileName?: unknown; fullFilename?: unknown; videoId?: unknown },
+  ): Promise<string> {
+    const name = fullFileName ?? fullFilename;
+    if (!poster?.buffer?.length) {
+      throw new BadRequestException('A poster image is required');
     }
+    if (!isPlainFileName(name)) {
+      throw new BadRequestException(
+        'The poster name must be a plain file name',
+      );
+    }
+    if (typeof videoId !== 'string' || !is_id(videoId)) {
+      throw new BadRequestException('Invalid video id');
+    }
+    await this.assertOwnVideoExists(uid, videoId);
+
+    const file = admin
+      .storage()
+      .bucket()
+      .file(`users/${uid}/videoPosters/${name}`);
+    await file.save(poster.buffer, { contentType: poster.mimetype });
+
+    await admin
+      .database()
+      .ref(`users/${uid}/videos/${videoId}`)
+      .update({ posterRef: name });
+
+    return (await file.getSignedUrl(this.config))[0];
   }
 }
