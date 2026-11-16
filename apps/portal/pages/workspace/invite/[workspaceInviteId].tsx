@@ -101,12 +101,14 @@ const WorkspaceInvite: FC<any> = () => {
               </h1>
             )}
             <h1 className="tw-font-extrabold tw-text-3xl tw-tracking-wide tw-text-center">
-              {t('workspace.workspace')}
-              <span className="tw-text-primary-purple">
-                {workspaceName}
-              </span>{' '}
-              {t('common.no')}
-              Rec.
+              {/* The name is escaped so Trans never reads it as markup, then shown as typed. */}
+              <Trans
+                i18nKey="workspace.joinWorkspaceOnRec"
+                values={{ workspaceName }}
+                components={{ 1: <span className="tw-text-primary-purple" /> }}
+                tOptions={{ interpolation: { escapeValue: true } }}
+                shouldUnescape
+              />
             </h1>
             <p className="tw-pt-6 tw-pb-2 tw-text-2xl tw-text-primary-purple tw-font-extrabold">
               {workspaceName}
