@@ -14,7 +14,7 @@ import {
 import { FirebaseClient } from 'src/services/firebase/firebase.client';
 import { sendError, sendResponse } from 'src/services/utils/sendResponse';
 import { IWorkspaceInvite } from '../workspace/Interfaces/Invites';
-import { IWorkspace } from '../workspace/Interfaces/Workspace';
+import { isWorkspaceMember } from '../workspace/guards/CanAccessWorkspace.guard';
 import { StreamServiceService } from '../video-services/streamService.service';
 
 /** The kinds of item that can be mailed as a link. */
@@ -332,14 +332,58 @@ export class EmailService {
     }
   }
 
+  /**
+   * The workspace of the invite `inviteId`, or null when the invite or its workspace is missing,
+   * or when `uid` is neither the admin nor a member of that workspace. Only someone in a workspace
+   * may mail its invite, and the workspace name in the mail is read from the workspace itself.
+   */
+  async resolveInviteWorkspace(
+    uid: string,
+    inviteId: string,
+  ): Promise<{ workspaceId: string; workspaceName: string } | null> {
+    // The invite id goes straight into a database path, so only plain ids may reach it.
+    if (
+      typeof uid !== 'string' ||
+      !uid ||
+      typeof inviteId !== 'string' ||
+      !is_id(inviteId)
+    ) {
+      return null;
+    }
+
+    const db = admin.database();
+    const invite: IWorkspaceInvite | null = (
+      await db.ref(`workspaceInvites/${inviteId}`).get()
+    ).val();
+    const workspaceId = invite?.workspaceId;
+
+    // A missing workspace has no admin and no members, so it fails the membership check too.
+    if (
+      typeof workspaceId !== 'string' ||
+      !is_id(workspaceId) ||
+      !(await isWorkspaceMember(uid, workspaceId))
+    ) {
+      return null;
+    }
+
+    const name = (await db.ref(`workspaces/${workspaceId}/name`).get()).val();
+
+    return {
+      workspaceId,
+      workspaceName: typeof name === 'string' ? name : '',
+    };
+  }
+
   async sendWorkspaceInviteLink({
     emails,
     inviteId,
     inviterDisplayName,
+    workspaceName,
   }: {
     emails: string[];
     inviteId: string;
     inviterDisplayName: string;
+    workspaceName: string;
   }) {
     try {
       const client = new postmark.ServerClient(
@@ -348,8 +392,6 @@ export class EmailService {
       const inviteLink =
         this.configService.get<string>('WEBSITE_URL') +
         `/workspace/invite/${inviteId}`;
-
-      const workspaceName = await this.getWorkspaceName(inviteId);
 
       const templates: postmark.TemplatedMessage[] = [];
       emails.forEach(async (email) => {
@@ -378,21 +420,5 @@ export class EmailService {
       console.log(e.message);
       return sendError('Could not send email.', e.message);
     }
-  }
-
-  // Helpers
-  async getWorkspaceName(inviteId: string) {
-    const db = admin.database();
-    const workspaceInviteRef = db.ref(`workspaceInvites/${inviteId}`);
-    const workspaceInviteData: IWorkspaceInvite = (
-      await workspaceInviteRef.get()
-    ).val();
-    const workspaceRef = db.ref(
-      `workspaces/${workspaceInviteData.workspaceId}`,
-    );
-    const workspaceData: IWorkspace = (await workspaceRef.get()).val();
-    const workspaceName = workspaceData?.name;
-
-    return workspaceName ? workspaceName : '';
   }
 }
