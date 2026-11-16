@@ -1,8 +1,9 @@
 /**
- * `email/send-item`, `email/send-welcome-email` and `email/welcome-email` with the real guard and
- * service. Only a signed-in user can send. The welcome mail goes to the session's own address, and
- * an item is mailed only for a share record of the caller, with the sender name and the links
- * taken from the session and the item: never from the body.
+ * `email/send-item`, `email/send-welcome-email`, `email/welcome-email` and
+ * `email/send-workspace-invite-email` with the real guard and service. Only a signed-in user can
+ * send. The welcome mail goes to the session's own address, an item is mailed only for a share
+ * record of the caller, and an invite only for a workspace the caller is in. The sender name, the
+ * links and the workspace name come from the session and the stored records: never from the body.
  */
 import { ConfigService } from '@nestjs/config';
 import { INestApplication } from '@nestjs/common';
@@ -201,6 +202,22 @@ describe('email routes', () => {
           screenshots: { img2: { id: 'img2', refName: 'two.png' } },
           videos: { vid9: { id: 'vid9', refName: 'nine.webm' } },
         },
+      },
+      workspaceInvites: {
+        // uid-a is a member of ws1 and the admin of ws3, and not in ws2.
+        inv1: { id: 'inv1', workspaceId: 'ws1', inviterId: 'uid-b' },
+        invAdmin: { id: 'invAdmin', workspaceId: 'ws3', inviterId: 'uid-a' },
+        invOther: { id: 'invOther', workspaceId: 'ws2', inviterId: 'uid-b' },
+        invGone: { id: 'invGone', workspaceId: 'wsGone', inviterId: 'uid-a' },
+      },
+      workspaces: {
+        ws1: {
+          name: 'Team One',
+          admin: 'uid-b',
+          members: [{ id: 'uid-b' }, { id: 'uid-a' }],
+        },
+        ws2: { name: 'Team Two', admin: 'uid-b', members: [{ id: 'uid-b' }] },
+        ws3: { name: 'Team Three', admin: 'uid-a' },
       },
     };
   });
@@ -412,6 +429,104 @@ describe('email routes', () => {
         body({ emails: ['a@example.test', 'a@example.test'] }),
         'uid-a',
       ).expect(201);
+      expect(sentMessages()).toHaveLength(1);
+    });
+  });
+
+  describe('send-workspace-invite-email', () => {
+    // What the portal and the extension send: the inviter name is the user's own display name.
+    const body = (extra: object = {}) => ({
+      emails: ['friend@example.test', 'pal@example.test'],
+      inviteId: 'inv1',
+      inviterDisplayName: 'Name of uid-a',
+      ...extra,
+    });
+    const invite = (extra: object = {}) =>
+      post('send-workspace-invite-email', body(extra), 'uid-a');
+
+    it('needs a signed-in user, and sends nothing without one', async () => {
+      await post('send-workspace-invite-email', body()).expect(401);
+      await post('send-workspace-invite-email', body(), 'bad').expect(401);
+      expect(mockSendBatch).not.toHaveBeenCalled();
+    });
+
+    it('mails a member one batch, with the session name and the workspace name', async () => {
+      await invite().expect(201);
+
+      expect(mockSendBatch).toHaveBeenCalledTimes(1);
+      expect(sentMessages()).toEqual(
+        ['friend@example.test', 'pal@example.test'].map((To) => ({
+          From: 'sender@rec.test',
+          To,
+          TemplateAlias: expect.any(String),
+          TemplateModel: {
+            joinWorkspaceLink: 'https://rec.test/workspace/invite/inv1',
+            fullName: 'Name of uid-a',
+            workspaceName: 'Team One',
+          },
+        })),
+      );
+
+      // The admin of a workspace is in it too.
+      mockSendBatch.mockClear();
+      await invite({ inviteId: 'invAdmin' }).expect(201);
+      expect(sentMessages()[0].TemplateModel.workspaceName).toBe('Team Three');
+    });
+
+    it('never mails the inviter name of the body', async () => {
+      await invite({ inviterDisplayName: 'Support Team' }).expect(201);
+      expect(JSON.stringify(sentMessages())).not.toContain('Support Team');
+      expect(
+        sentMessages().map((message) => message.TemplateModel.fullName),
+      ).toEqual(['Name of uid-a', 'Name of uid-a']);
+
+      mockSendBatch.mockClear();
+      await invite({ inviterDisplayName: undefined }).expect(201);
+      expect(sentMessages()[0].TemplateModel.fullName).toBe('Name of uid-a');
+    });
+
+    it('refuses an invite of a workspace the caller is not in, a missing invite and a gone workspace', async () => {
+      await invite({ inviteId: 'invOther' }).expect(403);
+      await invite({ inviteId: 'unknown' }).expect(403);
+      await invite({ inviteId: 'invGone' }).expect(403);
+      expect(mockSendBatch).not.toHaveBeenCalled();
+    });
+
+    it('refuses an invite id that is not a plain id', async () => {
+      for (const inviteId of ['a/b', 'inv1/x', '../x', '', 5, null, ['inv1']]) {
+        await invite({ inviteId }).expect(400);
+      }
+      await post(
+        'send-workspace-invite-email',
+        { emails: ['a@example.test'] },
+        'uid-a',
+      ).expect(400);
+      expect(mockSendBatch).not.toHaveBeenCalled();
+    });
+
+    it('refuses too many recipients, none, and anything that is not an email', async () => {
+      const many = Array.from({ length: 21 }, (_, i) => `p${i}@example.test`);
+      await invite({ emails: many }).expect(400);
+      await invite({ emails: [] }).expect(400);
+      await invite({ emails: undefined }).expect(400);
+      await invite({ emails: 'a@example.test' }).expect(400);
+      await invite({ emails: ['not an email'] }).expect(400);
+      await invite({
+        emails: ['a@example.test', 'b@example.test, c@example.test'],
+      }).expect(400);
+      await invite({ emails: [1] }).expect(400);
+      expect(mockSendBatch).not.toHaveBeenCalled();
+    });
+
+    it('lets the largest allowed list through, without repeats', async () => {
+      const max = Array.from({ length: 20 }, (_, i) => `p${i}@example.test`);
+      await invite({ emails: max }).expect(201);
+      expect(sentMessages()).toHaveLength(20);
+
+      mockSendBatch.mockClear();
+      await invite({ emails: ['a@example.test', 'a@example.test'] }).expect(
+        201,
+      );
       expect(sentMessages()).toHaveLength(1);
     });
   });
