@@ -164,6 +164,26 @@ export class ApiVideoService {
     }
   }
 
+  /**
+   * The playback and thumbnail URLs of a video, as api.video reports them, or null when it has no
+   * such video.
+   */
+  async getStreamLinks(
+    assetId: string,
+  ): Promise<{ playbackUrl: string; thumbnailUrl: string } | null> {
+    try {
+      const video = await this.ApiVideo.videos.get(assetId);
+      const playbackUrl = video?.assets?.hls;
+
+      return playbackUrl
+        ? { playbackUrl, thumbnailUrl: video.assets.thumbnail }
+        : null;
+    } catch (error) {
+      console.log(error);
+      return null;
+    }
+  }
+
   async deleteAsset(assetId: string) {
     return this.ApiVideo.videos.delete(assetId);
   }

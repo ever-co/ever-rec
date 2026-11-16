@@ -12,8 +12,14 @@ import { TokenService } from '../auth/services/tokens';
 import { FirebaseClient } from 'src/services/firebase/firebase.client';
 import { EmailController } from './email.controller';
 import { EmailService } from './email.service';
+import { StreamServiceService } from '../video-services/streamService.service';
+
+const mockGetStreamLinks = jest.fn();
 
 jest.mock('../auth/services/tokens', () => ({ TokenService: class {} }));
+jest.mock('../video-services/streamService.service', () => ({
+  StreamServiceService: class {},
+}));
 jest.mock('src/services/firebase/firebase.client', () => ({
   FirebaseClient: class {},
 }));
@@ -65,6 +71,10 @@ describe('email routes', () => {
         EmailService,
         { provide: FirebaseClient, useValue: {} },
         {
+          provide: StreamServiceService,
+          useValue: { getStreamLinks: mockGetStreamLinks },
+        },
+        {
           provide: ConfigService,
           useValue: {
             get: (key: string) =>
@@ -105,6 +115,18 @@ describe('email routes', () => {
   beforeEach(() => {
     mockSendWithTemplate.mockReset().mockResolvedValue({});
     mockSendBatch.mockReset().mockResolvedValue([]);
+    mockGetStreamLinks.mockReset().mockImplementation(async (assetId) =>
+      ({
+        asset1: {
+          playbackUrl: 'https://stream.mux.com/pb1.m3u8',
+          thumbnailUrl: 'https://image.mux.com/pb1/thumbnail.png',
+        },
+        asset2: {
+          playbackUrl: 'https://vod.api.video/asset2/manifest.m3u8',
+          thumbnailUrl: undefined,
+        },
+      }[assetId] ?? null),
+    );
     mockDb.data = {
       shared: {
         imgLink: { uid: 'uid-a', imageId: 'img1' },
@@ -115,9 +137,9 @@ describe('email routes', () => {
       sharedVideos: {
         vidLink: { uid: 'uid-a', videoId: 'vid1' },
         vidStream: { uid: 'uid-a', videoId: 'vid2' },
-        vidEvil: { uid: 'uid-a', videoId: 'vid3' },
-        vidLookalike: { uid: 'uid-a', videoId: 'vid4' },
-        vidHttp: { uid: 'uid-a', videoId: 'vid5' },
+        vidUnknownAsset: { uid: 'uid-a', videoId: 'vid3' },
+        vidBadAsset: { uid: 'uid-a', videoId: 'vid4' },
+        vidNoAsset: { uid: 'uid-a', videoId: 'vid5' },
         vidThumb: { uid: 'uid-a', videoId: 'vid6' },
         vidPath: { uid: 'uid-a', videoId: 'vid7' },
         vidOther: { uid: 'uid-b', videoId: 'vid9' },
@@ -130,36 +152,45 @@ describe('email routes', () => {
           },
           videos: {
             vid1: { id: 'vid1', refName: 'one.webm', posterRef: 'one.jpg' },
+            // The URLs saved with a streamed video are written by its owner: here they are
+            // planted, and only the asset id is used.
             vid2: {
               id: 'vid2',
               streamData: {
-                playbackUrl: 'https://stream.mux.com/abc.m3u8',
-                thumbnailUrl: 'https://image.mux.com/abc/thumbnail.png',
+                serviceType: 'mux',
+                assetId: 'asset1',
+                playbackUrl: 'https://evil.test/login',
+                thumbnailUrl: 'https://evil.test/pixel.png',
               },
             },
-            // Stream data planted by the owner: a foreign host, a look-alike host, a plain
-            // http URL and a missing thumbnail.
+            // An asset the provider does not know, an asset id that is not a plain id, and
+            // stream data without an asset id.
             vid3: {
               id: 'vid3',
               streamData: {
+                serviceType: 'mux',
+                assetId: 'unknown',
                 playbackUrl: 'https://evil.test/login',
-                thumbnailUrl: 'https://image.mux.com/abc/thumbnail.png',
               },
             },
             vid4: {
               id: 'vid4',
               streamData: {
-                playbackUrl: 'https://stream.mux.com.evil.test/x.m3u8',
+                serviceType: 'mux',
+                assetId: 'asset1/../x',
+                playbackUrl: 'https://evil.test/login',
               },
             },
             vid5: {
               id: 'vid5',
-              streamData: { playbackUrl: 'http://stream.mux.com/abc.m3u8' },
+              streamData: { playbackUrl: 'https://evil.test/login' },
             },
+            // The provider reports no thumbnail.
             vid6: {
               id: 'vid6',
               streamData: {
-                playbackUrl: 'https://stream.mux.com/abc.m3u8',
+                serviceType: 'api.video',
+                assetId: 'asset2',
                 thumbnailUrl: 'https://evil.test/pixel.png',
               },
             },
@@ -260,29 +291,36 @@ describe('email routes', () => {
         body({ itemType: 'video', itemLink: 'vidStream' }),
         'uid-a',
       ).expect(201);
+      expect(mockGetStreamLinks).toHaveBeenCalledWith('asset1', 'mux');
       expect(sentMessages()[0].TemplateModel).toEqual(
         expect.objectContaining({
-          itemPublicLink: 'https://stream.mux.com/abc.m3u8',
-          templateUrl: 'https://image.mux.com/abc/thumbnail.png',
+          itemPublicLink: 'https://stream.mux.com/pb1.m3u8',
+          templateUrl: 'https://image.mux.com/pb1/thumbnail.png',
         }),
       );
+      expect(JSON.stringify(sentMessages())).not.toContain('evil.test');
     });
 
-    it('never mails stream URLs saved by the owner that are not a provider host', async () => {
+    it('never mails the stream URLs saved with a video, only what the provider reports', async () => {
       const video = (itemLink: string) =>
         post('send-item', body({ itemType: 'video', itemLink }), 'uid-a');
 
-      await video('vidEvil').expect(403);
-      await video('vidLookalike').expect(403);
-      await video('vidHttp').expect(403);
+      await video('vidUnknownAsset').expect(403);
+      await video('vidBadAsset').expect(403);
+      await video('vidNoAsset').expect(403);
       await video('vidPath').expect(403);
       expect(mockSendBatch).not.toHaveBeenCalled();
+      // An asset id that is not a plain id never reaches the provider.
+      expect(mockGetStreamLinks).not.toHaveBeenCalledWith(
+        'asset1/../x',
+        expect.anything(),
+      );
 
-      // A foreign thumbnail is left out; the video itself is still mailed.
+      // The provider reports no thumbnail: the video is mailed without one.
       await video('vidThumb').expect(201);
       expect(sentMessages()[0].TemplateModel).toEqual(
         expect.objectContaining({
-          itemPublicLink: 'https://stream.mux.com/abc.m3u8',
+          itemPublicLink: 'https://vod.api.video/asset2/manifest.m3u8',
           templateUrl: false,
         }),
       );

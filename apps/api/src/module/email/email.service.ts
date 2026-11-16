@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { URL } from 'url';
 import * as postmark from 'postmark';
 import { ConfigService } from '@nestjs/config';
 import { PostmarkTemplate } from 'src/config/email';
@@ -16,6 +15,7 @@ import { FirebaseClient } from 'src/services/firebase/firebase.client';
 import { sendError, sendResponse } from 'src/services/utils/sendResponse';
 import { IWorkspaceInvite } from '../workspace/Interfaces/Invites';
 import { IWorkspace } from '../workspace/Interfaces/Workspace';
+import { StreamServiceService } from '../video-services/streamService.service';
 
 /** The kinds of item that can be mailed as a link. */
 export type SendableItemType = 'image' | 'video';
@@ -23,35 +23,6 @@ export type SendableItemType = 'image' | 'video';
 const SIGNED_URL_CONFIG = {
   action: 'read' as const,
   expires: '03-01-2500',
-};
-
-// The hosts the streaming providers serve playback and thumbnails from.
-const STREAM_HOSTS = [
-  'stream.mux.com',
-  'image.mux.com',
-  'vod.api.video',
-  'cdn.api.video',
-];
-
-/** The URL when it is a plain https URL on a streaming provider's host, else null. */
-const trustedStreamUrl = (value: unknown): string | null => {
-  if (typeof value !== 'string') {
-    return null;
-  }
-
-  try {
-    const url = new URL(value);
-
-    return url.protocol === 'https:' &&
-      !url.username &&
-      !url.password &&
-      !url.port &&
-      STREAM_HOSTS.includes(url.hostname)
-      ? url.href
-      : null;
-  } catch {
-    return null;
-  }
 };
 
 /** A stored file name: text that cannot step out of the owner's folder. */
@@ -70,6 +41,7 @@ export class EmailService {
   constructor(
     private readonly firebaseClient: FirebaseClient,
     private readonly configService: ConfigService,
+    private readonly streamService: StreamServiceService,
   ) {}
 
   async sendWelcomeEmail({ email }: { email: string }): Promise<any> {
@@ -254,17 +226,27 @@ export class EmailService {
         : null;
     }
 
-    // The URLs saved with a streamed video are written by its owner, so they are mailed only when
-    // they point at a streaming provider's own host.
+    // The URLs saved with a streamed video are written by its owner (the save route stores what
+    // the client sends), so they are never mailed. The links are asked of the streaming provider
+    // for the saved asset id, which must name an asset the provider knows.
     const streamData = item.streamData;
 
     if (streamData) {
-      const playbackUrl = trustedStreamUrl(streamData.playbackUrl);
+      const { assetId, serviceType } = streamData;
 
-      return playbackUrl
+      if (typeof assetId !== 'string' || !is_id(assetId)) {
+        return null;
+      }
+
+      const links = await this.streamService.getStreamLinks(
+        assetId,
+        serviceType,
+      );
+
+      return links?.playbackUrl
         ? {
-            itemPublicLink: playbackUrl,
-            templateUrl: trustedStreamUrl(streamData.thumbnailUrl) || false,
+            itemPublicLink: links.playbackUrl,
+            templateUrl: links.thumbnailUrl || false,
           }
         : null;
     }

@@ -138,6 +138,21 @@ export class StreamServiceService {
     }
   }
 
+  /** The links of an asset as its streaming provider reports them, or null. */
+  async getStreamLinks(
+    assetId: string,
+    serviceType: VideoServicesEnum,
+  ): Promise<{ playbackUrl: string; thumbnailUrl: string } | null> {
+    switch (serviceType) {
+      case VideoServicesEnum.MUX:
+        return this.muxService.getStreamLinks(assetId);
+      case VideoServicesEnum.API_VIDEO:
+        return this.apiVideoService.getStreamLinks(assetId);
+      default:
+        return null;
+    }
+  }
+
   async deleteAsset(assetId: string, serviceType: VideoServicesEnum) {
     switch (serviceType) {
       case VideoServicesEnum.MUX:
