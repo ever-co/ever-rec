@@ -96,10 +96,7 @@ export class EmailService {
           await this.firebaseAuthService.sendVerificationEmail(idToken);
 
         if (!result.success) {
-          this.logger.error(
-            'Failed to send verification email',
-            result.error,
-          );
+          this.logger.error('Failed to send verification email', result.error);
           return sendError('Failed to send verification email');
         }
       }

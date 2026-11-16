@@ -32,7 +32,8 @@ jest.mock('./services/password-reset/password-reset.strategy', () => ({
 
 const OWN_EMAIL = 'me@example.com';
 const OTHER_EMAIL = 'victim@example.com';
-const LINK = 'https://example.test/__/auth/action?mode=verifyEmail&oobCode=secret';
+const LINK =
+  'https://example.test/__/auth/action?mode=verifyEmail&oobCode=secret';
 
 const ROUTES = [
   '/auth/generate-email-verification-link',
@@ -112,7 +113,10 @@ describe('verification mail routes', () => {
 
     it('sends the mail for the caller own email and returns no link', async () => {
       // A link in the service result must never reach the response.
-      sendVerificationEmail.mockResolvedValue({ success: true, data: { link: LINK } });
+      sendVerificationEmail.mockResolvedValue({
+        success: true,
+        data: { link: LINK },
+      });
 
       const res = await request(app.getHttpServer())
         .post(route)
