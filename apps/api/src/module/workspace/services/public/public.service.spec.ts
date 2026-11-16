@@ -111,4 +111,56 @@ describe('workspace invite data', () => {
       workspaceMembers: ['Two'],
     });
   });
+
+  it('skips member entries without an id', async () => {
+    await mockDb.ref('workspaceInvites/inv-5').set({
+      inviterId: 'uid-2',
+      workspaceId: 'ws-5',
+    });
+    await mockDb.ref('workspaces/ws-5').set({
+      name: 'Gaps',
+      admin: 'uid-2',
+      members: [
+        { id: 'uid-2' },
+        null,
+        { displayName: 'No id' },
+        { id: 'uid-3' },
+      ],
+    });
+    const refSpy = jest.spyOn(mockDb, 'ref');
+
+    const result = await service.getWorkspaceInviteData('inv-5');
+
+    expect(result.status).toBe(ResStatusEnum.success);
+    expect(result.data?.workspaceMembers).toEqual(['Two', 'three']);
+    // No lookup of a user without an id.
+    expect(refSpy).not.toHaveBeenCalledWith('users/undefined');
+  });
+
+  it('gives the not-found error when the workspace of the invite is gone', async () => {
+    await mockDb.ref('workspaceInvites/inv-6').set({
+      inviterId: 'uid-2',
+      workspaceId: 'ws-deleted',
+    });
+
+    const result = await service.getWorkspaceInviteData('inv-6');
+
+    expect(result).toEqual({
+      status: ResStatusEnum.error,
+      message: "Couldn't find the workspace for this invite",
+      error: null,
+      data: null,
+    });
+  });
+
+  it('gives the not-found error when the invite is gone', async () => {
+    const result = await service.getWorkspaceInviteData('inv-missing');
+
+    expect(result).toEqual({
+      status: ResStatusEnum.error,
+      message: "Couldn't find the workspace for this invite",
+      error: null,
+      data: null,
+    });
+  });
 });
