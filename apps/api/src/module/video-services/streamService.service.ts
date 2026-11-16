@@ -1,5 +1,11 @@
 import * as admin from 'firebase-admin';
-import { Injectable } from '@nestjs/common';
+import { unlink } from 'fs/promises';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+} from '@nestjs/common';
+import { is_id } from '../workspace/validators/id.validator';
 import { DbVideoData, IStreamingDbData } from '../../interfaces/IEditorVideo';
 import {
   PlaybackStatusEnum as PSEnum,
@@ -24,12 +30,66 @@ export class StreamServiceService {
     };
   }
 
+  /**
+   * Refuses (400) a service type we cannot look an asset up in or an assetId that is not a plain
+   * id, and (403) an asset that was not created for `uid`. The asset ids of shared videos are
+   * public, and this service deletes the previously stored asset with its own provider
+   * credentials, so an unchecked assetId would let one user delete another user's stream.
+   */
+  async assertAssetOwnedBy(
+    uid: string,
+    assetId: string,
+    serviceType: VideoServicesEnum,
+  ): Promise<void> {
+    if (
+      serviceType !== VideoServicesEnum.MUX &&
+      serviceType !== VideoServicesEnum.API_VIDEO
+    ) {
+      throw new BadRequestException('Unsupported serviceType');
+    }
+
+    if (typeof assetId !== 'string' || !is_id(assetId)) {
+      throw new BadRequestException('Invalid assetId');
+    }
+
+    let owner: string | null = null;
+    try {
+      owner =
+        serviceType === VideoServicesEnum.MUX
+          ? await this.muxService.getAssetOwner(assetId)
+          : await this.apiVideoService.getAssetOwner(assetId);
+    } catch (error) {
+      // An asset the provider does not know, or cannot be asked about, is not proven to be theirs.
+      console.error(error);
+    }
+
+    if (!uid || !owner || owner !== uid) {
+      throw new ForbiddenException('This asset does not belong to you');
+    }
+  }
+
+  /** Removes the temporary file of a refused upload, then rethrows the reason it was refused. */
+  private async discardUpload(
+    blob: Express.Multer.File,
+    reason: unknown,
+  ): Promise<never> {
+    if (blob?.path) {
+      await unlink(blob.path).catch(() => undefined);
+    }
+    throw reason;
+  }
+
   async saveVideoData(
     uid: string,
     data: IStreamingDbData,
     blob: Express.Multer.File,
     fullFilename: string,
   ) {
+    // Outside the try/catch below, which would swallow it into a 201 with no body.
+    await this.assertAssetOwnedBy(uid, data?.assetId, data?.serviceType).catch(
+      (error) => this.discardUpload(blob, error),
+    );
+
     try {
       const db = admin.database();
       const videoRef = db.ref(`users/${uid}/videos`);
@@ -83,6 +143,17 @@ export class StreamServiceService {
     blob: Express.Multer.File,
     fullFilename: string,
   ) {
+    // Outside the try/catch below, which would swallow it into a 201 with no body.
+    if (typeof videoId !== 'string' || !is_id(videoId)) {
+      return this.discardUpload(
+        blob,
+        new BadRequestException('Invalid videoId'),
+      );
+    }
+    await this.assertAssetOwnedBy(uid, data?.assetId, data?.serviceType).catch(
+      (error) => this.discardUpload(blob, error),
+    );
+
     try {
       const db = admin.database();
       const videoRef = db.ref(`users/${uid}/videos/${videoId}`);

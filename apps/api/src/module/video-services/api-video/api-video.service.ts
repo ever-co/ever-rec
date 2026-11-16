@@ -26,13 +26,13 @@ export class ApiVideoService {
     this.ApiVideo = client;
   }
 
-  async getDirectUpload(): Promise<{
+  async getDirectUpload(uid: string): Promise<{
     id: string;
     url: string;
     token: string;
   }> {
     try {
-      const { videoId } = await this.createVideo();
+      const { videoId } = await this.createVideo(uid);
       const { token } = await this.getUploadToken();
 
       return { id: videoId, token, url: '' };
@@ -41,9 +41,11 @@ export class ApiVideoService {
     }
   }
 
-  async createVideo(): Promise<{ videoId: string }> {
+  async createVideo(uid: string): Promise<{ videoId: string }> {
     const config: VideoCreationPayload = {
       title: 'Rec', //? it's good to have different titles here, yet the client doesn't care for now
+      // Binds the video to the uploader, see StreamServiceService.assertAssetOwnedBy.
+      metadata: [{ key: 'uid', value: uid }],
     };
 
     const result = await this.ApiVideo.videos.create(config);
@@ -162,6 +164,13 @@ export class ApiVideoService {
       console.error(error);
       return { downloadStatus: PSEnum.ERRORED, downloadUrl: '' };
     }
+  }
+
+  /** The uid the video was created for (its `uid` metadata), or null when it has none. */
+  async getAssetOwner(assetId: string): Promise<string | null> {
+    const video = await this.ApiVideo.videos.get(assetId);
+    const entry = video?.metadata?.find((item) => item.key === 'uid');
+    return typeof entry?.value === 'string' && entry.value ? entry.value : null;
   }
 
   async deleteAsset(assetId: string) {

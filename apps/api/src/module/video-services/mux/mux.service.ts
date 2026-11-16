@@ -38,13 +38,15 @@ export class MuxService {
     this.Video = VideoMux;
   }
 
-  async getDirectUpload(): Promise<{ url: string; id: string }> {
+  async getDirectUpload(uid: string): Promise<{ url: string; id: string }> {
     try {
       const upload = await this.Video.Uploads.create({
         cors_origin: '*',
         new_asset_settings: {
           playback_policy: 'public',
           mp4_support: 'standard',
+          // Binds the asset to the uploader, see StreamServiceService.assertAssetOwnedBy.
+          passthrough: uid,
         },
       });
 
@@ -143,6 +145,14 @@ export class MuxService {
       console.error(error);
       return { downloadStatus: PSEnum.ERRORED, downloadUrl: '' };
     }
+  }
+
+  /** The uid the asset was created for (its passthrough), or null when it has none. */
+  async getAssetOwner(assetId: string): Promise<string | null> {
+    const asset = await this.Video.Assets.get(assetId);
+    return typeof asset?.passthrough === 'string' && asset.passthrough
+      ? asset.passthrough
+      : null;
   }
 
   async deleteAsset(assetId: string): Promise<void> {

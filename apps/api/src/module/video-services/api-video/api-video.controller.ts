@@ -17,8 +17,8 @@ export class ApiVideoController {
 
   @UseGuards(AuthGuard)
   @Get('/direct-upload')
-  async getDirectUpload() {
-    return this.apiVideoService.getDirectUpload();
+  async getDirectUpload(@Req() request) {
+    return this.apiVideoService.getDirectUpload(request.user?.id);
   }
 
   @UseGuards(AuthGuard, CanAccessWorkspaceQueryGuard, PlaybackStatusGuard)
