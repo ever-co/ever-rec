@@ -400,6 +400,9 @@
       "chaptersDes": "Here, you can check and jump to different chapters of this video.",
       "editBrackets": "(edited)",
       "addChapter": "Add Chapter",
+      "copyChapters": "Copy chapters as timestamps",
+      "chaptersCopied": "Chapters copied",
+      "chaptersCopyError": "Could not copy the chapters.",
       "chapterContentPlaceholder": "Type your chapter content here...",
       "chapterIsFirst": "(e.g., Introduction)",
       "chaptersSection": {

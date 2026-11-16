@@ -41,6 +41,32 @@
   }
 }
 
+.CopyChaptersWrapper {
+  display: flex;
+  justify-content: center;
+  width: 91.8%;
+  margin: 0.75rem auto 0;
+}
+
+.CopyChaptersWrapperHorizontal {
+  justify-content: start;
+  margin: 0.75rem 0 0 0;
+}
+
+.CopyChaptersButton {
+  background: none;
+  border: none;
+  padding: 0.25rem 0.5rem;
+  color: $primary-violet;
+  font-size: 0.875rem;
+  text-decoration: underline;
+  cursor: pointer;
+
+  &:hover {
+    color: $primary-violet80;
+  }
+}
+
 .AddChapterButtonWrapper {
   display: flex;
   align-items: center;
