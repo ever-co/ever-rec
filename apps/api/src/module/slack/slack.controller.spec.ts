@@ -141,6 +141,27 @@ describe('Slack installation callback', () => {
     expect(mockDb.data.users['uid-a'].slackToken).toBe('user-1');
   });
 
+  it('exchanges the code once when two callbacks race with the same nonce', async () => {
+    const state = await oauthState.issue('uid-a', 'slack');
+
+    const responses = await Promise.all([
+      request(app.getHttpServer())
+        .get('/slack/installation')
+        .query({ code: 'code-1', state }),
+      request(app.getHttpServer())
+        .get('/slack/installation')
+        .query({ code: 'code-2', state }),
+    ]);
+
+    expect(slackAuthorizeToken).toHaveBeenCalledTimes(1);
+    expect(
+      responses.map((res) => res.headers.location).sort(),
+    ).toEqual([`${website}/integrations`, invalidState].sort());
+    expect(
+      userWrites().filter((path) => path === 'users/uid-a/slackToken'),
+    ).toHaveLength(1);
+  });
+
   it('writes nothing for a nonce issued for another provider', async () => {
     const state = await oauthState.issue('uid-a', 'dropbox');
 

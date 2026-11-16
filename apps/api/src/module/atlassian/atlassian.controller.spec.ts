@@ -157,6 +157,27 @@ describe('Jira complete-oauth callback', () => {
     ).toBe('access-1');
   });
 
+  it('exchanges the code once when two callbacks race with the same nonce', async () => {
+    const state = await oauthState.issue('uid-a', 'jira');
+
+    const responses = await Promise.all([
+      request(app.getHttpServer())
+        .get('/atlassian/jira/complete-oauth')
+        .query({ code: 'code-1', state }),
+      request(app.getHttpServer())
+        .get('/atlassian/jira/complete-oauth')
+        .query({ code: 'code-2', state }),
+    ]);
+
+    expect(getAccessToken).toHaveBeenCalledTimes(1);
+    expect(
+      responses.map((res) => res.headers.location).sort(),
+    ).toEqual([done, invalidState].sort());
+    expect(
+      userWrites().filter((path) => path === 'users/uid-a/jiraAPISCredentials'),
+    ).toHaveLength(1);
+  });
+
   it('writes nothing for a nonce issued for another provider', async () => {
     const state = await oauthState.issue('uid-a', 'slack');
 

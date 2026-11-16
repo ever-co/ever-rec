@@ -63,6 +63,8 @@ export function createFakeRealtimeDb(): FakeRealtimeDb {
     },
     // The update function runs against the current value and nothing happens in between.
     transaction: async (update: (current: any) => any) => {
+      // Yield first so that two callers really are in flight together.
+      await Promise.resolve();
       const current = read(path);
       const next = update(
         current === null ? null : JSON.parse(JSON.stringify(current)),
