@@ -33,6 +33,7 @@ import {
   parseCollectionToIdValueObj,
 } from '../../../services/utils/helpers';
 import { IWorkspaceFolder } from '../Interfaces/Folders';
+import { IWorkspaceUser } from '../Interfaces/Workspace';
 import {
   dbEndpoints,
   SharedService,
@@ -568,6 +569,31 @@ export class WorkspaceFilesService {
     )[0];
   }
 
+  /**
+   * The ids of the workspace admin and members: the users who receive marker updates of the
+   * workspace's items. Fails closed: nobody when the workspace cannot be read. The id goes into a
+   * database path, so the caller must have checked it (the routes use `ValidateId`).
+   */
+  private async workspaceMemberIds(workspaceId: string): Promise<string[]> {
+    try {
+      // Only `admin` and `members` are read, not the whole workspace.
+      const db = admin.database();
+      const [adminSnap, membersSnap] = await Promise.all([
+        db.ref(`workspaces/${workspaceId}/admin`).get(),
+        db.ref(`workspaces/${workspaceId}/members`).get(),
+      ]);
+      const memberIds = parseCollectionToArray<IWorkspaceUser>(
+        membersSnap.val(),
+      ).map((member) => member?.id);
+      return [...new Set([adminSnap.val(), ...memberIds])].filter(
+        (id): id is string => typeof id === 'string' && id !== '',
+      );
+    } catch (e) {
+      console.log(e);
+      return [];
+    }
+  }
+
   async updateItemData(
     uid: string,
     workspaceId: string,
@@ -599,7 +625,12 @@ export class WorkspaceFilesService {
     }
 
     if (markers !== undefined) {
-      this.editorGateway.emitMarkerUpdate(uid, id, markers);
+      this.editorGateway.emitMarkerUpdate(
+        await this.workspaceMemberIds(workspaceId),
+        uid,
+        id,
+        markers,
+      );
     }
     if (itemType === 'image') {
       return this.getImage(workspaceId, id);

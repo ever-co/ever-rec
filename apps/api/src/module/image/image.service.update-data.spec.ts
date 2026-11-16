@@ -105,4 +105,51 @@ describe('ImageService.updateImageData', () => {
     }
     expect(mockDb.updates).toEqual([]);
   });
+
+  // The markers hold comment text and commenter details: a save goes over the editor websocket
+  // to the owner of the personal image only, never to every connected socket.
+  it('sends a markers save of a personal image to its owner only', async () => {
+    const markers = JSON.stringify([{ id: 'm1', comments: [] }]);
+    await service.updateImageData(
+      'uid-owner',
+      'img1',
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      markers,
+    );
+
+    expect(emitMarkerUpdate).toHaveBeenCalledTimes(1);
+    expect(emitMarkerUpdate).toHaveBeenCalledWith(
+      ['uid-owner'],
+      'uid-owner',
+      'img1',
+      markers,
+    );
+  });
+
+  it('sends nothing over the websocket when the save has no markers', async () => {
+    await update('uid-owner', 'img1');
+    expect(emitMarkerUpdate).not.toHaveBeenCalled();
+  });
+
+  it('sends nothing over the websocket when the save is refused', async () => {
+    await expect(
+      service.updateImageData(
+        'uid-other',
+        'img1',
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        '[]',
+      ),
+    ).rejects.toBeInstanceOf(NotFoundException);
+    expect(emitMarkerUpdate).not.toHaveBeenCalled();
+  });
 });
