@@ -203,12 +203,28 @@ export class AuthController {
     return this.authOrchestratorService.sendEmailVerification(body.idToken);
   }
 
+  /**
+   * The caller's own session token, as `AuthGuard` reads it. Used to ask
+   * Firebase to mail the verification message to the signed-in address.
+   */
+  private getSessionIdToken(request: Request): string {
+    const authHeader = request?.headers?.['authorization'];
+    const bearer =
+      typeof authHeader === 'string' ? authHeader.split(' ')[1] : undefined;
+    const header = request?.headers?.['idtoken'];
+
+    return ((Array.isArray(header) ? header[0] : header) || bearer) as string;
+  }
+
+  @UseGuards(AuthGuard, EmailOwnershipGuard)
   @Post('generate-email-verification-link')
   async generateEmailVerificationLink(
     @Body() body: GenerateEmailVerificationLinkDto,
+    @Req() request: Request,
   ): Promise<IDataResponse> {
     return this.authOrchestratorService.generateEmailVerificationLink(
       body.email,
+      this.getSessionIdToken(request),
     );
   }
 
@@ -221,11 +237,16 @@ export class AuthController {
     );
   }
 
+  @UseGuards(AuthGuard, EmailOwnershipGuard)
   @Post('resend-verification-email')
   async resendVerificationEmail(
     @Body() body: { email: string },
+    @Req() request: Request,
   ): Promise<IDataResponse> {
-    return this.authOrchestratorService.resendVerificationEmail(body.email);
+    return this.authOrchestratorService.resendVerificationEmail(
+      body.email,
+      this.getSessionIdToken(request),
+    );
   }
 
   @UseGuards(AuthGuard)
