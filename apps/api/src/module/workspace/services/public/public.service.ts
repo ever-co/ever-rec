@@ -42,15 +42,20 @@ export class WorkspacePublicService {
       const workspaceRef = db.ref(
         `workspaces/${workspaceInviteData.workspaceId}`,
       );
-      const workspaceData: IWorkspace = (await workspaceRef.get()).val();
+      const workspaceData: IWorkspace | null = (await workspaceRef.get()).val();
+      if (!workspaceData) {
+        // The workspace was deleted while its invite was left behind.
+        // tslint:disable-next-line: quotemark
+        return sendError("Couldn't find the workspace for this invite");
+      }
       const workspaceName = workspaceData.name;
 
       // Get workspace members
       let workspaceMembers = [];
 
       const workspaceMembersData = parseCollectionToArray<IWorkspaceUser>(
-        workspaceData?.members,
-      );
+        workspaceData.members,
+      ).filter((member) => member?.id);
       if (workspaceMembersData.length) {
         const workspaceMembersPromises = workspaceMembersData.map(
           async (workspaceMember) => {
