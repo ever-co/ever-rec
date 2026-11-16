@@ -567,15 +567,21 @@ export class VideoController {
     return await this.videoService.getPoster(request.user?.id, id);
   }
 
-  // TODO: Fix
   @UseGuards(AuthGuard)
   @Post('setPosterRef')
   @UseInterceptors(FileInterceptor('templateBase64'))
   async uploadPoster(
     @Req() req,
     @Body() posterBody,
-    @UploadedFile() templateBase64: any,
-  ) {
+    @UploadedFile() templateBase64: Express.Multer.File | undefined,
+  ): Promise<string> {
+    // The poster is a frame the client captured from the video: an image and nothing else.
+    if (!templateBase64) {
+      throw new BadRequestException('A poster image is required');
+    }
+    if (!templateBase64.mimetype?.startsWith('image/')) {
+      throw new UnsupportedMediaTypeException('The poster must be an image');
+    }
     return await this.videoService.setPoster(req.user?.id, templateBase64, {
       ...posterBody,
     });
