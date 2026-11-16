@@ -20,7 +20,11 @@ import { RegisterChain } from './register';
 import { RequestPasswordChain } from './password-reset/password-request.chain';
 import { PasswordUpdateChain } from './password-update/password-update.chain';
 import { UpdateUserProfileChain } from './update-user-profile/update-user-profile.chain';
-import { IUpdateUserProfileProps, IUploadAvatarProfileProps, WorkflowProfileType } from './update-user-profile/interfaces/update-user-profile.interface';
+import {
+  IUpdateUserProfileProps,
+  IUploadAvatarProfileProps,
+  WorkflowProfileType,
+} from './update-user-profile/interfaces/update-user-profile.interface';
 
 /**
  * Re-exported from `AuthenticationService` rather than restated.
@@ -72,8 +76,8 @@ export class AuthOrchestratorService {
     private readonly registerChain: RegisterChain,
     private readonly requestPasswordChain: RequestPasswordChain,
     private readonly passwordUpdateChain: PasswordUpdateChain,
-    private readonly updateUserProfileChain: UpdateUserProfileChain
-  ) { }
+    private readonly updateUserProfileChain: UpdateUserProfileChain,
+  ) {}
 
   // ==================== AUTHENTICATION METHODS ====================
 
@@ -130,13 +134,18 @@ export class AuthOrchestratorService {
   async updateUserData(
     updateData: IUpdateUserProfileProps,
   ): Promise<IDataResponse> {
-    return this.updateUserProfileChain.execute(updateData, WorkflowProfileType.NAME);
+    return this.updateUserProfileChain.execute(
+      updateData,
+      WorkflowProfileType.NAME,
+    );
   }
 
   /**
    * Upload user avatar
    */
-  async uploadAvatar(uploadData: IUploadAvatarProfileProps): Promise<IDataResponse> {
+  async uploadAvatar(
+    uploadData: IUploadAvatarProfileProps,
+  ): Promise<IDataResponse> {
     return this.updateUserProfileChain.execute(
       uploadData,
       WorkflowProfileType.AVATAR,
@@ -149,7 +158,10 @@ export class AuthOrchestratorService {
   async changeUserEmail(
     updateData: IUpdateUserProfileProps,
   ): Promise<IDataResponse> {
-    return this.updateUserProfileChain.execute(updateData, WorkflowProfileType.EMAIL);
+    return this.updateUserProfileChain.execute(
+      updateData,
+      WorkflowProfileType.EMAIL,
+    );
   }
 
   /**
