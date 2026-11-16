@@ -33,7 +33,8 @@ jest.mock('multer', () => {
 const mockDb: {
   data: Record<string, any>;
   writes: Array<{ op: string; path: string }>;
-} = { data: {}, writes: [] };
+  payloads: Array<{ path: string; payload: Record<string, any> }>;
+} = { data: {}, writes: [], payloads: [] };
 jest.mock('firebase-admin', () => {
   const read = (path: string) => {
     let value: any = mockDb.data;
@@ -46,8 +47,12 @@ jest.mock('firebase-admin', () => {
     database: () => ({
       ref: (path: string) => ({
         get: async () => ({ val: () => read(path) }),
-        update: async () => {
+        update: async (payload: Record<string, any>) => {
           mockDb.writes.push({ op: 'update', path });
+          mockDb.payloads.push({ path, payload });
+          // Apply it to the fixture, so a later read sees what was written.
+          const target = read(path);
+          if (target) Object.assign(target, payload);
         },
         set: async () => {
           mockDb.writes.push({ op: 'set', path });
@@ -100,6 +105,7 @@ describe('stream save-data routes', () => {
     jest.spyOn(console, 'log').mockImplementation(() => undefined);
     jest.spyOn(console, 'error').mockImplementation(() => undefined);
     mockDb.writes = [];
+    mockDb.payloads = [];
     mockDb.data = {
       users: {
         'uid-me': {
@@ -206,11 +212,19 @@ describe('stream save-data routes', () => {
 
   describe('POST stream/save-data/:videoId', () => {
     it('replaces the asset with one created for the caller and deletes the old one', async () => {
-      await save('/vid1', fields('mine')).expect(201);
+      const res = await save('/vid1', fields('mine')).expect(201);
       expect(mockDb.writes).toContainEqual({
         op: 'update',
         path: 'users/uid-me/videos/vid1',
       });
+      const written = mockDb.payloads.find(
+        (p) => p.path === 'users/uid-me/videos/vid1',
+      );
+      expect(written?.payload.streamData).toMatchObject({
+        assetId: 'mine',
+        serviceType: 'mux',
+      });
+      expect(res.body.dbData.streamData.assetId).toBe('mine');
       expect(mux.deleteAsset).toHaveBeenCalledWith('old-asset');
     });
 
