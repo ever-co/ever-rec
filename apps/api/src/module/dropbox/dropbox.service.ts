@@ -9,6 +9,7 @@ import { ConfigService } from '@nestjs/config';
 import { VideoService } from '../video/video.service';
 import { Readable } from 'stream';
 import { IDataResponse } from 'src/interfaces/_types';
+import { OAuthStateService } from '../../services/shared/oauth-state.service';
 
 @Injectable()
 export class DropboxService {
@@ -23,6 +24,7 @@ export class DropboxService {
     private readonly imageService: ImageService,
     private readonly configService: ConfigService,
     private readonly videoService: VideoService,
+    private readonly oauthStateService: OAuthStateService,
   ) {
     this.apiKey = this.configService.get<string>('DROPBOX_API_KEY');
     this.apiSecrete = this.configService.get<string>('DROPBOX_API_SECRET');
@@ -31,14 +33,6 @@ export class DropboxService {
   }
 
   async generateAuthUrl(uid): Promise<any> {
-    const dropbox = dropboxV2Api.authenticate({
-      client_id: this.apiKey,
-      client_secret: this.apiSecrete,
-      redirect_uri: this.redirectURI,
-      token_access_type: 'offline', // if you need an offline long-living refresh token
-      state: uid,
-    });
-
     const userData = await this.getUserData(uid);
 
     if (userData && userData.dropboxAPISCredentials) {
@@ -48,6 +42,13 @@ export class DropboxService {
           'You have already dropbox integrated. Please refresh the page and try again.',
       };
     } else {
+      const dropbox = dropboxV2Api.authenticate({
+        client_id: this.apiKey,
+        client_secret: this.apiSecrete,
+        redirect_uri: this.redirectURI,
+        token_access_type: 'offline', // if you need an offline long-living refresh token
+        state: await this.oauthStateService.issue(uid, 'dropbox'),
+      });
       return dropbox.generateAuthUrl();
     }
   }
@@ -60,7 +61,14 @@ export class DropboxService {
     return userData;
   }
 
-  async completeOAuth(uid: string, code: string): Promise<any> {
+  async completeOAuth(state: string, code: string): Promise<any> {
+    // The state is a one-time value issued for a signed-in user. Anything else: no exchange, no
+    // write.
+    const uid = await this.oauthStateService.consume(state, 'dropbox');
+    if (!uid) {
+      return null;
+    }
+
     const dropbox = dropboxV2Api.authenticate({
       client_id: this.apiKey,
       client_secret: this.apiSecrete,

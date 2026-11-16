@@ -45,16 +45,24 @@ export class DropboxController {
   @Get('/complete-oauth')
   @Redirect()
   async completeOAuth(@Req() req, @Query() query, @Res() res) {
+    let completed;
     try {
-      await this.dropBoxService.completeOAuth(query.state, query.code);
+      completed = await this.dropBoxService.completeOAuth(
+        query.state,
+        query.code,
+      );
     } catch (e) {
       res.status(500).send(e);
     }
 
+    const integrationsUrl = `${this.configService.get<string>(
+      'WEBSITE_URL',
+    )}/media/integrations`;
     return {
-      url: `${this.configService.get<string>(
-        'WEBSITE_URL',
-      )}/media/integrations`,
+      url:
+        completed === null
+          ? `${integrationsUrl}?error=invalid_state`
+          : integrationsUrl,
     };
   }
 

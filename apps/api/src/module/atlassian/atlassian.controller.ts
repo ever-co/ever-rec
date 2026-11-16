@@ -34,9 +34,16 @@ export class AtlassianController {
   @Get('jira/complete-oauth')
   @Redirect()
   async completeOAuth(@Query() query) {
-    await this.atlassianService.completeJiraOAuth(query.state, query.code);
+    const completed = await this.atlassianService.completeJiraOAuth(
+      query.state,
+      query.code,
+    );
+    const integrationsUrl = `${this.configService.get<string>('WEBSITE_URL')}/media/integrations`;
     return {
-      url: `${this.configService.get<string>('WEBSITE_URL')}/media/integrations`,
+      url:
+        completed === null
+          ? `${integrationsUrl}?error=invalid_state`
+          : integrationsUrl,
     };
   }
 

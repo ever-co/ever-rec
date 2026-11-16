@@ -2,6 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { App, LogLevel } from '@slack/bolt';
 import { ResStatusEnum } from 'src/enums/ResStatusEnum';
+import { OAuthStateService } from '../shared/oauth-state.service';
 
 @Injectable()
 export class SlackBoltService {
@@ -13,7 +14,10 @@ export class SlackBoltService {
   private redirectUriPath: string = '/api/v1/slack/installation';
   private boltApp: App;
 
-  constructor(private readonly configService: ConfigService) {
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly oauthStateService: OAuthStateService,
+  ) {
     this.clientId = this.configService.get<string>('SLACK_CLIENT_ID');
     this.clientSecrete = this.configService.get<string>('SLACK_CLIENT_SECRET');
     this.baseURL = this.configService.get<string>('API_BASE_URL');
@@ -40,7 +44,8 @@ export class SlackBoltService {
   }
 
   public async slackLoginUrl(uid: string) {
-    const sharableURL = `https://slack.com/oauth/v2/authorize?client_id=${this.clientId}&scope=channels:read,commands,groups:read,mpim:read,im:read&user_scope=channels:read,chat:write,users:read&redirect_uri=${this.oauthRedirect}&state=${uid}&type=web`;
+    const state = await this.oauthStateService.issue(uid, 'slack');
+    const sharableURL = `https://slack.com/oauth/v2/authorize?client_id=${this.clientId}&scope=channels:read,commands,groups:read,mpim:read,im:read&user_scope=channels:read,chat:write,users:read&redirect_uri=${this.oauthRedirect}&state=${state}&type=web`;
 
     return sharableURL;
   }

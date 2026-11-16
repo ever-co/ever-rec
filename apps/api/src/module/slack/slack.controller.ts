@@ -26,9 +26,15 @@ export class SlackController {
   @Get('installation')
   @Redirect()
   async slackInstallation(@Req() req): Promise<{ url: string }> {
-    await this.slackService.storeInstallationInformation(req.query);
+    const stored = await this.slackService.storeInstallationInformation(
+      req.query,
+    );
+    const integrationsUrl = `${this.configService.get<string>('WEBSITE_URL')}/integrations`;
     return {
-      url: `${this.configService.get<string>('WEBSITE_URL')}/integrations`,
+      url:
+        stored === null
+          ? `${integrationsUrl}?error=invalid_state`
+          : integrationsUrl,
     };
   }
 

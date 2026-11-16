@@ -4,6 +4,7 @@ import { HttpService } from 'nestjs-http-promise';
 import { ResStatusEnum } from 'src/enums/ResStatusEnum';
 import * as admin from 'firebase-admin';
 import { Readable } from 'stream';
+import { OAuthStateService } from '../shared/oauth-state.service';
 const fetch = require('node-fetch');
 const FormData = require('form-data');
 
@@ -28,6 +29,7 @@ export class AtlassianApiService {
   constructor(
     private readonly configService: ConfigService,
     private readonly httpService: HttpService,
+    private readonly oauthStateService: OAuthStateService,
   ) {
     this.clientId = this.configService.get<string>('JIRA_CLIENT_ID');
     this.clientSecrete = this.configService.get<string>('JIRA_CLIENT_SECRET');
@@ -125,7 +127,8 @@ export class AtlassianApiService {
   }
 
   async generateOauthLink(uid: string) {
-    const url = `https://auth.atlassian.com/authorize?audience=api.atlassian.com&client_id=${this.clientId}&scope=${this.jiraScope}&redirect_uri=${this.oauthRedirect}&state=${uid}&response_type=code&prompt=consent`;
+    const state = await this.oauthStateService.issue(uid, 'jira');
+    const url = `https://auth.atlassian.com/authorize?audience=api.atlassian.com&client_id=${this.clientId}&scope=${this.jiraScope}&redirect_uri=${this.oauthRedirect}&state=${state}&response_type=code&prompt=consent`;
     return encodeURI(url);
   }
 

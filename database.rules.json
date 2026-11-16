@@ -94,6 +94,10 @@
       ".indexOn": ["expiresAt"],
       ".read": false,
       ".write": false
+    },
+    "oauthStates": {
+      ".read": false,
+      ".write": false
     }
   }
 }
