@@ -1,8 +1,9 @@
 /**
  * `FirebaseValidateStrategy` is the ID token check behind `AuthGuard`, `OptionalAuthGuard` and the
- * editor socket. It asks Firebase to look the account up as well (`checkRevoked`), so the token of
- * a deleted, disabled or signed-out account is refused instead of passing on its signature and
- * expiry alone.
+ * editor socket. `supports` checks the signature and the expiry only; `handle` asks Firebase to look
+ * the account up as well (`checkRevoked`), so the token of a deleted, disabled or signed-out account
+ * is refused instead of passing on its signature and expiry alone. The account is looked up once
+ * per request, not once in each step.
  */
 import { FirebaseAdminService } from '../../../../../firebase/services/firebase-admin.service';
 import { InMemoryFirebaseApp } from '../../../../../../../test/support/in-memory-firebase';
@@ -28,6 +29,10 @@ describe('FirebaseValidateStrategy', () => {
     );
   });
 
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   it('supports and handles the token of a live account', async () => {
     const request: any = {};
 
@@ -43,7 +48,6 @@ describe('FirebaseValidateStrategy', () => {
     await firebase.authService.deleteUser('uid-a');
     const request: any = {};
 
-    await expect(strategy.supports(TOKEN)).resolves.toBe(false);
     await expect(
       strategy.resolve({ token: TOKEN, request } as any),
     ).rejects.toThrow();
@@ -57,26 +61,41 @@ describe('FirebaseValidateStrategy', () => {
     'auth/user-not-found',
     'auth/user-disabled',
     'auth/id-token-revoked',
-  ])('refuses a token that Firebase refuses with %s', async (code) => {
-    jest
-      .spyOn(firebase.authService, 'verifyIdToken')
-      .mockRejectedValue(Object.assign(new Error(code), { code }));
-    const request: any = {};
+  ])(
+    'refuses a token that the account lookup refuses with %s and sets no user',
+    async (code) => {
+      // As Firebase does: the signature and the expiry still pass, only the lookup refuses.
+      const auth = firebase.authService;
+      const verify = auth.verifyIdToken.bind(auth);
+      jest
+        .spyOn(auth, 'verifyIdToken')
+        .mockImplementation(async (token: string, checkRevoked?: boolean) => {
+          if (checkRevoked) throw Object.assign(new Error(code), { code });
+          return verify(token, checkRevoked);
+        });
+      const request: any = {};
 
-    await expect(strategy.supports(TOKEN)).resolves.toBe(false);
-    await expect(
-      strategy.resolve({ token: TOKEN, request } as any),
-    ).rejects.toThrow();
-    expect(request.user).toBeUndefined();
-  });
+      await expect(
+        strategy.resolve({ token: TOKEN, request } as any),
+      ).rejects.toThrow();
+      await expect(
+        strategy.handle({ token: TOKEN, request } as any),
+      ).rejects.toMatchObject({ code });
+      expect(request.user).toBeUndefined();
+    },
+  );
 
-  it('asks Firebase to look the account up in both steps', async () => {
+  it('looks the account up once per resolve, in the step that sets the user', async () => {
     const verify = jest.spyOn(firebase.authService, 'verifyIdToken');
 
     await strategy.resolve({ token: TOKEN, request: {} } as any);
 
+    const lookups = verify.mock.calls.filter(
+      ([, checkRevoked]) => checkRevoked === true,
+    );
+    expect(lookups).toEqual([[TOKEN, true]]);
     expect(verify).toHaveBeenCalledTimes(2);
-    expect(verify).toHaveBeenNthCalledWith(1, TOKEN, true);
+    expect(verify).toHaveBeenNthCalledWith(1, TOKEN, false);
     expect(verify).toHaveBeenNthCalledWith(2, TOKEN, true);
   });
 });
