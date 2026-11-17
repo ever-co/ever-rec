@@ -7,6 +7,7 @@
  */
 import request from 'supertest';
 import { createTestApp, TestApp } from '../../../../test/support/test-app';
+import { AuthProviderId } from '../interfaces/auth.interface';
 import { AuthContext } from './auth.context';
 import { AuthenticationService } from './authentication.service';
 import { PasswordUpdate } from './password-update/interfaces/password-update.interface';
@@ -153,6 +154,46 @@ describe('changing the password', () => {
       .get(FirebaseValidateStrategy)
       .resolve({ token: data.idToken, request: validated } as any);
     expect(validated.user).toMatchObject({ id: UID, email: EMAIL });
+  });
+
+  it('keeps the change and runs the next provider when the sign-in with the new password fails', async () => {
+    const before = await signIn();
+    const post = t.toolkit.post.bind(t.toolkit);
+    let signIns = 0;
+    jest
+      .spyOn(t.toolkit, 'post')
+      .mockImplementation(async (path: string, body: any) => {
+        if (path === 'accounts:signInWithPassword' && ++signIns === 2) {
+          throw new Error('sign-in unavailable');
+        }
+        return post(path, body);
+      });
+    const gauzy = { handle: jest.fn().mockResolvedValue(undefined) };
+    const state = new FirebasePasswordUpdateState(
+      t.app.get(AuthenticationService),
+      gauzy as any,
+      true,
+    );
+    const context = new AuthContext<PasswordUpdate>(state, {
+      isValid: async () => true,
+    } as any);
+
+    await context.request({
+      uid: UID,
+      email: EMAIL,
+      oldPassword: OLD_PASSWORD,
+      newPassword: NEW_PASSWORD,
+      token: before.refreshToken,
+    });
+
+    // The password is changed, so the next provider gets it too, and no revoked token is answered.
+    expect(signIns).toBe(2);
+    expect(gauzy.handle).toHaveBeenCalledTimes(1);
+    expect(t.firebase.authService.users.get(UID)?.password).toBe(NEW_PASSWORD);
+    const answered: any = context.getResults().get(AuthProviderId.FIREBASE);
+    expect(answered.data.message).toBe('Password changed successfully!');
+    expect(answered.data.idToken).toBeUndefined();
+    expect(answered.data.refreshToken).toBeUndefined();
   });
 
   it('still puts the old password back when the next provider fails', async () => {
