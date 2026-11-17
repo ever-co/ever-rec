@@ -152,4 +152,43 @@ describe('EverIdLinkService', () => {
     await expect(links.resolve('i', 's')).resolves.toBeNull();
     expect(db.dump('ever_identities_by_uid/gone')).toBeNull();
   });
+
+  it('forgets every link of a deleted account and leaves other accounts alone', async () => {
+    const base = { emailAtLink: 'a@example.test', linkMethod: 'jit' as const };
+    await links.link({ ...base, issuer: 'i1', subject: 's1', uid: 'gone' });
+    await links.link({ ...base, issuer: 'i2', subject: 's2', uid: 'gone' });
+    await links.link({ ...base, issuer: 'i1', subject: 'other', uid: 'kept' });
+
+    await expect(links.forgetAllForUser('gone')).resolves.toBe(2);
+
+    await expect(links.resolve('i1', 's1')).resolves.toBeNull();
+    await expect(links.resolve('i2', 's2')).resolves.toBeNull();
+    expect(db.dump('ever_identities_by_uid/gone')).toBeNull();
+    await expect(links.resolve('i1', 'other')).resolves.toMatchObject({
+      uid: 'kept',
+    });
+    expect(
+      db.dump(`ever_identities_by_uid/kept/${links.key('i1', 'other')}`),
+    ).toBe(true);
+    await expect(links.forgetAllForUser('never-linked')).resolves.toBe(0);
+  });
+
+  it('never forgets a link that names another account by now', async () => {
+    const base = {
+      issuer: 'i',
+      subject: 's',
+      emailAtLink: 'a@example.test',
+      linkMethod: 'explicit' as const,
+    };
+    await links.link({ ...base, uid: 'gone' });
+    // The link was taken over meanwhile, while the stale index entry of `gone` stayed.
+    await db.ref(`ever_identities/${links.key('i', 's')}/uid`).set('new');
+
+    await links.forgetAllForUser('gone');
+
+    await expect(links.resolve('i', 's')).resolves.toMatchObject({
+      uid: 'new',
+    });
+    expect(db.dump('ever_identities_by_uid/gone')).toBeNull();
+  });
 });
