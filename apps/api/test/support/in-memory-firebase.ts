@@ -292,6 +292,7 @@ export interface FakeUser {
   providers: string[];
   customClaims?: Record<string, unknown>;
   lastSignInTime: string | null;
+  /** The last revocation of the account's sessions, on the `InMemoryAuth.tick()` counter. */
   tokensValidAfter?: number;
 }
 
@@ -306,6 +307,27 @@ export class InMemoryAuth {
   /** Deleted accounts, whose ID tokens were already issued. */
   private readonly deletedUsers = new Map<string, FakeUser>();
   private counter = 0;
+  /**
+   * Orders sign-ins and revocations, as `auth_time` and `tokensValidAfterTime` do for the Admin
+   * SDK. A counter rather than the clock, so two steps in the same millisecond keep their order.
+   */
+  private clock = 0;
+  /** The sign-in time of the session of each ID token the Identity Toolkit double issued. */
+  private readonly authTimes = new Map<string, number>();
+
+  tick(): number {
+    this.clock += 1;
+    return this.clock;
+  }
+
+  recordAuthTime(idToken: string, authTime: number): void {
+    this.authTimes.set(idToken, authTime);
+  }
+
+  /** A session that signed in before the last revocation of its account is revoked. */
+  isRevoked(user: FakeUser, authTime: number): boolean {
+    return authTime < (user.tokensValidAfter ?? 0);
+  }
 
   addUser(user: Partial<FakeUser> & { email: string }): FakeUser {
     this.counter += 1;
@@ -397,7 +419,8 @@ export class InMemoryAuth {
 
   /**
    * As the Admin SDK does: an ID token carries its own claims, so a token issued before its account
-   * was deleted still verifies, and the account is looked up only when `checkRevoked` is set.
+   * was deleted still verifies, and the account is looked up only when `checkRevoked` is set. With
+   * `checkRevoked`, the token of a session that signed in before `revokeRefreshTokens` is refused.
    */
   async verifyIdToken(token: string, checkRevoked = false) {
     const match = /^fid\.([^.]+)\.[a-f0-9]+$/.exec(token ?? '');
@@ -415,6 +438,11 @@ export class InMemoryAuth {
         'auth/user-not-found',
         'There is no user record corresponding to the provided identifier.',
       );
+    if (checkRevoked && this.isRevoked(user, this.authTimes.get(token) ?? 0))
+      throw authError(
+        'auth/id-token-revoked',
+        'The Firebase ID token has been revoked.',
+      );
     return {
       uid: user.uid,
       email: user.email,
@@ -426,7 +454,7 @@ export class InMemoryAuth {
   async revokeRefreshTokens(uid: string) {
     this.revoked.push(uid);
     const user = this.users.get(uid);
-    if (user) user.tokensValidAfter = Date.now();
+    if (user) user.tokensValidAfter = this.tick();
   }
 
   async listUsers(maxResults = 1000, pageToken?: string) {
@@ -576,6 +604,8 @@ export class InMemoryFirebaseApp {
 interface RestSession {
   uid: string;
   refreshToken: string;
+  /** When the session signed in, on the `InMemoryAuth.tick()` counter; a refresh keeps it. */
+  authTime: number;
 }
 
 /** The axios-style error `nestjs-http-promise` rejects with. */
@@ -628,6 +658,30 @@ export class InMemoryIdentityToolkit {
             email: user.email,
             displayName: user.displayName ?? '',
             registered: true,
+            ...this.issue(user.uid),
+          },
+        };
+      }
+      case 'accounts:update': {
+        // Only the password change of `FirebaseAuthService.updatePassword`. As Firebase does, the
+        // change ends the sessions opened before it and answers with the tokens of a new one.
+        if (typeof body?.password !== 'string')
+          throw restError(400, `UNSUPPORTED_IN_TEST:${path}`);
+        let uid: string;
+        try {
+          ({ uid } = await this.auth.verifyIdToken(body?.idToken, true));
+        } catch {
+          throw restError(400, 'INVALID_ID_TOKEN');
+        }
+        const user = this.auth.users.get(uid)!;
+        user.password = body.password;
+        user.tokensValidAfter = this.auth.tick();
+        return {
+          data: {
+            kind: 'identitytoolkit#SetAccountInfoResponse',
+            localId: user.uid,
+            email: user.email,
+            emailVerified: user.emailVerified,
             ...this.issue(user.uid),
           },
         };
@@ -692,9 +746,9 @@ export class InMemoryIdentityToolkit {
       case 'token': {
         const session = this.refreshTokens.get(body?.refresh_token);
         const user = session ? this.auth.users.get(session.uid) : undefined;
-        if (!session || !user || (user.tokensValidAfter ?? 0) > 0)
+        if (!session || !user || this.auth.isRevoked(user, session.authTime))
           throw restError(400, 'INVALID_REFRESH_TOKEN');
-        const issued = this.issue(user.uid, session.refreshToken);
+        const issued = this.issue(user.uid, session);
         return {
           data: {
             id_token: issued.idToken,
@@ -710,11 +764,15 @@ export class InMemoryIdentityToolkit {
     }
   }
 
-  private issue(uid: string, keepRefreshToken?: string) {
+  /** Tokens of a new session, or of `session` when it is refreshed. */
+  private issue(uid: string, session?: RestSession) {
     this.counter += 1;
     const n = this.counter.toString(16).padStart(6, '0');
-    const refreshToken = keepRefreshToken ?? `frt.${uid}.${n}`;
-    this.refreshTokens.set(refreshToken, { uid, refreshToken });
-    return { idToken: `fid.${uid}.${n}`, refreshToken, expiresIn: '3600' };
+    const refreshToken = session?.refreshToken ?? `frt.${uid}.${n}`;
+    const authTime = session?.authTime ?? this.auth.tick();
+    this.refreshTokens.set(refreshToken, { uid, refreshToken, authTime });
+    const idToken = `fid.${uid}.${n}`;
+    this.auth.recordAuthTime(idToken, authTime);
+    return { idToken, refreshToken, expiresIn: '3600' };
   }
 }
