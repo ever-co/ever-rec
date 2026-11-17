@@ -6,7 +6,7 @@ export const REQUIRED_DESTINATION_FOLDER_ACCESS_METADATA =
   'requiredDestinationFolderAccess';
 
 // Requires `requiredAccess` on the folder named by `parentId` in the body (the folder an item is
-// moved into).
+// moved into) and on every folder above it.
 export function CanAccessDestinationFolder(
   requiredAccess: PermissionAccessEnum,
 ) {

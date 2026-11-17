@@ -6,6 +6,9 @@
  *   folder decides now.
  * - An item whose permissions list teams only was open to every member of a workspace that has
  *   teams; only members of the listed teams (and the admin) may use it.
+ * - Only the folder itself was checked, never the folders above it: a member shut out of a folder
+ *   could still open a subfolder with no permissions of its own, and the items in it. Every folder
+ *   above counts now, on the folder routes, the item routes and the folder an item is moved into.
  *
  * Only the database, the token check and the services behind the handlers are replaced.
  */
@@ -14,8 +17,10 @@ import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import { TokenService } from '../../auth/services/tokens';
 import { WorkspaceFilesController } from '../controllers/files.controller';
+import { WorkspacesController } from '../controllers/workspaces.controller';
 import { WorkspaceFilesService } from '../services/files.service';
 import { WorkspaceSharedService } from '../services/shared.service';
+import { WorkspacesService } from '../services/workspace.service';
 
 jest.mock('../../auth/services/tokens', () => ({ TokenService: class {} }));
 jest.mock('../services/files.service', () => ({
@@ -23,6 +28,9 @@ jest.mock('../services/files.service', () => ({
 }));
 jest.mock('../services/shared.service', () => ({
   WorkspaceSharedService: class {},
+}));
+jest.mock('../services/workspace.service', () => ({
+  WorkspacesService: class {},
 }));
 
 const mockDb: { data: Record<string, unknown> } = { data: {} };
@@ -47,10 +55,13 @@ describe('item routes: folder and team permissions', () => {
   let app: INestApplication;
   const saveOriginalWSImage = jest.fn();
   const updateItemData = jest.fn();
+  const getImage = jest.fn();
+  const moveItemFromPersonalToWorkspace = jest.fn();
+  const getSingleWorkspace = jest.fn();
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
-      controllers: [WorkspaceFilesController],
+      controllers: [WorkspaceFilesController, WorkspacesController],
       providers: [
         {
           provide: TokenService,
@@ -63,9 +74,15 @@ describe('item routes: folder and team permissions', () => {
         },
         {
           provide: WorkspaceFilesService,
-          useValue: { saveOriginalWSImage, updateItemData },
+          useValue: {
+            saveOriginalWSImage,
+            updateItemData,
+            getImage,
+            moveItemFromPersonalToWorkspace,
+          },
         },
         { provide: WorkspaceSharedService, useValue: {} },
+        { provide: WorkspacesService, useValue: { getSingleWorkspace } },
       ],
     }).compile();
 
@@ -121,6 +138,11 @@ describe('item routes: folder and team permissions', () => {
     };
     saveOriginalWSImage.mockReset().mockResolvedValue('https://example.com/o');
     updateItemData.mockReset().mockResolvedValue({ status: true });
+    getImage.mockReset().mockResolvedValue({ status: 'success' });
+    moveItemFromPersonalToWorkspace
+      .mockReset()
+      .mockResolvedValue({ status: 'success' });
+    getSingleWorkspace.mockReset().mockResolvedValue({ status: 'success' });
   });
 
   afterEach(() => {
@@ -208,6 +230,111 @@ describe('item routes: folder and team permissions', () => {
       ];
       await putData('uid-onteam', 'teamOnly').expect(200);
       await putData('uid-outsider', 'teamOnly').expect(403);
+    });
+  });
+
+  describe('a subfolder of a folder the member is shut out of', () => {
+    // `A` is shut to `uid-reader` (no access) and open to `uid-writer`. `B` sits in `A` with no
+    // permissions of its own, so only `A` can refuse anyone in it. `loop1` and `loop2` are each
+    // the parent of the other.
+    beforeEach(() => {
+      const ws: any = mockDb.data['workspaces/ws1'];
+      ws.folders = {
+        ...ws.folders,
+        A: {
+          id: 'A',
+          parentId: false,
+          access: {
+            teams: [],
+            members: [
+              { uid: 'uid-reader', access: 'NONE' },
+              { uid: 'uid-writer', access: 'WRITE' },
+            ],
+          },
+        },
+        B: { id: 'B', parentId: 'A' },
+        loop1: { id: 'loop1', parentId: 'loop2' },
+        loop2: { id: 'loop2', parentId: 'loop1' },
+      };
+      ws.screenshots = {
+        ...ws.screenshots,
+        inB: { id: 'inB', refName: 'in-b.png', parentId: 'B' },
+        inLoop: { id: 'inLoop', refName: 'in-loop.png', parentId: 'loop1' },
+      };
+    });
+
+    const readFolder = (uid: string, folderId: string) =>
+      request(app.getHttpServer())
+        .get(`/workspace/single/ws1?folderId=${folderId}`)
+        .set(as(uid));
+    const readImage = (uid: string, id: string) =>
+      request(app.getHttpServer()).get(`${IMAGE_URL}/${id}`).set(as(uid));
+    const addToFolder = (uid: string, folderId: string) =>
+      request(app.getHttpServer())
+        .post(
+          `/workspace/ws1/files/video/add-from-personal?itemId=v1&folderId=${folderId}`,
+        )
+        .set(as(uid));
+    const moveInto = (uid: string, id: string, parentId: string) =>
+      request(app.getHttpServer())
+        .put(`${IMAGE_URL}/${id}/single-data`)
+        .set(as(uid))
+        .send({ parentId });
+
+    describe('a member shut out of the parent folder', () => {
+      it('cannot read the subfolder', async () => {
+        await readFolder('uid-reader', 'B').expect(403);
+        expect(getSingleWorkspace).not.toHaveBeenCalled();
+      });
+
+      it('cannot read an item in the subfolder', async () => {
+        await readImage('uid-reader', 'inB').expect(403);
+        expect(getImage).not.toHaveBeenCalled();
+      });
+
+      it('cannot add to the subfolder', async () => {
+        await addToFolder('uid-reader', 'B').expect(403);
+        expect(moveItemFromPersonalToWorkspace).not.toHaveBeenCalled();
+      });
+
+      it('cannot change an item in the subfolder', async () => {
+        await putData('uid-reader', 'inB').expect(403);
+        expect(updateItemData).not.toHaveBeenCalled();
+      });
+
+      it('cannot move an item into the subfolder', async () => {
+        await moveInto('uid-reader', 'open', 'B').expect(403);
+        expect(updateItemData).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('a member allowed on the parent folder', () => {
+      it('reads the subfolder and the item in it', async () => {
+        await readFolder('uid-writer', 'B').expect(200);
+        await readImage('uid-writer', 'inB').expect(200);
+      });
+
+      it('adds to the subfolder, changes the item in it and moves items into it', async () => {
+        await addToFolder('uid-writer', 'B').expect(201);
+        await putData('uid-writer', 'inB').expect(200);
+        await moveInto('uid-writer', 'open', 'B').expect(200);
+      });
+    });
+
+    it('lets the workspace admin in everywhere', async () => {
+      await readFolder('uid-admin', 'B').expect(200);
+      await readImage('uid-admin', 'inB').expect(200);
+      await addToFolder('uid-admin', 'B').expect(201);
+      await putData('uid-admin', 'inB').expect(200);
+      await moveInto('uid-admin', 'open', 'B').expect(200);
+    });
+
+    it('refuses a loop of parent folders to members, for reading and writing', async () => {
+      await readFolder('uid-writer', 'loop1').expect(403);
+      await readImage('uid-writer', 'inLoop').expect(403);
+      await addToFolder('uid-writer', 'loop1').expect(403);
+      await putData('uid-writer', 'inLoop').expect(403);
+      await moveInto('uid-writer', 'open', 'loop1').expect(403);
     });
   });
 });
