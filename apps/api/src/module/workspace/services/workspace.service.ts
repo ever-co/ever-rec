@@ -60,18 +60,24 @@ export class WorkspacesService {
 
       // Don't really want to fetch the files of each workspace. This function sends basic workspace data,
       // for listing available workspaces, their names etc. Files data will be loaded on demand for each workspace.
-      const userWorkspaces = userVal.workspaceIds || [];
-      userWorkspaces.forEach(
-        (id) =>
-          id &&
-          workspaces.push({
-            ...workspacesVal[id],
-            screenshots: [],
-            videos: [],
-            id: id,
-            folders: parseCollectionToArray(workspacesVal[id].folders, true),
-          }),
-      );
+      // An id can outlive its workspace (a join that lands after deleteWorkspace read the members,
+      // or a member update there that failed), and can be listed twice. Skip the first and list
+      // each workspace once, so one such id does not fail the whole list.
+      const userWorkspaces = [...new Set(userVal.workspaceIds || [])];
+      userWorkspaces.forEach((id) => {
+        const workspace = id ? workspacesVal?.[id] : null;
+        if (!workspace) {
+          return;
+        }
+
+        workspaces.push({
+          ...workspace,
+          screenshots: [],
+          videos: [],
+          id: id,
+          folders: parseCollectionToArray(workspace.folders, true),
+        });
+      });
 
       return sendResponse<IWorkspace[]>(workspaces);
     } catch (e) {
