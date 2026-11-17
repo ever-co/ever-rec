@@ -303,6 +303,8 @@ function authError(code: string, message: string): Error {
 export class InMemoryAuth {
   readonly users = new Map<string, FakeUser>();
   readonly revoked: string[] = [];
+  /** Deleted accounts, whose ID tokens were already issued. */
+  private readonly deletedUsers = new Map<string, FakeUser>();
   private counter = 0;
 
   addUser(user: Partial<FakeUser> & { email: string }): FakeUser {
@@ -379,6 +381,8 @@ export class InMemoryAuth {
   }
 
   async deleteUser(uid: string) {
+    const user = this.users.get(uid);
+    if (user) this.deletedUsers.set(uid, user);
     this.users.delete(uid);
   }
 
@@ -391,13 +395,25 @@ export class InMemoryAuth {
     return `custom.${uid}.${randomBytes(4).toString('hex')}`;
   }
 
-  async verifyIdToken(token: string) {
+  /**
+   * As the Admin SDK does: an ID token carries its own claims, so a token issued before its account
+   * was deleted still verifies, and the account is looked up only when `checkRevoked` is set.
+   */
+  async verifyIdToken(token: string, checkRevoked = false) {
     const match = /^fid\.([^.]+)\.[a-f0-9]+$/.exec(token ?? '');
-    const user = match ? this.users.get(match[1]) : undefined;
+    const uid = match?.[1];
+    const user = uid
+      ? (this.users.get(uid) ?? this.deletedUsers.get(uid))
+      : undefined;
     if (!user)
       throw authError(
         'auth/argument-error',
         'Decoding Firebase ID token failed.',
+      );
+    if (checkRevoked && !this.users.has(user.uid))
+      throw authError(
+        'auth/user-not-found',
+        'There is no user record corresponding to the provided identifier.',
       );
     return {
       uid: user.uid,
