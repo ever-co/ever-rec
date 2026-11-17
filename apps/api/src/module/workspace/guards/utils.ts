@@ -159,8 +159,12 @@ export function canAccessItemData(
   return true;
 }
 
-// Same rule as `CanAccessFolderGuard`: no folder, the admin and folders without their own
-// permissions pass; a folder id that matches no folder does not.
+// Same rule as `CanAccessFolderGuard`: no folder (the workspace root) and the admin pass; a folder
+// id that matches no folder does not. Otherwise the folder and every folder above it, up to the
+// root, must give the user `requiredAccessLevel` wherever they have permissions of their own.
+// Permissions are stored on one folder only, so a subfolder without its own is closed to whoever
+// a folder above it is closed to. A parent id that matches no folder, or parent ids that loop,
+// are refused.
 export function canAccessFolderById(
   folderId: unknown,
   workspace: IWorkspace,
@@ -170,14 +174,25 @@ export function canAccessFolderById(
   if (!folderId || folderId === 'false' || user.id === workspace.admin) {
     return true;
   }
-  const folder: IWorkspaceFolder | undefined = parseCollectionToArray(
-    workspace.folders,
-  ).find((x: IWorkspaceFolder) => x?.id === folderId);
-  if (!folder) {
-    return false;
-  }
-  if (folder.access) {
-    return !!evaluateAccess(folder, workspace, user, requiredAccessLevel);
+  const folders = parseCollectionToArray<IWorkspaceFolder>(workspace.folders);
+  const visited = new Set<unknown>();
+  let currentId: unknown = folderId;
+  while (currentId && currentId !== 'false') {
+    if (visited.has(currentId)) {
+      return false;
+    }
+    visited.add(currentId);
+    const folder = folders.find((x) => x?.id === currentId);
+    if (!folder) {
+      return false;
+    }
+    if (
+      folder.access &&
+      !evaluateAccess(folder, workspace, user, requiredAccessLevel)
+    ) {
+      return false;
+    }
+    currentId = folder.parentId;
   }
   return true;
 }

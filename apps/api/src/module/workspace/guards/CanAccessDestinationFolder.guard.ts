@@ -1,6 +1,6 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { evaluateAccess, getUserAndWorkspace } from './utils';
+import { canAccessFolderById, getUserAndWorkspace } from './utils';
 import { parseCollectionToArray } from '../../../services/utils/helpers';
 import { IWorkspaceFolder } from '../Interfaces/Folders';
 import { PermissionAccessEnum } from '../Interfaces/Workspace';
@@ -41,20 +41,18 @@ export class CanAccessDestinationFolderGuard implements CanActivate {
         return false;
       }
 
-      if (user.id === workspace.admin) {
-        return true;
-      }
-
       const requiredAccessLevel = this.reflector.get<PermissionAccessEnum>(
         REQUIRED_DESTINATION_FOLDER_ACCESS_METADATA,
         context.getHandler(),
       );
 
-      if (folder.access) {
-        return evaluateAccess(folder, workspace, user, requiredAccessLevel);
-      }
-
-      return true;
+      // The destination and every folder above it, as on the folder routes (the admin passes).
+      return canAccessFolderById(
+        parentId,
+        workspace,
+        user,
+        requiredAccessLevel,
+      );
     } catch (e) {
       console.log(e);
       return false;
