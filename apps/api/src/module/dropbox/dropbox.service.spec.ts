@@ -1,0 +1,296 @@
+/**
+ * Saving to Dropbox and removing the copy, with the real service. Dropbox and the database are
+ * mocked. Dropbox issues short-lived access tokens (sign-in asks for `offline` access), so an upload
+ * a few hours after connecting meets `expired_access_token`: the service must refresh the token once,
+ * retry once and answer the request either way. A delete must report what Dropbox did.
+ */
+import { ConfigService } from '@nestjs/config';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { Test } from '@nestjs/testing';
+import { Readable } from 'stream';
+import { ResStatusEnum } from '../../enums/ResStatusEnum';
+import { OAuthStateService } from '../../services/shared/oauth-state.service';
+import { createFakeRealtimeDb } from '../../services/shared/fake-realtime-db';
+import { ImageService } from '../image/image.service';
+import { VideoService } from '../video/video.service';
+import { DropboxService } from './dropbox.service';
+
+jest.mock('../image/image.service', () => ({ ImageService: class {} }));
+jest.mock('../video/video.service', () => ({ VideoService: class {} }));
+
+/** One call per Dropbox API request: (token, { resource, parameters, readStream }, callback). */
+const mockApiCall = jest.fn();
+/** One call per token refresh: (refreshToken, callback). */
+const mockRefresh = jest.fn();
+jest.mock('dropbox-v2-api', () => ({
+  __esModule: true,
+  default: {
+    authenticate: (options: { token?: string }) => {
+      // Like the real client: returns the request at once and calls back when Dropbox answers.
+      const client: any = (opts: any, cb: (...args: any[]) => void) => {
+        mockApiCall(options.token, opts, cb);
+        return {};
+      };
+      client.refreshToken = (refreshToken: string, cb: (...a: any[]) => void) =>
+        mockRefresh(refreshToken, cb);
+      return client;
+    },
+  },
+}));
+
+const mockDb = createFakeRealtimeDb();
+jest.mock('firebase-admin', () => ({
+  database: (...args: any[]) => (mockDb.admin.database as any)(...args),
+}));
+
+const expiredToken = {
+  error_summary: 'expired_access_token/',
+  error: { '.tag': 'expired_access_token' },
+  code: 401,
+};
+
+/** Reads the upload body the way the real client pipes it into the request. */
+const readAll = async (stream: Readable) => {
+  const chunks: Buffer[] = [];
+  for await (const chunk of stream) {
+    chunks.push(Buffer.from(chunk));
+  }
+  return Buffer.concat(chunks).toString();
+};
+
+/** Fails instead of hanging when the service never answers. */
+const answered = <T>(promise: Promise<T>, ms = 1000): Promise<T> => {
+  let timer: NodeJS.Timeout;
+  const timeout = new Promise<never>((_res, rej) => {
+    timer = setTimeout(() => rej(new Error('the request never answered')), ms);
+  });
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+};
+
+describe('DropboxService', () => {
+  let service: DropboxService;
+
+  beforeAll(async () => {
+    const moduleRef = await Test.createTestingModule({
+      providers: [
+        DropboxService,
+        { provide: OAuthStateService, useValue: {} },
+        {
+          provide: ImageService,
+          useValue: {
+            getImageByIdPrivate: async () => ({
+              dbData: { refName: 'shot.png' },
+            }),
+          },
+        },
+        { provide: VideoService, useValue: {} },
+        { provide: ConfigService, useValue: { get: () => 'https://api.test' } },
+        { provide: EventEmitter2, useValue: { emit: jest.fn() } },
+      ],
+    }).compile();
+
+    service = moduleRef.get(DropboxService);
+  });
+
+  beforeEach(() => {
+    mockDb.data = {
+      users: {
+        'uid-a': {
+          dropboxAPISCredentials: {
+            credentials: {
+              access_token: 'old-token',
+              refresh_token: 'refresh-a',
+            },
+            account_id: 'acc-a',
+            email: 'a@example.com',
+          },
+          screenshots: { 'img-1': { title: 'Shot' } },
+        },
+      },
+    };
+    mockDb.writes = [];
+    mockDb.staleReads = {};
+    mockApiCall.mockReset();
+    mockRefresh.mockReset();
+    jest.spyOn(console, 'log').mockImplementation(() => undefined);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  const credentials = () =>
+    mockDb.data.users['uid-a'].dropboxAPISCredentials.credentials;
+
+  describe('dropboxUploadFile', () => {
+    const uploadRequest = () => ({
+      user: { id: 'uid-a' },
+      body: {
+        itemId: 'img-1',
+        itemType: 'image',
+        name: 'Shot',
+        blob: { buffer: Buffer.from('image-bytes') },
+      },
+    });
+
+    const uploaded = {
+      id: 'id:file-1',
+      name: 'Shot.png',
+      rev: 'rev-1',
+      path_lower: '/shot.png',
+    };
+
+    it('refreshes an expired access token once, retries the upload and answers with its result', async () => {
+      const bodies: string[] = [];
+      mockApiCall.mockImplementation(async (token, opts, cb) => {
+        bodies.push(await readAll(opts.readStream));
+        if (token === 'old-token') {
+          return cb(expiredToken, null);
+        }
+        return cb(null, uploaded);
+      });
+      mockRefresh.mockImplementation((_refreshToken, cb) =>
+        cb(false, { access_token: 'new-token' }),
+      );
+
+      const result = await answered(service.dropboxUploadFile(uploadRequest()));
+
+      expect(result).toMatchObject({
+        status: ResStatusEnum.success,
+        data: 'Shot.png',
+      });
+      expect(mockRefresh).toHaveBeenCalledTimes(1);
+      expect(mockRefresh).toHaveBeenCalledWith(
+        'refresh-a',
+        expect.any(Function),
+      );
+      expect(mockApiCall.mock.calls.map(([token]) => token)).toEqual([
+        'old-token',
+        'new-token',
+      ]);
+      // The retry sends the whole file again, not a stream the first attempt already read.
+      expect(bodies).toEqual(['image-bytes', 'image-bytes']);
+      expect(credentials()).toEqual({
+        access_token: 'new-token',
+        refresh_token: 'refresh-a',
+      });
+      expect(
+        mockDb.data.users['uid-a'].screenshots['img-1'].dropBoxData,
+      ).toMatchObject({ id: 'id:file-1', path_lower: '/shot.png' });
+    });
+
+    it('answers with an error when the token cannot be refreshed', async () => {
+      mockApiCall.mockImplementation(async (_token, opts, cb) => {
+        await readAll(opts.readStream);
+        return cb(expiredToken, null);
+      });
+      // The real client calls back twice when Dropbox refuses the refresh token.
+      mockRefresh.mockImplementation((_refreshToken, cb) => {
+        cb('invalid_grant');
+        cb(false, { error: 'invalid_grant' });
+      });
+
+      const result = await answered(service.dropboxUploadFile(uploadRequest()));
+
+      expect(result).toMatchObject({ status: ResStatusEnum.error, data: null });
+      expect(mockApiCall).toHaveBeenCalledTimes(1);
+      expect(credentials().access_token).toBe('old-token');
+      expect(
+        mockDb.data.users['uid-a'].screenshots['img-1'].dropBoxData,
+      ).toBeUndefined();
+    });
+
+    it('answers with an error and refreshes only once when the retry fails too', async () => {
+      mockApiCall.mockImplementation(async (_token, opts, cb) => {
+        await readAll(opts.readStream);
+        // Stop answering after a few calls so a retry loop cannot run forever.
+        if (mockApiCall.mock.calls.length > 3) {
+          return;
+        }
+        return cb(expiredToken, null);
+      });
+      mockRefresh.mockImplementation((_refreshToken, cb) =>
+        cb(false, { access_token: 'new-token' }),
+      );
+
+      const result = await answered(service.dropboxUploadFile(uploadRequest()));
+
+      expect(result).toMatchObject({ status: ResStatusEnum.error, data: null });
+      expect(mockRefresh).toHaveBeenCalledTimes(1);
+      expect(mockApiCall).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('deleteFile', () => {
+    const dropBoxData = {
+      id: 'id:file-1',
+      name: 'Shot.png',
+      rev: 'rev-1',
+      path_lower: '/shot.png',
+      email: 'a@example.com',
+    };
+
+    const item = () => mockDb.data.users['uid-a'].screenshots['img-1'];
+
+    beforeEach(() => {
+      item().dropBoxData = { ...dropBoxData };
+    });
+
+    it('reports an error and keeps the link when Dropbox refuses the delete', async () => {
+      mockApiCall.mockImplementation((_token, _opts, cb) =>
+        cb(
+          {
+            error_summary: 'path_lookup/not_found/',
+            error: { '.tag': 'path_lookup' },
+            code: 409,
+          },
+          null,
+        ),
+      );
+
+      const result = await service.deleteFile('uid-a', 'img-1', 'image');
+
+      expect(result.status).toBe(ResStatusEnum.error);
+      expect(item().dropBoxData).toEqual(dropBoxData);
+    });
+
+    it('reports success with the Dropbox answer and clears the link when the delete succeeds', async () => {
+      const deleted = { metadata: { '.tag': 'file', name: 'Shot.png' } };
+      mockApiCall.mockImplementation((token, opts, cb) => {
+        expect(token).toBe('old-token');
+        expect(opts).toMatchObject({
+          resource: 'files/delete_v2',
+          parameters: { path: '/shot.png', parent_rev: 'rev-1' },
+        });
+        return cb(null, deleted);
+      });
+
+      const result = await service.deleteFile('uid-a', 'img-1', 'image');
+
+      expect(result).toMatchObject({
+        status: ResStatusEnum.success,
+        data: deleted,
+      });
+      expect(item().dropBoxData).toBeUndefined();
+    });
+
+    it('reports an error when the item has no Dropbox copy', async () => {
+      delete item().dropBoxData;
+
+      const result = await service.deleteFile('uid-a', 'img-1', 'image');
+
+      expect(result.status).toBe(ResStatusEnum.error);
+      expect(mockApiCall).not.toHaveBeenCalled();
+    });
+
+    it('reports an error when the user has no Dropbox credentials', async () => {
+      delete mockDb.data.users['uid-a'].dropboxAPISCredentials;
+
+      const result = await service.deleteFile('uid-a', 'img-1', 'image');
+
+      expect(result.status).toBe(ResStatusEnum.error);
+      expect(mockApiCall).not.toHaveBeenCalled();
+      expect(item().dropBoxData).toEqual(dropBoxData);
+    });
+  });
+});
