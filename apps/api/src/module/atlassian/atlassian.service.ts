@@ -10,7 +10,6 @@ import { ConfigService } from '@nestjs/config';
 import { OAuthStateService } from 'src/services/shared/oauth-state.service';
 const FormData = require('form-data');
 const getRawBody = require('raw-body');
-const fetch = require('node-fetch');
 
 @Injectable()
 export class AtlassianService {
@@ -411,38 +410,26 @@ export class AtlassianService {
     };
   }
 
+  /**
+   * The file of an item, read from the bucket. A streamed video is read from its master file too,
+   * never from its stored downloadUrl: the server must not fetch a URL a client could have written.
+   * It has no file (false) while its master file is not in the bucket yet.
+   */
   async getStreamFromFile(res, type = 'image') {
     const collection = type === 'image' ? 'screenshots' : 'videos';
     const userVal = res.dbData;
     const bucket = admin.storage().bucket();
     const streamData = userVal?.streamData;
 
-    if (!streamData) {
-      const readableStream = await bucket.file(
-        `users/${userVal.uid}/${collection}/${res.dbData.refName}`,
-      );
-      const metadata = (await readableStream.getMetadata())[0];
-      const buffer = await getRawBody(readableStream.createReadStream());
-      return { buffer, size: metadata.size, name: metadata.name };
-    } else {
-      const steamResponse = await fetch(streamData.downloadUrl)
-        .then((res) => res.buffer())
-        .then((buffer) => {
-          return buffer;
-        })
-        .catch((err) => {
-          console.log(err, 'stream error');
-          return false;
-        });
-      if (steamResponse) {
-        return {
-          buffer: steamResponse,
-          size: steamResponse.byteLength,
-          name: new Date().getTime() + '.mp4',
-        };
-      }
+    const readableStream = await bucket.file(
+      `users/${userVal.uid}/${collection}/${res.dbData.refName}`,
+    );
+    if (streamData && !(await readableStream.exists())[0]) {
+      return false;
     }
-    return false;
+    const metadata = (await readableStream.getMetadata())[0];
+    const buffer = await getRawBody(readableStream.createReadStream());
+    return { buffer, size: metadata.size, name: metadata.name };
   }
 
   async createTrelloCard(uid: string, req: any): Promise<any> {

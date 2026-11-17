@@ -4,6 +4,8 @@
  * previously stored asset with the server's own provider credentials. So a caller may only store
  * an asset that was created for them: a foreign asset is refused (403) before anything is written
  * or deleted, an unknown service type or a malformed id is a 400, and their own asset still saves.
+ * The download link is the streaming provider's, never the `downloadUrl` the client sends: the
+ * Jira and Trello export used to fetch that URL from the server.
  */
 import { INestApplication } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -65,8 +67,9 @@ jest.mock('firebase-admin', () => {
         },
         push: () => ({
           key: 'newVideoId',
-          set: async () => {
+          set: async (payload: Record<string, any>) => {
             mockDb.writes.push({ op: 'set', path: `${path}/newVideoId` });
+            mockDb.payloads.push({ path: `${path}/newVideoId`, payload });
           },
         }),
       }),
@@ -76,8 +79,16 @@ jest.mock('firebase-admin', () => {
 
 describe('stream save-data routes', () => {
   let app: INestApplication;
-  const mux = { getAssetOwner: jest.fn(), deleteAsset: jest.fn() };
-  const apiVideo = { getAssetOwner: jest.fn(), deleteAsset: jest.fn() };
+  const mux = {
+    getAssetOwner: jest.fn(),
+    deleteAsset: jest.fn(),
+    getDownloadUrl: jest.fn(),
+  };
+  const apiVideo = {
+    getAssetOwner: jest.fn(),
+    deleteAsset: jest.fn(),
+    getDownloadUrl: jest.fn(),
+  };
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -137,6 +148,16 @@ describe('stream save-data routes', () => {
       .mockImplementation(async (id: string) => owners[id] ?? null);
     mux.deleteAsset.mockReset().mockResolvedValue(undefined);
     apiVideo.deleteAsset.mockReset().mockResolvedValue(undefined);
+    mux.getDownloadUrl
+      .mockReset()
+      .mockImplementation(async (id: string) =>
+        id === 'mine' ? 'https://stream.mux.com/pb-mine/high.mp4' : null,
+      );
+    apiVideo.getDownloadUrl
+      .mockReset()
+      .mockImplementation(async (id: string) =>
+        id === 'mine' ? 'https://vod.api.video/vod/mine/mp4/source.mp4' : null,
+      );
   });
 
   afterEach(() => {
@@ -252,6 +273,62 @@ describe('stream save-data routes', () => {
       await save('/vid1.x', fields('mine')).expect(400);
       expect(mockDb.writes).toEqual([]);
       expect(mux.deleteAsset).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('the stored download link', () => {
+    const metadata = 'http://169.254.169.254/x';
+    const withDownloadUrl = (assetId: string, serviceType = 'mux') => ({
+      ...fields(assetId, serviceType),
+      downloadUrl: metadata,
+    });
+    const stored = (path: string) =>
+      mockDb.payloads.find((p) => p.path === path)?.payload.streamData;
+
+    it('save-data stores the Mux link, never the downloadUrl the client sent', async () => {
+      const res = await save('', withDownloadUrl('mine')).expect(201);
+      expect(stored('users/uid-me/videos/newVideoId')).toMatchObject({
+        downloadUrl: 'https://stream.mux.com/pb-mine/high.mp4',
+      });
+      expect(mux.getDownloadUrl).toHaveBeenCalledWith('mine');
+      expect(JSON.stringify(mockDb.payloads)).not.toContain(metadata);
+      expect(JSON.stringify(res.body)).not.toContain(metadata);
+    });
+
+    it('save-data stores the api.video link, never the downloadUrl the client sent', async () => {
+      await save('', withDownloadUrl('mine', 'api.video')).expect(201);
+      expect(stored('users/uid-me/videos/newVideoId')).toMatchObject({
+        downloadUrl: 'https://vod.api.video/vod/mine/mp4/source.mp4',
+      });
+      expect(apiVideo.getDownloadUrl).toHaveBeenCalledWith('mine');
+      expect(JSON.stringify(mockDb.payloads)).not.toContain(metadata);
+    });
+
+    it('save-data stores no link while the provider does not know one', async () => {
+      mux.getDownloadUrl.mockResolvedValueOnce(null);
+      const res = await save('', withDownloadUrl('mine')).expect(201);
+      expect(stored('users/uid-me/videos/newVideoId')).toMatchObject({
+        downloadUrl: '',
+      });
+      expect(JSON.stringify(res.body)).not.toContain(metadata);
+    });
+
+    it('save-data/:videoId stores the provider link, never the downloadUrl the client sent', async () => {
+      const res = await save('/vid1', withDownloadUrl('mine')).expect(201);
+      expect(stored('users/uid-me/videos/vid1')).toMatchObject({
+        downloadUrl: 'https://stream.mux.com/pb-mine/high.mp4',
+      });
+      expect(JSON.stringify(mockDb.payloads)).not.toContain(metadata);
+      expect(JSON.stringify(res.body)).not.toContain(metadata);
+    });
+
+    it('save-data/:videoId stores no link while the provider does not know one', async () => {
+      apiVideo.getDownloadUrl.mockResolvedValueOnce(null);
+      await save('/vid1', withDownloadUrl('mine', 'api.video')).expect(201);
+      expect(stored('users/uid-me/videos/vid1')).toMatchObject({
+        downloadUrl: '',
+      });
+      expect(JSON.stringify(mockDb.payloads)).not.toContain(metadata);
     });
   });
 });

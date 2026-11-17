@@ -95,6 +95,12 @@ export class StreamServiceService {
       const videoRef = db.ref(`users/${uid}/videos`);
       const newVideoRef = videoRef.push();
       const id = newVideoRef.key;
+      // Never data.downloadUrl: the Jira and Trello export used to fetch the stored link from the
+      // server, so a client-sent URL let a caller read internal addresses.
+      const downloadUrl = await this.getDownloadUrl(
+        data.assetId,
+        data.serviceType,
+      );
 
       const newVideo: any = {
         title: data.videoTitle,
@@ -109,7 +115,7 @@ export class StreamServiceService {
           playbackUrl: data.playbackUrl,
           playbackStatus: PSEnum.PREPARING,
           downloadStatus: PSEnum.PREPARING,
-          downloadUrl: data.downloadUrl,
+          downloadUrl,
         },
         uid,
         refName: fullFilename,
@@ -165,6 +171,12 @@ export class StreamServiceService {
         );
       }
 
+      // Never data.downloadUrl, see saveVideoData.
+      const downloadUrl = await this.getDownloadUrl(
+        data.assetId,
+        data.serviceType,
+      );
+
       await videoRef.update({
         duration: data.videoDuration,
         streamData: {
@@ -174,7 +186,7 @@ export class StreamServiceService {
           playbackUrl: data.playbackUrl,
           playbackStatus: PSEnum.PREPARING,
           downloadStatus: PSEnum.PREPARING,
-          downloadUrl: data.downloadUrl,
+          downloadUrl,
         },
       });
 
@@ -221,6 +233,24 @@ export class StreamServiceService {
         return this.apiVideoService.getStreamLinks(assetId);
       default:
         return null;
+    }
+  }
+
+  /**
+   * The MP4 download link of an asset as its streaming provider reports it, or '' when it is not
+   * known. Until the master file is in the bucket, this is the link the video is downloaded from.
+   */
+  async getDownloadUrl(
+    assetId: string,
+    serviceType: VideoServicesEnum,
+  ): Promise<string> {
+    switch (serviceType) {
+      case VideoServicesEnum.MUX:
+        return (await this.muxService.getDownloadUrl(assetId)) ?? '';
+      case VideoServicesEnum.API_VIDEO:
+        return (await this.apiVideoService.getDownloadUrl(assetId)) ?? '';
+      default:
+        return '';
     }
   }
 

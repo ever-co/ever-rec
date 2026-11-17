@@ -22,6 +22,11 @@ const createThumbnailUrl = (playbackId: string) => {
   return `https://image.mux.com/${playbackId}/thumbnail.png`;
 };
 
+// The static MP4 rendition, which assets get from `mp4_support` (see getDirectUpload).
+const createDownloadUrl = (playbackId: string) => {
+  return `https://stream.mux.com/${playbackId}/high.mp4`;
+};
+
 @Injectable()
 export class MuxService {
   private readonly Video: InstanceType<typeof Mux>['Video'];
@@ -164,6 +169,22 @@ export class MuxService {
             thumbnailUrl: createThumbnailUrl(playbackId),
           }
         : null;
+    } catch (error) {
+      console.log(error);
+      return null;
+    }
+  }
+
+  /**
+   * The MP4 download URL of an asset, built from what Mux reports for it, or null when Mux has no
+   * such asset or it has no public playback id.
+   */
+  async getDownloadUrl(assetId: string): Promise<string | null> {
+    try {
+      const asset = await this.Video.Assets.get(assetId);
+      const playbackId = asset?.playback_ids?.[0]?.id;
+
+      return playbackId ? createDownloadUrl(playbackId) : null;
     } catch (error) {
       console.log(error);
       return null;
