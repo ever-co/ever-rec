@@ -296,7 +296,18 @@ export const changeUserPassword = async (
   oldPassword: string,
   newPassword: string,
 ) => {
-  return await changeUserPasswordAPI(email, oldPassword, newPassword);
+  const response = await changeUserPasswordAPI(email, oldPassword, newPassword);
+
+  // The change revokes every session of the account, this one too. Keep the
+  // tokens of the session the API opened after that, as a sign-in does.
+  const idToken = response?.data?.idToken;
+  const refreshToken = response?.data?.refreshToken;
+  if (response?.status === 'success' && idToken && refreshToken) {
+    storeUserTokens({ idToken, refreshToken });
+    updateExtensionAuthData({ idToken, refreshToken });
+  }
+
+  return response;
 };
 
 export const deleteUser = async (): Promise<void> => {
