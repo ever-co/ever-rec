@@ -219,6 +219,32 @@ describe('DropboxService', () => {
       expect(mockRefresh).toHaveBeenCalledTimes(1);
       expect(mockApiCall).toHaveBeenCalledTimes(2);
     });
+
+    it('answers with an error when the file uploads but its link cannot be stored', async () => {
+      mockApiCall.mockImplementation(async (_token, opts, cb) => {
+        await readAll(opts.readStream);
+        return cb(null, uploaded);
+      });
+      const database = mockDb.admin.database;
+      jest.spyOn(mockDb.admin, 'database').mockImplementation(() => {
+        const db = database();
+        return {
+          ref: (path: string) =>
+            path.includes('/screenshots/')
+              ? {
+                  ...db.ref(path),
+                  update: async () => {
+                    throw new Error('write refused');
+                  },
+                }
+              : db.ref(path),
+        };
+      });
+
+      const result = await answered(service.dropboxUploadFile(uploadRequest()));
+
+      expect(result).toMatchObject({ status: ResStatusEnum.error, data: null });
+    });
   });
 
   describe('deleteFile', () => {
@@ -251,6 +277,62 @@ describe('DropboxService', () => {
       const result = await service.deleteFile('uid-a', 'img-1', 'image');
 
       expect(result.status).toBe(ResStatusEnum.error);
+      // The page shows the message in a toast: words, with Dropbox's reason kept in `error`.
+      expect(typeof result.message).toBe('string');
+      expect(result.error).toBe('path_lookup/not_found/');
+      expect(item().dropBoxData).toEqual(dropBoxData);
+    });
+
+    it('refreshes an expired access token once and deletes with the new one', async () => {
+      const deleted = { metadata: { '.tag': 'file', name: 'Shot.png' } };
+      mockApiCall.mockImplementation((token, _opts, cb) =>
+        token === 'old-token' ? cb(expiredToken, null) : cb(null, deleted),
+      );
+      mockRefresh.mockImplementation((_refreshToken, cb) =>
+        cb(false, { access_token: 'new-token' }),
+      );
+
+      const result = await answered(
+        service.deleteFile('uid-a', 'img-1', 'image'),
+      );
+
+      expect(result).toMatchObject({
+        status: ResStatusEnum.success,
+        data: deleted,
+      });
+      expect(mockRefresh).toHaveBeenCalledTimes(1);
+      expect(mockRefresh).toHaveBeenCalledWith(
+        'refresh-a',
+        expect.any(Function),
+      );
+      expect(mockApiCall.mock.calls.map(([token]) => token)).toEqual([
+        'old-token',
+        'new-token',
+      ]);
+      expect(credentials()).toEqual({
+        access_token: 'new-token',
+        refresh_token: 'refresh-a',
+      });
+      expect(item().dropBoxData).toBeUndefined();
+    });
+
+    it('reports an error and keeps the link when the expired token cannot be refreshed', async () => {
+      mockApiCall.mockImplementation((_token, _opts, cb) =>
+        cb(expiredToken, null),
+      );
+      mockRefresh.mockImplementation((_refreshToken, cb) => {
+        cb('invalid_grant');
+        cb(false, { error: 'invalid_grant' });
+      });
+
+      const result = await answered(
+        service.deleteFile('uid-a', 'img-1', 'image'),
+      );
+
+      expect(result.status).toBe(ResStatusEnum.error);
+      expect(mockRefresh).toHaveBeenCalledTimes(1);
+      expect(mockApiCall).toHaveBeenCalledTimes(1);
+      expect(credentials().access_token).toBe('old-token');
       expect(item().dropBoxData).toEqual(dropBoxData);
     });
 
