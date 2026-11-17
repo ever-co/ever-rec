@@ -148,25 +148,31 @@ export class DropboxService {
     });
   }
 
-  async refreshToken(refresh_token, req): Promise<any> {
+  /**
+   * Gets a new access token for the user's refresh token and saves it. Resolves with the new access
+   * token; rejects when Dropbox refuses the refresh token or the token cannot be saved.
+   */
+  refreshToken(refresh_token, req): Promise<string> {
     const dropbox = dropboxV2Api.authenticate({
       client_id: this.apiKey,
       client_secret: this.apiSecrete,
       redirect_uri: this.redirectURI,
       token_access_type: 'offline',
     });
-    await dropbox.refreshToken(refresh_token, async (err, response) => {
-      if (err) {
-        console.log(err, 'err');
-        return {
-          status: ResStatusEnum.error,
-          message: 'Error while trying to upload dropbox',
-          error: err.code,
-          data: null,
-        };
-      }
-      if (response) {
-        if (response.access_token) {
+    return new Promise<string>((res, rej) => {
+      // The client can call back twice when Dropbox refuses the refresh token: first with the
+      // error, then with the error body. Only the first answer counts.
+      let answered = false;
+      dropbox.refreshToken(refresh_token, async (err, response) => {
+        if (answered) {
+          return;
+        }
+        answered = true;
+        try {
+          if (err || !response?.access_token) {
+            console.log(err, 'err');
+            throw err || new Error('Dropbox returned no access token');
+          }
           const db = admin.database();
           const userRef = db.ref(`/users/${req?.user.id}`);
           const snapshot = await userRef.get();
@@ -184,9 +190,11 @@ export class DropboxService {
               ...dropboxUserData,
             },
           });
-          return await this.dropboxUploadFile(req);
+          res(response.access_token);
+        } catch (e) {
+          rej(e);
         }
-      }
+      });
     });
   }
 
@@ -209,73 +217,108 @@ export class DropboxService {
       const collection = itemType === 'image' ? 'screenshots' : 'videos';
       const itemRef = db.ref(`/users/${uid}/${collection}/${itemId}`);
 
-      return new Promise(async (res, rej) => {
-        try {
-          const token =
-            userData.dropboxAPISCredentials.credentials.access_token;
+      // Access tokens are short-lived: when one has expired, refresh it once and retry the upload
+      // once with the new token. Every attempt answers the request, whatever happens.
+      const upload = (token: string, isRetry: boolean): Promise<any> =>
+        new Promise((res) => {
+          try {
+            const dropbox = dropboxV2Api.authenticate({ token });
+            // A stream can be read once, so each attempt sends the file from a new one.
+            const mediaBody = Readable.from(blob.buffer);
 
-          const dropbox = dropboxV2Api.authenticate({ token });
-          const mediaBody = Readable.from(blob.buffer);
-
-          await dropbox(
-            {
-              resource: 'files/upload',
-              parameters: {
-                path: `/${name}.${ext.split('.').pop()}`,
-                mode: 'add',
-                autorename: true,
-                mute: false,
-                strict_conflict: false,
+            dropbox(
+              {
+                resource: 'files/upload',
+                parameters: {
+                  path: `/${name}.${ext.split('.').pop()}`,
+                  mode: 'add',
+                  autorename: true,
+                  mute: false,
+                  strict_conflict: false,
+                },
+                readStream: mediaBody,
               },
-              readStream: mediaBody,
-            },
-            async (err, response) => {
-              if (err) {
-                console.log(err, 'err');
-                if (err.error && err.error['.tag'] == 'expired_access_token') {
-                  return await this.refreshToken(
-                    userData.dropboxAPISCredentials.credentials.refresh_token,
-                    req,
-                  );
-                }
-                res({
-                  status: ResStatusEnum.error,
-                  message: 'Error while trying to upload file',
-                  error: err,
-                  data: null,
-                });
-              }
-              if (response) {
-                if (response && response.name && itemRef) {
-                  await itemRef.update({
-                    dropBoxData: {
-                      id: response.id,
-                      name: response.name,
-                      rev: response.rev,
-                      path_lower: response.path_lower,
-                      email: userData.dropboxAPISCredentials.email,
-                    },
+              async (err, response) => {
+                if (err) {
+                  console.log(err, 'err');
+                  if (
+                    !isRetry &&
+                    err.error?.['.tag'] === 'expired_access_token'
+                  ) {
+                    let newToken: string;
+                    try {
+                      newToken = await this.refreshToken(
+                        userData.dropboxAPISCredentials.credentials
+                          .refresh_token,
+                        req,
+                      );
+                    } catch {
+                      // refreshToken has logged why; the token endpoint's answer stays here.
+                      return res({
+                        status: ResStatusEnum.error,
+                        message:
+                          'Error while trying to refresh the Dropbox access token',
+                        error: null,
+                        data: null,
+                      });
+                    }
+                    return res(await upload(newToken, true));
+                  }
+                  return res({
+                    status: ResStatusEnum.error,
+                    message: 'Error while trying to upload file',
+                    error: err,
+                    data: null,
                   });
                 }
-                res({
-                  status: ResStatusEnum.success,
-                  message: 'Success',
-                  error: null,
-                  data: response.name,
-                });
-              }
-            },
-          );
-        } catch (e) {
-          console.log(e, 'e 1');
-          res({
-            status: ResStatusEnum.error,
-            message: 'Error while trying to upload item to dropbox',
-            error: e,
-            data: null,
-          });
-        }
-      });
+                if (response) {
+                  if (response && response.name && itemRef) {
+                    try {
+                      await itemRef.update({
+                        dropBoxData: {
+                          id: response.id,
+                          name: response.name,
+                          rev: response.rev,
+                          path_lower: response.path_lower,
+                          email: userData.dropboxAPISCredentials.email,
+                        },
+                      });
+                    } catch (e) {
+                      // Nothing awaits this callback: a failed write must still answer the request.
+                      console.log(e, 'e 2');
+                      return res({
+                        status: ResStatusEnum.error,
+                        message:
+                          'The file was saved to Dropbox, but the link to it could not be stored',
+                        error: null,
+                        data: null,
+                      });
+                    }
+                  }
+                  res({
+                    status: ResStatusEnum.success,
+                    message: 'Success',
+                    error: null,
+                    data: response.name,
+                  });
+                }
+              },
+            );
+          } catch (e) {
+            console.log(e, 'e 1');
+            res({
+              status: ResStatusEnum.error,
+              message: 'Error while trying to upload item to dropbox',
+              error: e,
+              data: null,
+            });
+          }
+        });
+
+      return upload(
+        userData.dropboxAPISCredentials.credentials.access_token,
+        false,
+      );
     } else {
       return {
         status: ResStatusEnum.error,
@@ -356,46 +399,88 @@ export class DropboxService {
     const itemSnap = await itemRef.get();
     const item = itemSnap.val();
 
-    if (item && item.dropBoxData && userVal) {
-      const token = userVal.dropboxAPISCredentials.credentials.access_token;
-      const dropbox = dropboxV2Api.authenticate({ token });
-      await dropbox(
-        {
-          resource: 'files/delete_v2',
-          parameters: {
-            path: item.dropBoxData.path_lower,
-            parent_rev: item.dropBoxData.rev,
-          },
-        },
-        async (err, response) => {
-          console.log(err, 'err');
-          if (err) {
-            return {
-              status: ResStatusEnum.error,
-              message: err.code || 'Error while trying to delete dropbox file.',
-              error: null,
-              data: null,
-            };
-          }
-          if (response) {
-            await itemRef.update({
-              dropBoxData: null,
-            });
-            return {
-              status: ResStatusEnum.success,
-              message: 'Dropbox file successfully deleted.',
-              error: null,
-              data: response,
-            };
-          }
-        },
-      );
+    if (!item?.dropBoxData) {
+      return {
+        status: ResStatusEnum.error,
+        message: 'This item has no Dropbox file to delete.',
+        error: null,
+        data: null,
+      };
     }
-    return {
-      status: ResStatusEnum.success,
-      message: 'Dropbox file successfully deleted.',
-      error: null,
-      data: null,
-    };
+
+    const token = userVal?.dropboxAPISCredentials?.credentials?.access_token;
+    if (!token) {
+      return {
+        status: ResStatusEnum.error,
+        message: 'Dropbox is not connected.',
+        error: null,
+        data: null,
+      };
+    }
+
+    // Answer with what Dropbox did, and unlink the item only when the file is gone. Access tokens are
+    // short-lived: when one has expired, refresh it once and try once more, as the upload does.
+    const remove = (
+      accessToken: string,
+      isRetry: boolean,
+    ): Promise<IDataResponse> =>
+      new Promise<IDataResponse>((res, rej) => {
+        const dropbox = dropboxV2Api.authenticate({ token: accessToken });
+        dropbox(
+          {
+            resource: 'files/delete_v2',
+            parameters: {
+              path: item.dropBoxData.path_lower,
+              parent_rev: item.dropBoxData.rev,
+            },
+          },
+          (err, response) => {
+            if (err) {
+              console.log(err, 'err');
+              if (!isRetry && err.error?.['.tag'] === 'expired_access_token') {
+                return this.refreshToken(
+                  userVal.dropboxAPISCredentials.credentials.refresh_token,
+                  { user: { id: uid } },
+                )
+                  .then(
+                    (newToken) => remove(newToken, true),
+                    // refreshToken has logged why; the token endpoint's answer stays here.
+                    (): IDataResponse => ({
+                      status: ResStatusEnum.error,
+                      message:
+                        'Error while trying to refresh the Dropbox access token',
+                      error: null,
+                      data: null,
+                    }),
+                  )
+                  .then(res, rej);
+              }
+              // The page shows the message in a toast, so it must be words, not a status code.
+              return res({
+                status: ResStatusEnum.error,
+                message: 'Error while trying to delete the Dropbox file.',
+                error: err.error_summary || err.code || null,
+                data: null,
+              });
+            }
+            itemRef
+              .update({
+                dropBoxData: null,
+              })
+              .then(
+                () =>
+                  res({
+                    status: ResStatusEnum.success,
+                    message: 'Dropbox file successfully deleted.',
+                    error: null,
+                    data: response,
+                  }),
+                rej,
+              );
+          },
+        );
+      });
+
+    return remove(token, false);
   }
 }
