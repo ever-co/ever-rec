@@ -120,6 +120,43 @@ describe('joining a workspace with an invite', () => {
     expect(mockDb.dump('users/uid-joiner/workspaceIds')).toEqual(['ws-own']);
   });
 
+  it('creates no stub when the workspace is deleted during the transaction', async () => {
+    // As in the SDK when a write is rejected: the update function first sees the stored workspace
+    // and proposes the join, the delete lands before that write, and the function runs again with
+    // `null`. Only the last run's result may be written.
+    const results: unknown[] = [];
+    jest
+      .spyOn(FakeReference.prototype, 'transaction')
+      .mockImplementation(async function (
+        this: FakeReference,
+        updateFn: (current: unknown) => unknown,
+      ) {
+        results.push(updateFn(mockDb.dump(pathOf(this))));
+        await mockDb.ref(pathOf(this)).remove();
+        const next = updateFn(null);
+        results.push(next);
+        if (next === undefined) {
+          return {
+            committed: false,
+            snapshot: new FakeSnapshot(this.key, null),
+          };
+        }
+        await mockDb.ref(pathOf(this)).set(next);
+        return { committed: true, snapshot: new FakeSnapshot(this.key, next) };
+      });
+
+    const result = await service.joinWorkspace('uid-joiner', 'inv-1');
+
+    expect(results[0]).toEqual(
+      expect.objectContaining({
+        members: [{ id: 'uid-admin' }, { id: 'uid-joiner' }],
+      }),
+    );
+    expect(result).toEqual(notFound);
+    expect(mockDb.dump('workspaces/ws-1')).toBeNull();
+    expect(mockDb.dump('users/uid-joiner/workspaceIds')).toEqual(['ws-own']);
+  });
+
   it('joins with a valid invite and keeps the rest of the workspace', async () => {
     const result = await service.joinWorkspace('uid-joiner', 'inv-1');
 
