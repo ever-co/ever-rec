@@ -35,6 +35,11 @@ import { StreamServiceService } from '../video-services/streamService.service';
 import { is_id } from '../workspace/validators/id.validator';
 import { toPublicLikes } from '../../services/utils/likes';
 import {
+  PUBLIC_VIDEO_FIELDS,
+  PublicVideoData,
+  toPublicItemData,
+} from '../../services/utils/publicItemData';
+import {
   EVER_COUNTER_EVENTS,
   storedBytes,
 } from '../../common/events/ever-counters.events';
@@ -158,7 +163,7 @@ export class VideoService {
     IDataResponse<{
       video: {
         owner: Omit<IUserShort, 'email'>;
-        dbData: DbVideoData;
+        dbData: PublicVideoData;
         url: string;
       };
     }>
@@ -219,10 +224,10 @@ export class VideoService {
 
         const allViews = formatDataToArray(videoData.views);
         const chapters = parseCollectionToArray(videoData.chapters);
-        // Anyone with the link reads this answer: the viewers (names, emails) go to the owner
-        // only, through `shared/get-view-info`.
-        const publicData: any = { ...videoData };
-        delete publicData.uniqueViews;
+        // Anyone with the link reads this answer, so it carries only the fields the share and
+        // embed pages read. The viewers (names, emails) go to the owner only, through
+        // `shared/get-view-info`; the Drive and Dropbox copies (owner's emails) never go out.
+        const publicData = toPublicItemData(videoData, PUBLIC_VIDEO_FIELDS);
 
         return sendResponse({
           video: {
