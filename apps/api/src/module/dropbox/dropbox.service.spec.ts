@@ -2,7 +2,8 @@
  * Saving to Dropbox and removing the copy, with the real service. Dropbox and the database are
  * mocked. Dropbox issues short-lived access tokens (sign-in asks for `offline` access), so an upload
  * a few hours after connecting meets `expired_access_token`: the service must refresh the token once,
- * retry once and answer the request either way. A delete must report what Dropbox did.
+ * retry once and answer the request either way. A delete must report what Dropbox did, and unlink a
+ * copy the user already deleted in Dropbox itself.
  */
 import { ConfigService } from '@nestjs/config';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -262,25 +263,177 @@ describe('DropboxService', () => {
       item().dropBoxData = { ...dropBoxData };
     });
 
-    it('reports an error and keeps the link when Dropbox refuses the delete', async () => {
-      mockApiCall.mockImplementation((_token, _opts, cb) =>
-        cb(
-          {
-            error_summary: 'path_lookup/not_found/',
-            error: { '.tag': 'path_lookup' },
-            code: 409,
+    /** Dropbox's answer to a delete when the path holds no file, or not the revision Rec stored. */
+    const deleteNotFound = {
+      error_summary: 'path_lookup/not_found/..',
+      error: { '.tag': 'path_lookup', path_lookup: { '.tag': 'not_found' } },
+      code: 409,
+    };
+
+    /** Dropbox's answer to get_metadata when the path holds nothing. */
+    const metadataNotFound = {
+      error_summary: 'path/not_found/.',
+      error: { '.tag': 'path', path: { '.tag': 'not_found' } },
+      code: 409,
+    };
+
+    const requests = () =>
+      mockApiCall.mock.calls.map(([token, opts]) => [token, opts.resource]);
+
+    it.each([
+      [
+        'a lookup error other than not_found',
+        {
+          error_summary: 'path_lookup/restricted_content/',
+          error: {
+            '.tag': 'path_lookup',
+            path_lookup: { '.tag': 'restricted_content' },
           },
-          null,
-        ),
+          code: 409,
+        },
+        'path_lookup/restricted_content/',
+      ],
+      [
+        'a write error',
+        {
+          error_summary: 'too_many_write_operations/',
+          error: { '.tag': 'too_many_write_operations' },
+          code: 409,
+        },
+        'too_many_write_operations/',
+      ],
+      ['a server error', { code: 500, text: 'Internal Server Error' }, 500],
+      [
+        'a network error',
+        Object.assign(new Error('socket hang up'), { code: 'ECONNRESET' }),
+        'ECONNRESET',
+      ],
+    ])(
+      'reports an error and keeps the link when Dropbox answers %s',
+      async (_case, dropboxError, reason) => {
+        mockApiCall.mockImplementation((_token, _opts, cb) =>
+          cb(dropboxError, null),
+        );
+
+        const result = await answered(
+          service.deleteFile('uid-a', 'img-1', 'image'),
+        );
+
+        // The page shows the message in a toast: words, with Dropbox's reason kept in `error`.
+        expect(result).toEqual({
+          status: ResStatusEnum.error,
+          message: 'Error while trying to delete the Dropbox file.',
+          error: reason,
+          data: null,
+        });
+        expect(requests()).toEqual([['old-token', 'files/delete_v2']]);
+        expect(item().dropBoxData).toEqual(dropBoxData);
+      },
+    );
+
+    it('unlinks the item and reports success when the file was already deleted in Dropbox', async () => {
+      mockApiCall.mockImplementation((_token, opts, cb) =>
+        opts.resource === 'files/delete_v2'
+          ? cb(deleteNotFound, null)
+          : cb(metadataNotFound, null),
       );
 
-      const result = await service.deleteFile('uid-a', 'img-1', 'image');
+      const result = await answered(
+        service.deleteFile('uid-a', 'img-1', 'image'),
+      );
 
-      expect(result.status).toBe(ResStatusEnum.error);
-      // The page shows the message in a toast: words, with Dropbox's reason kept in `error`.
-      expect(typeof result.message).toBe('string');
-      expect(result.error).toBe('path_lookup/not_found/');
-      expect(item().dropBoxData).toEqual(dropBoxData);
+      expect(result).toEqual({
+        status: ResStatusEnum.success,
+        message: 'Dropbox file successfully deleted.',
+        error: null,
+        data: null,
+      });
+      expect(mockApiCall.mock.calls[1]).toEqual([
+        'old-token',
+        { resource: 'files/get_metadata', parameters: { path: '/shot.png' } },
+        expect.any(Function),
+      ]);
+      expect(requests()).toEqual([
+        ['old-token', 'files/delete_v2'],
+        ['old-token', 'files/get_metadata'],
+      ]);
+      expect(item().dropBoxData).toBeUndefined();
+    });
+
+    it.each([
+      [
+        'the path still holds the file, in a newer revision',
+        (cb: (...args: any[]) => void) =>
+          cb(null, {
+            '.tag': 'file',
+            name: 'Shot.png',
+            path_lower: '/shot.png',
+            rev: 'rev-2',
+          }),
+      ],
+      [
+        'the lookup fails',
+        (cb: (...args: any[]) => void) =>
+          cb(
+            Object.assign(new Error('socket hang up'), { code: 'ECONNRESET' }),
+            null,
+          ),
+      ],
+    ])(
+      'reports an error and keeps the link when the delete finds nothing but %s',
+      async (_case, answerLookup) => {
+        mockApiCall.mockImplementation((_token, opts, cb) =>
+          opts.resource === 'files/delete_v2'
+            ? cb(deleteNotFound, null)
+            : answerLookup(cb),
+        );
+
+        const result = await answered(
+          service.deleteFile('uid-a', 'img-1', 'image'),
+        );
+
+        expect(result).toEqual({
+          status: ResStatusEnum.error,
+          message: 'Error while trying to delete the Dropbox file.',
+          error: 'path_lookup/not_found/..',
+          data: null,
+        });
+        expect(mockApiCall.mock.calls[1]?.[1]).toEqual({
+          resource: 'files/get_metadata',
+          parameters: { path: '/shot.png' },
+        });
+        expect(item().dropBoxData).toEqual(dropBoxData);
+      },
+    );
+
+    it('refreshes an expired access token, then unlinks the item when the retry finds the file already deleted', async () => {
+      mockApiCall.mockImplementation((token, opts, cb) => {
+        if (token === 'old-token') {
+          return cb(expiredToken, null);
+        }
+        return opts.resource === 'files/delete_v2'
+          ? cb(deleteNotFound, null)
+          : cb(metadataNotFound, null);
+      });
+      mockRefresh.mockImplementation((_refreshToken, cb) =>
+        cb(false, { access_token: 'new-token' }),
+      );
+
+      const result = await answered(
+        service.deleteFile('uid-a', 'img-1', 'image'),
+      );
+
+      expect(result).toMatchObject({
+        status: ResStatusEnum.success,
+        data: null,
+      });
+      expect(mockRefresh).toHaveBeenCalledTimes(1);
+      expect(requests()).toEqual([
+        ['old-token', 'files/delete_v2'],
+        ['new-token', 'files/delete_v2'],
+        ['new-token', 'files/get_metadata'],
+      ]);
+      expect(item().dropBoxData).toBeUndefined();
     });
 
     it('refreshes an expired access token once and deletes with the new one', async () => {
