@@ -187,21 +187,45 @@ export class StreamServiceService {
           playbackStatus: PSEnum.PREPARING,
           downloadStatus: PSEnum.PREPARING,
           downloadUrl,
+          // The master file in the bucket is still the previous cut (such as the untrimmed
+          // video) until the upload below is done, and for good if it fails.
+          masterStale: true,
         },
       });
 
       const refName = videoData?.refName;
       if (refName) {
+        const uploadedAssetId = data.assetId;
         fixVideoAndUploadToBucket(blob, fullFilename, uid, refName)
           .then(async (fileRef) => {
+            if (!fileRef) {
+              // The upload failed (the uploader logged why): the mark stays.
+              return;
+            }
             const downloadUrl = (await fileRef.getSignedUrl(this.config))[0];
             const streamDataRef = db.ref(
               `users/${uid}/videos/${videoId}/streamData`,
             );
-            await streamDataRef.update({
-              downloadStatus: PSEnum.READY,
-              downloadUrl,
-            });
+            // A transaction, so the asset is compared and the mark cleared in one step.
+            await streamDataRef.transaction(
+              (current: IStreamingDbData | null) => {
+                if (!current) {
+                  // A video deleted meanwhile is not recreated as a partial record.
+                  return current;
+                }
+                if (current.assetId !== uploadedAssetId) {
+                  // The video was replaced again meanwhile, and the bucket now holds this older
+                  // cut: the newer asset keeps its mark (or gets it back) and its own links.
+                  return { ...current, masterStale: true };
+                }
+                return {
+                  ...current,
+                  downloadStatus: PSEnum.READY,
+                  downloadUrl,
+                  masterStale: false,
+                };
+              },
+            );
           })
           .catch((error) => console.error(error));
       }
