@@ -186,6 +186,24 @@ export class ApiVideoService {
     }
   }
 
+  /**
+   * The MP4 download URL of a video, as api.video reports it, or null when it has no such video or
+   * no MP4 asset.
+   */
+  async getDownloadUrl(assetId: string): Promise<string | null> {
+    try {
+      const video = await this.ApiVideo.videos.get(assetId);
+      const downloadUrl = video?.assets?.mp4;
+
+      return typeof downloadUrl === 'string' && downloadUrl
+        ? downloadUrl
+        : null;
+    } catch (error) {
+      console.log(error);
+      return null;
+    }
+  }
+
   /** The uid the video was created for (its `uid` metadata), or null when it has none. */
   async getAssetOwner(assetId: string): Promise<string | null> {
     const video = await this.ApiVideo.videos.get(assetId);
