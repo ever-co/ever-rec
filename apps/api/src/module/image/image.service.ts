@@ -28,6 +28,11 @@ import { FoldersSharedService } from '../../services/shared/folders.shared.servi
 import { IFavoriteFolders } from '../../interfaces/Folders';
 import { sendError, sendResponse } from 'src/services/utils/sendResponse';
 import { toPublicLikes } from '../../services/utils/likes';
+import {
+  PUBLIC_IMAGE_FIELDS,
+  PublicImgData,
+  toPublicItemData,
+} from '../../services/utils/publicItemData';
 import { EditorGateway } from '../editor-websocket-module/editor.gateway';
 import { is_id } from '../workspace/validators/id.validator';
 import {
@@ -162,7 +167,7 @@ export class ImageService {
     link: string,
     isWorkspace: boolean,
     viewerUid?: string,
-  ): Promise<{ image: { owner: any; dbData: DbImgData } }> {
+  ): Promise<{ image: { owner: any; dbData: PublicImgData } }> {
     try {
       const db = admin.database();
       const sharedRootDb = isWorkspace ? 'sharedWorkspaceItems' : 'shared';
@@ -213,10 +218,10 @@ export class ImageService {
           ? imageData.views.length
           : 0;
 
-        // Anyone with the link reads this answer: the viewers (names, emails) go to the owner
-        // only, through `shared/get-view-info`.
-        const publicData = { ...imageSnapshot.val() };
-        delete publicData.uniqueViews;
+        // Anyone with the link reads this answer, so it carries only the fields the share page
+        // reads. The viewers (names, emails) go to the owner only, through
+        // `shared/get-view-info`; the Drive and Dropbox copies (owner's emails) never go out.
+        const publicData = toPublicItemData(imageData, PUBLIC_IMAGE_FIELDS);
 
         return {
           image: {
