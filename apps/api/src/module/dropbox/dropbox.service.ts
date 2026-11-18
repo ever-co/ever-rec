@@ -450,6 +450,31 @@ export class DropboxService {
       };
     }
 
+    const unlink = (data: unknown): Promise<IDataResponse> =>
+      itemRef.update({ dropBoxData: null }).then(() => ({
+        status: ResStatusEnum.success,
+        message: 'Dropbox file successfully deleted.',
+        error: null,
+        data,
+      }));
+
+    // True only when Dropbox says the item's path holds nothing now; any other answer means "still there".
+    const isGone = (accessToken: string): Promise<boolean> =>
+      new Promise<boolean>((res) => {
+        const dropbox = dropboxV2Api.authenticate({ token: accessToken });
+        dropbox(
+          {
+            resource: 'files/get_metadata',
+            parameters: { path: item.dropBoxData.path_lower },
+          },
+          (err) =>
+            res(
+              err?.error?.['.tag'] === 'path' &&
+                err.error.path?.['.tag'] === 'not_found',
+            ),
+        );
+      });
+
     // Answer with what Dropbox did, and unlink the item only when the file is gone. Access tokens are
     // short-lived: when one has expired, refresh it once and try once more, as the upload does.
     const remove = (
@@ -488,27 +513,25 @@ export class DropboxService {
                   .then(res, rej);
               }
               // The page shows the message in a toast, so it must be words, not a status code.
-              return res({
+              const failed: IDataResponse = {
                 status: ResStatusEnum.error,
                 message: 'Error while trying to delete the Dropbox file.',
                 error: err.error_summary || err.code || null,
                 data: null,
-              });
+              };
+              // not_found is about the stored path and revision (`parent_rev`). Unlink only when the path
+              // holds nothing at all, as when the user deleted the file in Dropbox itself.
+              if (
+                err.error?.['.tag'] === 'path_lookup' &&
+                err.error.path_lookup?.['.tag'] === 'not_found'
+              ) {
+                return isGone(accessToken)
+                  .then((gone) => (gone ? unlink(null) : failed))
+                  .then(res, rej);
+              }
+              return res(failed);
             }
-            itemRef
-              .update({
-                dropBoxData: null,
-              })
-              .then(
-                () =>
-                  res({
-                    status: ResStatusEnum.success,
-                    message: 'Dropbox file successfully deleted.',
-                    error: null,
-                    data: response,
-                  }),
-                rej,
-              );
+            unlink(response).then(res, rej);
           },
         );
       });
