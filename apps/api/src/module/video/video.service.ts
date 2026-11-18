@@ -4,6 +4,7 @@ import {
   BadRequestException,
   ForbiddenException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -310,6 +311,10 @@ export class VideoService {
       return editorVideo;
     } catch (error) {
       console.log(error);
+      // Not an empty 201: the client must learn that the video was not saved.
+      throw new InternalServerErrorException(
+        'There was a problem uploading the video.',
+      );
     }
   }
 
