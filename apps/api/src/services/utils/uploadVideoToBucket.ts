@@ -74,7 +74,9 @@ export async function uploadVideoToBucket({
     const fileBuffer = await fs.readFile(fullFilepath);
     await bucketRef.save(fileBuffer);
 
-    await fs.unlink(fullFilepath);
+    // The file is in the bucket now, so a temporary file left behind must not hide that: the
+    // caller still gets the file it wrote (an upload that replaced a newer cut must be told).
+    await fs.unlink(fullFilepath).catch((err) => console.error(err));
 
     return bucketRef;
   } catch (err) {

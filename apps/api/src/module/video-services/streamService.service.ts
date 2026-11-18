@@ -124,16 +124,13 @@ export class StreamServiceService {
 
       await newVideoRef.set(JSON.parse(JSON.stringify(newVideo)));
 
-      // Dont await this, we have polling on the client for downloadStatus and downloadUrl
+      // Dont await this, we have polling on the client for downloadStatus and downloadUrl.
+      // A trim right after the recording can replace the asset before this upload is done.
+      const uploadedAssetId = data.assetId;
       fixVideoAndUploadToBucket(blob, fullFilename, uid)
-        .then(async (fileRef) => {
-          const downloadUrl = (await fileRef.getSignedUrl(this.config))[0];
-          const streamDataRef = db.ref(`users/${uid}/videos/${id}/streamData`);
-          await streamDataRef.update({
-            downloadStatus: PSEnum.READY,
-            downloadUrl,
-          });
-        })
+        .then((fileRef) =>
+          this.markMasterUploaded(fileRef, uid, id, uploadedAssetId),
+        )
         .catch((error) => console.error(error));
 
       return { dbData: newVideo, url: data.playbackUrl };
@@ -187,22 +184,19 @@ export class StreamServiceService {
           playbackStatus: PSEnum.PREPARING,
           downloadStatus: PSEnum.PREPARING,
           downloadUrl,
+          // The master file in the bucket is still the previous cut (such as the untrimmed
+          // video) until the upload below is done, and for good if it fails.
+          masterStale: true,
         },
       });
 
       const refName = videoData?.refName;
       if (refName) {
+        const uploadedAssetId = data.assetId;
         fixVideoAndUploadToBucket(blob, fullFilename, uid, refName)
-          .then(async (fileRef) => {
-            const downloadUrl = (await fileRef.getSignedUrl(this.config))[0];
-            const streamDataRef = db.ref(
-              `users/${uid}/videos/${videoId}/streamData`,
-            );
-            await streamDataRef.update({
-              downloadStatus: PSEnum.READY,
-              downloadUrl,
-            });
-          })
+          .then((fileRef) =>
+            this.markMasterUploaded(fileRef, uid, videoId, uploadedAssetId),
+          )
           .catch((error) => console.error(error));
       }
 
@@ -218,6 +212,61 @@ export class StreamServiceService {
       return { dbData, url: data.playbackUrl };
     } catch (error) {
       console.log(error);
+    }
+  }
+
+  /**
+   * Records that the master file of `uploadedAssetId` was written to the bucket, at
+   * users/<uid>/videos/<refName>. The first upload of a recording and the upload after each trim or
+   * reset write that same file, in the background.
+   * - A failed upload (no file) changes nothing: a replaced asset keeps its `masterStale` mark.
+   * - If the record still has that asset, the master is its cut: ready, with the bucket link.
+   *   Without a link (signing failed) the record is left as it is, mark included.
+   * - If the asset was replaced meanwhile, the bucket now holds this older cut: the newer asset
+   *   keeps its mark (or gets it back) and its own links, even when signing failed.
+   * - A video deleted meanwhile is not recreated as a partial record.
+   * A transaction, so the asset is compared and the record written in one step.
+   */
+  private async markMasterUploaded(
+    fileRef: Awaited<ReturnType<typeof fixVideoAndUploadToBucket>>,
+    uid: string,
+    videoId: string,
+    uploadedAssetId: string,
+  ) {
+    if (!fileRef) {
+      // The upload failed before the bucket was written (the uploader logged why).
+      return;
+    }
+    let downloadUrl: string | undefined;
+    let signError: unknown;
+    try {
+      downloadUrl = (await fileRef.getSignedUrl(this.config))[0];
+    } catch (error) {
+      signError = error;
+    }
+    const streamDataRef = admin
+      .database()
+      .ref(`users/${uid}/videos/${videoId}/streamData`);
+    await streamDataRef.transaction((current: IStreamingDbData | null) => {
+      if (!current) {
+        return current;
+      }
+      if (current.assetId !== uploadedAssetId) {
+        return { ...current, masterStale: true };
+      }
+      if (!downloadUrl) {
+        // Abort: nothing to publish.
+        return undefined;
+      }
+      return {
+        ...current,
+        downloadStatus: PSEnum.READY,
+        downloadUrl,
+        masterStale: false,
+      };
+    });
+    if (signError) {
+      throw signError;
     }
   }
 

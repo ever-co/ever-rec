@@ -6,6 +6,14 @@
  * or deleted, an unknown service type or a malformed id is a 400, and their own asset still saves.
  * The download link is the streaming provider's, never the `downloadUrl` the client sends: the
  * Jira and Trello export used to fetch that URL from the server.
+ *
+ * Replacing the asset (a trim or a reset) replaces the master file in the bucket in the background.
+ * Until that upload is done, the bucket holds the previous cut, so the record is marked
+ * (`streamData.masterStale`) and the Jira and Trello export attaches nothing. Only the upload of
+ * the asset the record still has clears the mark: not a failed upload, and not a late one for an
+ * asset that was replaced again meanwhile, which marks the master file stale again (even when the
+ * link of that late upload cannot be signed). That includes the first upload of a recording that
+ * is trimmed at once: it writes the same file.
  */
 import { INestApplication } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -22,9 +30,13 @@ jest.mock('./mux/mux.service', () => ({ MuxService: class {} }));
 jest.mock('./api-video/api-video.service', () => ({
   ApiVideoService: class {},
 }));
+// By default it never settles: the bucket upload runs in the background. The tests of the master
+// file settle it themselves.
+const mockUpload = jest.fn<Promise<unknown>, unknown[]>(
+  () => new Promise(() => undefined),
+);
 jest.mock('src/services/utils/uploadVideoToBucket', () => ({
-  // Never settles: the bucket upload runs in the background and is not under test.
-  fixVideoAndUploadToBucket: () => new Promise(() => undefined),
+  fixVideoAndUploadToBucket: (...args: unknown[]) => mockUpload(...args),
 }));
 // Keep the uploaded file in memory instead of writing it to the tmp folder.
 jest.mock('multer', () => {
@@ -45,6 +57,19 @@ jest.mock('firebase-admin', () => {
     }
     return value ?? null;
   };
+  const write = (path: string, value: any) => {
+    const parts = path.split('/').filter(Boolean);
+    let node: any = mockDb.data;
+    for (const part of parts.slice(0, -1)) {
+      if (node[part] === null || typeof node[part] !== 'object')
+        node[part] = {};
+      node = node[part];
+    }
+    if (value === null) delete node[parts[parts.length - 1]];
+    else node[parts[parts.length - 1]] = value;
+  };
+  const copy = (value: any) =>
+    value === null ? null : JSON.parse(JSON.stringify(value));
   return {
     database: () => ({
       ref: (path: string) => ({
@@ -65,11 +90,26 @@ jest.mock('firebase-admin', () => {
         set: async () => {
           mockDb.writes.push({ op: 'set', path });
         },
+        transaction: async (update: (current: any) => any) => {
+          // Like the real database, the update function is first called with its local guess
+          // (null here), and that attempt is thrown away when the stored value is something else.
+          update(null);
+          const current = read(path);
+          const next = update(copy(current));
+          if (next === undefined || (next === null && current === null)) {
+            return { committed: false };
+          }
+          mockDb.writes.push({ op: 'transaction', path });
+          mockDb.payloads.push({ path, payload: next });
+          write(path, copy(next));
+          return { committed: true };
+        },
         push: () => ({
           key: 'newVideoId',
           set: async (payload: Record<string, any>) => {
             mockDb.writes.push({ op: 'set', path: `${path}/newVideoId` });
             mockDb.payloads.push({ path: `${path}/newVideoId`, payload });
+            write(`${path}/newVideoId`, copy(payload));
           },
         }),
       }),
@@ -136,8 +176,12 @@ describe('stream save-data routes', () => {
         },
       },
     };
+    mockUpload
+      .mockReset()
+      .mockImplementation(() => new Promise(() => undefined));
     const owners: Record<string, string> = {
       mine: 'uid-me',
+      mine2: 'uid-me',
       victim: 'uid-victim',
     };
     mux.getAssetOwner
@@ -329,6 +373,240 @@ describe('stream save-data routes', () => {
         downloadUrl: '',
       });
       expect(JSON.stringify(mockDb.payloads)).not.toContain(metadata);
+    });
+  });
+
+  describe('the master file after save-data/:videoId', () => {
+    const providerLink = 'https://stream.mux.com/pb-mine/high.mp4';
+    const streamData = () => mockDb.data.users['uid-me'].videos.vid1.streamData;
+
+    /** The next bucket upload, settled by the test. */
+    const nextUpload = () => {
+      const upload: {
+        done: (fileRef: unknown) => void;
+        fail: (error: Error) => void;
+      } = { done: () => undefined, fail: () => undefined };
+      mockUpload.mockImplementationOnce(
+        () =>
+          new Promise((resolve, reject) => {
+            upload.done = resolve;
+            upload.fail = reject;
+          }),
+      );
+      return upload;
+    };
+    /** The bucket file the upload wrote. */
+    const uploadedFile = (name: string) => ({
+      getSignedUrl: async () => [`https://bucket.test/${name}`],
+    });
+    /** Lets the background upload callback run to its end. */
+    const settled = async () => {
+      for (let i = 0; i < 5; i++) {
+        await new Promise((resolve) => setImmediate(resolve));
+      }
+    };
+
+    it('marks the master file stale until the upload of the new cut is done', async () => {
+      const upload = nextUpload();
+
+      await save('/vid1', fields('mine')).expect(201);
+
+      expect(mockUpload).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.any(String),
+        'uid-me',
+        'vid1.webm',
+      );
+      expect(streamData()).toMatchObject({
+        assetId: 'mine',
+        masterStale: true,
+        downloadStatus: 'preparing',
+        downloadUrl: providerLink,
+      });
+
+      upload.done(uploadedFile('trimmed'));
+      await settled();
+
+      expect(streamData()).toMatchObject({
+        assetId: 'mine',
+        masterStale: false,
+        downloadStatus: 'ready',
+        downloadUrl: 'https://bucket.test/trimmed',
+      });
+    });
+
+    it.each([
+      [
+        'the uploader swallowed the error',
+        (upload: ReturnType<typeof nextUpload>) => upload.done(undefined),
+      ],
+      [
+        'the upload was rejected',
+        (upload: ReturnType<typeof nextUpload>) =>
+          upload.fail(new Error('ffmpeg failed')),
+      ],
+    ])('keeps the mark when the upload failed (%s)', async (_, failUpload) => {
+      const upload = nextUpload();
+      await save('/vid1', fields('mine')).expect(201);
+
+      failUpload(upload);
+      await settled();
+
+      expect(streamData()).toMatchObject({
+        assetId: 'mine',
+        masterStale: true,
+        downloadStatus: 'preparing',
+        downloadUrl: providerLink,
+      });
+    });
+
+    it('a late upload of an older asset does not clear the mark of the newer one', async () => {
+      const first = nextUpload();
+      await save('/vid1', fields('mine')).expect(201);
+      const second = nextUpload();
+      await save('/vid1', fields('mine2')).expect(201);
+
+      first.done(uploadedFile('first-cut'));
+      await settled();
+
+      expect(streamData()).toMatchObject({
+        assetId: 'mine2',
+        masterStale: true,
+        downloadStatus: 'preparing',
+      });
+      expect(streamData().downloadUrl).not.toBe(
+        'https://bucket.test/first-cut',
+      );
+
+      second.done(uploadedFile('second-cut'));
+      await settled();
+
+      expect(streamData()).toMatchObject({
+        assetId: 'mine2',
+        masterStale: false,
+        downloadStatus: 'ready',
+        downloadUrl: 'https://bucket.test/second-cut',
+      });
+    });
+
+    it('a late upload of an older asset marks the master stale again', async () => {
+      const first = nextUpload();
+      await save('/vid1', fields('mine')).expect(201);
+      const second = nextUpload();
+      await save('/vid1', fields('mine2')).expect(201);
+
+      second.done(uploadedFile('second-cut'));
+      await settled();
+      expect(streamData()).toMatchObject({ masterStale: false });
+
+      // The older cut was written over the newer one.
+      first.done(uploadedFile('first-cut'));
+      await settled();
+
+      expect(streamData()).toMatchObject({
+        assetId: 'mine2',
+        masterStale: true,
+      });
+    });
+
+    it('does not recreate a video deleted before its upload was done', async () => {
+      const upload = nextUpload();
+      await save('/vid1', fields('mine')).expect(201);
+      delete mockDb.data.users['uid-me'].videos.vid1;
+      mockDb.writes = [];
+
+      upload.done(uploadedFile('trimmed'));
+      await settled();
+
+      expect(mockDb.writes).toEqual([]);
+      expect(mockDb.data.users['uid-me'].videos.vid1).toBeUndefined();
+    });
+
+    it('the first upload of a recording makes it ready with the bucket link', async () => {
+      const first = nextUpload();
+      await save('', fields('mine')).expect(201);
+
+      first.done(uploadedFile('recording'));
+      await settled();
+
+      expect(
+        mockDb.data.users['uid-me'].videos.newVideoId.streamData,
+      ).toMatchObject({
+        assetId: 'mine',
+        downloadStatus: 'ready',
+        downloadUrl: 'https://bucket.test/recording',
+      });
+      expect(
+        mockDb.data.users['uid-me'].videos.newVideoId.streamData.masterStale,
+      ).not.toBe(true);
+    });
+
+    it('a first upload of the recording that lands after a trim marks the master stale', async () => {
+      // Record, then trim at once: the first upload (the whole recording) is still running.
+      const first = nextUpload();
+      await save('', fields('mine')).expect(201);
+      const trim = nextUpload();
+      await save('/newVideoId', fields('mine2')).expect(201);
+      const stored = () =>
+        mockDb.data.users['uid-me'].videos.newVideoId.streamData;
+
+      trim.done(uploadedFile('trimmed'));
+      await settled();
+      expect(stored()).toMatchObject({ assetId: 'mine2', masterStale: false });
+
+      // The whole recording was written over the trimmed cut.
+      first.done(uploadedFile('whole-recording'));
+      await settled();
+
+      expect(stored()).toMatchObject({ assetId: 'mine2', masterStale: true });
+      expect(stored().downloadUrl).toBe('https://bucket.test/trimmed');
+    });
+
+    /** A bucket file the upload wrote, whose link cannot be signed. */
+    const unsignableFile = () => ({
+      getSignedUrl: async () => {
+        throw new Error('signing failed');
+      },
+    });
+
+    it('a late upload of an older asset marks the master stale even when its link cannot be signed', async () => {
+      const first = nextUpload();
+      await save('', fields('mine')).expect(201);
+      const trim = nextUpload();
+      await save('/newVideoId', fields('mine2')).expect(201);
+      const stored = () =>
+        mockDb.data.users['uid-me'].videos.newVideoId.streamData;
+
+      trim.done(uploadedFile('trimmed'));
+      await settled();
+      expect(stored()).toMatchObject({ assetId: 'mine2', masterStale: false });
+
+      // The whole recording was written over the trimmed cut, then signing its link failed.
+      first.done(unsignableFile());
+      await settled();
+
+      expect(stored()).toMatchObject({ assetId: 'mine2', masterStale: true });
+      expect(stored().downloadUrl).toBe('https://bucket.test/trimmed');
+      expect(console.error).toHaveBeenCalledWith(
+        expect.objectContaining({ message: 'signing failed' }),
+      );
+    });
+
+    it('keeps the mark when the link of the new cut cannot be signed', async () => {
+      const upload = nextUpload();
+      await save('/vid1', fields('mine')).expect(201);
+      mockDb.writes = [];
+
+      upload.done(unsignableFile());
+      await settled();
+
+      expect(mockDb.writes).toEqual([]);
+      expect(streamData()).toMatchObject({
+        assetId: 'mine',
+        masterStale: true,
+        downloadStatus: 'preparing',
+        downloadUrl: providerLink,
+      });
     });
   });
 });

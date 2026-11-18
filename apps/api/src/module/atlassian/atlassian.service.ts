@@ -413,7 +413,8 @@ export class AtlassianService {
   /**
    * The file of an item, read from the bucket. A streamed video is read from its master file too,
    * never from its stored downloadUrl: the server must not fetch a URL a client could have written.
-   * It has no file (false) while its master file is not in the bucket yet.
+   * It has no file (false) while its master file is not in the bucket yet, while that file is still
+   * the cut before a trim or a reset (`masterStale`), or when the bucket cannot be read.
    */
   async getStreamFromFile(res, type = 'image') {
     const collection = type === 'image' ? 'screenshots' : 'videos';
@@ -421,15 +422,33 @@ export class AtlassianService {
     const bucket = admin.storage().bucket();
     const streamData = userVal?.streamData;
 
+    if (streamData?.masterStale) {
+      // It may still hold what the owner cut out.
+      return false;
+    }
+
     const readableStream = await bucket.file(
       `users/${userVal.uid}/${collection}/${res.dbData.refName}`,
     );
-    if (streamData && !(await readableStream.exists())[0]) {
+    const read = async () => {
+      if (streamData && !(await readableStream.exists())[0]) {
+        return false;
+      }
+      const metadata = (await readableStream.getMetadata())[0];
+      const buffer = await getRawBody(readableStream.createReadStream());
+      return { buffer, size: metadata.size, name: metadata.name };
+    };
+
+    if (!streamData) {
+      return read();
+    }
+    try {
+      return await read();
+    } catch (error) {
+      // The issue or card is created without the video, as when it was fetched by link.
+      console.error(error);
       return false;
     }
-    const metadata = (await readableStream.getMetadata())[0];
-    const buffer = await getRawBody(readableStream.createReadStream());
-    return { buffer, size: metadata.size, name: metadata.name };
   }
 
   async createTrelloCard(uid: string, req: any): Promise<any> {

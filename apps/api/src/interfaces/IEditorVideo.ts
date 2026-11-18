@@ -66,6 +66,12 @@ export interface IStreamingDbData {
   playbackStatus: PlaybackStatusEnum;
   downloadUrl: string;
   downloadStatus: PlaybackStatusEnum;
+  /**
+   * Written by the server only. True while the master file in the bucket may still be the cut of
+   * an earlier asset (after a trim or a reset, until the upload of the new cut is done), so it
+   * must not be handed out as this asset's video. Absent on records that were never replaced.
+   */
+  masterStale?: boolean;
 }
 
 export interface ISharedDataVideo extends IWorkspaceSharedData {
