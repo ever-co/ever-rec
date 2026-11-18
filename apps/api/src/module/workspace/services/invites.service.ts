@@ -74,11 +74,13 @@ export class WorkspaceInvitesService {
         return this.utilitiesService.sendError(WORKSPACE_NOT_FOUND);
       }
 
-      const userRef = db.ref(`users/${uid}`);
-      const userData: IUser = (await userRef.get()).val();
-      const userWorkspaces = userData.workspaceIds
-        ? Object.values(userData.workspaceIds)
-        : [];
+      const userData: IUser | null = (await db.ref(`users/${uid}`).get()).val();
+      if (!userData) {
+        // No user record (for example an account deleted while its session is still valid).
+        return this.utilitiesService.sendError(
+          'There was a problem joining the workspace',
+        );
+      }
 
       const newMember = {
         id: uid,
@@ -130,9 +132,21 @@ export class WorkspaceInvitesService {
         );
       }
 
-      // Update users joined workspaces, now that the membership is stored
-      const newUserWorkspaces = [...userWorkspaces, workspaceId];
-      await userRef.update({ workspaceIds: newUserWorkspaces });
+      // Add the workspace to the user's list, now that the membership is stored. A transaction on
+      // the list itself, not a write of the list read before the join: that write dropped an id
+      // added meanwhile and listed this one twice when it was already there.
+      await db
+        .ref(`users/${uid}/workspaceIds`)
+        .transaction((current: string[] | Record<string, string> | null) => {
+          // `null` is also the first run's local guess; the server then runs this again with the
+          // stored list, so `null` must not abort.
+          const workspaceIds = current ? Object.values(current) : [];
+          if (workspaceIds.includes(workspaceId)) {
+            return undefined; // abort: already listed
+          }
+
+          return [...workspaceIds, workspaceId];
+        });
 
       return this.utilitiesService.sendResponse({
         workspaceId,

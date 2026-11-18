@@ -4,6 +4,9 @@
  * an invite page left open can be used after the workspace is deleted. Such a join must be refused
  * without writing anything: before, it recreated `workspaces/<id>` holding only `members` (no name,
  * no admin, so nobody could delete it) and added it to the user's list.
+ *
+ * The join adds the workspace to the user's `workspaceIds` without writing back the list it read
+ * before: that write dropped an id added meanwhile and listed an id already there twice.
  */
 import {
   FakeReference,
@@ -193,6 +196,70 @@ describe('joining a workspace with an invite', () => {
     expect(mockDb.dump()).toEqual(afterFirstJoin);
   });
 
+  it('does not list the workspace twice when its id is already in the user list', async () => {
+    // The id stayed in the list without a membership (for example a member update that failed).
+    await mockDb.ref('users/uid-joiner/workspaceIds').set(['ws-own', 'ws-1']);
+
+    const result = await service.joinWorkspace('uid-joiner', 'inv-1');
+
+    expect(result.data).toEqual({
+      workspaceId: 'ws-1',
+      hasAlreadyJoined: false,
+    });
+    expect(mockDb.dump('workspaces/ws-1/members')).toEqual([
+      { id: 'uid-admin' },
+      { id: 'uid-joiner' },
+    ]);
+    expect(mockDb.dump('users/uid-joiner/workspaceIds')).toEqual([
+      'ws-own',
+      'ws-1',
+    ]);
+  });
+
+  it('keeps a workspace id added to the user list while the join is under way', async () => {
+    // The user creates (or joins) another workspace after the join read the user, and before it
+    // stores the membership.
+    const { transaction } = FakeReference.prototype;
+    jest
+      .spyOn(FakeReference.prototype, 'transaction')
+      .mockImplementation(async function (
+        this: FakeReference,
+        updateFn: (current: unknown) => unknown,
+      ) {
+        if (pathOf(this) === 'workspaces/ws-1') {
+          await mockDb
+            .ref('users/uid-joiner/workspaceIds')
+            .set(['ws-own', 'ws-new']);
+        }
+        return transaction.call(this, updateFn);
+      });
+
+    const result = await service.joinWorkspace('uid-joiner', 'inv-1');
+
+    expect(result.data).toEqual({
+      workspaceId: 'ws-1',
+      hasAlreadyJoined: false,
+    });
+    expect(mockDb.dump('users/uid-joiner/workspaceIds')).toEqual([
+      'ws-own',
+      'ws-new',
+      'ws-1',
+    ]);
+  });
+
+  it('refuses a user without a record and writes nothing', async () => {
+    // For example an account deleted while its session is still valid.
+    await mockDb.ref('users/uid-joiner').remove();
+    jest.spyOn(console, 'log').mockImplementation(() => undefined);
+    const before = mockDb.dump();
+
+    const result = await service.joinWorkspace('uid-joiner', 'inv-1');
+
+    expect(result.status).toBe(ResStatusEnum.error);
+    expect(result.message).toBe('There was a problem joining the workspace');
+    expect(mockDb.dump()).toEqual(before);
+  });
+
   it('joins when the first run of the transaction sees no cached value', async () => {
     // As in the SDK: the first run sees the local cache (empty here, so `null`), and returning
     // `undefined` there aborts at once, without asking the server. Only a non-abort result is
@@ -222,6 +289,11 @@ describe('joining a workspace with an invite', () => {
     expect(mockDb.dump('workspaces/ws-1/members')).toEqual([
       { id: 'uid-admin' },
       { id: 'uid-joiner' },
+    ]);
+    // The same holds for the transaction on the user's list.
+    expect(mockDb.dump('users/uid-joiner/workspaceIds')).toEqual([
+      'ws-own',
+      'ws-1',
     ]);
   });
 });
