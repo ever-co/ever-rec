@@ -1,13 +1,15 @@
 /**
- * Connecting Dropbox with the real controller, service and one-time state. The token exchange and
- * the database are mocked. A state that is not a nonce we issued, such as a raw user id, must
- * exchange no code and write nothing; a nonce is good once, only for the user it was issued for and
- * only for the browser that asked for it (it holds a cookie that is set with the Connect URL).
+ * Connecting Dropbox with the real controller, service and one-time state. The token exchange (at
+ * the HTTP transport) and the database are mocked. A state that is not a nonce we issued, such as a
+ * raw user id, must exchange no code and write nothing; a nonce is good once, only for the user it
+ * was issued for and only for the browser that asked for it (it holds a cookie that is set with the
+ * Connect URL).
  */
 import { INestApplication } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Test } from '@nestjs/testing';
+import nock from 'nock';
 import { HttpService } from 'nestjs-http-promise';
 import request from 'supertest';
 import {
@@ -25,21 +27,26 @@ jest.mock('../auth/services/tokens', () => ({ TokenService: class {} }));
 jest.mock('../image/image.service', () => ({ ImageService: class {} }));
 jest.mock('../video/video.service', () => ({ VideoService: class {} }));
 
+/** One call per code exchanged at Dropbox's token endpoint: (code). */
 const mockGetToken = jest.fn();
-jest.mock('dropbox-v2-api', () => ({
-  __esModule: true,
-  default: {
-    authenticate: (options: { state?: string }) => {
-      const client: any = (_req: unknown, cb: (...args: any[]) => void) =>
-        cb(null, { email: 'a@example.com' });
-      client.getToken = (code: string, cb: (...args: any[]) => void) =>
-        mockGetToken(code, cb);
-      client.generateAuthUrl = () =>
-        `https://dropbox.test/authorize?state=${options.state}`;
-      return client;
+jest.mock('dropbox-v2-api', () => {
+  const actual = jest.requireActual('dropbox-v2-api');
+  return {
+    __esModule: true,
+    default: {
+      authenticate: (options: { state?: string }) => {
+        const client: any = (_req: unknown, cb: (...args: any[]) => void) =>
+          cb(null, { email: 'a@example.com' });
+        // The code exchange is not mocked here: whichever client sends it, it goes over HTTP to
+        // Dropbox's token endpoint, where nock answers it.
+        client.getToken = actual.authenticate(options).getToken;
+        client.generateAuthUrl = () =>
+          `https://dropbox.test/authorize?state=${options.state}`;
+        return client;
+      },
     },
-  },
-}));
+  };
+});
 
 const mockDb = createFakeRealtimeDb();
 jest.mock('firebase-admin', () => ({
@@ -50,12 +57,16 @@ const website = 'https://web.test';
 const done = `${website}/media/integrations`;
 const invalidState = `${done}?error=invalid_state`;
 const cookieName = 'ever_rec_oauth_dropbox';
+/** The test server; nothing else is reachable. */
+const LOOPBACK = /^(127\.0\.0\.1|localhost|\[::1\])(:\d+)?$/;
 
 describe('Dropbox connection', () => {
   let app: INestApplication;
   let oauthState: OAuthStateService;
 
   beforeAll(async () => {
+    nock.disableNetConnect();
+    nock.enableNetConnect(LOOPBACK);
     const moduleRef = await Test.createTestingModule({
       controllers: [DropboxController],
       providers: [
@@ -84,6 +95,8 @@ describe('Dropbox connection', () => {
 
   afterAll(async () => {
     await app.close();
+    nock.cleanAll();
+    nock.enableNetConnect();
   });
 
   beforeEach(() => {
@@ -99,13 +112,18 @@ describe('Dropbox connection', () => {
     mockDb.staleReads = {};
     mockGetToken.mockReset();
     let call = 0;
-    mockGetToken.mockImplementation((_code, cb) =>
-      cb(null, {
-        access_token: `access-${++call}`,
-        refresh_token: `refresh-${call}`,
-        account_id: 'acc-a',
-      }),
-    );
+    nock.cleanAll();
+    nock('https://api.dropboxapi.com')
+      .persist()
+      .post('/1/oauth2/token')
+      .reply(200, (_uri, body) => {
+        mockGetToken(new URLSearchParams(String(body)).get('code'));
+        return {
+          access_token: `access-${++call}`,
+          refresh_token: `refresh-${call}`,
+          account_id: 'acc-a',
+        };
+      });
   });
 
   const userWrites = () =>
@@ -169,7 +187,7 @@ describe('Dropbox connection', () => {
 
     expect(res.status).toBe(302);
     expect(res.headers.location).toBe(done);
-    expect(mockGetToken).toHaveBeenCalledWith('good-code', expect.any(Function));
+    expect(mockGetToken).toHaveBeenCalledWith('good-code');
     expect(mockDb.data.users['uid-a'].dropboxAPISCredentials).toMatchObject({
       credentials: { access_token: 'access-1', refresh_token: 'refresh-1' },
       account_id: 'acc-a',

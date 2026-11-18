@@ -2,14 +2,59 @@ import { Injectable } from '@nestjs/common';
 import { ResStatusEnum } from '../../enums/ResStatusEnum';
 import * as admin from 'firebase-admin';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import axios from 'axios';
 import dropboxV2Api from 'dropbox-v2-api';
-import * as fs from 'fs';
 import { ImageService } from '../image/image.service';
 import { ConfigService } from '@nestjs/config';
 import { VideoService } from '../video/video.service';
 import { Readable } from 'stream';
 import { IDataResponse } from 'src/interfaces/_types';
 import { OAuthStateService } from '../../services/shared/oauth-state.service';
+
+/** Dropbox's OAuth 2 token endpoint, the one the dropbox-v2-api client posts to. */
+const DROPBOX_TOKEN_URL = 'https://api.dropboxapi.com/1/oauth2/token';
+
+/** The parts of a token answer the service reads. */
+interface DropboxToken {
+  access_token: string;
+  refresh_token?: string;
+  account_id?: string;
+}
+
+/**
+ * Posts a form to Dropbox's token endpoint and resolves with the answer. Rejects when the request
+ * fails (a DNS failure, a reset connection), when Dropbox answers with a non-2xx status or when the
+ * answer has no access token. The dropbox-v2-api client's getToken and refreshToken are not used:
+ * they read the body of a request that got no answer, so a network error threw in a callback that
+ * nothing catches and ended the process.
+ */
+async function requestDropboxToken(
+  form: Record<string, string>,
+): Promise<DropboxToken> {
+  let data: any;
+  try {
+    ({ data } = await axios.post(
+      DROPBOX_TOKEN_URL,
+      // Like the client's form, a field with no value is left out.
+      new URLSearchParams(
+        Object.entries(form).filter(([, value]) => value != null),
+      ),
+      // The client did not follow a redirect of the POST, which carries the app secret.
+      { maxRedirects: 0 },
+    ));
+  } catch (e) {
+    // An axios error carries the request, whose form holds the app secret and the user's code or
+    // refresh token: keep only the HTTP status or the error code.
+    const reason =
+      e?.response?.status ??
+      (typeof e?.code === 'string' ? e.code : 'no answer');
+    throw new Error(`Dropbox token request failed (${reason})`);
+  }
+  if (!data?.access_token) {
+    throw new Error('Dropbox returned no access token');
+  }
+  return data;
+}
 
 @Injectable()
 export class DropboxService {
@@ -73,129 +118,116 @@ export class DropboxService {
       return null;
     }
 
-    const dropbox = dropboxV2Api.authenticate({
-      client_id: this.apiKey,
-      client_secret: this.apiSecrete,
-      redirect_uri: this.redirectURI,
-      token_access_type: 'offline', // if you need an offline long-living refresh token
-    });
-
     const db = admin.database();
     const userRef = db.ref(`/users/${uid}`);
 
-    return new Promise((res, rej) => {
-      dropbox.getToken(code, async (err, result, response) => {
-        try {
-          if (err) {
-            rej('Error retrieving access token');
-          }
-
-          if (result) {
-            const userDropbox = dropboxV2Api.authenticate({
-              token: result.access_token,
-            });
-
-            await userDropbox(
-              {
-                resource: 'users/get_account',
-                parameters: {
-                  account_id: result.account_id,
-                },
-              },
-              async (accErr, accResult) => {
-                if (accResult) {
-                  const dropboxUserData = {
-                    account_id: result.account_id,
-                    email: accResult.email,
-                  };
-
-                  await userRef.update({
-                    dropboxAPISCredentials: {
-                      credentials: {
-                        access_token: result.access_token,
-                        refresh_token: result.refresh_token,
-                      },
-                      ...dropboxUserData,
-                    },
-                  });
-
-                  res({
-                    status: ResStatusEnum.success,
-                    message: 'Success',
-                    error: null,
-                    data: 'success',
-                  });
-                } else {
-                  rej({
-                    status: ResStatusEnum.error,
-                    message: 'Error while trying to sign in with dropbox',
-                    error: accErr,
-                    data: null,
-                  });
-                }
-              },
-            );
-          }
-        } catch (e) {
-          rej({
-            status: ResStatusEnum.error,
-            message: 'Error while trying to sign in with dropbox',
-            error: e,
-            data: null,
-          });
-        }
+    let result: DropboxToken;
+    try {
+      result = await requestDropboxToken({
+        code,
+        client_id: this.apiKey,
+        client_secret: this.apiSecrete,
+        grant_type: 'authorization_code',
+        redirect_uri: this.redirectURI,
       });
+    } catch (e) {
+      console.log(e.message, 'err');
+      return Promise.reject('Error retrieving access token');
+    }
+
+    return new Promise((res, rej) => {
+      try {
+        const userDropbox = dropboxV2Api.authenticate({
+          token: result.access_token,
+        });
+
+        userDropbox(
+          {
+            resource: 'users/get_account',
+            parameters: {
+              account_id: result.account_id,
+            },
+          },
+          async (accErr, accResult) => {
+            if (accResult) {
+              const dropboxUserData = {
+                account_id: result.account_id,
+                email: accResult.email,
+              };
+
+              await userRef.update({
+                dropboxAPISCredentials: {
+                  credentials: {
+                    access_token: result.access_token,
+                    refresh_token: result.refresh_token,
+                  },
+                  ...dropboxUserData,
+                },
+              });
+
+              res({
+                status: ResStatusEnum.success,
+                message: 'Success',
+                error: null,
+                data: 'success',
+              });
+            } else {
+              rej({
+                status: ResStatusEnum.error,
+                message: 'Error while trying to sign in with dropbox',
+                error: accErr,
+                data: null,
+              });
+            }
+          },
+        );
+      } catch (e) {
+        rej({
+          status: ResStatusEnum.error,
+          message: 'Error while trying to sign in with dropbox',
+          error: e,
+          data: null,
+        });
+      }
     });
   }
 
   /**
    * Gets a new access token for the user's refresh token and saves it. Resolves with the new access
-   * token; rejects when Dropbox refuses the refresh token or the token cannot be saved.
+   * token; rejects when the token request fails or gets no access token (a network error, a non-2xx
+   * answer such as a refused refresh token) or when the token cannot be saved.
    */
-  refreshToken(refresh_token, req): Promise<string> {
-    const dropbox = dropboxV2Api.authenticate({
-      client_id: this.apiKey,
-      client_secret: this.apiSecrete,
-      redirect_uri: this.redirectURI,
-      token_access_type: 'offline',
-    });
-    return new Promise<string>((res, rej) => {
-      // The client can call back twice when Dropbox refuses the refresh token: first with the
-      // error, then with the error body. Only the first answer counts.
-      let answered = false;
-      dropbox.refreshToken(refresh_token, async (err, response) => {
-        if (answered) {
-          return;
-        }
-        answered = true;
-        try {
-          if (err || !response?.access_token) {
-            console.log(err, 'err');
-            throw err || new Error('Dropbox returned no access token');
-          }
-          const db = admin.database();
-          const userRef = db.ref(`/users/${req?.user.id}`);
-          const snapshot = await userRef.get();
-          const userData = snapshot.val();
-          const dropboxUserData = {
-            account_id: userData.dropboxAPISCredentials.account_id,
-            email: userData.dropboxAPISCredentials.email,
-          };
-          await userRef.update({
-            dropboxAPISCredentials: {
-              credentials: {
-                ...userData.dropboxAPISCredentials.credentials,
-                access_token: response.access_token,
-              },
-              ...dropboxUserData,
-            },
-          });
-          res(response.access_token);
-        } catch (e) {
-          rej(e);
-        }
+  async refreshToken(refresh_token, req): Promise<string> {
+    let response: DropboxToken;
+    try {
+      response = await requestDropboxToken({
+        refresh_token,
+        client_id: this.apiKey,
+        client_secret: this.apiSecrete,
+        grant_type: 'refresh_token',
       });
+    } catch (e) {
+      console.log(e.message, 'err');
+      throw e;
+    }
+    const db = admin.database();
+    const userRef = db.ref(`/users/${req?.user.id}`);
+    const snapshot = await userRef.get();
+    const userData = snapshot.val();
+    const dropboxUserData = {
+      account_id: userData.dropboxAPISCredentials.account_id,
+      email: userData.dropboxAPISCredentials.email,
+    };
+    await userRef.update({
+      dropboxAPISCredentials: {
+        credentials: {
+          ...userData.dropboxAPISCredentials.credentials,
+          access_token: response.access_token,
+        },
+        ...dropboxUserData,
+      },
     });
+    return response.access_token;
   }
 
   async dropboxUploadFile(req): Promise<any> {

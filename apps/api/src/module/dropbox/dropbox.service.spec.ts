@@ -1,12 +1,15 @@
 /**
- * Saving to Dropbox and removing the copy, with the real service. Dropbox and the database are
- * mocked. Dropbox issues short-lived access tokens (sign-in asks for `offline` access), so an upload
- * a few hours after connecting meets `expired_access_token`: the service must refresh the token once,
- * retry once and answer the request either way. A delete must report what Dropbox did.
+ * Saving to Dropbox, removing the copy and connecting, with the real service. Dropbox and the
+ * database are mocked. Dropbox issues short-lived access tokens (sign-in asks for `offline` access),
+ * so an upload a few hours after connecting meets `expired_access_token`: the service must refresh
+ * the token once, retry once and answer the request either way. A delete must report what Dropbox
+ * did. A token request that fails, even with no answer at all, must reject and never throw where
+ * nothing catches it: that ends the API process.
  */
 import { ConfigService } from '@nestjs/config';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Test } from '@nestjs/testing';
+import nock from 'nock';
 import { Readable } from 'stream';
 import { ResStatusEnum } from '../../enums/ResStatusEnum';
 import { OAuthStateService } from '../../services/shared/oauth-state.service';
@@ -20,28 +23,68 @@ jest.mock('../video/video.service', () => ({ VideoService: class {} }));
 
 /** One call per Dropbox API request: (token, { resource, parameters, readStream }, callback). */
 const mockApiCall = jest.fn();
-/** One call per token refresh: (refreshToken, callback). */
-const mockRefresh = jest.fn();
-jest.mock('dropbox-v2-api', () => ({
-  __esModule: true,
-  default: {
-    authenticate: (options: { token?: string }) => {
-      // Like the real client: returns the request at once and calls back when Dropbox answers.
-      const client: any = (opts: any, cb: (...args: any[]) => void) => {
-        mockApiCall(options.token, opts, cb);
-        return {};
-      };
-      client.refreshToken = (refreshToken: string, cb: (...a: any[]) => void) =>
-        mockRefresh(refreshToken, cb);
-      return client;
+jest.mock('dropbox-v2-api', () => {
+  const actual = jest.requireActual('dropbox-v2-api');
+  return {
+    __esModule: true,
+    default: {
+      authenticate: (options: { token?: string }) => {
+        // Like the real client: returns the request at once and calls back when Dropbox answers.
+        const client: any = (opts: any, cb: (...args: any[]) => void) => {
+          mockApiCall(options.token, opts, cb);
+          return {};
+        };
+        // Token requests are not mocked here: whichever client sends them, they go over HTTP to
+        // Dropbox's token endpoint, where nock answers them.
+        const real = actual.authenticate(options);
+        client.getToken = real.getToken;
+        client.refreshToken = real.refreshToken;
+        return client;
+      },
     },
-  },
-}));
+  };
+});
 
 const mockDb = createFakeRealtimeDb();
 jest.mock('firebase-admin', () => ({
   database: (...args: any[]) => (mockDb.admin.database as any)(...args),
 }));
+
+const config: Record<string, string> = {
+  DROPBOX_API_KEY: 'app-key',
+  DROPBOX_API_SECRET: 'app-secret',
+  API_BASE_URL: 'https://api.test',
+};
+
+/** Every form posted to Dropbox's token endpoint, in order. */
+let tokenForms: Record<string, string>[] = [];
+
+/**
+ * Answers every request to Dropbox's token endpoint at the HTTP transport, as `answer` says, and
+ * records its form. Only form posts match.
+ */
+const answerTokenRequests = (
+  answer: (request: nock.Interceptor) => nock.Scope,
+) =>
+  answer(
+    nock('https://api.dropboxapi.com')
+      .persist()
+      .post('/1/oauth2/token')
+      .matchHeader('content-type', /^application\/x-www-form-urlencoded/),
+  ).on('request', (_req, _interceptor, body: string) => {
+    tokenForms.push(Object.fromEntries(new URLSearchParams(body)));
+  });
+
+/** The connection fails before Dropbox answers: the client gets an error and no body. */
+const networkError = () =>
+  Object.assign(new Error('read ECONNRESET'), { code: 'ECONNRESET' });
+
+const refreshForm = {
+  refresh_token: 'refresh-a',
+  client_id: 'app-key',
+  client_secret: 'app-secret',
+  grant_type: 'refresh_token',
+};
 
 const expiredToken = {
   error_summary: 'expired_access_token/',
@@ -67,14 +110,34 @@ const answered = <T>(promise: Promise<T>, ms = 1000): Promise<T> => {
   return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
 };
 
+/**
+ * Like `answered`, then lets the transport finish its callbacks. An error thrown in a callback that
+ * nothing awaits lands while the test still runs, and Jest fails the test with it.
+ */
+const answeredCleanly = async <T>(promise: Promise<T>): Promise<T> => {
+  try {
+    return await answered(promise);
+  } finally {
+    await new Promise((res) => setTimeout(res, 50));
+  }
+};
+
 describe('DropboxService', () => {
   let service: DropboxService;
+  let logged: jest.SpyInstance;
+
+  /** Everything the service logged: never the app secret or the user's tokens. */
+  const logs = () => JSON.stringify(logged.mock.calls);
 
   beforeAll(async () => {
+    nock.disableNetConnect();
     const moduleRef = await Test.createTestingModule({
       providers: [
         DropboxService,
-        { provide: OAuthStateService, useValue: {} },
+        {
+          provide: OAuthStateService,
+          useValue: { consume: async () => 'uid-a' },
+        },
         {
           provide: ImageService,
           useValue: {
@@ -84,12 +147,20 @@ describe('DropboxService', () => {
           },
         },
         { provide: VideoService, useValue: {} },
-        { provide: ConfigService, useValue: { get: () => 'https://api.test' } },
+        {
+          provide: ConfigService,
+          useValue: { get: (key: string) => config[key] },
+        },
         { provide: EventEmitter2, useValue: { emit: jest.fn() } },
       ],
     }).compile();
 
     service = moduleRef.get(DropboxService);
+  });
+
+  afterAll(() => {
+    nock.cleanAll();
+    nock.enableNetConnect();
   });
 
   beforeEach(() => {
@@ -111,16 +182,81 @@ describe('DropboxService', () => {
     mockDb.writes = [];
     mockDb.staleReads = {};
     mockApiCall.mockReset();
-    mockRefresh.mockReset();
-    jest.spyOn(console, 'log').mockImplementation(() => undefined);
+    tokenForms = [];
+    logged = jest.spyOn(console, 'log').mockImplementation(() => undefined);
   });
 
   afterEach(() => {
+    nock.cleanAll();
     jest.restoreAllMocks();
   });
 
   const credentials = () =>
     mockDb.data.users['uid-a'].dropboxAPISCredentials.credentials;
+
+  describe('refreshToken', () => {
+    const refresh = () =>
+      service.refreshToken('refresh-a', { user: { id: 'uid-a' } });
+
+    it('rejects, and throws nothing outside the promise, when the token request fails with a network error', async () => {
+      answerTokenRequests((request) => request.replyWithError(networkError()));
+
+      await expect(answeredCleanly(refresh())).rejects.toThrow(
+        /Dropbox token request failed/,
+      );
+      expect(tokenForms).toEqual([refreshForm]);
+      expect(credentials().access_token).toBe('old-token');
+      expect(logs()).not.toMatch(/app-secret|refresh-a/);
+    });
+
+    it('rejects when Dropbox answers with an error status and no body', async () => {
+      answerTokenRequests((request) => request.reply(503));
+
+      await expect(answeredCleanly(refresh())).rejects.toThrow(
+        /Dropbox token request failed/,
+      );
+      expect(credentials().access_token).toBe('old-token');
+    });
+
+    it('rejects when Dropbox refuses the refresh token', async () => {
+      answerTokenRequests((request) =>
+        request.reply(400, {
+          error: 'invalid_grant',
+          error_description: 'refresh token is invalid or revoked',
+        }),
+      );
+
+      await expect(answeredCleanly(refresh())).rejects.toBeDefined();
+      expect(credentials().access_token).toBe('old-token');
+      expect(logs()).not.toMatch(/app-secret|refresh-a/);
+    });
+
+    it('rejects when Dropbox answers without an access token', async () => {
+      answerTokenRequests((request) => request.reply(200, {}));
+
+      await expect(answeredCleanly(refresh())).rejects.toThrow(
+        'Dropbox returned no access token',
+      );
+      expect(credentials().access_token).toBe('old-token');
+    });
+
+    it('posts the refresh form to the token endpoint and saves the new access token', async () => {
+      answerTokenRequests((request) =>
+        request.reply(200, {
+          access_token: 'new-token',
+          token_type: 'bearer',
+          expires_in: 14400,
+        }),
+      );
+
+      await expect(answeredCleanly(refresh())).resolves.toBe('new-token');
+      expect(tokenForms).toEqual([refreshForm]);
+      expect(credentials()).toEqual({
+        access_token: 'new-token',
+        refresh_token: 'refresh-a',
+      });
+    });
+  });
 
   describe('dropboxUploadFile', () => {
     const uploadRequest = () => ({
@@ -149,8 +285,8 @@ describe('DropboxService', () => {
         }
         return cb(null, uploaded);
       });
-      mockRefresh.mockImplementation((_refreshToken, cb) =>
-        cb(false, { access_token: 'new-token' }),
+      answerTokenRequests((request) =>
+        request.reply(200, { access_token: 'new-token' }),
       );
 
       const result = await answered(service.dropboxUploadFile(uploadRequest()));
@@ -159,11 +295,7 @@ describe('DropboxService', () => {
         status: ResStatusEnum.success,
         data: 'Shot.png',
       });
-      expect(mockRefresh).toHaveBeenCalledTimes(1);
-      expect(mockRefresh).toHaveBeenCalledWith(
-        'refresh-a',
-        expect.any(Function),
-      );
+      expect(tokenForms).toEqual([refreshForm]);
       expect(mockApiCall.mock.calls.map(([token]) => token)).toEqual([
         'old-token',
         'new-token',
@@ -184,15 +316,38 @@ describe('DropboxService', () => {
         await readAll(opts.readStream);
         return cb(expiredToken, null);
       });
-      // The real client calls back twice when Dropbox refuses the refresh token.
-      mockRefresh.mockImplementation((_refreshToken, cb) => {
-        cb('invalid_grant');
-        cb(false, { error: 'invalid_grant' });
-      });
+      answerTokenRequests((request) =>
+        request.reply(400, { error: 'invalid_grant' }),
+      );
 
       const result = await answered(service.dropboxUploadFile(uploadRequest()));
 
       expect(result).toMatchObject({ status: ResStatusEnum.error, data: null });
+      expect(mockApiCall).toHaveBeenCalledTimes(1);
+      expect(credentials().access_token).toBe('old-token');
+      expect(
+        mockDb.data.users['uid-a'].screenshots['img-1'].dropBoxData,
+      ).toBeUndefined();
+    });
+
+    it('answers with the refresh error when the token request fails with a network error', async () => {
+      mockApiCall.mockImplementation(async (_token, opts, cb) => {
+        await readAll(opts.readStream);
+        return cb(expiredToken, null);
+      });
+      answerTokenRequests((request) => request.replyWithError(networkError()));
+
+      const result = await answeredCleanly(
+        service.dropboxUploadFile(uploadRequest()),
+      );
+
+      expect(result).toEqual({
+        status: ResStatusEnum.error,
+        message: 'Error while trying to refresh the Dropbox access token',
+        error: null,
+        data: null,
+      });
+      expect(tokenForms).toEqual([refreshForm]);
       expect(mockApiCall).toHaveBeenCalledTimes(1);
       expect(credentials().access_token).toBe('old-token');
       expect(
@@ -209,14 +364,14 @@ describe('DropboxService', () => {
         }
         return cb(expiredToken, null);
       });
-      mockRefresh.mockImplementation((_refreshToken, cb) =>
-        cb(false, { access_token: 'new-token' }),
+      answerTokenRequests((request) =>
+        request.reply(200, { access_token: 'new-token' }),
       );
 
       const result = await answered(service.dropboxUploadFile(uploadRequest()));
 
       expect(result).toMatchObject({ status: ResStatusEnum.error, data: null });
-      expect(mockRefresh).toHaveBeenCalledTimes(1);
+      expect(tokenForms).toHaveLength(1);
       expect(mockApiCall).toHaveBeenCalledTimes(2);
     });
 
@@ -288,8 +443,8 @@ describe('DropboxService', () => {
       mockApiCall.mockImplementation((token, _opts, cb) =>
         token === 'old-token' ? cb(expiredToken, null) : cb(null, deleted),
       );
-      mockRefresh.mockImplementation((_refreshToken, cb) =>
-        cb(false, { access_token: 'new-token' }),
+      answerTokenRequests((request) =>
+        request.reply(200, { access_token: 'new-token' }),
       );
 
       const result = await answered(
@@ -300,11 +455,7 @@ describe('DropboxService', () => {
         status: ResStatusEnum.success,
         data: deleted,
       });
-      expect(mockRefresh).toHaveBeenCalledTimes(1);
-      expect(mockRefresh).toHaveBeenCalledWith(
-        'refresh-a',
-        expect.any(Function),
-      );
+      expect(tokenForms).toEqual([refreshForm]);
       expect(mockApiCall.mock.calls.map(([token]) => token)).toEqual([
         'old-token',
         'new-token',
@@ -320,17 +471,38 @@ describe('DropboxService', () => {
       mockApiCall.mockImplementation((_token, _opts, cb) =>
         cb(expiredToken, null),
       );
-      mockRefresh.mockImplementation((_refreshToken, cb) => {
-        cb('invalid_grant');
-        cb(false, { error: 'invalid_grant' });
-      });
+      answerTokenRequests((request) =>
+        request.reply(400, { error: 'invalid_grant' }),
+      );
 
       const result = await answered(
         service.deleteFile('uid-a', 'img-1', 'image'),
       );
 
       expect(result.status).toBe(ResStatusEnum.error);
-      expect(mockRefresh).toHaveBeenCalledTimes(1);
+      expect(tokenForms).toHaveLength(1);
+      expect(mockApiCall).toHaveBeenCalledTimes(1);
+      expect(credentials().access_token).toBe('old-token');
+      expect(item().dropBoxData).toEqual(dropBoxData);
+    });
+
+    it('answers with the refresh error and keeps the link when the token request fails with a network error', async () => {
+      mockApiCall.mockImplementation((_token, _opts, cb) =>
+        cb(expiredToken, null),
+      );
+      answerTokenRequests((request) => request.replyWithError(networkError()));
+
+      const result = await answeredCleanly(
+        service.deleteFile('uid-a', 'img-1', 'image'),
+      );
+
+      expect(result).toEqual({
+        status: ResStatusEnum.error,
+        message: 'Error while trying to refresh the Dropbox access token',
+        error: null,
+        data: null,
+      });
+      expect(tokenForms).toEqual([refreshForm]);
       expect(mockApiCall).toHaveBeenCalledTimes(1);
       expect(credentials().access_token).toBe('old-token');
       expect(item().dropBoxData).toEqual(dropBoxData);
@@ -373,6 +545,72 @@ describe('DropboxService', () => {
       expect(result.status).toBe(ResStatusEnum.error);
       expect(mockApiCall).not.toHaveBeenCalled();
       expect(item().dropBoxData).toEqual(dropBoxData);
+    });
+  });
+
+  describe('completeOAuth', () => {
+    const codeForm = {
+      code: 'code-1',
+      client_id: 'app-key',
+      client_secret: 'app-secret',
+      grant_type: 'authorization_code',
+      redirect_uri: 'https://api.test/api/v1/dropbox/complete-oauth',
+    };
+
+    beforeEach(() => {
+      delete mockDb.data.users['uid-a'].dropboxAPISCredentials;
+    });
+
+    it('answers with an error, and throws nothing outside the promise, when the token request fails with a network error', async () => {
+      answerTokenRequests((request) => request.replyWithError(networkError()));
+
+      await expect(
+        answeredCleanly(service.completeOAuth('state-1', 'code-1', 'binding')),
+      ).rejects.toBe('Error retrieving access token');
+      expect(tokenForms).toEqual([codeForm]);
+      expect(mockApiCall).not.toHaveBeenCalled();
+      expect(mockDb.writes).toEqual([]);
+      expect(logs()).not.toMatch(/app-secret|code-1/);
+    });
+
+    it('answers with an error when Dropbox answers with an error status and no body', async () => {
+      answerTokenRequests((request) => request.reply(503));
+
+      await expect(
+        answeredCleanly(service.completeOAuth('state-1', 'code-1', 'binding')),
+      ).rejects.toBe('Error retrieving access token');
+      expect(mockApiCall).not.toHaveBeenCalled();
+      expect(mockDb.writes).toEqual([]);
+    });
+
+    it('posts the code form to the token endpoint and saves the credentials', async () => {
+      answerTokenRequests((request) =>
+        request.reply(200, {
+          access_token: 'access-1',
+          refresh_token: 'refresh-1',
+          account_id: 'acc-a',
+        }),
+      );
+      mockApiCall.mockImplementation((token, opts, cb) => {
+        expect(token).toBe('access-1');
+        expect(opts).toMatchObject({
+          resource: 'users/get_account',
+          parameters: { account_id: 'acc-a' },
+        });
+        return cb(null, { email: 'a@example.com' });
+      });
+
+      const result = await answeredCleanly(
+        service.completeOAuth('state-1', 'code-1', 'binding'),
+      );
+
+      expect(result).toMatchObject({ status: ResStatusEnum.success });
+      expect(tokenForms).toEqual([codeForm]);
+      expect(mockDb.data.users['uid-a'].dropboxAPISCredentials).toEqual({
+        credentials: { access_token: 'access-1', refresh_token: 'refresh-1' },
+        account_id: 'acc-a',
+        email: 'a@example.com',
+      });
     });
   });
 });
