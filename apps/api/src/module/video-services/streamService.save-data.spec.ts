@@ -11,7 +11,8 @@
  * Until that upload is done, the bucket holds the previous cut, so the record is marked
  * (`streamData.masterStale`) and the Jira and Trello export attaches nothing. Only the upload of
  * the asset the record still has clears the mark: not a failed upload, and not a late one for an
- * asset that was replaced again meanwhile, which marks the master file stale again.
+ * asset that was replaced again meanwhile, which marks the master file stale again. That includes
+ * the first upload of a recording that is trimmed at once: it writes the same file.
  */
 import { INestApplication } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -107,6 +108,7 @@ jest.mock('firebase-admin', () => {
           set: async (payload: Record<string, any>) => {
             mockDb.writes.push({ op: 'set', path: `${path}/newVideoId` });
             mockDb.payloads.push({ path: `${path}/newVideoId`, payload });
+            write(`${path}/newVideoId`, copy(payload));
           },
         }),
       }),
@@ -517,6 +519,46 @@ describe('stream save-data routes', () => {
 
       expect(mockDb.writes).toEqual([]);
       expect(mockDb.data.users['uid-me'].videos.vid1).toBeUndefined();
+    });
+
+    it('the first upload of a recording makes it ready with the bucket link', async () => {
+      const first = nextUpload();
+      await save('', fields('mine')).expect(201);
+
+      first.done(uploadedFile('recording'));
+      await settled();
+
+      expect(
+        mockDb.data.users['uid-me'].videos.newVideoId.streamData,
+      ).toMatchObject({
+        assetId: 'mine',
+        downloadStatus: 'ready',
+        downloadUrl: 'https://bucket.test/recording',
+      });
+      expect(
+        mockDb.data.users['uid-me'].videos.newVideoId.streamData.masterStale,
+      ).not.toBe(true);
+    });
+
+    it('a first upload of the recording that lands after a trim marks the master stale', async () => {
+      // Record, then trim at once: the first upload (the whole recording) is still running.
+      const first = nextUpload();
+      await save('', fields('mine')).expect(201);
+      const trim = nextUpload();
+      await save('/newVideoId', fields('mine2')).expect(201);
+      const stored = () =>
+        mockDb.data.users['uid-me'].videos.newVideoId.streamData;
+
+      trim.done(uploadedFile('trimmed'));
+      await settled();
+      expect(stored()).toMatchObject({ assetId: 'mine2', masterStale: false });
+
+      // The whole recording was written over the trimmed cut.
+      first.done(uploadedFile('whole-recording'));
+      await settled();
+
+      expect(stored()).toMatchObject({ assetId: 'mine2', masterStale: true });
+      expect(stored().downloadUrl).toBe('https://bucket.test/trimmed');
     });
   });
 });
