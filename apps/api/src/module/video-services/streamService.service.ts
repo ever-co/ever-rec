@@ -221,8 +221,9 @@ export class StreamServiceService {
    * reset write that same file, in the background.
    * - A failed upload (no file) changes nothing: a replaced asset keeps its `masterStale` mark.
    * - If the record still has that asset, the master is its cut: ready, with the bucket link.
+   *   Without a link (signing failed) the record is left as it is, mark included.
    * - If the asset was replaced meanwhile, the bucket now holds this older cut: the newer asset
-   *   keeps its mark (or gets it back) and its own links.
+   *   keeps its mark (or gets it back) and its own links, even when signing failed.
    * - A video deleted meanwhile is not recreated as a partial record.
    * A transaction, so the asset is compared and the record written in one step.
    */
@@ -233,10 +234,16 @@ export class StreamServiceService {
     uploadedAssetId: string,
   ) {
     if (!fileRef) {
-      // The upload failed (the uploader logged why).
+      // The upload failed before the bucket was written (the uploader logged why).
       return;
     }
-    const downloadUrl = (await fileRef.getSignedUrl(this.config))[0];
+    let downloadUrl: string | undefined;
+    let signError: unknown;
+    try {
+      downloadUrl = (await fileRef.getSignedUrl(this.config))[0];
+    } catch (error) {
+      signError = error;
+    }
     const streamDataRef = admin
       .database()
       .ref(`users/${uid}/videos/${videoId}/streamData`);
@@ -247,6 +254,10 @@ export class StreamServiceService {
       if (current.assetId !== uploadedAssetId) {
         return { ...current, masterStale: true };
       }
+      if (!downloadUrl) {
+        // Abort: nothing to publish.
+        return undefined;
+      }
       return {
         ...current,
         downloadStatus: PSEnum.READY,
@@ -254,6 +265,9 @@ export class StreamServiceService {
         masterStale: false,
       };
     });
+    if (signError) {
+      throw signError;
+    }
   }
 
   /** The links of an asset as its streaming provider reports them, or null. */

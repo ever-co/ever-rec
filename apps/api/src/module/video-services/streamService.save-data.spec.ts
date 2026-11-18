@@ -11,8 +11,9 @@
  * Until that upload is done, the bucket holds the previous cut, so the record is marked
  * (`streamData.masterStale`) and the Jira and Trello export attaches nothing. Only the upload of
  * the asset the record still has clears the mark: not a failed upload, and not a late one for an
- * asset that was replaced again meanwhile, which marks the master file stale again. That includes
- * the first upload of a recording that is trimmed at once: it writes the same file.
+ * asset that was replaced again meanwhile, which marks the master file stale again (even when the
+ * link of that late upload cannot be signed). That includes the first upload of a recording that
+ * is trimmed at once: it writes the same file.
  */
 import { INestApplication } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -559,6 +560,53 @@ describe('stream save-data routes', () => {
 
       expect(stored()).toMatchObject({ assetId: 'mine2', masterStale: true });
       expect(stored().downloadUrl).toBe('https://bucket.test/trimmed');
+    });
+
+    /** A bucket file the upload wrote, whose link cannot be signed. */
+    const unsignableFile = () => ({
+      getSignedUrl: async () => {
+        throw new Error('signing failed');
+      },
+    });
+
+    it('a late upload of an older asset marks the master stale even when its link cannot be signed', async () => {
+      const first = nextUpload();
+      await save('', fields('mine')).expect(201);
+      const trim = nextUpload();
+      await save('/newVideoId', fields('mine2')).expect(201);
+      const stored = () =>
+        mockDb.data.users['uid-me'].videos.newVideoId.streamData;
+
+      trim.done(uploadedFile('trimmed'));
+      await settled();
+      expect(stored()).toMatchObject({ assetId: 'mine2', masterStale: false });
+
+      // The whole recording was written over the trimmed cut, then signing its link failed.
+      first.done(unsignableFile());
+      await settled();
+
+      expect(stored()).toMatchObject({ assetId: 'mine2', masterStale: true });
+      expect(stored().downloadUrl).toBe('https://bucket.test/trimmed');
+      expect(console.error).toHaveBeenCalledWith(
+        expect.objectContaining({ message: 'signing failed' }),
+      );
+    });
+
+    it('keeps the mark when the link of the new cut cannot be signed', async () => {
+      const upload = nextUpload();
+      await save('/vid1', fields('mine')).expect(201);
+      mockDb.writes = [];
+
+      upload.done(unsignableFile());
+      await settled();
+
+      expect(mockDb.writes).toEqual([]);
+      expect(streamData()).toMatchObject({
+        assetId: 'mine',
+        masterStale: true,
+        downloadStatus: 'preparing',
+        downloadUrl: providerLink,
+      });
     });
   });
 });
