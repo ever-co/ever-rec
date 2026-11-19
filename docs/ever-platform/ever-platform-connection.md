@@ -205,7 +205,8 @@ server) and a **check of the last backup** (the file still matches its manifest)
 - the request arrives inside that window.
 
 Otherwise the answer is `failed` and nothing else happens. Ever Platform receives the status, the
-version and sizes only: never a path, a file name or any data. Ever Rec does not run updates this
+version and sizes only: never a path, a file name or any data. A backup reads the whole database into
+the API's memory before writing it: on a large installation, prefer your own database export. Ever Rec does not run updates this
 way. To stop: switch the opt-in off here, or disable *Maintenance operations* in app.ever.co. On Ever
 Cloud this does not apply (Ever operates it).
 
