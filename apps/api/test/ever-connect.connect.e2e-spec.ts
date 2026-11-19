@@ -9,7 +9,7 @@ import { ConnectTestApp, createConnectTestApp, OPERATOR_UID } from './support/ev
 
 const ON = { EVER_CONNECT_ENABLED: 'true' };
 
-describe('CN-2 connect with a code', () => {
+describe('connect with a code', () => {
   let t: ConnectTestApp;
   let operator: string;
 
@@ -107,7 +107,7 @@ describe('CN-2 connect with a code', () => {
   });
 });
 
-describe('CN-2 the sample REC_JWT_SECRET', () => {
+describe('the sample REC_JWT_SECRET', () => {
   it('refuses to create the connect key (at_rest_key_default)', async () => {
     const t = await createConnectTestApp({
       env: { ...ON, REC_JWT_SECRET: 'hard!To_find:my/GuyZ' },
@@ -128,7 +128,7 @@ describe('CN-2 the sample REC_JWT_SECRET', () => {
   });
 });
 
-describe('CN-3 the first-boot code', () => {
+describe('the first-boot code', () => {
   it('connects without a workspace and is consumed once', async () => {
     const t = await createConnectTestApp({ env: ON });
     try {

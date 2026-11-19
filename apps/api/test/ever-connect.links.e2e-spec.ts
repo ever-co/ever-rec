@@ -4,7 +4,7 @@ import { EVER_CONNECT_PATHS } from '../src/module/ever-connect/ever-connect.type
 import { ConnectTestApp, createConnectTestApp, OPERATOR_UID } from './support/ever-connect-app';
 import { CONNECT_ON, connectInstallation, readFeed, scheduler } from './support/ever-connect-flows';
 
-describe('CN-7 workspace link and unlink', () => {
+describe('workspace link and unlink', () => {
   let t: ConnectTestApp;
   let operator: string;
 
@@ -88,7 +88,7 @@ describe('CN-7 workspace link and unlink', () => {
   });
 });
 
-describe('CN-12 guards', () => {
+describe('guards', () => {
   it('operator routes answer 404 to anyone but the operator, and on Ever Cloud', async () => {
     const t = await createConnectTestApp({
       env: { ...CONNECT_ON, EVER_OPERATOR_UIDS: 'uid-second-operator' },
@@ -133,7 +133,7 @@ describe('CN-12 guards', () => {
   });
 });
 
-describe('CN-10 disconnect', () => {
+describe('disconnect', () => {
   it('ends the connection whatever the platform answers, and leaves the statistics alone', async () => {
     const t = await createConnectTestApp({ env: CONNECT_ON });
     try {
@@ -178,7 +178,7 @@ describe('CN-10 disconnect', () => {
   });
 });
 
-describe('CN-6 degradation ladder', () => {
+describe('degradation ladder', () => {
   it('valid, then grace with the refresh date, then paused; Rec routes are unaffected', async () => {
     const t = await createConnectTestApp({ env: CONNECT_ON });
     try {

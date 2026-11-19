@@ -1,5 +1,5 @@
 /**
- * CN-16: no secret in any answer, log line or stored record. The connect private key and the Ever
+ * No secret in any answer, log line or stored record. The connect private key and the Ever
  * ID client secret are stored encrypted only; the instance token lives in memory only.
  */
 import { Logger } from '@nestjs/common';
@@ -26,7 +26,7 @@ export function findSecrets(texts: string[], extra: string[] = []): string[] {
   return found;
 }
 
-describe('CN-16 secrets', () => {
+describe('secrets', () => {
   it('no answer, log line or stored record carries a secret', async () => {
     const logs: string[] = [];
     const spies = (['log', 'warn', 'error', 'debug'] as const).map((level) =>

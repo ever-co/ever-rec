@@ -1,4 +1,4 @@
-/** CN-13: the scheduler's timers (fake timers, stub services). */
+/** The scheduler's timers (fake timers, stub services). */
 import { readEverConnectConfig } from '../ever-connect.config';
 import { EverConnectSchedulerService } from './ever-connect-scheduler.service';
 

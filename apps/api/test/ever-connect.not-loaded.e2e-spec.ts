@@ -28,7 +28,7 @@ describe.each([
   ["'TRUE'", 'TRUE'],
   ["'1'", '1'],
   ['garbage', 'yes please'],
-])('CN-1 not loaded: EVER_CONNECT_ENABLED %s', (_label, value) => {
+])('not loaded: EVER_CONNECT_ENABLED %s', (_label, value) => {
   let t: ConnectTestApp;
 
   beforeAll(async () => {
@@ -50,7 +50,7 @@ describe.each([
   });
 });
 
-describe('CN-19 loaded but not connected', () => {
+describe('loaded but not connected', () => {
   it('sends nothing until the operator connects', async () => {
     const t = await createConnectTestApp({ env: { EVER_CONNECT_ENABLED: 'true' } });
     try {

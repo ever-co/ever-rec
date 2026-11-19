@@ -1,5 +1,5 @@
 /**
- * CN-5, CN-6: the module verifies entitlement documents with the SDK verifier (the contracts'
+ * The module verifies entitlement documents with the SDK verifier (the contracts'
  * fixtures: every invalid document is refused with its code) and reads the ladder from the cache.
  */
 import { readdirSync, readFileSync } from 'node:fs';

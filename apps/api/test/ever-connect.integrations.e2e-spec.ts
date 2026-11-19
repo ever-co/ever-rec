@@ -14,7 +14,7 @@ import { CONNECT_ON, connectInstallation, readFeed, scheduler } from './support/
 const integration = (t: ConnectTestApp, key: string) =>
   t.firebase.db.dump(`${EVER_CONNECT_PATHS.integrations}/${key}`);
 
-describe('CN-8 consent through app.ever.co, delivered by the feed', () => {
+describe('consent through app.ever.co, delivered by the feed', () => {
   let t: ConnectTestApp;
   let operator: string;
 
@@ -106,7 +106,7 @@ describe('CN-8 consent through app.ever.co, delivered by the feed', () => {
       'https://id.example.org',
     );
 
-    // CN-14: a person link once an account links its Ever ID; no e-mail in the body.
+    // A person link once an account links its Ever ID; no e-mail in the body.
     t.seedWorkspace('ws-1', OPERATOR_UID, ['uid-person'], 'Acme recordings');
     await t.get(EventEmitter2).emitAsync(EVER_IDENTITY_EVENTS.linkCreated, {
       uid: 'uid-person',
@@ -123,7 +123,7 @@ describe('CN-8 consent through app.ever.co, delivered by the feed', () => {
       display_name: 'Acme recordings',
     });
 
-    // CN-9: revoked in app.ever.co: switched off here within one feed read, settings cleared.
+    // Revoked in app.ever.co: switched off here within one feed read, settings cleared.
     t.platform.setIntegration('ever_id_login', 'revoked', false);
     await readFeed(t);
     expect(integration(t, 'ever_id_login')).toMatchObject({
@@ -135,7 +135,7 @@ describe('CN-8 consent through app.ever.co, delivered by the feed', () => {
     expect(t.firebase.db.dump(EVER_CONNECT_PATHS.connection).oidcConfigEnc).toBeUndefined();
   });
 
-  it('CN-9 switched off here while the platform is unreachable: told at the next heartbeat', async () => {
+  it('switched off here while the platform is unreachable: told at the next heartbeat', async () => {
     t.platform.setIntegration('instance_url', 'enabled', true);
     await readFeed(t);
     t.platform.down = true;
@@ -184,7 +184,7 @@ describe('CN-8 consent through app.ever.co, delivered by the feed', () => {
   });
 });
 
-describe('CN-11 instance policy', () => {
+describe('instance policy', () => {
   it('env deny wins over the UI, and an enabled integration is switched off with reason policy', async () => {
     const t = await createConnectTestApp({
       env: { ...CONNECT_ON, EVER_CONNECT_INTEGRATIONS_DENY: 'stats_link' },
@@ -251,7 +251,7 @@ describe('CN-11 instance policy', () => {
   });
 });
 
-describe('CN-14 a person\'s deletion and export requests', () => {
+describe('a person\'s deletion and export requests', () => {
   const hashOf = (issuer: string, subject: string) =>
     createHash('sha256').update(`${issuer}#${subject}`).digest('hex');
 
