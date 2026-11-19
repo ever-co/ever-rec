@@ -90,7 +90,7 @@ export class EverConnectPersonService {
     return null;
   }
 
-  @OnEvent(EVER_IDENTITY_EVENTS.linkCreated, { async: true })
+  @OnEvent(EVER_IDENTITY_EVENTS.linkCreated, { async: true, promisify: true })
   async onLinkCreated(event: EverIdentityLinkEvent): Promise<void> {
     try {
       if (!(await this.reporting())) return;
@@ -112,7 +112,7 @@ export class EverConnectPersonService {
     }
   }
 
-  @OnEvent(EVER_IDENTITY_EVENTS.linkRemoved, { async: true })
+  @OnEvent(EVER_IDENTITY_EVENTS.linkRemoved, { async: true, promisify: true })
   async onLinkRemoved(event: EverIdentityLinkEvent): Promise<void> {
     try {
       if (!(await this.reporting())) return;

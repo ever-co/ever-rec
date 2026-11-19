@@ -45,6 +45,48 @@ describe('AppModule and the optional Ever Platform modules', () => {
     expect(warnings[0]).toContain('EVER_STATS_ENABLED is "FALSE"');
   });
 
+  describe('the Ever Platform connection (EVER_CONNECT_ENABLED)', () => {
+    it.each([
+      ['unset', undefined, 0],
+      ["'false'", 'false', 0],
+      ["'TRUE'", 'TRUE', 1],
+      ["'1'", '1', 1],
+    ])('%s: not loaded', (_label, value, warningCount) => {
+      expect(names({ EVER_CONNECT_ENABLED: value })).toEqual([
+        'EverInstanceModule',
+        'EverStatsModule',
+      ]);
+      expect(warnings).toHaveLength(warningCount);
+      if (warningCount) {
+        expect(warnings[0]).toContain('EVER_CONNECT_ENABLED');
+        expect(warnings[0]).not.toContain('yes please');
+      }
+    });
+
+    it("'true': loaded, after the statistics", () => {
+      expect(names({ EVER_CONNECT_ENABLED: 'true' })).toEqual([
+        'EverInstanceModule',
+        'EverStatsModule',
+        'EverConnectModule',
+      ]);
+    });
+
+    it("'true' with the statistics off: the instance identity is loaded for the connection only", () => {
+      expect(
+        names({ EVER_CONNECT_ENABLED: 'true', EVER_STATS_ENABLED: 'false' }),
+      ).toEqual(['EverInstanceModule', 'EverConnectModule']);
+    });
+
+    it('its code is not even required while it is off', () => {
+      const source = readFileSync(
+        join(__dirname, 'common', 'ever-platform', 'modules.ts'),
+        'utf8',
+      );
+      expect(source).not.toMatch(/^import .*ever-connect/m);
+      expect(source).toMatch(/connectEnabled \? \[everConnectModule\(\)\]/);
+    });
+  });
+
   it('AppModule spreads that list last, after ConfigModule.forRoot(), and changes nothing else', () => {
     const source = readFileSync(join(__dirname, 'app.module.ts'), 'utf8');
     const config = source.indexOf('ConfigModule.forRoot(');
@@ -52,7 +94,9 @@ describe('AppModule and the optional Ever Platform modules', () => {
     expect(config).toBeGreaterThan(0);
     expect(spread).toBeGreaterThan(config);
     expect(source.slice(spread).indexOf('],')).toBeLessThan(40);
-    expect(source).not.toMatch(/import \{ Ever(Stats|Instance)Module \}/);
+    expect(source).not.toMatch(
+      /import \{ Ever(Stats|Instance|Connect)Module \}/,
+    );
     for (const existing of [
       'FirebaseModule,',
       'AuthModule,',

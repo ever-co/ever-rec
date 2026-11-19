@@ -499,8 +499,11 @@ export class EverConnectIntegrationsService {
         client_secret?: string | null;
         issuer?: string | null;
       };
+      const pending = (await this.store.connection())?.oidcPending === true;
       try {
-        answer = await client.instances.oidcClient.request(request);
+        answer = pending
+          ? await client.instances.oidcClient.get()
+          : await client.instances.oidcClient.request(request);
       } catch (error) {
         if (error instanceof ProblemError && error.status === 409) {
           answer = await client.instances.oidcClient.get();

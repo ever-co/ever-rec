@@ -36,6 +36,8 @@ jobs:
         run: pnpm --filter ever-rec-api exec jest src/module/ever-id
       - name: Unit tests (anonymous usage statistics)
         run: pnpm --filter ever-rec-api exec jest src/common src/app.module.ever-platform src/module/ever-instance src/module/ever-stats
+      - name: Unit tests (Ever Platform connection)
+        run: pnpm --filter ever-rec-api exec jest src/module/ever-connect
 
   api-e2e:
     name: API end-to-end tests (sign-in providers, existing sign-in routes)
@@ -56,6 +58,8 @@ jobs:
         run: pnpm --filter ever-rec-api exec jest --config ./test/jest-e2e.json test/ever-id test/auth-regression
       - name: End-to-end tests (anonymous usage statistics, route table)
         run: pnpm --filter ever-rec-api exec jest --config ./test/jest-e2e.json test/ever-stats test/route-table
+      - name: End-to-end tests (Ever Platform connection, against an in-process platform stand-in)
+        run: pnpm --filter ever-rec-api exec jest --config ./test/jest-e2e.json test/ever-connect
 
   api-integration:
     name: API integration tests (Firebase emulators)

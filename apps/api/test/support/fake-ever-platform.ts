@@ -410,8 +410,9 @@ export class FakeEverPlatform {
       return this.json(200, { acknowledged: instance.acked });
     }
     if (method === 'POST' && path === '/v1/instances/me/oidc-client') {
+      if (instance.oidc?.requested) return this.problem(409, 'already_requested');
       instance.oidc = { requested: true, ready: true, secretRead: false };
-      return this.json(200, { job_id: fakeUlid(), client_id: null, client_secret: null, issuer: null });
+      return this.json(202, { job_id: fakeUlid(), client_id: null, client_secret: null, issuer: null });
     }
     if (method === 'GET' && path === '/v1/instances/me/oidc-client') {
       if (!instance.oidc?.ready) return this.json(200, { job_id: fakeUlid() });
@@ -447,7 +448,7 @@ export class FakeEverPlatform {
     if (method === 'POST' && path === '/v1/instances/me/stats-link') {
       if (!instance.integrations.stats_link?.enabled) return this.problem(403, 'integration_disabled');
       instance.statsLink = r.body;
-      return this.json(201, {});
+      return this.json(200, {});
     }
     if (method === 'POST' && path === '/v1/instances/me/disconnect') {
       instance.status = 'disconnected';

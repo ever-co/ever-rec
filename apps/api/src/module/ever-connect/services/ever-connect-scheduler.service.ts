@@ -257,6 +257,10 @@ export class EverConnectSchedulerService
   /** Entitlements, then integration states. */
   async refresh(actor = 'system'): Promise<void> {
     await this.entitlements.refreshAll(actor);
-    await this.integrations.refresh(actor);
+    try {
+      await this.integrations.refresh(actor);
+    } catch (error) {
+      this.logger.warn(`Integration states could not be read (${errorCode(error)}).`);
+    }
   }
 }
