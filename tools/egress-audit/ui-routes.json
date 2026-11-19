@@ -54,6 +54,11 @@
       "source": "router"
     },
     {
+      "path": "/ever-connect/provision",
+      "file": "apps/portal/pages/ever-connect/provision.tsx",
+      "source": "router"
+    },
+    {
       "path": "/image/:id",
       "file": "apps/portal/pages/image/[id].tsx",
       "source": "router"

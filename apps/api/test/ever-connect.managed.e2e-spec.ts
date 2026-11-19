@@ -52,9 +52,9 @@ describe('managed operations', () => {
     t.http().put('/api/v1/ever-connect/managed').set('idToken', operator).send(body);
 
   beforeEach(async () => {
+    dir = mkdtempSync(join(tmpdir(), 'rec-managed-'));
     t = await createConnectTestApp({ env: CONNECT_ON });
     operator = await connectInstallation(t);
-    dir = mkdtempSync(join(tmpdir(), 'rec-managed-'));
   });
   afterEach(async () => {
     await t.close();

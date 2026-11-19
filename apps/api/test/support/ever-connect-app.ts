@@ -127,7 +127,8 @@ export async function createConnectTestApp(
     .useValue({ rootKeys: platform.rootKeys, issuer: FAKE_PLATFORM_ISSUER })
     .compile();
 
-  const app = moduleRef.createNestApplication({ logger: false });
+  // Errors only: an unexpected 500 shows its cause in the test output.
+  const app = moduleRef.createNestApplication({ logger: ['error'] });
   app.setGlobalPrefix('api/v1');
   await app.init();
 
