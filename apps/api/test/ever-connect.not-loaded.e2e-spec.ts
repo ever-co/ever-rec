@@ -69,7 +69,8 @@ describe('loaded but not connected', () => {
       await scheduler.heartbeat();
       await scheduler.refresh();
       expect(t.platform.requests).toEqual([]);
-      // Provisioning routes are not part of this release, and there is no pending-events route.
+      // Provisioning routes exist only with EVER_CONNECT_PROVISION_ENABLED=true; there is no
+      // pending-events route.
       for (const path of ['/api/v1/ever-connect/events/pending', '/api/v1/ever-connect/provision/intent']) {
         expect((await t.http().post(path).set('idToken', token).send({})).status).toBe(404);
       }

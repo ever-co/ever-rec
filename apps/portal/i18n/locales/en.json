@@ -860,6 +860,32 @@
       "saveEachFile": "Ask where to save each file before downloading.",
       "saveEachFileDescription": "Note: To use this feature, you need to allow the extension to manage downloads when the permission request window pops up. Also, only when this option is turned on can you specify a default subfolder to save screenshots to your local disk. It defaults to the Downloads folder if you don’t specify a subfolder.",
       "addDateAndUrl": "Add date and URL to the top of a screenshot."
+    },
+    "everConnect": {
+      "provision": {
+        "title": "Create your Ever Rec workspace",
+        "loading": "Checking the link from app.ever.co…",
+        "missing": "This link is incomplete. Start again from app.ever.co.",
+        "question": "Create workspace {{name}} linked to ever.co/{{handle}} in Ever Rec?",
+        "create": "Create",
+        "decline": "Decline",
+        "signInHint": "Sign in with the same Ever ID you used on app.ever.co to create the workspace.",
+        "continueWithEverId": "Continue with Ever ID",
+        "mismatch": "Sign in with the same Ever ID you used on app.ever.co.",
+        "created": "Your workspace is ready.",
+        "declined": "Nothing was created.",
+        "errors": {
+          "generic": "That did not work. Please try again from app.ever.co.",
+          "intent_expired": "This link has expired. Start again from app.ever.co.",
+          "intent_consumed": "This link was already used.",
+          "invalid_intent": "This link is not valid. Start again from app.ever.co.",
+          "wrong_audience": "This link is not for Ever Rec.",
+          "product_mismatch": "This link is not for Ever Rec.",
+          "instance_mismatch": "This link is for another Ever Rec installation.",
+          "invalid_txn": "This confirmation is not valid. Start again from app.ever.co.",
+          "not_connected": "This Ever Rec installation is not connected to Ever Platform."
+        }
+      }
     }
   },
   "modals": {

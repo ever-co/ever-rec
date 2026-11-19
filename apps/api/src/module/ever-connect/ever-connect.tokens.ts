@@ -22,3 +22,12 @@ export interface EverConnectLocalPlatform {
 export const EVER_CONNECT_LOCAL_PLATFORM = Symbol(
   'ever connect local platform',
 );
+
+/** Creates a Rec workspace with `admin = uid` (the product's own workspace service). */
+export interface EverConnectWorkspaceCreator {
+  /** Answers the new workspace's id. */
+  create(uid: string, name: string): Promise<string>;
+}
+export const EVER_CONNECT_WORKSPACE_CREATOR = Symbol(
+  'ever connect workspace creator',
+);

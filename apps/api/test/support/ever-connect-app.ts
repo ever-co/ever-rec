@@ -17,6 +17,7 @@ import {
   EVER_CONNECT_CLOCK,
   EVER_CONNECT_FETCH,
   EVER_CONNECT_LOCAL_PLATFORM,
+  EVER_CONNECT_WORKSPACE_CREATOR,
 } from '../../src/module/ever-connect/ever-connect.tokens';
 import { FIREBASE_ADMIN } from '../../src/module/firebase/firebase.constants';
 import { FirebaseModule } from '../../src/module/firebase/firebase.module';
@@ -43,6 +44,9 @@ export const EVER_CONNECT_VARIABLES = [
   'EVER_OPERATOR_UIDS',
   'SUPER_ADMIN_ACCOUNT_UID',
   'API_BASE_URL',
+  'EVER_CONNECT_PROVISION_ENABLED',
+  'EVER_ID_ISSUER_URL',
+  'EVER_ID_ISSUER',
 ];
 
 export const OPERATOR_UID = 'uid-operator';
@@ -105,6 +109,20 @@ export async function createConnectTestApp(
     .useValue(platform.fetch)
     .overrideProvider(EVER_CONNECT_AUTOSTART)
     .useValue(false)
+    // Rec's workspace service writes through the default Firebase app; here the in-memory one.
+    .overrideProvider(EVER_CONNECT_WORKSPACE_CREATOR)
+    .useValue({
+      async create(uid: string, name: string) {
+        const id = `ws-${firebase.db.pushId().slice(-6)}`;
+        firebase.db.write(['workspaces', id], {
+          id,
+          name,
+          admin: uid,
+          members: [{ id: uid }],
+        });
+        return id;
+      },
+    })
     .overrideProvider(EVER_CONNECT_LOCAL_PLATFORM)
     .useValue({ rootKeys: platform.rootKeys, issuer: FAKE_PLATFORM_ISSUER })
     .compile();

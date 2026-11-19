@@ -14,6 +14,7 @@ working whatever happens to the connection.
 - [A person's export and deletion requests](#a-persons-export-and-deletion-requests)
 - [Settings](#settings)
 - [What is stored, and where](#what-is-stored-and-where)
+- [Ever Rec cloud: workspaces started from app.ever.co](#ever-rec-cloud-workspaces-started-from-appeverco)
 - [How to verify it yourself](#how-to-verify-it-yourself)
 
 Every call, with what it carries and what switches it off, is listed in
@@ -144,6 +145,7 @@ An Ever ID this installation does not know gets the receipt `no_account`.
 | `EVER_INSTALL_SOURCE` | `self-hosted` | how the installation was set up; `cloud` only on Ever Cloud |
 | `SUPER_ADMIN_ACCOUNT_UID`, `EVER_OPERATOR_UIDS` | | who operates the installation |
 | `NEXT_PUBLIC_EVER_CONNECT_ENABLED` (portal, at build time) | unset | `true` shows the Connect tabs, which also need the API's connection loaded |
+| `EVER_CONNECT_PROVISION_ENABLED` | unset (off) | `true` (Ever Rec cloud only) opens the provision routes for workspaces started from app.ever.co |
 
 The portal reads `NEXT_PUBLIC_EVER_CONNECT_ENABLED` when it is built (`.deploy/portal/Dockerfile`
 build argument), not when it runs.
@@ -169,6 +171,24 @@ Changing `REC_JWT_SECRET` makes the stored connection key and the Ever ID client
 (they are not re-encrypted), so the connection stops working. To change it: disconnect, change the
 secret, then connect again with a new code (a connection key the new secret cannot read is replaced
 by a new one when you connect).
+
+## Ever Rec cloud: workspaces started from app.ever.co
+
+On Ever Rec cloud (`EVER_CONNECT_PROVISION_ENABLED=true`, off everywhere else: the routes answer 404),
+a person who starts an organization on app.ever.co can choose Ever Rec and land on
+`<portal>/ever-connect/provision#intent=…`. Nothing is created until they confirm there:
+
+1. The page reads the intent from the address fragment (never from a query string, so it never
+   reaches a server log) and posts it to `POST /api/v1/ever-connect/provision/intent`. The API checks
+   the signature (a key of Ever Platform's key set for this purpose), that it is meant for Ever Rec
+   and this installation, its times and that it was not used before, and answers a sealed
+   confirmation with the organization's name and handle. Nothing is created.
+2. The person signs in with the same Ever ID they used on app.ever.co ("Continue with Ever ID";
+   another Ever ID is refused with "Sign in with the same Ever ID you used on app.ever.co").
+3. "Create workspace <name> linked to ever.co/<handle> in Ever Rec?" *Create* makes one workspace
+   with that person as its admin, links it to the organization and tells Ever Platform (the
+   workspace id, the account id and the portal address; never an e-mail address). Using the same link
+   again answers that the workspace exists. *Decline* tells Ever Platform that nothing was created.
 
 ## How to verify it yourself
 

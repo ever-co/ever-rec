@@ -37,6 +37,8 @@ export const EVER_CONNECT_PATHS = Object.freeze({
   personLinksSynced: 'ever_connect/person_links_synced',
   personLinksDirtyAt: 'ever_connect/person_links_dirty_at',
   personLinkRemovals: 'ever_connect/person_link_removals',
+  provisionResults: 'ever_connect/provision_results',
+  provisionPending: 'ever_connect/provision_pending',
   audit: 'ever_connect/audit',
   lease: 'ever_connect/lease',
 });
@@ -177,6 +179,24 @@ export interface PersonExportRecord {
   bundleEnc: string;
 }
 
+/**
+ * `ever_connect/provision_results/{jti}`: what this installation did with one provision intent
+ * (one-time; a replay answers the recorded result).
+ */
+export interface ProvisionResultRecord {
+  state: 'creating' | 'created' | 'refused';
+  at: number;
+  uid?: string;
+  workspaceId?: string;
+  tenantLinkId?: string | null;
+  /** The platform was not told yet (`/complete`): retried by the heartbeat. */
+  pendingComplete?: boolean;
+  /** The platform no longer held the intent when it was told (a final answer). */
+  completeRefused?: string;
+  /** The organization, for the local link and a retried `/complete`. */
+  org?: { id: string; handle: string; displayName: string };
+}
+
 /** The actions the audit trail records. */
 export type EverConnectAuditAction =
   | 'instance.connect'
@@ -197,7 +217,9 @@ export type EverConnectAuditAction =
   | 'policy.set'
   | 'public_url.set'
   | 'person.deletion'
-  | 'person.export';
+  | 'person.export'
+  | 'provision.accept'
+  | 'provision.refuse';
 
 /** One row of `ever_connect/audit`. No e-mail address, IP address, user agent or secret. */
 export interface EverConnectAuditRow {

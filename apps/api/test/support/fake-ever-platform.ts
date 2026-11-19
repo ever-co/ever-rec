@@ -83,6 +83,9 @@ export interface FakeInstance {
 export class FakeEverPlatform {
   readonly root = newKey('test-root-1');
   readonly entitlementKey = newKey('test-entitlement-1');
+  readonly intentKey = newKey('test-intent-1');
+  /** `/complete` answers recorded per intent. */
+  readonly completions = new Map<string, any>();
   readonly requests: RecordedRequest[] = [];
   readonly instances = new Map<string, FakeInstance>();
   /** Connect codes the platform knows: code → the organization it was minted for. */
@@ -183,6 +186,18 @@ export class FakeEverPlatform {
         use: 'sig',
         alg: 'EdDSA',
         ever_purpose: 'entitlement',
+        state: 'active',
+        not_before: new Date((nowS - 86400 * 400) * 1000).toISOString().replace(/\.\d{3}Z$/, 'Z'),
+        not_after: null,
+      },
+      {
+        kty: 'OKP',
+        crv: 'Ed25519',
+        kid: this.intentKey.kid,
+        x: this.intentKey.x,
+        use: 'sig',
+        alg: 'EdDSA',
+        ever_purpose: 'intent',
         state: 'active',
         not_before: new Date((nowS - 86400 * 400) * 1000).toISOString().replace(/\.\d{3}Z$/, 'Z'),
         not_after: null,
@@ -455,6 +470,29 @@ export class FakeEverPlatform {
       instance.statsLink = r.body;
       return this.json(200, {});
     }
+    const completeMatch = /^\/v1\/provision-intents\/([^/]+)\/complete$/.exec(path);
+    if (completeMatch && method === 'POST') {
+      const jti = completeMatch[1];
+      if (r.body?.instance_id !== instance.id) return this.problem(403, 'forbidden_role');
+      if (this.completions.has(jti)) {
+        return this.json(200, { status: 'already_completed', tenant_link_id: this.completions.get(jti).tenant_link_id });
+      }
+      let tenantLinkId: string | null = null;
+      if (r.body?.result === 'created') {
+        const link: FakeLink = {
+          id: fakeUlid(),
+          orgId: instance.orgId,
+          handle: 'acme',
+          productTenantId: r.body.product_tenant_id,
+          state: 'active',
+          seq: 1,
+        };
+        instance.links.set(link.id, link);
+        tenantLinkId = link.id;
+      }
+      this.completions.set(jti, { ...r.body, tenant_link_id: tenantLinkId });
+      return this.json(200, { status: 'completed', tenant_link_id: tenantLinkId, job_id: null });
+    }
     if (method === 'POST' && path === '/v1/instances/me/disconnect') {
       instance.status = 'disconnected';
       return this.json(200, { instance: { id: instance.id, status: 'disconnected' }, tenant_links: [] });
@@ -565,6 +603,41 @@ export class FakeEverPlatform {
     const token = `evit_${randomBytes(16).toString('base64url')}`;
     this.tokens.set(token, instance.id);
     return this.json(200, { access_token: token, token_type: 'Bearer', expires_in: 3600 });
+  }
+
+  /** A provision intent for Ever Rec, signed with the TEST intent key (claims can be overridden). */
+  async signIntent(overrides: Record<string, unknown> = {}, key: 'intent' | 'entitlement' = 'intent') {
+    const nowS = Math.floor(this.now() / 1000);
+    const jti = fakeUlid();
+    const signer = key === 'intent' ? this.intentKey : this.entitlementKey;
+    const claims = {
+      iss: FAKE_PLATFORM_ISSUER,
+      aud: 'ever-connect:rec',
+      jti,
+      iat: nowS,
+      exp: nowS + 900,
+      typ: 'ever.provision_intent.v1',
+      ever_purpose: 'intent',
+      job_id: fakeUlid(),
+      step_seq: 1,
+      idempotency_key: `rec:${jti}`,
+      org: { id: fakeUlid(), handle: 'acme', display_name: 'Acme Inc' },
+      product: 'rec',
+      tier: 'free',
+      features: {},
+      person: { ever_id_sub: 'sub-person-1' },
+      consent_id: fakeUlid(),
+      mode: 'handoff',
+      callback: `${FAKE_PLATFORM_ISSUER}/v1/provision-intents/${jti}/complete`,
+      return_to: 'https://app.ever.co/start/jobs/1',
+      ...overrides,
+    };
+    const jws = await signCompactJws(
+      signerOf(signer),
+      { alg: 'EdDSA', kid: signer.kid, typ: 'ever-intent+jwt' },
+      claims,
+    );
+    return { jws, claims };
   }
 
   /** Every recorded request as `METHOD /path`. */
