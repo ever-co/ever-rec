@@ -11,5 +11,12 @@ export const EVER_CONNECT_FETCH = Symbol('ever connect fetch');
 /** Whether the scheduler starts its timers on its own (tests drive it instead). */
 export const EVER_CONNECT_AUTOSTART = Symbol('ever connect autostart');
 
-/** Extra root keys for a local platform (tests and local runs only; ignored for a public URL). */
-export const EVER_CONNECT_ROOT_KEYS = Symbol('ever connect root keys');
+/**
+ * A local platform (tests and local runs only): extra root keys and the issuer its documents name.
+ * The SDK honours both for a local `EVER_PLATFORM_API_URL` only and ignores them for any other.
+ */
+export interface EverConnectLocalPlatform {
+  rootKeys?: ReadonlyArray<{ kid: string; x: string; iss?: string }>;
+  issuer?: string;
+}
+export const EVER_CONNECT_LOCAL_PLATFORM = Symbol('ever connect local platform');

@@ -22,8 +22,9 @@ import { EVER_CONNECT_CONFIG, EverConnectConfig } from '../ever-connect.config';
 import {
   EVER_CONNECT_CLOCK,
   EVER_CONNECT_FETCH,
-  EVER_CONNECT_ROOT_KEYS,
+  EVER_CONNECT_LOCAL_PLATFORM,
   EverConnectClock,
+  EverConnectLocalPlatform,
 } from '../ever-connect.tokens';
 import { EverConnectStoreService } from './ever-connect-store.service';
 
@@ -87,8 +88,8 @@ export class EverConnectClientService {
     private readonly instance: EverInstanceService,
     private readonly events: EventEmitter2,
     @Optional()
-    @Inject(EVER_CONNECT_ROOT_KEYS)
-    private readonly rootKeys?: readonly RootKey[],
+    @Inject(EVER_CONNECT_LOCAL_PLATFORM)
+    private readonly local?: EverConnectLocalPlatform,
   ) {}
 
   /** Whether `EVER_PLATFORM_API_URL` can be used at all. */
@@ -113,13 +114,11 @@ export class EverConnectClientService {
       registryInstanceId,
       fetch: this.fetchImpl,
       now: () => Math.floor(this.clock() / 1000),
-      ...(this.rootKeys?.length ? { rootKeys: this.rootKeys } : {}),
+      ...(this.local?.rootKeys?.length
+        ? { rootKeys: this.local.rootKeys as readonly RootKey[] }
+        : {}),
+      ...(this.local?.issuer ? { issuer: this.local.issuer } : {}),
       onWarning: (message) => this.logger.warn(message),
-      onToken: () => {
-        void this.store
-          .patchConnection({ lastTokenAt: this.clock() })
-          .catch(() => undefined);
-      },
     });
   }
 

@@ -17,6 +17,7 @@ import {
   EVER_CONNECT_AUTOSTART,
   EVER_CONNECT_CLOCK,
   EVER_CONNECT_FETCH,
+  EVER_CONNECT_LOCAL_PLATFORM,
   systemClock,
 } from './ever-connect.tokens';
 import {
@@ -74,6 +75,8 @@ const logger = new Logger('EverConnect');
       useValue: (...args: Parameters<typeof fetch>) => fetch(...args),
     },
     { provide: EVER_CONNECT_AUTOSTART, useValue: true },
+    // Extra roots are honoured by the SDK for a local platform address only (tests, local runs).
+    { provide: EVER_CONNECT_LOCAL_PLATFORM, useValue: {} },
     EverConnectStoreService,
     EverConnectAuditService,
     EverConnectLeaseService,
