@@ -204,6 +204,12 @@ describe('CN-11 instance policy', () => {
         .send({ key: 'stats_link', allowed: true });
       expect(lift.status).toBe(409);
 
+      // A denied key the platform still reports enabled sends nothing, and is switched off.
+      t.platform.setIntegration('stats_link', 'enabled', true);
+      await readFeed(t);
+      expect(t.platform.instance.statsLink).toBeNull();
+      expect(t.platform.instance.integrations.stats_link.state).toBe('denied_by_policy');
+
       t.platform.setIntegration('instance_url', 'enabled', true);
       await readFeed(t);
       const deny = await t

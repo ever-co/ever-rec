@@ -243,6 +243,9 @@ export class EverConnectIntegrationsService {
     );
     const reported = (answer.instance ?? {}) as Record<string, PlatformBrief>;
     const before = await this.store.integrations();
+    // A key the policy denies never sends anything, even if the platform still reports it enabled
+    // (it is switched off right after, below).
+    const denied = await this.denied();
     const now = this.clock();
     for (const key of offeredKeys(this.config.installSource)) {
       const brief = reported[key];
@@ -272,14 +275,19 @@ export class EverConnectIntegrationsService {
       if (enabled && !previous?.enabled) {
         await this.audit.write('consent.grant', actor, { key });
         await this.audit.write('integration.enable', actor, { key });
-        await this.onEnable(key);
+        if (!denied.has(key)) await this.onEnable(key);
       } else if (!enabled && previous?.enabled) {
         await this.audit.write('consent.revoke', actor, {
           key,
           source: record.revokeSource ?? 'platform',
         });
         await this.onDisable(key);
-      } else if (enabled && key === 'ever_id_login' && !this.oidc.enabled) {
+      } else if (
+        enabled &&
+        key === 'ever_id_login' &&
+        !this.oidc.enabled &&
+        !denied.has(key)
+      ) {
         // A client still being prepared by the platform.
         await this.onEnable(key);
       }
