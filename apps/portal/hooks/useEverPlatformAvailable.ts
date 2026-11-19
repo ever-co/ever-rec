@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import { getHealth, getStatus } from 'app/services/ever-platform';
+import { getConnectHealth, isEverConnectBuildEnabled } from 'app/services/ever-connect';
 import { getCookies } from 'app/services/helpers/getCookies';
 
 /**
  * Whether this signed-in person may open *Settings → Ever Platform*: the API has the anonymous
  * usage statistics loaded (`health` answers 200) and the person operates the installation
- * (`status` answers 200). Asked once per sign-in session, and only for a signed-in person: the
+ * (`status` answers 200), or this portal was built with the Ever Platform connection and the API
+ * has it loaded (its `health` answers 200). Asked once per sign-in session, and only for a signed-in person: the
  * answer is kept for that session only, so the next person who signs in on this page (without a
  * reload) is asked again.
  */
@@ -37,7 +39,16 @@ export const loadEverPlatformAvailable = (): Promise<boolean> => {
       answer: getHealth()
         .then(() => getStatus())
         .then(() => true)
-        .catch(() => false),
+        .catch(() => false)
+        // With the Ever Platform connection switched on (portal build and API), workspace admins
+        // use the page too.
+        .then((statistics) =>
+          statistics || !isEverConnectBuildEnabled()
+            ? statistics
+            : getConnectHealth()
+                .then(() => true)
+                .catch(() => false),
+        ),
     };
   }
   return cached.answer;

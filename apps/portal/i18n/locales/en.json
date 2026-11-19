@@ -327,6 +327,149 @@
         "no_destination": "The statistics address of this server cannot be used: nothing was sent.",
         "busy": "Another report is being sent right now. Try again in a few minutes.",
         "refused_until_upgrade": "Ever Platform does not accept the reports of this version: nothing is sent until Rec is upgraded."
+      },
+      "tabs": {
+        "statistics": "Statistics",
+        "connection": "Connection",
+        "link": "Organization link",
+        "integrations": "Integrations & data",
+        "audit": "Audit"
+      },
+      "connect": {
+        "docs": "What is sent, when, and how to verify it",
+        "operatedByCloud": "Operated by Ever Cloud",
+        "refresh": "Refresh",
+        "refreshed": "Refreshed.",
+        "noWorkspace": "You do not administer any workspace yet. The admin of a workspace links it to an Ever organization here.",
+        "status": {
+          "not_connected": "Not connected",
+          "active": "Connected",
+          "pending_approval": "Waiting for approval in app.ever.co",
+          "revoked": "Revoked in Ever Platform",
+          "disconnected": "Disconnected"
+        },
+        "connection": {
+          "title": "Connect this installation to Ever Platform",
+          "description": "Connect with a code from app.ever.co: workspaces can then be linked to an Ever organization (ever.co/<handle>), and the organization can enable integrations after a recorded consent. Nothing is sent until you connect, and Ever Rec keeps working the same whatever happens to the connection.",
+          "code": "Connect code",
+          "workspace": "First workspace to link (one you administer)",
+          "whatIsSent": "Connecting sends:",
+          "sentProduct": "the product (Ever Rec) and its version ({{version}})",
+          "sentInstallSource": "how it was installed ({{source}})",
+          "sentWorkspace": "the id and name of the workspace you pick",
+          "sentKey": "the public key of this installation's connection key",
+          "notSent": "No address of this installation, no user, no e-mail and no file is sent.",
+          "connect": "Connect this installation",
+          "connected": "Connected.",
+          "status": "Status",
+          "platform": "Ever Platform",
+          "instanceId": "Installation id in Ever Platform",
+          "keyId": "Connection key id",
+          "lastHeartbeat": "Last heartbeat",
+          "linkedWorkspaces": "Linked workspaces",
+          "publicUrl": "Public address of this installation",
+          "publicUrlHint": "Sent only after the organization enabled \"Installation address\" in app.ever.co.",
+          "savePublicUrl": "Save address",
+          "publicUrlSaved": "The address was saved and sent.",
+          "rotate": "Rotate connection key",
+          "rotateTitle": "Rotate the connection key?",
+          "rotateConfirm": "A new connection key is created and used once Ever Platform accepted it. The anonymous usage statistics are not affected.",
+          "rotated": "The connection key was rotated.",
+          "disconnect": "Disconnect",
+          "disconnectTitle": "Disconnect from Ever Platform?",
+          "disconnectConfirm": "Ever Platform is told, then every integration is switched off, every workspace link is ended and the entitlements are deleted here. Ever Rec itself and the anonymous usage statistics are not affected. You can connect again with a new code.",
+          "disconnected": "Disconnected."
+        },
+        "link": {
+          "description": "Link this workspace to its Ever organization with a link code from app.ever.co.",
+          "notConnected": "This installation is not connected to Ever Platform: its operator connects it first.",
+          "link": "Link workspace",
+          "linked": "The workspace is linked.",
+          "sameOrg": "The workspace is linked. Another workspace of this installation is linked to the same organization.",
+          "state": "State",
+          "plan": "Plan",
+          "linkedAt": "Linked",
+          "states": {
+            "active": "Linked",
+            "suspended": "Suspended by Ever Platform",
+            "orphaned": "Orphaned",
+            "unlinked": "Unlinked"
+          },
+          "unlink": "Unlink",
+          "unlinkTitle": "Unlink this workspace?",
+          "unlinkConfirm": "Ever Platform is told, and the integrations of this link stop. The workspace and its content stay as they are.",
+          "unlinked": "The workspace is unlinked."
+        },
+        "ladder": {
+          "grace": "Entitlements could not be refreshed since {{date}}. Ever Platform features keep working for now.",
+          "paused": "Ever Platform features are paused: the entitlements could not be refreshed for more than 30 days. Ever Rec itself keeps working.",
+          "revoked": "Ever Platform revoked this installation. Ever Rec itself keeps working.",
+          "reconnect": "Reconnect to Ever Platform"
+        },
+        "integrations": {
+          "description": "Nothing is enabled here: each integration is enabled by the organization in app.ever.co, after a recorded consent, and can be switched off here at any time.",
+          "showScope": "Show scope",
+          "enable": "Enable…",
+          "openConsent": "Open the consent screen in app.ever.co",
+          "disable": "Disable",
+          "accept": "Accept",
+          "decline": "Decline",
+          "allowed": "Allowed for every workspace",
+          "deniedByEnv": "Denied by the server configuration",
+          "pendingRevoke": "Switched off here; Ever Platform is told as soon as it can be reached.",
+          "states": {
+            "available": "Available",
+            "enabled": "Enabled",
+            "disabled": "Disabled",
+            "revoked": "Revoked",
+            "revoked_remote": "Revoked in app.ever.co",
+            "denied_by_policy": "Denied by policy",
+            "pending_operator": "Waiting for the operator",
+            "declined": "Declined",
+            "coming_soon": "Coming soon",
+            "not_available": "Not available"
+          },
+          "consentState": {
+            "denied_by_policy": "This integration is denied by the policy of this installation.",
+            "coming_soon": "This integration is not available yet.",
+            "not_connected": "This installation is not connected to Ever Platform."
+          },
+          "directions": {
+            "to_ever": "Sent to Ever Platform",
+            "from_ever": "Received from Ever Platform"
+          },
+          "scope": {
+            "field": "Data",
+            "direction": "Direction",
+            "frequency": "When",
+            "purpose": "Why",
+            "retention": "Kept"
+          }
+        },
+        "audit": {
+          "empty": "Nothing recorded yet.",
+          "at": "When",
+          "action": "What",
+          "actor": "Who",
+          "details": "Details",
+          "more": "Load more"
+        },
+        "errors": {
+          "invalid_connect_code": "A connect code reads EVC-XXXX-XXXX-XXXX.",
+          "invalid_link_code": "A link code reads EVL-XXXX-XXXX-XXXX.",
+          "already_connected": "This installation is already connected.",
+          "already_linked": "This workspace is already linked.",
+          "not_connected": "This installation is not connected to Ever Platform.",
+          "not_linked": "This workspace is not linked.",
+          "not_workspace_admin": "Pick a workspace you administer.",
+          "at_rest_key_default": "Set your own REC_JWT_SECRET first: the connection key is stored encrypted with a key derived from it.",
+          "no_platform_url": "The Ever Platform address of this server (EVER_PLATFORM_API_URL) cannot be used.",
+          "consent_required": "The address is sent only after the organization enabled \"Installation address\" in app.ever.co.",
+          "invalid_url": "Enter an https address without credentials, query or fragment.",
+          "denied_by_env": "The server configuration (EVER_CONNECT_INTEGRATIONS_DENY) denies this integration.",
+          "denied_by_policy": "This integration is denied by the policy of this installation.",
+          "not_pending_operator": "This integration is not waiting for the operator."
+        }
       }
     },
     "install": {
