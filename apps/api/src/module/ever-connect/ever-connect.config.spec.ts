@@ -85,6 +85,16 @@ describe('ever-connect config', () => {
     ).toBeNull();
   });
 
+  it('the provision routes are off unless EVER_CONNECT_PROVISION_ENABLED is exactly true', () => {
+    expect(read({}).provisionEnabled).toBe(false);
+    expect(
+      read({ EVER_CONNECT_PROVISION_ENABLED: 'TRUE' }).provisionEnabled,
+    ).toBe(false);
+    expect(
+      read({ EVER_CONNECT_PROVISION_ENABLED: 'true' }).provisionEnabled,
+    ).toBe(true);
+  });
+
   it('connect codes: the SDK pattern, normalised', () => {
     expect(normaliseConnectCode('EVC-0000-1111-2222')).toBe(
       'EVC-0000-1111-2222',

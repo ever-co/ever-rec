@@ -145,7 +145,12 @@ export class EverConnectProvisionService {
     const connection = await this.connected();
     const parts = typeof jws === 'string' ? jws.trim().split('.') : [];
     if (parts.length !== 3 || (jws as string).length > 16_384) {
-      throw refuse(BadRequestException, 400, 'invalid_intent', 'Not an intent.');
+      throw refuse(
+        BadRequestException,
+        400,
+        'invalid_intent',
+        'Not an intent.',
+      );
     }
     let header: { alg?: string; typ?: string; kid?: string; crit?: unknown };
     let claims: IntentClaims;
@@ -154,10 +159,20 @@ export class EverConnectProvisionService {
       claims = decodePart(parts[1]);
       if (!B64URL.test(parts[2])) throw new Error('malformed');
     } catch {
-      throw refuse(BadRequestException, 400, 'invalid_intent', 'Not an intent.');
+      throw refuse(
+        BadRequestException,
+        400,
+        'invalid_intent',
+        'Not an intent.',
+      );
     }
     const invalid = () =>
-      refuse(UnauthorizedException, 401, 'invalid_intent', 'The intent does not verify.');
+      refuse(
+        UnauthorizedException,
+        401,
+        'invalid_intent',
+        'The intent does not verify.',
+      );
     if (
       header.alg !== 'EdDSA' ||
       header.typ !== INTENT_HEADER_TYP ||
@@ -170,7 +185,11 @@ export class EverConnectProvisionService {
     const ok = await this.client.run(async (client) => {
       let keySet = await this.client.keySet(client);
       let key = keySet.find(header.kid as string, 'intent', nowS);
-      if (!key && !keySet.has(header.kid as string) && keySet.unknownKidRefreshAllowed(nowS)) {
+      if (
+        !key &&
+        !keySet.has(header.kid as string) &&
+        keySet.unknownKidRefreshAllowed(nowS)
+      ) {
         keySet = await this.client.keySet(client, true);
         key = keySet.find(header.kid as string, 'intent', nowS);
       }
@@ -193,7 +212,12 @@ export class EverConnectProvisionService {
     });
     if (!ok) throw invalid();
     if (claims.aud !== INTENT_AUDIENCE) {
-      throw refuse(UnauthorizedException, 401, 'wrong_audience', 'This intent is not for Ever Rec.');
+      throw refuse(
+        UnauthorizedException,
+        401,
+        'wrong_audience',
+        'This intent is not for Ever Rec.',
+      );
     }
     if (
       claims.typ !== INTENT_CLAIMS_TYP ||
@@ -212,19 +236,45 @@ export class EverConnectProvisionService {
       throw invalid();
     }
     if (claims.product !== 'rec') {
-      throw refuse(UnprocessableEntityException, 422, 'product_mismatch', 'This intent is for another product.');
+      throw refuse(
+        UnprocessableEntityException,
+        422,
+        'product_mismatch',
+        'This intent is for another product.',
+      );
     }
-    if (claims.instance_id && claims.instance_id !== connection.registryInstanceId) {
-      throw refuse(UnprocessableEntityException, 422, 'instance_mismatch', 'This intent is for another installation.');
+    if (
+      claims.instance_id &&
+      claims.instance_id !== connection.registryInstanceId
+    ) {
+      throw refuse(
+        UnprocessableEntityException,
+        422,
+        'instance_mismatch',
+        'This intent is for another installation.',
+      );
     }
-    if (claims.iat > nowS + INTENT_SKEW_S || claims.exp - claims.iat > INTENT_MAX_TTL_S) {
+    if (
+      claims.iat > nowS + INTENT_SKEW_S ||
+      claims.exp - claims.iat > INTENT_MAX_TTL_S
+    ) {
       throw invalid();
     }
     if (claims.exp <= nowS) {
-      throw refuse(ConflictException, 409, 'intent_expired', 'This link has expired: start again from app.ever.co.');
+      throw refuse(
+        ConflictException,
+        409,
+        'intent_expired',
+        'This link has expired: start again from app.ever.co.',
+      );
     }
     if (await this.result(claims.jti)) {
-      throw refuse(ConflictException, 409, 'intent_consumed', 'This link was already used.');
+      throw refuse(
+        ConflictException,
+        409,
+        'intent_consumed',
+        'This link was already used.',
+      );
     }
     return claims;
   }
@@ -235,7 +285,9 @@ export class EverConnectProvisionService {
       .db()
       .ref(`${EVER_CONNECT_PATHS.provisionResults}/${jti}`)
       .get()
-      .then((snapshot) => (snapshot.exists() ? (snapshot.val() as ProvisionResultRecord) : null));
+      .then((snapshot) =>
+        snapshot.exists() ? (snapshot.val() as ProvisionResultRecord) : null,
+      );
   }
 
   /** `POST /ever-connect/provision/intent`: checks the intent and seals it; creates nothing. */
@@ -282,15 +334,30 @@ export class EverConnectProvisionService {
       );
     } catch (error) {
       if (error instanceof SealError || error instanceof SyntaxError) {
-        throw refuse(BadRequestException, 400, 'invalid_txn', 'This confirmation is not valid.');
+        throw refuse(
+          BadRequestException,
+          400,
+          'invalid_txn',
+          'This confirmation is not valid.',
+        );
       }
       throw error;
     }
     if (!isDbKey(txn.jti)) {
-      throw refuse(BadRequestException, 400, 'invalid_txn', 'This confirmation is not valid.');
+      throw refuse(
+        BadRequestException,
+        400,
+        'invalid_txn',
+        'This confirmation is not valid.',
+      );
     }
     if (txn.exp <= this.nowS()) {
-      throw refuse(ConflictException, 409, 'intent_expired', 'This link has expired: start again from app.ever.co.');
+      throw refuse(
+        ConflictException,
+        409,
+        'intent_expired',
+        'This link has expired: start again from app.ever.co.',
+      );
     }
     return txn;
   }
@@ -299,10 +366,13 @@ export class EverConnectProvisionService {
   private async hasEverId(uid: string, subject: string): Promise<boolean> {
     if (!isDbKey(uid)) return false;
     const db = this.store.db();
-    const index = (await db.ref(`${EVER_ID_LINK_ROOTS.byUid}/${uid}`).get()).val() ?? {};
+    const index =
+      (await db.ref(`${EVER_ID_LINK_ROOTS.byUid}/${uid}`).get()).val() ?? {};
     for (const key of Object.keys(index)) {
       if (!isDbKey(key)) continue;
-      const row = (await db.ref(`${EVER_ID_LINK_ROOTS.links}/${key}`).get()).val();
+      const row = (
+        await db.ref(`${EVER_ID_LINK_ROOTS.links}/${key}`).get()
+      ).val();
       if (row?.uid === uid && row?.subject === subject) return true;
     }
     return false;
@@ -334,9 +404,18 @@ export class EverConnectProvisionService {
     if (!claim.committed) {
       const existing = await this.result(txn.jti);
       if (existing?.state === 'created' && existing.uid === uid) {
-        return { status: 'exists', workspaceId: existing.workspaceId, returnTo: txn.returnTo };
+        return {
+          status: 'exists',
+          workspaceId: existing.workspaceId,
+          returnTo: txn.returnTo,
+        };
       }
-      throw refuse(ConflictException, 409, 'intent_consumed', 'This link was already used.');
+      throw refuse(
+        ConflictException,
+        409,
+        'intent_consumed',
+        'This link was already used.',
+      );
     }
     let workspaceId: string;
     try {
@@ -367,7 +446,9 @@ export class EverConnectProvisionService {
     });
     await this.audit.write('provision.accept', uid, {}, workspaceId);
     await this.complete(txn.jti).catch((error) =>
-      this.logger.warn(`The provisioning could not be reported yet (${errorCode(error)}); retried later.`),
+      this.logger.warn(
+        `The provisioning could not be reported yet (${errorCode(error)}); retried later.`,
+      ),
     );
     return { status: 'created', workspaceId, returnTo: txn.returnTo };
   }
@@ -376,7 +457,12 @@ export class EverConnectProvisionService {
   async reject(jti: string, provisionTxn: unknown) {
     const txn = await this.open(provisionTxn);
     if (txn.jti !== jti) {
-      throw refuse(BadRequestException, 400, 'invalid_txn', 'This confirmation is not valid.');
+      throw refuse(
+        BadRequestException,
+        400,
+        'invalid_txn',
+        'This confirmation is not valid.',
+      );
     }
     const path = `${EVER_CONNECT_PATHS.provisionResults}/${jti}`;
     const record: ProvisionResultRecord = {
@@ -387,15 +473,25 @@ export class EverConnectProvisionService {
     const claim = await this.store
       .db()
       .ref(path)
-      .transaction((current: ProvisionResultRecord | null) => (current ? undefined : record));
+      .transaction((current: ProvisionResultRecord | null) =>
+        current ? undefined : record,
+      );
     if (!claim.committed) {
       const existing = await this.result(jti);
-      if (existing?.state === 'refused') return { status: 'refused', returnTo: txn.returnTo };
-      throw refuse(ConflictException, 409, 'intent_consumed', 'This link was already used.');
+      if (existing?.state === 'refused')
+        return { status: 'refused', returnTo: txn.returnTo };
+      throw refuse(
+        ConflictException,
+        409,
+        'intent_consumed',
+        'This link was already used.',
+      );
     }
     await this.audit.write('provision.refuse', 'system', {});
     await this.complete(jti).catch((error) =>
-      this.logger.warn(`The refusal could not be reported yet (${errorCode(error)}); retried later.`),
+      this.logger.warn(
+        `The refusal could not be reported yet (${errorCode(error)}); retried later.`,
+      ),
     );
     return { status: 'refused', returnTo: txn.returnTo };
   }
@@ -429,19 +525,30 @@ export class EverConnectProvisionService {
       tenantLinkId = answer.tenant_link_id ?? null;
     } catch (error) {
       // An intent the platform no longer holds is final: nothing to retry.
-      if (!(platformAnswered(error) && [404, 409, 410].includes(error.status))) throw error;
+      if (!(platformAnswered(error) && [404, 409, 410].includes(error.status)))
+        throw error;
     }
-    await this.store.db().ref(path).update({ pendingComplete: null, tenantLinkId });
+    await this.store
+      .db()
+      .ref(path)
+      .update({ pendingComplete: null, tenantLinkId });
     if (record.state === 'created' && record.workspaceId && tenantLinkId) {
       await this.store.patchLink(record.workspaceId, { tenantLinkId });
       await this.fetchLinkEntitlement(record.workspaceId, tenantLinkId);
     }
   }
 
-  private async fetchLinkEntitlement(workspaceId: string, tenantLinkId: string) {
+  private async fetchLinkEntitlement(
+    workspaceId: string,
+    tenantLinkId: string,
+  ) {
     try {
       await this.client.run(async (client) => {
-        const verified = await this.entitlements.fetchLink(client, tenantLinkId, null);
+        const verified = await this.entitlements.fetchLink(
+          client,
+          tenantLinkId,
+          null,
+        );
         if (!verified) return;
         const facts: Partial<LinkRecord> = linkFacts(verified);
         await this.store.patchLink(workspaceId, {
@@ -450,15 +557,21 @@ export class EverConnectProvisionService {
         });
       });
     } catch (error) {
-      this.logger.warn(`The link's entitlement could not be read yet (${errorCode(error)}).`);
+      this.logger.warn(
+        `The link's entitlement could not be read yet (${errorCode(error)}).`,
+      );
     }
   }
 
   /** Reports the results the platform did not hear about yet (called by the heartbeat). */
   async retryPendingCompletes(): Promise<void> {
     const all =
-      (await this.store.db().ref(EVER_CONNECT_PATHS.provisionResults).get()).val() ?? {};
-    for (const [jti, record] of Object.entries(all as Record<string, ProvisionResultRecord>)) {
+      (
+        await this.store.db().ref(EVER_CONNECT_PATHS.provisionResults).get()
+      ).val() ?? {};
+    for (const [jti, record] of Object.entries(
+      all as Record<string, ProvisionResultRecord>,
+    )) {
       if (!record?.pendingComplete || record.state === 'creating') continue;
       await this.complete(jti).catch(() => undefined);
     }

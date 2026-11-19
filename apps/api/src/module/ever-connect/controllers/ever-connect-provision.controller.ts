@@ -37,7 +37,9 @@ export class EverConnectProvisionRateGuard implements CanActivate {
 
   canActivate(context: ExecutionContext): boolean {
     const request = context.switchToHttp().getRequest();
-    const key = String(request?.ip ?? request?.socket?.remoteAddress ?? 'unknown');
+    const key = String(
+      request?.ip ?? request?.socket?.remoteAddress ?? 'unknown',
+    );
     const now = Date.now();
     const recent = (this.hits.get(key) ?? []).filter((at) => now - at < 60_000);
     if (recent.length >= 30) {

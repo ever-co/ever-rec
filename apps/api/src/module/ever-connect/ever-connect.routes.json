@@ -24,6 +24,9 @@
     { "method": "GET", "path": "/api/v1/ever-connect/workspaces/:workspaceId/integrations/:key/consent-url", "access": "workspace_admin", "purpose": "The consent link of app.ever.co, for a linked workspace" },
     { "method": "POST", "path": "/api/v1/ever-connect/workspaces/:workspaceId/refresh", "access": "workspace_admin", "purpose": "Refresh the entitlement documents and integration states now" },
     { "method": "GET", "path": "/api/v1/ever-connect/workspaces/:workspaceId/audit", "access": "workspace_admin", "purpose": "The workspace's audit rows" },
-    { "method": "GET", "path": "/api/v1/ever-connect/me/exports/:jobId", "access": "self", "purpose": "A person's own export requested from app.ever.co (7 days)" }
+    { "method": "GET", "path": "/api/v1/ever-connect/me/exports/:jobId", "access": "self", "purpose": "A person's own export requested from app.ever.co (7 days)" },
+    { "method": "POST", "path": "/api/v1/ever-connect/provision/intent", "access": "public", "purpose": "Checks a provision intent from app.ever.co and answers a sealed confirmation; creates nothing (404 unless EVER_CONNECT_PROVISION_ENABLED=true)" },
+    { "method": "POST", "path": "/api/v1/ever-connect/provision/confirm", "access": "signed_in", "purpose": "The person, signed in with the intent's Ever ID, creates the workspace (404 unless EVER_CONNECT_PROVISION_ENABLED=true)" },
+    { "method": "POST", "path": "/api/v1/ever-connect/provision/intents/:jti/reject", "access": "public", "purpose": "The person declines (with the sealed confirmation; 404 unless EVER_CONNECT_PROVISION_ENABLED=true)" }
   ]
 }

@@ -55,9 +55,7 @@ describe('route table', () => {
       .map((r: { method: string; path: string }) => `${r.method} ${r.path}`)
       .sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
     expect(added).toEqual(listed);
-    expect(added.some((route) => /events\/pending|provision/.test(route))).toBe(
-      false,
-    );
+    expect(added.some((route) => /events\/pending/.test(route))).toBe(false);
   });
 
   it('notices a removed route (control)', () => {

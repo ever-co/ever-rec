@@ -114,13 +114,18 @@ const logger = new Logger('EverConnect');
           const { WorkspacesService } =
             // eslint-disable-next-line @typescript-eslint/no-require-imports
             require('../workspace/services/workspace.service');
-          const workspaces = moduleRef.get(WorkspacesService, { strict: false });
+          const workspaces = moduleRef.get(WorkspacesService, {
+            strict: false,
+          });
           const answer = await workspaces.createNewWorkspace(uid, '', '', name);
           const id = (answer as { data?: { id?: string } })?.data?.id;
           if (!id) {
-            throw Object.assign(new Error('The workspace could not be created.'), {
-              code: 'workspace_not_created',
-            });
+            throw Object.assign(
+              new Error('The workspace could not be created.'),
+              {
+                code: 'workspace_not_created',
+              },
+            );
           }
           return id;
         },

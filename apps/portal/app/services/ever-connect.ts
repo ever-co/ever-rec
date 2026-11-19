@@ -170,3 +170,30 @@ export const getWorkspaceAudit = (workspaceId: string, before?: string): Promise
 /** The public documentation of the connection: what is sent, when, and how to verify it. */
 export const EVER_CONNECT_DOCS_URL =
   'https://github.com/ever-co/ever-rec/blob/develop/docs/ever-platform/ever-platform-connection.md';
+
+// Ever Rec cloud provisioning (hand-off from app.ever.co; the routes exist only on Ever Cloud)
+
+export interface IProvisionIntent {
+  /** Sealed by the API: what the confirmation needs (opaque here). */
+  provisionTxn: string;
+  jti: string;
+  handle: string;
+  displayName: string;
+  expiresAt: number;
+}
+
+export interface IProvisionResult {
+  status: 'created' | 'exists' | 'refused';
+  workspaceId?: string;
+  returnTo: string | null;
+}
+
+/** Posts the intent read from the page's fragment (never from a query string). */
+export const postProvisionIntent = (intent: string): Promise<IProvisionIntent> =>
+  api.post(`${BASE}/provision/intent`, { intent }) as any;
+
+export const confirmProvision = (provisionTxn: string): Promise<IProvisionResult> =>
+  api.post(`${BASE}/provision/confirm`, { provisionTxn }) as any;
+
+export const rejectProvision = (jti: string, provisionTxn: string): Promise<IProvisionResult> =>
+  api.post(`${BASE}/provision/intents/${encodeURIComponent(jti)}/reject`, { provisionTxn }) as any;
