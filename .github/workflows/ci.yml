@@ -148,13 +148,18 @@ jobs:
           set -e
           cp "$RUNNER_TEMP/ui-routes.json" tools/egress-audit/ui-routes.json
           if [ "$code" -ne 1 ]; then echo "::error::a route list missing a page must fail the check"; exit 1; fi
+      # The steps below run even when a check above failed, so that one red check does not hide
+      # the result of the others (the audit legs need the images and the secrets of this run).
       - name: 'Static: the statistics code never guesses where it runs'
+        if: ${{ !cancelled() }}
         run: node "$EGRESS_AUDIT" cloud-inference --dirs apps/api/src/module/ever-stats,apps/api/src/module/ever-instance,apps/api/src/common/ever-platform
       - name: Build the API image under test and the emulators image
+        if: ${{ !cancelled() }}
         run: |
           docker build -f .deploy/api/Dockerfile -t "$REC_API_IMAGE" .
           docker build -f tools/egress-audit/emulators.Dockerfile -t "$REC_EMULATORS_IMAGE" .
       - name: Secrets of this run
+        if: ${{ !cancelled() }}
         run: |
           secret=$(openssl rand -hex 32)
           echo "::add-mask::$secret"

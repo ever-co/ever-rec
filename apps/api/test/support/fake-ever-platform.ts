@@ -6,6 +6,7 @@
  * installation. Nothing here is a real key or a real address.
  */
 import { createHash, generateKeyPairSync, KeyObject, randomBytes, sign, verify } from 'node:crypto';
+import { ReadableStream } from 'node:stream/web';
 import { keysSha256, signCompactJws } from '@ever-co/connect-sdk';
 
 export const FAKE_PLATFORM_URL = 'http://mock-platform.localhost:8080';
@@ -49,6 +50,113 @@ function newKey(kid: string): FakeKey {
 const signerOf = (key: FakeKey) => (bytes: Uint8Array) => sign(null, bytes, key.privateKey);
 
 const b64json = (part: string) => JSON.parse(Buffer.from(part, 'base64url').toString('utf8'));
+
+/** The headers of an answer, read case-insensitively like the Fetch API's `Headers`. */
+class AnswerHeaders {
+  private readonly values = new Map<string, string>();
+
+  constructor(init: Record<string, string> = {}) {
+    for (const [name, value] of Object.entries(init)) this.values.set(name.toLowerCase(), value);
+  }
+
+  get(name: string): string | null {
+    return this.values.get(name.toLowerCase()) ?? null;
+  }
+
+  has(name: string): boolean {
+    return this.values.has(name.toLowerCase());
+  }
+
+  forEach(callback: (value: string, name: string) => void): void {
+    this.values.forEach((value, name) => callback(value, name));
+  }
+
+  [Symbol.iterator]() {
+    return this.values.entries();
+  }
+}
+
+/**
+ * An answer of the stand-in: the part of the Fetch API `Response` a `fetch` caller reads (status,
+ * headers, a body stream or its bytes). Built here rather than with the global `Response`: under
+ * Node 26 the Jest 29 sandbox has none of the Fetch API globals (`fetch`, `Response`, `Headers`,
+ * `ReadableStream`), so the stream comes from `node:stream/web`.
+ */
+class PlatformAnswer {
+  readonly type = 'basic';
+  readonly redirected = false;
+  readonly statusText = '';
+  readonly url = '';
+  readonly status: number;
+  readonly headers: AnswerHeaders;
+  readonly body: ReadableStream<Uint8Array> | null;
+  /** Set once the body stream was read from or cancelled (the Fetch API's "disturbed"). */
+  private disturbed = false;
+
+  constructor(text: string | null, init: { status: number; headers?: Record<string, string> }) {
+    this.status = init.status;
+    this.headers = new AnswerHeaders(init.headers);
+    if (text === null) {
+      this.body = null;
+      return;
+    }
+    const bytes = new Uint8Array(Buffer.from(text, 'utf8'));
+    // highWaterMark 0: nothing is pulled until someone reads, so a pull means the body is in use.
+    this.body = new ReadableStream<Uint8Array>(
+      {
+        pull: (controller) => {
+          this.disturbed = true;
+          if (bytes.length > 0) controller.enqueue(bytes);
+          controller.close();
+        },
+        cancel: () => {
+          this.disturbed = true;
+        },
+      },
+      { highWaterMark: 0 },
+    );
+  }
+
+  get ok(): boolean {
+    return this.status >= 200 && this.status < 300;
+  }
+
+  get bodyUsed(): boolean {
+    return this.disturbed;
+  }
+
+  /** Reads the body stream itself, so a body is consumed once whichever way it is read. */
+  async arrayBuffer(): Promise<ArrayBuffer> {
+    if (this.body === null) return new ArrayBuffer(0);
+    if (this.disturbed || this.body.locked) {
+      throw new TypeError('Body is unusable: Body has already been read');
+    }
+    const reader = this.body.getReader();
+    const chunks: Uint8Array[] = [];
+    let size = 0;
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      chunks.push(value);
+      size += value.length;
+    }
+    const out = new Uint8Array(size);
+    let at = 0;
+    for (const chunk of chunks) {
+      out.set(chunk, at);
+      at += chunk.length;
+    }
+    return out.buffer;
+  }
+
+  async text(): Promise<string> {
+    return Buffer.from(await this.arrayBuffer()).toString('utf8');
+  }
+
+  async json(): Promise<unknown> {
+    return JSON.parse(await this.text());
+  }
+}
 
 export interface FakeLink {
   id: string;
@@ -259,23 +367,23 @@ export class FakeEverPlatform {
     );
   }
 
-  private json(status: number, body?: unknown, headers: Record<string, string> = {}): Response {
-    if (body === undefined) return new Response(null, { status, headers });
-    return new Response(JSON.stringify(body), {
+  private json(status: number, body?: unknown, headers: Record<string, string> = {}): PlatformAnswer {
+    if (body === undefined) return new PlatformAnswer(null, { status, headers });
+    return new PlatformAnswer(JSON.stringify(body), {
       status,
       headers: { 'content-type': 'application/json', ...headers },
     });
   }
 
-  private problem(status: number, code: string, extra: Record<string, unknown> = {}): Response {
-    return new Response(JSON.stringify({ type: `https://errors.ever.co/${code}`, title: code, status, code, ...extra }), {
+  private problem(status: number, code: string, extra: Record<string, unknown> = {}): PlatformAnswer {
+    return new PlatformAnswer(JSON.stringify({ type: `https://errors.ever.co/${code}`, title: code, status, code, ...extra }), {
       status,
       headers: { 'content-type': 'application/problem+json' },
     });
   }
 
   /** The instance a bearer token belongs to, or a 401 answer. */
-  private authed(headers: Record<string, string>): FakeInstance | Response {
+  private authed(headers: Record<string, string>): FakeInstance | PlatformAnswer {
     const token = (headers['authorization'] ?? '').replace(/^Bearer /, '');
     const id = this.tokens.get(token);
     const instance = id ? this.instances.get(id) : undefined;
@@ -285,7 +393,7 @@ export class FakeEverPlatform {
     return instance;
   }
 
-  /** The `fetch` the module is given. */
+  /** The `fetch` the module is given (its answers have the shape of a Fetch API `Response`). */
   readonly fetch = async (input: string | URL | Request, init: RequestInit = {}): Promise<Response> => {
     const url = new URL(typeof input === 'string' ? input : input instanceof URL ? input.href : input.url);
     const headers: Record<string, string> = {};
@@ -309,10 +417,10 @@ export class FakeEverPlatform {
     this.requests.push(request);
     if (this.down) throw new TypeError('fetch failed');
     if (url.origin !== FAKE_PLATFORM_URL) throw new TypeError('unexpected host');
-    return this.route(request);
+    return (await this.route(request)) as unknown as Response;
   };
 
-  private async route(r: RecordedRequest): Promise<Response> {
+  private async route(r: RecordedRequest): Promise<PlatformAnswer> {
     const { method, path } = r;
     if (this.failOnce.delete(`${method} ${path}`)) {
       return this.problem(503, 'unavailable');
@@ -323,7 +431,7 @@ export class FakeEverPlatform {
     if (method === 'POST' && path === '/v1/connect/redeem') return this.redeem(r);
     if (method === 'POST' && path === '/v1/instances/token') return this.token(r);
     const instance = this.authed(r.headers);
-    if (instance instanceof Response) return instance;
+    if (instance instanceof PlatformAnswer) return instance;
     if (instance.status === 'pending_approval' && path !== '/v1/instances/me') {
       return this.problem(403, 'pending_approval');
     }
@@ -533,7 +641,7 @@ export class FakeEverPlatform {
     };
   }
 
-  private redeem(r: RecordedRequest): Response {
+  private redeem(r: RecordedRequest): PlatformAnswer {
     const key = r.headers['idempotency-key'];
     if (key && this.idempotency.has(key)) return this.json(201, this.idempotency.get(key));
     if (this.failRedeem) {
@@ -590,7 +698,7 @@ export class FakeEverPlatform {
     return this.json(201, answer);
   }
 
-  private token(r: RecordedRequest): Response {
+  private token(r: RecordedRequest): PlatformAnswer {
     const assertion = String(r.body?.client_assertion ?? '');
     const [h, p, s] = assertion.split('.');
     if (!h || !p || !s) return this.problem(400, 'invalid_request');
