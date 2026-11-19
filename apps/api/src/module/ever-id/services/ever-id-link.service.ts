@@ -1,4 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { EVER_IDENTITY_EVENTS } from '../../../common/events/ever-identity.events';
 import { FirebaseAdminService } from '../../firebase/services/firebase-admin.service';
 import { identityKey } from './ever-id-crypto.service';
 
@@ -64,7 +66,10 @@ export interface EverIdLinkInput {
  */
 @Injectable()
 export class EverIdLinkService {
-  constructor(private readonly firebaseAdminService: FirebaseAdminService) {}
+  constructor(
+    private readonly firebaseAdminService: FirebaseAdminService,
+    @Optional() private readonly events?: EventEmitter2,
+  ) {}
 
   key(issuer: string, subject: string): string {
     return identityKey(issuer, subject);
@@ -110,6 +115,12 @@ export class EverIdLinkService {
       throw new EverIdSubjectLinkedError();
     }
     await this.indexRef(input.uid, key).set(true);
+    this.events?.emit(EVER_IDENTITY_EVENTS.linkCreated, {
+      uid: input.uid,
+      issuer: input.issuer,
+      subject: input.subject,
+      linkMethod: (written as EverIdLink).linkMethod,
+    });
     return written;
   }
 
@@ -180,6 +191,12 @@ export class EverIdLinkService {
       return outcome;
     }
     await this.removeIfOwnedBy(key, uid);
+    this.events?.emit(EVER_IDENTITY_EVENTS.linkRemoved, {
+      uid,
+      issuer,
+      subject,
+      linkMethod: 'explicit',
+    });
     return 'removed';
   }
 

@@ -98,6 +98,10 @@
     "oauthStates": {
       ".read": false,
       ".write": false
+    },
+    "ever_connect": {
+      ".read": false,
+      ".write": false
     }
   }
 }

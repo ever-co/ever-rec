@@ -67,6 +67,8 @@ export interface EverConnectOidcConfig {
   issuer?: string;
   clientId?: string;
   clientSecret?: string;
+  /** The API callback registered with the client (used when `EVER_ID_REDIRECT_URL` is unset). */
+  redirectUrl?: string;
 }
 
 type Env = Record<string, string | undefined>;
@@ -201,7 +203,9 @@ export function readEverIdSettings(
     issuers: [],
     clientId,
     clientSecret,
-    redirectUrl: text(env, 'EVER_ID_REDIRECT_URL'),
+    redirectUrl:
+      text(env, 'EVER_ID_REDIRECT_URL') ||
+      (issuerFromConnect ? (connect?.redirectUrl ?? '').trim() : ''),
     platformProjectId: text(env, 'EVER_ID_PLATFORM_PROJECT_ID'),
     linkMode: 'explicit',
     signUpAllowed,

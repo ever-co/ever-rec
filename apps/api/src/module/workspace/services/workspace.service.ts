@@ -4,7 +4,7 @@ import { IDataResponse, IUserData, ItemType } from '../../../interfaces/_types';
 import { IUser } from '../../../interfaces/IUser';
 import { nanoid } from 'nanoid';
 import { WorkspaceUtilitiesService } from './utilities.service';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import {
   IDbWorkspaceImageData,
   IDbWorkspaceVideoData,
@@ -25,6 +25,10 @@ import {
   EVER_COUNTER_EVENTS,
   storedMediaUnder,
 } from '../../../common/events/ever-counters.events';
+import {
+  EVER_CONNECT_WORKSPACE_LINK_READER,
+  EverConnectWorkspaceLinkReader,
+} from '../../../common/ever-platform/tokens';
 
 @Injectable()
 export class WorkspacesService {
@@ -34,6 +38,10 @@ export class WorkspacesService {
     private readonly utilitiesService: WorkspaceUtilitiesService,
     private readonly workspaceMembersService: WorkspaceMembersService,
     @Optional() private readonly eventEmitter?: EventEmitter2,
+    // Present only when the optional Ever Platform connection module is loaded.
+    @Optional()
+    @Inject(EVER_CONNECT_WORKSPACE_LINK_READER)
+    private readonly everLinks?: EverConnectWorkspaceLinkReader,
   ) {
     this.config = {
       action: 'read',
@@ -256,9 +264,13 @@ export class WorkspacesService {
         members,
       });
 
+      // The organization handle of a workspace linked through the Ever Platform connection; the
+      // body is unchanged when that module is not loaded or the workspace is not linked.
+      const everHandle = await this.everLinks?.everHandle(workspaceId);
       return sendResponse<IWorkspace & { favFolders: IFavoriteFolders }>({
         ...workspace,
         favFolders,
+        ...(everHandle ? { everHandle } : {}),
       });
     } catch (e) {
       console.log(e);

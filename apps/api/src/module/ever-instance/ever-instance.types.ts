@@ -32,10 +32,28 @@ export interface EverInstanceRecord {
   /** When the identity was last reset (epoch milliseconds), if ever. */
   resetAt?: number;
   /*
-   * Reserved for a later Ever Platform connection module and never written here:
-   * `connectPublicKey`, `connectPrivateKeyEnc`, `connectKeyId`. The statistics key is used for
-   * statistics reports only, and a reset never touches a connection key.
+   * The connect key of the Ever Platform connection (written only when that module is switched on
+   * and the operator connects). The statistics key is used for statistics reports only, and a reset
+   * never touches the connect key.
    */
+  /** The connect public key: base64url of the raw 32-byte Ed25519 key. */
+  connectPublicKey?: string;
+  /** The connect private key (PKCS#8 DER), AES-256-GCM encrypted under its own purpose. */
+  connectPrivateKeyEnc?: string;
+  /** The key id of the connect key (the same derivation as `statsKeyId`). */
+  connectKeyId?: string;
+  connectKeyCreatedAt?: number;
+  /** A rotation in progress: the next connect key, until Ever Platform accepted it. */
+  connectNextPublicKey?: string;
+  connectNextPrivateKeyEnc?: string;
+  connectNextKeyId?: string;
+}
+
+/** The connect key, decrypted, for signing. Never leaves the process. */
+export interface EverConnectKey {
+  publicKey: string;
+  keyId: string;
+  privateKeyDer: Buffer;
 }
 
 /** What a response may show of the identity: never the encrypted private key. */
