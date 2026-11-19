@@ -102,6 +102,17 @@ export function isEverStatsEnabled(
 }
 
 /**
+ * Whether the Ever Platform connection module is loaded. Unset means off; only the exact value
+ * `true` loads it. Any other value (`TRUE`, `1`, ...) keeps it off and is reported once.
+ */
+export function isEverConnectEnabled(
+  env: Env = process.env,
+  warn: Warn = consoleWarn,
+): boolean {
+  return readBoolStrict('EVER_CONNECT_ENABLED', false, env, warn);
+}
+
+/**
  * How this installation was deployed, as its operator declares it in `EVER_INSTALL_SOURCE`. It is
  * never inferred from a host name, a project id or any other signal. Unset gives `self-hosted`; a
  * value outside the closed list gives `self-hosted` and one warning.

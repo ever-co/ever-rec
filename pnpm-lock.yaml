@@ -51,6 +51,12 @@ importers:
       '@api.video/nodejs-client':
         specifier: ^2.2.8
         version: 2.6.8
+      '@ever-co/connect-contracts':
+        specifier: 1.0.0-rc.8
+        version: 1.0.0-rc.8
+      '@ever-co/connect-sdk':
+        specifier: 1.0.0-rc.8
+        version: 1.0.0-rc.8
       '@ever-co/legal':
         specifier: ^0.1.0
         version: 0.1.2
@@ -3451,6 +3457,14 @@ packages:
   '@eslint/plugin-kit@0.2.8':
     resolution: {integrity: sha512-ZAoA40rNMPwSm+AeHpCq8STiNAwzWLJuP8Xv4CHIc9wv/PSuExjMrmjfYNj682vW0OOiZ1HKxzvjQr9XZIisQA==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+
+  '@ever-co/connect-contracts@1.0.0-rc.8':
+    resolution: {integrity: sha512-WmBcFC0mRxKWcTAWeb0YVFPAwovxnxf/FyUib0UDJgu+EdDIj5eVYSRQ6iwCO1FojRcA3Pnc8ZkG++R3ju0A4w==}
+    engines: {node: '>=20'}
+
+  '@ever-co/connect-sdk@1.0.0-rc.8':
+    resolution: {integrity: sha512-vbJy0CpKJNGxkwyZh+OVFw18otpA03wMRJU31HCcqSg5s4hTbOvCKfYWoN4vu/Qk03QdLSs+PQoxmWnzGwjAEw==}
+    engines: {node: '>=20'}
 
   '@ever-co/legal@0.1.2':
     resolution: {integrity: sha512-TbnRbXD2AhGBI0F/odq+TC5eCFrp4eTDziDy3gJhautda9td5Po23GRCQ6PfvW58J8xQrZXNMBIKYle36Kv1/g==}
@@ -8415,6 +8429,9 @@ packages:
 
   ajv@8.17.1:
     resolution: {integrity: sha512-B/gBuNg5SiMTrPkC+A2+cW0RszwxYmn6VYxB/inlBStS5nx6xHIt/ehKRhIMhqusl7a8LjQoZnjCs5vhwxOQ1g==}
+
+  ajv@8.20.0:
+    resolution: {integrity: sha512-Thbli+OlOj+iMPYFBVBfJ3OmCAnaSyNn4M1vz9T6Gka5Jt9ba/HIR56joy65tY6kx/FCF5VXNB819Y7/GUrBGA==}
 
   alphanum-sort@1.0.2:
     resolution: {integrity: sha512-0FcBfdcmaumGPQ0qPn7Q5qTgz/ooXgIyp1rf8ik5bGX8mpE2YHjC0P/eyQvxu1GURYQgq9ozf2mteQ5ZD9YiyQ==}
@@ -23401,6 +23418,13 @@ snapshots:
       '@eslint/core': 0.13.0
       levn: 0.4.1
 
+  '@ever-co/connect-contracts@1.0.0-rc.8': {}
+
+  '@ever-co/connect-sdk@1.0.0-rc.8':
+    dependencies:
+      '@ever-co/connect-contracts': 1.0.0-rc.8
+      ajv: 8.20.0
+
   '@ever-co/legal@0.1.2': {}
 
   '@ever-gauzy/desktop-core@0.1.0':
@@ -30532,6 +30556,13 @@ snapshots:
       uri-js: 4.4.1
 
   ajv@8.17.1:
+    dependencies:
+      fast-deep-equal: 3.1.3
+      fast-uri: 3.1.0
+      json-schema-traverse: 1.0.0
+      require-from-string: 2.0.2
+
+  ajv@8.20.0:
     dependencies:
       fast-deep-equal: 3.1.3
       fast-uri: 3.1.0

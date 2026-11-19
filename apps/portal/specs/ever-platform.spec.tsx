@@ -17,6 +17,12 @@ jest.mock('app/services/ever-platform', () => ({
   recount: jest.fn(),
 }));
 
+// The Ever Platform connection is not built into this portal here (NEXT_PUBLIC_EVER_CONNECT_ENABLED unset).
+jest.mock('app/services/ever-connect', () => ({
+  isEverConnectBuildEnabled: () => false,
+  getConnectHealth: jest.fn(),
+}));
+
 import * as service from 'app/services/ever-platform';
 import * as cookies from 'app/services/helpers/getCookies';
 import { loadEverPlatformAvailable, resetEverPlatformAvailable } from 'hooks/useEverPlatformAvailable';

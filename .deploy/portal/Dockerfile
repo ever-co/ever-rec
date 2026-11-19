@@ -8,6 +8,9 @@ ARG NEXT_PUBLIC_API_BASE_URL
 ARG NEXT_PUBLIC_WEBSITE_URL
 ARG NEXT_PUBLIC_STATIC_FILES_URL=${NEXT_PUBLIC_API_BASE_URL}
 ARG NEXT_PUBLIC_SENTRY_DSN
+# Ever Platform connection tabs (Settings -> Ever Platform): shown only when built with `true` and the
+# API has the connection loaded. No default: unset keeps them hidden.
+ARG NEXT_PUBLIC_EVER_CONNECT_ENABLED
 ARG SENTRY_ORG=ever-co
 
 FROM node:26.12.1-alpine AS base
@@ -56,6 +59,9 @@ RUN cd apps/portal && pnpm install --frozen-lockfile
 
 # Build the project
 COPY --from=builder /app/out/full/ .
+# Next.js inlines NEXT_PUBLIC_* when it builds, so this switch is read here (not at run time).
+ARG NEXT_PUBLIC_EVER_CONNECT_ENABLED
+ENV NEXT_PUBLIC_EVER_CONNECT_ENABLED=${NEXT_PUBLIC_EVER_CONNECT_ENABLED}
 # Build the apps
 RUN pnpm build --filter=ever-rec-portal...
 # Prune dev deps

@@ -29,6 +29,8 @@
   },
   "dependencies": {
     "@api.video/nodejs-client": "^2.2.8",
+    "@ever-co/connect-contracts": "1.0.0-rc.8",
+    "@ever-co/connect-sdk": "1.0.0-rc.8",
     "@ever-co/legal": "^0.1.0",
     "@firebase/storage": "^0.13.1",
     "@mux/mux-node": "^6.1.0",

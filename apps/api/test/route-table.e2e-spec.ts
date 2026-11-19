@@ -10,19 +10,16 @@ import { routeTable, routesOfSource } from './support/route-table';
 const snapshot: string[] = JSON.parse(
   readFileSync(join(__dirname, 'route-table.snapshot.json'), 'utf8'),
 ).routes;
-const manifest = JSON.parse(
-  readFileSync(
-    join(
-      __dirname,
-      '..',
-      'src',
-      'module',
-      'ever-stats',
-      'ever-stats.routes.json',
+const manifestOf = (module: string) =>
+  JSON.parse(
+    readFileSync(
+      join(__dirname, '..', 'src', 'module', module, `${module}.routes.json`),
+      'utf8',
     ),
-    'utf8',
-  ),
-);
+  );
+const manifest = manifestOf('ever-stats');
+// The Ever Platform connection (off unless EVER_CONNECT_ENABLED=true) lists its own routes.
+const connectManifest = manifestOf('ever-connect');
 
 describe('route table', () => {
   const now = routeTable(join(__dirname, '..', 'src'));
@@ -36,7 +33,10 @@ describe('route table', () => {
   });
 
   it('adds only /api/v1/ever-stats/* routes, exactly those of the manifest', () => {
-    const added = now.filter((route) => !snapshot.includes(route));
+    const added = now.filter(
+      (route) =>
+        !snapshot.includes(route) && !/ \/api\/v1\/ever-connect\//.test(route),
+    );
     expect(added.every((route) => / \/api\/v1\/ever-stats\//.test(route))).toBe(
       true,
     );
@@ -44,6 +44,20 @@ describe('route table', () => {
       .map((r: { method: string; path: string }) => `${r.method} ${r.path}`)
       .sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
     expect(added).toEqual(listed);
+  });
+
+  it('adds only /api/v1/ever-connect/* routes for the connection, exactly those of its manifest', () => {
+    const added = now.filter(
+      (route) =>
+        !snapshot.includes(route) && / \/api\/v1\/ever-connect\//.test(route),
+    );
+    const listed = connectManifest.routes
+      .map((r: { method: string; path: string }) => `${r.method} ${r.path}`)
+      .sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+    expect(added).toEqual(listed);
+    expect(added.some((route) => /events\/pending|provision/.test(route))).toBe(
+      false,
+    );
   });
 
   it('notices a removed route (control)', () => {

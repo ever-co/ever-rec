@@ -30,6 +30,15 @@ export const SAMPLE_REC_JWT_SECRET = 'hard!To_find:my/GuyZ';
 const HKDF_INFO = 'ever-instance/stats-key';
 const AAD = Buffer.from('ever_instance:stats', 'utf8');
 
+/**
+ * The connect key (Ever Platform connection, when that module is switched on) is wrapped the same
+ * way under its own purpose, salted with its own key id: the statistics key and the connect key
+ * never share a wrapping key, and a reset of the statistics identity leaves the connect key
+ * readable.
+ */
+const CONNECT_HKDF_INFO = 'ever-instance/connect-key';
+const CONNECT_AAD = Buffer.from('ever_instance:connect', 'utf8');
+
 /** A stored key that cannot be read. Carries no key material and no secret. */
 export class EverInstanceKeyError extends Error {
   constructor(readonly code: 'malformed' | 'secret_missing' | 'unreadable') {
@@ -45,7 +54,11 @@ export function isWeakSecret(secret: string | undefined): boolean {
   return !secret || secret === SAMPLE_REC_JWT_SECRET;
 }
 
-function wrappingKey(secret: string, instanceId: string): Buffer {
+function wrappingKey(
+  secret: string,
+  instanceId: string,
+  info = HKDF_INFO,
+): Buffer {
   if (!secret) {
     throw new EverInstanceKeyError('secret_missing');
   }
@@ -54,9 +67,71 @@ function wrappingKey(secret: string, instanceId: string): Buffer {
       'sha256',
       Buffer.from(secret, 'utf8'),
       Buffer.from(instanceId, 'utf8'),
-      Buffer.from(HKDF_INFO, 'utf8'),
+      Buffer.from(info, 'utf8'),
       32,
     ),
+  );
+}
+
+function seal(key: Buffer, aad: Buffer, plaintext: Buffer): string {
+  const iv = randomBytes(12);
+  const cipher = createCipheriv('aes-256-gcm', key, iv);
+  cipher.setAAD(aad);
+  const ciphertext = Buffer.concat([cipher.update(plaintext), cipher.final()]);
+  return [
+    'v1',
+    iv.toString('base64url'),
+    cipher.getAuthTag().toString('base64url'),
+    ciphertext.toString('base64url'),
+  ].join(':');
+}
+
+function open(blob: string, key: () => Buffer, aad: Buffer): Buffer {
+  const parts = typeof blob === 'string' ? blob.split(':') : [];
+  if (parts.length !== 4 || parts[0] !== 'v1') {
+    throw new EverInstanceKeyError('malformed');
+  }
+  const wrapping = key();
+  try {
+    const decipher = createDecipheriv(
+      'aes-256-gcm',
+      wrapping,
+      Buffer.from(parts[1], 'base64url'),
+    );
+    decipher.setAAD(aad);
+    decipher.setAuthTag(Buffer.from(parts[2], 'base64url'));
+    return Buffer.concat([
+      decipher.update(Buffer.from(parts[3], 'base64url')),
+      decipher.final(),
+    ]);
+  } catch {
+    throw new EverInstanceKeyError('unreadable');
+  }
+}
+
+/** Encrypts a PKCS#8 DER connect key for storage, salted with its key id. */
+export function wrapConnectKey(
+  privateKeyDer: Buffer,
+  secret: string,
+  connectKeyId: string,
+): string {
+  return seal(
+    wrappingKey(secret, connectKeyId, CONNECT_HKDF_INFO),
+    CONNECT_AAD,
+    privateKeyDer,
+  );
+}
+
+/** Decrypts a stored connect key; throws {@link EverInstanceKeyError} (fails closed). */
+export function unwrapConnectKey(
+  blob: string,
+  secret: string,
+  connectKeyId: string,
+): Buffer {
+  return open(
+    blob,
+    () => wrappingKey(secret, connectKeyId, CONNECT_HKDF_INFO),
+    CONNECT_AAD,
   );
 }
 
