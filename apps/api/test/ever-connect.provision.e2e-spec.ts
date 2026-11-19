@@ -8,12 +8,17 @@ import { EVER_CONNECT_PATHS } from '../src/module/ever-connect/ever-connect.type
 import { ConnectTestApp, createConnectTestApp } from './support/ever-connect-app';
 import { CONNECT_ON, connectInstallation, scheduler } from './support/ever-connect-flows';
 
-const PROVISION_ON = { ...CONNECT_ON, EVER_CONNECT_PROVISION_ENABLED: 'true', WEBSITE_URL: 'https://app.rec.example' };
+const PROVISION_ON = {
+  ...CONNECT_ON,
+  EVER_CONNECT_PROVISION_ENABLED: 'true',
+  WEBSITE_URL: 'https://app.rec.example',
+  EVER_ID_ISSUER_URL: 'https://auth.ever.co',
+};
 
 /** A Rec account linked to an Ever ID `subject`. */
-function linkEverId(t: ConnectTestApp, uid: string, subject: string) {
+function linkEverId(t: ConnectTestApp, uid: string, subject: string, issuer = 'https://auth.ever.co') {
   const key = `k-${uid}`;
-  t.firebase.db.write(['ever_identities', key], { issuer: 'https://auth.ever.co', subject, uid });
+  t.firebase.db.write(['ever_identities', key], { issuer, subject, uid });
   t.firebase.db.write(['ever_identities_by_uid', uid, key], true);
 }
 
@@ -59,6 +64,20 @@ describe('Ever Rec cloud provisioning', () => {
     expect(res.body.provisionTxn).toMatch(/^v1:/);
     expect(JSON.stringify(t.firebase.db.dump('workspaces'))).toBe(before);
     expect(t.platform.requests.some((r) => r.path.includes('/provision-intents/'))).toBe(false);
+  });
+
+  it('the same subject from another issuer gets 403', async () => {
+    const { jws } = await t.platform.signIntent();
+    const { provisionTxn } = (await postIntent(jws)).body;
+    linkEverId(t, 'uid-elsewhere', 'sub-person-1', 'https://id.example.org');
+    const token = await t.signIn('uid-elsewhere');
+    const res = await t
+      .http()
+      .post('/api/v1/ever-connect/provision/confirm')
+      .set('idToken', token)
+      .send({ provisionTxn });
+    expect(res.status).toBe(403);
+    expect(workspacesOf(t, 'uid-elsewhere')).toEqual([]);
   });
 
   it('a different Ever ID gets 403 and nothing is created', async () => {

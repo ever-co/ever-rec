@@ -40,6 +40,7 @@ import {
   storedFrom,
 } from './ever-connect-entitlement.service';
 import { checkPublicUrl } from './ever-connect-integrations.service';
+import { EverConnectOidcService } from './ever-connect-oidc.service';
 import { EverConnectStoreService, isDbKey } from './ever-connect-store.service';
 
 /** The header `typ` of a provision intent. */
@@ -50,6 +51,8 @@ export const INTENT_CLAIMS_TYP = 'ever.provision_intent.v1';
 export const INTENT_AUDIENCE = 'ever-connect:rec';
 /** The longest an intent lives (seconds). */
 export const INTENT_MAX_TTL_S = 900;
+/** A claim still `creating` after this long was interrupted; the same person may resume it. */
+export const CREATING_STALE_MS = 5 * 60 * 1000;
 /** Clock skew tolerated on `iat` (seconds). */
 export const INTENT_SKEW_S = 300;
 
@@ -117,6 +120,7 @@ export class EverConnectProvisionService {
     private readonly client: EverConnectClientService,
     private readonly entitlements: EverConnectEntitlementService,
     private readonly audit: EverConnectAuditService,
+    private readonly oidc: EverConnectOidcService,
   ) {}
 
   private nowS(): number {
@@ -363,8 +367,23 @@ export class EverConnectProvisionService {
   }
 
   /** Whether the account holds an Ever ID link with this subject. */
+  /**
+   * The Ever ID issuers this installation trusts: its own `EVER_ID_ISSUER_URL`, and the issuer of
+   * the Ever ID client the connection prepared.
+   */
+  private trustedIssuers(): string[] {
+    return [this.config.everIdIssuer, this.oidc.view.issuer]
+      .filter(
+        (issuer): issuer is string => typeof issuer === 'string' && !!issuer,
+      )
+      .map((issuer) => issuer.trim());
+  }
+
+  /** Whether the account holds an Ever ID link with this subject, from a trusted issuer. */
   private async hasEverId(uid: string, subject: string): Promise<boolean> {
     if (!isDbKey(uid)) return false;
+    const issuers = this.trustedIssuers();
+    if (!issuers.length) return false;
     const db = this.store.db();
     const index =
       (await db.ref(`${EVER_ID_LINK_ROOTS.byUid}/${uid}`).get()).val() ?? {};
@@ -373,7 +392,13 @@ export class EverConnectProvisionService {
       const row = (
         await db.ref(`${EVER_ID_LINK_ROOTS.links}/${key}`).get()
       ).val();
-      if (row?.uid === uid && row?.subject === subject) return true;
+      if (
+        row?.uid === uid &&
+        row?.subject === subject &&
+        issuers.includes(String(row?.issuer ?? '').trim())
+      ) {
+        return true;
+      }
     }
     return false;
   }
@@ -401,25 +426,43 @@ export class EverConnectProvisionService {
       .transaction((current: ProvisionResultRecord | null) =>
         current ? undefined : { state: 'creating', at: now, uid },
       );
+    let claimedAt = now;
     if (!claim.committed) {
       const existing = await this.result(txn.jti);
       if (existing?.state === 'created' && existing.uid === uid) {
+        // A replay; the steps after the creation are completed if they were interrupted.
+        await this.finishLocal(
+          txn.jti,
+          existing.workspaceId as string,
+          uid,
+          txn.org,
+        );
         return {
           status: 'exists',
           workspaceId: existing.workspaceId,
           returnTo: txn.returnTo,
         };
       }
-      throw refuse(
-        ConflictException,
-        409,
-        'intent_consumed',
-        'This link was already used.',
-      );
+      const stale =
+        existing?.state === 'creating' &&
+        existing.uid === uid &&
+        now - existing.at > CREATING_STALE_MS;
+      if (!stale) {
+        throw refuse(
+          ConflictException,
+          409,
+          'intent_consumed',
+          'This link was already used.',
+        );
+      }
+      claimedAt = existing.at;
     }
     let workspaceId: string;
     try {
-      workspaceId = await this.workspaces.create(uid, txn.org.displayName);
+      workspaceId =
+        (claimedAt !== now
+          ? await this.createdSince(uid, txn.org.displayName, claimedAt)
+          : null) ?? (await this.workspaces.create(uid, txn.org.displayName));
     } catch (error) {
       await this.store.db().ref(path).remove();
       throw error;
@@ -434,6 +477,10 @@ export class EverConnectProvisionService {
       org: txn.org,
     };
     await this.store.db().ref(path).set(record);
+    await this.store
+      .db()
+      .ref(`${EVER_CONNECT_PATHS.provisionPending}/${txn.jti}`)
+      .set(true);
     await this.store.setLink({
       workspaceId,
       tenantLinkId: '',
@@ -451,6 +498,57 @@ export class EverConnectProvisionService {
       ),
     );
     return { status: 'created', workspaceId, returnTo: txn.returnTo };
+  }
+
+  /** The local link of a created workspace, written again when it is missing. */
+  private async finishLocal(
+    jti: string,
+    workspaceId: string,
+    uid: string,
+    org: ProvisionTxn['org'],
+  ): Promise<void> {
+    if (!(await this.store.link(workspaceId))) {
+      await this.store.setLink({
+        workspaceId,
+        tenantLinkId: '',
+        everOrgId: org.id,
+        handle: org.handle,
+        state: 'active',
+        linkedAt: this.clock(),
+        linkedBy: uid,
+        displayName: org.displayName,
+      });
+    }
+    await this.complete(jti).catch(() => undefined);
+  }
+
+  /** A workspace the person administers, of this name, created since `since` (an interrupted try). */
+  private async createdSince(
+    uid: string,
+    name: string,
+    since: number,
+  ): Promise<string | null> {
+    const db = this.store.db();
+    const raw: unknown =
+      (await db.ref(`users/${uid}/workspaceIds`).get()).val() ?? [];
+    const ids = (
+      Array.isArray(raw) ? raw : Object.values(raw as object)
+    ).filter((id): id is string => typeof id === 'string');
+    for (const id of ids) {
+      const workspace = (await this.store.workspace(id)) as {
+        admin?: string;
+        name?: string;
+        created?: number;
+      } | null;
+      if (
+        workspace?.admin === uid &&
+        workspace.name === name &&
+        Number(workspace.created ?? 0) >= since
+      ) {
+        return id;
+      }
+    }
+    return null;
   }
 
   /** `POST /ever-connect/provision/intents/:jti/reject`: the person declines. */
@@ -487,6 +585,10 @@ export class EverConnectProvisionService {
         'This link was already used.',
       );
     }
+    await this.store
+      .db()
+      .ref(`${EVER_CONNECT_PATHS.provisionPending}/${jti}`)
+      .set(true);
     await this.audit.write('provision.refuse', 'system', {});
     await this.complete(jti).catch((error) =>
       this.logger.warn(
@@ -518,24 +620,35 @@ export class EverConnectProvisionService {
             result: 'refused' as const,
           };
     let tenantLinkId: string | null = null;
+    let finalRefusal: string | null = null;
     try {
       const answer = await this.client.run((client) =>
         client.connect.completeProvisionIntent(jti, body as never),
       );
       tenantLinkId = answer.tenant_link_id ?? null;
     } catch (error) {
-      // An intent the platform no longer holds is final: nothing to retry.
+      // An intent the platform no longer holds is final: recorded, not retried.
       if (!(platformAnswered(error) && [404, 409, 410].includes(error.status)))
         throw error;
+      finalRefusal = errorCode(error);
     }
-    await this.store
-      .db()
-      .ref(path)
-      .update({ pendingComplete: null, tenantLinkId });
     if (record.state === 'created' && record.workspaceId && tenantLinkId) {
       await this.store.patchLink(record.workspaceId, { tenantLinkId });
       await this.fetchLinkEntitlement(record.workspaceId, tenantLinkId);
     }
+    // The retry flags go last: an interrupted step above is done again by the heartbeat.
+    await this.store
+      .db()
+      .ref(path)
+      .update({
+        pendingComplete: null,
+        tenantLinkId,
+        ...(finalRefusal ? { completeRefused: finalRefusal } : {}),
+      });
+    await this.store
+      .db()
+      .ref(`${EVER_CONNECT_PATHS.provisionPending}/${jti}`)
+      .remove();
   }
 
   private async fetchLinkEntitlement(
@@ -565,14 +678,12 @@ export class EverConnectProvisionService {
 
   /** Reports the results the platform did not hear about yet (called by the heartbeat). */
   async retryPendingCompletes(): Promise<void> {
-    const all =
+    const pending =
       (
-        await this.store.db().ref(EVER_CONNECT_PATHS.provisionResults).get()
+        await this.store.db().ref(EVER_CONNECT_PATHS.provisionPending).get()
       ).val() ?? {};
-    for (const [jti, record] of Object.entries(
-      all as Record<string, ProvisionResultRecord>,
-    )) {
-      if (!record?.pendingComplete || record.state === 'creating') continue;
+    for (const jti of Object.keys(pending)) {
+      if (!isDbKey(jti)) continue;
       await this.complete(jti).catch(() => undefined);
     }
   }

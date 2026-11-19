@@ -41,13 +41,18 @@ export class EverConnectProvisionRateGuard implements CanActivate {
       request?.ip ?? request?.socket?.remoteAddress ?? 'unknown',
     );
     const now = Date.now();
+    if (this.hits.size > 1_000) {
+      // Forget addresses idle for a minute (the map never grows without bound).
+      for (const [address, times] of this.hits) {
+        if (!times.some((at) => now - at < 60_000)) this.hits.delete(address);
+      }
+    }
     const recent = (this.hits.get(key) ?? []).filter((at) => now - at < 60_000);
     if (recent.length >= 30) {
       throw new HttpException({ statusCode: 429, code: 'rate_limited' }, 429);
     }
     recent.push(now);
     this.hits.set(key, recent);
-    if (this.hits.size > 10_000) this.hits.clear();
     return true;
   }
 }
@@ -77,6 +82,7 @@ export class EverConnectProvisionController {
     return this.provision.confirm(body?.provisionTxn, request.user.id);
   }
 
+  /** The sealed confirmation is the capability: whoever holds it (valid while the intent is) may decline. */
   @Post('intents/:jti/reject')
   @HttpCode(200)
   reject(@Param('jti') jti: string, @Body() body: Body_) {

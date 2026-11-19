@@ -117,6 +117,12 @@ const logger = new Logger('EverConnect');
           const workspaces = moduleRef.get(WorkspacesService, {
             strict: false,
           });
+          if (!workspaces) {
+            throw Object.assign(
+              new Error('The workspace service is not available.'),
+              { code: 'workspace_service_missing' },
+            );
+          }
           const answer = await workspaces.createNewWorkspace(uid, '', '', name);
           const id = (answer as { data?: { id?: string } })?.data?.id;
           if (!id) {

@@ -4,7 +4,15 @@
  * Operator routes answer the operator of a self-hosted installation only (404 for anyone else);
  * workspace routes answer the workspace's admin only.
  */
+import axios from 'axios';
 import api from './api/api';
+
+/**
+ * The public provision routes go through a client of their own: an invalid link answers 401, which
+ * must not sign the person out the way the shared client does for a session that ended.
+ */
+const publicApi = axios.create({ baseURL: process.env.NEXT_PUBLIC_API_BASE_URL });
+publicApi.interceptors.response.use((response) => response.data);
 
 const BASE = '/api/v1/ever-connect';
 
@@ -190,10 +198,10 @@ export interface IProvisionResult {
 
 /** Posts the intent read from the page's fragment (never from a query string). */
 export const postProvisionIntent = (intent: string): Promise<IProvisionIntent> =>
-  api.post(`${BASE}/provision/intent`, { intent }) as any;
+  publicApi.post(`${BASE}/provision/intent`, { intent }) as any;
 
 export const confirmProvision = (provisionTxn: string): Promise<IProvisionResult> =>
   api.post(`${BASE}/provision/confirm`, { provisionTxn }) as any;
 
 export const rejectProvision = (jti: string, provisionTxn: string): Promise<IProvisionResult> =>
-  api.post(`${BASE}/provision/intents/${encodeURIComponent(jti)}/reject`, { provisionTxn }) as any;
+  publicApi.post(`${BASE}/provision/intents/${encodeURIComponent(jti)}/reject`, { provisionTxn }) as any;

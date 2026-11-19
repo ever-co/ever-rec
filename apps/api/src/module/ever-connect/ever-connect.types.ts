@@ -38,6 +38,7 @@ export const EVER_CONNECT_PATHS = Object.freeze({
   personLinksDirtyAt: 'ever_connect/person_links_dirty_at',
   personLinkRemovals: 'ever_connect/person_link_removals',
   provisionResults: 'ever_connect/provision_results',
+  provisionPending: 'ever_connect/provision_pending',
   audit: 'ever_connect/audit',
   lease: 'ever_connect/lease',
 });
@@ -190,6 +191,8 @@ export interface ProvisionResultRecord {
   tenantLinkId?: string | null;
   /** The platform was not told yet (`/complete`): retried by the heartbeat. */
   pendingComplete?: boolean;
+  /** The platform no longer held the intent when it was told (a final answer). */
+  completeRefused?: string;
   /** The organization, for the local link and a retried `/complete`. */
   org?: { id: string; handle: string; displayName: string };
 }
