@@ -37,7 +37,11 @@ type Job =
   | 'sweep';
 
 /** Jobs that read or clean the installation's own database only (no request leaves). */
-const LOCAL_JOBS: ReadonlyArray<Job> = ['watch', 'sweep', 'envCode'];
+const LOCAL_JOBS: ReadonlySet<Job> = new Set<Job>([
+  'watch',
+  'sweep',
+  'envCode',
+]);
 
 const WATCH_MS = 5 * 60 * 1000;
 const SWEEP_MS = 60 * 60 * 1000;
@@ -174,7 +178,7 @@ export class EverConnectSchedulerService
           this.logger.warn(`Background ${job} failed (${errorCode(error)}).`);
           next = 15 * 60 * 1000;
         }
-        if (next !== null && (this.running || LOCAL_JOBS.includes(job))) {
+        if (next !== null && (this.running || LOCAL_JOBS.has(job))) {
           this.schedule(job, next, run);
         }
       },

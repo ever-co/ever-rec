@@ -35,7 +35,7 @@ const EverPlatformTabs: React.FC<{ uid: string | undefined }> = ({ uid }) => {
 
   useEffect(() => {
     let active = true;
-    (async () => {
+    void (async () => {
       const statistics = await ok(() => getHealth().then(() => getStatus()));
       const connect = isEverConnectBuildEnabled() && (await ok(() => getConnectHealth()));
       const operator = connect && (await ok(() => getConnectStatus()));

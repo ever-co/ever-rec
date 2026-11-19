@@ -22,12 +22,12 @@ const FOCUS_REFRESH_MS = 30_000;
 import { useErrorMessage } from './shared';
 
 /** Where the consent screens live: the links the platform signs must point there. */
-const CONSENT_ORIGINS = ['https://app.ever.co', 'https://app-stage.ever.co', 'https://app-dev.ever.co'];
+const CONSENT_ORIGINS = new Set(['https://app.ever.co', 'https://app-stage.ever.co', 'https://app-dev.ever.co']);
 
 const consentLinkAllowed = (url: string) => {
   try {
     const parsed = new URL(url);
-    return CONSENT_ORIGINS.includes(parsed.origin) || parsed.hostname === 'localhost';
+    return CONSENT_ORIGINS.has(parsed.origin) || parsed.hostname === 'localhost';
   } catch {
     return false;
   }

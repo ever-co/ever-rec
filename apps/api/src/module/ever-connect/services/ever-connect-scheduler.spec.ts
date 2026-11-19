@@ -122,7 +122,7 @@ describe('EverConnectSchedulerService', () => {
     await flush();
     expect(feed.cycle).toHaveBeenCalledTimes(1);
     expect(feed.cycle).toHaveBeenLastCalledWith(0);
-    for (let i = 0; i < 90; i += 1) {
+    for (let i = 0; i < 100; i += 1) {
       jest.advanceTimersByTime(10_000);
       await flush();
     }

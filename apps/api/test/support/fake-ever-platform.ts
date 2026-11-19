@@ -201,7 +201,7 @@ export class FakeEverPlatform {
     ).then((manifest) => ({ manifest, keys }));
   }
 
-  async entitlement(instance: FakeInstance, link?: FakeLink): Promise<string> {
+  entitlement(instance: FakeInstance, link?: FakeLink): Promise<string> {
     const nowS = Math.floor(this.now() / 1000);
     const key = this.tamperEntitlements ? newKey('test-entitlement-1') : this.entitlementKey;
     const ever: Record<string, unknown> = {
@@ -488,7 +488,7 @@ export class FakeEverPlatform {
     };
   }
 
-  private async redeem(r: RecordedRequest): Promise<Response> {
+  private redeem(r: RecordedRequest): Response {
     const key = r.headers['idempotency-key'];
     if (key && this.idempotency.has(key)) return this.json(201, this.idempotency.get(key));
     if (this.failRedeem) {

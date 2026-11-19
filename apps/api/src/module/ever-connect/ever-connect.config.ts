@@ -84,6 +84,13 @@ export function apiVersion(start = __dirname): string {
   return '0.0.0';
 }
 
+/** A trimmed value without trailing slashes (no regular expression: linear on any input). */
+export function trimTrailingSlashes(value: string | undefined): string {
+  let text = (value ?? '').trim();
+  while (text.endsWith('/')) text = text.slice(0, -1);
+  return text;
+}
+
 /** Splits `EVER_CONNECT_INTEGRATIONS_DENY`: Rec keys only (`*` denies all three). */
 export function parseDenyList(
   raw: string | undefined,
@@ -142,7 +149,7 @@ export function readEverConnectConfig(env: Env, warn: Warn): EverConnectConfig {
     denied: parseDenyList(env['EVER_CONNECT_INTEGRATIONS_DENY'], warn),
     feedMode,
     installSource: readInstallSource(env, warn),
-    apiBaseUrl: (env['API_BASE_URL'] ?? '').trim().replace(/\/+$/, ''),
+    apiBaseUrl: trimTrailingSlashes(env['API_BASE_URL']),
     version: apiVersion(),
     timings: {
       heartbeatIntervalMs: CONSTANTS.heartbeat_interval_s * 1000,

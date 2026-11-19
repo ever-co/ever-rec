@@ -85,7 +85,6 @@ describe('CN-7 workspace link and unlink', () => {
     t.platform.publish('ever.registry.tenant_link.unlinked', { tenant_link_id: tenantLinkId });
     await readFeed(t);
     expect(t.firebase.db.dump(`${EVER_CONNECT_PATHS.links}/ws-1`).state).toBe('unlinked');
-    void operator;
   });
 });
 

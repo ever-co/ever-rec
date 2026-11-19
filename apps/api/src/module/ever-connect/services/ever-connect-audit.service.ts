@@ -8,7 +8,14 @@ import {
 import { EVER_CONNECT_CLOCK, EverConnectClock } from '../ever-connect.tokens';
 import { EverConnectStoreService } from './ever-connect-store.service';
 
-const EMAIL = /[^\s@]+@[^\s@]+\.[^\s@]+/;
+/** Something shaped like an e-mail address: `x@y.z` (linear, no backtracking). */
+export function looksLikeEmail(value: string): boolean {
+  const at = value.indexOf('@');
+  if (at <= 0) return false;
+  const domain = value.slice(at + 1).split(/\s/)[0];
+  const dot = domain.lastIndexOf('.');
+  return dot > 0 && dot < domain.length - 1;
+}
 /** Values shaped like a secret: tokens, JWS/JWT, keys, long random strings. */
 const SECRET_SHAPED = [
   /\bevit_[A-Za-z0-9_-]+/,
@@ -43,7 +50,7 @@ export function checkAuditDetails(
       throw new AuditRefusedError(field);
     }
     if (typeof value !== 'string') continue;
-    if (EMAIL.test(value) || SECRET_SHAPED.some((re) => re.test(value))) {
+    if (looksLikeEmail(value) || SECRET_SHAPED.some((re) => re.test(value))) {
       throw new AuditRefusedError(field);
     }
   }

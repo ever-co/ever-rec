@@ -5,7 +5,7 @@
 import { Logger } from '@nestjs/common';
 import { EVER_CONNECT_PATHS } from '../src/module/ever-connect/ever-connect.types';
 import { EverInstanceService } from '../src/module/ever-instance/ever-instance.service';
-import { createConnectTestApp, OPERATOR_UID } from './support/ever-connect-app';
+import { createConnectTestApp } from './support/ever-connect-app';
 import { CONNECT_ON, connectInstallation, readFeed, scheduler } from './support/ever-connect-flows';
 
 // `client_secret` as a member (the scope table names the field `oidc.client_secret`, which is fine).
@@ -73,7 +73,6 @@ describe('CN-16 secrets', () => {
       // Control: the check finds a planted secret.
       expect(findSecrets([`${bodies[0]}"client_secret":"x"`])).toHaveLength(1);
       expect(findSecrets(['abc'], ['abc'])).toEqual(['planted']);
-      void OPERATOR_UID;
     } finally {
       spies.forEach((spy) => spy.mockRestore());
       await t.close();

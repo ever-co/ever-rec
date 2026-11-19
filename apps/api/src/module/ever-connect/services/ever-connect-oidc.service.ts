@@ -33,25 +33,25 @@ export class EverConnectOidcService {
     @Inject(EVER_INSTANCE_SETTINGS)
     private readonly settings: EverInstanceSettings,
   ) {
-    const self = this; // eslint-disable-line @typescript-eslint/no-this-alias
+    const current = () => this.current;
     this.view = {
       get enabled() {
-        return !!self.current;
+        return !!current();
       },
       get issuer() {
-        return self.current?.issuer;
+        return current()?.issuer;
       },
       get clientId() {
-        return self.current?.clientId;
+        return current()?.clientId;
       },
       get clientSecret() {
-        return self.current?.clientSecret;
+        return current()?.clientSecret;
       },
       get redirectUrl() {
-        return self.current?.redirectUrl;
+        return current()?.redirectUrl;
       },
       toJSON() {
-        return { enabled: !!self.current };
+        return { enabled: !!current() };
       },
     } as EverConnectOidcConfig;
   }

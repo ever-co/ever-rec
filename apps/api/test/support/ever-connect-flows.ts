@@ -21,7 +21,7 @@ export async function connectInstallation(t: ConnectTestApp, handle = 'acme'): P
 }
 
 /** One read of the feed (as the scheduler does it in interval mode). */
-export async function readFeed(t: ConnectTestApp) {
+export function readFeed(t: ConnectTestApp) {
   return t.get(EverConnectFeedService).cycle(0);
 }
 

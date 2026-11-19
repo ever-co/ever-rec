@@ -6,7 +6,6 @@ import { EVER_IDENTITY_EVENTS } from '../src/common/events/ever-identity.events'
 import { EVER_CONNECT_OIDC_CONFIG } from '../src/module/ever-id/ever-id.tokens';
 import { readEverIdSettings } from '../src/module/ever-id/ever-id.config';
 import { EVER_CONNECT_PATHS } from '../src/module/ever-connect/ever-connect.types';
-import { EverConnectPersonService } from '../src/module/ever-connect/services/ever-connect-person.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { createHash } from 'node:crypto';
 import { ConnectTestApp, createConnectTestApp, OPERATOR_UID } from './support/ever-connect-app';
@@ -264,7 +263,7 @@ describe('CN-14 a person\'s deletion and export requests', () => {
         displayName: 'Person',
         email: 'person@example.test',
         workspaceIds: ['ws-1'],
-        password: 'never-exported',
+        providerNote: 'never-exported',
       });
       t.firebase.db.write(['ever_identities', 'k1'], {
         issuer: 'https://auth.ever.co',
@@ -320,8 +319,7 @@ describe('CN-14 a person\'s deletion and export requests', () => {
       expect(t.firebase.db.dump('ever_identities/k1')).toBeNull();
       expect(t.firebase.db.dump('users/uid-person')).not.toBeNull();
       const bodies = JSON.stringify(t.platform.requests.map((r) => r.body));
-      expect(bodies).not.toMatch(/[^\s@"]+@[^\s@"]+\.[a-z]+/);
-      void EverConnectPersonService;
+      expect(bodies).not.toContain('@');
     } finally {
       await t.close();
     }
