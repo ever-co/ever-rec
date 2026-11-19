@@ -94,6 +94,8 @@ export class FakeEverPlatform {
   failRedeem: { status: number; code: string } | null = null;
   /** Sign the next entitlement documents with an unknown key (they do not verify). */
   tamperEntitlements = false;
+  /** Requests (`METHOD /path`) answered once with `503 unavailable`, then served normally. */
+  readonly failOnce = new Set<string>();
   /** Integrations whose consent URL answers `integration_not_available`. */
   comingSoon = new Set<string>(['ever_id_login']);
   private readonly idempotency = new Map<string, unknown>();
@@ -295,6 +297,9 @@ export class FakeEverPlatform {
 
   private async route(r: RecordedRequest): Promise<Response> {
     const { method, path } = r;
+    if (this.failOnce.delete(`${method} ${path}`)) {
+      return this.problem(503, 'unavailable');
+    }
     if (method === 'GET' && path === '/.well-known/ever-keys.json') {
       return this.json(200, await this.manifest());
     }

@@ -63,7 +63,9 @@ describe('CN-19 loaded but not connected', () => {
           .EverConnectSchedulerService,
       );
       await scheduler.boot();
-      expect(scheduler.scheduled).toEqual([]);
+      // Only local jobs (the watch of the stored connection, the clean-up of exports).
+      expect(scheduler.scheduled.sort()).toEqual(['sweep', 'watch']);
+      scheduler.stop();
       await scheduler.heartbeat();
       await scheduler.refresh();
       expect(t.platform.requests).toEqual([]);

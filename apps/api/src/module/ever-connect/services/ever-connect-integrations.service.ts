@@ -6,7 +6,7 @@ import {
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
-import { OnEvent } from '@nestjs/event-emitter';
+import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { EverPlatformClient, ProblemError } from '@ever-co/connect-sdk';
 import { EverInstanceService } from '../../ever-instance/ever-instance.service';
 import { EVER_INSTANCE_EVENTS } from '../../ever-instance/ever-instance.types';
@@ -14,6 +14,7 @@ import { EVER_CONNECT_CONFIG, EverConnectConfig } from '../ever-connect.config';
 import { sha256Hex } from '../ever-connect.crypto';
 import { EVER_CONNECT_CLOCK, EverConnectClock } from '../ever-connect.tokens';
 import {
+  EVER_CONNECT_EVENTS,
   IntegrationRecord,
   isRecIntegrationKey,
   REC_INTEGRATION_KEYS,
@@ -82,6 +83,7 @@ export class EverConnectIntegrationsService {
     private readonly audit: EverConnectAuditService,
     private readonly instance: EverInstanceService,
     private readonly oidc: EverConnectOidcService,
+    private readonly events: EventEmitter2,
   ) {}
 
   /** Keys denied for every workspace: `EVER_CONNECT_INTEGRATIONS_DENY` plus the operator's policy. */
@@ -238,6 +240,9 @@ export class EverConnectIntegrationsService {
   async refresh(actor = 'platform'): Promise<void> {
     const connection = await this.store.connection();
     if (connection?.status !== 'active') return;
+    // Switch-offs the platform has not heard about yet go first; until it has, the local
+    // switch-off stands whatever it still reports.
+    await this.retryPendingRevokes();
     const answer = await this.client.run((client) =>
       client.instances.integrations(),
     );
@@ -251,6 +256,7 @@ export class EverConnectIntegrationsService {
       const brief = reported[key];
       if (!brief) continue;
       const previous = before[key];
+      if (previous?.pendingRemoteRevoke) continue;
       const enabled = brief.enabled === true;
       const record: IntegrationRecord = {
         key,
@@ -275,7 +281,12 @@ export class EverConnectIntegrationsService {
       if (enabled && !previous?.enabled) {
         await this.audit.write('consent.grant', actor, { key });
         await this.audit.write('integration.enable', actor, { key });
-        if (!denied.has(key)) await this.onEnable(key);
+        if (!denied.has(key)) {
+          await this.onEnable(key);
+          if (key === 'ever_id_login') {
+            await this.events.emitAsync(EVER_CONNECT_EVENTS.everIdLoginEnabled);
+          }
+        }
       } else if (!enabled && previous?.enabled) {
         await this.audit.write('consent.revoke', actor, {
           key,
@@ -407,6 +418,26 @@ export class EverConnectIntegrationsService {
           });
         }
       }
+    }
+  }
+
+  /**
+   * Sends again what an enabled integration could not send (Ever Platform was unreachable, or
+   * answered an error): called by the heartbeat. The requests carry the same idempotency keys.
+   */
+  async retryFailedSends(): Promise<void> {
+    const connection = await this.store.connection();
+    if (connection?.status !== 'active') return;
+    const [records, denied] = await Promise.all([
+      this.store.integrations(),
+      this.denied(),
+    ]);
+    for (const record of Object.values(records)) {
+      if (!record?.enabled || denied.has(record.key)) continue;
+      const failed = record.lastSync?.ok === false;
+      const pendingClient =
+        record.key === 'ever_id_login' && !this.oidc.enabled;
+      if (failed || pendingClient) await this.onEnable(record.key);
     }
   }
 
@@ -543,7 +574,10 @@ export class EverConnectIntegrationsService {
 
   /** What stops when an integration is switched off (locally; the platform drops its side). */
   async onDisable(key: RecIntegrationKey): Promise<void> {
-    if (key === 'ever_id_login') await this.oidc.clear();
+    if (key === 'ever_id_login') {
+      await this.oidc.clear();
+      await this.events.emitAsync(EVER_CONNECT_EVENTS.everIdLoginDisabled);
+    }
     if (key === 'instance_url')
       await this.store.patchPublicUrl({ sentAt: null }).catch(() => undefined);
   }

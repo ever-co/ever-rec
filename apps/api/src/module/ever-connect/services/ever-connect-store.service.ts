@@ -209,31 +209,36 @@ export class EverConnectStoreService {
       .set(JSON.parse(JSON.stringify(value)));
   }
 
-  personExport(jobId: string): Promise<PersonExportRecord | null> {
-    if (!isDbKey(jobId)) return Promise.resolve(null);
+  personExport(jobId: string, uid: string): Promise<PersonExportRecord | null> {
+    if (!isDbKey(jobId) || !isDbKey(uid)) return Promise.resolve(null);
     return this.read<PersonExportRecord>(
-      `${EVER_CONNECT_PATHS.personExports}/${jobId}`,
+      `${EVER_CONNECT_PATHS.personExports}/${jobId}/${uid}`,
     );
   }
 
   async setPersonExport(
     jobId: string,
+    uid: string,
     record: PersonExportRecord,
   ): Promise<void> {
     await this.db()
-      .ref(`${EVER_CONNECT_PATHS.personExports}/${jobId}`)
+      .ref(`${EVER_CONNECT_PATHS.personExports}/${jobId}/${uid}`)
       .set(record);
   }
 
   /** Deletes exports past their expiry; answers how many. */
   async sweepPersonExports(now: number): Promise<number> {
     const all =
-      (await this.read<Record<string, PersonExportRecord>>(
+      (await this.read<Record<string, Record<string, PersonExportRecord>>>(
         EVER_CONNECT_PATHS.personExports,
       )) ?? {};
-    const expired = Object.entries(all)
-      .filter(([, record]) => !record || record.expiresAt <= now)
-      .map(([key]) => key);
+    const expired: string[] = [];
+    for (const [jobId, byUid] of Object.entries(all)) {
+      for (const [uid, record] of Object.entries(byUid ?? {})) {
+        if (!record || !(record.expiresAt > now))
+          expired.push(`${jobId}/${uid}`);
+      }
+    }
     if (expired.length) {
       await this.db()
         .ref(EVER_CONNECT_PATHS.personExports)

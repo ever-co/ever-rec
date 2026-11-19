@@ -13,8 +13,12 @@ import {
   IEverConnectIntegration,
   IEverConnectPolicy,
   refreshIntegrations,
+  refreshWorkspace,
   setPolicy,
 } from 'app/services/ever-connect';
+
+/** The states are read from Ever Platform at most this often when the tab is shown again. */
+const FOCUS_REFRESH_MS = 30_000;
 import { useErrorMessage } from './shared';
 
 /** Where the consent screens live: the links the platform signs must point there. */
@@ -45,6 +49,7 @@ const EverConnectIntegrations: React.FC<{ operator: boolean; workspaceId?: strin
   const [notice, setNotice] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const returned = useRef(false);
+  const lastRemoteRefresh = useRef(0);
 
   const load = useCallback(async () => {
     try {
@@ -55,14 +60,20 @@ const EverConnectIntegrations: React.FC<{ operator: boolean; workspaceId?: strin
     }
   }, [operator, workspaceId]);
 
+  /** Reads the states from Ever Platform now (not only the copy this installation keeps). */
   const refreshFromPlatform = useCallback(async () => {
-    if (!operator) return load();
+    lastRemoteRefresh.current = Date.now();
     try {
-      setRows(await refreshIntegrations());
+      if (operator) {
+        setRows(await refreshIntegrations());
+        return;
+      }
+      if (workspaceId) await refreshWorkspace(workspaceId);
     } catch {
-      await load();
+      // The copy kept here is shown below.
     }
-  }, [operator, load]);
+    await load();
+  }, [operator, workspaceId, load]);
 
   useEffect(() => {
     // Back from the consent screen (`?ever_connect_return=1`): read the states once.
@@ -75,11 +86,15 @@ const EverConnectIntegrations: React.FC<{ operator: boolean; workspaceId?: strin
   }, [load, refreshFromPlatform, router?.query?.ever_connect_return]);
 
   useEffect(() => {
-    // The consent happens in another tab: read the states again when this one is shown again.
-    const onFocus = () => void load();
+    // The consent happens in another tab: read the states from Ever Platform again when this one
+    // is shown again (at most every 30 seconds).
+    const onFocus = () => {
+      if (Date.now() - lastRemoteRefresh.current < FOCUS_REFRESH_MS) return;
+      void refreshFromPlatform();
+    };
     window.addEventListener('focus', onFocus);
     return () => window.removeEventListener('focus', onFocus);
-  }, [load]);
+  }, [refreshFromPlatform]);
 
   const run = async (work: () => Promise<unknown>) => {
     setBusy(true);

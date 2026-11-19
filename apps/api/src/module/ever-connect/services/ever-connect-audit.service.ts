@@ -85,20 +85,24 @@ export class EverConnectAuditService {
     }
   }
 
-  /** Rows, newest first; only those of one workspace when `workspaceId` is given. */
+  /**
+   * Rows, newest first; only those of one workspace when `workspaceId` is given. Pages by row key
+   * (`before` is the `id` of the last row of the previous page): rows written in the same
+   * millisecond are never skipped.
+   */
   async rows(
-    options: { limit?: number; before?: number; workspaceId?: string } = {},
-  ): Promise<EverConnectAuditRow[]> {
+    options: { limit?: number; before?: string; workspaceId?: string } = {},
+  ): Promise<Array<EverConnectAuditRow & { id: string }>> {
     const snapshot = await this.store.db().ref(EVER_CONNECT_PATHS.audit).get();
     const all = (snapshot.val() ?? {}) as Record<string, EverConnectAuditRow>;
     const limit = Math.min(Math.max(options.limit ?? 50, 1), 200);
     return Object.keys(all)
       .sort((a, b) => (a < b ? 1 : a > b ? -1 : 0))
-      .map((key) => all[key])
+      .filter((key) => options.before === undefined || key < options.before)
+      .map((key) => ({ id: key, ...all[key] }))
       .filter(
         (row) =>
-          (!options.workspaceId || row.workspaceId === options.workspaceId) &&
-          (options.before === undefined || row.at < options.before),
+          !options.workspaceId || row.workspaceId === options.workspaceId,
       )
       .slice(0, limit);
   }

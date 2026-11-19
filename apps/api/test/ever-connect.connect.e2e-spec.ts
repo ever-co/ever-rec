@@ -175,7 +175,7 @@ describe('CN-3 the first-boot code', () => {
       t.platform.down = true;
       const connect = t.get(EverConnectService);
       expect(await connect.connectWithEnvCode()).toBe('unreachable');
-      expect(await connect.connectWithEnvCode()).toBe('skipped');
+      expect(await connect.connectWithEnvCode()).toBe('waiting');
       t.platform.down = false;
       t.clock.now += 2 * 60 * 1000;
       expect(await connect.connectWithEnvCode()).toBe('connected');

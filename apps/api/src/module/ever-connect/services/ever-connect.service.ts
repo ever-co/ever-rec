@@ -50,7 +50,11 @@ import { EverConnectStoreService } from './ever-connect-store.service';
 export const ENV_CODE_ACTOR = 'env:EVER_CONNECT_CODE';
 
 /** The outcome of a redeem attempt with the first-boot code. */
-export type EnvCodeOutcome = 'connected' | 'refused' | 'unreachable';
+export type EnvCodeOutcome =
+  | 'connected'
+  | 'refused'
+  | 'unreachable'
+  | 'waiting';
 
 /**
  * Connects this installation to Ever Platform with a connect code, disconnects it, and rotates its
@@ -302,7 +306,8 @@ export class EverConnectService {
       previous?.consumedHash === hash &&
       (previous.retryAt ?? 0) > this.clock()
     ) {
-      return 'skipped';
+      // A failed attempt (before a restart, perhaps): wait for its retry time.
+      return 'waiting';
     }
     const connection = await this.store.connection();
     if (
@@ -475,29 +480,57 @@ export class EverConnectService {
     const current = await this.instance.connectKey();
     if (!current)
       throw new ConflictException({ statusCode: 409, code: 'no_connect_key' });
+    const resumed = !!(await this.instance.read())?.connectNextKeyId;
     const next = await this.instance.prepareConnectKeyRotation();
+    if (resumed) {
+      // An earlier rotation whose answer was lost: the platform may hold the new key already.
+      const self = await this.client.run((client) => client.instances.self());
+      if (
+        (self.instance as { key?: { kid?: string | null } }).key?.kid ===
+        next.keyId
+      ) {
+        await this.instance.commitConnectKeyRotation(next.keyId);
+        await this.store.patchConnection({ kid: next.keyId });
+        this.client.reset();
+        await this.audit.write('key.rotate', actor, { kid: next.keyId });
+        return this.status();
+      }
+    }
+    const body = await signKeyRotation({
+      current: makeNodeSigner(new Uint8Array(current.privateKeyDer)),
+      next: makeNodeSigner(new Uint8Array(next.privateKeyDer)),
+      registryInstanceId: connection.registryInstanceId,
+      issuer: (await this.client.client()).issuer,
+      now: Math.floor(this.clock() / 1000),
+    });
+    let answer: { kid: string };
     try {
-      const body = await signKeyRotation({
-        current: makeNodeSigner(new Uint8Array(current.privateKeyDer)),
-        next: makeNodeSigner(new Uint8Array(next.privateKeyDer)),
-        registryInstanceId: connection.registryInstanceId,
-        issuer: (await this.client.client()).issuer,
-        now: Math.floor(this.clock() / 1000),
-      });
-      const answer = await this.client.run((client) =>
+      answer = await this.client.run((client) =>
         client.instances.rotateKey(
           body as never,
           sha256Hex(`rotate:${next.keyId}`),
         ),
       );
-      await this.instance.commitConnectKeyRotation(next.keyId);
-      await this.store.patchConnection({ kid: answer.kid });
-      this.client.reset();
-      await this.audit.write('key.rotate', actor, { kid: answer.kid });
     } catch (error) {
-      await this.instance.abortConnectKeyRotation();
+      // Only a refusal by the platform drops the prepared key. When the answer was lost, the key
+      // is kept, and the next rotation sends the same request again.
+      if (platformAnswered(error) && error.status !== 401) {
+        await this.instance.abortConnectKeyRotation();
+      }
       throw error;
     }
+    // Accepted by the platform: from now on this installation signs with the new key. A failed
+    // local commit keeps the prepared key, so a new attempt completes it.
+    if (!(await this.instance.commitConnectKeyRotation(next.keyId))) {
+      throw new ConflictException({
+        statusCode: 409,
+        code: 'rotation_not_committed',
+        message: 'The new connection key could not be stored; try again.',
+      });
+    }
+    await this.store.patchConnection({ kid: answer.kid });
+    this.client.reset();
+    await this.audit.write('key.rotate', actor, { kid: answer.kid });
     return this.status();
   }
 

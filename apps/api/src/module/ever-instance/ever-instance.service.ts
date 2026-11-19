@@ -367,22 +367,48 @@ export class EverInstanceService implements OnModuleInit {
     }
     const { publicKey, privateKeyDer } = generateStatsKeyPair();
     const keyId = keyIdOf(publicKey);
+    const fields = {
+      connectNextPublicKey: publicKey,
+      connectNextPrivateKeyEnc: wrapConnectKey(
+        privateKeyDer,
+        this.settings.recJwtSecret,
+        keyId,
+      ),
+      connectNextKeyId: keyId,
+    };
+    // One rotation at a time: a key already prepared (by a concurrent request, or by an attempt
+    // whose answer was lost) is used again, so the platform sees the same request.
     await this.db()
       .ref(EVER_INSTANCE_PATHS.self)
-      .update({
-        connectNextPublicKey: publicKey,
-        connectNextPrivateKeyEnc: wrapConnectKey(
-          privateKeyDer,
+      .transaction((current: EverInstanceRecord | null) =>
+        current?.connectNextKeyId
+          ? undefined
+          : { ...(current ?? {}), ...fields },
+      );
+    const record = await this.read();
+    if (!record?.connectNextKeyId || !record.connectNextPrivateKeyEnc) {
+      throw new EverConnectKeyError('no_connect_key');
+    }
+    try {
+      return {
+        publicKey: record.connectNextPublicKey,
+        keyId: record.connectNextKeyId,
+        privateKeyDer: unwrapConnectKey(
+          record.connectNextPrivateKeyEnc,
           this.settings.recJwtSecret,
-          keyId,
+          record.connectNextKeyId,
         ),
-        connectNextKeyId: keyId,
-      });
-    return { publicKey, keyId, privateKeyDer };
+      };
+    } catch {
+      throw new EverConnectKeyError('key_unreadable');
+    }
   }
 
-  /** Makes the prepared connect key the current one (after Ever Platform accepted it). */
-  async commitConnectKeyRotation(keyId: string): Promise<void> {
+  /**
+   * Makes the prepared connect key the current one (after Ever Platform accepted it). Answers
+   * whether the key is the current one afterwards.
+   */
+  async commitConnectKeyRotation(keyId: string): Promise<boolean> {
     await this.db()
       .ref(EVER_INSTANCE_PATHS.self)
       .transaction((current: EverInstanceRecord | null) => {
@@ -398,6 +424,7 @@ export class EverInstanceService implements OnModuleInit {
         delete next.connectNextKeyId;
         return next;
       });
+    return (await this.read())?.connectKeyId === keyId;
   }
 
   /** Forgets a prepared connect key that Ever Platform did not accept. */

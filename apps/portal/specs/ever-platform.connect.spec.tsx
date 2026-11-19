@@ -33,6 +33,7 @@ jest.mock('app/services/ever-connect', () => ({
   getWorkspaceConsentUrl: jest.fn(),
   getAudit: jest.fn(),
   getWorkspaceAudit: jest.fn(),
+  refreshWorkspace: jest.fn(),
 }));
 
 import * as stats from 'app/services/ever-platform';
@@ -210,6 +211,18 @@ describe('Integrations & data', () => {
     await render(<EverConnectIntegrations operator />);
     await render(<EverConnectIntegrations operator />);
     expect(api.refreshIntegrations).toHaveBeenCalledTimes(1);
+  });
+
+  it('a workspace admin back on the tab reads the states from Ever Platform again (once per 30 s)', async () => {
+    api.refreshWorkspace.mockResolvedValue({} as any);
+    await render(<EverConnectIntegrations operator={false} workspaceId="ws-1" />);
+    await act(async () => {
+      window.dispatchEvent(new Event('focus'));
+      window.dispatchEvent(new Event('focus'));
+    });
+    await render(<EverConnectIntegrations operator={false} workspaceId="ws-1" />);
+    expect(api.refreshWorkspace).toHaveBeenCalledTimes(1);
+    expect(api.refreshWorkspace).toHaveBeenCalledWith('ws-1');
   });
 
   it('shows the scope table read-only', async () => {

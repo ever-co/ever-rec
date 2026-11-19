@@ -11,7 +11,7 @@ const EverConnectAudit: React.FC<{ operator: boolean; workspaceId?: string }> = 
   const [more, setMore] = useState(false);
 
   const page = useCallback(
-    async (before?: number) => {
+    async (before?: string) => {
       const answer = operator
         ? await getAudit(before)
         : workspaceId
@@ -54,7 +54,7 @@ const EverConnectAudit: React.FC<{ operator: boolean; workspaceId?: string }> = 
           </thead>
           <tbody>
             {rows.map((row, index) => (
-              <tr key={`${row.at}-${index}`} data-testid="ever-connect-audit-row">
+              <tr key={row.id ?? `${row.at}-${index}`} data-testid="ever-connect-audit-row">
                 <td>{formatTime(row.at)}</td>
                 <td>{row.action}</td>
                 <td>
@@ -74,7 +74,7 @@ const EverConnectAudit: React.FC<{ operator: boolean; workspaceId?: string }> = 
         <Button
           data-testid="ever-connect-audit-more"
           onClick={async () => {
-            const next = await page(rows[rows.length - 1]?.at);
+            const next = await page(rows[rows.length - 1]?.id);
             setRows([...rows, ...next]);
             setMore(next.length >= 50);
           }}

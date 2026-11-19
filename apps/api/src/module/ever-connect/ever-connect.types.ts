@@ -34,6 +34,7 @@ export const EVER_CONNECT_PATHS = Object.freeze({
   feedSeen: 'ever_connect/feed_seen',
   keySet: 'ever_connect/key_set',
   personExports: 'ever_connect/person_exports',
+  personLinksSynced: 'ever_connect/person_links_synced',
   audit: 'ever_connect/audit',
   lease: 'ever_connect/lease',
 });
@@ -214,4 +215,6 @@ export const EVER_CONNECT_EVENTS = Object.freeze({
   connected: 'ever.connect.connected',
   disconnected: 'ever.connect.disconnected',
   oidcConfigChanged: 'ever.connect.oidc_config_changed',
+  everIdLoginEnabled: 'ever.connect.ever_id_login_enabled',
+  everIdLoginDisabled: 'ever.connect.ever_id_login_disabled',
 });

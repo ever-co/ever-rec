@@ -151,7 +151,7 @@ export class EverConnectAdminController {
     return {
       rows: await this.audit.rows({
         limit: Number(limit) || 50,
-        before: before ? Number(before) || undefined : undefined,
+        before: typeof before === 'string' && before ? before : undefined,
       }),
     };
   }

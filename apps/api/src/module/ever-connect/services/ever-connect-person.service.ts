@@ -11,6 +11,7 @@ import {
 } from '../../ever-instance/ever-instance.settings';
 import { EVER_ID_LINK_ROOTS } from '../../ever-id/services/ever-id-link.service';
 import { open, seal } from '../ever-connect.crypto';
+import { EVER_CONNECT_EVENTS, EVER_CONNECT_PATHS } from '../ever-connect.types';
 import { EVER_CONNECT_CLOCK, EverConnectClock } from '../ever-connect.tokens';
 import { EverConnectAuditService } from './ever-connect-audit.service';
 import {
@@ -92,8 +93,20 @@ export class EverConnectPersonService {
 
   @OnEvent(EVER_IDENTITY_EVENTS.linkCreated, { async: true, promisify: true })
   async onLinkCreated(event: EverIdentityLinkEvent): Promise<void> {
+    if (!(await this.reporting().catch(() => false))) return;
+    if (!(await this.report(event))) {
+      // Reported again by the initial sync, which the heartbeat retries.
+      await this.store
+        .db()
+        .ref(EVER_CONNECT_PATHS.personLinksSynced)
+        .remove()
+        .catch(() => undefined);
+    }
+  }
+
+  /** Reports one person link; `false` when it did not go through. */
+  private async report(event: EverIdentityLinkEvent): Promise<boolean> {
     try {
-      if (!(await this.reporting())) return;
       const workspace = await this.workspaceOf(event.uid);
       await this.client.run((client) =>
         client.instances.personLinks.create({
@@ -105,10 +118,12 @@ export class EverConnectPersonService {
           ...(workspace?.name ? { display_name: workspace.name } : {}),
         }),
       );
+      return true;
     } catch (error) {
       this.logger.warn(
         `A person link could not be reported (${errorCode(error)}).`,
       );
+      return false;
     }
   }
 
@@ -124,6 +139,60 @@ export class EverConnectPersonService {
         `A person link could not be removed (${errorCode(error)}).`,
       );
     }
+  }
+
+  /**
+   * Reports the Ever ID links that existed before `ever_id_login` was enabled (once; retried by
+   * the heartbeat until every report went through).
+   */
+  async syncExistingLinks(): Promise<void> {
+    if (!(await this.reporting())) return;
+    const done = await this.store
+      .db()
+      .ref(EVER_CONNECT_PATHS.personLinksSynced)
+      .get();
+    if (done.val() === true) return;
+    const snapshot = await this.store.db().ref(EVER_ID_LINK_ROOTS.links).get();
+    const rows = Object.values(
+      (snapshot.val() ?? {}) as Record<string, IdentityRow>,
+    ).filter((row) => row?.uid && row.issuer && row.subject);
+    let failed = 0;
+    for (const row of rows) {
+      const ok = await this.report({
+        uid: row.uid,
+        issuer: row.issuer,
+        subject: row.subject,
+        linkMethod: row.linkMethod ?? 'explicit',
+      });
+      if (!ok) failed += 1;
+    }
+    if (!failed) {
+      await this.store.db().ref(EVER_CONNECT_PATHS.personLinksSynced).set(true);
+    }
+  }
+
+  @OnEvent(EVER_CONNECT_EVENTS.everIdLoginEnabled, {
+    async: true,
+    promisify: true,
+  })
+  async onEverIdLoginEnabled(): Promise<void> {
+    await this.syncExistingLinks().catch((error) =>
+      this.logger.warn(
+        `Existing Ever ID links could not be reported (${errorCode(error)}).`,
+      ),
+    );
+  }
+
+  @OnEvent(EVER_CONNECT_EVENTS.everIdLoginDisabled, {
+    async: true,
+    promisify: true,
+  })
+  async onEverIdLoginDisabled(): Promise<void> {
+    await this.store
+      .db()
+      .ref(EVER_CONNECT_PATHS.personLinksSynced)
+      .remove()
+      .catch(() => undefined);
   }
 
   /** Every stored Ever ID link whose `sha256(issuer#subject)` is one of `hashes`. */
@@ -201,8 +270,10 @@ export class EverConnectPersonService {
     subject_hashes?: string[];
   }): Promise<void> {
     const matches = await this.matching(data.subject_hashes ?? []);
-    const uid = matches[0]?.uid;
-    if (!uid || !isDbKey(data.job_id)) {
+    const uids = [...new Set(matches.map((match) => match.uid))].filter(
+      isDbKey,
+    );
+    if (!uids.length || !isDbKey(data.job_id)) {
       await this.client.run((client) =>
         client.instances.ack({ job_id: data.job_id, result: 'no_account' }),
       );
@@ -211,23 +282,33 @@ export class EverConnectPersonService {
       });
       return;
     }
-    const bundle = await this.bundleFor(uid, matches);
+    // One export per account the person's Ever IDs are linked to, each with that account's own
+    // links only, each downloadable by that account only.
     const now = this.clock();
-    await this.store.setPersonExport(data.job_id, {
-      uid,
-      createdAt: now,
-      expiresAt: now + PERSON_EXPORT_TTL_MS,
-      bundleEnc: seal(
-        JSON.stringify(bundle),
-        this.settings.recJwtSecret,
-        data.job_id,
-        'person-export',
-      ),
-    });
+    for (const uid of uids) {
+      const bundle = await this.bundleFor(
+        uid,
+        matches.filter((match) => match.uid === uid),
+      );
+      await this.store.setPersonExport(data.job_id, uid, {
+        uid,
+        createdAt: now,
+        expiresAt: now + PERSON_EXPORT_TTL_MS,
+        bundleEnc: seal(
+          JSON.stringify(bundle),
+          this.settings.recJwtSecret,
+          `${data.job_id}:${uid}`,
+          'person-export',
+        ),
+      });
+    }
     await this.client.run((client) =>
       client.instances.ack({ job_id: data.job_id, result: 'exported' }),
     );
-    await this.audit.write('person.export', 'platform', { result: 'exported' });
+    await this.audit.write('person.export', 'platform', {
+      result: 'exported',
+      accounts: uids.length,
+    });
   }
 
   private async bundleFor(uid: string, identities: IdentityRow[]) {
@@ -281,7 +362,7 @@ export class EverConnectPersonService {
 
   /** The export of `jobId` for its own account only (404 for anyone else, and once expired). */
   async download(jobId: string, uid: string): Promise<unknown> {
-    const record = await this.store.personExport(jobId);
+    const record = await this.store.personExport(jobId, uid);
     if (!record || record.uid !== uid || record.expiresAt <= this.clock()) {
       throw new NotFoundException();
     }
@@ -289,7 +370,7 @@ export class EverConnectPersonService {
       open(
         record.bundleEnc,
         this.settings.recJwtSecret,
-        jobId,
+        `${jobId}:${uid}`,
         'person-export',
       ),
     );

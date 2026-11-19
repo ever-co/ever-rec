@@ -104,8 +104,18 @@ export class EverConnectFeedService {
   }
 
   /** The cursor is past retention: re-read the state, then continue from the position given. */
+  /** An entitlement notice is handled only once the documents were read again. */
+  private async refreshEntitlements(): Promise<void> {
+    const result = await this.entitlements.refreshAll('platform');
+    if (!result.ok && result.code !== 'not_connected') {
+      throw Object.assign(new Error('Entitlements could not be refreshed.'), {
+        code: result.code ?? 'entitlement_refresh_failed',
+      });
+    }
+  }
+
   private async resync(lastId: string | null): Promise<FeedCycle> {
-    await this.entitlements.refreshAll('platform');
+    await this.refreshEntitlements();
     await this.integrations.refresh('platform');
     if (lastId) {
       await this.client.run((client) => client.instances.ackEvents(lastId));
@@ -139,7 +149,7 @@ export class EverConnectFeedService {
         return;
       case 'ever.entitlements.entitlement.issued':
       case 'ever.entitlements.entitlement.revoked':
-        await this.entitlements.refreshAll('platform');
+        await this.refreshEntitlements();
         return;
       case 'ever.registry.tenant_link.unlinked':
         if (typeof data.tenant_link_id === 'string') {

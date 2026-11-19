@@ -22,10 +22,25 @@ import { EverConnectFeedService } from './ever-connect-feed.service';
 import { EverConnectIntegrationsService } from './ever-connect-integrations.service';
 import { EverConnectLeaseService } from './ever-connect-lease.service';
 import { EverConnectLinksService } from './ever-connect-links.service';
+import { EverConnectPersonService } from './ever-connect-person.service';
 import { EverConnectStoreService } from './ever-connect-store.service';
 import { EverConnectService } from './ever-connect.service';
 
-type Job = 'heartbeat' | 'refresh' | 'feed' | 'lease' | 'envCode' | 'approval';
+type Job =
+  | 'heartbeat'
+  | 'refresh'
+  | 'feed'
+  | 'lease'
+  | 'envCode'
+  | 'approval'
+  | 'watch'
+  | 'sweep';
+
+/** Jobs that read or clean the installation's own database only (no request leaves). */
+const LOCAL_JOBS: ReadonlyArray<Job> = ['watch', 'sweep', 'envCode'];
+
+const WATCH_MS = 5 * 60 * 1000;
+const SWEEP_MS = 60 * 60 * 1000;
 
 const jitter = (ms: number, spread = 0.1) =>
   Math.round(ms * (1 - spread / 2 + Math.random() * spread));
@@ -57,6 +72,7 @@ export class EverConnectSchedulerService
     private readonly integrations: EverConnectIntegrationsService,
     private readonly links: EverConnectLinksService,
     private readonly feed: EverConnectFeedService,
+    private readonly person: EverConnectPersonService,
   ) {}
 
   /** Jobs with a timer now (tests). */
@@ -69,15 +85,23 @@ export class EverConnectSchedulerService
     await this.boot();
   }
 
-  /** Reads the stored connection (no request) and starts what applies. */
+  /**
+   * Reads the stored connection (no request) and starts what applies. Not connected, only local
+   * jobs run: a watch of the stored connection (another API process may connect), the clean-up
+   * of expired exports and, when `EVER_CONNECT_CODE` is set, its one-time use.
+   */
   async boot(): Promise<void> {
+    this.schedule('sweep', jitter(60_000, 0.5), () => this.sweepJob());
     const connection = await this.store.connection().catch(() => null);
     if (
       connection?.status === 'active' ||
       connection?.status === 'pending_approval'
     ) {
       this.start(true);
-    } else if (this.config.envCode) {
+      return;
+    }
+    this.schedule('watch', WATCH_MS, () => this.watchJob());
+    if (this.config.envCode) {
       this.schedule('envCode', jitter(5_000, 0.5), () => this.envCodeJob());
     }
   }
@@ -90,12 +114,18 @@ export class EverConnectSchedulerService
   @OnEvent(EVER_CONNECT_EVENTS.disconnected, { async: true })
   onDisconnected(): void {
     this.stop();
+    if (!this.autostart) return;
+    this.schedule('sweep', SWEEP_MS, () => this.sweepJob());
+    this.schedule('watch', WATCH_MS, () => this.watchJob());
   }
 
   /** Starts the timers (idempotent). */
   start(atBoot: boolean): void {
     if (this.running) return;
     this.running = true;
+    const watch = this.timers.get('watch');
+    if (watch) clearTimeout(watch);
+    this.timers.delete('watch');
     const t = this.config.timings;
     this.schedule('lease', t.leaseRenewMs, () => this.leaseJob());
     this.schedule(
@@ -144,7 +174,7 @@ export class EverConnectSchedulerService
           this.logger.warn(`Background ${job} failed (${errorCode(error)}).`);
           next = 15 * 60 * 1000;
         }
-        if (next !== null && (this.running || job === 'envCode')) {
+        if (next !== null && (this.running || LOCAL_JOBS.includes(job))) {
           this.schedule(job, next, run);
         }
       },
@@ -163,10 +193,30 @@ export class EverConnectSchedulerService
     return this.config.timings.leaseRenewMs;
   }
 
+  /** Starts the timers once another API process has connected the installation. */
+  private async watchJob(): Promise<number | null> {
+    if (this.running) return null;
+    const connection = await this.store.connection().catch(() => null);
+    if (
+      connection?.status === 'active' ||
+      connection?.status === 'pending_approval'
+    ) {
+      this.start(true);
+      return null;
+    }
+    return WATCH_MS;
+  }
+
+  /** Deletes expired exports, connected or not (local only). */
+  private async sweepJob(): Promise<number> {
+    await this.store.sweepPersonExports(this.clock()).catch(() => 0);
+    return SWEEP_MS;
+  }
+
   private async envCodeJob(): Promise<number | null> {
     if (!(await this.holdsLease())) return 60_000;
     const outcome = await this.connect.connectWithEnvCode();
-    if (outcome === 'unreachable') {
+    if (outcome === 'unreachable' || outcome === 'waiting') {
       const record = await this.store.envCode();
       return Math.max(
         60_000,
@@ -254,9 +304,8 @@ export class EverConnectSchedulerService
     }
     await this.integrations.retryPendingRevokes();
     await this.links.retryPendingUnlinks();
-    if (connection.oidcPending)
-      await this.integrations.onEnable('ever_id_login');
-    await this.store.sweepPersonExports(this.clock());
+    await this.integrations.retryFailedSends();
+    await this.person.syncExistingLinks();
   }
 
   /** Entitlements, then integration states. */

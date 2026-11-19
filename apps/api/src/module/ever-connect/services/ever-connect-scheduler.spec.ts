@@ -39,6 +39,7 @@ function scheduler(
     refresh: jest.fn(async () => undefined),
     denied: jest.fn(async () => new Set()),
     retryPendingRevokes: jest.fn(async () => undefined),
+    retryFailedSends: jest.fn(async () => undefined),
   };
   const links = { retryPendingUnlinks: jest.fn(async () => undefined) };
   const connect = {
@@ -57,6 +58,7 @@ function scheduler(
     integrations as any,
     links as any,
     feed as any,
+    { syncExistingLinks: jest.fn(async () => undefined) } as any,
   );
   return { service, calls, feed, connect };
 }
@@ -65,10 +67,25 @@ describe('EverConnectSchedulerService', () => {
   beforeEach(() => jest.useFakeTimers());
   afterEach(() => jest.useRealTimers());
 
-  it('starts no timer before a connection exists', async () => {
+  it('before a connection exists only local jobs run (no request)', async () => {
     const { service } = scheduler({}, null);
     await service.boot();
-    expect(service.scheduled).toEqual([]);
+    expect(service.scheduled.sort()).toEqual(['sweep', 'watch']);
+    service.stop();
+  });
+
+  it('starts the timers once another process connected', async () => {
+    const connection: { value: unknown } = { value: null };
+    const { service } = scheduler({ EVER_CONNECT_FEED_MODE: 'interval' }, null);
+    (service as any).store.connection = jest.fn(async () => connection.value);
+    await service.boot();
+    connection.value = { status: 'active', registryInstanceId: '01J' };
+    jest.advanceTimersByTime(5 * 60 * 1000);
+    await flush();
+    expect(service.scheduled).toEqual(
+      expect.arrayContaining(['heartbeat', 'feed', 'refresh']),
+    );
+    service.stop();
   });
 
   it('with a first-start code and no connection, only that job runs', async () => {
@@ -77,7 +94,7 @@ describe('EverConnectSchedulerService', () => {
       null,
     );
     await service.boot();
-    expect(service.scheduled).toEqual(['envCode']);
+    expect(service.scheduled.sort()).toEqual(['envCode', 'sweep', 'watch']);
     jest.advanceTimersByTime(10_000);
     await flush();
     expect(connect.connectWithEnvCode).toHaveBeenCalledTimes(1);

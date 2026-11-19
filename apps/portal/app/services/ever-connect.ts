@@ -91,6 +91,8 @@ export interface IEverConnectLinkView {
 }
 
 export interface IEverConnectAuditRow {
+  /** The row's key: the cursor of the next page. */
+  id: string;
   at: number;
   actor: string;
   action: string;
@@ -138,7 +140,7 @@ export const disableIntegration = (key: string): Promise<IEverConnectIntegration
 export const acceptIntegration = (key: string, accepted: boolean): Promise<IEverConnectIntegration[]> =>
   api.post(`${BASE}/integrations/${encodeURIComponent(key)}/accept`, { accepted }) as any;
 
-export const getAudit = (before?: number): Promise<{ rows: IEverConnectAuditRow[] }> =>
+export const getAudit = (before?: string): Promise<{ rows: IEverConnectAuditRow[] }> =>
   api.get(`${BASE}/audit`, { params: { limit: 50, ...(before ? { before } : {}) } }) as any;
 
 // Workspace admin
@@ -162,7 +164,7 @@ export const getWorkspaceIntegrations = (workspaceId: string): Promise<IEverConn
 export const getWorkspaceConsentUrl = (workspaceId: string, key: string): Promise<ConsentUrlAnswer> =>
   api.get(`${ws(workspaceId)}/integrations/${encodeURIComponent(key)}/consent-url`) as any;
 
-export const getWorkspaceAudit = (workspaceId: string, before?: number): Promise<{ rows: IEverConnectAuditRow[] }> =>
+export const getWorkspaceAudit = (workspaceId: string, before?: string): Promise<{ rows: IEverConnectAuditRow[] }> =>
   api.get(`${ws(workspaceId)}/audit`, { params: { limit: 50, ...(before ? { before } : {}) } }) as any;
 
 /** The public documentation of the connection: what is sent, when, and how to verify it. */
