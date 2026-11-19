@@ -203,12 +203,17 @@ export class EverConnectSchedulerService
       return jitter(this.config.timings.feedIntervalMs, 0.05);
     }
     this.feedAbort = new AbortController();
+    const started = Date.now();
     try {
       const cycle = await this.feed.cycle(
         this.config.timings.feedWaitS,
         this.feedAbort.signal,
       );
-      return cycle.received ? 0 : 250;
+      if (cycle.received) return 0;
+      // An empty answer that came back early (a proxy or a platform that does not hold the
+      // request) waits out the rest of the long-poll window instead of asking again at once.
+      const waitMs = this.config.timings.feedWaitS * 1000;
+      return Math.max(250, waitMs - (Date.now() - started));
     } catch (error) {
       this.logger.warn(`Feed read failed (${errorCode(error)}).`);
       return jitter(60_000, 0.5);
