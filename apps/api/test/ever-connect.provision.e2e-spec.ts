@@ -1,5 +1,5 @@
 /**
- * CN-15: Ever Rec cloud provisioning, hand-off only. An intent creates nothing; a different Ever ID
+ * Ever Rec cloud provisioning, hand-off only. An intent creates nothing; a different Ever ID
  * gets 403; the confirmation creates one workspace with the person as admin and tells Ever
  * Platform; a replay answers `exists`; wrong product or audience is refused; the routes do not
  * exist while the switch is off.
@@ -20,7 +20,7 @@ function linkEverId(t: ConnectTestApp, uid: string, subject: string) {
 const workspacesOf = (t: ConnectTestApp, uid: string) =>
   Object.values(t.firebase.db.dump('workspaces') ?? {}).filter((w: any) => w.admin === uid);
 
-describe('CN-15 provision routes while the switch is off', () => {
+describe('provision routes while the switch is off', () => {
   it('answer 404', async () => {
     const t = await createConnectTestApp({ env: CONNECT_ON });
     try {
@@ -38,7 +38,7 @@ describe('CN-15 provision routes while the switch is off', () => {
   });
 });
 
-describe('CN-15 Ever Rec cloud provisioning', () => {
+describe('Ever Rec cloud provisioning', () => {
   let t: ConnectTestApp;
 
   beforeEach(async () => {
