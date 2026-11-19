@@ -185,7 +185,8 @@ export class EverConnectService {
     }
     let key;
     try {
-      key = await this.instance.ensureConnectKey();
+      // Not connected here: a key the current REC_JWT_SECRET cannot read is replaced.
+      key = await this.instance.ensureConnectKey({ replaceUnreadable: true });
     } catch (error) {
       if (error instanceof EverConnectKeyError) {
         throw new ConflictException({
@@ -329,9 +330,15 @@ export class EverConnectService {
       });
       return 'connected';
     } catch (error) {
-      const answered =
-        platformAnswered(error) || error instanceof HttpException;
-      if (answered) {
+      if (!platformAnswered(error) && error instanceof HttpException) {
+        // Refused here before anything was sent (the secret, the address, already connected):
+        // the code is kept for the next start.
+        this.logger.warn(
+          `EVER_CONNECT_CODE was not used (${errorCode(error)}); it is tried again at the next start.`,
+        );
+        return 'skipped';
+      }
+      if (platformAnswered(error)) {
         await this.store.setEnvCode({
           consumedHash: hash,
           at: this.clock(),
@@ -422,12 +429,8 @@ export class EverConnectService {
     const connection = await this.store.connection();
     if (!connection) return;
     this.client.reset();
-    await this.store.patchConnection({
-      status,
-      disconnectedAt: this.clock(),
-      oidcConfigEnc: null,
-      oidcPending: null,
-    });
+    // Everything is switched off first; the status changes last, so a step that fails leaves the
+    // connection as it was and the next attempt runs every step again.
     await this.oidc.clear();
     await this.store.setEntitlement(null);
     const records = await this.store.integrations();
@@ -445,6 +448,12 @@ export class EverConnectService {
     }
     await this.links.unlinkAllLocally();
     await this.store.setFeedCursor(null);
+    await this.store.patchConnection({
+      status,
+      disconnectedAt: this.clock(),
+      oidcConfigEnc: null,
+      oidcPending: null,
+    });
     await this.audit.write(
       status === 'revoked' ? 'instance.revoked' : 'instance.disconnect',
       actor,
@@ -515,7 +524,7 @@ export class EverConnectService {
       // Only a refusal by the platform drops the prepared key. When the answer was lost, the key
       // is kept, and the next rotation sends the same request again.
       if (platformAnswered(error) && error.status !== 401) {
-        await this.instance.abortConnectKeyRotation();
+        await this.instance.abortConnectKeyRotation(next.keyId);
       }
       throw error;
     }

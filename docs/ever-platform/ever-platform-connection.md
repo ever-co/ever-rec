@@ -29,7 +29,9 @@ Every call, with what it carries and what switches it off, is listed in
   sent to any Ever host until the operator connects with a code, or until the one-time
   `EVER_CONNECT_CODE` is used at the first start.
 
-Firebase (Google) hosts are a dependency of Ever Rec itself and are not part of this feature.
+Firebase (Google) hosts are a dependency of Ever Rec itself and are not part of this feature. The
+anonymous usage statistics are a separate feature with their own switch (`EVER_STATS_ENABLED`): while
+they are on, their one daily report also goes to Ever Platform, connected or not.
 
 ## Connect, link, disconnect
 
@@ -164,12 +166,15 @@ Unsetting `EVER_CONNECT_ENABLED` and restarting leaves this data in place, unuse
 reuses the connection.
 
 Changing `REC_JWT_SECRET` makes the stored connection key and the Ever ID client settings unreadable
-(they are not re-encrypted). Disconnect first, change the secret, then connect again with a new code.
+(they are not re-encrypted), so the connection stops working. To change it: disconnect, change the
+secret, then connect again with a new code (a connection key the new secret cannot read is replaced
+by a new one when you connect).
 
 ## How to verify it yourself
 
 - With `EVER_CONNECT_ENABLED` unset, `GET /api/v1/ever-connect/health` answers 404.
 - With it set and not connected, watch the API's traffic (for example with `tcpdump` on its
-  container): nothing goes to an Ever host until you connect.
+  container, with `EVER_STATS_ENABLED=false` so the statistics report does not show up): nothing goes
+  to an Ever host until you connect.
 - After connecting, *Settings → Ever Platform → Audit* lists every change, and every request matches a
   row of [outbound-calls.md](outbound-calls.md).

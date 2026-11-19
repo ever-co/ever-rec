@@ -60,7 +60,12 @@ export class EverConnectOidcService {
   async load(): Promise<void> {
     try {
       const connection = await this.store.connection();
-      if (connection?.status !== 'active' || !connection.oidcConfigEnc) {
+      const integration = await this.store.integration('ever_id_login');
+      if (
+        connection?.status !== 'active' ||
+        !connection.oidcConfigEnc ||
+        !integration?.enabled
+      ) {
         this.current = null;
         return;
       }
@@ -100,9 +105,12 @@ export class EverConnectOidcService {
   /** Clears the settings (disable, revoke, disconnect). */
   async clear(): Promise<void> {
     this.current = null;
-    await this.store
-      .patchConnection({ oidcConfigEnc: null, oidcPending: null })
-      .catch(() => undefined);
+    // A failure is reported to the caller; at the next start, settings are used only while
+    // `ever_id_login` is enabled anyway.
+    await this.store.patchConnection({
+      oidcConfigEnc: null,
+      oidcPending: null,
+    });
   }
 
   get enabled(): boolean {

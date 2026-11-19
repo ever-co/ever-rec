@@ -255,7 +255,8 @@ export class EverConnectIntegrationsService {
     for (const key of offeredKeys(this.config.installSource)) {
       const brief = reported[key];
       if (!brief) continue;
-      const previous = before[key];
+      // Read again just before writing: a switch-off made meanwhile wins over this answer.
+      const previous = (await this.store.integration(key)) ?? before[key];
       if (previous?.pendingRemoteRevoke) continue;
       const enabled = brief.enabled === true;
       const record: IntegrationRecord = {
@@ -371,9 +372,16 @@ export class EverConnectIntegrationsService {
     } catch (error) {
       if (platformAnswered(error) && error.status === 404) {
         // No state on the platform: already off there.
-      } else if (platformAnswered(error) && error.status !== 401) {
+      } else if (
+        platformAnswered(error) &&
+        error.status >= 400 &&
+        error.status < 500 &&
+        error.status !== 401 &&
+        error.status !== 429
+      ) {
         throw error;
       } else {
+        // Unreachable, or a server error: off here now, the platform is told later.
         pending = true;
       }
     }
@@ -471,6 +479,12 @@ export class EverConnectIntegrationsService {
   async onEnable(key: RecIntegrationKey): Promise<void> {
     const connection = await this.store.connection();
     if (connection?.status !== 'active') return;
+    // Only an integration enabled by the platform and not denied here sends anything.
+    const [record, denied] = await Promise.all([
+      this.store.integration(key),
+      this.denied(),
+    ]);
+    if (!record?.enabled || denied.has(key)) return;
     const now = this.clock();
     try {
       await this.client.run((client) =>
@@ -559,6 +573,9 @@ export class EverConnectIntegrationsService {
           throw error;
         }
       }
+      // Switched off while the request was on its way: the client is not kept.
+      const still = await this.store.integration('ever_id_login');
+      if (!still?.enabled || (await this.denied()).has('ever_id_login')) return;
       if (answer.client_id && answer.client_secret && answer.issuer) {
         await this.oidc.save(registryInstanceId, {
           issuer: answer.issuer,

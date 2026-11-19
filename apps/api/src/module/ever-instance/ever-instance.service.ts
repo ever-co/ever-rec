@@ -292,13 +292,25 @@ export class EverInstanceService implements OnModuleInit {
    * `REC_JWT_SECRET` is unset or the public sample value. The statistics identity and key are
    * never changed here.
    */
-  async ensureConnectKey(): Promise<EverConnectKey> {
+  async ensureConnectKey(
+    options: { replaceUnreadable?: boolean } = {},
+  ): Promise<EverConnectKey> {
     if (isWeakSecret(this.settings.recJwtSecret)) {
       throw new EverConnectKeyError('at_rest_key_default');
     }
     await this.ensure();
     const existing = await this.read();
-    if (!existing?.connectPrivateKeyEnc) {
+    let unreadable = false;
+    if (existing?.connectPrivateKeyEnc && options.replaceUnreadable) {
+      try {
+        await this.connectKey();
+      } catch (error) {
+        unreadable =
+          error instanceof EverConnectKeyError &&
+          error.code === 'key_unreadable';
+      }
+    }
+    if (!existing?.connectPrivateKeyEnc || unreadable) {
       const { publicKey, privateKeyDer } = generateStatsKeyPair();
       const keyId = keyIdOf(publicKey);
       const fields = {
@@ -316,7 +328,8 @@ export class EverInstanceService implements OnModuleInit {
         // A first call may see the locally cached `null`: answering a value (not aborting) lets the
         // database compare with the stored node and call again with it.
         .transaction((current: EverInstanceRecord | null) =>
-          current?.connectPrivateKeyEnc
+          current?.connectPrivateKeyEnc &&
+          !(unreadable && current.connectKeyId === existing?.connectKeyId)
             ? undefined
             : { ...(current ?? {}), ...fields },
         );
@@ -428,12 +441,18 @@ export class EverInstanceService implements OnModuleInit {
   }
 
   /** Forgets a prepared connect key that Ever Platform did not accept. */
-  async abortConnectKeyRotation(): Promise<void> {
-    await this.db().ref(EVER_INSTANCE_PATHS.self).update({
-      connectNextPublicKey: null,
-      connectNextPrivateKeyEnc: null,
-      connectNextKeyId: null,
-    });
+  async abortConnectKeyRotation(keyId: string): Promise<void> {
+    await this.db()
+      .ref(EVER_INSTANCE_PATHS.self)
+      .transaction((current: EverInstanceRecord | null) => {
+        if (!current) return null;
+        if (current.connectNextKeyId !== keyId) return undefined;
+        const next = { ...current };
+        delete next.connectNextPublicKey;
+        delete next.connectNextPrivateKeyEnc;
+        delete next.connectNextKeyId;
+        return next;
+      });
   }
 
   /**

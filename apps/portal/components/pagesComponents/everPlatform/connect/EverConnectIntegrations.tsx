@@ -49,23 +49,41 @@ const EverConnectIntegrations: React.FC<{ operator: boolean; workspaceId?: strin
   const [notice, setNotice] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const returned = useRef(false);
+  /** Each read or change takes a number; only the newest read may set the rows. */
+  const generation = useRef(0);
   const lastRemoteRefresh = useRef(0);
 
-  const load = useCallback(async () => {
+  const loadPolicy = useCallback(async () => {
+    if (!operator) return;
     try {
-      setRows(operator ? await getIntegrations() : workspaceId ? await getWorkspaceIntegrations(workspaceId) : []);
-      if (operator) setPolicyRows(await getPolicy());
+      setPolicyRows(await getPolicy());
     } catch {
-      setRows([]);
+      // The integration rows stay; only the policy switches are missing.
     }
-  }, [operator, workspaceId]);
+  }, [operator]);
+
+  const load = useCallback(async () => {
+    const mine = ++generation.current;
+    try {
+      let next: IEverConnectIntegration[] = [];
+      if (operator) next = await getIntegrations();
+      else if (workspaceId) next = await getWorkspaceIntegrations(workspaceId);
+      if (mine === generation.current) setRows(next);
+    } catch {
+      if (mine === generation.current) setRows((current) => current ?? []);
+    }
+    await loadPolicy();
+  }, [operator, workspaceId, loadPolicy]);
 
   /** Reads the states from Ever Platform now (not only the copy this installation keeps). */
   const refreshFromPlatform = useCallback(async () => {
     lastRemoteRefresh.current = Date.now();
+    const mine = ++generation.current;
     try {
       if (operator) {
-        setRows(await refreshIntegrations());
+        const next = await refreshIntegrations();
+        if (mine === generation.current) setRows(next);
+        await loadPolicy();
         return;
       }
       if (workspaceId) await refreshWorkspace(workspaceId);
@@ -73,7 +91,7 @@ const EverConnectIntegrations: React.FC<{ operator: boolean; workspaceId?: strin
       // The copy kept here is shown below.
     }
     await load();
-  }, [operator, workspaceId, load]);
+  }, [operator, workspaceId, load, loadPolicy]);
 
   useEffect(() => {
     // Back from the consent screen (`?ever_connect_return=1`): read the states once.
@@ -97,6 +115,8 @@ const EverConnectIntegrations: React.FC<{ operator: boolean; workspaceId?: strin
   }, [refreshFromPlatform]);
 
   const run = async (work: () => Promise<unknown>) => {
+    // A read still on its way predates this change: its answer is dropped.
+    generation.current += 1;
     setBusy(true);
     setNotice(null);
     try {

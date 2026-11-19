@@ -3,8 +3,10 @@
 Every call the optional Ever Platform features of Ever Rec can make, with what it carries and what
 switches it off. With `EVER_STATS_ENABLED=false` and `EVER_CONNECT_ENABLED` unset the API makes none
 of them: the [egress audit](../../tools/egress-audit/README.md) proves it for the statistics on every
-change. Every call of the Ever Platform connection (rows other than 17) leaves only after the operator
-connected the installation ([ever-platform-connection.md](ever-platform-connection.md)).
+change. The calls of the Ever Platform connection (rows other than 17) leave only once the operator
+connects the installation: first the redeem of the connect code (row 3, or the one-time
+`EVER_CONNECT_CODE` at the first start), then the others
+([ever-platform-connection.md](ever-platform-connection.md)).
 
 <!-- BEGIN GENERATED: outbound-calls (rows of the Ever Platform SDK contract list, product "rec", the modules this repository has) -->
 

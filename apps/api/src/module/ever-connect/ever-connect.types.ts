@@ -35,6 +35,8 @@ export const EVER_CONNECT_PATHS = Object.freeze({
   keySet: 'ever_connect/key_set',
   personExports: 'ever_connect/person_exports',
   personLinksSynced: 'ever_connect/person_links_synced',
+  personLinksDirtyAt: 'ever_connect/person_links_dirty_at',
+  personLinkRemovals: 'ever_connect/person_link_removals',
   audit: 'ever_connect/audit',
   lease: 'ever_connect/lease',
 });

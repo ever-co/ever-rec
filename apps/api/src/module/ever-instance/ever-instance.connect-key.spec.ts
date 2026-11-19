@@ -50,6 +50,24 @@ describe('EverInstanceService: the connect key', () => {
     expect((await s.connectKey())?.keyId).toBe(key.keyId);
   });
 
+  it('a key the current secret cannot read is replaced only when asked (connecting)', async () => {
+    const firebase = new InMemoryFirebaseApp();
+    const before = await service(
+      firebase,
+      'first-secret-of-this-install',
+    ).ensureConnectKey();
+    const changed = service(firebase, 'second-secret-of-this-install');
+    await expect(changed.connectKey()).rejects.toEqual(
+      new EverConnectKeyError('key_unreadable'),
+    );
+    await expect(changed.ensureConnectKey()).rejects.toEqual(
+      new EverConnectKeyError('key_unreadable'),
+    );
+    const after = await changed.ensureConnectKey({ replaceUnreadable: true });
+    expect(after.keyId).not.toBe(before.keyId);
+    expect((await changed.connectKey())?.keyId).toBe(after.keyId);
+  });
+
   it('a rotation replaces the key only once committed', async () => {
     const firebase = new InMemoryFirebaseApp();
     const s = service(firebase);

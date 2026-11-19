@@ -15,6 +15,11 @@ import {
   RecIntegrationKey,
 } from '../ever-connect.types';
 
+/** A copy without `undefined` members (the Realtime Database refuses them). */
+export function clean<T>(value: T): T {
+  return JSON.parse(JSON.stringify(value)) as T;
+}
+
 /** A Realtime Database key: no `.`, `#`, `$`, `[`, `]` or `/`, and not empty. */
 export function isDbKey(value: unknown): value is string {
   return (
@@ -49,7 +54,7 @@ export class EverConnectStoreService {
   }
 
   async setConnection(record: ConnectionRecord): Promise<void> {
-    await this.db().ref(EVER_CONNECT_PATHS.connection).set(record);
+    await this.db().ref(EVER_CONNECT_PATHS.connection).set(clean(record));
   }
 
   async patchConnection(patch: Record<string, unknown>): Promise<void> {
@@ -71,7 +76,27 @@ export class EverConnectStoreService {
   async setEntitlement(
     record: InstanceEntitlementRecord | null,
   ): Promise<void> {
-    await this.db().ref(EVER_CONNECT_PATHS.entitlement).set(record);
+    await this.db()
+      .ref(EVER_CONNECT_PATHS.entitlement)
+      .set(record ? clean(record) : null);
+  }
+
+  /**
+   * Stores a verified document unless a newer one (a higher `seq`) is stored already: overlapping
+   * refreshes never replace a newer document with an older one.
+   */
+  async storeNewerEntitlement(
+    path: string,
+    record: InstanceEntitlementRecord,
+  ): Promise<void> {
+    const value = clean(record);
+    await this.db()
+      .ref(path)
+      .transaction((current: InstanceEntitlementRecord | null) =>
+        current && Number(current.seq) > value.seq
+          ? undefined
+          : { ...(current ?? {}), ...value },
+      );
   }
 
   async patchEntitlement(patch: Record<string, unknown>): Promise<void> {
@@ -100,7 +125,7 @@ export class EverConnectStoreService {
   async setLink(record: LinkRecord): Promise<void> {
     await this.db()
       .ref(`${EVER_CONNECT_PATHS.links}/${record.workspaceId}`)
-      .set(record);
+      .set(clean(record));
   }
 
   async patchLink(
@@ -109,7 +134,7 @@ export class EverConnectStoreService {
   ): Promise<void> {
     await this.db()
       .ref(`${EVER_CONNECT_PATHS.links}/${workspaceId}`)
-      .update(patch);
+      .update(clean(patch));
   }
 
   async integrations(): Promise<
@@ -131,7 +156,7 @@ export class EverConnectStoreService {
   async setIntegration(record: IntegrationRecord): Promise<void> {
     await this.db()
       .ref(`${EVER_CONNECT_PATHS.integrations}/${record.key}`)
-      .set(record);
+      .set(clean(record));
   }
 
   async patchIntegration(

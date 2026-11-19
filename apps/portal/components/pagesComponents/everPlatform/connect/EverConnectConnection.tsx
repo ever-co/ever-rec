@@ -30,13 +30,16 @@ const EverConnectConnection: React.FC<{ workspaces: AdminWorkspace[] }> = ({ wor
   const [workspaceId, setWorkspaceId] = useState<string | undefined>(workspaces[0]?.id);
   const [url, setUrl] = useState('');
   const [busy, setBusy] = useState(false);
+  const [failed, setFailed] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
     try {
       setStatus(await getConnectStatus());
+      setFailed(false);
     } catch {
-      setStatus(null);
+      // The last state stays on screen; with none yet, a retry is offered.
+      setFailed(true);
     }
   }, []);
 
@@ -63,7 +66,16 @@ const EverConnectConnection: React.FC<{ workspaces: AdminWorkspace[] }> = ({ wor
   };
 
   if (!status) {
-    return <p data-testid="ever-connect-connection-loading">{t('page.everPlatform.loading')}</p>;
+    return failed ? (
+      <p data-testid="ever-connect-load-failed">
+        {t('page.everPlatform.errors.generic')}{' '}
+        <Button data-testid="ever-connect-retry" size="small" onClick={() => void refresh()}>
+          {t('page.everPlatform.connect.retry')}
+        </Button>
+      </p>
+    ) : (
+      <p data-testid="ever-connect-connection-loading">{t('page.everPlatform.loading')}</p>
+    );
   }
 
   const connected = status.status === 'active' || status.status === 'pending_approval';

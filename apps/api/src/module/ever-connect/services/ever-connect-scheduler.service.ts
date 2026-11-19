@@ -62,6 +62,7 @@ export class EverConnectSchedulerService
   private readonly logger = new Logger('EverConnect');
   private readonly timers = new Map<Job, NodeJS.Timeout>();
   private running = false;
+  private destroyed = false;
   private feedAbort: AbortController | null = null;
 
   constructor(
@@ -157,6 +158,7 @@ export class EverConnectSchedulerService
   }
 
   async onModuleDestroy(): Promise<void> {
+    this.destroyed = true;
     this.stop();
     await this.lease.release().catch(() => undefined);
   }
@@ -166,6 +168,7 @@ export class EverConnectSchedulerService
     delayMs: number,
     run: () => Promise<number | null>,
   ): void {
+    if (this.destroyed) return;
     const existing = this.timers.get(job);
     if (existing) clearTimeout(existing);
     const timer = setTimeout(
@@ -254,6 +257,7 @@ export class EverConnectSchedulerService
     if (this.config.feedMode === 'interval') {
       let cycle = await this.feed.cycle(0);
       while (cycle.hasMore) cycle = await this.feed.cycle(0);
+      if (cycle.failed) return jitter(60_000, 0.5);
       return jitter(this.config.timings.feedIntervalMs, 0.05);
     }
     this.feedAbort = new AbortController();
@@ -263,6 +267,7 @@ export class EverConnectSchedulerService
         this.config.timings.feedWaitS,
         this.feedAbort.signal,
       );
+      if (cycle.failed) return jitter(60_000, 0.5);
       if (cycle.received) return 0;
       // An empty answer that came back early (a proxy or a platform that does not hold the
       // request) waits out the rest of the long-poll window instead of asking again at once.
@@ -283,6 +288,10 @@ export class EverConnectSchedulerService
    */
   async heartbeat(): Promise<void> {
     const connection = await this.store.connection();
+    if (connection?.status === 'pending_approval') {
+      await this.connect.checkApproval().catch(() => undefined);
+      return;
+    }
     if (connection?.status !== 'active') return;
     const denied = [...(await this.integrations.denied())];
     try {

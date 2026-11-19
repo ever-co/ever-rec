@@ -20,13 +20,16 @@ const EverConnectOrganizationLink: React.FC<{ workspaceId: string }> = ({ worksp
   const [view, setView] = useState<IEverConnectLinkView | null>(null);
   const [code, setCode] = useState('');
   const [busy, setBusy] = useState(false);
+  const [failed, setFailed] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
     try {
       setView(await getWorkspaceLink(workspaceId));
+      setFailed(false);
     } catch {
-      setView(null);
+      // The last view stays on screen; with none yet, a retry is offered.
+      setFailed(true);
     }
   }, [workspaceId]);
 
@@ -48,7 +51,18 @@ const EverConnectOrganizationLink: React.FC<{ workspaceId: string }> = ({ worksp
     }
   };
 
-  if (!view) return <p data-testid="ever-connect-link-loading">{t('page.everPlatform.loading')}</p>;
+  if (!view) {
+    return failed ? (
+      <p data-testid="ever-connect-load-failed">
+        {t('page.everPlatform.errors.generic')}{' '}
+        <Button data-testid="ever-connect-retry" size="small" onClick={() => void refresh()}>
+          {t('page.everPlatform.connect.retry')}
+        </Button>
+      </p>
+    ) : (
+      <p data-testid="ever-connect-link-loading">{t('page.everPlatform.loading')}</p>
+    );
+  }
 
   const linked = view.link && view.link.state !== 'unlinked';
 

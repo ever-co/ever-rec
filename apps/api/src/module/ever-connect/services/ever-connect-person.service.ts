@@ -17,7 +17,9 @@ import { EverConnectAuditService } from './ever-connect-audit.service';
 import {
   EverConnectClientService,
   errorCode,
+  platformAnswered,
 } from './ever-connect-client.service';
+import { EVER_CONNECT_CONFIG, EverConnectConfig } from '../ever-connect.config';
 import { displayNameOf } from './ever-connect-links.service';
 import { EverConnectStoreService, isDbKey } from './ever-connect-store.service';
 
@@ -58,15 +60,31 @@ export class EverConnectPersonService {
     @Inject(EVER_CONNECT_CLOCK) private readonly clock: EverConnectClock,
     @Inject(EVER_INSTANCE_SETTINGS)
     private readonly settings: EverInstanceSettings,
+    @Inject(EVER_CONNECT_CONFIG) private readonly config: EverConnectConfig,
   ) {}
 
   /** Person links are reported only while connected and `ever_id_login` is enabled. */
   private async reporting(): Promise<boolean> {
-    const [connection, integration] = await Promise.all([
+    const [connection, integration, policy] = await Promise.all([
       this.store.connection(),
       this.store.integration('ever_id_login'),
+      this.store.policy(),
     ]);
-    return connection?.status === 'active' && integration?.enabled === true;
+    const denied =
+      this.config.denied.has('ever_id_login') ||
+      policy.ever_id_login?.allowed === false;
+    return (
+      connection?.status === 'active' &&
+      integration?.enabled === true &&
+      !denied
+    );
+  }
+
+  /** Marks the initial sync as to be done again (a report did not go through). */
+  private async markDirty(): Promise<void> {
+    const db = this.store.db();
+    await db.ref(EVER_CONNECT_PATHS.personLinksDirtyAt).set(this.clock());
+    await db.ref(EVER_CONNECT_PATHS.personLinksSynced).remove();
   }
 
   /** The first linked workspace the uid administers or belongs to. */
@@ -96,11 +114,7 @@ export class EverConnectPersonService {
     if (!(await this.reporting().catch(() => false))) return;
     if (!(await this.report(event))) {
       // Reported again by the initial sync, which the heartbeat retries.
-      await this.store
-        .db()
-        .ref(EVER_CONNECT_PATHS.personLinksSynced)
-        .remove()
-        .catch(() => undefined);
+      await this.markDirty().catch(() => undefined);
     }
   }
 
@@ -129,16 +143,40 @@ export class EverConnectPersonService {
 
   @OnEvent(EVER_IDENTITY_EVENTS.linkRemoved, { async: true, promisify: true })
   async onLinkRemoved(event: EverIdentityLinkEvent): Promise<void> {
+    if (!(await this.reporting().catch(() => false))) return;
+    await this.removeLink(event.uid);
+  }
+
+  /** Removes a person link; when it does not go through, it is kept and retried. */
+  private async removeLink(uid: string): Promise<void> {
+    if (!isDbKey(uid)) return;
+    const pending = this.store
+      .db()
+      .ref(`${EVER_CONNECT_PATHS.personLinkRemovals}/${uid}`);
     try {
-      if (!(await this.reporting())) return;
       await this.client.run((client) =>
-        client.instances.personLinks.remove(event.uid),
+        client.instances.personLinks.remove(uid),
       );
+      await pending.remove();
     } catch (error) {
+      if (platformAnswered(error) && error.status === 404) {
+        await pending.remove();
+        return;
+      }
+      await pending.set(this.clock());
       this.logger.warn(
-        `A person link could not be removed (${errorCode(error)}).`,
+        `A person link could not be removed (${errorCode(error)}); retried later.`,
       );
     }
+  }
+
+  /** Retries the removals that did not go through (called with the sync by the heartbeat). */
+  private async retryRemovals(): Promise<void> {
+    const pending =
+      (
+        await this.store.db().ref(EVER_CONNECT_PATHS.personLinkRemovals).get()
+      ).val() ?? {};
+    for (const uid of Object.keys(pending)) await this.removeLink(uid);
   }
 
   /**
@@ -147,17 +185,21 @@ export class EverConnectPersonService {
    */
   async syncExistingLinks(): Promise<void> {
     if (!(await this.reporting())) return;
+    await this.retryRemovals();
     const done = await this.store
       .db()
       .ref(EVER_CONNECT_PATHS.personLinksSynced)
       .get();
     if (done.val() === true) return;
+    const startedAt = this.clock();
     const snapshot = await this.store.db().ref(EVER_ID_LINK_ROOTS.links).get();
     const rows = Object.values(
       (snapshot.val() ?? {}) as Record<string, IdentityRow>,
     ).filter((row) => row?.uid && row.issuer && row.subject);
     let failed = 0;
     for (const row of rows) {
+      // The consent may end while the scan runs: nothing more is sent then.
+      if (!(await this.reporting())) return;
       const ok = await this.report({
         uid: row.uid,
         issuer: row.issuer,
@@ -166,7 +208,14 @@ export class EverConnectPersonService {
       });
       if (!ok) failed += 1;
     }
-    if (!failed) {
+    if (failed) return;
+    // Marked done only if no report failed since this scan started.
+    const dirtyAt = Number(
+      (
+        await this.store.db().ref(EVER_CONNECT_PATHS.personLinksDirtyAt).get()
+      ).val() ?? 0,
+    );
+    if (dirtyAt < startedAt) {
       await this.store.db().ref(EVER_CONNECT_PATHS.personLinksSynced).set(true);
     }
   }
@@ -230,19 +279,18 @@ export class EverConnectPersonService {
     ];
     const matches = await this.matching(hashes);
     for (const match of matches) {
+      // The account's index entry first: if a later step fails, a retry still finds the identity.
+      await this.store
+        .db()
+        .ref(`${EVER_ID_LINK_ROOTS.byUid}/${match.uid}/${match.key}`)
+        .remove();
       await this.store
         .db()
         .ref(`${EVER_ID_LINK_ROOTS.links}/${match.key}`)
         .transaction((current: IdentityRow | null) =>
           !current ? null : current.uid === match.uid ? null : undefined,
         );
-      await this.store
-        .db()
-        .ref(`${EVER_ID_LINK_ROOTS.byUid}/${match.uid}/${match.key}`)
-        .remove();
-      await this.client
-        .run((client) => client.instances.personLinks.remove(match.uid))
-        .catch(() => undefined);
+      await this.removeLink(match.uid);
     }
     await this.client.run((client) =>
       client.instances.ack(

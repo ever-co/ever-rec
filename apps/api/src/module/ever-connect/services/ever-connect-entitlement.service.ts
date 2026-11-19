@@ -7,6 +7,7 @@ import {
 } from '@ever-co/connect-sdk';
 import {
   ConnectionRecord,
+  EVER_CONNECT_PATHS,
   LadderState,
   LinkRecord,
   StoredEntitlement,
@@ -37,19 +38,22 @@ export function storedFrom(
 /** The handle, plan and features a link document carries. */
 export function linkFacts(
   verified: VerifiedEntitlement,
-): Pick<LinkRecord, 'handle' | 'plan' | 'tier' | 'everOrgId'> {
+): Partial<Pick<LinkRecord, 'handle' | 'plan' | 'tier' | 'everOrgId'>> {
   const ever = verified.claims.ever as {
     handle?: string;
     plan?: { code?: string };
     tier?: string;
     org_id?: string;
   };
-  return {
-    handle: ever.handle ?? undefined,
-    plan: ever.plan?.code ?? undefined,
-    tier: ever.tier ?? undefined,
-    everOrgId: ever.org_id ?? undefined,
-  };
+  // Members a document does not carry are left out (never stored as `undefined`).
+  const facts: Partial<
+    Pick<LinkRecord, 'handle' | 'plan' | 'tier' | 'everOrgId'>
+  > = {};
+  if (ever.handle) facts.handle = ever.handle;
+  if (ever.plan?.code) facts.plan = ever.plan.code;
+  if (ever.tier) facts.tier = ever.tier;
+  if (ever.org_id) facts.everOrgId = ever.org_id;
+  return facts;
 }
 
 export interface LadderView {
@@ -132,7 +136,10 @@ export class EverConnectEntitlementService {
           cached,
         );
         if (verified) {
-          await this.store.setEntitlement(storedFrom(verified, now));
+          await this.store.storeNewerEntitlement(
+            EVER_CONNECT_PATHS.entitlement,
+            storedFrom(verified, now),
+          );
         } else if (cached) {
           await this.store.patchEntitlement({
             fetchedAt: now,
@@ -148,10 +155,11 @@ export class EverConnectEntitlementService {
               link.entitlement,
             );
             if (next) {
-              await this.store.patchLink(link.workspaceId, {
-                ...linkFacts(next),
-                entitlement: storedFrom(next, now),
-              });
+              await this.store.storeNewerEntitlement(
+                `${EVER_CONNECT_PATHS.links}/${link.workspaceId}/entitlement`,
+                storedFrom(next, now),
+              );
+              await this.store.patchLink(link.workspaceId, linkFacts(next));
             } else if (link.entitlement) {
               await this.store.patchLink(link.workspaceId, {
                 'entitlement/fetchedAt': now,

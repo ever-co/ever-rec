@@ -340,6 +340,7 @@
         "operatedByCloud": "Operated by Ever Cloud",
         "refresh": "Refresh",
         "refreshed": "Refreshed.",
+        "retry": "Try again",
         "noWorkspace": "You do not administer any workspace yet. The admin of a workspace links it to an Ever organization here.",
         "status": {
           "not_connected": "Not connected",

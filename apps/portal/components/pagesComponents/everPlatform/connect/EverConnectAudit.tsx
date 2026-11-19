@@ -9,6 +9,7 @@ const EverConnectAudit: React.FC<{ operator: boolean; workspaceId?: string }> = 
   const { t } = useTranslation();
   const [rows, setRows] = useState<IEverConnectAuditRow[] | null>(null);
   const [more, setMore] = useState(false);
+  const [paging, setPaging] = useState(false);
 
   const page = useCallback(
     async (before?: string) => {
@@ -73,10 +74,18 @@ const EverConnectAudit: React.FC<{ operator: boolean; workspaceId?: string }> = 
       {more && (
         <Button
           data-testid="ever-connect-audit-more"
+          disabled={paging}
           onClick={async () => {
-            const next = await page(rows[rows.length - 1]?.id);
-            setRows([...rows, ...next]);
-            setMore(next.length >= 50);
+            setPaging(true);
+            try {
+              const next = await page(rows[rows.length - 1]?.id);
+              setRows((current) => [...(current ?? []), ...next]);
+              setMore(next.length >= 50);
+            } catch {
+              // Try again with the same button.
+            } finally {
+              setPaging(false);
+            }
           }}
         >
           {t('page.everPlatform.connect.audit.more')}

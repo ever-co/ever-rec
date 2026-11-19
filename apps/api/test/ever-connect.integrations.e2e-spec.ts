@@ -7,6 +7,7 @@ import { EVER_CONNECT_OIDC_CONFIG } from '../src/module/ever-id/ever-id.tokens';
 import { readEverIdSettings } from '../src/module/ever-id/ever-id.config';
 import { EVER_CONNECT_PATHS } from '../src/module/ever-connect/ever-connect.types';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { verifyBytes } from '../src/module/ever-instance/ever-instance.crypto';
 import { createHash } from 'node:crypto';
 import { ConnectTestApp, createConnectTestApp, OPERATOR_UID } from './support/ever-connect-app';
 import { CONNECT_ON, connectInstallation, readFeed, scheduler } from './support/ever-connect-flows';
@@ -69,7 +70,13 @@ describe('consent through app.ever.co, delivered by the feed', () => {
     const self = t.firebase.db.dump('ever_instance/self');
     expect(body.stats_instance_id).toBe(self.instanceId);
     expect(body.stats_public_jwk.x).toBe(self.statsPublicKey);
-    const [h, p] = body.statement_sig.split('.');
+    const [h, p, sig] = body.statement_sig.split('.');
+    expect(
+      verifyBytes(self.statsPublicKey, Buffer.from(`${h}.${p}`), Buffer.from(sig, 'base64url')),
+    ).toBe(true);
+    expect(
+      verifyBytes(self.connectPublicKey, Buffer.from(`${h}.${p}`), Buffer.from(sig, 'base64url')),
+    ).toBe(false);
     expect(JSON.parse(Buffer.from(h, 'base64url').toString())).toEqual({
       alg: 'EdDSA',
       typ: 'ever-stats-link+jwt',

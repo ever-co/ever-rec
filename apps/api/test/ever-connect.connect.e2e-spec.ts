@@ -147,6 +147,20 @@ describe('the first-boot code', () => {
     }
   });
 
+  it('is kept when this installation refuses before sending anything', async () => {
+    const t = await createConnectTestApp({
+      env: { ...ON, REC_JWT_SECRET: 'hard!To_find:my/GuyZ' },
+    });
+    try {
+      (t.get(EverConnectService) as any).config.envCode = t.platform.issueConnectCode();
+      expect(await t.get(EverConnectService).connectWithEnvCode()).toBe('skipped');
+      expect(t.platform.requests).toEqual([]);
+      expect(t.firebase.db.dump(EVER_CONNECT_PATHS.envCode)).toBeNull();
+    } finally {
+      await t.close();
+    }
+  });
+
   it('is never retried after the platform refused it', async () => {
     const t = await createConnectTestApp({ env: ON });
     try {

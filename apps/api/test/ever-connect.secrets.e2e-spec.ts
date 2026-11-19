@@ -38,6 +38,7 @@ describe('secrets', () => {
     try {
       const bodies: string[] = [];
       const operator = await connectInstallation(t);
+      const first = (await t.get(EverInstanceService).connectKey())!.privateKeyDer;
       t.platform.setIntegration('ever_id_login', 'enabled', true);
       t.platform.setIntegration('instance_url', 'enabled', true);
       await readFeed(t);
@@ -60,9 +61,12 @@ describe('secrets', () => {
       }
       const key = await t.get(EverInstanceService).connectKey();
       const der = key!.privateKeyDer;
+      expect(der.equals(first)).toBe(false);
       const dump = JSON.stringify(t.firebase.db.dump());
-      expect(findSecrets(bodies)).toEqual([]);
-      expect(findSecrets(logs)).toEqual([]);
+      const keys = [first, der].flatMap((k) => [k.toString('base64'), k.toString('base64url')]);
+      expect(findSecrets(bodies, keys)).toEqual([]);
+      expect(findSecrets(logs, keys)).toEqual([]);
+      expect(findSecrets([dump], keys).filter((hit) => hit === 'planted')).toEqual([]);
       expect(dump).not.toMatch(/evit_/);
       expect(dump).not.toContain('test-client-secret-value');
       expect(dump).not.toContain(der.toString('base64'));

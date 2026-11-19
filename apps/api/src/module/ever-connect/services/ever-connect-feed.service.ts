@@ -25,6 +25,8 @@ export interface FeedCycle {
   handled: number;
   hasMore: boolean;
   acked: string | null;
+  /** An event could not be handled: read again after a pause. */
+  failed?: boolean;
 }
 
 /**
@@ -74,6 +76,7 @@ export class EverConnectFeedService {
       throw error;
     }
     let handled = 0;
+    let failed = false;
     let position: string | null = null;
     for (const event of page.events ?? []) {
       try {
@@ -84,6 +87,7 @@ export class EverConnectFeedService {
         this.logger.warn(
           `A feed event (${event.type}) could not be handled (${errorCode(error)}); it is read again later.`,
         );
+        failed = true;
         break;
       }
     }
@@ -98,8 +102,9 @@ export class EverConnectFeedService {
     return {
       received: (page.events ?? []).length,
       handled,
-      hasMore: page.has_more === true,
+      hasMore: page.has_more === true && !failed,
       acked: position,
+      ...(failed ? { failed } : {}),
     };
   }
 
