@@ -4,7 +4,7 @@ import {
   Delete,
   Get,
   HttpCode,
-  NotFoundException,
+  ConflictException,
   Param,
   Post,
   Query,
@@ -76,7 +76,13 @@ export class EverConnectWorkspaceController {
     @Param('key') key: string,
   ) {
     const link = await this.store.link(workspaceId);
-    if (link?.state !== 'active') throw new NotFoundException();
+    if (link?.state !== 'active') {
+      throw new ConflictException({
+        statusCode: 409,
+        code: 'not_linked',
+        message: 'This workspace is not linked.',
+      });
+    }
     return this.integrations.consentUrl(key);
   }
 

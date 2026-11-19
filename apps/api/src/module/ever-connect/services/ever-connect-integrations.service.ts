@@ -496,7 +496,16 @@ export class EverConnectIntegrationsService {
     }
     if (key === 'ever_id_login') {
       if (this.oidc.enabled) return;
-      const base = this.config.apiBaseUrl;
+      // The API's own https address (API_BASE_URL): the callbacks Ever ID returns to.
+      const base = checkPublicUrl(this.config.apiBaseUrl);
+      if (!base) {
+        throw Object.assign(
+          new Error('API_BASE_URL is not an https address.'),
+          {
+            code: 'no_api_base_url',
+          },
+        );
+      }
       const redirectUrl = `${base}/api/v1/auth/ever-id/callback`;
       const request = {
         redirect_uri: redirectUrl,

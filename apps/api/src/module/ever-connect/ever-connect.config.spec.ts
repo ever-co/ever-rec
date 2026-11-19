@@ -73,6 +73,18 @@ describe('ever-connect config', () => {
     ).toBeNull();
   });
 
+  it('a public https platform is used as given; an empty value keeps the default', () => {
+    expect(
+      read({ EVER_PLATFORM_API_URL: 'https://api-stage.ever.co/' }).apiUrl,
+    ).toBe('https://api-stage.ever.co');
+    expect(read({ EVER_PLATFORM_API_URL: '' }).apiUrl).toBe(
+      'https://api.ever.co',
+    );
+    expect(
+      read({ EVER_PLATFORM_API_URL: 'https://user:pw@api.ever.co' }).apiUrl,
+    ).toBeNull();
+  });
+
   it('connect codes: the SDK pattern, normalised', () => {
     expect(normaliseConnectCode('EVC-0000-1111-2222')).toBe(
       'EVC-0000-1111-2222',
