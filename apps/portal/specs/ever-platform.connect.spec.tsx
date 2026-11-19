@@ -34,6 +34,8 @@ jest.mock('app/services/ever-connect', () => ({
   getAudit: jest.fn(),
   getWorkspaceAudit: jest.fn(),
   refreshWorkspace: jest.fn(),
+  getManaged: jest.fn(),
+  setManaged: jest.fn(),
 }));
 
 import * as stats from 'app/services/ever-platform';
@@ -41,6 +43,7 @@ import * as connect from 'app/services/ever-connect';
 import * as workspaces from 'app/services/api/workspace';
 import EverPlatformTabs from 'components/pagesComponents/everPlatform/EverPlatformTabs';
 import EverConnectIntegrations from 'components/pagesComponents/everPlatform/connect/EverConnectIntegrations';
+import EverConnectManaged from 'components/pagesComponents/everPlatform/connect/EverConnectManaged';
 
 const act: (callback: () => void | Promise<void>) => Promise<void> = (React as any).act;
 const statsApi = stats as jest.Mocked<typeof stats>;
@@ -173,10 +176,16 @@ describe('Ever Platform Connect tabs', () => {
     expect(container.querySelector('[data-testid="ever-connect-banner-grace"]')).not.toBeNull();
   });
 
+  it('only the operator gets the Maintenance operations tab', async () => {
+    await render(<EverPlatformTabs uid="uid-1" />);
+    expect(tabLabels()).not.toContain('page.everPlatform.tabs.managed');
+  });
+
   it('the operator gets the Connection tab', async () => {
     api.getConnectStatus.mockResolvedValue({ status: 'not_connected', links: [], entitlement: { state: 'paused' } } as any);
     await render(<EverPlatformTabs uid="uid-1" />);
     expect(tabLabels()).toContain('page.everPlatform.tabs.connection');
+    expect(tabLabels()).toContain('page.everPlatform.tabs.managed');
   });
 });
 
@@ -232,6 +241,28 @@ describe('Integrations & data', () => {
       'instance.public_url',
     );
     expect(container.querySelector('[data-testid="ever-connect-disable-instance_url"]')).toBeNull();
+  });
+});
+
+describe('Maintenance operations', () => {
+  it('never shows the backup directory back, and sends a new one only when typed', async () => {
+    const view = {
+      available: true,
+      optIn: false,
+      kinds: [],
+      supportedKinds: ['health_report', 'backup', 'restore_check'],
+      windows: [],
+      backupDirSet: true,
+      history: [],
+    };
+    api.getManaged.mockResolvedValue(view as any);
+    api.setManaged.mockResolvedValue({ ...view, optIn: true } as any);
+    await render(<EverConnectManaged />);
+    const input = container.querySelector('[data-testid="ever-connect-managed-backup-dir"]') as HTMLInputElement;
+    expect(input.value).toBe('');
+    expect(input.placeholder).toBe('page.everPlatform.connect.managed.backupDirSet');
+    await act(async () => (container.querySelector('[data-testid="ever-connect-managed-save"]') as HTMLButtonElement).click());
+    expect(api.setManaged.mock.calls[0][0]).not.toHaveProperty('backupDir');
   });
 });
 

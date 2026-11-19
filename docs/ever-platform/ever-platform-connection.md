@@ -15,6 +15,7 @@ working whatever happens to the connection.
 - [Settings](#settings)
 - [What is stored, and where](#what-is-stored-and-where)
 - [Ever Rec cloud: workspaces started from app.ever.co](#ever-rec-cloud-workspaces-started-from-appeverco)
+- [Maintenance operations](#maintenance-operations)
 - [How to verify it yourself](#how-to-verify-it-yourself)
 
 Every call, with what it carries and what switches it off, is listed in
@@ -139,7 +140,7 @@ An Ever ID this installation does not know gets the receipt `no_account`.
 |---|---|---|
 | `EVER_CONNECT_ENABLED` | unset (off) | `true` (exactly) loads the connection module |
 | `EVER_CONNECT_CODE` | unset | a connect code used once at the first start |
-| `EVER_CONNECT_INTEGRATIONS_DENY` | unset | integrations denied for every workspace (`instance_url`, `stats_link`, `ever_id_login`, or `*`) |
+| `EVER_CONNECT_INTEGRATIONS_DENY` | unset | integrations denied for every workspace (`instance_url`, `stats_link`, `ever_id_login`, `managed_operations`, or `*`) |
 | `EVER_CONNECT_FEED_MODE` | `longpoll` | `interval` reads the feed every 15 minutes instead (for proxies that cut long requests) |
 | `EVER_PLATFORM_API_URL` | `https://api.ever.co` | the Ever Platform API; plain `http` only for a local address |
 | `EVER_INSTALL_SOURCE` | `self-hosted` | how the installation was set up; `cloud` only on Ever Cloud |
@@ -189,6 +190,25 @@ a person who starts an organization on app.ever.co can choose Ever Rec and land 
    with that person as its admin, links it to the organization and tells Ever Platform (the
    workspace id, the account id and the portal address; never an e-mail address). Using the same link
    again answers that the workspace exists. *Decline* tells Ever Platform that nothing was created.
+
+## Maintenance operations
+
+A self-hosted installation can let an owner of its linked organization request, from app.ever.co, a
+**health report** (the API answers and reaches its database; the version), a **backup** (the whole
+Realtime Database as a JSON file plus a manifest with its SHA-256, written to a directory on this
+server) and a **check of the last backup** (the file still matches its manifest). Nothing runs unless:
+
+- the organization enabled *Maintenance operations* in app.ever.co (`managed_operations`), **and**
+- the operator opted in under *Settings → Ever Platform → Maintenance operations*, chose the kinds
+  allowed, a weekly window (UTC) and the backup directory (an absolute path; stored encrypted and
+  never shown back), **and**
+- the request arrives inside that window.
+
+Otherwise the answer is `failed` and nothing else happens. Ever Platform receives the status, the
+version and sizes only: never a path, a file name or any data. A backup reads the whole database into
+the API's memory before writing it: on a large installation, prefer your own database export. Ever Rec does not run updates this
+way. To stop: switch the opt-in off here, or disable *Maintenance operations* in app.ever.co. On Ever
+Cloud this does not apply (Ever operates it).
 
 ## How to verify it yourself
 

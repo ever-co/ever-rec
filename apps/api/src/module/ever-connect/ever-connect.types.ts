@@ -10,6 +10,7 @@ export const REC_INTEGRATION_KEYS = Object.freeze([
   'instance_url',
   'stats_link',
   'ever_id_login',
+  'managed_operations',
 ] as const);
 
 export type RecIntegrationKey = (typeof REC_INTEGRATION_KEYS)[number];
@@ -39,6 +40,8 @@ export const EVER_CONNECT_PATHS = Object.freeze({
   personLinkRemovals: 'ever_connect/person_link_removals',
   provisionResults: 'ever_connect/provision_results',
   provisionPending: 'ever_connect/provision_pending',
+  managed: 'ever_connect/managed',
+  managedHistory: 'ever_connect/managed_history',
   audit: 'ever_connect/audit',
   lease: 'ever_connect/lease',
 });
@@ -219,7 +222,10 @@ export type EverConnectAuditAction =
   | 'person.deletion'
   | 'person.export'
   | 'provision.accept'
-  | 'provision.refuse';
+  | 'provision.refuse'
+  | 'managed.opt_in'
+  | 'managed.opt_out'
+  | 'managed.result';
 
 /** One row of `ever_connect/audit`. No e-mail address, IP address, user agent or secret. */
 export interface EverConnectAuditRow {

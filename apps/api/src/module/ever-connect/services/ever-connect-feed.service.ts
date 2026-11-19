@@ -8,6 +8,7 @@ import {
 import { EverConnectEntitlementService } from './ever-connect-entitlement.service';
 import { EverConnectIntegrationsService } from './ever-connect-integrations.service';
 import { EverConnectLinksService } from './ever-connect-links.service';
+import { EverConnectManagedService } from './ever-connect-managed.service';
 import { EverConnectPersonService } from './ever-connect-person.service';
 import { EverConnectStoreService } from './ever-connect-store.service';
 import { EverConnectService } from './ever-connect.service';
@@ -47,6 +48,7 @@ export class EverConnectFeedService {
     private readonly integrations: EverConnectIntegrationsService,
     private readonly links: EverConnectLinksService,
     private readonly person: EverConnectPersonService,
+    private readonly managed: EverConnectManagedService,
   ) {}
 
   /** One read of the feed (`waitS` > 0: a long poll). */
@@ -189,8 +191,11 @@ export class EverConnectFeedService {
           await this.person.onExportRequested(data as { job_id: string });
         }
         return;
+      case 'ever.registry.managed_operation.requested':
+        await this.managed.handle(event);
+        return;
       default:
-        // Acknowledged and ignored: managed operations (not run by this release), install and
+        // Acknowledged and ignored: install and
         // provisioning notices, memberships, instance notices, and any type added later.
         return;
     }

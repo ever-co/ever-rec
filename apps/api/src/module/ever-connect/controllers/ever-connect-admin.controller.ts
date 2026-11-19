@@ -15,6 +15,7 @@ import { EverSignedInGuard } from '../../ever-instance/ever-operator.guard';
 import { EverConnectOperatorGuard } from '../guards/ever-connect.guards';
 import { EverConnectAuditService } from '../services/ever-connect-audit.service';
 import { EverConnectIntegrationsService } from '../services/ever-connect-integrations.service';
+import { EverConnectManagedService } from '../services/ever-connect-managed.service';
 import { EverConnectSchedulerService } from '../services/ever-connect-scheduler.service';
 import { EverConnectService } from '../services/ever-connect.service';
 
@@ -35,7 +36,20 @@ export class EverConnectAdminController {
     private readonly integrations: EverConnectIntegrationsService,
     private readonly scheduler: EverConnectSchedulerService,
     private readonly audit: EverConnectAuditService,
+    private readonly managed: EverConnectManagedService,
   ) {}
+
+  @Get('managed')
+  @UseGuards(EverConnectOperatorGuard)
+  managedSettings() {
+    return this.managed.view();
+  }
+
+  @Put('managed')
+  @UseGuards(EverConnectOperatorGuard)
+  setManaged(@Body() body: Body_, @Req() request: any) {
+    return this.managed.update(body, uidOf(request));
+  }
 
   @Get('health')
   @UseGuards(EverSignedInGuard)

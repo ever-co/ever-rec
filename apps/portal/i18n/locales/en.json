@@ -333,6 +333,7 @@
         "connection": "Connection",
         "link": "Organization link",
         "integrations": "Integrations & data",
+        "managed": "Maintenance operations",
         "audit": "Audit"
       },
       "connect": {
@@ -469,7 +470,33 @@
           "invalid_url": "Enter an https address without credentials, query or fragment.",
           "denied_by_env": "The server configuration (EVER_CONNECT_INTEGRATIONS_DENY) denies this integration.",
           "denied_by_policy": "This integration is denied by the policy of this installation.",
-          "not_pending_operator": "This integration is not waiting for the operator."
+          "not_pending_operator": "This integration is not waiting for the operator.",
+          "invalid_managed": "Check the kinds, the window (HH:MM, UTC) and the backup directory (an absolute path)."
+        },
+        "managed": {
+          "description": "An owner of the linked organization can ask from app.ever.co for a health report, a backup or a check of the last backup. Nothing runs unless the organization enabled \"Maintenance operations\" in app.ever.co and you opt in here, for the kinds you allow, in your window. Updates are not run from here.",
+          "optIn": "Allow maintenance operations requested from app.ever.co",
+          "window": "Window",
+          "backupDir": "Backup directory (an absolute path on this server)",
+          "backupDirSet": "Set (not shown); type a new path to change it",
+          "whatTheyGet": "Ever Platform receives the status, the version and sizes only: never a path, a file name or any data.",
+          "save": "Save",
+          "saved": "Saved.",
+          "kinds": {
+            "health_report": "Health report",
+            "backup": "Backup",
+            "restore_check": "Check the last backup",
+            "update": "Update"
+          },
+          "days": {
+            "0": "Sun",
+            "1": "Mon",
+            "2": "Tue",
+            "3": "Wed",
+            "4": "Thu",
+            "5": "Fri",
+            "6": "Sat"
+          }
         }
       }
     },

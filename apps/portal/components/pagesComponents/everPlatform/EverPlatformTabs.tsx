@@ -8,6 +8,7 @@ import EverPlatformStatistics from './EverPlatformStatistics';
 import EverConnectAudit from './connect/EverConnectAudit';
 import EverConnectConnection, { AdminWorkspace } from './connect/EverConnectConnection';
 import EverConnectIntegrations from './connect/EverConnectIntegrations';
+import EverConnectManaged from './connect/EverConnectManaged';
 import EverConnectOrganizationLink from './connect/EverConnectOrganizationLink';
 
 interface Availability {
@@ -108,6 +109,15 @@ const EverPlatformTabs: React.FC<{ uid: string | undefined }> = ({ uid }) => {
               perWorkspace((id) => <EverConnectIntegrations key={id} operator={false} workspaceId={id} />)
             ),
           },
+          ...(available.operator
+            ? [
+                {
+                  key: 'managed',
+                  label: t('page.everPlatform.tabs.managed'),
+                  children: <EverConnectManaged />,
+                },
+              ]
+            : []),
           {
             key: 'audit',
             label: t('page.everPlatform.tabs.audit'),
