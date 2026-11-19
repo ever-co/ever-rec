@@ -28,8 +28,32 @@ async function json(fetch, url, init) {
 	return { status: response.status, body };
 }
 
+/** How long the adapter waits for the Authentication emulator to answer. */
+const AUTH_READY_TIMEOUT_MS = 300_000;
+
+/**
+ * Waits until the Authentication emulator answers. The emulators start the Realtime Database (a
+ * Java process) before Authentication, and the API answers its health check without them, so on a
+ * slow runner Authentication comes up a minute or more after the audit starts signing in.
+ */
+async function authReady({ fetch, log }) {
+	const deadline = Date.now() + AUTH_READY_TIMEOUT_MS;
+	for (let attempt = 1; ; attempt += 1) {
+		try {
+			const response = await fetch(`${AUTH}/`);
+			await response.text();
+			if (attempt > 1) log?.(`Authentication emulator: answered after ${attempt} attempts`);
+			return;
+		} catch (error) {
+			if (Date.now() >= deadline) throw error;
+			await new Promise((resolve) => setTimeout(resolve, 2000));
+		}
+	}
+}
+
 /** Creates the operator in the Authentication emulator (once) and signs in: a Firebase ID token. */
 async function operatorToken({ fetch, env, log }) {
+	await authReady({ fetch, log });
 	const create = await json(fetch, `${AUTH}/identitytoolkit.googleapis.com/v1/projects/${PROJECT}/accounts`, {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json', Authorization: 'Bearer owner' },

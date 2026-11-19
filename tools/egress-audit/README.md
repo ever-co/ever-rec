@@ -25,7 +25,7 @@ This directory holds only Ever Rec's inputs:
 | `egress-audit.config.json` | The API leg: the API as the audited process, the statistics routes probed in `off`, the watched window, the Firebase host names the API may look up (they reach nothing) |
 | `docker-compose.audit.yml` | The API image under test (`REC_API_IMAGE`) and the Firebase Emulator Suite (`REC_EMULATORS_IMAGE`) instead of a real Firebase project (`demo-` project, kept local); a random `REC_JWT_SECRET` and a throwaway service-account key per run |
 | `emulators.Dockerfile`, `emulators.firebase.json` | The emulators image (Authentication, Realtime Database, Storage), also usable for `npm run test:integration` in `apps/api` |
-| `adapter.mjs` | Signs in as the operator through the Authentication emulator, reads the statistics routes, switches the statistics off as the operator (`loaded_off`), signs in through the portal's page (browser leg) |
+| `adapter.mjs` | Waits for the Authentication emulator (it can start a minute after the API answers), signs in as the operator through it, reads the statistics routes, switches the statistics off as the operator (`loaded_off`), signs in through the portal's page (browser leg) |
 | `harness.json` | The harness version and integrity |
 | `egress-audit.web.config.json`, `compose.web.yml` | The browser leg: the portal image under test as a second audited process, walked page by page in a real browser |
 | `ui-routes.json`, `ui-routes-pages.mjs` | Every portal page, generated from the Next.js pages router (`node tools/egress-audit/ui-routes-pages.mjs`; CI checks it with `--check`, with a control that must fail) |
