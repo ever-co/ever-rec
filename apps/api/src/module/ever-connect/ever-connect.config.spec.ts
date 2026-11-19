@@ -51,6 +51,7 @@ describe('ever-connect config', () => {
       'instance_url',
       'stats_link',
       'ever_id_login',
+      'managed_operations',
     ]);
   });
 

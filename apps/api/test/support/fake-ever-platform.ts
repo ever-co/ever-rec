@@ -84,6 +84,8 @@ export class FakeEverPlatform {
   readonly root = newKey('test-root-1');
   readonly entitlementKey = newKey('test-entitlement-1');
   readonly intentKey = newKey('test-intent-1');
+  /** Managed-operation results received. */
+  readonly managedResults: any[] = [];
   /** `/complete` answers recorded per intent. */
   readonly completions = new Map<string, any>();
   readonly requests: RecordedRequest[] = [];
@@ -375,7 +377,7 @@ export class FakeEverPlatform {
     }
     if (method === 'GET' && path === '/v1/instances/me/integrations') {
       const view: Record<string, unknown> = {};
-      for (const key of ['instance_url', 'stats_link', 'ever_id_login']) {
+      for (const key of ['instance_url', 'stats_link', 'ever_id_login', 'managed_operations']) {
         const state = instance.integrations[key];
         view[key] = instance.denied.includes(key)
           ? { enabled: false, state: 'denied_by_policy', consent_id: null, config: {} }
@@ -492,6 +494,11 @@ export class FakeEverPlatform {
       }
       this.completions.set(jti, { ...r.body, tenant_link_id: tenantLinkId });
       return this.json(200, { status: 'completed', tenant_link_id: tenantLinkId, job_id: null });
+    }
+    const managedMatch = /^\/v1\/instances\/me\/managed-operations\/([^/]+)\/result$/.exec(path);
+    if (managedMatch && method === 'POST') {
+      this.managedResults.push({ id: managedMatch[1], ...r.body });
+      return this.json(200, {});
     }
     if (method === 'POST' && path === '/v1/instances/me/disconnect') {
       instance.status = 'disconnected';

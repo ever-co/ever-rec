@@ -53,7 +53,13 @@ export function isOffered(
   key: RecIntegrationKey,
   installSource: InstallSource,
 ): boolean {
-  if (key === 'stats_link' && installSource === 'cloud') return false;
+  // Ever operates its cloud itself: neither applies there.
+  if (
+    (key === 'stats_link' || key === 'managed_operations') &&
+    installSource === 'cloud'
+  ) {
+    return false;
+  }
   const raw = (INTEGRATIONS as Record<string, any>)[key];
   return Array.isArray(raw?.products) && raw.products.includes('rec');
 }

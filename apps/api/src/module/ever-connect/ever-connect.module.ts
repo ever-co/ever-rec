@@ -39,6 +39,7 @@ import { EverConnectFeedService } from './services/ever-connect-feed.service';
 import { EverConnectIntegrationsService } from './services/ever-connect-integrations.service';
 import { EverConnectLeaseService } from './services/ever-connect-lease.service';
 import { EverConnectLinksService } from './services/ever-connect-links.service';
+import { EverConnectManagedService } from './services/ever-connect-managed.service';
 import { EverConnectOidcService } from './services/ever-connect-oidc.service';
 import { EverConnectPersonService } from './services/ever-connect-person.service';
 import { EverConnectProvisionService } from './services/ever-connect-provision.service';
@@ -97,6 +98,7 @@ const logger = new Logger('EverConnect');
     EverConnectLinksService,
     EverConnectService,
     EverConnectPersonService,
+    EverConnectManagedService,
     EverConnectFeedService,
     EverConnectSchedulerService,
     EverConnectProvisionService,

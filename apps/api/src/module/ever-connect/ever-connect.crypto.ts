@@ -14,7 +14,11 @@ import {
 } from 'node:crypto';
 import { isWeakSecret } from '../ever-instance/ever-instance.crypto';
 
-export type SealPurpose = 'oidc-config' | 'person-export' | 'provision-txn';
+export type SealPurpose =
+  | 'oidc-config'
+  | 'person-export'
+  | 'provision-txn'
+  | 'managed-target';
 
 /** A sealed value that cannot be opened. Carries no secret. */
 export class SealError extends Error {

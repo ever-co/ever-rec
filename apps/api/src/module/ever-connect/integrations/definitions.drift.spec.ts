@@ -15,6 +15,8 @@ const PINNED: Record<string, string> = {
     '894e65146993f578506d3d044b2f730d9f1570666c2950bfbdaf4cae9d31c9a0',
   ever_id_login:
     '946a4d203df34e692bb3dd4de9613f60e17e8d177e0c033aeae1c08b7db377e6',
+  managed_operations:
+    'b6c6a842aa8b8e379861cf28241ea47f9c8717dccaefa94b2b15dc6c248dffde',
 };
 
 const digest = (value: unknown) =>
@@ -41,6 +43,7 @@ describe('integration definitions (drift)', () => {
       'instance_url',
       'stats_link',
       'ever_id_login',
+      'managed_operations',
     ]);
     expect(offeredKeys('cloud')).toEqual(['instance_url', 'ever_id_login']);
     expect(isOffered('stats_link', 'cloud')).toBe(false);

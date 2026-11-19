@@ -17,6 +17,8 @@
     { "method": "POST", "path": "/api/v1/ever-connect/integrations/:key/disable", "access": "operator", "purpose": "Switch an integration off here" },
     { "method": "POST", "path": "/api/v1/ever-connect/integrations/:key/accept", "access": "operator", "purpose": "Accept or decline an integration that waits for the operator" },
     { "method": "GET", "path": "/api/v1/ever-connect/audit", "access": "operator", "purpose": "The audit trail, newest first" },
+    { "method": "GET", "path": "/api/v1/ever-connect/managed", "access": "operator", "purpose": "The operator's opt-in to maintenance operations, its kinds and windows, and the history (status and size)" },
+    { "method": "PUT", "path": "/api/v1/ever-connect/managed", "access": "operator", "purpose": "Opt in or out, the kinds, the windows and the backup directory (write-only)" },
     { "method": "GET", "path": "/api/v1/ever-connect/workspaces/:workspaceId/link", "access": "workspace_admin", "purpose": "The workspace's organization link, plan and entitlement state" },
     { "method": "POST", "path": "/api/v1/ever-connect/workspaces/:workspaceId/link", "access": "workspace_admin", "purpose": "Link the workspace with a link code" },
     { "method": "DELETE", "path": "/api/v1/ever-connect/workspaces/:workspaceId/link", "access": "workspace_admin", "purpose": "Unlink the workspace" },
