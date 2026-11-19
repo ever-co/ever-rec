@@ -6,6 +6,7 @@ import {
   Env,
   InstallSource,
   readApiUrl,
+  readBoolStrict,
   readInstallSource,
   warnOnce,
   Warn,
@@ -32,6 +33,10 @@ export interface EverConnectConfig {
   installSource: InstallSource;
   /** `API_BASE_URL`: the API's own address (Ever ID callbacks; the cloud's public address). */
   apiBaseUrl: string;
+  /** `WEBSITE_URL`: the portal (the address a provisioned workspace opens at). */
+  portalUrl: string;
+  /** `EVER_CONNECT_PROVISION_ENABLED` (exactly `true`): the cloud provision routes exist. */
+  provisionEnabled: boolean;
   /** The version Rec reports (`apps/api/package.json`). */
   version: string;
   /** Numbers of the platform contract; products may lower them, never raise them. */
@@ -150,6 +155,13 @@ export function readEverConnectConfig(env: Env, warn: Warn): EverConnectConfig {
     feedMode,
     installSource: readInstallSource(env, warn),
     apiBaseUrl: trimTrailingSlashes(env['API_BASE_URL']),
+    portalUrl: trimTrailingSlashes(env['WEBSITE_URL']),
+    provisionEnabled: readBoolStrict(
+      'EVER_CONNECT_PROVISION_ENABLED',
+      false,
+      env,
+      warn,
+    ),
     version: apiVersion(),
     timings: {
       heartbeatIntervalMs: CONSTANTS.heartbeat_interval_s * 1000,
@@ -173,6 +185,7 @@ export function describeConfig(config: EverConnectConfig): string {
     `install_source=${config.installSource}`,
     `deny=${[...config.denied].join('+') || 'none'}`,
     `env_code=${config.envCode ? 'set' : 'unset'}`,
+    `provision=${config.provisionEnabled ? 'on' : 'off'}`,
   ].join(' ');
 }
 
@@ -187,6 +200,8 @@ export function everConnectConfigFactory(
     'EVER_PLATFORM_API_URL',
     'EVER_INSTALL_SOURCE',
     'API_BASE_URL',
+    'WEBSITE_URL',
+    'EVER_CONNECT_PROVISION_ENABLED',
   ];
   const env = Object.fromEntries(
     names.map((name) => [name, config.get<string>(name)]),

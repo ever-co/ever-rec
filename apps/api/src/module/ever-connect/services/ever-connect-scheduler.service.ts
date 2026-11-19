@@ -23,6 +23,7 @@ import { EverConnectIntegrationsService } from './ever-connect-integrations.serv
 import { EverConnectLeaseService } from './ever-connect-lease.service';
 import { EverConnectLinksService } from './ever-connect-links.service';
 import { EverConnectPersonService } from './ever-connect-person.service';
+import { EverConnectProvisionService } from './ever-connect-provision.service';
 import { EverConnectStoreService } from './ever-connect-store.service';
 import { EverConnectService } from './ever-connect.service';
 
@@ -78,6 +79,7 @@ export class EverConnectSchedulerService
     private readonly links: EverConnectLinksService,
     private readonly feed: EverConnectFeedService,
     private readonly person: EverConnectPersonService,
+    private readonly provision: EverConnectProvisionService,
   ) {}
 
   /** Jobs with a timer now (tests). */
@@ -319,6 +321,7 @@ export class EverConnectSchedulerService
     await this.links.retryPendingUnlinks();
     await this.integrations.retryFailedSends();
     await this.person.syncExistingLinks();
+    await this.provision.retryPendingCompletes();
   }
 
   /** Entitlements, then integration states. */

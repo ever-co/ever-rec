@@ -1,8 +1,14 @@
 import { Global, Logger, Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { ModuleRef } from '@nestjs/core';
 import { EVER_CONNECT_WORKSPACE_LINK_READER } from '../../common/ever-platform/tokens';
 import { EverInstanceModule } from '../ever-instance/ever-instance.module';
 import { EVER_CONNECT_OIDC_CONFIG } from '../ever-id/ever-id.tokens';
+import {
+  EverConnectProvisionController,
+  EverConnectProvisionEnabledGuard,
+  EverConnectProvisionRateGuard,
+} from './controllers/ever-connect-provision.controller';
 import { EverConnectAdminController } from './controllers/ever-connect-admin.controller';
 import {
   EverConnectPersonController,
@@ -18,6 +24,8 @@ import {
   EVER_CONNECT_CLOCK,
   EVER_CONNECT_FETCH,
   EVER_CONNECT_LOCAL_PLATFORM,
+  EVER_CONNECT_WORKSPACE_CREATOR,
+  EverConnectWorkspaceCreator,
   systemClock,
 } from './ever-connect.tokens';
 import {
@@ -33,6 +41,7 @@ import { EverConnectLeaseService } from './services/ever-connect-lease.service';
 import { EverConnectLinksService } from './services/ever-connect-links.service';
 import { EverConnectOidcService } from './services/ever-connect-oidc.service';
 import { EverConnectPersonService } from './services/ever-connect-person.service';
+import { EverConnectProvisionService } from './services/ever-connect-provision.service';
 import { EverConnectSchedulerService } from './services/ever-connect-scheduler.service';
 import { EverConnectStoreService } from './services/ever-connect-store.service';
 import { EverConnectService } from './services/ever-connect.service';
@@ -56,6 +65,7 @@ const logger = new Logger('EverConnect');
     EverConnectAdminController,
     EverConnectWorkspaceController,
     EverConnectPersonController,
+    EverConnectProvisionController,
   ],
   providers: [
     {
@@ -89,8 +99,34 @@ const logger = new Logger('EverConnect');
     EverConnectPersonService,
     EverConnectFeedService,
     EverConnectSchedulerService,
+    EverConnectProvisionService,
     EverConnectOperatorGuard,
     EverConnectWorkspaceAdminGuard,
+    EverConnectProvisionEnabledGuard,
+    EverConnectProvisionRateGuard,
+    {
+      // A provisioned workspace is created by Rec's own workspace service (admin = the person).
+      provide: EVER_CONNECT_WORKSPACE_CREATOR,
+      useFactory: (moduleRef: ModuleRef): EverConnectWorkspaceCreator => ({
+        async create(uid, name) {
+          // Resolved when used: the workspace service (and what it loads) stays out of this
+          // module's own import graph.
+          const { WorkspacesService } =
+            // eslint-disable-next-line @typescript-eslint/no-require-imports
+            require('../workspace/services/workspace.service');
+          const workspaces = moduleRef.get(WorkspacesService, { strict: false });
+          const answer = await workspaces.createNewWorkspace(uid, '', '', name);
+          const id = (answer as { data?: { id?: string } })?.data?.id;
+          if (!id) {
+            throw Object.assign(new Error('The workspace could not be created.'), {
+              code: 'workspace_not_created',
+            });
+          }
+          return id;
+        },
+      }),
+      inject: [ModuleRef],
+    },
     {
       provide: EVER_CONNECT_WORKSPACE_LINK_READER,
       useExisting: EverConnectLinksService,
