@@ -1,7 +1,8 @@
 /**
  * How the connection keeps its few secrets at rest (the Ever ID client settings, a person's
- * export): AES-256-GCM with a key derived by HKDF-SHA256 from `REC_JWT_SECRET`, salted with the
- * record's own id and bound to its purpose (also the additional data). A stored value reads
+ * export): AES-256-GCM with a key derived by HKDF-SHA256 from `REC_JWT_SECRET` (refused while it is
+ * unset or the public `.env.sample` value), salted with the record's own id and bound to its
+ * purpose (also the additional data). A stored value reads
  * `v1:<iv>:<tag>:<ciphertext>`, each part base64url. Nothing here logs or returns key material.
  */
 import {
@@ -11,6 +12,7 @@ import {
   hkdfSync,
   randomBytes,
 } from 'node:crypto';
+import { isWeakSecret } from '../ever-instance/ever-instance.crypto';
 
 export type SealPurpose = 'oidc-config' | 'person-export' | 'provision-txn';
 
@@ -25,7 +27,8 @@ export class SealError extends Error {
 }
 
 function keyFor(secret: string, salt: string, purpose: SealPurpose): Buffer {
-  if (!secret) throw new SealError('secret_missing');
+  // Unset, or the public value of `.env.sample`: it would protect nothing.
+  if (isWeakSecret(secret)) throw new SealError('secret_missing');
   return Buffer.from(
     hkdfSync(
       'sha256',
