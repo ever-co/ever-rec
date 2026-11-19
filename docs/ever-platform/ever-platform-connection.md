@@ -163,6 +163,9 @@ rules deny every client read and write), plus the connection key beside the stat
 Unsetting `EVER_CONNECT_ENABLED` and restarting leaves this data in place, unused; setting it again
 reuses the connection.
 
+Changing `REC_JWT_SECRET` makes the stored connection key and the Ever ID client settings unreadable
+(they are not re-encrypted). Disconnect first, change the secret, then connect again with a new code.
+
 ## How to verify it yourself
 
 - With `EVER_CONNECT_ENABLED` unset, `GET /api/v1/ever-connect/health` answers 404.
