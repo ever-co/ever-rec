@@ -39,6 +39,8 @@ here (`apps/api/.eslintrc.js`); the rest of the API injects the optional tokens 
 | `services/ever-connect-integrations.service.ts` | Catalog, policy, consent links, switch-offs, and what each integration sends |
 | `services/ever-connect-oidc.service.ts` | The Ever ID client settings handed to the Ever ID module |
 | `services/ever-connect-person.service.ts` | Person links; export and deletion requests and their receipts |
+| `services/ever-connect-provision.service.ts` | Ever Rec cloud provisioning (hand-off; `EVER_CONNECT_PROVISION_ENABLED`) |
+| `services/ever-connect-managed.service.ts` | Maintenance operations with the operator's opt-in (health report, backup, backup check) |
 | `services/ever-connect-feed.service.ts` | Reads, handles once and acknowledges the event feed |
 | `services/ever-connect-scheduler.service.ts` | Heartbeat, entitlement refresh, feed loop, first-start code, lease renewal |
 

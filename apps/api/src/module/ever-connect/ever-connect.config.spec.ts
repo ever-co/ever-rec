@@ -41,7 +41,7 @@ describe('ever-connect config', () => {
     expect(warnings[0]).not.toContain('ABCD');
   });
 
-  it('the deny list keeps Rec keys only; * denies all three', () => {
+  it('the deny list keeps Rec keys only; * denies every one', () => {
     expect([
       ...read({ EVER_CONNECT_INTEGRATIONS_DENY: 'stats_link, webhooks' })
         .denied,

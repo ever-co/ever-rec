@@ -38,7 +38,7 @@ describe('integration definitions (drift)', () => {
     expect(digest(copy)).not.toBe(PINNED.instance_url);
   });
 
-  it('offers exactly the three Rec keys; stats_link never on Ever Cloud', () => {
+  it('offers exactly the Rec keys; stats_link and managed_operations never on Ever Cloud', () => {
     expect(offeredKeys('self-hosted')).toEqual([
       'instance_url',
       'stats_link',

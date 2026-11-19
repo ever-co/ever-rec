@@ -98,7 +98,7 @@ export function trimTrailingSlashes(value: string | undefined): string {
   return text;
 }
 
-/** Splits `EVER_CONNECT_INTEGRATIONS_DENY`: Rec keys only (`*` denies all three). */
+/** Splits `EVER_CONNECT_INTEGRATIONS_DENY`: Rec keys only (`*` denies every one). */
 export function parseDenyList(
   raw: string | undefined,
   warn: Warn,

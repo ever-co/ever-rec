@@ -205,3 +205,31 @@ export const confirmProvision = (provisionTxn: string): Promise<IProvisionResult
 
 export const rejectProvision = (jti: string, provisionTxn: string): Promise<IProvisionResult> =>
   publicApi.post(`${BASE}/provision/intents/${encodeURIComponent(jti)}/reject`, { provisionTxn }) as any;
+
+// Maintenance operations (the operator of a self-hosted installation)
+
+export interface IManagedWindow {
+  days: number[];
+  from: string;
+  to: string;
+}
+
+export interface IManagedSettings {
+  available: boolean;
+  optIn: boolean;
+  kinds: string[];
+  supportedKinds: string[];
+  windows: IManagedWindow[];
+  /** Whether a backup directory is set (the directory itself is never sent back). */
+  backupDirSet: boolean;
+  history: Array<{ operationId: string; kind: string; status: string; at: number; sizeBytes?: number; reason?: string }>;
+}
+
+export const getManaged = (): Promise<IManagedSettings> => api.get(`${BASE}/managed`) as any;
+
+export const setManaged = (body: {
+  optIn: boolean;
+  kinds: string[];
+  windows: IManagedWindow[];
+  backupDir?: string;
+}): Promise<IManagedSettings> => api.put(`${BASE}/managed`, body) as any;

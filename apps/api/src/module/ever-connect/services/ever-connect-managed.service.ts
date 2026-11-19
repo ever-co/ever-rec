@@ -109,7 +109,10 @@ export class EverConnectManagedService {
   ) {}
 
   private async read(): Promise<ManagedSettingsRecord | null> {
-    const snapshot = await this.store.db().ref(EVER_CONNECT_PATHS.managed).get();
+    const snapshot = await this.store
+      .db()
+      .ref(EVER_CONNECT_PATHS.managed)
+      .get();
     return snapshot.exists() ? (snapshot.val() as ManagedSettingsRecord) : null;
   }
 
@@ -135,30 +138,45 @@ export class EverConnectManagedService {
   /** The operator's opt-in, kinds, windows and backup directory (write-only). */
   async update(body: Record<string, unknown> | undefined, actor: string) {
     const bad = (message: string) =>
-      new BadRequestException({ statusCode: 400, code: 'invalid_managed', message });
+      new BadRequestException({
+        statusCode: 400,
+        code: 'invalid_managed',
+        message,
+      });
     const previous = await this.read();
     const optIn = body?.optIn === true;
-    const kinds = Array.isArray(body?.kinds) ? (body.kinds as unknown[]) : previous?.kinds ?? [];
-    if (!kinds.every((kind) => REC_MANAGED_KINDS.includes(kind as ManagedOperationKind))) {
+    const kinds = Array.isArray(body?.kinds)
+      ? (body.kinds as unknown[])
+      : (previous?.kinds ?? []);
+    if (
+      !kinds.every((kind) =>
+        REC_MANAGED_KINDS.includes(kind as ManagedOperationKind),
+      )
+    ) {
       throw bad(`Kinds are ${REC_MANAGED_KINDS.join(', ')}.`);
     }
     const windows = Array.isArray(body?.windows)
       ? (body.windows as ManagedWindow[])
-      : previous?.windows ?? [];
+      : (previous?.windows ?? []);
     for (const window of windows) {
       if (
         !Array.isArray(window?.days) ||
-        !window.days.every((day) => Number.isInteger(day) && day >= 0 && day <= 6) ||
+        !window.days.every(
+          (day) => Number.isInteger(day) && day >= 0 && day <= 6,
+        ) ||
         !HHMM.test(String(window.from)) ||
         !HHMM.test(String(window.to))
       ) {
-        throw bad('A window is {days: [0-6], from: "HH:MM", to: "HH:MM"} in UTC.');
+        throw bad(
+          'A window is {days: [0-6], from: "HH:MM", to: "HH:MM"} in UTC.',
+        );
       }
     }
     let backupDirEnc = previous?.backupDirEnc ?? null;
     if (typeof body?.backupDir === 'string') {
       const dir = body.backupDir.trim();
-      if (dir && !isAbsolute(dir)) throw bad('The backup directory is an absolute path.');
+      if (dir && !isAbsolute(dir))
+        throw bad('The backup directory is an absolute path.');
       backupDirEnc = dir
         ? seal(dir, this.settings.recJwtSecret, 'managed', 'managed-target')
         : null;
@@ -166,14 +184,22 @@ export class EverConnectManagedService {
     const record: ManagedSettingsRecord = {
       optIn,
       kinds: kinds as ManagedOperationKind[],
-      windows: windows.map((w) => ({ days: [...w.days], from: w.from, to: w.to })),
+      windows: windows.map((w) => ({
+        days: [...w.days],
+        from: w.from,
+        to: w.to,
+      })),
       backupDirEnc,
       updatedAt: this.clock(),
       updatedBy: actor,
     };
     await this.store.db().ref(EVER_CONNECT_PATHS.managed).set(record);
     if (optIn !== (previous?.optIn === true)) {
-      await this.audit.write(optIn ? 'managed.opt_in' : 'managed.opt_out', actor, {});
+      await this.audit.write(
+        optIn ? 'managed.opt_in' : 'managed.opt_out',
+        actor,
+        {},
+      );
     }
     return this.view();
   }
@@ -182,7 +208,12 @@ export class EverConnectManagedService {
     const record = await this.read();
     if (!record?.backupDirEnc) return null;
     try {
-      return open(record.backupDirEnc, this.settings.recJwtSecret, 'managed', 'managed-target');
+      return open(
+        record.backupDirEnc,
+        this.settings.recJwtSecret,
+        'managed',
+        'managed-target',
+      );
     } catch {
       return null;
     }
@@ -195,20 +226,30 @@ export class EverConnectManagedService {
     if (!consent?.enabled) return 'no_consent';
     const record = await this.read();
     if (!record?.optIn) return 'no_operator_opt_in';
-    if (!(record.kinds ?? []).includes(kind as ManagedOperationKind)) return 'kind_not_allowed';
+    if (!(record.kinds ?? []).includes(kind as ManagedOperationKind))
+      return 'kind_not_allowed';
     if (!inWindow(record.windows ?? [], this.clock())) return 'outside_window';
     return null;
   }
 
   /** A `managed_operation.requested` event of the feed. */
-  async handle(event: { type: string; data?: Record<string, unknown> }): Promise<void> {
+  async handle(event: {
+    type: string;
+    data?: Record<string, unknown>;
+  }): Promise<void> {
     const operationId = String(event.data?.operation_id ?? '');
     const kind = String(event.data?.kind ?? '');
     if (!operationId) return;
     const refusal = await this.refusal(kind);
     if (refusal) {
       await this.post(operationId, { status: 'failed' });
-      await this.record({ operationId, kind, status: 'refused', at: this.clock(), reason: refusal });
+      await this.record({
+        operationId,
+        kind,
+        status: 'refused',
+        at: this.clock(),
+        reason: refusal,
+      });
       return;
     }
     const report = await this.runner.handle(event as never);
@@ -218,7 +259,9 @@ export class EverConnectManagedService {
         kind,
         status: report.result.status === 'succeeded' ? 'succeeded' : 'failed',
         at: this.clock(),
-        ...(report.result.size_bytes !== undefined ? { sizeBytes: report.result.size_bytes } : {}),
+        ...(report.result.size_bytes !== undefined
+          ? { sizeBytes: report.result.size_bytes }
+          : {}),
       });
       await this.audit.write('managed.result', 'platform', {
         kind,
@@ -227,7 +270,10 @@ export class EverConnectManagedService {
     }
   }
 
-  private async post(operationId: string, result: { status: string; [key: string]: unknown }) {
+  private async post(
+    operationId: string,
+    result: { status: string; [key: string]: unknown },
+  ) {
     await this.client.run((client) =>
       client.instances.managedOperationResult(operationId, result as never),
     );
@@ -236,12 +282,17 @@ export class EverConnectManagedService {
   private async record(row: ManagedHistoryRow): Promise<void> {
     const ref = this.store.db().ref(EVER_CONNECT_PATHS.managedHistory);
     await ref.child(row.operationId).set(row);
-    const all = ((await ref.get()).val() ?? {}) as Record<string, ManagedHistoryRow>;
+    const all = ((await ref.get()).val() ?? {}) as Record<
+      string,
+      ManagedHistoryRow
+    >;
     const old = Object.values(all)
       .sort((a, b) => b.at - a.at)
       .slice(HISTORY_KEPT);
     if (old.length) {
-      await ref.update(Object.fromEntries(old.map((row) => [row.operationId, null])));
+      await ref.update(
+        Object.fromEntries(old.map((row) => [row.operationId, null])),
+      );
     }
   }
 
@@ -268,7 +319,9 @@ export class EverConnectManagedService {
           size_bytes: outcome.size_bytes,
         };
       },
-      execute: async (op: ManagedOperation): Promise<ManagedOperationOutcome> => {
+      execute: async (
+        op: ManagedOperation,
+      ): Promise<ManagedOperationOutcome> => {
         if (op.kind === 'health_report') return this.health();
         if (op.kind === 'backup') return this.backup();
         if (op.kind === 'restore_check') return this.restoreCheck();
@@ -283,7 +336,9 @@ export class EverConnectManagedService {
       await this.store.db().ref(EVER_CONNECT_PATHS.connection).get();
       return { status: 'succeeded', version: this.config.version };
     } catch (error) {
-      this.logger.warn(`Health report: the database is not reachable (${errorCode(error)}).`);
+      this.logger.warn(
+        `Health report: the database is not reachable (${errorCode(error)}).`,
+      );
       return { status: 'failed', version: this.config.version };
     }
   }
@@ -292,7 +347,10 @@ export class EverConnectManagedService {
   private async backup(): Promise<ManagedOperationOutcome> {
     const dir = await this.backupDir();
     if (!dir) return { status: 'failed' };
-    const stamp = new Date(this.clock()).toISOString().replace(/[-:]/g, '').slice(0, 13);
+    const stamp = new Date(this.clock())
+      .toISOString()
+      .replace(/[-:]/g, '')
+      .slice(0, 13);
     const ref = `bk-${stamp}-${randomBytes(3).toString('hex')}`;
     const data = Buffer.from(
       JSON.stringify((await this.store.db().ref('/').get()).val() ?? {}),
@@ -303,7 +361,12 @@ export class EverConnectManagedService {
     await fs.writeFile(join(dir, `${ref}.json`), data, { mode: 0o600 });
     await fs.writeFile(
       join(dir, `${ref}.manifest.json`),
-      JSON.stringify({ ref, createdAt: this.clock(), sizeBytes: data.length, sha256 }),
+      JSON.stringify({
+        ref,
+        createdAt: this.clock(),
+        sizeBytes: data.length,
+        sha256,
+      }),
       { mode: 0o600 },
     );
     return { status: 'succeeded', artefact_ref: ref, size_bytes: data.length };
@@ -315,7 +378,9 @@ export class EverConnectManagedService {
     if (!dir) return { status: 'failed' };
     try {
       const manifests = (await fs.readdir(dir))
-        .filter((name) => /^bk-[0-9TZ]+-[0-9a-f]{6}\.manifest\.json$/.test(name))
+        .filter((name) =>
+          /^bk-[0-9TZ]+-[0-9a-f]{6}\.manifest\.json$/.test(name),
+        )
         .sort();
       const last = manifests[manifests.length - 1];
       if (!last) return { status: 'failed' };
@@ -325,7 +390,11 @@ export class EverConnectManagedService {
         data.length === manifest.sizeBytes &&
         createHash('sha256').update(data).digest('hex') === manifest.sha256;
       return ok
-        ? { status: 'succeeded', artefact_ref: manifest.ref, size_bytes: data.length }
+        ? {
+            status: 'succeeded',
+            artefact_ref: manifest.ref,
+            size_bytes: data.length,
+          }
         : { status: 'failed', artefact_ref: manifest.ref };
     } catch {
       return { status: 'failed' };
