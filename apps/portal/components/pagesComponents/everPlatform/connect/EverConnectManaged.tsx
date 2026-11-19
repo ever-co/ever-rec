@@ -51,7 +51,8 @@ const EverConnectManaged: React.FC = () => {
         await setManaged({
           optIn,
           kinds,
-          windows: [slot],
+          // The first window is edited here; any other window set before is kept.
+          windows: [slot, ...settings.windows.slice(1)],
           ...(backupDir.trim() ? { backupDir: backupDir.trim() } : {}),
         }),
       );

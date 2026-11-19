@@ -9,6 +9,21 @@ import { join } from 'node:path';
 import { EVER_CONNECT_PATHS } from '../src/module/ever-connect/ever-connect.types';
 import { ConnectTestApp, createConnectTestApp } from './support/ever-connect-app';
 import { fakeUlid } from './support/fake-ever-platform';
+import {
+  EverConnectManagedService,
+  inWindow,
+} from '../src/module/ever-connect/services/ever-connect-managed.service';
+
+describe('maintenance windows', () => {
+  const at = (iso: string) => Date.parse(iso);
+  const saturdayNight = [{ days: [6], from: '22:00', to: '02:00' }];
+  it('an overnight window runs from the chosen day into the next morning', () => {
+    expect(inWindow(saturdayNight, at('2026-11-21T23:00:00Z'))).toBe(true); // Saturday 23:00
+    expect(inWindow(saturdayNight, at('2026-11-22T01:00:00Z'))).toBe(true); // Sunday 01:00
+    expect(inWindow(saturdayNight, at('2026-11-21T01:00:00Z'))).toBe(false); // Saturday 01:00
+    expect(inWindow(saturdayNight, at('2026-11-22T03:00:00Z'))).toBe(false);
+  });
+});
 import { CONNECT_ON, connectInstallation, readFeed } from './support/ever-connect-flows';
 
 const ALL_WEEK = [{ days: [0, 1, 2, 3, 4, 5, 6], from: '00:00', to: '23:59' }];
@@ -60,7 +75,11 @@ describe('managed operations', () => {
     expect(resultOf(noOptIn)).toMatchObject({ status: 'failed' });
     expect(readdirSync(dir)).toEqual([]);
     const history = t.firebase.db.dump(EVER_CONNECT_PATHS.managedHistory);
-    expect(Object.values(history).map((row: any) => row.reason).sort()).toEqual([
+    expect(
+      Object.values(history)
+        .map((row: any) => String(row.reason))
+        .sort((a, b) => a.localeCompare(b)),
+    ).toEqual([
       'no_consent',
       'no_operator_opt_in',
     ]);
@@ -104,6 +123,24 @@ describe('managed operations', () => {
     const sent = JSON.stringify(t.platform.managedResults);
     expect(sent).not.toContain(dir);
     expect(sent).not.toMatch(/\.json|[\\/]/);
+  });
+
+  it('a denied integration runs nothing, even if its stored state is still enabled', async () => {
+    t.platform.setIntegration('managed_operations', 'enabled', true);
+    await optIn({ optIn: true, kinds: ['backup'], windows: ALL_WEEK, backupDir: dir });
+    await readFeed(t);
+    t.firebase.db.write(['ever_connect', 'policy', 'managed_operations'], {
+      allowed: false,
+      setBy: 'uid-operator',
+      setAt: t.clock.now,
+    });
+    const id = request('backup');
+    await t.get(EverConnectManagedService).handle({
+      type: 'ever.registry.managed_operation.requested',
+      data: t.platform.instance.events[t.platform.instance.events.length - 1].data,
+    });
+    expect(resultOf(id)).toMatchObject({ status: 'failed' });
+    expect(readdirSync(dir)).toEqual([]);
   });
 
   it('update is not run by Ever Rec', async () => {

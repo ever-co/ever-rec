@@ -72,12 +72,17 @@ const HISTORY_KEPT = 50;
 export function inWindow(windows: ManagedWindow[], at: number): boolean {
   const date = new Date(at);
   const day = date.getUTCDay();
+  const yesterday = (day + 6) % 7;
   const now = date.getUTCHours() * 60 + date.getUTCMinutes();
   return windows.some((window) => {
-    if (!window.days.includes(day)) return false;
     const from = minutes(window.from);
     const to = minutes(window.to);
-    return from <= to ? now >= from && now < to : now >= from || now < to;
+    if (from <= to) return window.days.includes(day) && now >= from && now < to;
+    // Overnight: the late part belongs to the chosen day, the early part to the day after it.
+    return (
+      (window.days.includes(day) && now >= from) ||
+      (window.days.includes(yesterday) && now < to)
+    );
   });
 }
 
@@ -222,8 +227,17 @@ export class EverConnectManagedService {
   /** Why an operation may not run now, or `null` when it may. */
   async refusal(kind: string): Promise<string | null> {
     if (this.config.installSource === 'cloud') return 'operated_by_ever';
-    const consent = await this.store.integration('managed_operations');
+    const [consent, policy] = await Promise.all([
+      this.store.integration('managed_operations'),
+      this.store.policy(),
+    ]);
     if (!consent?.enabled) return 'no_consent';
+    if (
+      this.config.denied.has('managed_operations') ||
+      policy.managed_operations?.allowed === false
+    ) {
+      return 'denied_by_policy';
+    }
     const record = await this.read();
     if (!record?.optIn) return 'no_operator_opt_in';
     if (!(record.kinds ?? []).includes(kind as ManagedOperationKind))
@@ -377,14 +391,28 @@ export class EverConnectManagedService {
     const dir = await this.backupDir();
     if (!dir) return { status: 'failed' };
     try {
-      const manifests = (await fs.readdir(dir))
-        .filter((name) =>
-          /^bk-[0-9TZ]+-[0-9a-f]{6}\.manifest\.json$/.test(name),
-        )
-        .sort();
-      const last = manifests[manifests.length - 1];
-      if (!last) return { status: 'failed' };
-      const manifest = JSON.parse(await fs.readFile(join(dir, last), 'utf8'));
+      const names = (await fs.readdir(dir)).filter((name) =>
+        /^bk-[0-9TZ]+-[0-9a-f]{6}\.manifest\.json$/.test(name),
+      );
+      // The newest by the time each manifest records (names only carry the minute).
+      let manifest: {
+        ref: string;
+        createdAt: number;
+        sizeBytes: number;
+        sha256: string;
+      } | null = null;
+      for (const name of names) {
+        const candidate = JSON.parse(
+          await fs.readFile(join(dir, name), 'utf8'),
+        );
+        if (
+          !manifest ||
+          Number(candidate.createdAt) > Number(manifest.createdAt)
+        ) {
+          manifest = candidate;
+        }
+      }
+      if (!manifest) return { status: 'failed' };
       const data = await fs.readFile(join(dir, `${manifest.ref}.json`));
       const ok =
         data.length === manifest.sizeBytes &&
