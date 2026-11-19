@@ -9,18 +9,26 @@ import { REC_INTEGRATION_KEYS } from '../ever-connect.types';
 import { definitionOf, isOffered, offeredKeys } from '.';
 
 const PINNED: Record<string, string> = {
-  instance_url: 'f26416b396ee00a2c69665e1b1348e58e851202139e91e89065e37d3d44b23ef',
-  stats_link: '894e65146993f578506d3d044b2f730d9f1570666c2950bfbdaf4cae9d31c9a0',
-  ever_id_login: '946a4d203df34e692bb3dd4de9613f60e17e8d177e0c033aeae1c08b7db377e6',
+  instance_url:
+    'f26416b396ee00a2c69665e1b1348e58e851202139e91e89065e37d3d44b23ef',
+  stats_link:
+    '894e65146993f578506d3d044b2f730d9f1570666c2950bfbdaf4cae9d31c9a0',
+  ever_id_login:
+    '946a4d203df34e692bb3dd4de9613f60e17e8d177e0c033aeae1c08b7db377e6',
 };
 
 const digest = (value: unknown) =>
   createHash('sha256').update(JSON.stringify(value)).digest('hex');
 
 describe('integration definitions (drift)', () => {
-  it.each(REC_INTEGRATION_KEYS)('%s matches the pinned contract bytes', (key) => {
-    expect(digest((INTEGRATIONS as Record<string, unknown>)[key])).toBe(PINNED[key]);
-  });
+  it.each(REC_INTEGRATION_KEYS)(
+    '%s matches the pinned contract bytes',
+    (key) => {
+      expect(digest((INTEGRATIONS as Record<string, unknown>)[key])).toBe(
+        PINNED[key],
+      );
+    },
+  );
 
   it('a mutated byte fails (control)', () => {
     const copy = JSON.parse(JSON.stringify((INTEGRATIONS as any).instance_url));
@@ -29,7 +37,11 @@ describe('integration definitions (drift)', () => {
   });
 
   it('offers exactly the three Rec keys; stats_link never on Ever Cloud', () => {
-    expect(offeredKeys('self-hosted')).toEqual(['instance_url', 'stats_link', 'ever_id_login']);
+    expect(offeredKeys('self-hosted')).toEqual([
+      'instance_url',
+      'stats_link',
+      'ever_id_login',
+    ]);
     expect(offeredKeys('cloud')).toEqual(['instance_url', 'ever_id_login']);
     expect(isOffered('stats_link', 'cloud')).toBe(false);
   });

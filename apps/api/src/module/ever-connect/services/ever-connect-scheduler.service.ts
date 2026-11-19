@@ -260,7 +260,9 @@ export class EverConnectSchedulerService
     try {
       await this.integrations.refresh(actor);
     } catch (error) {
-      this.logger.warn(`Integration states could not be read (${errorCode(error)}).`);
+      this.logger.warn(
+        `Integration states could not be read (${errorCode(error)}).`,
+      );
     }
   }
 }

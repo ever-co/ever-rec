@@ -19,4 +19,6 @@ export interface EverConnectLocalPlatform {
   rootKeys?: ReadonlyArray<{ kid: string; x: string; iss?: string }>;
   issuer?: string;
 }
-export const EVER_CONNECT_LOCAL_PLATFORM = Symbol('ever connect local platform');
+export const EVER_CONNECT_LOCAL_PLATFORM = Symbol(
+  'ever connect local platform',
+);

@@ -7,7 +7,7 @@ import { Env, isEverConnectEnabled, isEverStatsEnabled, Warn } from './env';
  * `EVER_CONNECT_ENABLED` unset its code (and the SDK it uses) is never even required.
  */
 function everConnectModule() {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   return require('../../module/ever-connect/ever-connect.module')
     .EverConnectModule;
 }

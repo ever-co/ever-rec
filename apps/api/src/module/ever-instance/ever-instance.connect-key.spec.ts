@@ -1,7 +1,10 @@
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InMemoryFirebaseApp } from '../../../test/support/in-memory-firebase';
 import { SAMPLE_REC_JWT_SECRET, verifyBytes } from './ever-instance.crypto';
-import { EverConnectKeyError, EverInstanceService } from './ever-instance.service';
+import {
+  EverConnectKeyError,
+  EverInstanceService,
+} from './ever-instance.service';
 import { readEverInstanceSettings } from './ever-instance.settings';
 import { EVER_INSTANCE_PATHS } from './ever-instance.types';
 
@@ -26,14 +29,16 @@ describe('EverInstanceService: the connect key', () => {
     expect(self.connectKeyId).not.toBe(self.statsKeyId);
     expect(self.connectPublicKey).not.toBe(self.statsPublicKey);
     expect(self.connectPrivateKeyEnc).toMatch(/^v1:/);
-    expect(JSON.stringify(self)).not.toContain(keys[0].privateKeyDer.toString('base64url'));
+    expect(JSON.stringify(self)).not.toContain(
+      keys[0].privateKeyDer.toString('base64url'),
+    );
   });
 
   it('is refused with the sample REC_JWT_SECRET (at_rest_key_default)', async () => {
     const firebase = new InMemoryFirebaseApp();
-    await expect(service(firebase, SAMPLE_REC_JWT_SECRET).ensureConnectKey()).rejects.toEqual(
-      new EverConnectKeyError('at_rest_key_default'),
-    );
+    await expect(
+      service(firebase, SAMPLE_REC_JWT_SECRET).ensureConnectKey(),
+    ).rejects.toEqual(new EverConnectKeyError('at_rest_key_default'));
     expect(firebase.db.dump(EVER_INSTANCE_PATHS.self)).toBeNull();
   });
 
@@ -53,13 +58,18 @@ describe('EverInstanceService: the connect key', () => {
     expect((await s.connectKey())?.keyId).toBe(key.keyId);
     await s.commitConnectKeyRotation(next.keyId);
     expect((await s.connectKey())?.keyId).toBe(next.keyId);
-    expect(firebase.db.dump(EVER_INSTANCE_PATHS.self).connectNextKeyId).toBeUndefined();
+    expect(
+      firebase.db.dump(EVER_INSTANCE_PATHS.self).connectNextKeyId,
+    ).toBeUndefined();
   });
 
   it('the stats-link statement is signed by the statistics key', async () => {
     const firebase = new InMemoryFirebaseApp();
     const s = service(firebase);
-    const statement = await s.signStatsLinkStatement('01JNE7V9J03J6XQ2WN8H0Z88R5', 1793613600);
+    const statement = await s.signStatsLinkStatement(
+      '01JNE7V9J03J6XQ2WN8H0Z88R5',
+      1793613600,
+    );
     const [header, payload, signature] = statement.statement_sig.split('.');
     const self = firebase.db.dump(EVER_INSTANCE_PATHS.self);
     expect(

@@ -1,3 +1,5 @@
+import { existsSync, readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
 import { ConfigService } from '@nestjs/config';
 import { CONSTANTS } from '@ever-co/connect-sdk';
 import {
@@ -56,17 +58,30 @@ export function normaliseConnectCode(value: unknown): string | null {
   return CODE.test(code) ? code : null;
 }
 
-/** The version reported to Ever Platform: `major.minor.patch` of `apps/api/package.json`. */
-export function apiVersion(): string {
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const version = require('../../../package.json').version;
-    return typeof version === 'string' && /^\d+\.\d+\.\d+/.test(version)
-      ? version
-      : '0.0.0';
-  } catch {
-    return '0.0.0';
+/**
+ * The version reported to Ever Platform: `major.minor.patch` of `apps/api/package.json`, found from
+ * this file's folder (source or `dist`).
+ */
+export function apiVersion(start = __dirname): string {
+  let dir = start;
+  for (let i = 0; i < 8; i += 1) {
+    const file = join(dir, 'package.json');
+    if (existsSync(file)) {
+      try {
+        const pkg = JSON.parse(readFileSync(file, 'utf8'));
+        if (pkg?.name === 'ever-rec-api') {
+          const match = /^(\d+)\.(\d+)\.(\d+)/.exec(String(pkg.version ?? ''));
+          return match ? `${match[1]}.${match[2]}.${match[3]}` : '0.0.0';
+        }
+      } catch {
+        return '0.0.0';
+      }
+    }
+    const parent = dirname(dir);
+    if (parent === dir) break;
+    dir = parent;
   }
+  return '0.0.0';
 }
 
 /** Splits `EVER_CONNECT_INTEGRATIONS_DENY`: Rec keys only (`*` denies all three). */

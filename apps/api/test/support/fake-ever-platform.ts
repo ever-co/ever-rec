@@ -29,7 +29,7 @@ interface FakeKey {
 const CROCKFORD = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
 
 /** The closed members of an entitlement document, from the contracts' own valid fixture. */
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const TEMPLATE = require('@ever-co/connect-contracts/fixtures/entitlement/valid/instance.claims.json').ever;
 
 /** A ULID-shaped id (26 Crockford base32 characters). */

@@ -8,7 +8,8 @@ import {
 describe('ever-connect config', () => {
   let warnings: string[];
   const warn = (message: string) => warnings.push(message);
-  const read = (env: Record<string, string | undefined>) => readEverConnectConfig(env, warn);
+  const read = (env: Record<string, string | undefined>) =>
+    readEverConnectConfig(env, warn);
 
   beforeEach(() => {
     warnings = [];
@@ -41,9 +42,10 @@ describe('ever-connect config', () => {
   });
 
   it('the deny list keeps Rec keys only; * denies all three', () => {
-    expect([...read({ EVER_CONNECT_INTEGRATIONS_DENY: 'stats_link, webhooks' }).denied]).toEqual([
-      'stats_link',
-    ]);
+    expect([
+      ...read({ EVER_CONNECT_INTEGRATIONS_DENY: 'stats_link, webhooks' })
+        .denied,
+    ]).toEqual(['stats_link']);
     expect(warnings).toHaveLength(1);
     expect([...read({ EVER_CONNECT_INTEGRATIONS_DENY: '*' }).denied]).toEqual([
       'instance_url',
@@ -53,20 +55,28 @@ describe('ever-connect config', () => {
   });
 
   it('interval feed mode; anything else is long poll with a warning', () => {
-    expect(read({ EVER_CONNECT_FEED_MODE: 'interval' }).feedMode).toBe('interval');
-    expect(read({ EVER_CONNECT_FEED_MODE: 'websocket' }).feedMode).toBe('longpoll');
+    expect(read({ EVER_CONNECT_FEED_MODE: 'interval' }).feedMode).toBe(
+      'interval',
+    );
+    expect(read({ EVER_CONNECT_FEED_MODE: 'websocket' }).feedMode).toBe(
+      'longpoll',
+    );
     expect(warnings).toHaveLength(1);
   });
 
   it('plain http only for a local platform; a public one is unusable (nothing is sent)', () => {
-    expect(read({ EVER_PLATFORM_API_URL: 'http://localhost:4000' }).apiUrl).toBe(
-      'http://localhost:4000',
-    );
-    expect(read({ EVER_PLATFORM_API_URL: 'http://api.example.com' }).apiUrl).toBeNull();
+    expect(
+      read({ EVER_PLATFORM_API_URL: 'http://localhost:4000' }).apiUrl,
+    ).toBe('http://localhost:4000');
+    expect(
+      read({ EVER_PLATFORM_API_URL: 'http://api.example.com' }).apiUrl,
+    ).toBeNull();
   });
 
   it('connect codes: the SDK pattern, normalised', () => {
-    expect(normaliseConnectCode('EVC-0000-1111-2222')).toBe('EVC-0000-1111-2222');
+    expect(normaliseConnectCode('EVC-0000-1111-2222')).toBe(
+      'EVC-0000-1111-2222',
+    );
     expect(normaliseConnectCode('EVC-0000-1111')).toBeNull();
     expect(normaliseConnectCode(42)).toBeNull();
   });
