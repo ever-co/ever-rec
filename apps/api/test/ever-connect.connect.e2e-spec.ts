@@ -168,13 +168,13 @@ describe('CN-3 the first-boot code', () => {
     }
   });
 
-  it('backs off on a network error and tries again later', async () => {
+  it('backs off when the platform cannot be reached and tries again later', async () => {
     const t = await createConnectTestApp({ env: ON });
     try {
       (t.get(EverConnectService) as any).config.envCode = t.platform.issueConnectCode();
       t.platform.down = true;
       const connect = t.get(EverConnectService);
-      expect(await connect.connectWithEnvCode()).toBe('network');
+      expect(await connect.connectWithEnvCode()).toBe('unreachable');
       expect(await connect.connectWithEnvCode()).toBe('skipped');
       t.platform.down = false;
       t.clock.now += 2 * 60 * 1000;

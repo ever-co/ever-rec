@@ -381,6 +381,8 @@ pnpm build:extensions
 
 Ever Rec sends one anonymous usage report a day about the installation as a whole (counts and feature switches only; `EVER_STATS_ENABLED=false` turns it off): see [docs/ever-platform/anonymous-usage-statistics.md](docs/ever-platform/anonymous-usage-statistics.md).
 
+An installation can also connect to Ever Platform (off by default; `EVER_CONNECT_ENABLED=true` loads it): workspaces linked to an Ever organization, and integrations enabled only after a recorded consent. See [docs/ever-platform/](docs/ever-platform/ever-platform-connection.md).
+
 ### Firebase Project Configuration
 
 1. **Create Firebase Project**

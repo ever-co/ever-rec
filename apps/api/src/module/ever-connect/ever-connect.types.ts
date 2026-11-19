@@ -82,7 +82,7 @@ export interface EnvCodeRecord {
   outcome: 'connected' | 'refused' | 'failed';
   /** The HTTP status or error code of the attempt. */
   detail?: string;
-  /** Network errors only: when to try again (the code was not answered). */
+  /** Ever Platform could not be reached: when to try again (the code was not answered). */
   retryAt?: number;
   attempts?: number;
 }

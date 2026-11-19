@@ -50,7 +50,7 @@ import { EverConnectStoreService } from './ever-connect-store.service';
 export const ENV_CODE_ACTOR = 'env:EVER_CONNECT_CODE';
 
 /** The outcome of a redeem attempt with the first-boot code. */
-export type EnvCodeOutcome = 'connected' | 'refused' | 'network';
+export type EnvCodeOutcome = 'connected' | 'refused' | 'unreachable';
 
 /**
  * Connects this installation to Ever Platform with a connect code, disconnects it, and rotates its
@@ -288,7 +288,7 @@ export class EverConnectService {
 
   /**
    * The first-boot code (`EVER_CONNECT_CODE`): the same redeem without a workspace. Any answer of
-   * the platform consumes it (its hash is stored and it is never retried); a network error is
+   * the platform consumes it (its hash is stored and it is never retried); a failed connection is
    * retried later with a backoff.
    */
   async connectWithEnvCode(): Promise<EnvCodeOutcome | 'skipped'> {
@@ -359,7 +359,7 @@ export class EverConnectService {
       this.logger.warn(
         `Ever Platform could not be reached with EVER_CONNECT_CODE (${errorCode(error)}); retrying later.`,
       );
-      return 'network';
+      return 'unreachable';
     }
   }
 

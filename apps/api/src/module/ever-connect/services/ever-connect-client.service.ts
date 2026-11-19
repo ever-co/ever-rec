@@ -50,7 +50,7 @@ export function errorCode(error: unknown): string {
   return 'unreachable';
 }
 
-/** Whether Ever Platform answered at all (a problem document), as opposed to a network failure. */
+/** Whether Ever Platform answered at all (a problem document), as opposed to a failed connection. */
 export function platformAnswered(error: unknown): error is ProblemError {
   return error instanceof ProblemError;
 }

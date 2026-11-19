@@ -166,7 +166,7 @@ export class EverConnectSchedulerService
   private async envCodeJob(): Promise<number | null> {
     if (!(await this.holdsLease())) return 60_000;
     const outcome = await this.connect.connectWithEnvCode();
-    if (outcome === 'network') {
+    if (outcome === 'unreachable') {
       const record = await this.store.envCode();
       return Math.max(
         60_000,
