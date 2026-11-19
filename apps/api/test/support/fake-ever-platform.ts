@@ -90,23 +90,31 @@ class PlatformAnswer {
   readonly status: number;
   readonly headers: AnswerHeaders;
   readonly body: ReadableStream<Uint8Array> | null;
-  private readonly bytes: Uint8Array;
-  private used = false;
+  /** Set once the body stream was read from or cancelled (the Fetch API's "disturbed"). */
+  private disturbed = false;
 
   constructor(text: string | null, init: { status: number; headers?: Record<string, string> }) {
     this.status = init.status;
     this.headers = new AnswerHeaders(init.headers);
-    this.bytes = new Uint8Array(Buffer.from(text ?? '', 'utf8'));
-    const bytes = this.bytes;
-    this.body =
-      text === null
-        ? null
-        : new ReadableStream<Uint8Array>({
-            start(controller) {
-              if (bytes.length > 0) controller.enqueue(bytes);
-              controller.close();
-            },
-          });
+    if (text === null) {
+      this.body = null;
+      return;
+    }
+    const bytes = new Uint8Array(Buffer.from(text, 'utf8'));
+    // highWaterMark 0: nothing is pulled until someone reads, so a pull means the body is in use.
+    this.body = new ReadableStream<Uint8Array>(
+      {
+        pull: (controller) => {
+          this.disturbed = true;
+          if (bytes.length > 0) controller.enqueue(bytes);
+          controller.close();
+        },
+        cancel: () => {
+          this.disturbed = true;
+        },
+      },
+      { highWaterMark: 0 },
+    );
   }
 
   get ok(): boolean {
@@ -114,13 +122,31 @@ class PlatformAnswer {
   }
 
   get bodyUsed(): boolean {
-    return this.used || (this.body?.locked ?? false);
+    return this.disturbed;
   }
 
+  /** Reads the body stream itself, so a body is consumed once whichever way it is read. */
   async arrayBuffer(): Promise<ArrayBuffer> {
-    if (this.bodyUsed) throw new TypeError('Body is unusable: Body has already been read');
-    this.used = true;
-    return this.bytes.slice().buffer;
+    if (this.body === null) return new ArrayBuffer(0);
+    if (this.disturbed || this.body.locked) {
+      throw new TypeError('Body is unusable: Body has already been read');
+    }
+    const reader = this.body.getReader();
+    const chunks: Uint8Array[] = [];
+    let size = 0;
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      chunks.push(value);
+      size += value.length;
+    }
+    const out = new Uint8Array(size);
+    let at = 0;
+    for (const chunk of chunks) {
+      out.set(chunk, at);
+      at += chunk.length;
+    }
+    return out.buffer;
   }
 
   async text(): Promise<string> {
