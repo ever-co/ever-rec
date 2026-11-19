@@ -57,8 +57,11 @@ describe('managed operations', () => {
     operator = await connectInstallation(t);
   });
   afterEach(async () => {
-    rmSync(dir, { recursive: true, force: true });
-    await t?.close();
+    try {
+      await t?.close();
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
 
   it('without the consent, or without the opt-in, nothing runs and the answer is failed', async () => {
