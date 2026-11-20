@@ -15,6 +15,13 @@ import { EverConnectStoreService } from './ever-connect-store.service';
  */
 export const EVER_CONNECT_OIDC_REFRESH_MS = 15_000;
 
+/**
+ * How long a request waits for that read. A read that takes longer (a database that does not
+ * answer) goes on in the background; the request, and the ones after it until the next interval,
+ * use the last known client.
+ */
+export const EVER_CONNECT_OIDC_REFRESH_WAIT_MS = 2_000;
+
 const UNREADABLE =
   'The stored Ever ID client settings cannot be read; Ever ID sign-in through the connection stays off.';
 
@@ -86,7 +93,8 @@ export class EverConnectOidcService {
   /**
    * Reads the stored settings again when the last read is older than
    * {@link EVER_CONNECT_OIDC_REFRESH_MS} (one read at a time), so that a consent recorded by another
-   * API process reaches this one. A failed database read keeps the settings in memory.
+   * API process reaches this one. Waits for that read at most
+   * {@link EVER_CONNECT_OIDC_REFRESH_WAIT_MS}; a failed or slow read keeps the settings in memory.
    */
   async refresh(): Promise<void> {
     if (this.clock() - this.readAt < EVER_CONNECT_OIDC_REFRESH_MS) {
@@ -97,7 +105,22 @@ export class EverConnectOidcService {
         this.reading = null;
       });
     }
-    await this.reading;
+    let timer: NodeJS.Timeout | undefined;
+    const late = new Promise<'late'>((resolve) => {
+      timer = setTimeout(
+        () => resolve('late'),
+        EVER_CONNECT_OIDC_REFRESH_WAIT_MS,
+      );
+      timer.unref?.();
+    });
+    try {
+      if ((await Promise.race([this.reading, late])) === 'late') {
+        // Not again before the interval: the read on its way updates the settings when it ends.
+        this.readAt = this.clock();
+      }
+    } finally {
+      clearTimeout(timer);
+    }
   }
 
   private async read(keepOnFailure: boolean): Promise<void> {
@@ -173,15 +196,22 @@ export class EverConnectOidcService {
 
   /** Clears the settings (disable, revoke, disconnect). */
   async clear(): Promise<void> {
-    this.generation += 1;
-    this.current = null;
-    this.readAt = this.clock();
+    // Off at once, and again once the write is done: a read that overlapped the write may have
+    // seen the client still stored.
+    this.forget();
     // A failure is reported to the caller; a later read uses stored settings only while
     // `ever_id_login` is enabled anyway.
     await this.store.patchConnection({
       oidcConfigEnc: null,
       oidcPending: null,
     });
+    this.forget();
+  }
+
+  private forget(): void {
+    this.generation += 1;
+    this.current = null;
+    this.readAt = this.clock();
   }
 
   get enabled(): boolean {

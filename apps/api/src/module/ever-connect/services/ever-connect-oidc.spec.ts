@@ -2,6 +2,7 @@
 import { seal } from '../ever-connect.crypto';
 import {
   EVER_CONNECT_OIDC_REFRESH_MS,
+  EVER_CONNECT_OIDC_REFRESH_WAIT_MS,
   EverConnectOidcService,
   StoredOidcClient,
 } from './ever-connect-oidc.service';
@@ -119,6 +120,36 @@ describe('EverConnectOidcService', () => {
     expect(store.connection).toHaveBeenCalledTimes(reads);
   });
 
+  it('a read that does not answer delays a request by at most the wait; the last client serves', async () => {
+    jest.useFakeTimers();
+    try {
+      const { service, store, state, clock } = setup();
+      await service.load();
+      store.integration.mockImplementationOnce(
+        () => new Promise<never>(() => undefined),
+      );
+      state.enabled = false;
+      clock.now += EVER_CONNECT_OIDC_REFRESH_MS;
+      let done = false;
+      const waiting = service.refresh().then(() => {
+        done = true;
+      });
+      await jest.advanceTimersByTimeAsync(
+        EVER_CONNECT_OIDC_REFRESH_WAIT_MS - 1,
+      );
+      expect(done).toBe(false);
+      await jest.advanceTimersByTimeAsync(1);
+      await waiting;
+      expect(service.view.enabled).toBe(true);
+      // The next requests do not wait for it again before the interval.
+      const reads = store.connection.mock.calls.length;
+      await service.refresh();
+      expect(store.connection).toHaveBeenCalledTimes(reads);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
   it('a boot read that fails, or a value that cannot be decrypted, counts as no client', async () => {
     const failing = setup();
     failing.state.failing = true;
@@ -163,6 +194,23 @@ describe('EverConnectOidcService', () => {
     const second = service.refresh();
     await service.clear();
     await second;
+    expect(service.view.enabled).toBe(false);
+  });
+
+  it('a read that starts while the clear is being written cannot bring the client back', async () => {
+    const { service, store, clock } = setup();
+    await service.load();
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => (release = resolve));
+    store.patchConnection.mockImplementationOnce(async () => {
+      await gate;
+    });
+    const clearing = service.clear();
+    // The read sees the client still stored (the write has not landed).
+    clock.now += EVER_CONNECT_OIDC_REFRESH_MS;
+    await service.refresh();
+    release();
+    await clearing;
     expect(service.view.enabled).toBe(false);
   });
 });

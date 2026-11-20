@@ -127,6 +127,23 @@ describe('EverIdSettingsService', () => {
     expect(service.view.problems.join(' ')).toContain('Ever-operated install');
   });
 
+  it('a link mode Rec does not implement keeps the handed-over client off, with the reason, without throwing', () => {
+    const connect = connection();
+    const service = new EverIdSettingsService(
+      configOf({ ...PORTAL, EVER_ID_LINK_MODE: 'confirmed' }),
+      connect,
+    );
+    expect(service.available).toBe(false);
+    connect.grant();
+    expect(() => service.current()).not.toThrow();
+    expect(service.available).toBe(false);
+    expect(service.view.problems.join(' ')).toContain('EVER_ID_LINK_MODE');
+    // Still the same answer at the next request (the reason is not lost).
+    expect(service.view.problems.join(' ')).toContain('EVER_ID_LINK_MODE');
+    connect.withdraw();
+    expect(service.view.problems).toEqual([]);
+  });
+
   it('resolves again only when the handed-over client changed', () => {
     const connect = connection();
     const service = new EverIdSettingsService(configOf(PORTAL), connect);

@@ -71,11 +71,31 @@ export class EverIdSettingsService {
     const fingerprint = fingerprintOf(this.connect);
     if (fingerprint !== this.fingerprint) {
       const previous = this.resolved;
+      this.resolved = this.resolve();
       this.fingerprint = fingerprint;
-      this.resolved = readEverIdSettings(this.env, this.connect);
       this.report(this.resolved, previous);
     }
     return this.resolved;
+  }
+
+  /**
+   * Resolves the settings with the connection's client. A value that would have stopped the boot
+   * (an `EVER_ID_LINK_MODE` Rec does not implement) keeps the provider off here instead, with the
+   * reason in `problems`: the API is running already.
+   */
+  private resolve(): EverIdSettings {
+    try {
+      return readEverIdSettings(this.env, this.connect);
+    } catch (error) {
+      const settings = readEverIdSettings(this.env, null);
+      return {
+        ...settings,
+        issuer: (this.connect?.issuer ?? '').trim(),
+        problems: [
+          error instanceof Error ? error.message : 'The settings are invalid.',
+        ],
+      };
+    }
   }
 
   /** Whether the provider can run now. */

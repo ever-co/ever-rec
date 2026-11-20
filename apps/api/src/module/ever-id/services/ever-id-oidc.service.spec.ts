@@ -496,6 +496,35 @@ describe('EverIdOidcService', () => {
       );
     });
 
+    it('uses one copy of the settings for the whole exchange, even when they change meanwhile', async () => {
+      const live = settings();
+      service = new TestOidcService(live, http.service as any);
+      const idToken = await sign(claims());
+      http.service.post.mockResolvedValue({
+        status: 200,
+        data: { id_token: idToken },
+      });
+      // The client changes while discovery is on its way.
+      const discovery = http.service.get.getMockImplementation()!;
+      http.service.get.mockImplementationOnce(async (url: string) => {
+        Object.assign(live, {
+          clientId: 'another-client',
+          clientSecret: 'another-value',
+        });
+        return discovery(url);
+      });
+      const { claims: verified } = await service.exchangeCode(
+        'code-1',
+        'verifier-1',
+        NONCE,
+      );
+      expect(verified.subject).toBe('subject-1');
+      const [, , config] = http.service.post.mock.calls[0];
+      expect(config.headers.Authorization).toBe(
+        `Basic ${Buffer.from('rec-client:rec-secret').toString('base64')}`,
+      );
+    });
+
     it('maps a refused code to provider_error', async () => {
       http.service.post.mockResolvedValue({
         status: 400,
