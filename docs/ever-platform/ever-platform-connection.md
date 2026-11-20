@@ -119,6 +119,20 @@ every state below. Only Ever Platform features (the handle, the integrations) ar
 | paused | expired 30 days ago or more, or no document | "Reconnect to Ever Platform"; Ever Platform features pause |
 | revoked | the installation was revoked in app.ever.co | the connection ended |
 
+**Answers of the routes when a call to Ever Platform fails.** The body carries a status and a code
+only, never a message of Ever Platform:
+
+| Answer | Code | When |
+|---|---|---|
+| 502 | `platform_unreachable`, `platform_timeout`, `platform_unavailable` | no connection, no answer in time, or a 5xx answer |
+| 502 | `platform_refused`, `platform_rate_limited` | Ever Platform refused the request, or asks to wait |
+| 502 | `entitlement_unverified`, `platform_keys_unverified` | a document or the key manifest does not verify (nothing is stored) |
+| 502 | `platform_answer_too_large`, `platform_egress_refused` | an oversized answer, or a redirect or address outside Ever Platform |
+| 422 | `connect_code_refused` | the connect code is unknown, used, expired or minted for another product |
+| 422 | `no_platform_url` | `EVER_PLATFORM_API_URL` cannot be used; nothing was sent |
+| 409 | `connection_revoked`, `not_connected` | Ever Platform revoked the connection, or it does not exist yet |
+| 429 | `rate_limited` | the client holds the call back for its rate; nothing was sent |
+
 ## A person's export and deletion requests
 
 When a person who linked an Ever ID to a Rec account asks app.ever.co to export or delete their Ever

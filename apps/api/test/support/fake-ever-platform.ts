@@ -650,7 +650,7 @@ export class FakeEverPlatform {
       return this.problem(status, code);
     }
     const code = this.connectCodes.get(String(r.body?.code).toUpperCase());
-    if (!code || code.used) return this.problem(422, 'invalid_code');
+    if (!code || code.used) return this.problem(422, 'code_invalid');
     const instance: FakeInstance = {
       id: fakeUlid(),
       x: r.body.public_jwk.x,

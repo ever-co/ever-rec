@@ -9,7 +9,11 @@ import {
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
-import { makeNodeSigner, signKeyRotation } from '@ever-co/connect-sdk';
+import {
+  makeNodeSigner,
+  ProblemError,
+  signKeyRotation,
+} from '@ever-co/connect-sdk';
 import {
   EverConnectKeyError,
   EverInstanceService,
@@ -48,6 +52,24 @@ import { EverConnectOidcService } from './ever-connect-oidc.service';
 import { EverConnectStoreService } from './ever-connect-store.service';
 
 export const ENV_CODE_ACTOR = 'env:EVER_CONNECT_CODE';
+
+/**
+ * The redeem answers of Ever Platform that refuse the connect code itself (unknown, used, expired,
+ * or minted for another product): the operator mints a new code.
+ */
+const CODE_REFUSALS = new Set([
+  'not_found',
+  'code_invalid',
+  'code_expired',
+  'product_mismatch',
+]);
+
+/** The platform refused the connect code of a redeem (still a {@link ProblemError}). */
+export class ConnectCodeRefusedError extends ProblemError {
+  constructor(source: ProblemError) {
+    super(source.status, source.code);
+  }
+}
 
 /** The outcome of a redeem attempt with the first-boot code. */
 export type EnvCodeOutcome =
@@ -151,7 +173,20 @@ export class EverConnectService {
       }
       tenant = { workspaceId, name: displayNameOf(workspace.name) };
     }
-    const outcome = await this.redeem(code, tenant, actor);
+    let outcome: 'active' | 'pending_approval';
+    try {
+      outcome = await this.redeem(code, tenant, actor);
+    } catch (error) {
+      // A refused code is the operator's to fix (422); any other failure of the platform is
+      // answered by the module's interceptor (502).
+      if (error instanceof ConnectCodeRefusedError) {
+        throw new UnprocessableEntityException({
+          statusCode: 422,
+          code: 'connect_code_refused',
+        });
+      }
+      throw error;
+    }
     return { ...(await this.status()), outcome };
   }
 
@@ -200,26 +235,32 @@ export class EverConnectService {
     let registryInstanceId: string | null = null;
     const client = this.client.build(key, () => registryInstanceId);
     const now = this.clock();
-    const redeemed = await client.connect.redeem(
-      {
-        code,
-        product: 'rec',
-        version: this.config.version,
-        install_source: this.config.installSource,
-        kind: this.config.installSource === 'cloud' ? 'cloud' : 'self_hosted',
-        public_jwk: { kty: 'OKP', crv: 'Ed25519', x: key.publicKey } as never,
-        ...(tenant
-          ? {
-              tenant: {
-                product_tenant_id: tenant.workspaceId,
-                ...(tenant.name ? { display_name: tenant.name } : {}),
-              },
-            }
-          : {}),
-      },
-      // A hash of the connect key id and the code: never the anonymous statistics id.
-      sha256Hex(`${key.keyId}${code}`),
-    );
+    const redeemed = await client.connect
+      .redeem(
+        {
+          code,
+          product: 'rec',
+          version: this.config.version,
+          install_source: this.config.installSource,
+          kind: this.config.installSource === 'cloud' ? 'cloud' : 'self_hosted',
+          public_jwk: { kty: 'OKP', crv: 'Ed25519', x: key.publicKey } as never,
+          ...(tenant
+            ? {
+                tenant: {
+                  product_tenant_id: tenant.workspaceId,
+                  ...(tenant.name ? { display_name: tenant.name } : {}),
+                },
+              }
+            : {}),
+        },
+        // A hash of the connect key id and the code: never the anonymous statistics id.
+        sha256Hex(`${key.keyId}${code}`),
+      )
+      .catch((error: unknown) => {
+        throw error instanceof ProblemError && CODE_REFUSALS.has(error.code)
+          ? new ConnectCodeRefusedError(error)
+          : error;
+      });
     registryInstanceId = redeemed.instance_id;
     const connection: ConnectionRecord = {
       registryInstanceId: redeemed.instance_id,

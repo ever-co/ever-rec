@@ -25,6 +25,7 @@ here (`apps/api/.eslintrc.js`); the rest of the API injects the optional tokens 
 | `ever-connect.types.ts` | Realtime Database paths and records, audit actions |
 | `ever-connect.crypto.ts` | AES-256-GCM sealing of the Ever ID client settings and of exports |
 | `ever-connect.tokens.ts` | Clock, `fetch`, autostart and local-platform tokens (tests replace them) |
+| `ever-connect.errors.ts` | Failures of Ever Platform answered as 502 (or the right 4xx) with a code only, on every route of the module |
 | `ever-connect.routes.json` | The list of the module's routes (checked by `test/route-table.e2e-spec.ts`) |
 | `integrations/` | The three definitions, read from the SDK contracts; `definitions.drift.spec.ts` pins their bytes |
 | `guards/` | Operator (404 for anyone else, and on Ever Cloud) and workspace admin (403) |

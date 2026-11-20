@@ -10,8 +10,10 @@ import {
   Query,
   Req,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { EverSignedInGuard } from '../../ever-instance/ever-operator.guard';
+import { EverConnectPlatformErrorsInterceptor } from '../ever-connect.errors';
 import { EverConnectOperatorGuard } from '../guards/ever-connect.guards';
 import { EverConnectAuditService } from '../services/ever-connect-audit.service';
 import { EverConnectIntegrationsService } from '../services/ever-connect-integrations.service';
@@ -30,6 +32,7 @@ const uidOf = (request: any): string => request.user.id;
  * installation only, and 404 to anyone else.
  */
 @Controller('ever-connect')
+@UseInterceptors(EverConnectPlatformErrorsInterceptor)
 export class EverConnectAdminController {
   constructor(
     private readonly connect: EverConnectService,
