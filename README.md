@@ -462,6 +462,8 @@ The provider is **off by default**. While `EVER_ID_ISSUER_URL` is unset, the but
 
 An issuer on an Ever host (`*.ever.co`) is used only by an Ever-operated install (`EVER_INSTALL_SOURCE=cloud`). A self-hosted install configured with one keeps the provider off and logs one warning, without contacting that host. Any other issuer works as soon as it is configured.
 
+With the Ever Platform connection (`EVER_CONNECT_ENABLED=true`, see [docs/ever-platform](docs/ever-platform/ever-platform-connection.md)) and no `EVER_ID_ISSUER_URL`, the **Sign in with Ever ID** integration supplies the client instead: the provider turns on once the organization consents and Ever Platform has prepared the client, and off when the consent is withdrawn, without restarting the API (another API process of the same installation follows within 15 seconds). `EVER_ID_ISSUER_URL` always wins: with it set, the connection's client is never used.
+
 ### Registering the client at the issuer
 
 -   Application: web, confidential, authorization code flow with PKCE (`S256`).

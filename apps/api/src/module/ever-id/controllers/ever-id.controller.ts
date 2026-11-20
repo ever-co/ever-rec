@@ -20,9 +20,9 @@ import type { Request, Response } from 'express';
 import { User } from '../../auth/decorators/user.decorator';
 import { AuthGuard, IRequestUser } from '../../auth/guards/auth.guard';
 import { sendResponse } from '../../../services/utils/sendResponse';
-import { EverIdSettings } from '../ever-id.config';
+import { EverIdSettings, isEverIdAvailable } from '../ever-id.config';
 import { providerDisabled } from '../ever-id.errors';
-import { EVER_ID_AVAILABLE, EVER_ID_SETTINGS } from '../ever-id.tokens';
+import { EVER_ID_SETTINGS } from '../ever-id.tokens';
 import { EverIdEnabledGuard } from '../guards/ever-id-enabled.guard';
 import {
   EverIdRateLimited,
@@ -36,6 +36,7 @@ import {
 } from '../dto/ever-id.dto';
 import { EverIdFlowService } from '../services/ever-id-flow.service';
 import { EverIdLogoutService } from '../services/ever-id-logout.service';
+import { EverIdSettingsService } from '../services/ever-id-settings.service';
 
 /** What the portal and the extension read to decide whether to show the button. */
 export interface EverIdPublicConfig {
@@ -55,7 +56,7 @@ export interface EverIdPublicConfig {
 @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
 export class EverIdController {
   constructor(
-    @Inject(EVER_ID_AVAILABLE) private readonly available: boolean,
+    private readonly provider: EverIdSettingsService,
     @Inject(EVER_ID_SETTINGS) private readonly settings: EverIdSettings,
     private readonly flow: EverIdFlowService,
     private readonly logout: EverIdLogoutService,
@@ -63,13 +64,15 @@ export class EverIdController {
 
   @Get('config')
   @Header('Cache-Control', 'no-store')
-  config(): EverIdPublicConfig {
-    if (!this.available) {
+  async config(): Promise<EverIdPublicConfig> {
+    await this.provider.refresh();
+    const settings = this.provider.current();
+    if (!isEverIdAvailable(settings)) {
       return { enabled: false, buttonLabel: 'Ever ID' };
     }
     return {
       enabled: true,
-      issuer: this.settings.issuer,
+      issuer: settings.issuer,
       buttonLabel: 'Ever ID',
     };
   }

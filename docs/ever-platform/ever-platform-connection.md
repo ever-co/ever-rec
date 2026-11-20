@@ -97,7 +97,10 @@ integration off at any time. All three are installation-wide.
 | `ever_id_login` (Sign in with Ever ID) | Adds Ever ID as a sign-in option | the API's sign-in callback and sign-out addresses; later, for each user who links an Ever ID, the user's id, the Ever ID and the workspace id and name (never an e-mail address) |
 
 The Ever ID client that Ever Platform prepares is stored encrypted and used by the Ever ID sign-in
-module from its next start; its own `EVER_ID_*` settings always win.
+module at once, without a restart: sign-in with Ever ID appears once the client is ready and goes
+away when the consent is withdrawn (another API process of the installation follows within 15
+seconds). Its own `EVER_ID_*` settings always win: with `EVER_ID_ISSUER_URL` set, the connection's
+client is never used.
 
 **Instance policy.** The operator can deny an integration for every workspace in *Integrations &
 data*, or with `EVER_CONNECT_INTEGRATIONS_DENY` (the server configuration wins). A denied integration
