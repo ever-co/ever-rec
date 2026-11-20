@@ -24,6 +24,7 @@ import { equal } from 'assert';
 import { WorkspaceSharedService } from './shared.service';
 import { canAccessFolderById, evaluateAccess } from '../guards/utils';
 import { IUser } from 'src/interfaces/IUser';
+import { planFolderMove } from './folder-move';
 
 @Injectable()
 export class WorkspaceFoldersService {
@@ -141,6 +142,38 @@ export class WorkspaceFoldersService {
       return sendError(
         e.message || 'Error while trying to update workspace folder.',
       );
+    }
+  }
+
+  // Moves a folder, with its subfolders and items, under another folder or to the top level.
+  async moveFolder(
+    workspaceId: string,
+    folderId: string,
+    newParentId: string | false,
+  ): Promise<IDataResponse<IWorkspaceFolder[] | null>> {
+    try {
+      const { workspaceVal, workspaceRef } =
+        await this.utilitiesService.getWorkspaceById(workspaceId);
+      const plan = planFolderMove(
+        parseCollectionToArray<IWorkspaceFolder>(workspaceVal.folders),
+        folderId,
+        newParentId,
+      );
+
+      if (!plan.ok) {
+        return sendError(plan.message);
+      }
+
+      if (plan.changed) {
+        await workspaceRef.update({
+          folders: parseCollectionToIdValueObj(plan.folders),
+        });
+      }
+
+      return sendResponse<IWorkspaceFolder[]>(plan.folders);
+    } catch (e) {
+      console.log(e);
+      return sendError('Error while trying to move workspace folder.');
     }
   }
 
