@@ -28,6 +28,19 @@ async function json(fetch, url, init) {
 	return { status: response.status, body };
 }
 
+/**
+ * What `GET /api/v1/ever-connect/status` must answer the operator in each mode: 404 while the
+ * connection is not loaded, the status of a loaded connection otherwise (not connected yet in
+ * `loaded_off`; in `positive_connect` the first-start code may or may not have been used yet).
+ */
+const CONNECT_STATUS = {
+	off: (status) => status === 404,
+	positive_stats: (status) => status === 404,
+	connect_off_signin_on: (status) => status === 404,
+	loaded_off: (status, body) => status === 200 && body?.status === 'not_connected',
+	positive_connect: (status, body) => status === 200 && typeof body?.status === 'string'
+};
+
 /** How long the adapter waits for the Authentication emulator to answer. */
 const AUTH_READY_TIMEOUT_MS = 300_000;
 
@@ -106,17 +119,24 @@ export default {
 
 	/**
 	 * Opens what the settings pages read (404 when a module is off): the statistics, and the
-	 * connection's status (read from the database only, connected or not).
+	 * connection's status (read from the database only, connected or not). The connection's answer
+	 * is checked, so a mode that should exercise it cannot pass on an error page.
 	 */
-	async openSettings({ baseUrl, fetch, headers, log }) {
+	async openSettings({ baseUrl, mode, fetch, headers, log }) {
 		for (const path of [
 			'/api/v1/ever-stats/health',
 			'/api/v1/ever-stats/status',
-			'/api/v1/ever-stats/reports?limit=12',
-			'/api/v1/ever-connect/status'
+			'/api/v1/ever-stats/reports?limit=12'
 		]) {
 			const response = await fetch(`${baseUrl}${path}`, { headers });
 			log?.(`${path}: ${response.status}`);
+		}
+		const path = '/api/v1/ever-connect/status';
+		const { status, body } = await json(fetch, `${baseUrl}${path}`, { headers });
+		log?.(`${path}: ${status} ${body?.status ?? ''}`.trim());
+		const expected = CONNECT_STATUS[mode];
+		if (expected && !expected(status, body)) {
+			throw new Error(`${path} answered ${status} in ${mode}, which this mode does not expect`);
 		}
 	},
 
