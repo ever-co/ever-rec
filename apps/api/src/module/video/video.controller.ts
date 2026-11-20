@@ -23,6 +23,7 @@ import {
 } from '@nestjs/platform-express';
 import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
+import { unlink } from 'fs/promises';
 import { diskStorage } from 'multer';
 import { IDataResponse } from 'src/interfaces/_types';
 import {
@@ -54,6 +55,11 @@ import { PermissionAccessEnum } from '../workspace/Interfaces/Workspace';
 import { ValidateId } from '../workspace/pipes/validate-id.pipe';
 import { isWorkspaceMember } from '../workspace/guards/CanAccessWorkspace.guard';
 import { is_id } from '../workspace/validators/id.validator';
+
+// Multer has already written a refused upload to TMP_PATH: remove it, or it stays there for good.
+const removeUpload = async (blob?: Express.Multer.File) => {
+  if (blob?.path) await unlink(blob.path).catch(() => undefined);
+};
 
 @Controller('video')
 export class VideoController {
@@ -296,6 +302,7 @@ export class VideoController {
   @UseGuards(AuthGuard)
   @UseInterceptors(
     FileInterceptor('blob', {
+      limits: { fileSize: 1024 * 1024 * 1024 },
       storage: diskStorage({
         destination: (req, file, callback) => {
           callback(null, TMP_PATH);
@@ -314,12 +321,14 @@ export class VideoController {
     @UploadedFile() blob: Express.Multer.File,
   ) {
     if (!blob || !blob.mimetype || !blob.filename) {
+      await removeUpload(blob);
       throw new BadRequestException('Missing uploaded file or file metadata.');
     }
 
     const fileExtension = fileExtensionMap[blob.mimetype];
 
     if (!fileExtension) {
+      await removeUpload(blob);
       throw new UnsupportedMediaTypeException(
         `Unsupported media type: ${blob.mimetype}`,
       );
@@ -357,12 +366,14 @@ export class VideoController {
     @RefreshToken() token: string,
   ): Promise<IDataResponse<IEditorVideo>> {
     if (!blob || !blob.mimetype || !blob.filename) {
+      await removeUpload(blob);
       throw new BadRequestException('Missing uploaded file or file metadata.');
     }
 
     const fileExtension = fileExtensionMap[blob.mimetype];
 
     if (!fileExtension) {
+      await removeUpload(blob);
       throw new UnsupportedMediaTypeException(
         `Unsupported media type: ${blob.mimetype}`,
       );

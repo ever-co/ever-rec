@@ -68,4 +68,28 @@ describe('uploadVideoToBucket', () => {
     expect(await uploadVideoToBucket(params)).toBeUndefined();
     expect(mockSave).toHaveBeenCalledTimes(1);
   });
+
+  // A failed upload must not leave its full-size temporary file on the API disk for good.
+  it('removes the temporary file when the bucket write fails', async () => {
+    mockSave.mockRejectedValueOnce(new Error('bucket unavailable'));
+
+    expect(await uploadVideoToBucket(params)).toBeUndefined();
+    expect(mockUnlink).toHaveBeenCalledWith('tmp_videos_fixed/rec.webm');
+  });
+
+  it('removes the temporary file when it cannot be read', async () => {
+    mockReadFile.mockRejectedValueOnce(new Error('EIO'));
+
+    expect(await uploadVideoToBucket(params)).toBeUndefined();
+    expect(mockSave).not.toHaveBeenCalled();
+    expect(mockUnlink).toHaveBeenCalledWith('tmp_videos_fixed/rec.webm');
+  });
+
+  it('returns nothing, without throwing, when neither the write nor the removal works', async () => {
+    mockSave.mockRejectedValueOnce(new Error('bucket unavailable'));
+    mockUnlink.mockRejectedValueOnce(new Error('EBUSY'));
+
+    expect(await uploadVideoToBucket(params)).toBeUndefined();
+    expect(mockUnlink).toHaveBeenCalledTimes(1);
+  });
 });

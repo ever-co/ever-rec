@@ -12,6 +12,7 @@
  * database, the storage bucket, the token check and the video conversion are stand-ins.
  */
 import { INestApplication } from '@nestjs/common';
+import { INTERCEPTORS_METADATA } from '@nestjs/common/constants';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Test } from '@nestjs/testing';
 import { readdirSync, rmSync } from 'fs';
@@ -418,6 +419,17 @@ describe('workspace video routes', () => {
     it('refuses an anonymous request', async () => {
       await upload(undefined, { fullFileName: 'fresh.webm' }).expect(401);
       expect(addVideoFromFile).not.toHaveBeenCalled();
+    });
+
+    // Without a cap, one upload of any size could fill the API disk.
+    it('caps the upload at 1 GB, like POST video/upload/file', () => {
+      const [Interceptor] = Reflect.getMetadata(
+        INTERCEPTORS_METADATA,
+        WorkspaceFilesController.prototype.uploadNewVideoFromFile,
+      );
+      expect(new Interceptor().multer.limits).toEqual({
+        fileSize: 1024 * 1024 * 1024,
+      });
     });
   });
 
