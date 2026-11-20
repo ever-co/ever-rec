@@ -1,11 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import * as postmark from 'postmark';
 import { ConfigService } from '@nestjs/config';
 import { PostmarkTemplate } from 'src/config/email';
 import { IDataResponse } from '../../interfaces/_types';
 import { is_id } from '../workspace/validators/id.validator';
 import * as admin from 'firebase-admin';
-import { getAuth } from 'firebase-admin/auth';
+import { getAuth, UserRecord } from 'firebase-admin/auth';
 import {
   AuthError,
   confirmPasswordReset,
@@ -36,8 +36,57 @@ enum ResStatusEnum {
   success = 'success',
 }
 
+const RESET_EMAIL_SENT_MESSAGE =
+  'Password reset instructions sent. Check your email.';
+const RESET_LIMIT_MESSAGE =
+  'Reset password limit exceeded, please try again later.';
+const RESET_EMAIL_FAILED_MESSAGE =
+  'Could not send the e-mail, please try again later.';
+
+/** Firebase's codes for an address with no account. */
+const NO_ACCOUNT_CODES = ['auth/user-not-found', 'auth/email-not-found'];
+
+/**
+ * Identity Toolkit's codes for too many reset requests. firebase-admin maps neither, so they come
+ * as `auth/internal-error` with the server's code in the message.
+ */
+const RESET_LIMIT_SERVER_CODES = [
+  'RESET_PASSWORD_EXCEED_LIMIT',
+  'TOO_MANY_ATTEMPTS_TRY_LATER',
+];
+
+/** The error's code (a Firebase string or a Postmark number), for the log. */
+const errorCodeOf = (error: unknown): string => {
+  const code = (error as { code?: unknown } | null)?.code;
+  return typeof code === 'string' || typeof code === 'number'
+    ? String(code)
+    : 'unknown';
+};
+
+const isNoAccountError = (error: unknown): boolean =>
+  NO_ACCOUNT_CODES.includes(errorCodeOf(error));
+
+/** The code of a Firebase reset-limit error, or null for any other error. */
+const resetLimitCodeOf = (error: unknown): string | null => {
+  const code = errorCodeOf(error);
+  if (code === 'auth/quota-exceeded') {
+    return code;
+  }
+  if (code !== 'auth/internal-error') {
+    return null;
+  }
+  const message = (error as { message?: unknown }).message;
+  return typeof message === 'string'
+    ? (RESET_LIMIT_SERVER_CODES.find((serverCode) =>
+        message.includes(serverCode),
+      ) ?? null)
+    : null;
+};
+
 @Injectable()
 export class EmailService {
+  private readonly logger = new Logger(EmailService.name);
+
   constructor(
     private readonly firebaseClient: FirebaseClient,
     private readonly configService: ConfigService,
@@ -73,26 +122,70 @@ export class EmailService {
     }
   }
 
+  /**
+   * Mails a password reset link. An address with no account gets the same answer as a real send
+   * and no mail, so the form does not tell anyone which addresses have accounts. Each other failure
+   * gets its own answer, and the log names its code, never the address.
+   */
   async sendResetPasswordEmail(email: string): Promise<IDataResponse> {
+    const sent: IDataResponse = {
+      status: ResStatusEnum.success,
+      message: RESET_EMAIL_SENT_MESSAGE,
+      error: null,
+      data: null,
+    };
+
+    let user: UserRecord;
     try {
-      const auth = admin.auth();
+      user = await admin.auth().getUserByEmail(email);
+    } catch (error) {
+      if (isNoAccountError(error)) {
+        return sent;
+      }
+      return this.resetEmailNotSent(
+        'look-up',
+        errorCodeOf(error),
+        RESET_EMAIL_FAILED_MESSAGE,
+      );
+    }
+
+    if (user?.providerData[0]?.providerId === 'google.com') {
+      return {
+        status: ResStatusEnum.error,
+        message: 'You cannot change Google account password.',
+        error: null,
+        data: null,
+      };
+    }
+
+    let originalLink: string;
+    try {
+      originalLink = await getAuth().generatePasswordResetLink(email);
+    } catch (error) {
+      if (isNoAccountError(error)) {
+        return sent;
+      }
+      const limitCode = resetLimitCodeOf(error);
+      return limitCode
+        ? this.resetEmailNotSent('reset link', limitCode, RESET_LIMIT_MESSAGE)
+        : this.resetEmailNotSent(
+            'reset link',
+            errorCodeOf(error),
+            RESET_EMAIL_FAILED_MESSAGE,
+          );
+    }
+
+    const indexOfLink = originalLink.indexOf('oobCode');
+    const customLink = originalLink.slice(indexOfLink);
+
+    const resetLink =
+      this.configService.get<string>('WEBSITE_URL') +
+      `/auth/new-password?${customLink}`;
+
+    try {
       const client = new postmark.ServerClient(
         this.configService.get<string>('POSTMARK_CLIENT_TOKEN'),
       );
-      const user = await auth.getUserByEmail(email);
-
-      if (user?.providerData[0]?.providerId === 'google.com') {
-        throw { message: 'You cannot change Google account password.' };
-      }
-
-      const originalLink = await getAuth().generatePasswordResetLink(email);
-      const indexOfLink = originalLink.indexOf('oobCode');
-      const customLink = originalLink.slice(indexOfLink);
-
-      const resetLink =
-        this.configService.get<string>('WEBSITE_URL') +
-        `/auth/new-password?${customLink}`;
-
       await client.sendEmailWithTemplate({
         From: this.configService.get<string>('POSTMARK_SENDER_EMAIL'),
         To: email,
@@ -101,21 +194,30 @@ export class EmailService {
           reset_url: resetLink,
         },
       });
-
-      return {
-        status: ResStatusEnum.success,
-        message: 'Password reset instructions sent. Check your email.',
-        error: null,
-        data: null,
-      };
     } catch (error) {
-      return {
-        status: ResStatusEnum.error,
-        message: 'Reset password limit exceeded, please try again later.',
-        error: null,
-        data: null,
-      };
+      return this.resetEmailNotSent(
+        'send',
+        errorCodeOf(error),
+        RESET_EMAIL_FAILED_MESSAGE,
+      );
     }
+
+    return sent;
+  }
+
+  /** Logs why a reset e-mail was not sent (the step and the error code) and answers `message`. */
+  private resetEmailNotSent(
+    step: string,
+    code: string,
+    message: string,
+  ): IDataResponse {
+    this.logger.warn(`Password reset e-mail not sent (${step}): ${code}`);
+    return {
+      status: ResStatusEnum.error,
+      message,
+      error: null,
+      data: null,
+    };
   }
 
   async verifyCode(oobCode: string): Promise<IDataResponse> {
