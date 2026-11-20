@@ -1,9 +1,12 @@
 # Egress audit
 
-A runtime proof of what the optional anonymous usage statistics of Ever Rec may send: **nothing at
-all** when they are off (`EVER_STATS_ENABLED=false`), **not a single call** when they are loaded but
-switched off by the operator, and **only the statistics report** when they are on. Every call they
-can make is listed in [`docs/ever-platform/outbound-calls.md`](../../docs/ever-platform/outbound-calls.md).
+A runtime proof of what the optional Ever Platform features of Ever Rec may send. The anonymous
+usage statistics: **nothing at all** when they are off (`EVER_STATS_ENABLED=false`), **not a single
+call** when they are loaded but switched off by the operator, and **only the statistics report** when
+they are on. The Ever Platform connection: **nothing** when it is not loaded (`EVER_CONNECT_ENABLED`
+unset) or loaded but not connected, and, once connected, **only its own calls to the platform**.
+Every call they can make is listed in
+[`docs/ever-platform/outbound-calls.md`](../../docs/ever-platform/outbound-calls.md).
 
 ## The harness
 
@@ -22,10 +25,10 @@ This directory holds only Ever Rec's inputs:
 
 | File | What it is |
 |---|---|
-| `egress-audit.config.json` | The API leg: the API as the audited process, the statistics routes probed in `off`, the watched window, the Firebase host names the API may look up (they reach nothing) |
+| `egress-audit.config.json` | The API leg: the API as the audited process, the module routes probed in `off` (statistics and connection), the watched window, the Firebase host names the API may look up (they reach nothing), the mock platform's connect code for Rec (`mock_config`) and Rec's own mode `connect_off_signin_on` |
 | `docker-compose.audit.yml` | The API image under test (`REC_API_IMAGE`) and the Firebase Emulator Suite (`REC_EMULATORS_IMAGE`) instead of a real Firebase project (`demo-` project, kept local); a random `REC_JWT_SECRET` and a throwaway service-account key per run |
 | `emulators.Dockerfile`, `emulators.firebase.json` | The emulators image (Authentication, Realtime Database, Storage), also usable for `npm run test:integration` in `apps/api` |
-| `adapter.mjs` | Waits for the Authentication emulator (it can start a minute after the API answers), signs in as the operator through it, reads the statistics routes, switches the statistics off as the operator (`loaded_off`), signs in through the portal's page (browser leg) |
+| `adapter.mjs` | Waits for the Authentication emulator (it can start a minute after the API answers), signs in as the operator through it, reads the statistics routes and the connection's status, switches the statistics off as the operator (`loaded_off`), signs in through the portal's page (browser leg) |
 | `harness.json` | The harness version and integrity |
 | `egress-audit.web.config.json`, `compose.web.yml` | The browser leg: the portal image under test as a second audited process, walked page by page in a real browser |
 | `ui-routes.json`, `ui-routes-pages.mjs` | Every portal page, generated from the Next.js pages router (`node tools/egress-audit/ui-routes-pages.mjs`; CI checks it with `--check`, with a control that must fail) |
@@ -35,13 +38,30 @@ This directory holds only Ever Rec's inputs:
 
 | Mode | The API | Passes when |
 |---|---|---|
-| `off` | `EVER_STATS_ENABLED=false` | no Ever host looked up, no connection attempt out, every `/api/v1/ever-stats/*` route answers 404, and the API log has no `ever_stats.` line |
-| `loaded_off` | statistics loaded, switched off by the operator through `PUT /api/v1/ever-stats/enabled`; a local reporting address outside the sealed setup and a 60-second interval | no call at all; the watched window (150 s) is longer than one interval, and the API must have logged `ever_stats.send outcome=skipped_ui_off` (the scheduler ran after the switch-off), so a run in which it never ran fails |
+| `off` | `EVER_STATS_ENABLED=false`, `EVER_CONNECT_ENABLED` unset | no Ever host looked up, no connection attempt out, every `/api/v1/ever-stats/*` and `/api/v1/ever-connect/*` route probed answers 404, and the API log has no `ever_stats.` line |
+| `loaded_off` | statistics loaded, switched off by the operator through `PUT /api/v1/ever-stats/enabled`; a local reporting address outside the sealed setup and a 60-second interval; the connection loaded (`EVER_CONNECT_ENABLED=true`) and not connected, its status opened by the operator | no call at all; the watched window (150 s) is longer than one interval, and the API must have logged `ever_stats.send outcome=skipped_ui_off` (the scheduler ran after the switch-off), so a run in which it never ran fails |
 | `positive_stats` | statistics on, reporting to the mock platform every 5 seconds | signed, schema-valid reports accepted (202), no other call |
 | control | `positive_stats` without the mock platform | must **fail** (exit 1): a green run is not a blind one |
 
 The job also runs the harness's `cloud-inference` scan over the statistics code (it never guesses
-where it runs).
+where it runs). The connection module passes the same scan
+(`cloud-inference --dirs apps/api/src/module/ever-connect`).
+
+## Modes of the connection (API leg, on demand)
+
+These run with the same config (`--mode <name>`); they are not steps of the CI job yet.
+
+| Mode | The API | Passes when |
+|---|---|---|
+| `positive_connect` | the connection loaded with the mock's connect code in `EVER_CONNECT_CODE` (`mock_config` issues it for `rec`), the mock as `EVER_PLATFORM_API_URL` (its issuer in `EVER_PLATFORM_ISSUER`, its TEST root in `EVER_PLATFORM_ROOT_KEYS_FILE`), statistics off | exactly the connection's calls: key manifest, redeem, instance token, heartbeat, event feed, entitlement and integration states (rows 1, 3, 4, 6, 7, 8, 9), and nothing to any other host |
+| control | `positive_connect --no-mock` | must **fail** (exit 1) |
+| `connect_off_signin_on` (Rec's own mode) | connection and statistics off; Ever ID sign-in configured with an Ever-hosted issuer on an Ever-operated install (`EVER_INSTALL_SOURCE=cloud`) | no Ever host looked up and no call while nobody signs in (the sign-in provider never contacts its issuer on its own); every module route answers 404 |
+
+Not run: `every_trigger` (every outbound-call row of Rec, row for row) needs an adapter that drives
+each trigger against the mock (an organization's consents, a link code, a provisioning hand-off, a
+managed operation, a person's export and deletion requests); `positive_managed` needs the
+`managed_operations` consent and the operator's opt-in before the request. Both are left for a
+later change.
 
 ## The browser leg (on demand)
 

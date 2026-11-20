@@ -27,6 +27,27 @@ describe('ever-connect config', () => {
     expect(warnings).toEqual([]);
   });
 
+  it('EVER_PLATFORM_ISSUER: an https origin only', () => {
+    expect(read({}).platformIssuer).toBeNull();
+    expect(
+      read({ EVER_PLATFORM_ISSUER: ' https://mock-platform.test/ ' })
+        .platformIssuer,
+    ).toBe('https://mock-platform.test');
+    expect(warnings).toEqual([]);
+    for (const value of [
+      'http://mock-platform.test',
+      'https://mock-platform.test/v1',
+      'https://user@mock-platform.test',
+      'not a url',
+    ]) {
+      resetWarnings();
+      warnings = [];
+      expect(read({ EVER_PLATFORM_ISSUER: value }).platformIssuer).toBeNull();
+      expect(warnings).toHaveLength(1);
+      expect(warnings[0]).not.toContain(value);
+    }
+  });
+
   it('reads the connect code case-insensitively and never logs it', () => {
     const config = read({ EVER_CONNECT_CODE: ' evc-abcd-efgh-jkmn ' });
     expect(config.envCode).toBe('EVC-ABCD-EFGH-JKMN');

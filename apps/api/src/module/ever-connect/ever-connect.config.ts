@@ -25,6 +25,12 @@ export type FeedMode = 'longpoll' | 'interval';
 export interface EverConnectConfig {
   /** `EVER_PLATFORM_API_URL` (or the default); `null` when it is set but cannot be used. */
   apiUrl: string | null;
+  /**
+   * `EVER_PLATFORM_ISSUER`: the https issuer the documents of a local platform name (a mock
+   * platform in tests and audits). The SDK honours it for a local `EVER_PLATFORM_API_URL` only;
+   * `null` when unset or not an https origin.
+   */
+  platformIssuer: string | null;
   /** `EVER_CONNECT_CODE`, normalised; `null` when unset or not a connect code. Never logged. */
   envCode: string | null;
   /** `EVER_CONNECT_INTEGRATIONS_DENY`: integrations denied for every workspace (env beats UI). */
@@ -124,6 +130,37 @@ export function parseDenyList(
   return denied;
 }
 
+/** `EVER_PLATFORM_ISSUER`: an https origin (no path, credential, query or fragment), or `null`. */
+export function readPlatformIssuer(
+  raw: string | undefined,
+  warn: Warn,
+): string | null {
+  const value = (raw ?? '').trim();
+  if (!value) return null;
+  let url: URL | null = null;
+  try {
+    url = new URL(value);
+  } catch {
+    url = null;
+  }
+  if (
+    url?.protocol === 'https:' &&
+    !url.username &&
+    !url.password &&
+    !url.search &&
+    !url.hash &&
+    (url.pathname === '/' || url.pathname === '')
+  ) {
+    return url.origin;
+  }
+  warnOnce(
+    'platform-issuer',
+    'EVER_PLATFORM_ISSUER is not an https origin; it is ignored.',
+    warn,
+  );
+  return null;
+}
+
 export function readEverConnectConfig(env: Env, warn: Warn): EverConnectConfig {
   const rawCode = (env['EVER_CONNECT_CODE'] ?? '').trim();
   const envCode = rawCode ? normaliseConnectCode(rawCode) : null;
@@ -152,6 +189,7 @@ export function readEverConnectConfig(env: Env, warn: Warn): EverConnectConfig {
       env,
       warn,
     ),
+    platformIssuer: readPlatformIssuer(env['EVER_PLATFORM_ISSUER'], warn),
     envCode,
     denied: parseDenyList(env['EVER_CONNECT_INTEGRATIONS_DENY'], warn),
     feedMode,
@@ -205,6 +243,7 @@ export function everConnectConfigFactory(
     'EVER_CONNECT_INTEGRATIONS_DENY',
     'EVER_CONNECT_FEED_MODE',
     'EVER_PLATFORM_API_URL',
+    'EVER_PLATFORM_ISSUER',
     'EVER_INSTALL_SOURCE',
     'API_BASE_URL',
     'WEBSITE_URL',

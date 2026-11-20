@@ -143,6 +143,7 @@ An Ever ID this installation does not know gets the receipt `no_account`.
 | `EVER_CONNECT_INTEGRATIONS_DENY` | unset | integrations denied for every workspace (`instance_url`, `stats_link`, `ever_id_login`, `managed_operations`, or `*`) |
 | `EVER_CONNECT_FEED_MODE` | `longpoll` | `interval` reads the feed every 15 minutes instead (for proxies that cut long requests) |
 | `EVER_PLATFORM_API_URL` | `https://api.ever.co` | the Ever Platform API; plain `http` only for a local address |
+| `EVER_PLATFORM_ISSUER`, `EVER_PLATFORM_ROOT_KEYS_FILE` | unset | tests and audits only: the https issuer and the extra root keys of a mock platform; both are ignored unless `EVER_PLATFORM_API_URL` is a local address |
 | `EVER_INSTALL_SOURCE` | `self-hosted` | how the installation was set up; `cloud` only on Ever Cloud |
 | `SUPER_ADMIN_ACCOUNT_UID`, `EVER_OPERATOR_UIDS` | | who operates the installation |
 | `NEXT_PUBLIC_EVER_CONNECT_ENABLED` (portal, at build time) | unset | `true` shows the Connect tabs, which also need the API's connection loaded |
