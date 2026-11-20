@@ -96,7 +96,7 @@ describe('connect with a code', () => {
     expect(t.firebase.db.dump(EVER_CONNECT_PATHS.links)).toBeNull();
   });
 
-  it('a code the platform refuses is the operator's to fix (422); nothing is stored', async () => {
+  it("a code the platform refuses is the operator's to fix (422); nothing is stored", async () => {
     const res = await t
       .http()
       .post('/api/v1/ever-connect/connect')

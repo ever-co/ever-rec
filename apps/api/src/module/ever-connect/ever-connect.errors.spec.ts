@@ -10,7 +10,11 @@ import {
   ResponseTooLargeError,
   TimeoutError,
 } from '@ever-co/connect-sdk';
-import { isNetworkFailure, platformFailure } from './ever-connect.errors';
+import {
+  ConnectCodeRefusedError,
+  isNetworkFailure,
+  platformFailure,
+} from './ever-connect.errors';
 
 const answerOf = (error: unknown) => {
   const mapped = platformFailure(error);
@@ -31,6 +35,11 @@ describe('platformFailure', () => {
     [new ProblemError(422, 'validation_failed'), 502, 'platform_refused'],
     [new ProblemError(401, 'credential_revoked'), 409, 'connection_revoked'],
     [new ProblemError(401, 'token_invalid'), 502, 'platform_refused'],
+    [
+      new ConnectCodeRefusedError(new ProblemError(422, 'code_invalid')),
+      422,
+      'connect_code_refused',
+    ],
     [new EntitlementError('bad_signature'), 502, 'entitlement_unverified'],
     [new KeyManifestError('bad_signature'), 502, 'platform_keys_unverified'],
     [new TimeoutError(10_000), 502, 'platform_timeout'],

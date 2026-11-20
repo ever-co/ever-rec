@@ -14,6 +14,7 @@ import {
   ProblemError,
   signKeyRotation,
 } from '@ever-co/connect-sdk';
+import { CODE_REFUSALS, ConnectCodeRefusedError } from '../ever-connect.errors';
 import {
   EverConnectKeyError,
   EverInstanceService,
@@ -52,24 +53,6 @@ import { EverConnectOidcService } from './ever-connect-oidc.service';
 import { EverConnectStoreService } from './ever-connect-store.service';
 
 export const ENV_CODE_ACTOR = 'env:EVER_CONNECT_CODE';
-
-/**
- * The redeem answers of Ever Platform that refuse the connect code itself (unknown, used, expired,
- * or minted for another product): the operator mints a new code.
- */
-const CODE_REFUSALS = new Set([
-  'not_found',
-  'code_invalid',
-  'code_expired',
-  'product_mismatch',
-]);
-
-/** The platform refused the connect code of a redeem (still a {@link ProblemError}). */
-export class ConnectCodeRefusedError extends ProblemError {
-  constructor(source: ProblemError) {
-    super(source.status, source.code);
-  }
-}
 
 /** The outcome of a redeem attempt with the first-boot code. */
 export type EnvCodeOutcome =
@@ -173,20 +156,9 @@ export class EverConnectService {
       }
       tenant = { workspaceId, name: displayNameOf(workspace.name) };
     }
-    let outcome: 'active' | 'pending_approval';
-    try {
-      outcome = await this.redeem(code, tenant, actor);
-    } catch (error) {
-      // A refused code is the operator's to fix (422); any other failure of the platform is
-      // answered by the module's interceptor (502).
-      if (error instanceof ConnectCodeRefusedError) {
-        throw new UnprocessableEntityException({
-          statusCode: 422,
-          code: 'connect_code_refused',
-        });
-      }
-      throw error;
-    }
+    // A code the platform refuses answers 422 connect_code_refused, any other failure of the
+    // platform 502 (the module's interceptor, ever-connect.errors.ts).
+    const outcome = await this.redeem(code, tenant, actor);
     return { ...(await this.status()), outcome };
   }
 
