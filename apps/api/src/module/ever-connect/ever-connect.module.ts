@@ -17,6 +17,7 @@ import {
 import {
   describeConfig,
   EVER_CONNECT_CONFIG,
+  EverConnectConfig,
   everConnectConfigFactory,
 } from './ever-connect.config';
 import {
@@ -25,6 +26,7 @@ import {
   EVER_CONNECT_FETCH,
   EVER_CONNECT_LOCAL_PLATFORM,
   EVER_CONNECT_WORKSPACE_CREATOR,
+  EverConnectLocalPlatform,
   EverConnectWorkspaceCreator,
   systemClock,
 } from './ever-connect.tokens';
@@ -86,8 +88,15 @@ const logger = new Logger('EverConnect');
       useValue: (...args: Parameters<typeof fetch>) => fetch(...args),
     },
     { provide: EVER_CONNECT_AUTOSTART, useValue: true },
-    // Extra roots are honoured by the SDK for a local platform address only (tests, local runs).
-    { provide: EVER_CONNECT_LOCAL_PLATFORM, useValue: {} },
+    // The issuer of a local platform (EVER_PLATFORM_ISSUER: a mock platform in tests and audits).
+    // The SDK honours it, like extra root keys (EVER_PLATFORM_ROOT_KEYS_FILE), for a local
+    // EVER_PLATFORM_API_URL only.
+    {
+      provide: EVER_CONNECT_LOCAL_PLATFORM,
+      useFactory: (config: EverConnectConfig): EverConnectLocalPlatform =>
+        config.platformIssuer ? { issuer: config.platformIssuer } : {},
+      inject: [EVER_CONNECT_CONFIG],
+    },
     EverConnectStoreService,
     EverConnectAuditService,
     EverConnectLeaseService,

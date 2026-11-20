@@ -1,6 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
-import { hostname } from 'node:os';
 import { EVER_CONNECT_PATHS } from '../ever-connect.types';
 import { EVER_CONNECT_CLOCK, EverConnectClock } from '../ever-connect.tokens';
 import { EverConnectStoreService } from './ever-connect-store.service';
@@ -20,8 +19,8 @@ export const CONNECT_LEASE_MS = 10 * 60 * 1000;
  */
 @Injectable()
 export class EverConnectLeaseService {
-  /** This process, as the lease names it (host name plus a random suffix; nothing else). */
-  readonly holderId = `${hostname().slice(0, 64)}:${randomUUID().slice(0, 8)}`;
+  /** This process, as the lease names it: a random id (nothing about the host it runs on). */
+  readonly holderId = randomUUID();
 
   constructor(
     private readonly store: EverConnectStoreService,

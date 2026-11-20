@@ -104,12 +104,16 @@ export default {
 		return {};
 	},
 
-	/** Opens what the settings page reads (404 when the module is off). */
+	/**
+	 * Opens what the settings pages read (404 when a module is off): the statistics, and the
+	 * connection's status (read from the database only, connected or not).
+	 */
 	async openSettings({ baseUrl, fetch, headers, log }) {
 		for (const path of [
 			'/api/v1/ever-stats/health',
 			'/api/v1/ever-stats/status',
-			'/api/v1/ever-stats/reports?limit=12'
+			'/api/v1/ever-stats/reports?limit=12',
+			'/api/v1/ever-connect/status'
 		]) {
 			const response = await fetch(`${baseUrl}${path}`, { headers });
 			log?.(`${path}: ${response.status}`);
