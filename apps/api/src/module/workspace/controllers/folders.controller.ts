@@ -24,6 +24,8 @@ import { ParseOptionalId, ValidateId } from '../pipes/validate-id.pipe';
 import { UpdateFolderDto } from '../dto/folders/update-folder.dto';
 import { DeleteFolderDto } from '../dto/folders/delete-folder.dto';
 import { MoveItemsDto } from '../dto/folders/move-items.dto';
+import { MoveFolderDto } from '../dto/folders/move-folder.dto';
+import { CanAccessDestinationFolder } from '../decorators/CanAccessDestinationFolder.decorator';
 import { UpdateFolderMemberPermissionsDto } from '../dto/folders/update-member-permissions.dto';
 
 @Controller('workspace/:workspaceId/folders')
@@ -68,6 +70,18 @@ export class WorkspaceFoldersController {
       folderId,
       { name: folder.name, color: folder.color },
     );
+  }
+
+  // WRITE on the folder being moved (and every folder above it) and on the destination.
+  @CanAccessFolder(PermissionAccessEnum.WRITE)
+  @CanAccessDestinationFolder(PermissionAccessEnum.WRITE)
+  @Put(':folderId/move')
+  async moveWorkspaceFolder(
+    @Param('workspaceId', ValidateId) workspaceId: string,
+    @Param('folderId', ValidateId) folderId: string,
+    @Body() { parentId }: MoveFolderDto,
+  ) {
+    return this.foldersService.moveFolder(workspaceId, folderId, parentId);
   }
 
   @CanAccessFolder(PermissionAccessEnum.WRITE)
