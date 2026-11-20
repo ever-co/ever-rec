@@ -10,8 +10,10 @@ import {
   Query,
   Req,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { EverSignedInGuard } from '../../ever-instance/ever-operator.guard';
+import { EverConnectPlatformErrorsInterceptor } from '../ever-connect.errors';
 import { EverConnectWorkspaceAdminGuard } from '../guards/ever-connect.guards';
 import { EverConnectAuditService } from '../services/ever-connect-audit.service';
 import { EverConnectIntegrationsService } from '../services/ever-connect-integrations.service';
@@ -30,6 +32,7 @@ type Body_ = Record<string, unknown> | undefined;
  */
 @Controller('ever-connect/workspaces/:workspaceId')
 @UseGuards(EverConnectWorkspaceAdminGuard)
+@UseInterceptors(EverConnectPlatformErrorsInterceptor)
 export class EverConnectWorkspaceController {
   constructor(
     private readonly links: EverConnectLinksService,
@@ -115,6 +118,7 @@ export class EverConnectWorkspaceController {
 /** A person's own export (`ever.registry.person.export_requested`): that account only, else 404. */
 @Controller('ever-connect/me')
 @UseGuards(EverSignedInGuard)
+@UseInterceptors(EverConnectPlatformErrorsInterceptor)
 export class EverConnectPersonController {
   constructor(private readonly person: EverConnectPersonService) {}
 

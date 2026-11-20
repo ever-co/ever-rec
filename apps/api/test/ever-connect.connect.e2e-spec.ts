@@ -83,16 +83,58 @@ describe('connect with a code', () => {
     expect(again.status).toBe(409);
   });
 
-  it('an entitlement that does not verify leaves no connection stored', async () => {
+  it('an entitlement that does not verify leaves no connection stored (502)', async () => {
     t.platform.tamperEntitlements = true;
     const res = await t
       .http()
       .post('/api/v1/ever-connect/connect')
       .set('idToken', operator)
       .send({ code: t.platform.issueConnectCode(), workspaceId: 'ws-1' });
-    expect(res.status).toBeGreaterThanOrEqual(400);
+    expect(res.status).toBe(502);
+    expect(res.body).toEqual({ statusCode: 502, code: 'entitlement_unverified' });
     expect(t.firebase.db.dump(EVER_CONNECT_PATHS.connection)).toBeNull();
     expect(t.firebase.db.dump(EVER_CONNECT_PATHS.links)).toBeNull();
+  });
+
+  it("a code the platform refuses is the operator's to fix (422); nothing is stored", async () => {
+    const res = await t
+      .http()
+      .post('/api/v1/ever-connect/connect')
+      .set('idToken', operator)
+      .send({ code: 'EVC-AAAA-BBBB-CCCC', workspaceId: 'ws-1' });
+    expect(res.status).toBe(422);
+    expect(res.body).toEqual({ statusCode: 422, code: 'connect_code_refused' });
+    expect(t.firebase.db.dump(EVER_CONNECT_PATHS.connection)).toBeNull();
+  });
+
+  it('the platform failing or out of reach answers 502 with a code only', async () => {
+    t.platform.failOnce.add('POST /v1/connect/redeem');
+    const failed = await t
+      .http()
+      .post('/api/v1/ever-connect/connect')
+      .set('idToken', operator)
+      .send({ code: t.platform.issueConnectCode(), workspaceId: 'ws-1' });
+    expect(failed.status).toBe(502);
+    expect(failed.body).toEqual({ statusCode: 502, code: 'platform_unavailable' });
+
+    t.platform.down = true;
+    const unreachable = await t
+      .http()
+      .post('/api/v1/ever-connect/connect')
+      .set('idToken', operator)
+      .send({ code: t.platform.issueConnectCode(), workspaceId: 'ws-1' });
+    expect(unreachable.status).toBe(502);
+    expect(unreachable.body).toEqual({ statusCode: 502, code: 'platform_unreachable' });
+    expect(t.firebase.db.dump(EVER_CONNECT_PATHS.connection)).toBeNull();
+
+    // Back: connecting works (nothing was stored by the failed attempts).
+    t.platform.down = false;
+    const ok = await t
+      .http()
+      .post('/api/v1/ever-connect/connect')
+      .set('idToken', operator)
+      .send({ code: t.platform.issueConnectCode(), workspaceId: 'ws-1' });
+    expect(ok.status).toBe(200);
   });
 
   it('refuses a workspace the operator does not administer (403)', async () => {
@@ -166,7 +208,7 @@ describe('the first-boot code', () => {
     try {
       const code = t.platform.issueConnectCode();
       (t.get(EverConnectService) as any).config.envCode = code;
-      t.platform.failRedeem = { status: 422, code: 'invalid_code' };
+      t.platform.failRedeem = { status: 422, code: 'code_invalid' };
       const connect = t.get(EverConnectService);
       expect(await connect.connectWithEnvCode()).toBe('refused');
       const before = t.platform.requests.length;

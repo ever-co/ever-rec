@@ -471,7 +471,19 @@
           "denied_by_env": "The server configuration (EVER_CONNECT_INTEGRATIONS_DENY) denies this integration.",
           "denied_by_policy": "This integration is denied by the policy of this installation.",
           "not_pending_operator": "This integration is not waiting for the operator.",
-          "invalid_managed": "Check the kinds, the window (HH:MM, UTC) and the backup directory (an absolute path)."
+          "invalid_managed": "Check the kinds, the window (HH:MM, UTC) and the backup directory (an absolute path).",
+          "connect_code_refused": "Ever Platform did not accept this connect code (unknown, already used or expired). Create a new one in app.ever.co.",
+          "entitlement_unverified": "Ever Platform sent a document that does not verify, so nothing was stored. Try again later.",
+          "platform_unavailable": "Ever Platform is not available right now. Try again later.",
+          "platform_unreachable": "Ever Platform cannot be reached from this server. Check its outbound connection and try again.",
+          "platform_timeout": "Ever Platform did not answer in time. Try again later.",
+          "platform_rate_limited": "Ever Platform asks this server to wait before the next request. Try again later.",
+          "platform_refused": "Ever Platform refused the request.",
+          "platform_keys_unverified": "The signing keys of Ever Platform do not verify, so nothing was stored. Try again later.",
+          "platform_answer_too_large": "Ever Platform sent an answer that is too large. Try again later.",
+          "platform_egress_refused": "This server did not follow an address outside Ever Platform. Try again later.",
+          "connection_revoked": "Ever Platform revoked the connection of this installation. Connect again with a new code.",
+          "rate_limited": "Too many requests. Try again in a minute."
         },
         "managed": {
           "description": "An owner of the linked organization can ask from app.ever.co for a health report, a backup or a check of the last backup. Nothing runs unless the organization enabled \"Maintenance operations\" in app.ever.co and you opt in here, for the kinds you allow, in your window. Updates are not run from here.",

@@ -9,7 +9,12 @@ import {
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
-import { makeNodeSigner, signKeyRotation } from '@ever-co/connect-sdk';
+import {
+  makeNodeSigner,
+  ProblemError,
+  signKeyRotation,
+} from '@ever-co/connect-sdk';
+import { CODE_REFUSALS, ConnectCodeRefusedError } from '../ever-connect.errors';
 import {
   EverConnectKeyError,
   EverInstanceService,
@@ -151,6 +156,8 @@ export class EverConnectService {
       }
       tenant = { workspaceId, name: displayNameOf(workspace.name) };
     }
+    // A code the platform refuses answers 422 connect_code_refused, any other failure of the
+    // platform 502 (the module's interceptor, ever-connect.errors.ts).
     const outcome = await this.redeem(code, tenant, actor);
     return { ...(await this.status()), outcome };
   }
@@ -200,26 +207,32 @@ export class EverConnectService {
     let registryInstanceId: string | null = null;
     const client = this.client.build(key, () => registryInstanceId);
     const now = this.clock();
-    const redeemed = await client.connect.redeem(
-      {
-        code,
-        product: 'rec',
-        version: this.config.version,
-        install_source: this.config.installSource,
-        kind: this.config.installSource === 'cloud' ? 'cloud' : 'self_hosted',
-        public_jwk: { kty: 'OKP', crv: 'Ed25519', x: key.publicKey } as never,
-        ...(tenant
-          ? {
-              tenant: {
-                product_tenant_id: tenant.workspaceId,
-                ...(tenant.name ? { display_name: tenant.name } : {}),
-              },
-            }
-          : {}),
-      },
-      // A hash of the connect key id and the code: never the anonymous statistics id.
-      sha256Hex(`${key.keyId}${code}`),
-    );
+    const redeemed = await client.connect
+      .redeem(
+        {
+          code,
+          product: 'rec',
+          version: this.config.version,
+          install_source: this.config.installSource,
+          kind: this.config.installSource === 'cloud' ? 'cloud' : 'self_hosted',
+          public_jwk: { kty: 'OKP', crv: 'Ed25519', x: key.publicKey } as never,
+          ...(tenant
+            ? {
+                tenant: {
+                  product_tenant_id: tenant.workspaceId,
+                  ...(tenant.name ? { display_name: tenant.name } : {}),
+                },
+              }
+            : {}),
+        },
+        // A hash of the connect key id and the code: never the anonymous statistics id.
+        sha256Hex(`${key.keyId}${code}`),
+      )
+      .catch((error: unknown) => {
+        throw error instanceof ProblemError && CODE_REFUSALS.has(error.code)
+          ? new ConnectCodeRefusedError(error)
+          : error;
+      });
     registryInstanceId = redeemed.instance_id;
     const connection: ConnectionRecord = {
       registryInstanceId: redeemed.instance_id,

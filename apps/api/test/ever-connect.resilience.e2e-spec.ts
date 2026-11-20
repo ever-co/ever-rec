@@ -107,7 +107,8 @@ describe('resilience', () => {
     const before = (await instance.connectKey())!.keyId;
     t.platform.failOnce.add('POST /v1/instances/me/keys');
     const failed = await t.http().post('/api/v1/ever-connect/rotate-key').set('idToken', operator);
-    expect(failed.status).toBeGreaterThanOrEqual(400);
+    expect(failed.status).toBe(502);
+    expect(failed.body).toEqual({ statusCode: 502, code: 'platform_unavailable' });
     // A refusal by the platform drops the prepared key.
     expect(t.firebase.db.dump('ever_instance/self').connectNextKeyId).toBeUndefined();
     const ok = await t.http().post('/api/v1/ever-connect/rotate-key').set('idToken', operator);

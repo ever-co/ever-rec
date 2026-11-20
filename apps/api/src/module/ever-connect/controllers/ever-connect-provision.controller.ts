@@ -12,9 +12,11 @@ import {
   Post,
   Req,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { AuthGuard } from '../../auth/guards/auth.guard';
 import { EVER_CONNECT_CONFIG, EverConnectConfig } from '../ever-connect.config';
+import { EverConnectPlatformErrorsInterceptor } from '../ever-connect.errors';
 import { EverConnectProvisionService } from '../services/ever-connect-provision.service';
 
 /** The provision routes exist only with `EVER_CONNECT_PROVISION_ENABLED=true` (404 otherwise). */
@@ -66,6 +68,7 @@ type Body_ = Record<string, unknown> | undefined;
  */
 @Controller('ever-connect/provision')
 @UseGuards(EverConnectProvisionEnabledGuard, EverConnectProvisionRateGuard)
+@UseInterceptors(EverConnectPlatformErrorsInterceptor)
 export class EverConnectProvisionController {
   constructor(private readonly provision: EverConnectProvisionService) {}
 
