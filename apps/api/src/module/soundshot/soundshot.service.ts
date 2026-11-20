@@ -22,12 +22,25 @@ export class SoundshotService {
     const { userId: uid, file, title, duration, folderId } = input;
 
     try {
-      // Optional: validate audio file (e.g., mime type)
-      if (!file.mimetype.startsWith('audio/')) {
+      if (!file) {
+        return sendError('No audio file was uploaded.');
+      }
+
+      if (
+        typeof file.mimetype !== 'string' ||
+        !file.mimetype.startsWith('audio/')
+      ) {
         return sendError('Invalid file type. Only audio files are allowed.');
       }
 
-      const buffer = await fs.readFile(file.path);
+      // The upload route sets no multer storage, so the bytes are in memory (`file.buffer`).
+      // Read from disk only when a disk storage set `file.path`.
+      const buffer =
+        file.buffer ?? (file.path ? await fs.readFile(file.path) : undefined);
+      if (!buffer) {
+        return sendError('No audio file was uploaded.');
+      }
+
       const filename = file.filename || `${Date.now()}.webm`;
 
       // 1. Upload to Firebase Storage
