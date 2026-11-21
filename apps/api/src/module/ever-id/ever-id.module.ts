@@ -1,21 +1,9 @@
-import { Logger, Module } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { Module } from '@nestjs/common';
 import { HttpModule } from 'nestjs-http-promise';
 import { AuthModule } from '../auth/auth.module';
 import { TermsModule } from '../terms/terms.module';
 import { EverIdController } from './controllers/ever-id.controller';
-import {
-  EVER_ID_ENV_NAMES,
-  EverConnectOidcConfig,
-  EverIdSettings,
-  isEverIdAvailable,
-  readEverIdSettings,
-} from './ever-id.config';
-import {
-  EVER_CONNECT_OIDC_CONFIG,
-  EVER_ID_AVAILABLE,
-  EVER_ID_SETTINGS,
-} from './ever-id.tokens';
+import { EVER_ID_SETTINGS } from './ever-id.tokens';
 import { EverIdEnabledGuard } from './guards/ever-id-enabled.guard';
 import { EverIdRateLimitGuard } from './guards/ever-id-rate-limit.guard';
 import { EverIdAccountDeletedListener } from './services/ever-id-account-deleted.listener';
@@ -26,38 +14,17 @@ import { EverIdLoginChain } from './services/ever-id-login.chain';
 import { EverIdLogoutService } from './services/ever-id-logout.service';
 import { EverIdOidcService } from './services/ever-id-oidc.service';
 import { EverIdSessionIndexService } from './services/ever-id-session-index.service';
+import { EverIdSettingsService } from './services/ever-id-settings.service';
 import { EverIdStoreService } from './services/ever-id-store.service';
-
-const logger = new Logger('EverIdModule');
-
-/**
- * Resolves the settings once at boot and logs each warning once. Never contacts the issuer.
- */
-export function everIdSettingsFactory(
-  configService: ConfigService,
-  connect?: EverConnectOidcConfig,
-): EverIdSettings {
-  const env = Object.fromEntries(
-    EVER_ID_ENV_NAMES.map((name) => [name, configService.get<string>(name)]),
-  );
-  const settings = readEverIdSettings(env, connect ?? null);
-  for (const warning of settings.warnings) {
-    logger.warn(warning);
-  }
-  if (settings.issuer && settings.problems.length) {
-    logger.warn(`Ever ID sign-in stays off: ${settings.problems.join(' ')}`);
-  } else if (settings.issuer) {
-    logger.log('Ever ID sign-in is enabled.');
-  }
-  return settings;
-}
 
 /**
  * Optional Ever ID sign-in (any OpenID Connect issuer), beside e-mail/password and Google.
  *
  * Always imported by `AppModule`, like the Gauzy integration: without `EVER_ID_ISSUER_URL` it
  * registers its routes but every one of them except `GET /auth/ever-id/config` answers 404
- * `provider_disabled`, and it makes no outbound request.
+ * `provider_disabled`, and it makes no outbound request. With the Ever Platform connection loaded and
+ * no issuer in the environment, the Ever ID client the connection holds turns it on and off while
+ * the API runs (no restart).
  */
 @Module({
   imports: [
@@ -67,22 +34,13 @@ export function everIdSettingsFactory(
   ],
   controllers: [EverIdController],
   providers: [
+    // Resolves the settings at boot (logging each warning once) and follows the client of a
+    // connected instance while the API runs. Never contacts the issuer.
+    EverIdSettingsService,
     {
       provide: EVER_ID_SETTINGS,
-      useFactory: (
-        configService: ConfigService,
-        connect?: EverConnectOidcConfig,
-      ) => everIdSettingsFactory(configService, connect),
-      // Optional, like `@Optional() @Inject(EVER_CONNECT_OIDC_CONFIG)`: nothing provides it today.
-      inject: [
-        ConfigService,
-        { token: EVER_CONNECT_OIDC_CONFIG, optional: true },
-      ],
-    },
-    {
-      provide: EVER_ID_AVAILABLE,
-      useFactory: (settings: EverIdSettings) => isEverIdAvailable(settings),
-      inject: [EVER_ID_SETTINGS],
+      useFactory: (settings: EverIdSettingsService) => settings.view,
+      inject: [EverIdSettingsService],
     },
     EverIdCryptoService,
     EverIdStoreService,
@@ -96,6 +54,6 @@ export function everIdSettingsFactory(
     EverIdEnabledGuard,
     EverIdRateLimitGuard,
   ],
-  exports: [EVER_ID_AVAILABLE, EVER_ID_SETTINGS, EverIdLinkService],
+  exports: [EverIdSettingsService, EVER_ID_SETTINGS, EverIdLinkService],
 })
 export class EverIdModule {}

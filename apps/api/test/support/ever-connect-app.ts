@@ -12,6 +12,7 @@ import request from 'supertest';
 import { isEverConnectEnabled } from '../../src/common/ever-platform/env';
 import { everPlatformModules } from '../../src/common/ever-platform/modules';
 import { AuthModule } from '../../src/module/auth/auth.module';
+import { EverIdModule } from '../../src/module/ever-id/ever-id.module';
 import {
   EVER_CONNECT_AUTOSTART,
   EVER_CONNECT_CLOCK,
@@ -67,7 +68,12 @@ export interface ConnectTestApp {
 }
 
 export async function createConnectTestApp(
-  options: { env?: Record<string, string | undefined>; now?: number } = {},
+  options: {
+    env?: Record<string, string | undefined>;
+    now?: number;
+    /** Also load the Ever ID sign-in module (as `AppModule` always does). */
+    everId?: boolean;
+  } = {},
 ): Promise<ConnectTestApp> {
   for (const name of EVER_CONNECT_VARIABLES) delete process.env[name];
   const env: Record<string, string | undefined> = {
@@ -91,6 +97,7 @@ export async function createConnectTestApp(
       EventEmitterModule.forRoot(),
       FirebaseModule,
       AuthModule,
+      ...(options.everId ? [EverIdModule] : []),
       ...everPlatformModules(env, () => undefined),
     ],
   })

@@ -34,7 +34,10 @@ export type EverIdLinkMode = (typeof EVER_ID_LINK_MODES)[number];
 /** At most this many issuers are accepted (the primary one included). */
 export const EVER_ID_MAX_ISSUERS = 3;
 
-/** Everything the provider needs, resolved once at boot. */
+/**
+ * Everything the provider needs. The environment is read once at boot; the client of a connected
+ * instance (used only when the environment configures no issuer) is followed while the API runs.
+ */
 export interface EverIdSettings {
   /** Primary issuer (used for every authorization redirect), without a trailing slash; '' when unset. */
   issuer: string;
@@ -54,13 +57,16 @@ export interface EverIdSettings {
   installSource: string;
   /** The portal origin the API sends the browser back to (`WEBSITE_URL`). */
   portalUrl: string;
-  /** Lines to log once at boot (deprecated aliases, ignored values). */
+  /** Lines to log once (deprecated aliases, ignored values). */
   warnings: string[];
   /** Why the provider stays off although an issuer is configured; empty when it can run. */
   problems: string[];
 }
 
-/** Optional settings handed over by a connected-instance module (not provided by Rec today). */
+/**
+ * Optional settings handed over by a connected-instance module (the Ever Platform connection). Its
+ * members are read on every use, so they may change while the API runs.
+ */
 export interface EverConnectOidcConfig {
   /** Whether the person-facing Ever ID sign-in integration is enabled for this install. */
   enabled: boolean;
@@ -69,6 +75,11 @@ export interface EverConnectOidcConfig {
   clientSecret?: string;
   /** The API callback registered with the client (used when `EVER_ID_REDIRECT_URL` is unset). */
   redirectUrl?: string;
+  /**
+   * Re-reads the stored client when the last read is a few seconds old, so that a change recorded
+   * by another API process is picked up. Optional: a fixed value has none.
+   */
+  refresh?(): Promise<void>;
 }
 
 type Env = Record<string, string | undefined>;

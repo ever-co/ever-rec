@@ -162,15 +162,24 @@ export class EverIdOidcService {
     private readonly http: HttpService,
   ) {}
 
+  /**
+   * The settings in force now, copied once. The settings can change while the API runs (the client
+   * of a connected instance), so one operation reads one copy across its awaits: an issuer's
+   * endpoints are never combined with another client's credentials.
+   */
+  private snapshot(): EverIdSettings {
+    return { ...this.settings };
+  }
+
   /** The scope string sent with every authorization request. */
-  scope(): string {
+  scope(settings: EverIdSettings = this.snapshot()): string {
     const scopes = [...BASE_SCOPES];
-    if (isEverHost(this.settings.issuer) || this.settings.platformProjectId) {
+    if (isEverHost(settings.issuer) || settings.platformProjectId) {
       scopes.push(...EVER_ID_SCOPES);
     }
-    if (this.settings.platformProjectId) {
+    if (settings.platformProjectId) {
       scopes.push(
-        `urn:zitadel:iam:org:project:id:${this.settings.platformProjectId}:aud`,
+        `urn:zitadel:iam:org:project:id:${settings.platformProjectId}:aud`,
       );
     }
     return scopes.join(' ');
@@ -178,13 +187,14 @@ export class EverIdOidcService {
 
   /** Builds the authorization request URL at the primary issuer. Never carries a login hint. */
   async authorizationUrl(request: AuthorizationRequest): Promise<string> {
-    const discovery = await this.discovery(this.settings.issuer);
+    const settings = this.snapshot();
+    const discovery = await this.discovery(settings.issuer);
     const url = new URL(discovery.authorization_endpoint);
     const params: Record<string, string> = {
       response_type: 'code',
-      client_id: this.settings.clientId,
-      redirect_uri: this.settings.redirectUrl,
-      scope: this.scope(),
+      client_id: settings.clientId,
+      redirect_uri: settings.redirectUrl,
+      scope: this.scope(settings),
       state: request.state,
       nonce: request.nonce,
       code_challenge: codeChallenge(request.codeVerifier),
@@ -218,11 +228,12 @@ export class EverIdOidcService {
         'Missing authorization code',
       );
     }
-    const discovery = await this.discovery(this.settings.issuer);
+    const settings = this.snapshot();
+    const discovery = await this.discovery(settings.issuer);
     const form = new URLSearchParams({
       grant_type: 'authorization_code',
       code,
-      redirect_uri: this.settings.redirectUrl,
+      redirect_uri: settings.redirectUrl,
       code_verifier: codeVerifier,
     });
     let status: number;
@@ -234,8 +245,8 @@ export class EverIdOidcService {
         {
           headers: {
             Authorization: basicCredential(
-              this.settings.clientId,
-              this.settings.clientSecret,
+              settings.clientId,
+              settings.clientSecret,
             ),
             'Content-Type': 'application/x-www-form-urlencoded',
             Accept: 'application/json',
@@ -256,7 +267,7 @@ export class EverIdOidcService {
         `Token endpoint answered ${status}`,
       );
     }
-    const claims = await this.verifyIdToken(idToken, nonce);
+    const claims = await this.verifyIdToken(idToken, nonce, settings);
     return { claims, idToken };
   }
 
@@ -265,12 +276,16 @@ export class EverIdOidcService {
    * issuers, `aud` contains the client id (and `azp`, when present or required, equals it), `exp`,
    * `iat`, the expected `nonce`, and `email_verified === true`.
    */
-  async verifyIdToken(idToken: string, nonce: string): Promise<EverIdClaims> {
-    const payload = await this.verifyAgainstAcceptedIssuers(idToken, [
-      'sub',
-      'exp',
-      'iat',
-    ]);
+  async verifyIdToken(
+    idToken: string,
+    nonce: string,
+    settings: EverIdSettings = this.snapshot(),
+  ): Promise<EverIdClaims> {
+    const payload = await this.verifyAgainstAcceptedIssuers(
+      idToken,
+      ['sub', 'exp', 'iat'],
+      settings,
+    );
 
     const audiences = audienceList(payload);
     const azp = stringClaim(payload, 'azp');
@@ -280,7 +295,7 @@ export class EverIdOidcService {
         'A token for several audiences must name its authorized party',
       );
     }
-    if (azp && azp !== this.settings.clientId) {
+    if (azp && azp !== settings.clientId) {
       throw new EverIdTokenError(
         'audience_rejected',
         'Authorized party is not this client',
@@ -329,10 +344,11 @@ export class EverIdOidcService {
    * and no `nonce`. Replay protection is the caller's job.
    */
   async verifyLogoutToken(token: string): Promise<EverIdLogoutClaims> {
-    const payload = await this.verifyAgainstAcceptedIssuers(token, [
-      'iat',
-      'jti',
-    ]);
+    const payload = await this.verifyAgainstAcceptedIssuers(
+      token,
+      ['iat', 'jti'],
+      this.snapshot(),
+    );
     const now = this.nowSeconds();
     const iat = Number(payload.iat);
     if (!Number.isFinite(iat) || now - iat > LOGOUT_TOKEN_MAX_AGE_SECONDS) {
@@ -400,18 +416,19 @@ export class EverIdOidcService {
   private async verifyAgainstAcceptedIssuers(
     token: string,
     requiredClaims: string[],
+    settings: EverIdSettings,
   ): Promise<JWTPayload> {
     if (!token || typeof token !== 'string') {
       throw new EverIdTokenError('token_invalid', 'Missing token');
     }
     let lastError: EverIdTokenError | null = null;
-    for (const issuer of this.settings.issuers) {
+    for (const issuer of settings.issuers) {
       try {
         const getKey: JWTVerifyGetKey = (header) =>
           this.key(issuer, header.alg, header.kid);
         const { payload } = await jwtVerify(token, getKey, {
           issuer,
-          audience: this.settings.clientId,
+          audience: settings.clientId,
           algorithms: [...EVER_ID_SIGNING_ALGORITHMS],
           clockTolerance: CLOCK_TOLERANCE_SECONDS,
           currentDate: new Date(this.nowMs()),

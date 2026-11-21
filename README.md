@@ -441,13 +441,13 @@ An installation can also connect to Ever Platform (off by default; `EVER_CONNECT
 
 Ever Rec can offer **Continue with Ever ID** next to e-mail/password and Google sign-in. Ever ID is the account of the Ever Platform. The API is a standard OpenID Connect relying party, so any OpenID Connect issuer that supports the authorization code flow with PKCE can be configured the same way.
 
-The provider is **off by default**. While `EVER_ID_ISSUER_URL` is unset, the button is hidden, every `/api/v1/auth/ever-id/*` route except `config` answers `404 provider_disabled`, the API makes no request to any issuer, and the existing sign-in methods behave exactly as before.
+The provider is **off by default**. While `EVER_ID_ISSUER_URL` is unset and no Ever Platform connection supplies a client (see below), the button is hidden, every `/api/v1/auth/ever-id/*` route except `config` answers `404 provider_disabled`, the API makes no request to any issuer, and the existing sign-in methods behave exactly as before.
 
 ### API configuration
 
 | Variable | Default | Meaning |
 | --- | --- | --- |
-| `EVER_ID_ISSUER_URL` | unset | Issuer URL, for example `https://idp.example.com`. Unset keeps the provider off. `EVER_ID_ISSUER` is still read as a deprecated alias. |
+| `EVER_ID_ISSUER_URL` | unset | Issuer URL, for example `https://idp.example.com`. Unset keeps the provider off, unless the Ever Platform connection supplies a client (see below). `EVER_ID_ISSUER` is still read as a deprecated alias. |
 | `EVER_ID_CLIENT_ID` | | Client ID of the confidential web client registered at the issuer. |
 | `EVER_ID_CLIENT_SECRET` | | Its client secret. Provide it from your secret store; it is never sent to a browser or written to a log. |
 | `EVER_ID_REDIRECT_URL` | | `https://<api host>/api/v1/auth/ever-id/callback`, exactly as registered at the issuer. |
@@ -461,6 +461,8 @@ The provider is **off by default**. While `EVER_ID_ISSUER_URL` is unset, the but
 `WEBSITE_URL` must be set (it already is for CORS): the API sends the browser back to the portal there. The portal and the extensions need no new variable; they read `GET /api/v1/auth/ever-id/config` at runtime, so the button appears or disappears without a rebuild.
 
 An issuer on an Ever host (`*.ever.co`) is used only by an Ever-operated install (`EVER_INSTALL_SOURCE=cloud`). A self-hosted install configured with one keeps the provider off and logs one warning, without contacting that host. Any other issuer works as soon as it is configured.
+
+With the Ever Platform connection (`EVER_CONNECT_ENABLED=true`, see [docs/ever-platform](docs/ever-platform/ever-platform-connection.md)) and no `EVER_ID_ISSUER_URL`, the **Sign in with Ever ID** integration supplies the client instead: the provider turns on once the organization consents and Ever Platform has prepared the client, and off when the consent is withdrawn, without restarting the API (another API process of the same installation follows within 15 seconds). `EVER_ID_ISSUER_URL` always wins: with it set, the connection's client is never used.
 
 ### Registering the client at the issuer
 
