@@ -20,6 +20,13 @@ function sealed(value: StoredOidcClient): string {
   return seal(JSON.stringify(value), KEY, INSTANCE, 'oidc-config');
 }
 
+/** Lets every pending promise job run (native promise jobs are never faked). */
+async function settle(): Promise<void> {
+  for (let i = 0; i < 20; i += 1) {
+    await Promise.resolve();
+  }
+}
+
 function setup() {
   const clock = { now: 1_000_000 };
   const state = {
@@ -134,11 +141,13 @@ describe('EverConnectOidcService', () => {
       const waiting = service.refresh().then(() => {
         done = true;
       });
-      await jest.advanceTimersByTimeAsync(
-        EVER_CONNECT_OIDC_REFRESH_WAIT_MS - 1,
-      );
+      // Synchronous advances plus a microtask flush: the API's test environment resolves to
+      // jest-environment-node 27 (hoisted), whose fake timers have no `advanceTimersByTimeAsync`.
+      // The wait's timer is set synchronously inside refresh(), so a synchronous advance reaches it.
+      jest.advanceTimersByTime(EVER_CONNECT_OIDC_REFRESH_WAIT_MS - 1);
+      await settle();
       expect(done).toBe(false);
-      await jest.advanceTimersByTimeAsync(1);
+      jest.advanceTimersByTime(1);
       await waiting;
       expect(service.view.enabled).toBe(true);
       // The next requests do not wait for it again before the interval.
