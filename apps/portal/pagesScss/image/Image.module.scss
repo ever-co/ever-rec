@@ -134,6 +134,10 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  width: 100%;
+  border: none;
+  font: inherit;
+  text-align: inherit;
   background-color: #f5f4f7;
   border-radius: 5px;
   color: #9b9b9b;
@@ -144,6 +148,11 @@
   font-family: 'Roboto', sans-serif;
   font-style: normal;
   height: 60px;
+
+  &:focus-visible {
+    outline: 2px solid #5b4dbe;
+    outline-offset: 2px;
+  }
 
   & .moveToFolderInner {
     width: 100%;

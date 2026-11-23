@@ -490,7 +490,8 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
                 {t('page.image.currentlySavedIn')}
                 <strong className="tw-ml-1.5">{currentlySavedIn}</strong>
               </div>
-              <div
+              <button
+                type="button"
                 className={styles.moveToFolder}
                 onClick={() => setShowFolderModal(true)}
               >
@@ -502,7 +503,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
                     className="tw-ml-4"
                   />
                 </div>
-              </div>
+              </button>
             </ImageActionsCard>
             <ImageActionsCard>
               <div className=" tw-grid tw-gap-4 tw-grid-cols-3 tw-justify-items-center across-btns:tw-gap-1 across-btns:tw-grid-rows-1 across-btns:tw-place-items-center">
