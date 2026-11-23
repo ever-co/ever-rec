@@ -54,6 +54,7 @@ import { PermissionAccessEnum } from '../workspace/Interfaces/Workspace';
 import { ValidateId } from '../workspace/pipes/validate-id.pipe';
 import { isWorkspaceMember } from '../workspace/guards/CanAccessWorkspace.guard';
 import { is_id } from '../workspace/validators/id.validator';
+import { RemoveUploadInterceptor } from '../../common/interceptors/remove-upload.interceptor';
 
 @Controller('video')
 export class VideoController {
@@ -296,6 +297,7 @@ export class VideoController {
   @UseGuards(AuthGuard)
   @UseInterceptors(
     FileInterceptor('blob', {
+      limits: { fileSize: 1024 * 1024 * 1024 },
       storage: diskStorage({
         destination: (req, file, callback) => {
           callback(null, TMP_PATH);
@@ -306,6 +308,8 @@ export class VideoController {
         },
       }),
     }),
+    // Multer has already written the upload to TMP_PATH: it goes however the request ends.
+    RemoveUploadInterceptor,
   )
   @Post('upload')
   async uploadVideo(
@@ -348,6 +352,8 @@ export class VideoController {
         },
       }),
     }),
+    // Also when @RefreshToken() refuses (401) or no uploader takes the token (empty answer).
+    RemoveUploadInterceptor,
   )
   @Post('upload/file')
   async uploadFile(
