@@ -46,6 +46,16 @@
     "trimVideo": "Trim Video",
     "accessBlocked": "Access to this page is blocked. To grant access, click the <0></0> icon in the address bar. See instructions below.",
     "selectArea": "Select Area",
+    "recordingControls": {
+      "stop": "Stop recording",
+      "pause": "Pause recording",
+      "resume": "Resume recording",
+      "mute": "Mute microphone",
+      "unmute": "Unmute microphone",
+      "cancel": "Cancel recording",
+      "pen": "Draw on screen",
+      "undo": "Undo last stroke"
+    },
     "encodingGIF": "Encoding GIF animation...",
     "fullPage": "Capturing full page...",
     "scroll": "Please <b>do not scroll</b> for the best possible result.",

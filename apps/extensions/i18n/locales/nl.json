@@ -46,6 +46,16 @@
     "trimVideo": "Video bijsnijden",
     "accessBlocked": "Toegang tot deze pagina is geblokkeerd. Om toegang te verlenen, klikt u op het <0></0>-pictogram in de adresbalk. Zie de instructies hieronder.",
     "selectArea": "Selecteer gebied",
+    "recordingControls": {
+      "stop": "Opname stoppen",
+      "pause": "Opname pauzeren",
+      "resume": "Opname hervatten",
+      "mute": "Microfoon dempen",
+      "unmute": "Microfoon inschakelen",
+      "cancel": "Opname annuleren",
+      "pen": "Op het scherm tekenen",
+      "undo": "Laatste streek ongedaan maken"
+    },
     "encodingGIF": "GIF-animatie wordt gecodeerd...",
     "fullPage": "Volledige pagina wordt vastgelegd...",
     "scroll": "Gelieve <b>niet te scrollen</b> voor het best mogelijke resultaat.",
