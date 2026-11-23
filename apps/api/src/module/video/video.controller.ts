@@ -23,7 +23,6 @@ import {
 } from '@nestjs/platform-express';
 import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
-import { unlink } from 'fs/promises';
 import { diskStorage } from 'multer';
 import { IDataResponse } from 'src/interfaces/_types';
 import {
@@ -55,11 +54,7 @@ import { PermissionAccessEnum } from '../workspace/Interfaces/Workspace';
 import { ValidateId } from '../workspace/pipes/validate-id.pipe';
 import { isWorkspaceMember } from '../workspace/guards/CanAccessWorkspace.guard';
 import { is_id } from '../workspace/validators/id.validator';
-
-// Multer has already written a refused upload to TMP_PATH: remove it, or it stays there for good.
-const removeUpload = async (blob?: Express.Multer.File) => {
-  if (blob?.path) await unlink(blob.path).catch(() => undefined);
-};
+import { RemoveUploadInterceptor } from '../../common/interceptors/remove-upload.interceptor';
 
 @Controller('video')
 export class VideoController {
@@ -313,6 +308,8 @@ export class VideoController {
         },
       }),
     }),
+    // Multer has already written the upload to TMP_PATH: it goes however the request ends.
+    RemoveUploadInterceptor,
   )
   @Post('upload')
   async uploadVideo(
@@ -321,14 +318,12 @@ export class VideoController {
     @UploadedFile() blob: Express.Multer.File,
   ) {
     if (!blob || !blob.mimetype || !blob.filename) {
-      await removeUpload(blob);
       throw new BadRequestException('Missing uploaded file or file metadata.');
     }
 
     const fileExtension = fileExtensionMap[blob.mimetype];
 
     if (!fileExtension) {
-      await removeUpload(blob);
       throw new UnsupportedMediaTypeException(
         `Unsupported media type: ${blob.mimetype}`,
       );
@@ -357,6 +352,8 @@ export class VideoController {
         },
       }),
     }),
+    // Also when @RefreshToken() refuses (401) or no uploader takes the token (empty answer).
+    RemoveUploadInterceptor,
   )
   @Post('upload/file')
   async uploadFile(
@@ -366,14 +363,12 @@ export class VideoController {
     @RefreshToken() token: string,
   ): Promise<IDataResponse<IEditorVideo>> {
     if (!blob || !blob.mimetype || !blob.filename) {
-      await removeUpload(blob);
       throw new BadRequestException('Missing uploaded file or file metadata.');
     }
 
     const fileExtension = fileExtensionMap[blob.mimetype];
 
     if (!fileExtension) {
-      await removeUpload(blob);
       throw new UnsupportedMediaTypeException(
         `Unsupported media type: ${blob.mimetype}`,
       );

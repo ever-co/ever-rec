@@ -2,7 +2,16 @@ import * as fs from 'fs/promises';
 import Ffmpeg from 'fluent-ffmpeg';
 import ffmpegPath from 'ffmpeg-static';
 import ffprobePath from 'ffprobe-static';
-import { basename, dirname, extname, join, resolve } from 'path';
+import {
+  basename,
+  dirname,
+  extname,
+  isAbsolute,
+  join,
+  relative,
+  resolve,
+  sep,
+} from 'path';
 import { TMP_PATH, TMP_PATH_FIXED } from '../../enums/tmpPathsEnums';
 Ffmpeg.setFfmpegPath(ffmpegPath);
 Ffmpeg.setFfprobePath(ffprobePath.path);
@@ -84,7 +93,9 @@ export async function fixVideoWithFFMPEG(
 async function removeTmpFile(path: string, tmpDir: string, label: string) {
   try {
     const resolvedPath = resolve(path);
-    if (resolvedPath.startsWith(resolve(tmpDir))) {
+    // A path check, not a prefix check: `tmp_videos_fixed/x` is not inside `tmp_videos/`.
+    const inside = relative(resolve(tmpDir), resolvedPath);
+    if (inside && !isAbsolute(inside) && inside.split(sep)[0] !== '..') {
       await fs
         .unlink(resolvedPath)
         .catch((err) =>

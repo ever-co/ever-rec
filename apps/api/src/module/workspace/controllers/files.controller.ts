@@ -20,6 +20,7 @@ import { diskStorage } from 'multer';
 import { v4 as uuidv4 } from 'uuid';
 
 import { TMP_PATH } from '../../../enums/tmpPathsEnums';
+import { RemoveUploadInterceptor } from '../../../common/interceptors/remove-upload.interceptor';
 import { WorkspaceFilesService } from '../services/files.service';
 import { CanAccessFolder } from '../decorators/CanAccessFolder.decorator';
 import { CanChangePermissions } from '../decorators/CanChangePermissions.decorator';
@@ -136,6 +137,8 @@ export class WorkspaceFilesController {
         },
       }),
     }),
+    // The upload goes however the request ends, also when the body fails validation (400).
+    RemoveUploadInterceptor,
     // After the file interceptor: it needs the parsed multipart body.
     WorkspaceVideoWriteInterceptor,
   )

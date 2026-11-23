@@ -411,6 +411,18 @@ describe('workspace video routes', () => {
       expect(addVideoFromFile).not.toHaveBeenCalled();
     });
 
+    it('refuses a request without a title, and removes the upload', async () => {
+      await auth(
+        request(app.getHttpServer())
+          .post(BASE)
+          .field('fullFileName', 'fresh.webm')
+          .attach('file', Buffer.from('video-bytes'), 'upload.webm'),
+        'uid-writer',
+      ).expect(400);
+      expect(addVideoFromFile).not.toHaveBeenCalled();
+      expect(leftoverUploads()).toEqual([]);
+    });
+
     it('refuses a user who is not a member of the workspace', async () => {
       await upload('uid-stranger', { fullFileName: 'fresh.webm' }).expect(403);
       expect(addVideoFromFile).not.toHaveBeenCalled();

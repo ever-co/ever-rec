@@ -128,4 +128,16 @@ describe('fixVideoWithFFMPEG', () => {
 
     expect(mockUnlink).not.toHaveBeenCalled();
   });
+
+  it('never removes an upload from a folder whose name only starts like the upload folder', async () => {
+    mockFfmpeg.run = { error: new Error('ffmpeg exited with code 1') };
+    // `tmp_videos_fixed/` starts with `tmp_videos`, but it is not inside `tmp_videos/`.
+    const outside = join(TMP_PATH_FIXED, 'other-upload.mp4');
+
+    await expect(fixVideoWithFFMPEG(outside, fixed)).rejects.toThrow(
+      'ffmpeg exited with code 1',
+    );
+
+    expect(mockUnlink.mock.calls).toEqual([[resolve(fixed)]]);
+  });
 });

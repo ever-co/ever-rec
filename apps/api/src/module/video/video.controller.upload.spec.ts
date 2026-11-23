@@ -67,6 +67,7 @@ const mockFix = fixVideoWithFFMPEG as jest.MockedFunction<
 const mockUpload = uploadVideoToBucket as jest.MockedFunction<
   typeof uploadVideoToBucket
 >;
+const mockContextUpload = jest.fn();
 
 describe('POST video/upload', () => {
   let app: INestApplication;
@@ -99,7 +100,10 @@ describe('POST video/upload', () => {
         { provide: SharedService, useValue: {} },
         { provide: FoldersSharedService, useValue: {} },
         { provide: UniqueViewsSharedService, useValue: {} },
-        { provide: ContextUploader, useValue: {} },
+        {
+          provide: ContextUploader,
+          useValue: { upload: (...args: any[]) => mockContextUpload(...args) },
+        },
       ],
     }).compile();
 
@@ -117,6 +121,7 @@ describe('POST video/upload', () => {
     jest.spyOn(console, 'error').mockImplementation(() => undefined);
     mockFix.mockReset();
     mockUpload.mockReset();
+    mockContextUpload.mockReset();
     // The conversion stand-in does not remove the upload the way the real one does.
     for (const name of readdirSync(TMP_PATH)) {
       rmSync(join(TMP_PATH, name), { force: true });
@@ -168,6 +173,36 @@ describe('POST video/upload', () => {
     expect(readdirSync(TMP_PATH)).toEqual([]);
   });
 
+  const uploadFile = (headers: Record<string, string>) =>
+    request(app.getHttpServer())
+      .post('/video/upload/file')
+      .set(headers)
+      .field('title', 'A video')
+      .attach('file', Buffer.from('not-a-video'), {
+        filename: 'file',
+        contentType: 'video/webm',
+      });
+
+  it('removes an upload on POST video/upload/file without a refresh token (401)', async () => {
+    await uploadFile({ Authorization: 'Bearer uid-owner' }).expect(401);
+
+    expect(mockContextUpload).not.toHaveBeenCalled();
+    expect(readdirSync(TMP_PATH)).toEqual([]);
+  });
+
+  it('removes an upload on POST video/upload/file that no uploader took', async () => {
+    // No uploader accepts the refresh token, so the pipeline answers nothing.
+    mockContextUpload.mockResolvedValue(undefined);
+
+    await uploadFile({
+      Authorization: 'Bearer uid-owner',
+      'x-refresh-token': 'rt',
+    }).expect(201);
+
+    expect(mockContextUpload).toHaveBeenCalledTimes(1);
+    expect(readdirSync(TMP_PATH)).toEqual([]);
+  });
+
   it('answers 500, not an empty 201, when the video cannot be converted', async () => {
     mockFix.mockRejectedValue(new Error('Invalid data found'));
 
@@ -175,6 +210,7 @@ describe('POST video/upload', () => {
 
     expect(mockFix).toHaveBeenCalledTimes(1);
     expect(mockUpload).not.toHaveBeenCalled();
+    expect(readdirSync(TMP_PATH)).toEqual([]);
   });
 
   it('answers 500, not an empty 201, when the bucket was not written', async () => {
