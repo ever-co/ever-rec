@@ -37,7 +37,8 @@ export class SoundshotService {
       // Read from disk only when a disk storage set `file.path`.
       const buffer =
         file.buffer ?? (file.path ? await fs.readFile(file.path) : undefined);
-      if (!buffer) {
+      // An empty file is refused too: it would be stored as a recording with no sound.
+      if (!buffer?.length) {
         return sendError('No audio file was uploaded.');
       }
 
@@ -57,8 +58,10 @@ export class SoundshotService {
         mediaType: this.itemType,
         data: {
           refName: filename,
-          title,
-          duration,
+          // title and duration are optional. The Realtime Database refuses an undefined value
+          // (set() throws, after the file is already in Storage); null leaves the key out.
+          title: title ?? null,
+          duration: duration ?? null,
           parentId: folderId || false,
           mimeType: file.mimetype,
         },

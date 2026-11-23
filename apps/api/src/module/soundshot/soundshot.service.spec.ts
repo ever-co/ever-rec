@@ -121,11 +121,44 @@ describe('SoundshotService.uploadSoundshot', () => {
     }
   });
 
+  it('writes the record without undefined values when title and duration are missing', async () => {
+    // The Realtime Database's set() throws on an undefined value, after the file is in Storage.
+    const result = await service.uploadSoundshot({
+      userId: uid,
+      file: {
+        fieldname: 'file',
+        originalname: 'blob',
+        mimetype: 'audio/webm',
+        buffer: Buffer.from('webm audio bytes'),
+      } as Express.Multer.File,
+    });
+
+    expect(result.status).toBe(ResStatusEnum.success);
+    expect(create).toHaveBeenCalledTimes(1);
+    const { data } = create.mock.calls[0][0];
+    const undefinedKeys = Object.keys(data).filter(
+      (key) => data[key] === undefined,
+    );
+    expect(undefinedKeys).toEqual([]);
+    expect(data).toEqual(
+      expect.objectContaining({ title: null, duration: null, parentId: false }),
+    );
+  });
+
   it.each([
     ['no file', undefined],
     [
       'a file with neither bytes nor a path',
       { originalname: 'a.webm', mimetype: 'audio/webm' },
+    ],
+    [
+      'an empty file',
+      {
+        originalname: 'a.webm',
+        mimetype: 'audio/webm',
+        buffer: Buffer.alloc(0),
+        size: 0,
+      },
     ],
   ])(
     'answers an error and stores nothing for %s, without throwing',
