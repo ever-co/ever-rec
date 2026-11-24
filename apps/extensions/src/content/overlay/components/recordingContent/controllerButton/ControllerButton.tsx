@@ -43,6 +43,11 @@ const ControllerButton: React.FC<IControllerButtonProps> = ({
     if (event.key === 'Enter' || event.key === ' ') {
       // Space would otherwise scroll the host page.
       event.preventDefault();
+      // A held key repeats keydown. Act on the first one only, so pause and pen
+      // do not flip back and forth.
+      if (event.repeat) {
+        return;
+      }
       clickHandler();
     }
   };

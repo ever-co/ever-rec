@@ -65,6 +65,7 @@ const RecordingContent: React.FC<IRecordingContentProps> = ({
   onCancelRecording,
 }) => {
   const { t } = useTranslation();
+  const canMute = !microphoneMuted && microphoneEnabled;
   const mainContainerGlobal: any = useRef();
   const penSlider: any = useRef();
   const colorPickerIcon: any = useRef();
@@ -202,23 +203,18 @@ const RecordingContent: React.FC<IRecordingContentProps> = ({
                     : t('ext.recordingControls.pause')
                 }
               ></ControllerButton>
-              {!microphoneMuted && microphoneEnabled && (
-                <ControllerButton
-                  className="micButton"
-                  onClick={() => muteOrUnmute(true)}
-                  imgSource="unmute.svg"
-                  label={t('ext.recordingControls.mute')}
-                />
-              )}
-              {(microphoneMuted || !microphoneEnabled) && (
-                <ControllerButton
-                  className="micButton"
-                  onClick={() => muteOrUnmute(false)}
-                  imgSource="mute.svg"
-                  disabled={!microphoneEnabled}
-                  label={t('ext.recordingControls.unmute')}
-                ></ControllerButton>
-              )}
+              {/* One mounted button, so keyboard focus survives a mute toggle. */}
+              <ControllerButton
+                className="micButton"
+                onClick={() => muteOrUnmute(canMute)}
+                imgSource={canMute ? 'unmute.svg' : 'mute.svg'}
+                disabled={!microphoneEnabled}
+                label={
+                  canMute
+                    ? t('ext.recordingControls.mute')
+                    : t('ext.recordingControls.unmute')
+                }
+              ></ControllerButton>
               <ControllerButton
                 className={'binButton'}
                 onClick={binButtonClickHandler}
