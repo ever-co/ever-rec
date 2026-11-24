@@ -246,6 +246,12 @@ const RecordingContent: React.FC<IRecordingContentProps> = ({
     penSlider.current.classList.remove('show-slider-keyboard');
   };
 
+  // A pen button the mouse focused turns :focus-visible at the next key press,
+  // but no new focus event fires, so a key press on it shows the slider too.
+  const keyDownPenHandler = (): void => {
+    penSlider.current.classList.add('show-slider-keyboard');
+  };
+
   const inputHandler = (event: ChangeEvent): void => {
     //@ts-ignore
     setInputValue(Number(event.target.value));
@@ -319,6 +325,7 @@ const RecordingContent: React.FC<IRecordingContentProps> = ({
                 onClick={penButtonClickHandler}
                 onFocus={focusPenToolsHandler}
                 onBlur={blurPenToolsHandler}
+                onKeyDown={keyDownPenHandler}
                 label={t('ext.recordingControls.pen')}
                 pressed={penImgSource == 'pen-active.svg'}
               ></ControllerButton>

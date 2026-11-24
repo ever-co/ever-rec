@@ -215,6 +215,11 @@
         box-shadow: 0 0 0 2px #fff, 0 0 0 4px #5b4dbe;
       }
 
+      // Firefox. A rule of its own: one unknown pseudo-element drops a whole list.
+      input:focus-visible::-moz-range-thumb {
+        box-shadow: 0 0 0 2px #fff, 0 0 0 4px #5b4dbe;
+      }
+
       img {
         position: absolute;
         z-index: 99999999;
