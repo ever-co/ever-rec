@@ -54,7 +54,9 @@
       "unmute": "取消麦克风静音",
       "cancel": "取消录制",
       "pen": "在屏幕上绘图",
-      "undo": "撤销上一笔"
+      "undo": "撤销上一笔",
+      "penColor": "选择画笔颜色",
+      "brushSize": "画笔大小"
     },
     "encodingGIF": "正在编码GIF动画...",
     "fullPage": "正在截取整个页面...",

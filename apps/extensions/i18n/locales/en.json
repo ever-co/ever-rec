@@ -54,7 +54,9 @@
       "unmute": "Unmute microphone",
       "cancel": "Cancel recording",
       "pen": "Draw on screen",
-      "undo": "Undo last stroke"
+      "undo": "Undo last stroke",
+      "penColor": "Choose pen color",
+      "brushSize": "Brush size"
     },
     "encodingGIF": "Encoding GIF animation...",
     "fullPage": "Capturing full page...",

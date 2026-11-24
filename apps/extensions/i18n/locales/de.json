@@ -54,7 +54,9 @@
       "unmute": "Mikrofon einschalten",
       "cancel": "Aufnahme abbrechen",
       "pen": "Auf dem Bildschirm zeichnen",
-      "undo": "Letzten Strich rückgängig machen"
+      "undo": "Letzten Strich rückgängig machen",
+      "penColor": "Stiftfarbe auswählen",
+      "brushSize": "Pinselgröße"
     },
     "encodingGIF": "GIF-Animation wird kodiert...",
     "fullPage": "Ganze Seite wird aufgenommen...",

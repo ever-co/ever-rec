@@ -54,7 +54,9 @@
       "unmute": "Microfoon inschakelen",
       "cancel": "Opname annuleren",
       "pen": "Op het scherm tekenen",
-      "undo": "Laatste streek ongedaan maken"
+      "undo": "Laatste streek ongedaan maken",
+      "penColor": "Penkleur kiezen",
+      "brushSize": "Penseelgrootte"
     },
     "encodingGIF": "GIF-animatie wordt gecodeerd...",
     "fullPage": "Volledige pagina wordt vastgelegd...",
