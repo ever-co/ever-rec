@@ -16,7 +16,7 @@ import {
   promiseAllSettled,
 } from '../../../services/utils/helpers';
 import { WorkspaceMembersService } from './members.service';
-import { IWorkspaceFolder } from '../Interfaces/Folders';
+import { changeWorkspaceFolders } from './change-workspace-collection';
 import { sendError, sendResponse } from 'src/services/utils/sendResponse';
 import { IFavoriteFolders } from 'src/interfaces/Folders';
 import { Optional } from '@nestjs/common';
@@ -304,15 +304,6 @@ export class WorkspacesService {
             members: newMembers,
           };
         });
-        const updatedWorkspaceFolders = parseCollectionToArray(
-          workspaceVal.folders,
-        ).map((x: IWorkspaceFolder) => {
-          if (x.access?.members) {
-            x.access.members = x.access.members.filter((y) => y.uid !== uid);
-          }
-
-          return x;
-        });
         const newUserWorkspaces = userVal.workspaceIds.filter(
           (x) => x !== workspaceId,
         );
@@ -324,9 +315,40 @@ export class WorkspacesService {
         await db.ref().update({
           [`workspaces/${workspaceId}/members`]: filteredWorkspaceMembers,
           [`workspaces/${workspaceId}/teams`]: newWorkspaceTeams,
-          [`workspaces/${workspaceId}/folders`]: updatedWorkspaceFolders,
           [`users/${uid}/workspaceIds`]: newUserWorkspaces,
         });
+
+        // The user's folder permissions leave in the transaction every writer of the folder list
+        // shares: a write of the list read above would undo a folder, an item count or a permission
+        // changed meanwhile. The workspace guard turns a non-member away before any folder
+        // permission is read, so the leave stands when this fails; the failure is only logged.
+        const cleaned = await changeWorkspaceFolders(workspaceId, (folders) => {
+          let changed = false;
+          const items = folders.map((folder) => {
+            const members = parseCollectionToArray<IAccessMember>(
+              folder.access?.members,
+            );
+            if (!members.some((member) => member?.uid === uid)) {
+              return folder;
+            }
+            changed = true;
+            return {
+              ...folder,
+              access: {
+                ...folder.access,
+                members: members.filter((member) => member?.uid !== uid),
+              },
+            };
+          });
+
+          return changed ? { items } : {};
+        });
+        if (cleaned.ok === false) {
+          console.log(
+            `Could not remove the folder permissions of a member who left workspace ${workspaceId}.`,
+          );
+        }
+
         return await this.getUserWorkspaces(uid);
       } else {
         return sendError('No such workspace or user');

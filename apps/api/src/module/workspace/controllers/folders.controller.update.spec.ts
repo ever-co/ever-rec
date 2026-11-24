@@ -14,6 +14,7 @@
 import { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
+import { InMemoryDatabase } from '../../../../test/support/in-memory-firebase';
 import { TokenService } from '../../auth/services/tokens';
 import { FoldersSharedService } from '../../../services/shared/folders.shared.service';
 import { WorkspaceFoldersController } from './folders.controller';
@@ -39,23 +40,12 @@ jest.mock('../../../services/shared/folders.shared.service', () => ({
   FoldersSharedService: class {},
 }));
 
-const mockDb: { data: Record<string, any> } = { data: {} };
-jest.mock('firebase-admin', () => ({
-  database: () => ({
-    ref: (path: string) => ({
-      get: async () => {
-        // `workspaces/<id>` is stored whole; `workspaces/<id>/<child>` reads one child of it.
-        const [root, id, child] = path.split('/');
-        const workspace = mockDb.data[`${root}/${id}`];
-        const value = child ? workspace?.[child] : workspace;
-        return { val: () => value ?? null };
-      },
-    }),
-  }),
-}));
+// The folder list is changed in a transaction, so the database is the in-memory one.
+let mockDb: InMemoryDatabase;
+jest.mock('firebase-admin', () => ({ database: () => mockDb }));
 
 const FOLDER_URL = '/workspace/ws1/folders/fold1';
-const storedFolder = () => mockDb.data['workspaces/ws1'].folders.fold1;
+const storedFolder = () => mockDb.dump('workspaces/ws1/folders/fold1');
 const ORIGINAL_ACCESS = {
   members: [
     { uid: 'uid-reader', access: 'READ' },
@@ -72,20 +62,11 @@ describe('workspace folder routes: update, delete and move-items', () => {
     // The real service for the update route; its database access goes to `mockDb`.
     const utilities = {
       getWorkspaceById: async (id: string) => {
-        const workspaceVal = mockDb.data[`workspaces/${id}`];
+        const workspaceRef = mockDb.ref(`workspaces/${id}`);
         return {
-          workspaceVal,
-          workspaceRef: {
-            update: async (patch: Record<string, unknown>) => {
-              Object.assign(workspaceVal, patch);
-            },
-          },
-          db: {
-            ref: () => ({
-              get: async () => ({ val: () => null }),
-              set: async () => undefined,
-            }),
-          },
+          workspaceVal: (await workspaceRef.get()).val(),
+          workspaceRef,
+          db: mockDb,
         };
       },
     };
@@ -121,31 +102,30 @@ describe('workspace folder routes: update, delete and move-items', () => {
     await app.close();
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     jest.spyOn(console, 'log').mockImplementation(() => undefined);
-    mockDb.data = {
-      'workspaces/ws1': {
-        admin: 'uid-admin',
-        members: [
-          { id: 'uid-admin' },
-          { id: 'uid-reader' },
-          { id: 'uid-writer' },
-          { id: 'uid-ungranted' },
-        ],
-        folders: {
-          fold1: {
-            id: 'fold1',
-            name: 'Original',
-            color: 'red',
-            items: 2,
-            parentId: false,
-            creator: 'uid-admin',
-            access: JSON.parse(JSON.stringify(ORIGINAL_ACCESS)),
-          },
-          fold2: { id: 'fold2', name: 'Other', color: 'blue', items: 0 },
+    mockDb = new InMemoryDatabase();
+    await mockDb.ref('workspaces/ws1').set({
+      admin: 'uid-admin',
+      members: [
+        { id: 'uid-admin' },
+        { id: 'uid-reader' },
+        { id: 'uid-writer' },
+        { id: 'uid-ungranted' },
+      ],
+      folders: {
+        fold1: {
+          id: 'fold1',
+          name: 'Original',
+          color: 'red',
+          items: 2,
+          parentId: false,
+          creator: 'uid-admin',
+          access: JSON.parse(JSON.stringify(ORIGINAL_ACCESS)),
         },
+        fold2: { id: 'fold2', name: 'Other', color: 'blue', items: 0 },
       },
-    };
+    });
     deleteFolder.mockReset().mockResolvedValue({ status: 'success' });
     moveItemsToFolder.mockReset().mockResolvedValue({ status: 'success' });
   });
@@ -278,7 +258,7 @@ describe('workspace folder routes: update, delete and move-items', () => {
         parentId: false,
       });
       expect(storedFolder().isPublic).toBeUndefined();
-      expect(mockDb.data['workspaces/ws1'].folders.fold2.name).toBe('Other');
+      expect(mockDb.dump('workspaces/ws1/folders/fold2/name')).toBe('Other');
     });
 
     it('keeps the stored values of fields the body leaves out', async () => {
@@ -306,7 +286,7 @@ describe('workspace folder routes: update, delete and move-items', () => {
 
     it('ignores the item count a client sends back, a negative one included', async () => {
       // Counts can drift below zero; the clients send the stored folder back on rename and recolour.
-      storedFolder().items = -1;
+      await mockDb.ref('workspaces/ws1/folders/fold1/items').set(-1);
       await request(app.getHttpServer())
         .put(FOLDER_URL)
         .set(as('uid-writer'))
@@ -338,14 +318,17 @@ describe('workspace folder routes: update, delete and move-items', () => {
 });
 
 describe('moving items out of a folder (the real move handler)', () => {
-  let workspace: Record<string, any>;
   let service: WorkspaceFoldersService;
+  let changeCount: jest.Mock;
   const user = (id: string) => ({ id }) as any;
-  const parentOf = (itemId: string) => workspace.screenshots[itemId].parentId;
+  const parentOf = (itemId: string) =>
+    mockDb.dump(`workspaces/ws1/screenshots/${itemId}/parentId`);
 
-  beforeEach(() => {
+  beforeEach(async () => {
     jest.spyOn(console, 'log').mockImplementation(() => undefined);
-    workspace = {
+    changeCount = jest.fn((folders: unknown) => folders);
+    mockDb = new InMemoryDatabase();
+    await mockDb.ref('workspaces/ws1').set({
       admin: 'uid-admin',
       members: [
         { id: 'uid-admin' },
@@ -374,18 +357,13 @@ describe('moving items out of a folder (the real move handler)', () => {
         // The writer's own image, in the same folder.
         writers: { id: 'writers', uid: 'uid-writer', parentId: 'fold1' },
       },
-      videos: {},
-    };
+    });
     const utilities = {
-      getWorkspaceById: async () => ({
-        workspaceVal: workspace,
-        workspaceRef: {
-          update: async (patch: Record<string, unknown>) => {
-            Object.assign(workspace, patch);
-          },
-        },
-      }),
-      changeFolderItemCountRecursive: (folders: unknown) => folders,
+      getWorkspaceById: async () => {
+        const workspaceRef = mockDb.ref('workspaces/ws1');
+        return { workspaceVal: (await workspaceRef.get()).val(), workspaceRef };
+      },
+      changeFolderItemCountRecursive: changeCount,
       parseWorkspaceItems: async (value: unknown) => value,
     };
     service = new WorkspaceFoldersService(utilities as any, {} as any);
@@ -428,7 +406,7 @@ describe('moving items out of a folder (the real move handler)', () => {
   });
 
   it('lets the reader move their own item when it is not in that folder', async () => {
-    workspace.screenshots.own.parentId = false;
+    await mockDb.ref('workspaces/ws1/screenshots/own/parentId').set(false);
     const res = await service.moveItemsToFolder(
       user('uid-reader'),
       'ws1',
@@ -465,7 +443,15 @@ describe('moving items out of a folder (the real move handler)', () => {
     expect(parentOf('granted')).toBe(false);
   });
 
+  // An id that is not an item writes nothing: no item, no folder count.
+  const expectNothingWritten = (before: unknown) => {
+    expect(mockDb.dump('workspaces/ws1')).toEqual(before);
+    expect(mockDb.dump('workspaces/ws1/videos')).toBeNull();
+    expect(changeCount).not.toHaveBeenCalled();
+  };
+
   it('does not create an item for an id that does not exist, even for the admin', async () => {
+    const before = mockDb.dump('workspaces/ws1');
     const res = await service.moveItemsToFolder(
       user('uid-admin'),
       'ws1',
@@ -474,13 +460,13 @@ describe('moving items out of a folder (the real move handler)', () => {
       'fold1',
     );
     expect(res.status).toBe('error');
-    expect(workspace.videos).toEqual({});
-    expect(workspace.screenshots.missing).toBeUndefined();
+    expectNothingWritten(before);
   });
 
   it.each(['constructor', 'toString', 'hasOwnProperty', '__proto__'])(
     'does not treat the inherited property %s as an item',
     async (itemId) => {
+      const before = mockDb.dump('workspaces/ws1');
       const res = await service.moveItemsToFolder(
         user('uid-admin'),
         'ws1',
@@ -489,17 +475,13 @@ describe('moving items out of a folder (the real move handler)', () => {
         'fold1',
       );
       expect(res.status).toBe('error');
-      expect(Object.keys(workspace.videos)).toEqual([]);
-      expect(Object.keys(workspace.screenshots).sort()).toEqual([
-        'granted',
-        'own',
-        'writers',
-      ]);
-      expect(workspace.folders.fold2.items).toBe(0);
+      expectNothingWritten(before);
+      expect(({} as any).parentId).toBeUndefined();
     },
   );
 
   it('saves nothing when one id of several does not exist', async () => {
+    const before = mockDb.dump('workspaces/ws1');
     const res = await service.moveItemsToFolder(
       user('uid-admin'),
       'ws1',
@@ -509,11 +491,13 @@ describe('moving items out of a folder (the real move handler)', () => {
     );
     expect(res.status).toBe('error');
     expect(parentOf('own')).toBe('fold1');
-    expect(workspace.videos).toEqual({});
+    expectNothingWritten(before);
   });
 
   it('still moves a video the same way', async () => {
-    workspace.videos.clip = { id: 'clip', uid: 'uid-writer', parentId: false };
+    await mockDb
+      .ref('workspaces/ws1/videos/clip')
+      .set({ id: 'clip', uid: 'uid-writer', parentId: false });
     const res = await service.moveItemsToFolder(
       user('uid-writer'),
       'ws1',
@@ -522,6 +506,11 @@ describe('moving items out of a folder (the real move handler)', () => {
       false,
     );
     expect(res.status).toBe('success');
-    expect(workspace.videos.clip.parentId).toBe('fold2');
+    expect(mockDb.dump('workspaces/ws1/videos/clip')).toEqual({
+      id: 'clip',
+      uid: 'uid-writer',
+      parentId: 'fold2',
+    });
+    expect(changeCount).toHaveBeenCalledWith(expect.anything(), 'fold2', 1);
   });
 });

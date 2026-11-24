@@ -54,7 +54,9 @@
       "unmute": "Activar micrófono",
       "cancel": "Cancelar grabación",
       "pen": "Dibujar en la pantalla",
-      "undo": "Deshacer último trazo"
+      "undo": "Deshacer último trazo",
+      "penColor": "Elegir el color del lápiz",
+      "brushSize": "Tamaño del pincel"
     },
     "encodingGIF": "Codificando animación GIF...",
     "fullPage": "Capturando página completa...",

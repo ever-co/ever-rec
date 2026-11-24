@@ -54,7 +54,9 @@
       "unmute": "Włącz mikrofon",
       "cancel": "Anuluj nagrywanie",
       "pen": "Rysuj na ekranie",
-      "undo": "Cofnij ostatnią kreskę"
+      "undo": "Cofnij ostatnią kreskę",
+      "penColor": "Wybierz kolor pióra",
+      "brushSize": "Rozmiar pędzla"
     },
     "encodingGIF": "Kodowanie animacji GIF...",
     "fullPage": "Przechwytywanie całej strony...",

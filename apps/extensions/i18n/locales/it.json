@@ -54,7 +54,9 @@
       "unmute": "Attiva microfono",
       "cancel": "Annulla registrazione",
       "pen": "Disegna sullo schermo",
-      "undo": "Annulla ultimo tratto"
+      "undo": "Annulla ultimo tratto",
+      "penColor": "Scegli il colore della penna",
+      "brushSize": "Dimensione del pennello"
     },
     "encodingGIF": "Codifica dell'animazione GIF in corso...",
     "fullPage": "Cattura della pagina intera in corso...",

@@ -24,6 +24,7 @@ import { fixVideoWithFFMPEG } from '../../../services/utils/fixVideoWithFFMPEG';
 import { uploadVideoToBucket } from '../../../services/utils/uploadVideoToBucket';
 import { WorkspaceUtilitiesService } from './utilities.service';
 import { updateExistingItem } from './update-existing-item';
+import { changeWorkspaceFolders } from './change-workspace-collection';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
   IDbWorkspaceImageData,
@@ -163,17 +164,16 @@ export class WorkspaceFilesService {
           url: downloadUrl,
         };
 
-        // Update folder item count recursively
-        const { workspaceVal, workspaceRef } =
-          await this.utilitiesService.getWorkspaceById(workspaceId);
-
-        const updatedFolders =
-          this.utilitiesService.changeFolderItemCountRecursive(
-            parseCollectionToArray(workspaceVal.folders),
-            folderId,
-          );
-
-        await workspaceRef.update({ folders: updatedFolders });
+        // Update folder item count recursively, in one transaction on the folder list
+        const counted = await changeWorkspaceFolders(
+          workspaceId,
+          (folders) => ({
+            items: this.utilitiesService.changeFolderItemCountRecursive(
+              folders,
+              folderId,
+            ),
+          }),
+        );
 
         this.eventEmitter.emit(
           'analytics.track',
@@ -194,6 +194,12 @@ export class WorkspaceFilesService {
             EVER_COUNTER_EVENTS.mediaCreated,
           ),
         });
+
+        if (counted.ok === false) {
+          return sendError(
+            'The screenshot was stored, but the folder item count could not be updated.',
+          );
+        }
         return sendResponse<IWorkspaceImage>(image);
       } else {
         return sendError('No screenshot metadata.');
@@ -729,17 +735,16 @@ export class WorkspaceFilesService {
           url: downloadUrl,
         };
 
-        // Update folder item count recursively
-        const { workspaceVal, workspaceRef } =
-          await this.utilitiesService.getWorkspaceById(workspaceId);
-
-        const updatedFolders =
-          this.utilitiesService.changeFolderItemCountRecursive(
-            parseCollectionToArray(workspaceVal.folders),
-            folderId,
-          );
-
-        await workspaceRef.update({ folders: updatedFolders });
+        // Update folder item count recursively, in one transaction on the folder list
+        const counted = await changeWorkspaceFolders(
+          workspaceId,
+          (folders) => ({
+            items: this.utilitiesService.changeFolderItemCountRecursive(
+              folders,
+              folderId,
+            ),
+          }),
+        );
 
         this.eventEmitter.emit(
           'analytics.track',
@@ -756,6 +761,12 @@ export class WorkspaceFilesService {
           kind: 'video',
           bytes: Number(metadata.size) || 0,
         });
+
+        if (counted.ok === false) {
+          return sendError(
+            'The video was stored, but the folder item count could not be updated.',
+          );
+        }
         return sendResponse<IWorkspaceVideo>(video);
       } else {
         return sendError('No video metadata');
@@ -779,8 +790,6 @@ export class WorkspaceFilesService {
     try {
       const db = admin.database();
       const bucket = admin.storage().bucket();
-      const { workspaceVal, workspaceRef } =
-        await this.utilitiesService.getWorkspaceById(workspaceId);
 
       const imageReference = db.ref(
         `workspaces/${workspaceId}/screenshots/${imageId}`,
@@ -827,14 +836,20 @@ export class WorkspaceFilesService {
         bytes: everStatsBytes,
       });
 
-      const updatedFolders =
-        this.utilitiesService.changeFolderItemCountRecursive(
-          parseCollectionToArray(workspaceVal.folders),
+      // Update folder item count recursively, in one transaction on the folder list
+      const counted = await changeWorkspaceFolders(workspaceId, (folders) => ({
+        items: this.utilitiesService.changeFolderItemCountRecursive(
+          folders,
           folderId,
           -1,
-        );
+        ),
+      }));
 
-      await workspaceRef.update({ folders: updatedFolders });
+      if (counted.ok === false) {
+        return sendError(
+          'The image was deleted, but the folder item count could not be updated.',
+        );
+      }
 
       return sendResponse('Successfully deleted the image');
     } catch (e) {
