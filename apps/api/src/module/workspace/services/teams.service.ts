@@ -36,12 +36,9 @@ export class WorkspaceTeamsService {
 
       teams.push(newTeam);
 
-      const newWorkspace = {
-        ...workspaceVal,
-        teams,
-      };
-
-      await workspaceRef.update(newWorkspace);
+      // Only `teams`: a write of the whole workspace read above would undo every change made
+      // meanwhile, a member removed or a folder taken away from a member included.
+      await workspaceRef.update({ teams });
       this.eventEmitter?.emit(EVER_COUNTER_EVENTS.teamCreated, {});
 
       return sendResponse(teams);
@@ -134,12 +131,8 @@ export class WorkspaceTeamsService {
         return team;
       });
 
-      const newWorkspace = {
-        ...workspaceVal,
-        teams: newTeams,
-      };
-
-      await workspaceRef.update(newWorkspace);
+      // Only `teams`, never the whole workspace read above.
+      await workspaceRef.update({ teams: newTeams });
 
       return sendResponse(updatedTeam);
     } catch (e) {
@@ -163,12 +156,8 @@ export class WorkspaceTeamsService {
 
       teams.splice(deleteIndex, 1);
 
-      const newWorkspace = {
-        ...workspaceVal,
-        teams,
-      };
-
-      await workspaceRef.update(newWorkspace);
+      // Only `teams`, never the whole workspace read above.
+      await workspaceRef.update({ teams });
       this.eventEmitter?.emit(EVER_COUNTER_EVENTS.teamDeleted, {});
 
       bucket
@@ -216,12 +205,8 @@ export class WorkspaceTeamsService {
         members: newMembers,
       };
 
-      const newWorkspace = {
-        ...workspaceVal,
-        teams,
-      };
-
-      await workspaceRef.update(newWorkspace);
+      // Only `teams`, never the whole workspace read above.
+      await workspaceRef.update({ teams });
 
       return sendResponse(uid);
     } catch (e) {
@@ -363,12 +348,8 @@ export class WorkspaceTeamsService {
         return team;
       });
 
-      const newWorkspace = {
-        ...workspaceVal,
-        teams: newTeams,
-      };
-
-      await workspaceRef.update(newWorkspace);
+      // Only `teams`, never the whole workspace read above.
+      await workspaceRef.update({ teams: newTeams });
 
       return sendResponse(newTeams);
     } catch (e) {
@@ -418,12 +399,8 @@ export class WorkspaceTeamsService {
         return team;
       });
 
-      const newWorkspace = {
-        ...workspaceVal,
-        teams: newTeams,
-      };
-
-      await workspaceRef.update(newWorkspace);
+      // Only `teams`, never the whole workspace read above.
+      await workspaceRef.update({ teams: newTeams });
 
       return sendResponse(newTeams);
     } catch (e) {

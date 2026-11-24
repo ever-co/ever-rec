@@ -8,6 +8,7 @@ import { IWorkspaceFolder } from '../../module/workspace/Interfaces/Folders';
 import { IFavoriteFolders, SingleFavFolder } from '../../interfaces/Folders';
 import { dbEndpoints } from './shared.service';
 import { sendError, sendResponse } from '../utils/sendResponse';
+import { changeWorkspaceFolders } from '../../module/workspace/services/change-workspace-collection';
 
 @Injectable()
 export class FoldersSharedService {
@@ -217,10 +218,9 @@ export class FoldersSharedService {
     };
 
     if (workspaceId) {
-      const { value: folder, ref: folderRef } =
-        await getDataFromDB<IWorkspaceFolder | null>(
-          `workspaces/${workspaceId}/folders/${folderId}`,
-        );
+      const { value: folder } = await getDataFromDB<IWorkspaceFolder | null>(
+        `workspaces/${workspaceId}/folders/${folderId}`,
+      );
 
       const parsedWorkspaceFavs: SingleFavFolder[] = parseCollectionToArray(
         favFolders?.workspaces[workspaceId],
@@ -229,7 +229,8 @@ export class FoldersSharedService {
         (x) => x.id === folderId,
       );
 
-      if (favFolderIndex === -1 && !forceRemove) {
+      const favoring = favFolderIndex === -1 && !forceRemove;
+      if (favoring) {
         favFolders.workspaces[workspaceId] = {
           ...favFolders.workspaces[workspaceId],
           [folderId]: {
@@ -237,27 +238,43 @@ export class FoldersSharedService {
             id: folderId,
           },
         };
-
-        if (!folder.isFavoredBy || folder.isFavoredBy?.some((x) => x !== uid)) {
-          folder.isFavoredBy = [
-            ...parseCollectionToArray(folder.isFavoredBy),
-            uid,
-          ];
-        }
-      } else {
-        if (
-          favFolders.workspaces[workspaceId] &&
-          favFolders.workspaces[workspaceId][folderId]
-        ) {
-          delete favFolders.workspaces[workspaceId][folderId];
-        }
-
-        if (folder?.isFavoredBy) {
-          folder.isFavoredBy = folder.isFavoredBy.filter((x) => x !== uid);
-        }
+      } else if (
+        favFolders.workspaces[workspaceId] &&
+        favFolders.workspaces[workspaceId][folderId]
+      ) {
+        delete favFolders.workspaces[workspaceId][folderId];
       }
 
-      await folderRef.set(folder);
+      // Only `isFavoredBy` changes, in the transaction every writer of the folder list shares: a
+      // write of the folder read above would undo its item count or its permissions changed
+      // meanwhile. A folder deleted meanwhile is not written back.
+      const result = await changeWorkspaceFolders(workspaceId, (folders) => {
+        const index = folders.findIndex((x) => x.id === folderId);
+        if (index === -1) {
+          return {};
+        }
+
+        const stored = folders[index];
+        const favoredBy = parseCollectionToArray<string>(stored.isFavoredBy);
+        let isFavoredBy = stored.isFavoredBy;
+        if (favoring) {
+          if (!stored.isFavoredBy || favoredBy.some((x) => x !== uid)) {
+            isFavoredBy = [...favoredBy, uid];
+          }
+        } else if (stored.isFavoredBy) {
+          isFavoredBy = favoredBy.filter((x) => x !== uid);
+        }
+        if (isFavoredBy === stored.isFavoredBy) {
+          return {};
+        }
+        folders[index] = { ...stored, isFavoredBy };
+
+        return { items: folders };
+      });
+
+      if (result.ok === false) {
+        throw 'Error while trying to operate favorite folder.';
+      }
     } else {
       const folderCollection = dbEndpoints.foldersCollection[itemType];
       const folderRef = db.ref(`users/${uid}/${folderCollection}/${folderId}`);

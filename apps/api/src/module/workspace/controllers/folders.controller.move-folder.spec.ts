@@ -8,6 +8,7 @@
 import { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
+import { InMemoryDatabase } from '../../../../test/support/in-memory-firebase';
 import { TokenService } from '../../auth/services/tokens';
 import { FoldersSharedService } from '../../../services/shared/folders.shared.service';
 import { WorkspaceFoldersController } from './folders.controller';
@@ -32,22 +33,11 @@ jest.mock('../../../services/shared/folders.shared.service', () => ({
   FoldersSharedService: class {},
 }));
 
-const mockDb: { data: Record<string, any> } = { data: {} };
-jest.mock('firebase-admin', () => ({
-  database: () => ({
-    ref: (path: string) => ({
-      get: async () => {
-        // `workspaces/<id>` is stored whole; `workspaces/<id>/<child>` reads one child of it.
-        const [root, id, child] = path.split('/');
-        const workspace = mockDb.data[`${root}/${id}`];
-        const value = child ? workspace?.[child] : workspace;
-        return { val: () => value ?? null };
-      },
-    }),
-  }),
-}));
+// The folder list is changed in a transaction, so the database is the in-memory one.
+let mockDb: InMemoryDatabase;
+jest.mock('firebase-admin', () => ({ database: () => mockDb }));
 
-const stored = (id: string) => mockDb.data['workspaces/ws1'].folders[id];
+const stored = (id: string) => mockDb.dump(`workspaces/ws1/folders/${id}`);
 const folderUrl = (id: string) => `/workspace/ws1/folders/${id}/move`;
 const grant = (uid: string, access: string) => ({
   members: [{ uid, access }],
@@ -59,14 +49,10 @@ describe('workspace folder route: move a folder', () => {
   beforeAll(async () => {
     const utilities = {
       getWorkspaceById: async (id: string) => {
-        const workspaceVal = mockDb.data[`workspaces/${id}`];
+        const workspaceRef = mockDb.ref(`workspaces/${id}`);
         return {
-          workspaceVal,
-          workspaceRef: {
-            update: async (patch: Record<string, unknown>) => {
-              Object.assign(workspaceVal, patch);
-            },
-          },
+          workspaceVal: (await workspaceRef.get()).val(),
+          workspaceRef,
         };
       },
     };
@@ -100,7 +86,7 @@ describe('workspace folder route: move a folder', () => {
     await app.close();
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     jest.spyOn(console, 'log').mockImplementation(() => undefined);
     const folder = (
       id: string,
@@ -126,13 +112,12 @@ describe('workspace folder route: move a folder', () => {
       folder('open', false, 0, 0),
       folder('openChild', 'open', 1, 0),
     ];
-    mockDb.data = {
-      'workspaces/ws1': {
-        admin: 'uid-admin',
-        members: [{ id: 'uid-admin' }, { id: 'uid-writer' }],
-        folders: Object.fromEntries(list.map((x) => [x.id, x])),
-      },
-    };
+    mockDb = new InMemoryDatabase();
+    await mockDb.ref('workspaces/ws1').set({
+      admin: 'uid-admin',
+      members: [{ id: 'uid-admin' }, { id: 'uid-writer' }],
+      folders: Object.fromEntries(list.map((x) => [x.id, x])),
+    });
   });
 
   afterEach(() => {
