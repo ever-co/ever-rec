@@ -32,6 +32,7 @@ describe('folder writers at the same time, on the emulators', () => {
     (await app.database().ref(`workspaces/ws1/${path}`).get()).val();
   const storedFolders = async () =>
     parseCollectionToArray<any>(await stored('folders')).filter(Boolean);
+  const byText = (a: string, b: string) => a.localeCompare(b);
 
   beforeAll(() => {
     requireEmulators();
@@ -115,7 +116,7 @@ describe('folder writers at the same time, on the emulators', () => {
       ),
     ]);
 
-    expect(counts.map((x) => x.ok)).toEqual(Array(8).fill(true));
+    expect(counts.map((x) => x.ok)).toEqual(new Array(8).fill(true));
     expect(created.map((x) => x.status)).toEqual([
       'success',
       'success',
@@ -130,7 +131,7 @@ describe('folder writers at the same time, on the emulators', () => {
       { uid: 'uid-member', access: 'NONE' },
     ]);
     expect(list.find((x) => x.id === 'fold2').name).toBe('Renamed');
-    expect(list.map((x) => x.name).sort()).toEqual([
+    expect(list.map((x) => x.name).sort(byText)).toEqual([
       'A',
       'B',
       'C',
@@ -138,8 +139,8 @@ describe('folder writers at the same time, on the emulators', () => {
       'Shots',
     ]);
     // Stored by id, as every reader of `folders/<id>` expects.
-    expect(Object.keys(await stored('folders')).sort()).toEqual(
-      list.map((x) => x.id).sort(),
+    expect(Object.keys(await stored('folders')).sort(byText)).toEqual(
+      list.map((x) => x.id).sort(byText),
     );
   });
 

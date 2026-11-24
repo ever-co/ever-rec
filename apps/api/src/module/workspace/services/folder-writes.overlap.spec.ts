@@ -23,6 +23,7 @@ import { WorkspaceMembersService } from './members.service';
 import { WorkspaceSharedService } from './shared.service';
 import { WorkspaceTeamsService } from './teams.service';
 import { WorkspaceUtilitiesService } from './utilities.service';
+import { WorkspacesService } from './workspace.service';
 
 let mockFirebase: InMemoryFirebaseApp;
 
@@ -91,6 +92,7 @@ describe('overlapping writes to a workspace', () => {
   let sharedService: WorkspaceSharedService;
   let teamsService: WorkspaceTeamsService;
   let favoritesService: FoldersSharedService;
+  let workspacesService: WorkspacesService;
 
   beforeEach(async () => {
     jest.spyOn(console, 'log').mockImplementation(() => undefined);
@@ -126,6 +128,7 @@ describe('overlapping writes to a workspace', () => {
     membersService = new WorkspaceMembersService(utilities);
     sharedService = new WorkspaceSharedService();
     teamsService = new WorkspaceTeamsService(utilities);
+    workspacesService = new WorkspacesService(utilities, membersService);
 
     await mockFirebase.db.ref('users/uid-member').set({
       email: 'member@example.test',
@@ -404,6 +407,96 @@ describe('overlapping writes to a workspace', () => {
     },
   );
 
+  describe('a member leaving the workspace', () => {
+    const leave = () => workspacesService.leaveWorkspace('uid-joiner', 'ws1');
+    const restrictFold1 = () =>
+      sharedService.updatePermissions(
+        'uid-member',
+        'ws1',
+        'fold1',
+        'folders',
+        false,
+        false,
+        'member',
+      );
+    const left = () => {
+      expect(memberIds()).not.toContain('uid-joiner');
+      // The leaving member's own folder permission goes, the others stay.
+      expect(
+        parseCollectionToArray<any>(folder('fold2')?.access?.members),
+      ).toEqual([]);
+      // Stored by id, as every reader of `folders/<id>` expects.
+      expect(Object.keys(stored('folders')).sort()).toEqual([
+        'fold1',
+        'fold2',
+        'fold3',
+      ]);
+    };
+
+    beforeEach(async () => {
+      await mockFirebase.db.ref('users/uid-joiner').set({
+        email: 'joiner@example.test',
+        workspaceIds: ['ws1'],
+      });
+      await mockFirebase.db
+        .ref(`${WORKSPACE}/folders/fold2/access`)
+        .set({ members: [{ uid: 'uid-joiner', access: 'READ' }] });
+    });
+
+    it('keeps an upload counted meanwhile', async () => {
+      const [leaving, uploaded] = await overlap(leave, upload);
+
+      expect(leaving.status).toBe('success');
+      expect(uploaded.status).toBe('success');
+      uploadSurvived();
+      left();
+    });
+
+    it('keeps a folder taken away from another member meanwhile', async () => {
+      const [leaving, restricted] = await overlap(leave, restrictFold1);
+
+      expect(leaving.status).toBe('success');
+      expect(restricted.status).toBe('success');
+      expect(accessOf('fold1', 'uid-member')).toBe('NONE');
+      left();
+    });
+  });
+
+  it('moves an item uploaded into a folder being deleted to the top level', async () => {
+    const [deleted, uploaded] = await overlap(
+      () => foldersService.deleteFolder('uid-admin', 'ws1', 'fold1', false),
+      upload,
+    );
+
+    expect(deleted.status).toBe('success');
+    expect(uploaded.status).toBe('success');
+    expect(folder('fold1')).toBeUndefined();
+    const shot = parseCollectionToArray<any>(stored('screenshots')).find(
+      (x) => x?.title === 'Uploaded',
+    );
+    expect(shot?.parentId).toBe(false);
+  });
+
+  it('lowers the counts above a deleted folder where it is now, after a move meanwhile', async () => {
+    // fold3 holds one item and is at the top level when the delete reads the workspace.
+    await mockFirebase.db
+      .ref(`${WORKSPACE}/screenshots/shot1/parentId`)
+      .set('fold3');
+    await mockFirebase.db.ref(`${WORKSPACE}/folders/fold3/items`).set(1);
+
+    const [deleted, moved] = await overlap(
+      () => foldersService.deleteFolder('uid-admin', 'ws1', 'fold3', false),
+      () => foldersService.moveFolder('ws1', 'fold3', 'fold2'),
+    );
+
+    expect(deleted.status).toBe('success');
+    expect(moved.status).toBe('success');
+    expect(folder('fold3')).toBeUndefined();
+    // The move counted the item in fold2; the delete takes it out of fold2 again.
+    expect(folder('fold2')?.items).toBe(0);
+    expect(stored('screenshots/shot1/parentId')).toBe(false);
+  });
+
   it('answers an error when the folder permission cannot be stored', async () => {
     // Every write of the folder list fails, as when the database refuses it.
     const refuse = <A extends unknown[], R>(
@@ -436,5 +529,27 @@ describe('overlapping writes to a workspace', () => {
 
     expect(result.status).toBe('error');
     expect(accessOf('fold1', 'uid-member')).toBe('WRITE');
+  });
+
+  it('answers an error when a favourite cannot be stored', async () => {
+    const { transaction } = FakeReference.prototype;
+    jest
+      .spyOn(FakeReference.prototype, 'transaction')
+      .mockImplementation(function (this: FakeReference, ...args) {
+        if (pathOf(this) === `${WORKSPACE}/folders`) {
+          return Promise.reject(new Error('write refused'));
+        }
+        return transaction.apply(this, args);
+      });
+
+    const result = await favoritesService.addRemoveFavFolder(
+      'uid-member',
+      'fold1',
+      undefined,
+      'ws1',
+    );
+
+    expect(result?.status).toBe('error');
+    expect(folder('fold1')?.isFavoredBy).toBeUndefined();
   });
 });

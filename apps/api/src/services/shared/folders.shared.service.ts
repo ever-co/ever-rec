@@ -341,7 +341,12 @@ export class FoldersSharedService {
       return sendResponse<IFavoriteFolders>(favFolders);
     } catch (e) {
       console.log(e);
-      sendError(e || 'Error while trying to operate favorite folder.');
+      // Answered, not dropped: a change that was not stored must not look like an empty success.
+      return sendError(
+        typeof e === 'string' && e
+          ? e
+          : 'Error while trying to operate favorite folder.',
+      );
     }
   }
 

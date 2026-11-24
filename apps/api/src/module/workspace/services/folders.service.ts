@@ -214,6 +214,10 @@ export class WorkspaceFoldersService {
       // move to the top level, so they no longer count in the folders above the deleted one.
       let deletedFolders: IWorkspaceFolder[] = [];
       const result = await changeWorkspaceFolders(workspaceId, (folders) => {
+        // The stored parent, not `currentFolderId` from the request: the folder may have been
+        // moved meanwhile, and the counts to lower are those of the folders above it now.
+        const parentId =
+          folders.find((x) => x.id === folderId)?.parentId || false;
         const removed = this.utilitiesService.removeChildFoldersRecursive(
           folders,
           [folderId],
@@ -228,7 +232,7 @@ export class WorkspaceFoldersService {
         return {
           items: this.utilitiesService.changeFolderItemCountRecursive(
             removed.updatedFolders,
-            currentFolderId,
+            parentId,
             0 - movedItems,
           ),
         };
@@ -259,10 +263,17 @@ export class WorkspaceFoldersService {
         }),
       );
 
-      // Only the `parentId` of the moved items is written: a write of the whole lists read above
-      // would undo every item added, changed or deleted meanwhile.
+      // The items move from the lists stored now, not the ones read above: an item uploaded into a
+      // deleted folder meanwhile would keep a folder that is gone. Only their `parentId` is
+      // written: a write of the whole lists would undo every item added, changed or deleted.
+      const [storedScreenshots, storedVideos] = await Promise.all([
+        workspaceRef.child('screenshots').get(),
+        workspaceRef.child('videos').get(),
+      ]);
       const movedItems: Record<string, false> = {};
-      const updatedScreenshots = screenshots.map((screenshot) => {
+      const updatedScreenshots = parseCollectionToArray(
+        storedScreenshots.val(),
+      ).map((screenshot) => {
         if (deletedFolderIds.includes(screenshot.parentId)) {
           movedItems[`screenshots/${screenshot.id}/parentId`] = false;
           return { ...screenshot, parentId: false };
@@ -270,13 +281,15 @@ export class WorkspaceFoldersService {
         return screenshot;
       });
 
-      const updatedVideos = videos.map((video) => {
-        if (deletedFolderIds.includes(video.parentId)) {
-          movedItems[`videos/${video.id}/parentId`] = false;
-          return { ...video, parentId: false };
-        }
-        return video;
-      });
+      const updatedVideos = parseCollectionToArray(storedVideos.val()).map(
+        (video) => {
+          if (deletedFolderIds.includes(video.parentId)) {
+            movedItems[`videos/${video.id}/parentId`] = false;
+            return { ...video, parentId: false };
+          }
+          return video;
+        },
+      );
 
       if (Object.keys(movedItems).length > 0) {
         await workspaceRef.update(movedItems);
