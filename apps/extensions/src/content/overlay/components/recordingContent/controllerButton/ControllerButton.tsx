@@ -1,4 +1,4 @@
-import React, { CSSProperties } from 'react';
+import React, { CSSProperties, KeyboardEvent } from 'react';
 
 interface IControllerButtonProps {
   className: string;
@@ -8,6 +8,10 @@ interface IControllerButtonProps {
   onMouse?: () => void;
   outMouse?: () => void;
   disabled?: boolean;
+  /** Accessible name announced by screen readers (the icon itself has no text). */
+  label?: string;
+  /** Set for toggle buttons (e.g. pen on/off) so the state is announced. */
+  pressed?: boolean;
 }
 
 const ControllerButton: React.FC<IControllerButtonProps> = ({
@@ -18,6 +22,8 @@ const ControllerButton: React.FC<IControllerButtonProps> = ({
   onMouse,
   outMouse,
   disabled,
+  label,
+  pressed,
 }) => {
   let disabledStyles: CSSProperties = {};
   if (disabled) {
@@ -30,6 +36,19 @@ const ControllerButton: React.FC<IControllerButtonProps> = ({
   const clickHandler = () => {
     if (!disabled && onClick) {
       onClick();
+    }
+  };
+
+  const keyDownHandler = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      // Space would otherwise scroll the host page.
+      event.preventDefault();
+      // A held key repeats keydown. Act on the first one only, so pause and pen
+      // do not flip back and forth.
+      if (event.repeat) {
+        return;
+      }
+      clickHandler();
     }
   };
 
@@ -49,7 +68,13 @@ const ControllerButton: React.FC<IControllerButtonProps> = ({
     <div
       className={className}
       style={disabledStyles}
+      role="button"
+      tabIndex={disabled ? -1 : 0}
+      aria-label={label}
+      aria-disabled={disabled ? true : undefined}
+      aria-pressed={pressed}
       onClick={clickHandler}
+      onKeyDown={keyDownHandler}
       onMouseOver={onMouseHandler}
       onMouseLeave={outMouseHandler}
     >

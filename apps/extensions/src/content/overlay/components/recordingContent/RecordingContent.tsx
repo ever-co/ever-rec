@@ -7,6 +7,7 @@ import { ColorResult, GithubPicker } from 'react-color';
 import useWindowSize from '@/content/utilities/hooks/useWindowSize';
 import '@/content/overlay/components/recordingContent/recording-content.scss';
 import Draggable from 'react-draggable';
+import { useTranslation } from 'react-i18next';
 
 const DraggableReact = Draggable as any;
 
@@ -63,6 +64,8 @@ const RecordingContent: React.FC<IRecordingContentProps> = ({
   onResumeRecording,
   onCancelRecording,
 }) => {
+  const { t } = useTranslation();
+  const canMute = !microphoneMuted && microphoneEnabled;
   const mainContainerGlobal: any = useRef();
   const penSlider: any = useRef();
   const colorPickerIcon: any = useRef();
@@ -188,31 +191,35 @@ const RecordingContent: React.FC<IRecordingContentProps> = ({
                 onClick={stopButtonClickHandler}
                 subFoldersWithPrefix="/recordingWindowIcons"
                 imgSource="button-stop-red-fill.svg"
+                label={t('ext.recordingControls.stop')}
               ></ControllerButton>
               <ControllerButton
                 className={'stopButton'}
                 onClick={pausePlayClickHandler}
                 imgSource={playPauseImgSource}
+                label={
+                  playPauseImgSource == 'play.svg'
+                    ? t('ext.recordingControls.resume')
+                    : t('ext.recordingControls.pause')
+                }
               ></ControllerButton>
-              {!microphoneMuted && microphoneEnabled && (
-                <ControllerButton
-                  className="micButton"
-                  onClick={() => muteOrUnmute(true)}
-                  imgSource="unmute.svg"
-                />
-              )}
-              {(microphoneMuted || !microphoneEnabled) && (
-                <ControllerButton
-                  className="micButton"
-                  onClick={() => muteOrUnmute(false)}
-                  imgSource="mute.svg"
-                  disabled={!microphoneEnabled}
-                ></ControllerButton>
-              )}
+              {/* One mounted button, so keyboard focus survives a mute toggle. */}
+              <ControllerButton
+                className="micButton"
+                onClick={() => muteOrUnmute(canMute)}
+                imgSource={canMute ? 'unmute.svg' : 'mute.svg'}
+                disabled={!microphoneEnabled}
+                label={
+                  canMute
+                    ? t('ext.recordingControls.mute')
+                    : t('ext.recordingControls.unmute')
+                }
+              ></ControllerButton>
               <ControllerButton
                 className={'binButton'}
                 onClick={binButtonClickHandler}
                 imgSource={'bin.svg'}
+                label={t('ext.recordingControls.cancel')}
               ></ControllerButton>
               <ControllerButton
                 className={'penButton'}
@@ -221,11 +228,14 @@ const RecordingContent: React.FC<IRecordingContentProps> = ({
                 onMouse={mouseOverHandler}
                 outMouse={outMouseHandler}
                 onClick={penButtonClickHandler}
+                label={t('ext.recordingControls.pen')}
+                pressed={penImgSource == 'pen-active.svg'}
               ></ControllerButton>
               <ControllerButton
                 className={'eraserButton'}
                 onClick={eraserButtonClickHandler}
                 imgSource={eraserImgSource}
+                label={t('ext.recordingControls.undo')}
               ></ControllerButton>
               <ControllerSlider
                 penSliderRef={penSlider}

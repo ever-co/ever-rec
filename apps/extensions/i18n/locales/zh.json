@@ -46,6 +46,16 @@
     "trimVideo": "裁剪视频",
     "accessBlocked": "访问此页面被阻止。要授予访问权限，请点击地址栏中的<0></0>图标。请参阅以下说明。",
     "selectArea": "选择区域",
+    "recordingControls": {
+      "stop": "停止录制",
+      "pause": "暂停录制",
+      "resume": "继续录制",
+      "mute": "麦克风静音",
+      "unmute": "取消麦克风静音",
+      "cancel": "取消录制",
+      "pen": "在屏幕上绘图",
+      "undo": "撤销上一笔"
+    },
     "encodingGIF": "正在编码GIF动画...",
     "fullPage": "正在截取整个页面...",
     "scroll": "为获得最佳效果，请<b>不要滚动</b>页面。",

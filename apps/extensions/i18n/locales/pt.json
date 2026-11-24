@@ -46,6 +46,16 @@
     "trimVideo": "Cortar Vídeo",
     "accessBlocked": "O acesso a esta página está bloqueado. Para conceder acesso, clique no ícone <0></0> na barra de endereços. Veja as instruções abaixo.",
     "selectArea": "Selecionar Área",
+    "recordingControls": {
+      "stop": "Parar gravação",
+      "pause": "Pausar gravação",
+      "resume": "Retomar gravação",
+      "mute": "Silenciar microfone",
+      "unmute": "Ativar microfone",
+      "cancel": "Cancelar gravação",
+      "pen": "Desenhar na tela",
+      "undo": "Desfazer último traço"
+    },
     "encodingGIF": "Codificando animação GIF...",
     "fullPage": "Capturando página inteira...",
     "scroll": "Por favor, <b>não role a página</b> para o melhor resultado possível.",
