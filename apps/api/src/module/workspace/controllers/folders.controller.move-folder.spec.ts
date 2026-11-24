@@ -108,7 +108,14 @@ describe('workspace folder route: move a folder', () => {
       nestLevel: number,
       items: number,
       access?: object,
-    ) => ({ id, name: id, parentId, nestLevel, items, ...(access && { access }) });
+    ) => ({
+      id,
+      name: id,
+      parentId,
+      nestLevel,
+      items,
+      ...(access && { access }),
+    });
     const list = [
       // The writer may write here.
       folder('src', false, 0, 2, grant('uid-writer', 'WRITE')),
