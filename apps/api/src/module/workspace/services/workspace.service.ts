@@ -1,4 +1,8 @@
-import { IAccessMember, IWorkspace } from '../Interfaces/Workspace';
+import {
+  IAccessMember,
+  IWorkspace,
+  IWorkspaceUser,
+} from '../Interfaces/Workspace';
 import * as admin from 'firebase-admin';
 import { IDataResponse, IUserData, ItemType } from '../../../interfaces/_types';
 import { IUser } from '../../../interfaces/IUser';
@@ -16,7 +20,11 @@ import {
   promiseAllSettled,
 } from '../../../services/utils/helpers';
 import { WorkspaceMembersService } from './members.service';
-import { changeWorkspaceFolders } from './change-workspace-collection';
+import {
+  changeWorkspaceFolders,
+  changeWorkspaceMembers,
+  changeWorkspaceTeams,
+} from './change-workspace-collection';
 import { sendError, sendResponse } from 'src/services/utils/sendResponse';
 import { IFavoriteFolders } from 'src/interfaces/Folders';
 import { Optional } from '@nestjs/common';
@@ -284,39 +292,72 @@ export class WorkspacesService {
   ): Promise<IDataResponse<IWorkspace[] | null>> {
     try {
       const db = admin.database();
-      const { workspaceVal } =
-        await this.utilitiesService.getWorkspaceById(workspaceId);
+      // The workspace must exist.
+      await this.utilitiesService.getWorkspaceById(workspaceId);
       const userRef = db.ref(`users/${uid}`);
       const userSnap = await userRef.get();
       const userVal: IUserData = userSnap.val();
 
       if (userVal) {
-        const filteredWorkspaceMembers = parseCollectionToArray(
-          workspaceVal.members,
-        ).filter((x) => x.id !== uid);
-        const newWorkspaceTeams = parseCollectionToArray(
-          workspaceVal.teams,
-        ).map((x) => {
-          const newMembers = (x.members || []).filter((x) => x.id !== uid);
-
-          return {
-            ...x,
-            members: newMembers,
-          };
-        });
-        const newUserWorkspaces = userVal.workspaceIds.filter(
-          (x) => x !== workspaceId,
-        );
-
         //TODO: should be decided if user images/videos/folders should be removed from workspace
 
-        // One multi-path write: the membership and the user's workspace list change together, so a
-        // failure cannot leave a non-member (who the workspace guard turns away) with a stale entry.
-        await db.ref().update({
-          [`workspaces/${workspaceId}/members`]: filteredWorkspaceMembers,
-          [`workspaces/${workspaceId}/teams`]: newWorkspaceTeams,
-          [`users/${uid}/workspaceIds`]: newUserWorkspaces,
+        // The teams and the members change in the transactions every writer of these lists shares,
+        // from the stored lists: a write of the lists read earlier put back a member who left
+        // meanwhile (with access to the workspace) and dropped one who joined. The teams go
+        // first: when either list does not change, the user is still a member and may leave again.
+        const teamsLeft = await changeWorkspaceTeams(workspaceId, (teams) => {
+          let changed = false;
+          const items = teams.map((team) => {
+            const members = parseCollectionToArray<IWorkspaceUser>(
+              team.members,
+            ).filter(Boolean);
+            if (!members.some((member) => member.id === uid)) {
+              return team;
+            }
+            changed = true;
+            return {
+              ...team,
+              members: members.filter((member) => member.id !== uid),
+            };
+          });
+
+          return changed ? { items } : {};
         });
+        if (teamsLeft.ok === false) {
+          return sendError(
+            'Error while trying to leave workspace. Please try again.',
+          );
+        }
+
+        const membersLeft = await changeWorkspaceMembers(
+          workspaceId,
+          (members) =>
+            members.some((member) => member.id === uid)
+              ? { items: members.filter((member) => member.id !== uid) }
+              : {},
+        );
+        if (membersLeft.ok === false) {
+          return sendError(
+            'Error while trying to leave workspace. Please try again.',
+          );
+        }
+
+        // Then the user's own list, in a transaction as a join adds to it: a write of the list read
+        // above would drop a workspace joined meanwhile.
+        await db
+          .ref(`users/${uid}/workspaceIds`)
+          .transaction((current: string[] | Record<string, string> | null) => {
+            // `null` is also the first run's local guess; the server then runs this again with the
+            // stored list, so `null` must not abort.
+            if (current === null || current === undefined) {
+              return null;
+            }
+
+            const workspaceIds = Object.values(current);
+            return workspaceIds.includes(workspaceId)
+              ? workspaceIds.filter((id) => id !== workspaceId)
+              : undefined; // abort: not listed
+          });
 
         // The user's folder permissions leave in the transaction every writer of the folder list
         // shares: a write of the list read above would undo a folder, an item count or a permission

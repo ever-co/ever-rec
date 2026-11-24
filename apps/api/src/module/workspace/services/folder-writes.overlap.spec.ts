@@ -4,7 +4,9 @@
  * later write undid the earlier one: an upload's item count dropped a folder created meanwhile, and
  * a move of items or a team change put back a member the admin had just removed or a folder access
  * the admin had just taken away. The folder list is now changed in one transaction on
- * `workspaces/<id>/folders`, and the other writers write only the children they change.
+ * `workspaces/<id>/folders`, and the other writers write only the children they change. The member
+ * list and the team list are changed the same way, in transactions on `workspaces/<id>/members` and
+ * `workspaces/<id>/teams`, so a member who left or was taken out of a team is not put back.
  *
  * `overlap(first, second)` runs `second` from start to end right after `first` reads anything of
  * the workspace for the first time: `second` lands between that read and the writes `first` makes.
@@ -19,6 +21,7 @@ import { FoldersSharedService } from '../../../services/shared/folders.shared.se
 import { parseCollectionToArray } from '../../../services/utils/helpers';
 import { WorkspaceFilesService } from './files.service';
 import { WorkspaceFoldersService } from './folders.service';
+import { WorkspaceInvitesService } from './invites.service';
 import { WorkspaceMembersService } from './members.service';
 import { WorkspaceSharedService } from './shared.service';
 import { WorkspaceTeamsService } from './teams.service';
@@ -91,6 +94,7 @@ describe('overlapping writes to a workspace', () => {
   let membersService: WorkspaceMembersService;
   let sharedService: WorkspaceSharedService;
   let teamsService: WorkspaceTeamsService;
+  let invitesService: WorkspaceInvitesService;
   let favoritesService: FoldersSharedService;
   let workspacesService: WorkspacesService;
 
@@ -128,6 +132,7 @@ describe('overlapping writes to a workspace', () => {
     membersService = new WorkspaceMembersService(utilities);
     sharedService = new WorkspaceSharedService();
     teamsService = new WorkspaceTeamsService(utilities);
+    invitesService = new WorkspaceInvitesService(utilities);
     workspacesService = new WorkspacesService(utilities, membersService);
 
     await mockFirebase.db.ref('users/uid-member').set({
@@ -459,6 +464,166 @@ describe('overlapping writes to a workspace', () => {
       expect(restricted.status).toBe('success');
       expect(accessOf('fold1', 'uid-member')).toBe('NONE');
       left();
+    });
+  });
+
+  describe('members and teams changed at the same time', () => {
+    const leave = (uid: string) => () =>
+      workspacesService.leaveWorkspace(uid, 'ws1');
+    const removeFromTeam = () =>
+      teamsService.deleteMember('ws1', 'team1', 'uid-member');
+    const add = (uid: string) => () =>
+      membersService.addWorkspaceMember(uid, 'Name', 'new@example.test', 'ws1');
+    const workspaceIdsOf = (uid: string) =>
+      parseCollectionToArray<string>(
+        mockFirebase.db.dump(`users/${uid}/workspaceIds`),
+      );
+    const teamMemberIds = () =>
+      parseCollectionToArray<any>(team('team1')?.members).map((x) => x?.id);
+    const teamNames = () =>
+      parseCollectionToArray<any>(stored('teams')).map((x) => x?.name);
+
+    beforeEach(async () => {
+      for (const uid of ['uid-joiner', 'uid-leaving']) {
+        await mockFirebase.db
+          .ref(`users/${uid}`)
+          .set({ email: `${uid}@example.test`, workspaceIds: ['ws1'] });
+      }
+      await mockFirebase.db
+        .ref('users/uid-new')
+        .set({ email: 'new@example.test', workspaceIds: ['ws-other'] });
+      await mockFirebase.db
+        .ref('workspaceInvites/invite1')
+        .set({ id: 'invite1', workspaceId: 'ws1', inviterId: 'uid-admin' });
+      // The leaving member is in the team too.
+      await mockFirebase.db
+        .ref(`${WORKSPACE}/teams/0/members`)
+        .set([
+          { id: 'uid-admin' },
+          { id: 'uid-member' },
+          { id: 'uid-leaving' },
+        ]);
+    });
+
+    it('keeps both members out when two leave at once', async () => {
+      const [first, second] = await overlap(
+        leave('uid-joiner'),
+        leave('uid-leaving'),
+      );
+
+      expect(first.status).toBe('success');
+      expect(second.status).toBe('success');
+      expect(memberIds()).toEqual(['uid-admin', 'uid-member']);
+      expect(teamMemberIds()).toEqual(['uid-admin', 'uid-member']);
+      expect(workspaceIdsOf('uid-joiner')).toEqual([]);
+      expect(workspaceIdsOf('uid-leaving')).toEqual([]);
+    });
+
+    it('keeps a join by invite that lands during a leave', async () => {
+      const [left, joined] = await overlap(leave('uid-joiner'), () =>
+        invitesService.joinWorkspace('uid-new', 'invite1'),
+      );
+
+      expect(left.status).toBe('success');
+      expect(joined).toMatchObject({
+        status: 'success',
+        data: { workspaceId: 'ws1', hasAlreadyJoined: false },
+      });
+      expect(memberIds()).toEqual([
+        'uid-admin',
+        'uid-member',
+        'uid-leaving',
+        'uid-new',
+      ]);
+      expect(workspaceIdsOf('uid-new')).toEqual(['ws-other', 'ws1']);
+      expect(workspaceIdsOf('uid-joiner')).toEqual([]);
+    });
+
+    // Each writer of the team list, with the change it makes.
+    const teamWriters: Array<
+      [string, () => Promise<{ status: string }>, () => void]
+    > = [
+      [
+        'adding a team',
+        () => teamsService.addTeam('uid-admin', 'ws1', 'Design'),
+        () => expect(teamNames()).toEqual(['Team', 'Design']),
+      ],
+      [
+        'renaming the team',
+        () => teamsService.updateTeam('ws1', 'team1', 'Renamed team'),
+        () => expect(team('team1')?.name).toBe('Renamed team'),
+      ],
+      [
+        'adding a member to the team',
+        () => teamsService.addMember('ws1', 'team1', 'uid-joiner'),
+        () => expect(teamMemberIds()).toContain('uid-joiner'),
+      ],
+      [
+        'a team member leaving the workspace',
+        leave('uid-leaving'),
+        () => {
+          expect(memberIds()).not.toContain('uid-leaving');
+          expect(teamMemberIds()).not.toContain('uid-leaving');
+        },
+      ],
+    ];
+
+    describe.each(teamWriters)(
+      '%s while the admin removes a member from the team',
+      (_name, write, wrote) => {
+        it('keeps the removal when it lands between the read and the write', async () => {
+          const [written, removed] = await overlap(write, removeFromTeam);
+
+          expect(written.status).toBe('success');
+          expect(removed.status).toBe('success');
+          wrote();
+          expect(teamMemberIds()).not.toContain('uid-member');
+        });
+
+        it('keeps the change when it lands while the removal is made', async () => {
+          const [removed, written] = await overlap(removeFromTeam, write);
+
+          expect(written.status).toBe('success');
+          expect(removed.status).toBe('success');
+          wrote();
+          expect(teamMemberIds()).not.toContain('uid-member');
+        });
+      },
+    );
+
+    it('stores a member once, however often the member is added', async () => {
+      const first = await add('uid-new')();
+      const second = await add('uid-new')();
+      const again = await add('uid-admin')();
+
+      expect([first.status, second.status, again.status]).toEqual([
+        'success',
+        'success',
+        'success',
+      ]);
+      expect(memberIds()).toEqual([
+        'uid-admin',
+        'uid-member',
+        'uid-joiner',
+        'uid-leaving',
+        'uid-new',
+      ]);
+    });
+
+    it('keeps two members added at the same time', async () => {
+      const [first, second] = await overlap(add('uid-new'), add('uid-other'));
+
+      expect(first.status).toBe('success');
+      expect(second.status).toBe('success');
+      // The second add lands while the first one reads, so it is stored first.
+      expect(memberIds()).toEqual([
+        'uid-admin',
+        'uid-member',
+        'uid-joiner',
+        'uid-leaving',
+        'uid-other',
+        'uid-new',
+      ]);
     });
   });
 

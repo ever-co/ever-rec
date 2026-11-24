@@ -4,10 +4,24 @@ import {
   parseCollectionToIdValueObj,
 } from '../../../services/utils/helpers';
 import { IWorkspaceFolder } from '../Interfaces/Folders';
+import { IWorkspaceTeam } from '../Interfaces/Teams';
+import { IWorkspaceUser } from '../Interfaces/Workspace';
 
-/** What a change makes of a workspace collection (the folders, the screenshots or the videos). */
+/**
+ * The lists stored as arrays, not by id: readers call `workspace.members.find(...)` and
+ * `workspace.teams.map(...)` on the stored value.
+ */
+const STORED_AS_ARRAY = ['members', 'teams'];
+
+/**
+ * What a change makes of a workspace collection (the folders, the screenshots, the videos, the
+ * members or the teams).
+ */
 export interface CollectionChange<T> {
-  /** The whole new list, stored by id. Left out, nothing is stored. */
+  /**
+   * The whole new list, stored by id (the members and the teams as an array). Left out, nothing
+   * is stored.
+   */
   items?: T[];
   /** Why the change is refused; nothing is stored. */
   error?: string;
@@ -26,11 +40,14 @@ export type CollectionChangeResult<T> =
  * and returns the new one, so two requests that change the list at the same time both count. A
  * write of a list read earlier (`update` or `set`) would undo whatever changed in between.
  *
- * `change` may run more than once and must only compute: the last run is the one stored.
+ * `change` may run more than once and must only compute: the last run is the one stored. It
+ * refuses with `error`, not with a throw (a throw is logged and answers not `ok`, without a message).
+ *
+ * The members and the teams are stored as an array, the other collections by id.
  */
 export async function changeWorkspaceCollection<T extends { id?: string }>(
   workspaceId: string,
-  collection: 'folders' | 'screenshots' | 'videos',
+  collection: 'folders' | 'screenshots' | 'videos' | 'members' | 'teams',
   change: (items: T[]) => CollectionChange<T>,
 ): Promise<CollectionChangeResult<T>> {
   let outcome: CollectionChange<T> = {};
@@ -55,7 +72,9 @@ export async function changeWorkspaceCollection<T extends { id?: string }>(
         }
 
         if (!failed && outcome.error === undefined && outcome.items) {
-          return parseCollectionToIdValueObj(outcome.items);
+          return STORED_AS_ARRAY.includes(collection)
+            ? JSON.parse(JSON.stringify(outcome.items))
+            : parseCollectionToIdValueObj(outcome.items);
         }
 
         // Nothing to store. The first run may see `null` for a list that exists (the local
@@ -97,6 +116,37 @@ export function changeWorkspaceFolders(
   return changeWorkspaceCollection<IWorkspaceFolder>(
     workspaceId,
     'folders',
+    change,
+  );
+}
+
+/**
+ * `changeWorkspaceCollection` for the member list, which grants access to the workspace. Every
+ * writer of the list goes through it: a write of the list read earlier would put back a member
+ * removed meanwhile, or drop one who joined.
+ */
+export function changeWorkspaceMembers(
+  workspaceId: string,
+  change: (members: IWorkspaceUser[]) => CollectionChange<IWorkspaceUser>,
+): Promise<CollectionChangeResult<IWorkspaceUser>> {
+  return changeWorkspaceCollection<IWorkspaceUser>(
+    workspaceId,
+    'members',
+    change,
+  );
+}
+
+/**
+ * `changeWorkspaceCollection` for the team list, whose `members` grant team-restricted items.
+ * Every writer of the list goes through it.
+ */
+export function changeWorkspaceTeams(
+  workspaceId: string,
+  change: (teams: IWorkspaceTeam[]) => CollectionChange<IWorkspaceTeam>,
+): Promise<CollectionChangeResult<IWorkspaceTeam>> {
+  return changeWorkspaceCollection<IWorkspaceTeam>(
+    workspaceId,
+    'teams',
     change,
   );
 }
