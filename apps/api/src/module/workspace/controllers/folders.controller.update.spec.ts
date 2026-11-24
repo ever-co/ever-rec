@@ -478,6 +478,27 @@ describe('moving items out of a folder (the real move handler)', () => {
     expect(workspace.screenshots.missing).toBeUndefined();
   });
 
+  it.each(['constructor', 'toString', 'hasOwnProperty', '__proto__'])(
+    'does not treat the inherited property %s as an item',
+    async (itemId) => {
+      const res = await service.moveItemsToFolder(
+        user('uid-admin'),
+        'ws1',
+        [itemId],
+        'fold2',
+        'fold1',
+      );
+      expect(res.status).toBe('error');
+      expect(Object.keys(workspace.videos)).toEqual([]);
+      expect(Object.keys(workspace.screenshots).sort()).toEqual([
+        'granted',
+        'own',
+        'writers',
+      ]);
+      expect(workspace.folders.fold2.items).toBe(0);
+    },
+  );
+
   it('saves nothing when one id of several does not exist', async () => {
     const res = await service.moveItemsToFolder(
       user('uid-admin'),

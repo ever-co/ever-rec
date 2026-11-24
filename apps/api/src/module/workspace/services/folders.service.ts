@@ -296,8 +296,14 @@ export class WorkspaceFoldersService {
 
       for (let i = 0; i < itemIds.length; i++) {
         const itemId = itemIds[i];
-        const collection = screenshots[itemId] ? screenshots : videos;
-        const item = collection[itemId];
+        // Own keys only: an id such as `constructor` or `toString` is found on every plain object,
+        // and must not count as an item.
+        const isOwnItem = (c: Record<string, unknown>) =>
+          Object.prototype.hasOwnProperty.call(c, itemId) &&
+          !!c[itemId] &&
+          typeof c[itemId] === 'object';
+        const collection = isOwnItem(screenshots) ? screenshots : videos;
+        const item = isOwnItem(collection) ? collection[itemId] : undefined;
 
         // An id that is in neither collection is not moved: writing to it would create an item
         // that holds only a `parentId`, and change the folder counts for something that is not there.
