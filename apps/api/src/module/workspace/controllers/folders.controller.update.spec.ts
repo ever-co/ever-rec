@@ -464,4 +464,43 @@ describe('moving items out of a folder (the real move handler)', () => {
     expect(parentOf('own')).toBe(false);
     expect(parentOf('granted')).toBe(false);
   });
+
+  it('does not create an item for an id that does not exist, even for the admin', async () => {
+    const res = await service.moveItemsToFolder(
+      user('uid-admin'),
+      'ws1',
+      ['missing'],
+      'fold2',
+      'fold1',
+    );
+    expect(res.status).toBe('error');
+    expect(workspace.videos).toEqual({});
+    expect(workspace.screenshots.missing).toBeUndefined();
+  });
+
+  it('saves nothing when one id of several does not exist', async () => {
+    const res = await service.moveItemsToFolder(
+      user('uid-admin'),
+      'ws1',
+      ['own', 'missing'],
+      'fold2',
+      'fold1',
+    );
+    expect(res.status).toBe('error');
+    expect(parentOf('own')).toBe('fold1');
+    expect(workspace.videos).toEqual({});
+  });
+
+  it('still moves a video the same way', async () => {
+    workspace.videos.clip = { id: 'clip', uid: 'uid-writer', parentId: false };
+    const res = await service.moveItemsToFolder(
+      user('uid-writer'),
+      'ws1',
+      ['clip'],
+      'fold2',
+      false,
+    );
+    expect(res.status).toBe('success');
+    expect(workspace.videos.clip.parentId).toBe('fold2');
+  });
 });

@@ -298,6 +298,13 @@ export class WorkspaceFoldersService {
         const itemId = itemIds[i];
         const collection = screenshots[itemId] ? screenshots : videos;
         const item = collection[itemId];
+
+        // An id that is in neither collection is not moved: writing to it would create an item
+        // that holds only a `parentId`, and change the folder counts for something that is not there.
+        if (!item) {
+          return sendError('Item not found.');
+        }
+
         let hasAccess =
           workspaceVal?.admin === user?.id || item?.uid === user?.id;
 
