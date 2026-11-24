@@ -211,6 +211,10 @@
         border-radius: 200px;
       }
 
+      input:focus-visible::-webkit-slider-thumb {
+        box-shadow: 0 0 0 2px #fff, 0 0 0 4px #5b4dbe;
+      }
+
       img {
         position: absolute;
         z-index: 99999999;
@@ -223,7 +227,9 @@
       opacity: 1;
     }
 
-    .show-slider {
+    // show-slider follows the mouse, show-slider-keyboard keyboard focus.
+    .show-slider,
+    .show-slider-keyboard {
       visibility: visible;
       opacity: 1;
     }

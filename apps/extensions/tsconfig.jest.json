@@ -1,0 +1,8 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "commonjs",
+    // Transpile only: `tsc --noEmit` is the type check.
+    "isolatedModules": true
+  }
+}

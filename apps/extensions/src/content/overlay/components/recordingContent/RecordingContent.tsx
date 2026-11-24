@@ -1,4 +1,12 @@
-import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
+import React, {
+  ChangeEvent,
+  FocusEvent,
+  KeyboardEvent,
+  UIEvent,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import classNames from 'classnames';
 import ControllerButton from './controllerButton/ControllerButton';
 import ControllerSlider from './controllerSlider/ControllerSlider';
@@ -69,6 +77,7 @@ const RecordingContent: React.FC<IRecordingContentProps> = ({
   const mainContainerGlobal: any = useRef();
   const penSlider: any = useRef();
   const colorPickerIcon: any = useRef();
+  const colorPickerContainer = useRef<HTMLDivElement>(null);
   const { height, width } = useWindowSize();
   const [playPauseImgSource, setPlayPauseImgSource] =
     useState('pause-light.svg');
@@ -95,6 +104,17 @@ const RecordingContent: React.FC<IRecordingContentProps> = ({
       colorPickerIcon.current.style.background = colorPicker.hex;
     }
   }, [colorPicker]);
+
+  useEffect(() => {
+    if (!togglePicker) {
+      return;
+    }
+    // react-color renders each colour as a focusable <div title="#hex"> that
+    // picks on Enter but has no role. As a button, its title is its name.
+    colorPickerContainer.current
+      ?.querySelectorAll('.color-picker-github [title]')
+      .forEach((swatch) => swatch.setAttribute('role', 'button'));
+  }, [togglePicker]);
 
   const binButtonClickHandler = (): void => {
     onCancelRecording();
@@ -145,6 +165,52 @@ const RecordingContent: React.FC<IRecordingContentProps> = ({
     }
   };
 
+  const colorButtonKeyDownHandler = (
+    event: KeyboardEvent<HTMLDivElement>,
+  ): void => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      // Space would otherwise scroll the host page.
+      event.preventDefault();
+      // A held key repeats keydown. Toggle on the first one only.
+      if (!event.repeat) {
+        handleColorPicker();
+      }
+    }
+  };
+
+  const colorPickerKeyDownHandler = (
+    event: KeyboardEvent<HTMLDivElement>,
+  ): void => {
+    if (!togglePicker) {
+      return;
+    }
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      event.stopPropagation();
+      setTogglePicker(false);
+      colorPickerIcon.current?.focus();
+      return;
+    }
+    const target = event.target as HTMLElement;
+    // react-color picks on Enter only; Space is the other button key.
+    if (event.key === ' ' && target.closest('.color-picker-github')) {
+      event.preventDefault();
+      if (!event.repeat) {
+        target.click();
+      }
+    }
+  };
+
+  const pickColorHandler = (color: ColorResult, event?: UIEvent): void => {
+    setColorPicker(color);
+    setTogglePicker(false);
+    // A key press removes the focused colour with the picker, so focus goes
+    // back to the swatch. A mouse click (detail >= 1) leaves focus as it was.
+    if (!event?.detail) {
+      colorPickerIcon.current?.focus();
+    }
+  };
+
   const leaveMouseHandler = (): void => {
     setTogglePicker(false);
   };
@@ -155,6 +221,29 @@ const RecordingContent: React.FC<IRecordingContentProps> = ({
 
   const outMouseHandler = () => {
     penSlider.current.classList.remove('show-slider');
+  };
+
+  // Keyboard users never hover, so the slider also shows while the pen button
+  // or the slider has keyboard focus. Mouse focus (not :focus-visible) keeps
+  // the hover behaviour above.
+  const focusPenToolsHandler = (event: FocusEvent<HTMLElement>) => {
+    penSlider.current.classList.toggle(
+      'show-slider-keyboard',
+      event.target.matches(':focus-visible'),
+    );
+  };
+
+  const blurPenToolsHandler = (event: FocusEvent<HTMLElement>) => {
+    const next = event.relatedTarget;
+    // Keep it shown while focus moves between the pen button and the slider:
+    // the browser drops focus on an element that is hidden by then.
+    if (
+      next &&
+      (penSlider.current.contains(next) || next.classList.contains('penButton'))
+    ) {
+      return;
+    }
+    penSlider.current.classList.remove('show-slider-keyboard');
   };
 
   const inputHandler = (event: ChangeEvent): void => {
@@ -228,30 +317,50 @@ const RecordingContent: React.FC<IRecordingContentProps> = ({
                 onMouse={mouseOverHandler}
                 outMouse={outMouseHandler}
                 onClick={penButtonClickHandler}
+                onFocus={focusPenToolsHandler}
+                onBlur={blurPenToolsHandler}
                 label={t('ext.recordingControls.pen')}
                 pressed={penImgSource == 'pen-active.svg'}
               ></ControllerButton>
+              {/* Right after the pen button, so Tab reaches it while it shows.
+                  It is absolutely positioned, so the order does not move it. */}
+              <ControllerSlider
+                penSliderRef={penSlider}
+                imageUrl={'slider-track.svg'}
+                inputValue={inputValue}
+                label={t('ext.recordingControls.brushSize')}
+                onMouseHandler={mouseOverHandler}
+                outMouseHandler={outMouseHandler}
+                onFocusHandler={focusPenToolsHandler}
+                onBlurHandler={blurPenToolsHandler}
+                onChangeSlider={inputHandler}
+              ></ControllerSlider>
               <ControllerButton
                 className={'eraserButton'}
                 onClick={eraserButtonClickHandler}
                 imgSource={eraserImgSource}
                 label={t('ext.recordingControls.undo')}
               ></ControllerButton>
-              <ControllerSlider
-                penSliderRef={penSlider}
-                imageUrl={'slider-track.svg'}
-                inputValue={inputValue}
-                onMouseHandler={mouseOverHandler}
-                outMouseHandler={outMouseHandler}
-                onChangeSlider={inputHandler}
-              ></ControllerSlider>
-              <div className="colorPicker" onClick={handleColorPicker}>
-                <div ref={colorPickerIcon} className="colorPicker-icon"></div>
+              {/* The whole circle stays the mouse target; the inner dot is the
+                  keyboard button, so the colours are not inside a button. */}
+              <div
+                ref={colorPickerContainer}
+                className="colorPicker"
+                onClick={handleColorPicker}
+                onKeyDown={colorPickerKeyDownHandler}
+              >
+                <div
+                  ref={colorPickerIcon}
+                  className="colorPicker-icon"
+                  role="button"
+                  tabIndex={0}
+                  aria-label={t('ext.recordingControls.penColor')}
+                  aria-expanded={togglePicker}
+                  onKeyDown={colorButtonKeyDownHandler}
+                ></div>
                 {togglePicker && (
                   <GithubPickerReact
-                    onChange={(color: ColorResult) => {
-                      setColorPicker(color), setTogglePicker(false);
-                    }}
+                    onChange={pickColorHandler}
                     colors={colors}
                     width="187px"
                     className={'color-picker-github'}

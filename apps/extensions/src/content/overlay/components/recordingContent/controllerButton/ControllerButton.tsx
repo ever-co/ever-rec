@@ -1,4 +1,4 @@
-import React, { CSSProperties, KeyboardEvent } from 'react';
+import React, { CSSProperties, FocusEvent, KeyboardEvent } from 'react';
 
 interface IControllerButtonProps {
   className: string;
@@ -12,6 +12,8 @@ interface IControllerButtonProps {
   label?: string;
   /** Set for toggle buttons (e.g. pen on/off) so the state is announced. */
   pressed?: boolean;
+  onFocus?: (event: FocusEvent<HTMLDivElement>) => void;
+  onBlur?: (event: FocusEvent<HTMLDivElement>) => void;
 }
 
 const ControllerButton: React.FC<IControllerButtonProps> = ({
@@ -24,6 +26,8 @@ const ControllerButton: React.FC<IControllerButtonProps> = ({
   disabled,
   label,
   pressed,
+  onFocus,
+  onBlur,
 }) => {
   let disabledStyles: CSSProperties = {};
   if (disabled) {
@@ -75,6 +79,8 @@ const ControllerButton: React.FC<IControllerButtonProps> = ({
       aria-pressed={pressed}
       onClick={clickHandler}
       onKeyDown={keyDownHandler}
+      onFocus={onFocus}
+      onBlur={onBlur}
       onMouseOver={onMouseHandler}
       onMouseLeave={outMouseHandler}
     >
