@@ -40,8 +40,9 @@ export type CollectionChangeResult<T> =
  * and returns the new one, so two requests that change the list at the same time both count. A
  * write of a list read earlier (`update` or `set`) would undo whatever changed in between.
  *
- * `change` may run more than once and must only compute: the last run is the one stored. It
- * refuses with `error`, not with a throw (a throw is logged and answers not `ok`, without a message).
+ * `change` may run more than once and must only compute: the last run is the one stored, and it
+ * always ran on the stored list. It refuses with `error`, not with a throw (a throw is logged and
+ * answers not `ok`, without a message).
  *
  * The members and the teams are stored as an array, the other collections by id.
  */
@@ -77,10 +78,13 @@ export async function changeWorkspaceCollection<T extends { id?: string }>(
             : parseCollectionToIdValueObj(outcome.items);
         }
 
-        // Nothing to store. The first run may see `null` for a list that exists (the local
-        // guess): `null` writes nothing when the list really is empty, and is rejected and run
-        // again with the stored list when it is not, where an abort would never look at it.
-        return current === null || current === undefined ? null : undefined;
+        // Nothing to store: the list seen is written back unchanged, never an abort. The list seen
+        // may not be the stored one: the first run gets the local guess (`null` for a list that
+        // exists), and a change of the same list still pending in this process shows here as
+        // already made, computed from that guess. An abort is final, so a refusal or a no-op
+        // decided on such a list would stand. A write is checked against the stored list and run
+        // again with it when they differ.
+        return current === undefined ? null : current;
       });
   } catch (e) {
     // Not committed (retried too often, or cancelled by another write of the same path).

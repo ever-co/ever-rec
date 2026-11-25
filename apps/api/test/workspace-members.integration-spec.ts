@@ -8,7 +8,11 @@ import { parseCollectionToArray } from '../src/services/utils/helpers';
 import { WorkspaceMembersService } from '../src/module/workspace/services/members.service';
 import { WorkspaceUtilitiesService } from '../src/module/workspace/services/utilities.service';
 import { WorkspacesService } from '../src/module/workspace/services/workspace.service';
-import { EMULATOR_PROJECT, requireEmulators } from './setup-emulators';
+import {
+  changeWorkspaceMembers,
+  changeWorkspaceTeams,
+} from '../src/module/workspace/services/change-workspace-collection';
+import { emulatorApp } from './setup-emulators';
 
 // Image resizing is not under test; this keeps the native module from loading.
 jest.mock('sharp', () => ({ __esModule: true, default: jest.fn() }));
@@ -28,12 +32,7 @@ describe('members leaving a workspace at the same time, on the emulators', () =>
     parseCollectionToArray<any>(list as object).map((x) => x?.id);
 
   beforeAll(() => {
-    requireEmulators();
-    app = admin.initializeApp({
-      projectId: EMULATOR_PROJECT,
-      databaseURL: `http://${process.env.FIREBASE_DATABASE_EMULATOR_HOST}?ns=${EMULATOR_PROJECT}`,
-      storageBucket: `${EMULATOR_PROJECT}.appspot.com`,
-    });
+    app = emulatorApp('[DEFAULT]');
   });
 
   afterAll(async () => {
@@ -92,5 +91,73 @@ describe('members leaving a workspace at the same time, on the emulators', () =>
     expect(ids(teams[0].members)).toEqual(['uid-admin']);
     expect(await read('users/uid-a/workspaceIds')).toBeNull();
     expect(await read('users/uid-b/workspaceIds')).toBeNull();
+  });
+
+  // The first run of a transaction gets the local guess (`null` for a list nobody here listens
+  // to), and a second change of the same list started meanwhile in this process (another request
+  // on the same API instance) gets what the first one made of that guess. What the second one
+  // decides on that list must still be checked against the stored one.
+  it('keeps a member leaving while an add of a member is pending in the same process', async () => {
+    const [added, left] = await Promise.all([
+      changeWorkspaceMembers('ws1', (members) =>
+        members.some((member) => member.id === 'uid-admin')
+          ? {}
+          : { items: [...members, { id: 'uid-admin' }] },
+      ),
+      changeWorkspaceMembers('ws1', (members) =>
+        members.some((member) => member.id === 'uid-a')
+          ? { items: members.filter((member) => member.id !== 'uid-a') }
+          : {},
+      ),
+    ]);
+
+    expect(added.ok).toBe(true);
+    expect(left.ok).toBe(true);
+    expect(ids(await read('workspaces/ws1/members'))).toEqual([
+      'uid-admin',
+      'uid-b',
+    ]);
+  });
+
+  it('takes a member out of a team while a team add is pending in the same process', async () => {
+    const [added, removed] = await Promise.all([
+      changeWorkspaceTeams('ws1', (teams) => ({
+        items: [
+          ...teams,
+          {
+            id: 'team2',
+            admin: 'uid-admin',
+            name: 'Design',
+            workspaceId: 'ws1',
+            members: [],
+          },
+        ],
+      })),
+      changeWorkspaceTeams('ws1', (teams) => {
+        const team = teams.find((t) => t.id === 'team1');
+        return team
+          ? {
+              items: teams.map((t) =>
+                t.id === 'team1'
+                  ? {
+                      ...t,
+                      members: parseCollectionToArray<any>(t.members).filter(
+                        (member) => member?.id !== 'uid-a',
+                      ),
+                    }
+                  : t,
+              ),
+            }
+          : { error: 'not found' };
+      }),
+    ]);
+
+    expect(added.ok).toBe(true);
+    expect(removed).toMatchObject({ ok: true });
+    const teams = parseCollectionToArray<any>(
+      await read('workspaces/ws1/teams'),
+    );
+    expect(teams.map((team) => team.name)).toEqual(['Team', 'Design']);
+    expect(ids(teams[0].members)).toEqual(['uid-admin', 'uid-b']);
   });
 });

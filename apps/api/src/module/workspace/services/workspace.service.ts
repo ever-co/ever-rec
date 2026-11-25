@@ -353,11 +353,32 @@ export class WorkspacesService {
               return null;
             }
 
+            // Not listed: written back unchanged, not an abort, which is final even when the list
+            // seen is a guess or a change of this process still pending.
             const workspaceIds = Object.values(current);
             return workspaceIds.includes(workspaceId)
               ? workspaceIds.filter((id) => id !== workspaceId)
-              : undefined; // abort: not listed
+              : current;
           });
+
+        // A join by invite of this same user that landed after the members change found the
+        // workspace still listed, and the change above then took it out: list it again, or the
+        // user is a member of a workspace missing from the list, which a new join does not repair.
+        const membersNow = parseCollectionToArray<IWorkspaceUser>(
+          (await db.ref(`workspaces/${workspaceId}/members`).get()).val(),
+        );
+        if (membersNow.some((member) => member?.id === uid)) {
+          await db
+            .ref(`users/${uid}/workspaceIds`)
+            .transaction(
+              (current: string[] | Record<string, string> | null) => {
+                const workspaceIds = current ? Object.values(current) : [];
+                return workspaceIds.includes(workspaceId)
+                  ? current
+                  : [...workspaceIds, workspaceId];
+              },
+            );
+        }
 
         // The user's folder permissions leave in the transaction every writer of the folder list
         // shares: a write of the list read above would undo a folder, an item count or a permission

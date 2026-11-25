@@ -539,6 +539,36 @@ describe('overlapping writes to a workspace', () => {
       expect(workspaceIdsOf('uid-joiner')).toEqual([]);
     });
 
+    it('keeps the workspace listed when the member who leaves joins again meanwhile', async () => {
+      // The join lands after the leave took the member out of the list of members, and before it
+      // takes the workspace out of the member's list.
+      const { transaction } = FakeReference.prototype;
+      let joined: Promise<unknown> | undefined;
+      jest
+        .spyOn(FakeReference.prototype, 'transaction')
+        .mockImplementation(async function (
+          this: FakeReference,
+          ...args: Parameters<FakeReference['transaction']>
+        ) {
+          if (!joined && pathOf(this) === 'users/uid-joiner/workspaceIds') {
+            joined = invitesService.joinWorkspace('uid-joiner', 'invite1');
+            await joined;
+          }
+          return transaction.apply(this, args);
+        });
+
+      const left = await workspacesService.leaveWorkspace('uid-joiner', 'ws1');
+
+      expect(left.status).toBe('success');
+      expect(await joined).toMatchObject({
+        status: 'success',
+        data: { workspaceId: 'ws1', hasAlreadyJoined: false },
+      });
+      // A member again, and the workspace in the member's list.
+      expect(memberIds()).toContain('uid-joiner');
+      expect(workspaceIdsOf('uid-joiner')).toEqual(['ws1']);
+    });
+
     // Each writer of the team list, with the change it makes.
     const teamWriters: Array<
       [string, () => Promise<{ status: string }>, () => void]
