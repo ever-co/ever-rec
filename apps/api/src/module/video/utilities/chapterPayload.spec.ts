@@ -133,20 +133,26 @@ describe('parseChapterList', () => {
         ].sort(),
       );
       expect(Object.getPrototypeOf(parsed)).toBe(Object.prototype);
-      expect((parsed as unknown as Record<string, unknown>).polluted).toBe(
-        undefined,
-      );
+      expect(
+        (parsed as unknown as Record<string, unknown>).polluted,
+      ).toBeUndefined();
     });
 
     it('returns new objects, not the ones it parsed', () => {
       const raw = '[{"id":"a1","content":"x","timestamp":"00:00","extra":1}]';
+      // Hand the parser a known list, so the test sees the objects it read.
+      const sent = JSON.parse(raw);
+      const jsonParse = jest.spyOn(JSON, 'parse').mockReturnValueOnce(sent);
 
-      const [first] = parse(raw);
-      const [second] = parse(raw);
+      try {
+        const [returned] = parse(raw);
 
-      expect(first).not.toBe(second);
-      expect(first).toEqual(second);
-      expect(first).not.toHaveProperty('extra');
+        expect(returned).not.toBe(sent[0]);
+        expect(returned).not.toHaveProperty('extra');
+        expect(sent[0]).toHaveProperty('extra', 1);
+      } finally {
+        jsonParse.mockRestore();
+      }
     });
   });
 

@@ -29,6 +29,79 @@ const isChapterId = (id: unknown): id is string =>
   is_id(id) &&
   !(id in Object.prototype);
 
+/** Text of at most `maxLength` characters. */
+const isShortText = (value: unknown, maxLength: number): value is string =>
+  typeof value === 'string' && value.length <= maxLength;
+
+/** Missing, or text of at most `maxLength` characters. */
+const isOptionalShortText = (
+  value: unknown,
+  maxLength: number,
+): value is string | undefined =>
+  value === undefined || isShortText(value, maxLength);
+
+/** Missing, or a finite number of seconds of at least 0. */
+const isOptionalSeconds = (value: unknown): value is number | undefined =>
+  value === undefined ||
+  (typeof value === 'number' && Number.isFinite(value) && value >= 0);
+
+/** Older chapters have no thumbnail name or an empty one. */
+const isOptionalRefName = (value: unknown): boolean =>
+  value === undefined ||
+  value === null ||
+  value === '' ||
+  is_plain_file_name(value);
+
+const invalidChapter = (fieldName: string, what: string) =>
+  new BadRequestException(`"${fieldName}" has an invalid chapter ${what}`);
+
+/**
+ * Checks one chapter of the list and returns a new chapter that holds only the
+ * fields the editors send. The database refuses `undefined`, so a field that
+ * was not sent stays out, and a missing thumbnail URL becomes `''`.
+ */
+const readChapter = (
+  chapter: unknown,
+  fieldName: string,
+  seen: Set<string>,
+): IChapter => {
+  if (!chapter || typeof chapter !== 'object' || Array.isArray(chapter)) {
+    throw new BadRequestException(`"${fieldName}" has an invalid chapter`);
+  }
+
+  const { id, content, timestamp, timestampSeconds, thumbnailURL, refName } =
+    chapter as Record<string, unknown>;
+
+  if (!isChapterId(id) || seen.has(id)) {
+    throw invalidChapter(fieldName, 'id');
+  }
+  seen.add(id);
+
+  if (!isOptionalRefName(refName)) {
+    throw invalidChapter(fieldName, 'thumbnail name');
+  }
+  if (!isOptionalShortText(content, MAX_CHAPTER_CONTENT_LENGTH)) {
+    throw invalidChapter(fieldName, 'title');
+  }
+  if (!isShortText(timestamp, MAX_CHAPTER_TIMESTAMP_LENGTH)) {
+    throw invalidChapter(fieldName, 'timestamp');
+  }
+  if (!isOptionalSeconds(timestampSeconds)) {
+    throw invalidChapter(fieldName, 'time in seconds');
+  }
+  if (!isOptionalShortText(thumbnailURL, MAX_CHAPTER_THUMBNAIL_URL_LENGTH)) {
+    throw invalidChapter(fieldName, 'thumbnail URL');
+  }
+
+  const kept: Partial<IChapter> = { id };
+  if (content !== undefined) kept.content = content;
+  kept.timestamp = timestamp;
+  if (timestampSeconds !== undefined) kept.timestampSeconds = timestampSeconds;
+  kept.thumbnailURL = thumbnailURL ?? '';
+  if (typeof refName === 'string') kept.refName = refName;
+  return kept as IChapter;
+};
+
 /**
  * Reads one JSON list of chapters from a multipart form field.
  *
@@ -74,85 +147,5 @@ export const parseChapterList = (
   }
 
   const seen = new Set<string>();
-  const chapters: IChapter[] = [];
-
-  for (const chapter of parsed) {
-    if (!chapter || typeof chapter !== 'object' || Array.isArray(chapter)) {
-      throw new BadRequestException(`"${fieldName}" has an invalid chapter`);
-    }
-
-    const { id, content, timestamp, timestampSeconds, thumbnailURL, refName } =
-      chapter as Record<string, unknown>;
-
-    if (!isChapterId(id) || seen.has(id)) {
-      throw new BadRequestException(`"${fieldName}" has an invalid chapter id`);
-    }
-    seen.add(id);
-
-    // Older chapters have no thumbnail name or an empty one.
-    if (
-      refName !== undefined &&
-      refName !== null &&
-      refName !== '' &&
-      !is_plain_file_name(refName)
-    ) {
-      throw new BadRequestException(
-        `"${fieldName}" has an invalid chapter thumbnail name`,
-      );
-    }
-
-    if (
-      content !== undefined &&
-      (typeof content !== 'string' ||
-        content.length > MAX_CHAPTER_CONTENT_LENGTH)
-    ) {
-      throw new BadRequestException(
-        `"${fieldName}" has an invalid chapter title`,
-      );
-    }
-
-    if (
-      typeof timestamp !== 'string' ||
-      timestamp.length > MAX_CHAPTER_TIMESTAMP_LENGTH
-    ) {
-      throw new BadRequestException(
-        `"${fieldName}" has an invalid chapter timestamp`,
-      );
-    }
-
-    if (
-      timestampSeconds !== undefined &&
-      (typeof timestampSeconds !== 'number' ||
-        !Number.isFinite(timestampSeconds) ||
-        timestampSeconds < 0)
-    ) {
-      throw new BadRequestException(
-        `"${fieldName}" has an invalid chapter time in seconds`,
-      );
-    }
-
-    if (
-      thumbnailURL !== undefined &&
-      (typeof thumbnailURL !== 'string' ||
-        thumbnailURL.length > MAX_CHAPTER_THUMBNAIL_URL_LENGTH)
-    ) {
-      throw new BadRequestException(
-        `"${fieldName}" has an invalid chapter thumbnail URL`,
-      );
-    }
-
-    // A new chapter with only the fields the editors send, checked above. The
-    // database refuses `undefined`, so a field that was not sent stays out.
-    const kept: Partial<IChapter> = { id };
-    if (typeof content === 'string') kept.content = content;
-    kept.timestamp = timestamp;
-    if (typeof timestampSeconds === 'number') {
-      kept.timestampSeconds = timestampSeconds;
-    }
-    kept.thumbnailURL = typeof thumbnailURL === 'string' ? thumbnailURL : '';
-    if (typeof refName === 'string') kept.refName = refName;
-    chapters.push(kept as IChapter);
-  }
-
-  return chapters;
+  return parsed.map((chapter) => readChapter(chapter, fieldName, seen));
 };
