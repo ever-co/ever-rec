@@ -7,6 +7,7 @@ import { IDataResponse } from 'src/interfaces/_types';
 import { IWorkspaceInvite } from '../Interfaces/Invites';
 import { Injectable } from '@nestjs/common';
 import { parseCollectionToArray } from 'src/services/utils/helpers';
+import { addUserWorkspaceId } from './user-workspace-ids';
 
 /** The answer for an invite, or the workspace of an invite, that no longer exists. */
 // tslint:disable-next-line: quotemark
@@ -135,18 +136,7 @@ export class WorkspaceInvitesService {
       // Add the workspace to the user's list, now that the membership is stored. A transaction on
       // the list itself, not a write of the list read before the join: that write dropped an id
       // added meanwhile and listed this one twice when it was already there.
-      await db
-        .ref(`users/${uid}/workspaceIds`)
-        .transaction((current: string[] | Record<string, string> | null) => {
-          // `null` is also the first run's local guess; the server then runs this again with the
-          // stored list, so `null` must not abort.
-          const workspaceIds = current ? Object.values(current) : [];
-          if (workspaceIds.includes(workspaceId)) {
-            return undefined; // abort: already listed
-          }
-
-          return [...workspaceIds, workspaceId];
-        });
+      await addUserWorkspaceId(uid, workspaceId);
 
       return this.utilitiesService.sendResponse({
         workspaceId,

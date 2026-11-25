@@ -1,7 +1,8 @@
 /**
  * Members leaving a workspace at the same time, through the real Firebase Admin SDK on the
  * Realtime Database emulator. Each leave changes the member list and the team list in
- * transactions, so neither puts back a member the other one took out.
+ * transactions, so neither puts back a member the other one took out. Creating and deleting a
+ * workspace change each user's list of workspaces in a transaction on the list the same way.
  */
 import * as admin from 'firebase-admin';
 import { parseCollectionToArray } from '../src/services/utils/helpers';
@@ -159,5 +160,54 @@ describe('members leaving a workspace at the same time, on the emulators', () =>
     );
     expect(teams.map((team) => team.name)).toEqual(['Team', 'Design']);
     expect(ids(teams[0].members)).toEqual(['uid-admin', 'uid-b']);
+  });
+
+  // A create adds its workspace to the user's list, and a delete takes it out of each member's
+  // list, in a transaction on that list: a write of the list read earlier dropped the id the other
+  // request added meanwhile.
+  describe("the user's list of workspaces", () => {
+    const workspaceIdsOf = async (uid: string) =>
+      parseCollectionToArray<string>(await read(`users/${uid}/workspaceIds`));
+    const create = (name: string) =>
+      workspaces.createNewWorkspace('uid-a', 'A', 'a@example.test', name);
+
+    it('keeps both workspaces when one user creates two at once', async () => {
+      const [first, second] = await Promise.all([
+        create('First'),
+        create('Second'),
+      ]);
+
+      expect(first.status).toBe('success');
+      expect(second.status).toBe('success');
+      expect((await workspaceIdsOf('uid-a')).sort()).toEqual(
+        ['ws1', first.data?.id, second.data?.id].sort(),
+      );
+    });
+
+    it('drops a deleted workspace and keeps one a member creates meanwhile', async () => {
+      const [deleted, created] = await Promise.all([
+        workspaces.deleteWorkspace('uid-admin', 'ws1'),
+        create('Mine'),
+      ]);
+
+      expect(deleted.status).toBe('success');
+      expect(created.status).toBe('success');
+      expect(await read('workspaces/ws1')).toBeNull();
+      expect(await workspaceIdsOf('uid-a')).toEqual([created.data?.id]);
+      expect(await workspaceIdsOf('uid-admin')).toEqual([]);
+    });
+
+    it('takes a deleted workspace out of a list stored as an object', async () => {
+      // A list with a hole comes back as an object.
+      await app
+        .database()
+        .ref('users/uid-b/workspaceIds')
+        .set({ 1: 'ws1', 5: 'ws-other' });
+
+      const deleted = await workspaces.deleteWorkspace('uid-admin', 'ws1');
+
+      expect(deleted.status).toBe('success');
+      expect(await workspaceIdsOf('uid-b')).toEqual(['ws-other']);
+    });
   });
 });

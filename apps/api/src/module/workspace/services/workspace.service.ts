@@ -25,6 +25,10 @@ import {
   changeWorkspaceMembers,
   changeWorkspaceTeams,
 } from './change-workspace-collection';
+import {
+  addUserWorkspaceId,
+  removeUserWorkspaceId,
+} from './user-workspace-ids';
 import { sendError, sendResponse } from 'src/services/utils/sendResponse';
 import { IFavoriteFolders } from 'src/interfaces/Folders';
 import { Optional } from '@nestjs/common';
@@ -137,11 +141,11 @@ export class WorkspacesService {
           videos: [],
           created: Date.now(),
         };
-        const workspaceIds = user.workspaceIds || [];
-        workspaceIds.push(workspaceId);
+        // The id joins the user's list in a transaction on the list: a write of the list read above
+        // would drop a workspace created or joined meanwhile.
         await Promise.all([
           workspaceRef.set(newWorkspace),
-          userRef.update({ workspaceIds }),
+          addUserWorkspaceId(uid, workspaceId),
         ]);
         this.eventEmitter?.emit(EVER_COUNTER_EVENTS.workspaceCreated, {});
         const workspace: IWorkspace =
@@ -344,22 +348,7 @@ export class WorkspacesService {
 
         // Then the user's own list, in a transaction as a join adds to it: a write of the list read
         // above would drop a workspace joined meanwhile.
-        await db
-          .ref(`users/${uid}/workspaceIds`)
-          .transaction((current: string[] | Record<string, string> | null) => {
-            // `null` is also the first run's local guess; the server then runs this again with the
-            // stored list, so `null` must not abort.
-            if (current === null || current === undefined) {
-              return null;
-            }
-
-            // Not listed: written back unchanged, not an abort, which is final even when the list
-            // seen is a guess or a change of this process still pending.
-            const workspaceIds = Object.values(current);
-            return workspaceIds.includes(workspaceId)
-              ? workspaceIds.filter((id) => id !== workspaceId)
-              : current;
-          });
+        await removeUserWorkspaceId(uid, workspaceId);
 
         // A join by invite of this same user that landed after the members change found the
         // workspace still listed, and the change above then took it out: list it again, or the
@@ -368,16 +357,7 @@ export class WorkspacesService {
           (await db.ref(`workspaces/${workspaceId}/members`).get()).val(),
         );
         if (membersNow.some((member) => member?.id === uid)) {
-          await db
-            .ref(`users/${uid}/workspaceIds`)
-            .transaction(
-              (current: string[] | Record<string, string> | null) => {
-                const workspaceIds = current ? Object.values(current) : [];
-                return workspaceIds.includes(workspaceId)
-                  ? current
-                  : [...workspaceIds, workspaceId];
-              },
-            );
+          await addUserWorkspaceId(uid, workspaceId);
         }
 
         // The user's folder permissions leave in the transaction every writer of the folder list
@@ -439,25 +419,13 @@ export class WorkspacesService {
         ...(workspaceVal.members || []),
         { id: workspaceVal.admin, canManageFolders: true },
       ];
+      // In a transaction on each member's list: a write of the list read earlier would drop a
+      // workspace the member created or joined meanwhile. A member without a list (or without a
+      // record) is left as it is.
       await Promise.allSettled(
         workspaceMembers.map(async (x) => {
           try {
-            const dbMemberRef = db.ref(`users/${x.id}`);
-            const dbMemberSnap = await dbMemberRef.get();
-            const dbMemberVal = dbMemberSnap.val();
-
-            if (dbMemberVal) {
-              const newWorkspaceIds = dbMemberVal.workspaceIds.filter(
-                (y) => y !== workspaceId,
-              );
-
-              await dbMemberRef.update({
-                workspaceIds: newWorkspaceIds,
-              });
-            } else {
-              console.log('Workspace user do not exists.');
-              return;
-            }
+            await removeUserWorkspaceId(x.id, workspaceId);
           } catch (e) {
             console.log(e);
             return undefined;
