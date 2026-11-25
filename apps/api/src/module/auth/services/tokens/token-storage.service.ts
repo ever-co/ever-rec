@@ -39,21 +39,19 @@ export class TokenStorageService {
    */
   public async update(id: string, token: string): Promise<IToken> {
     const ref = this.db.ref(`${this.PATH}/${id}`);
-    const snapshot = await ref.once("value");
+    // One transaction, so an entry deleted meanwhile (a logout) is never written back. The first
+    // attempt may see the locally cached value (null) while the entry exists: answering null then
+    // makes the server reject the attempt and run it again with the stored value. When the entry
+    // really is gone, null commits as a no-op and the snapshot stays empty.
+    const { snapshot } = await ref.transaction((current: IToken | null) =>
+      current === null ? null : { ...current, token, updatedAt: Date.now() },
+    );
 
     if (!snapshot.exists()) {
       throw new NotFoundException(`Token with ID ${id} not found`);
     }
 
-    const existing = snapshot.val() as IToken;
-    const updated: IToken = {
-      ...existing,
-      token,
-      updatedAt: Date.now(),
-    };
-
-    await ref.update(updated);
-    return updated;
+    return snapshot.val() as IToken;
   }
 
   /**

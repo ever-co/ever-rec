@@ -841,6 +841,23 @@ describe('Ever ID sign-in (e2e)', () => {
       }
     });
 
+    it('ends a refreshed session after its sign-in reference has expired', async () => {
+      // References live 3 s here: the one recorded at sign-in expires while the refreshed one is valid.
+      await t.close();
+      t = await createTestApp({ env: onEnv(issuer, { REC_JWT_EXPIRES_IN: '3s' }) });
+      const session = await signUp('expired-reference-person');
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      const refreshed = await refresh(session.refreshToken);
+      expect(refreshed.status).toBe(200);
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // The sign-in reference has expired; the refreshed one has not.
+      expect((await refresh(session.refreshToken)).status).toBeGreaterThanOrEqual(400);
+
+      const token = await issuer.logoutToken({ sid: 'sid-expired-reference-person' });
+      expect((await logout(token)).status).toBe(200);
+      expect((await refresh(refreshed.body.refreshToken)).status).toBeGreaterThanOrEqual(400);
+    }, 20000);
+
     it('ends a session without a session id on a subject-only logout', async () => {
       issuer.nextClaims = { sub: 'no-sid-person', sid: undefined };
       const landing = await authorize();
