@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -19,7 +20,13 @@ import {
 import { PermissionAccessEnum } from 'src/module/workspace/Interfaces/Workspace';
 import { ValidateId } from 'src/module/workspace/pipes/validate-id.pipe';
 import { VideoChapterService } from '../services/chapter.service';
-import { parseChapterList } from '../utilities/chapterPayload';
+import { MAX_CHAPTERS, parseChapterList } from '../utilities/chapterPayload';
+
+/**
+ * Largest chapter thumbnail, in bytes. The editors send 1000x562 JPEG
+ * thumbnails, which stay well under it.
+ */
+const MAX_CHAPTER_THUMBNAIL_BYTES = 2 * 1024 * 1024;
 
 @Controller('video/chapter')
 export class VideoChapterController {
@@ -42,7 +49,14 @@ export class VideoChapterController {
 
   @UseGuards(AuthGuard, CanAccessWorkspaceQueryGuard)
   @WorkspaceVideoAccess(PermissionAccessEnum.WRITE)
-  @UseInterceptors(FilesInterceptor('blobs'))
+  // Multer keeps every uploaded file in memory, so the count and the size of
+  // the thumbnails are capped while they are read: a file that reaches the cap
+  // gets a 413 and more than MAX_CHAPTERS files a 400.
+  @UseInterceptors(
+    FilesInterceptor('blobs', MAX_CHAPTERS, {
+      limits: { files: MAX_CHAPTERS, fileSize: MAX_CHAPTER_THUMBNAIL_BYTES },
+    }),
+  )
   @Post('save-changes/:videoId')
   async saveChapters(
     @Req() request,
@@ -56,6 +70,15 @@ export class VideoChapterController {
       body?.chaptersBlobs,
       'chaptersBlobs',
     );
+
+    // The service pairs the n-th thumbnail with the n-th entry of
+    // chaptersBlobs, so there must be exactly one thumbnail for each entry.
+    const thumbnailCount = thumbnailFiles?.length ?? 0;
+    if (thumbnailCount !== chaptersBlobs.length) {
+      throw new BadRequestException(
+        `"blobs" must hold one thumbnail for each entry of "chaptersBlobs" (got ${thumbnailCount} for ${chaptersBlobs.length})`,
+      );
+    }
 
     return await this.videoChapterService.saveChapters(
       request.user?.id,
