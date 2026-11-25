@@ -9,6 +9,13 @@ export const MAX_CHAPTERS = 200;
 export const MAX_CHAPTER_CONTENT_LENGTH = 1000;
 /** Longest chapter id. The editors make 21-character nanoid ids. */
 export const MAX_CHAPTER_ID_LENGTH = 128;
+/** Longest chapter timestamp. The editors send text such as "00:00" or "123:03:59". */
+export const MAX_CHAPTER_TIMESTAMP_LENGTH = 16;
+/**
+ * Longest chapter thumbnail URL. The editors send `''`, a `blob:` URL or the signed storage URL
+ * the API made, which stays well under it.
+ */
+export const MAX_CHAPTER_THUMBNAIL_URL_LENGTH = 4096;
 
 /**
  * A chapter id becomes a database key and the storage file name `<id>.jpg`, so
@@ -27,11 +34,19 @@ const isChapterId = (id: unknown): id is string =>
  *
  * The id of a chapter becomes a database key and part of a storage file name,
  * so it must be a plain id. A stored thumbnail name (`refName`) is later used
- * to build storage paths, so it must be one plain file name. A field that is
- * missing, is not JSON, is not a list, holds too many chapters, or holds a
- * chapter with a bad or repeated id, a bad thumbnail name, or a title that is
- * not text or is too long is refused with a 400, instead of crashing the route
- * or writing a broken record.
+ * to build storage paths, so it must be one plain file name. The video page,
+ * the share page included, renders the timestamp as text and reads the
+ * thumbnail URL as text, so the timestamp must be short text, the seconds a
+ * number of at least 0, and the thumbnail URL text when it is sent. A field
+ * that is missing, is not JSON, is not a list, holds too many chapters, or
+ * holds a chapter with a bad or repeated id, a bad thumbnail name, a title
+ * that is not text or is too long, or a bad timestamp, seconds or thumbnail
+ * URL is refused with a 400, instead of crashing the route or writing a broken
+ * record.
+ *
+ * It returns new chapters that hold only the fields the editors send, so a
+ * field of any other name is never stored or served to share-link viewers. A
+ * chapter sent without a thumbnail URL gets an empty one.
  */
 export const parseChapterList = (
   raw: unknown,
@@ -59,13 +74,15 @@ export const parseChapterList = (
   }
 
   const seen = new Set<string>();
+  const chapters: IChapter[] = [];
 
   for (const chapter of parsed) {
     if (!chapter || typeof chapter !== 'object' || Array.isArray(chapter)) {
       throw new BadRequestException(`"${fieldName}" has an invalid chapter`);
     }
 
-    const { id, content, refName } = chapter as Record<string, unknown>;
+    const { id, content, timestamp, timestampSeconds, thumbnailURL, refName } =
+      chapter as Record<string, unknown>;
 
     if (!isChapterId(id) || seen.has(id)) {
       throw new BadRequestException(`"${fieldName}" has an invalid chapter id`);
@@ -93,7 +110,49 @@ export const parseChapterList = (
         `"${fieldName}" has an invalid chapter title`,
       );
     }
+
+    if (
+      typeof timestamp !== 'string' ||
+      timestamp.length > MAX_CHAPTER_TIMESTAMP_LENGTH
+    ) {
+      throw new BadRequestException(
+        `"${fieldName}" has an invalid chapter timestamp`,
+      );
+    }
+
+    if (
+      timestampSeconds !== undefined &&
+      (typeof timestampSeconds !== 'number' ||
+        !Number.isFinite(timestampSeconds) ||
+        timestampSeconds < 0)
+    ) {
+      throw new BadRequestException(
+        `"${fieldName}" has an invalid chapter time in seconds`,
+      );
+    }
+
+    if (
+      thumbnailURL !== undefined &&
+      (typeof thumbnailURL !== 'string' ||
+        thumbnailURL.length > MAX_CHAPTER_THUMBNAIL_URL_LENGTH)
+    ) {
+      throw new BadRequestException(
+        `"${fieldName}" has an invalid chapter thumbnail URL`,
+      );
+    }
+
+    // A new chapter with only the fields the editors send, checked above. The
+    // database refuses `undefined`, so a field that was not sent stays out.
+    const kept: Partial<IChapter> = { id };
+    if (typeof content === 'string') kept.content = content;
+    kept.timestamp = timestamp;
+    if (typeof timestampSeconds === 'number') {
+      kept.timestampSeconds = timestampSeconds;
+    }
+    kept.thumbnailURL = typeof thumbnailURL === 'string' ? thumbnailURL : '';
+    if (typeof refName === 'string') kept.refName = refName;
+    chapters.push(kept as IChapter);
   }
 
-  return parsed as IChapter[];
+  return chapters;
 };
