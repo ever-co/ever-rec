@@ -218,8 +218,6 @@ export class WorkspaceFoldersService {
     try {
       const { workspaceVal, workspaceRef } =
         await this.utilitiesService.getWorkspaceById(workspaceId);
-      const screenshots = parseCollectionToArray(workspaceVal.screenshots);
-      const videos = parseCollectionToArray(workspaceVal.videos);
 
       const favFolders =
         await this.foldersSharedService.addRemoveFavoriteService(
@@ -236,17 +234,21 @@ export class WorkspaceFoldersService {
       const result = await changeWorkspaceFolders(workspaceId, (folders) => {
         // The stored parent, not `currentFolderId` from the request: the folder may have been
         // moved meanwhile, and the counts to lower are those of the folders above it now.
-        const parentId =
-          folders.find((x) => x.id === folderId)?.parentId || false;
+        const deletedFolder = folders.find((x) => x.id === folderId);
+        const parentId = deletedFolder?.parentId || false;
+        // The folder's stored count, which includes its subfolders, as a folder move uses it: not
+        // the items read above, since an item uploaded into the folder or moved out of it meanwhile
+        // has already changed the counts in its own transaction.
+        const movedItems =
+          typeof deletedFolder?.items === 'number' &&
+          Number.isFinite(deletedFolder.items)
+            ? deletedFolder.items
+            : 0;
         const removed = this.utilitiesService.removeChildFoldersRecursive(
           folders,
           [folderId],
         );
         deletedFolders = removed.deletedFolders;
-        const removedIds = deletedFolders.map((x) => x.id);
-        const movedItems = [...screenshots, ...videos].filter((x) =>
-          removedIds.includes(x?.parentId),
-        ).length;
 
         // Recursively remove item count based on removed items
         return {
