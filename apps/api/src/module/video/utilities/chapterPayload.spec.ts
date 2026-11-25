@@ -2,6 +2,7 @@ import { BadRequestException } from '@nestjs/common';
 import {
   MAX_CHAPTERS,
   MAX_CHAPTER_CONTENT_LENGTH,
+  MAX_CHAPTER_ID_LENGTH,
   parseChapterList,
 } from './chapterPayload';
 
@@ -41,6 +42,22 @@ describe('parseChapterList', () => {
 
       expect(parse(JSON.stringify(chapters))).toHaveLength(MAX_CHAPTERS);
     });
+
+    it('accepts the longest id', () => {
+      const list = JSON.stringify([chapter('a'.repeat(MAX_CHAPTER_ID_LENGTH))]);
+
+      expect(parse(list)).toHaveLength(1);
+    });
+
+    it('accepts the thumbnail names older and newer chapters carry', () => {
+      const chapters = [
+        chapter('noRef'),
+        chapter('emptyRef', { refName: '' }),
+        chapter('jpgRef', { refName: 'jpgRef.jpg' }),
+      ];
+
+      expect(parse(JSON.stringify(chapters))).toHaveLength(3);
+    });
   });
 
   describe('refuses with a 400', () => {
@@ -72,8 +89,26 @@ describe('parseChapterList', () => {
       ['an id with a dot', 'a.b'],
       ['an id with a database-reserved character', 'a$b'],
       ['an id with a space', 'a b'],
+      ['an id one character too long', 'a'.repeat(MAX_CHAPTER_ID_LENGTH + 1)],
+      ['the id __proto__', '__proto__'],
+      ['the id constructor', 'constructor'],
     ])('a chapter with %s', (_name, id) => {
       const list = JSON.stringify([chapter('ok'), { ...chapter('x'), id }]);
+
+      expect(() => parse(list)).toThrow(BadRequestException);
+    });
+
+    it.each([
+      [
+        'a thumbnail name that climbs out of its folder',
+        '../../x/videos/a.mp4',
+      ],
+      ['a thumbnail name with a slash', 'a/b.jpg'],
+      ['a thumbnail name with a backslash', 'a\\b.jpg'],
+      ['the thumbnail name ..', '..'],
+      ['a thumbnail name that is not text', 5],
+    ])('a chapter with %s', (_name, refName) => {
+      const list = JSON.stringify([chapter('a', { refName })]);
 
       expect(() => parse(list)).toThrow(BadRequestException);
     });

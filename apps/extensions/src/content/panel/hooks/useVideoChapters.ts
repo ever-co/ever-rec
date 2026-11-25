@@ -182,7 +182,8 @@ const useVideoChapters = ({
 
       if (
         chapters.some(
-          (chapter) => chapter.content.length > CHAPTER_MAX_CONTENT_LENGTH,
+          (chapter) =>
+            (chapter.content ?? '').length > CHAPTER_MAX_CONTENT_LENGTH,
         )
       )
         return (

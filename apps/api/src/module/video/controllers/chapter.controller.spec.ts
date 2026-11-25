@@ -291,6 +291,11 @@ describe('VideoChapterController workspace access', () => {
       ['not JSON', '{oops', '[]'],
       ['not a list', '{"id":"a1"}', '[]'],
       ['a chapter id that is not a plain id', '[{"id":"../x"}]', '[]'],
+      [
+        'a thumbnail name with a path in it',
+        '[{"id":"a1","refName":"../../x/videos/a.mp4"}]',
+        '[]',
+      ],
       ['a blob list that is not JSON', '[]', '{oops'],
     ])('are refused with 400 when %s', async (_name, chapters, blobs) => {
       await saveWith(chapters, blobs).expect(400);
