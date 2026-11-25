@@ -24,6 +24,8 @@
       "inviteLinkError": "Nie udało się utworzyć linku zapraszającego do obszaru roboczego.",
       "copyError": "Kopiowanie nie powiodło się.",
       "add3Chapters": "Proszę dodać co najmniej 3 rozdziały.",
+      "tooManyChapters": "Maksymalna liczba rozdziałów w filmie to {{max}}. Proszę usunąć część z nich, aby zapisać.",
+      "chapterTitleTooLong": "Limit znaków w tytule rozdziału: {{max}}. Proszę skrócić dłuższe tytuły, aby zapisać.",
       "chaptersSaved": "Rozdziały zapisane pomyślnie.",
       "noSourceURL": "Ten obraz nie ma adresu URL źródła.",
       "problemDeletingVideo": "Wystąpił problem podczas próby usunięcia Twojego filmu.",

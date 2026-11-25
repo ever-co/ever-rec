@@ -24,6 +24,8 @@
       "inviteLinkError": "Impossibile creare il link di invito all'area di lavoro.",
       "copyError": "Impossibile copiare.",
       "add3Chapters": "Aggiungi almeno 3 capitoli.",
+      "tooManyChapters": "Un video può avere al massimo {{max}} capitoli. Rimuovine alcuni per salvare.",
+      "chapterTitleTooLong": "I titoli dei capitoli possono avere al massimo {{max}} caratteri. Accorcia quelli più lunghi per salvare.",
       "chaptersSaved": "Capitoli salvati con successo.",
       "noSourceURL": "Questa immagine non ha un URL di origine.",
       "problemDeletingVideo": "Si è verificato un problema durante il tentativo di eliminare il tuo video.",

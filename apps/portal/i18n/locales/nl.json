@@ -24,6 +24,8 @@
       "inviteLinkError": "Kon de uitnodigingslink voor de werkruimte niet aanmaken.",
       "copyError": "Kopiëren mislukt.",
       "add3Chapters": "Voeg ten minste 3 hoofdstukken toe.",
+      "tooManyChapters": "Een video kan maximaal {{max}} hoofdstukken hebben. Verwijder er enkele om op te slaan.",
+      "chapterTitleTooLong": "Hoofdstuktitels mogen maximaal {{max}} tekens lang zijn. Kort de lange titels in om op te slaan.",
       "chaptersSaved": "Hoofdstukken succesvol opgeslagen.",
       "noSourceURL": "Deze afbeelding heeft geen bron-URL.",
       "problemDeletingVideo": "Er was een probleem bij het verwijderen van uw video.",
