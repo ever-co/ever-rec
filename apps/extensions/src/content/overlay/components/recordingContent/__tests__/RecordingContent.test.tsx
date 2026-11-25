@@ -156,6 +156,31 @@ describe('recording bar brush-size slider', () => {
 
   const withStyles = () => document.head.appendChild(style);
 
+  // jsdom counts every focus as :focus-visible; a real mouse click does not.
+  // The afterEach restores it.
+  const mockMouseFocus = () => {
+    const matches = Element.prototype.matches;
+    jest
+      .spyOn(Element.prototype, 'matches')
+      .mockImplementation(function (this: Element, selector: string) {
+        return selector === ':focus-visible'
+          ? false
+          : matches.call(this, selector);
+      });
+  };
+
+  // Renders the bar for a mouse user and adds the stylesheet once the pen
+  // tools are found.
+  const setupMouseFocus = () => {
+    mockMouseFocus();
+    const user = userEvent.setup();
+    const container = renderBar();
+    const pen = container.querySelector('.penButton') as HTMLElement;
+    const slider = screen.getByRole('slider', { name: 'Brush size' });
+    withStyles();
+    return { user, container, pen, slider };
+  };
+
   afterEach(() => {
     style.remove();
     jest.restoreAllMocks();
@@ -196,22 +221,7 @@ describe('recording bar brush-size slider', () => {
   });
 
   it('keeps the mouse behaviour: hover shows it, a click does not pin it open', async () => {
-    // jsdom counts every focus as :focus-visible; a real mouse click does not.
-    const matches = Element.prototype.matches;
-    jest
-      .spyOn(Element.prototype, 'matches')
-      .mockImplementation(function (this: Element, selector: string) {
-        return selector === ':focus-visible'
-          ? false
-          : matches.call(this, selector);
-      });
-    const user = userEvent.setup();
-    const container = renderBar();
-    const pen = container.querySelector('.penButton') as HTMLElement;
-    const slider = container.querySelector(
-      '.penSlider input',
-    ) as HTMLInputElement;
-    withStyles();
+    const { user, pen, slider } = setupMouseFocus();
 
     await user.hover(pen);
     expect(slider).toBeVisible();
@@ -226,19 +236,7 @@ describe('recording bar brush-size slider', () => {
   it('shows on the first key press after the mouse focused the pen button', async () => {
     // A mouse click focuses the pen without :focus-visible. The browser turns
     // it on at the next key press, but fires no new focus event.
-    const matches = Element.prototype.matches;
-    jest
-      .spyOn(Element.prototype, 'matches')
-      .mockImplementation(function (this: Element, selector: string) {
-        return selector === ':focus-visible'
-          ? false
-          : matches.call(this, selector);
-      });
-    const user = userEvent.setup();
-    const container = renderBar();
-    const pen = container.querySelector('.penButton') as HTMLElement;
-    const slider = screen.getByRole('slider', { name: 'Brush size' });
-    withStyles();
+    const { user, pen, slider } = setupMouseFocus();
 
     await user.click(pen);
     await user.unhover(pen);
