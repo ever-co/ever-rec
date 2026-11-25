@@ -1,11 +1,11 @@
 /**
  * The workspace video routes keep the holes closed that the image routes keep closed:
  *
- * - `POST video` stores a file under a name taken from the body. A name owned by a video the caller
- *   may not write, a name with a path separator, or a folder in the body the caller may not write
- *   to, must be refused (the guards only see the query).
- * - `POST video/add-from-personal` copies a personal video under the personal record's name; it
- *   must not replace a restricted video's file, and must not touch the image originals.
+ * - `POST video` stores a new file under a name taken from the body. A name a video of the
+ *   workspace already has (409), a name with a path separator, or a folder in the body the caller
+ *   may not write to, must be refused (the guards only see the query).
+ * - `POST video/add-from-personal` copies a personal video under a name of its own (the new
+ *   record's id); it must not replace any video's file, and must not touch the image originals.
  * - `DELETE video/single` is guarded on `videoId` and must delete only that video's own files.
  *
  * The routes are the real controller behind the real guards, interceptor and service; only the
@@ -16,7 +16,7 @@ import { INTERCEPTORS_METADATA } from '@nestjs/common/constants';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Test } from '@nestjs/testing';
 import { readdirSync, rmSync } from 'fs';
-import { join } from 'path';
+import { extname, join } from 'path';
 import request from 'supertest';
 import { InMemoryFirebaseApp } from '../../../../test/support/in-memory-firebase';
 import { TMP_PATH } from '../../../enums/tmpPathsEnums';
@@ -271,66 +271,35 @@ describe('workspace video routes', () => {
       expect(addVideoFromFile).not.toHaveBeenCalled();
     });
 
-    it('refuses a name owned by a video the member may only read, and removes the temporary file', async () => {
-      const res = await upload('uid-writer', { fullFileName: 'two.webm' });
-      expect(res.status).toBe(403);
-      await upload('uid-reader', { fullFileName: 'one.webm' }).expect(403);
+    it('refuses (409) a name a video of the workspace has, and removes the temporary file', async () => {
+      // vid1 the writer may write, vid2 only read; vid3 has no permissions of its own, and vid4 is
+      // in a folder the writer may only read.
+      for (const fullFileName of [
+        'one.webm',
+        'two.webm',
+        'three.webm',
+        'four.webm',
+      ]) {
+        await upload('uid-writer', { fullFileName }).expect(409);
+      }
+      await upload('uid-reader', { fullFileName: 'one.webm' }).expect(409);
 
       expect(addVideoFromFile).not.toHaveBeenCalled();
       expect(leftoverUploads()).toEqual([]);
-      expect(content(`${PREFIX}/two.webm`)).toBe('two-bytes');
+      for (const name of ['one', 'two', 'three', 'four']) {
+        expect(content(`${PREFIX}/${name}.webm`)).toBe(`${name}-bytes`);
+      }
     });
 
-    it('refuses a name owned by a video in a folder the member may only read', async () => {
-      await upload('uid-writer', { fullFileName: 'four.webm' }).expect(403);
+    it('refuses (409) the name of a video in the trash', async () => {
+      await mockFirebase.db
+        .ref('workspaces/ws1/videos/vid5')
+        .set({ id: 'vid5', refName: 'trashed.webm', trash: true });
+      await upload('uid-writer', { fullFileName: 'trashed.webm' }).expect(409);
       expect(addVideoFromFile).not.toHaveBeenCalled();
     });
 
-    it('lets a member write over the name of a video they may write', async () => {
-      await upload('uid-writer', { fullFileName: 'one.webm' }).expect(201);
-      expect(addVideoFromFile).toHaveBeenCalledTimes(1);
-    });
-
-    it('keeps letting a member reuse the name of a video with no permissions of its own', async () => {
-      await upload('uid-reader', { fullFileName: 'three.webm' }).expect(201);
-      expect(addVideoFromFile).toHaveBeenCalledTimes(1);
-    });
-
-    it("checks a video that only lists teams by the caller's teams, not by its member list", async () => {
-      await mockFirebase.db.ref('workspaces/ws1').update({
-        teams: [{ id: 't1' }],
-        members: [
-          { id: 'uid-admin' },
-          { id: 'uid-writer', teams: [{ id: 't1' }] },
-          { id: 'uid-reader' },
-        ],
-      });
-      await mockFirebase.db.ref('workspaces/ws1/videos').update({
-        vidT1: {
-          id: 'vidT1',
-          refName: 'team-write.webm',
-          access: { teams: [{ teamId: 't1', access: 'WRITE' }] },
-        },
-        vidT2: {
-          id: 'vidT2',
-          refName: 'team-read.webm',
-          access: { teams: [{ teamId: 't1', access: 'READ' }] },
-        },
-      });
-
-      await upload('uid-writer', { fullFileName: 'team-write.webm' }).expect(
-        201,
-      );
-      await upload('uid-writer', { fullFileName: 'team-read.webm' }).expect(
-        403,
-      );
-      await upload('uid-reader', { fullFileName: 'team-write.webm' }).expect(
-        403,
-      );
-      expect(addVideoFromFile).toHaveBeenCalledTimes(1);
-    });
-
-    it('reads team membership from the team, as the workspace stores it', async () => {
+    it('refuses (409) the name of a team video, whatever the teams of the caller', async () => {
       await mockFirebase.db.ref('workspaces/ws1').update({
         teams: [{ id: 't1', members: [{ id: 'uid-writer' }] }],
       });
@@ -341,26 +310,43 @@ describe('workspace video routes', () => {
           access: { teams: [{ teamId: 't1', access: 'WRITE' }] },
         },
       });
+
+      await upload('uid-writer', { fullFileName: 'team-write.webm' }).expect(
+        409,
+      );
+      await upload('uid-reader', { fullFileName: 'team-write.webm' }).expect(
+        409,
+      );
+      expect(addVideoFromFile).not.toHaveBeenCalled();
+    });
+
+    it('still checks the folder in the body first: no write access to it is a 403, whatever the name', async () => {
+      await upload('uid-writer', {
+        fullFileName: 'one.webm',
+        folderId: 'fRO',
+      }).expect(403);
+      expect(addVideoFromFile).not.toHaveBeenCalled();
+      expect(leftoverUploads()).toEqual([]);
+    });
+
+    it('reads team membership of a folder from the team, as the workspace stores it', async () => {
+      await mockFirebase.db.ref('workspaces/ws1').update({
+        teams: [{ id: 't1', members: [{ id: 'uid-writer' }] }],
+      });
       await mockFirebase.db.ref('workspaces/ws1/folders/3').set({
         id: 'fTeam',
         access: { teams: [{ teamId: 't1', access: 'WRITE' }] },
       });
 
-      await upload('uid-writer', { fullFileName: 'team-write.webm' }).expect(
-        201,
-      );
       await upload('uid-writer', {
         fullFileName: 'into-team.webm',
         folderId: 'fTeam',
       }).expect(201);
-      await upload('uid-reader', { fullFileName: 'team-write.webm' }).expect(
-        403,
-      );
       await upload('uid-reader', {
         fullFileName: 'into-team-2.webm',
         folderId: 'fTeam',
       }).expect(403);
-      expect(addVideoFromFile).toHaveBeenCalledTimes(2);
+      expect(addVideoFromFile).toHaveBeenCalledTimes(1);
     });
 
     it('treats the name of a video of another workspace as a new name', async () => {
@@ -379,12 +365,17 @@ describe('workspace video routes', () => {
       expect(addVideoFromFile).toHaveBeenCalledTimes(1);
     });
 
-    it('lets the workspace admin write any name and folder', async () => {
+    it('lets the workspace admin upload a new name into any folder, but not a name a video has', async () => {
+      await upload('uid-admin', {
+        fullFileName: 'fresh.webm',
+        folderId: 'fRO',
+      }).expect(201);
       await upload('uid-admin', {
         fullFileName: 'two.webm',
         folderId: 'fRO',
-      }).expect(201);
+      }).expect(409);
       expect(addVideoFromFile).toHaveBeenCalledTimes(1);
+      expect(content(`${PREFIX}/two.webm`)).toBe('two-bytes');
     });
 
     it.each([
@@ -458,6 +449,18 @@ describe('workspace video routes', () => {
         uid,
       );
 
+    // The one record the copy stored (the seeded records have no uid), and its file's content.
+    const copy = async () => {
+      const copies = Object.values(
+        (await mockFirebase.db.ref('workspaces/ws1/videos').get()).val() ?? {},
+      ).filter((video: any) => video.uid) as Array<{
+        id: string;
+        refName: string;
+      }>;
+      expect(copies).toHaveLength(1);
+      return { ...copies[0], bytes: content(`${PREFIX}/${copies[0].refName}`) };
+    };
+
     beforeEach(() => {
       mockFirebase.bucket.objects.set(
         'users/uid-writer/videos/mine.webm',
@@ -465,12 +468,15 @@ describe('workspace video routes', () => {
       );
     });
 
-    it('copies a personal video under a new name into the workspace', async () => {
+    it('copies a personal video into the workspace under a name of its own: the record id', async () => {
       await personal('p1', 'mine.webm');
       const res = await move('uid-writer', 'p1').expect(201);
 
       expect(res.body.status).toBe('success');
-      expect(content(`${PREFIX}/mine.webm`)).toBe('mine-bytes');
+      const copied = await copy();
+      expect(copied.refName).toBe(`${copied.id}.webm`);
+      expect(copied.bytes).toBe('mine-bytes');
+      expect(stored()).not.toContain(`${PREFIX}/mine.webm`);
     });
 
     it("does not copy anything into the workspace's image originals", async () => {
@@ -514,7 +520,7 @@ describe('workspace video routes', () => {
       expect(Object.keys(videos)).toEqual(['vid1', 'vid2', 'vid3', 'vid4']);
     });
 
-    it('lets a member copy over the name of a video they may write', async () => {
+    it('lets a member add a personal video whose name a video they may write has, and that video keeps its file', async () => {
       mockFirebase.bucket.objects.set(
         'users/uid-writer/videos/one.webm',
         Buffer.from('replacement'),
@@ -522,7 +528,8 @@ describe('workspace video routes', () => {
       await personal('p3', 'one.webm');
 
       await move('uid-writer', 'p3').expect(201);
-      expect(content(`${PREFIX}/one.webm`)).toBe('replacement');
+      expect(content(`${PREFIX}/one.webm`)).toBe('one-bytes');
+      expect((await copy()).bytes).toBe('replacement');
     });
 
     it.each(['clip.avi', 'CLIP.IVF', 'clip.mpv2', 'my clip.wmv'])(
@@ -537,7 +544,9 @@ describe('workspace video routes', () => {
         const res = await move('uid-writer', 'p7').expect(201);
 
         expect(res.body.status).toBe('success');
-        expect(content(`${PREFIX}/${refName}`)).toBe('clip-bytes');
+        const copied = await copy();
+        expect(copied.refName).toBe(`${copied.id}${extname(refName)}`);
+        expect(copied.bytes).toBe('clip-bytes');
       },
     );
 
@@ -593,9 +602,10 @@ describe('workspace video routes', () => {
         await personal('pt2', 'team-read.webm');
       });
 
-      it('lets a member of the team with WRITE copy over its name', async () => {
+      it('lets a member of the team with WRITE add a video with its name, and it keeps its file', async () => {
         await move('uid-writer', 'pt1').expect(201);
-        expect(content(`${PREFIX}/team-write.webm`)).toBe('replacement');
+        expect(content(`${PREFIX}/team-write.webm`)).toBe('team-bytes');
+        expect((await copy()).bytes).toBe('replacement');
       });
 
       it('refuses a member whose team only has READ', async () => {
@@ -617,7 +627,7 @@ describe('workspace video routes', () => {
       });
     });
 
-    it('lets a member of a team stored with its members copy over a team video name', async () => {
+    it('lets a member of a team stored with its members add a video with a team video name', async () => {
       await mockFirebase.db.ref('workspaces/ws1').update({
         teams: [{ id: 't1', members: [{ id: 'uid-writer' }] }],
       });
@@ -639,10 +649,11 @@ describe('workspace video routes', () => {
       await personal('pt1', 'team-write.webm');
 
       await move('uid-writer', 'pt1').expect(201);
-      expect(content(`${PREFIX}/team-write.webm`)).toBe('replacement');
+      expect(content(`${PREFIX}/team-write.webm`)).toBe('team-bytes');
+      expect((await copy()).bytes).toBe('replacement');
     });
 
-    it('lets the workspace admin copy over any name', async () => {
+    it('lets the workspace admin add a video with any name, and the video with that name keeps its file', async () => {
       await mockFirebase.db
         .ref('users/uid-admin/videos/pa')
         .set({ refName: 'two.webm', title: 'x' });
@@ -651,7 +662,8 @@ describe('workspace video routes', () => {
         Buffer.from('admin-bytes'),
       );
       await move('uid-admin', 'pa').expect(201);
-      expect(content(`${PREFIX}/two.webm`)).toBe('admin-bytes');
+      expect(content(`${PREFIX}/two.webm`)).toBe('two-bytes');
+      expect((await copy()).bytes).toBe('admin-bytes');
     });
 
     it('writes nothing for a personal video that does not exist', async () => {

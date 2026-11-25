@@ -27,12 +27,11 @@ import {
   InMemoryFirebaseApp,
 } from '../../../../test/support/in-memory-firebase';
 import { EVER_COUNTER_EVENTS } from '../../../common/events/ever-counters.events';
-import { IUser } from '../../../interfaces/IUser';
 import { FoldersSharedService } from '../../../services/shared/folders.shared.service';
 import { parseCollectionToArray } from '../../../services/utils/helpers';
 import { WorkspaceFilesController } from '../controllers/files.controller';
 import { WorkspaceFoldersController } from '../controllers/folders.controller';
-import { canWriteVideoByName, findImagesByFileName } from '../guards/utils';
+import { findImagesByFileName, findVideosByFileName } from '../guards/utils';
 import { WorkspaceFilesService } from './files.service';
 import { WorkspaceFoldersService } from './folders.service';
 import { WorkspaceInvitesService } from './invites.service';
@@ -1079,11 +1078,38 @@ describe('overlapping writes to a workspace', () => {
         return [firstResult, await betweenRun];
       }
 
+      // Runs `between` from start to end right after the delete has read the records of
+      // `collection` to see whether another one still holds the removed item's file name: no
+      // record holds it, and the files are not deleted yet.
+      async function afterNameCheck<A, B>(
+        collection: string,
+        first: () => Promise<A>,
+        between: () => Promise<B>,
+      ): Promise<[A, B]> {
+        let betweenRun: Promise<B> | undefined;
+        const { get } = FakeQuery.prototype;
+        jest
+          .spyOn(FakeQuery.prototype, 'get')
+          .mockImplementation(async function (this: FakeQuery) {
+            const snapshot = await get.call(this);
+            if (!betweenRun && pathOf(this) === `${WORKSPACE}/${collection}`) {
+              await (betweenRun = between());
+            }
+            return snapshot;
+          });
+        const firstResult = await first();
+        await settled();
+        if (!betweenRun) {
+          throw new Error(`${collection} was not read`);
+        }
+        return [firstResult, await betweenRun];
+      }
+
       it('keeps the files of an image uploaded under the same name once the record is removed', async () => {
         const before = imageFiles.map(generationOf);
 
-        const [deleted, uploaded] = await afterRemoval(
-          'screenshots/shot1',
+        const [deleted, uploaded] = await afterNameCheck(
+          'screenshots',
           deleteImage('shot1', 'fold1'),
           async () => {
             // No record holds the name now, so the upload's name check lets it through.
@@ -1119,17 +1145,16 @@ describe('overlapping writes to a workspace', () => {
       });
 
       it('keeps the file of a video uploaded under the same name once the record is removed', async () => {
-        const member = { id: 'uid-member' } as IUser;
         const replacement = Buffer.alloc(400, 2);
 
-        const [deleted] = await afterRemoval(
-          'videos/vid1',
+        const [deleted] = await afterNameCheck(
+          'videos',
           deleteVideo('vid1'),
           async () => {
             // No record holds the name now, so the upload's name check lets it through.
-            expect(
-              canWriteVideoByName(await workspace(), member, 'clip.mp4'),
-            ).toBe(true);
+            expect(findVideosByFileName(await workspace(), 'clip.mp4')).toEqual(
+              [],
+            );
             // What the upload stores: its file, then its record.
             await mockFirebase.bucket.file(videoFile).save(replacement);
             await mockFirebase.db.ref(`${WORKSPACE}/videos/vid2`).set({
@@ -1145,6 +1170,9 @@ describe('overlapping writes to a workspace', () => {
         expect(deleted.status).toBe('success');
         expect(stored('videos/vid2/refName')).toBe('clip.mp4');
         expect(mockFirebase.bucket.objects.get(videoFile)).toEqual(replacement);
+        expect(debug).toHaveBeenCalledWith(
+          `${videoFile} was stored again after its record was removed; it is kept.`,
+        );
         // The removed video's own chapter images go.
         expect(isStored(chapterFile)).toBe(false);
         expect(failures()).toEqual([]);

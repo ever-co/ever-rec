@@ -1,5 +1,6 @@
 import {
   CallHandler,
+  ConflictException,
   ExecutionContext,
   ForbiddenException,
   Injectable,
@@ -27,7 +28,7 @@ export const CHECKED_IMAGE_FILE_NAME = 'checkedImageFileName';
  * image by id) to routes that write an image under a name from the request. It must be listed
  * after the file interceptor so the multipart fields are already parsed. Chain with
  * `CanAccessWorkspaceGuard`. It fails closed: a missing handler option, an unreadable workspace or
- * any error is a 403.
+ * any error is a 403. A route with `mustBeNew` refuses a name an image already has with a 409.
  */
 @Injectable()
 export class NamedImageWriteInterceptor implements NestInterceptor {
@@ -41,6 +42,9 @@ export class NamedImageWriteInterceptor implements NestInterceptor {
     try {
       allowed = await this.isAllowed(context);
     } catch (e) {
+      if (e instanceof ConflictException) {
+        throw e;
+      }
       console.log(e);
     }
 
@@ -88,6 +92,11 @@ export class NamedImageWriteInterceptor implements NestInterceptor {
     const images = findImagesByFileName(workspace, fileName);
     if (images.length === 0) {
       return !options.mustExist;
+    }
+    if (options.mustBeNew) {
+      throw new ConflictException(
+        'An image of this workspace already has this file name',
+      );
     }
 
     // Every record that uses this file name must be writable by the caller, in its folder too.

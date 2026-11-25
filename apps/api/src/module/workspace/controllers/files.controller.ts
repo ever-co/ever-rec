@@ -79,9 +79,9 @@ export class WorkspaceFilesController {
     );
   }
 
-  // The copy is stored under the personal image's file name: refused when that name already
-  // belongs to a workspace image the caller may not write. A folder id in the query is read by
-  // the folder guard.
+  // The copy is stored under a name of its own (see `moveItemFromPersonalToWorkspace`). The
+  // personal image's file name is still checked as before: refused when it belongs to a workspace
+  // image the caller may not write. A folder id in the query is read by the folder guard.
   @Post('image/add-from-personal')
   @CanAccessFolder(PermissionAccessEnum.WRITE)
   @NamedImageWrite({ fileName: getPersonalImageFileName, nameOptional: true })
@@ -158,14 +158,16 @@ export class WorkspaceFilesController {
     );
   }
 
-  // Writes the file and its original under `fullFileName`: refused when that name already belongs
-  // to a workspace image the caller may not write. The body (multipart) is only parsed by the file
-  // interceptor, so the folder in the body is checked by the interceptor after it.
+  // Stores a new image, its thumbnail and its original under `fullFileName`: refused (409) when an
+  // image of the workspace already has that name (`PUT image` replaces a file). The body
+  // (multipart) is only parsed by the file interceptor, so the folder in the body is checked by the
+  // interceptor after it.
   @Post('image')
   @CanAccessFolder(PermissionAccessEnum.WRITE)
   @NamedImageWrite({
     fileName: (req) => req.body?.fullFileName,
     checkBodyFolder: true,
+    mustBeNew: true,
   })
   @UseInterceptors(FileInterceptor('file'), NamedImageWriteInterceptor)
   async uploadNewImageFromFile(

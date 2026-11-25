@@ -23,8 +23,11 @@ jest.mock('sharp', () => ({ __esModule: true, default: jest.fn() }));
 describe('moving a personal image into a workspace under the checked name', () => {
   let service: WorkspaceFilesService;
 
-  const stored = (name: string) =>
-    mockFirebase.bucket.objects.has(`workspaces/ws-1/screenshots/${name}`);
+  // Whether the copy is stored: its file, thumbnail and original, under a name of its own.
+  const copied = () =>
+    [...mockFirebase.bucket.objects.keys()].filter((name) =>
+      name.startsWith('workspaces/ws-1/'),
+    ).length === 3;
 
   const move = (checkedRefName?: string | null) =>
     service.moveItemFromPersonalToWorkspace(
@@ -70,21 +73,21 @@ describe('moving a personal image into a workspace under the checked name', () =
     const result = await move('shot.png');
 
     expect(result.status).toBe('success');
-    expect(stored('shot.png')).toBe(true);
+    expect(copied()).toBe(true);
   });
 
   it('refuses the copy when the personal image has another name than the checked one', async () => {
     const result = await move('other.png');
 
     expect(result.status).not.toBe('success');
-    expect(stored('shot.png')).toBe(false);
+    expect(copied()).toBe(false);
   });
 
   it('refuses the copy when no name was checked but the image has one by now', async () => {
     const result = await move(null);
 
     expect(result.status).not.toBe('success');
-    expect(stored('shot.png')).toBe(false);
+    expect(copied()).toBe(false);
   });
 
   it('does not check the name when the caller passes none (videos)', async () => {

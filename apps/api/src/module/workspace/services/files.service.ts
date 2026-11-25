@@ -1,4 +1,4 @@
-import { join } from 'path';
+import { extname, join } from 'path';
 import {
   BadRequestException,
   ForbiddenException,
@@ -78,6 +78,24 @@ interface ItemFile {
 
 /** The generation a stored file has, or null when it is not stored. */
 type Generation = string | number | null;
+
+/** What a delete reads of one of the item's stored files before its record is removed. */
+interface StoredVersion {
+  readonly generation: Generation;
+  /** The size of the file, for the counter of deleted bytes (0 when it is not known). */
+  readonly bytes: number;
+}
+
+const NOT_STORED: StoredVersion = { generation: null, bytes: 0 };
+
+/**
+ * The extension of a personal file name (`.png` of `shot.png`), kept on the name of its workspace
+ * copy. Empty for a name without one, or with one that is not plain letters and digits.
+ */
+const copyExtension = (fileName: unknown): string => {
+  const extension = typeof fileName === 'string' ? extname(fileName) : '';
+  return /^\.[A-Za-z0-9]{1,16}$/.test(extension) ? extension : '';
+};
 
 const errorCode = (error: unknown): number =>
   Number((error as { code?: unknown } | null)?.code);
@@ -258,10 +276,10 @@ export class WorkspaceFilesService {
       }
 
       if (itemType === 'video') {
-        // The copy below stores the file under the personal record's name, replacing any video of
-        // the workspace that has the same name. Allow it only for a plain file name (a personal
-        // video can have any extension, so only path tricks are refused) that no video the user
-        // may not write already uses.
+        // The personal record's file name is the path the copy is read from: only a plain file
+        // name is allowed (a personal video can have any extension, so only path tricks are
+        // refused). A name that a workspace video the user may not write uses is still refused, as
+        // before, although the copy no longer takes that name (see `copyName`).
         const refName: unknown = itemVal.refName;
         if (!is_plain_file_name(refName)) {
           throw new BadRequestException('The video has no valid file name');
@@ -275,15 +293,21 @@ export class WorkspaceFilesService {
         }
       }
 
+      // The copy is stored under a name of its own, made here: the new record's id and the
+      // extension of the personal file. Under the personal file name, a second copy of the same
+      // item would get a record that names the first copy's files, and deleting either record
+      // would delete them.
+      const copyName = `${newId}${copyExtension(itemVal.refName)}`;
+
       // Copy original file
       const [file] = await bucket
         .file(`users/${uid}/${itemLocation}/${itemVal.refName}`)
-        .copy(`workspaces/${workspaceId}/${itemLocation}/${itemVal.refName}`);
+        .copy(`workspaces/${workspaceId}/${itemLocation}/${copyName}`);
       itemLocation === 'screenshots' &&
         (await bucket
           .file(`users/${uid}/${itemLocation}/thumbnails/${itemVal.refName}`)
           .copy(
-            `workspaces/${workspaceId}/${itemLocation}/thumbnails/${itemVal.refName}`,
+            `workspaces/${workspaceId}/${itemLocation}/thumbnails/${copyName}`,
           ));
       const metadata = (await file.getMetadata())[0];
       const downloadUrl = (await file.getSignedUrl(this.config))[0];
@@ -296,12 +320,10 @@ export class WorkspaceFilesService {
       if (itemType === 'image') {
         await bucket
           .file(`users/${uid}/screenshots/originals/${itemVal.refName}`)
-          .copy(
-            `workspaces/${workspaceId}/screenshots/originals/${itemVal.refName}`,
-          );
+          .copy(`workspaces/${workspaceId}/screenshots/originals/${copyName}`);
 
         const originalFile = await bucket.file(
-          `workspaces/${workspaceId}/screenshots/originals/${itemVal.refName}`,
+          `workspaces/${workspaceId}/screenshots/originals/${copyName}`,
         );
 
         originalImageURL = (await originalFile.getSignedUrl(this.config))[0];
@@ -342,7 +364,7 @@ export class WorkspaceFilesService {
         id: newId,
         uid,
         title: itemVal.title,
-        refName: itemVal.refName,
+        refName: copyName,
         folderId,
         workspaceId,
         metadata,
@@ -847,22 +869,28 @@ export class WorkspaceFilesService {
   }
 
   /**
-   * The generation `file` is stored with, read before the record that names it is removed (see
-   * `deleteUnlessReplaced`). Null when it is not stored: the cleanup skips it. Also null, and
-   * logged, when its metadata cannot be read: without its generation a file stored under the same
-   * name later could not be told from it, so it is kept.
+   * The generation `file` is stored with, and its size, read in one request before the record that
+   * names it is removed (see `deleteUnlessReplaced`). No generation when it is not stored: the
+   * cleanup skips it. Also none, and logged, when its metadata cannot be read: without its
+   * generation a file stored under the same name later could not be told from it, so it is kept.
+   * A file that is kept frees no bytes, so its size is 0 then.
    */
-  private async storedGeneration(file: ItemFile): Promise<Generation> {
+  private async storedVersion(file: ItemFile): Promise<StoredVersion> {
     try {
       const [metadata] = (await file.getMetadata()) as Array<{
         generation?: unknown;
+        size?: unknown;
       }>;
       const generation = metadata?.generation;
       if (
         (typeof generation === 'string' && generation !== '') ||
         typeof generation === 'number'
       ) {
-        return generation;
+        const size = Number(metadata?.size);
+        return {
+          generation,
+          bytes: Number.isFinite(size) && size > 0 ? Math.floor(size) : 0,
+        };
       }
       console.log('No generation stored for ' + file.name + '; it is kept.');
     } catch (error) {
@@ -872,16 +900,49 @@ export class WorkspaceFilesService {
         console.log('Error reading ' + file.name + '; it is kept.', error);
       }
     }
-    return null;
+    return NOT_STORED;
+  }
+
+  /**
+   * True when a record of `workspaces/<workspaceId>/<collection>` holds the file name `refName`.
+   * A delete asks this after it removed its own record: another record that holds the name names
+   * the same stored files (records stored before each copy got a name of its own can share one),
+   * so they are kept for it. Asked after the removal, so of two records that share a name and are
+   * deleted at the same time, at least one delete finds the other record gone and deletes the
+   * files. Also true, and logged, when the records cannot be read: the files are kept.
+   */
+  private async isFileNameHeld(
+    workspaceId: string,
+    collection: 'screenshots' | 'videos',
+    refName: string,
+  ): Promise<boolean> {
+    try {
+      const records = (
+        await admin
+          .database()
+          .ref(`workspaces/${workspaceId}/${collection}`)
+          .get()
+      ).val();
+      return parseCollectionToArray<{ refName?: unknown }>(records).some(
+        (record) => record?.refName === refName,
+      );
+    } catch (error) {
+      console.log(
+        `Error reading the ${collection} of the workspace; the files of ${refName} are kept.`,
+        error,
+      );
+      return true;
+    }
   }
 
   /**
    * Deletes `file`, a file of an item whose record this request removed, only while it still has
    * `generation`, the one read before the removal. Once the record is gone its name is free: the
-   * upload routes take the name from the client (`fullFileName`) and refuse only a name a record
-   * still holds, so an upload can store new files under it before this runs. That upload changes
-   * the generation, the precondition fails (412) and its files stay. A file gone already (404) is
-   * left as it is. Any other error rejects. Resolves at once for a file that was not stored.
+   * upload routes take the name from the client (`fullFileName`) and refuse (409) only a name a
+   * record still holds, so an upload can store new files under it before this runs. That upload
+   * changes the generation, the precondition fails (412) and its files stay. A file gone already
+   * (404) is left as it is. Any other error rejects. Resolves at once for a file that was not
+   * stored.
    */
   private async deleteUnlessReplaced(
     file: ItemFile,
@@ -912,7 +973,8 @@ export class WorkspaceFilesService {
    * Deletes the image `imageId` and the stored files of that image. The storage names come from
    * the image's own record, never from the request: the route's permission check is made on
    * `imageId`, so a client-supplied file name could otherwise delete another image's file. The
-   * folder counts that lose the image are those of the folder in its record (see
+   * files stay while another image of the workspace still holds the name (see `isFileNameHeld`).
+   * The folder counts that lose the image are those of the folder in its record (see
    * `removeWorkspaceItem`).
    */
   async deleteImage(
@@ -943,55 +1005,58 @@ export class WorkspaceFilesService {
       );
       // Read while the record still holds the name, so the cleanup deletes these files and not
       // the files of an upload under the same name once the record is gone (see
-      // `deleteUnlessReplaced`).
-      const [imageGeneration, thumbnailGeneration, originalGeneration] =
-        await Promise.all(
-          [
-            imageStorageRef,
-            imageThumbnailStorageRef,
-            imageOriginalStorageRef,
-          ].map((file) => this.storedGeneration(file)),
-        );
+      // `deleteUnlessReplaced`), with the size the delete reports.
+      const [image, thumbnail, original] = await Promise.all(
+        [
+          imageStorageRef,
+          imageThumbnailStorageRef,
+          imageOriginalStorageRef,
+        ].map((file) => this.storedVersion(file)),
+      );
 
       // The record goes first. Only the delete that removed it deletes the files and reports their
-      // size: a delete of the same image at the same time finds it gone, so the size is read before
-      // any of its files goes, and a removal that does not commit leaves the image whole.
+      // size: a delete of the same image at the same time finds it gone, and a removal that does
+      // not commit leaves the image whole.
       const { removed, counted } = await this.removeWorkspaceItem(
         workspaceId,
         'screenshots',
         imageId,
       );
       if (removed) {
-        const everStatsBytes = await storedBytes(
-          this.eventEmitter,
-          imageStorageRef,
-        );
         this.workspaceShareService.deleteLinkById(workspaceId, imageId);
 
-        this.deleteUnlessReplaced(imageStorageRef, imageGeneration).catch(
-          () => {
-            console.log('Error deleting image from reference: ' + refName);
-          },
+        // Files another image still names are its files too: they stay, and no bytes are freed.
+        const kept = await this.isFileNameHeld(
+          workspaceId,
+          'screenshots',
+          refName,
         );
-        this.deleteUnlessReplaced(
-          imageThumbnailStorageRef,
-          thumbnailGeneration,
-        ).catch(() => {
-          console.log(
-            'Error deleting image thumbnail from reference: ' + refName,
+        if (!kept) {
+          this.deleteUnlessReplaced(imageStorageRef, image.generation).catch(
+            () => {
+              console.log('Error deleting image from reference: ' + refName);
+            },
           );
-        });
+          this.deleteUnlessReplaced(
+            imageThumbnailStorageRef,
+            thumbnail.generation,
+          ).catch(() => {
+            console.log(
+              'Error deleting image thumbnail from reference: ' + refName,
+            );
+          });
 
-        this.deleteUnlessReplaced(
-          imageOriginalStorageRef,
-          originalGeneration,
-        ).catch(() => {
-          console.log('Error deleting video from reference: ' + refName);
-        });
+          this.deleteUnlessReplaced(
+            imageOriginalStorageRef,
+            original.generation,
+          ).catch(() => {
+            console.log('Error deleting video from reference: ' + refName);
+          });
+        }
 
         this.eventEmitter.emit(EVER_COUNTER_EVENTS.mediaDeleted, {
           kind: 'screenshot',
-          bytes: everStatsBytes,
+          bytes: kept ? 0 : image.bytes,
         });
       }
 
@@ -1011,8 +1076,9 @@ export class WorkspaceFilesService {
   /**
    * Deletes the video `videoId` and the stored file of that video. The storage name comes from the
    * video's own record, never from the request: the route's permission check is made on `videoId`,
-   * so a client-supplied file name could otherwise delete another video's file. The folder counts
-   * that lose the video are those of the folder in its record (see `removeWorkspaceItem`).
+   * so a client-supplied file name could otherwise delete another video's file. The file stays
+   * while another video of the workspace still holds the name (see `isFileNameHeld`). The folder
+   * counts that lose the video are those of the folder in its record (see `removeWorkspaceItem`).
    */
   async deleteVideo(
     workspaceId: string,
@@ -1030,14 +1096,13 @@ export class WorkspaceFilesService {
       }
 
       const refName: unknown = videoData.refName;
-      const fileRef =
-        typeof refName === 'string' && refName !== ''
-          ? bucket.file(`workspaces/${workspaceId}/videos/${refName}`)
-          : null;
-      // Read while the record still holds the name (see `deleteImage`).
-      const fileGeneration = fileRef
-        ? await this.storedGeneration(fileRef)
+      const fileName =
+        typeof refName === 'string' && refName !== '' ? refName : null;
+      const fileRef = fileName
+        ? bucket.file(`workspaces/${workspaceId}/videos/${fileName}`)
         : null;
+      // Read while the record still holds the name (see `deleteImage`).
+      const file = fileRef ? await this.storedVersion(fileRef) : NOT_STORED;
 
       // The record goes first; only the delete that removed it deletes the files (see `deleteImage`).
       const { removed, counted } = await this.removeWorkspaceItem(
@@ -1048,10 +1113,14 @@ export class WorkspaceFilesService {
       if (removed) {
         this.workspaceShareService.deleteLinkById(workspaceId, videoId);
 
+        // A file another video still names is its file too: it stays, and no bytes are freed.
         let everStatsBytes = 0;
-        if (fileRef) {
-          everStatsBytes = await storedBytes(this.eventEmitter, fileRef);
-          this.deleteUnlessReplaced(fileRef, fileGeneration).catch(() => {
+        if (
+          fileRef &&
+          !(await this.isFileNameHeld(workspaceId, 'videos', fileName))
+        ) {
+          everStatsBytes = file.bytes;
+          this.deleteUnlessReplaced(fileRef, file.generation).catch(() => {
             console.log('Error deleting video from reference: ' + refName);
           });
         }
