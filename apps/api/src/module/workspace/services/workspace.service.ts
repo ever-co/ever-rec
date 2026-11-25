@@ -1,10 +1,14 @@
-import { IAccessMember, IWorkspace } from '../Interfaces/Workspace';
+import {
+  IAccessMember,
+  IWorkspace,
+  IWorkspaceUser,
+} from '../Interfaces/Workspace';
 import * as admin from 'firebase-admin';
 import { IDataResponse, IUserData, ItemType } from '../../../interfaces/_types';
 import { IUser } from '../../../interfaces/IUser';
 import { nanoid } from 'nanoid';
 import { WorkspaceUtilitiesService } from './utilities.service';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import {
   IDbWorkspaceImageData,
   IDbWorkspaceVideoData,
@@ -16,9 +20,27 @@ import {
   promiseAllSettled,
 } from '../../../services/utils/helpers';
 import { WorkspaceMembersService } from './members.service';
-import { IWorkspaceFolder } from '../Interfaces/Folders';
+import {
+  changeWorkspaceFolders,
+  changeWorkspaceMembers,
+  changeWorkspaceTeams,
+} from './change-workspace-collection';
+import {
+  addUserWorkspaceId,
+  removeUserWorkspaceId,
+} from './user-workspace-ids';
 import { sendError, sendResponse } from 'src/services/utils/sendResponse';
 import { IFavoriteFolders } from 'src/interfaces/Folders';
+import { Optional } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import {
+  EVER_COUNTER_EVENTS,
+  storedMediaUnder,
+} from '../../../common/events/ever-counters.events';
+import {
+  EVER_CONNECT_WORKSPACE_LINK_READER,
+  EverConnectWorkspaceLinkReader,
+} from '../../../common/ever-platform/tokens';
 
 @Injectable()
 export class WorkspacesService {
@@ -27,6 +49,11 @@ export class WorkspacesService {
   constructor(
     private readonly utilitiesService: WorkspaceUtilitiesService,
     private readonly workspaceMembersService: WorkspaceMembersService,
+    @Optional() private readonly eventEmitter?: EventEmitter2,
+    // Present only when the optional Ever Platform connection module is loaded.
+    @Optional()
+    @Inject(EVER_CONNECT_WORKSPACE_LINK_READER)
+    private readonly everLinks?: EverConnectWorkspaceLinkReader,
   ) {
     this.config = {
       action: 'read',
@@ -53,18 +80,24 @@ export class WorkspacesService {
 
       // Don't really want to fetch the files of each workspace. This function sends basic workspace data,
       // for listing available workspaces, their names etc. Files data will be loaded on demand for each workspace.
-      const userWorkspaces = userVal.workspaceIds || [];
-      userWorkspaces.forEach(
-        (id) =>
-          id &&
-          workspaces.push({
-            ...workspacesVal[id],
-            screenshots: [],
-            videos: [],
-            id: id,
-            folders: parseCollectionToArray(workspacesVal[id].folders, true),
-          }),
-      );
+      // An id can outlive its workspace (a join that lands after deleteWorkspace read the members,
+      // or a member update there that failed), and can be listed twice. Skip the first and list
+      // each workspace once, so one such id does not fail the whole list.
+      const userWorkspaces = [...new Set(userVal.workspaceIds || [])];
+      userWorkspaces.forEach((id) => {
+        const workspace = id ? workspacesVal?.[id] : null;
+        if (!workspace) {
+          return;
+        }
+
+        workspaces.push({
+          ...workspace,
+          screenshots: [],
+          videos: [],
+          id: id,
+          folders: parseCollectionToArray(workspace.folders, true),
+        });
+      });
 
       return sendResponse<IWorkspace[]>(workspaces);
     } catch (e) {
@@ -108,12 +141,13 @@ export class WorkspacesService {
           videos: [],
           created: Date.now(),
         };
-        const workspaceIds = user.workspaceIds || [];
-        workspaceIds.push(workspaceId);
+        // The id joins the user's list in a transaction on the list: a write of the list read above
+        // would drop a workspace created or joined meanwhile.
         await Promise.all([
           workspaceRef.set(newWorkspace),
-          userRef.update({ workspaceIds }),
+          addUserWorkspaceId(uid, workspaceId),
         ]);
+        this.eventEmitter?.emit(EVER_COUNTER_EVENTS.workspaceCreated, {});
         const workspace: IWorkspace =
           await this.utilitiesService.parseWorkspaceItems(newWorkspace);
 
@@ -155,7 +189,10 @@ export class WorkspacesService {
       const memberPromises = memberIds.map((memberObj) =>
         this.utilitiesService.getShortUserData(memberObj.id),
       );
-      const members = await promiseAllSettled(memberPromises);
+      // A member whose account was deleted has no record any more: leave it out.
+      const members = (await promiseAllSettled(memberPromises)).filter(
+        (member) => !!member,
+      );
 
       const parsedFolderId = folderId || false;
 
@@ -212,7 +249,8 @@ export class WorkspacesService {
         notFoundMembersPromises,
       );
       notFoundMembers.forEach((member, index) => {
-        if (member.id !== outsideWorkspaceMembers[index].id) return;
+        // No record (a deleted account): the item keeps no owner.
+        if (member.id !== outsideWorkspaceMembers[index]?.id) return;
 
         if (member.itemType === 'image') {
           screenshots[member.index] = {
@@ -238,9 +276,13 @@ export class WorkspacesService {
         members,
       });
 
+      // The organization handle of a workspace linked through the Ever Platform connection; the
+      // body is unchanged when that module is not loaded or the workspace is not linked.
+      const everHandle = await this.everLinks?.everHandle(workspaceId);
       return sendResponse<IWorkspace & { favFolders: IFavoriteFolders }>({
         ...workspace,
         favFolders,
+        ...(everHandle ? { everHandle } : {}),
       });
     } catch (e) {
       console.log(e);
@@ -254,47 +296,101 @@ export class WorkspacesService {
   ): Promise<IDataResponse<IWorkspace[] | null>> {
     try {
       const db = admin.database();
-      const { workspaceRef, workspaceVal } =
-        await this.utilitiesService.getWorkspaceById(workspaceId);
+      // The workspace must exist.
+      await this.utilitiesService.getWorkspaceById(workspaceId);
       const userRef = db.ref(`users/${uid}`);
       const userSnap = await userRef.get();
       const userVal: IUserData = userSnap.val();
 
       if (userVal) {
-        const filteredWorkspaceMembers = parseCollectionToArray(
-          workspaceVal.members,
-        ).filter((x) => x.id !== uid);
-        const newWorkspaceTeams = parseCollectionToArray(
-          workspaceVal.teams,
-        ).map((x) => {
-          const newMembers = (x.members || []).filter((x) => x.id !== uid);
-
-          return {
-            ...x,
-            members: newMembers,
-          };
-        });
-        const updatedWorkspaceFolders = parseCollectionToArray(
-          workspaceVal.folders,
-        ).map((x: IWorkspaceFolder) => {
-          if (x.access?.members) {
-            x.access.members = x.access.members.filter((y) => y.uid !== uid);
-          }
-
-          return x;
-        });
-        const newUserWorkspaces = userVal.workspaceIds.filter(
-          (x) => x !== workspaceId,
-        );
-
         //TODO: should be decided if user images/videos/folders should be removed from workspace
 
-        await workspaceRef.update({
-          members: filteredWorkspaceMembers,
-          teams: newWorkspaceTeams,
-          folders: updatedWorkspaceFolders,
+        // The teams and the members change in the transactions every writer of these lists shares,
+        // from the stored lists: a write of the lists read earlier put back a member who left
+        // meanwhile (with access to the workspace) and dropped one who joined. The teams go
+        // first: when either list does not change, the user is still a member and may leave again.
+        const teamsLeft = await changeWorkspaceTeams(workspaceId, (teams) => {
+          let changed = false;
+          const items = teams.map((team) => {
+            const members = parseCollectionToArray<IWorkspaceUser>(
+              team.members,
+            ).filter(Boolean);
+            if (!members.some((member) => member.id === uid)) {
+              return team;
+            }
+            changed = true;
+            return {
+              ...team,
+              members: members.filter((member) => member.id !== uid),
+            };
+          });
+
+          return changed ? { items } : {};
         });
-        await userRef.update({ workspaceIds: newUserWorkspaces });
+        if (teamsLeft.ok === false) {
+          return sendError(
+            'Error while trying to leave workspace. Please try again.',
+          );
+        }
+
+        const membersLeft = await changeWorkspaceMembers(
+          workspaceId,
+          (members) =>
+            members.some((member) => member.id === uid)
+              ? { items: members.filter((member) => member.id !== uid) }
+              : {},
+        );
+        if (membersLeft.ok === false) {
+          return sendError(
+            'Error while trying to leave workspace. Please try again.',
+          );
+        }
+
+        // Then the user's own list, in a transaction as a join adds to it: a write of the list read
+        // above would drop a workspace joined meanwhile.
+        await removeUserWorkspaceId(uid, workspaceId);
+
+        // A join by invite of this same user that landed after the members change found the
+        // workspace still listed, and the change above then took it out: list it again, or the
+        // user is a member of a workspace missing from the list, which a new join does not repair.
+        const membersNow = parseCollectionToArray<IWorkspaceUser>(
+          (await db.ref(`workspaces/${workspaceId}/members`).get()).val(),
+        );
+        if (membersNow.some((member) => member?.id === uid)) {
+          await addUserWorkspaceId(uid, workspaceId);
+        }
+
+        // The user's folder permissions leave in the transaction every writer of the folder list
+        // shares: a write of the list read above would undo a folder, an item count or a permission
+        // changed meanwhile. The workspace guard turns a non-member away before any folder
+        // permission is read, so the leave stands when this fails; the failure is only logged.
+        const cleaned = await changeWorkspaceFolders(workspaceId, (folders) => {
+          let changed = false;
+          const items = folders.map((folder) => {
+            const members = parseCollectionToArray<IAccessMember>(
+              folder.access?.members,
+            );
+            if (!members.some((member) => member?.uid === uid)) {
+              return folder;
+            }
+            changed = true;
+            return {
+              ...folder,
+              access: {
+                ...folder.access,
+                members: members.filter((member) => member?.uid !== uid),
+              },
+            };
+          });
+
+          return changed ? { items } : {};
+        });
+        if (cleaned.ok === false) {
+          console.log(
+            `Could not remove the folder permissions of a member who left workspace ${workspaceId}.`,
+          );
+        }
+
         return await this.getUserWorkspaces(uid);
       } else {
         return sendError('No such workspace or user');
@@ -323,25 +419,13 @@ export class WorkspacesService {
         ...(workspaceVal.members || []),
         { id: workspaceVal.admin, canManageFolders: true },
       ];
+      // In a transaction on each member's list: a write of the list read earlier would drop a
+      // workspace the member created or joined meanwhile. A member without a list (or without a
+      // record) is left as it is.
       await Promise.allSettled(
         workspaceMembers.map(async (x) => {
           try {
-            const dbMemberRef = db.ref(`users/${x.id}`);
-            const dbMemberSnap = await dbMemberRef.get();
-            const dbMemberVal = dbMemberSnap.val();
-
-            if (dbMemberVal) {
-              const newWorkspaceIds = dbMemberVal.workspaceIds.filter(
-                (y) => y !== workspaceId,
-              );
-
-              await dbMemberRef.update({
-                workspaceIds: newWorkspaceIds,
-              });
-            } else {
-              console.log('Workspace user do not exists.');
-              return;
-            }
+            await removeUserWorkspaceId(x.id, workspaceId);
           } catch (e) {
             console.log(e);
             return undefined;
@@ -360,10 +444,29 @@ export class WorkspacesService {
     }
 
     await workspaceRef.remove();
+    if (workspaceVal) {
+      this.eventEmitter?.emit(EVER_COUNTER_EVENTS.workspaceDeleted, {});
+    }
+    if (workspaceVal?.teams) {
+      this.eventEmitter?.emit(EVER_COUNTER_EVENTS.teamDeleted, {
+        count: Object.keys(workspaceVal.teams).length,
+      });
+    }
 
+    // The bytes of its screenshots and videos, subtracted once the files are gone.
+    const removedMedia = await storedMediaUnder(
+      this.eventEmitter,
+      bucket,
+      `workspaces/${workspaceId}/`,
+    );
     bucket
       .deleteFiles({
         prefix: `workspaces/${workspaceId}/`,
+      })
+      .then(() => {
+        for (const media of removedMedia) {
+          this.eventEmitter?.emit(EVER_COUNTER_EVENTS.mediaDeleted, media);
+        }
       })
       .catch((error) => {
         console.log('Error deleting files from workspace:', error);

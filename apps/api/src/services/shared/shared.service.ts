@@ -1,5 +1,9 @@
 import * as admin from 'firebase-admin';
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Reference } from '@firebase/database-types';
 import { ImageViewModel } from '../../module/image/view.models/image.view.model';
 import { nanoid } from 'nanoid';
@@ -29,7 +33,9 @@ import { IWorkspaceFolder } from '../../module/workspace/Interfaces/Folders';
 import { DatabaseService } from 'firebase-admin/lib/database/database';
 import { Database } from 'firebase-admin/lib/database';
 import { IUser } from 'src/interfaces/IUser';
-import { parseCollectionToArray } from '../utils/helpers';
+import { formatDataToArray, parseCollectionToArray } from '../utils/helpers';
+import { toPublicLikes } from '../utils/likes';
+import { is_id } from '../../module/workspace/validators/id.validator';
 
 export type queryReturnType =
   | ImageViewModel
@@ -63,6 +69,27 @@ export const dbEndpoints = {
   },
 };
 
+// The indexed child of a share record that holds `<uid>|<item id>`.
+const sharedItemKeyName = {
+  image: 'uidImageId',
+  video: 'uidVideoId',
+};
+
+export const COMMENT_MAX_LENGTH = 2000;
+
+/** Why a comment's content cannot be stored, or null when it can. */
+export const commentContentError = (content: unknown): string | null => {
+  if (typeof content !== 'string' || !content.trim()) {
+    return 'Comment cannot be empty.';
+  }
+
+  if (content.length > COMMENT_MAX_LENGTH) {
+    return `Comment cannot be longer than ${COMMENT_MAX_LENGTH} characters.`;
+  }
+
+  return null;
+};
+
 export type PermissionCollectionType =
   | IDbWorkspaceImageData[]
   | IDbWorkspaceVideoData[]
@@ -87,12 +114,46 @@ export class SharedService {
     return result;
   }
 
+  /**
+   * A stored comment as a viewer may see it: only known fields, never the stored `uid`. The
+   * author's id is shown (as `user.id`) to that author alone, so a client can tell the viewer's
+   * own comments apart through `isOwn`.
+   */
+  toResponseComment(
+    comment: DbCommentIntF,
+    author: { name?: string | null; photoURL?: string | null } | null,
+    viewerId?: string | null,
+  ): ResponseComment {
+    const isOwn = !!viewerId && comment.uid === viewerId;
+    const response: ResponseComment = {
+      id: comment.id,
+      content: comment.content,
+      timestamp: comment.timestamp,
+      isEdited: comment.isEdited,
+      isOwn,
+      user: {
+        photoURL: author?.photoURL || null,
+        name: author?.name || null,
+      },
+    };
+
+    if (comment.updatedTimestamp !== undefined) {
+      response.updatedTimestamp = comment.updatedTimestamp;
+    }
+    if (isOwn) {
+      response.user.id = comment.uid;
+    }
+
+    return response;
+  }
+
   async parseCommentsForResponse(
     itemType: ItemType,
     userId: string,
     itemId: string,
     initialComments: DbCommentIntF[],
     limit: string | number = '10',
+    viewerId?: string | null,
   ): Promise<ResponseComment[]> {
     try {
       const db = admin.database();
@@ -113,19 +174,23 @@ export class SharedService {
 
       await Promise.allSettled(
         comments.map(async (x) => {
-          const userRef = db.ref(`users/${x.uid}`);
-          const userVal = await userRef.get();
-          const user = userVal.val();
+          // The stored uid goes into a database path: a stored value that is not a plain id
+          // (a planted one) is not looked up.
+          const user =
+            typeof x.uid === 'string' && is_id(x.uid)
+              ? (await db.ref(`users/${x.uid}`).get()).val()
+              : null;
 
-          commentsResult.push({
-            ...x,
-
-            user: {
-              id: x.uid,
-              photoURL: user?.photoUrl || user?.photoURL,
-              name: user?.displayName || null,
-            },
-          });
+          commentsResult.push(
+            this.toResponseComment(
+              x,
+              {
+                photoURL: user?.photoUrl || user?.photoURL,
+                name: user?.displayName,
+              },
+              viewerId,
+            ),
+          );
         }),
       );
 
@@ -138,6 +203,10 @@ export class SharedService {
     }
   }
 
+  /**
+   * The share record of an item that exists, or null: a link left behind by a deleted item opens
+   * nothing.
+   */
   async getSharedItemById(
     uid: string,
     itemId: string,
@@ -147,27 +216,63 @@ export class SharedService {
     const collectionName = dbEndpoints.userCollections[itemType];
     const sharedCollectionName = dbEndpoints.sharedCollections[itemType];
     const sharedItemRefName = dbEndpoints.shareItemRefs[itemType];
-    const sharedRef = db.ref(`${sharedCollectionName}`);
-    const sharedSnap = await sharedRef.get();
+    const itemSnap = await db
+      .ref(`users/${uid}/${collectionName}/${itemId}`)
+      .get();
+
+    if (itemSnap.val() == null) {
+      return null;
+    }
+
+    // The share record of one item is read through the indexed `<uid>|<item id>` key, the way the
+    // share and unshare routes find it: the whole share collection is never loaded.
+    const sharedSnap = await db
+      .ref(`${sharedCollectionName}`)
+      .orderByChild(sharedItemKeyName[itemType])
+      .equalTo(`${uid}|${itemId}`)
+      .get();
     const sharedVal = sharedSnap.val();
-    const itemRef = db.ref(`users/${uid}/${collectionName}/${itemId}`);
-    const itemSnap = await itemRef.get();
-    const itemVal = itemSnap.val();
     let sharedItem = null;
 
-    if (sharedVal && itemVal) {
-      Object.entries(sharedVal).forEach(
-        ([_, item]: [
-          any,
-          { imageId: string; uid: string; uidImageId: string },
-        ]) => {
-          if (item[sharedItemRefName] == itemId && item.uid == uid) {
+    if (sharedVal) {
+      Object.values(sharedVal).forEach(
+        (item: { imageId: string; uid: string; uidImageId: string }) => {
+          if (item?.[sharedItemRefName] == itemId && item.uid == uid) {
             sharedItem = item;
           }
         },
       );
-      return sharedItem;
     }
+
+    return sharedItem;
+  }
+
+  /**
+   * Comments live under the owner's item (`users/<owner>/<collection>/<item>/comments`), so the
+   * caller may use them only when the item exists and is theirs, or is shared. The `isPublic` flag
+   * and the owner id of a request are never trusted: the shared record decides, not the caller.
+   */
+  async canViewItemComments(
+    itemType: ItemType,
+    ownerId: string,
+    itemId: string,
+    callerId?: string,
+  ): Promise<boolean> {
+    if (!is_id(ownerId) || !is_id(itemId)) {
+      return false;
+    }
+
+    if (callerId && callerId === ownerId) {
+      const userCollectionName = dbEndpoints.userCollections[itemType];
+      const itemSnap = await admin
+        .database()
+        .ref(`users/${ownerId}/${userCollectionName}/${itemId}`)
+        .get();
+
+      return itemSnap.val() != null;
+    }
+
+    return !!(await this.getSharedItemById(ownerId, itemId, itemType));
   }
 
   // TODO: Fix types for interfaces for ID and stuff.
@@ -179,9 +284,32 @@ export class SharedService {
     content: string,
     isPublic: boolean,
     limit?: string,
-  ): Promise<IDataResponse<DbCommentIntF>> {
+  ): Promise<IDataResponse<ICommentResponse>> {
     try {
-      if (isPublic) {
+      // All three ids go into a database path: a nested path or a wildcard must never get through.
+      if (
+        ![itemOwnerId, currentUserId, itemId].every(
+          (id) => typeof id === 'string' && is_id(id),
+        )
+      ) {
+        return sendError('Invalid item or user id.');
+      }
+
+      const db = admin.database();
+      const userCollectionName = dbEndpoints.userCollections[itemType];
+
+      // The client-sent `isPublic` flag is not trusted: the owner may comment on an item that
+      // exists; anybody else only on an item its owner has shared with a link. Nothing is created
+      // for an item that does not exist.
+      if (itemOwnerId === currentUserId) {
+        const itemSnap = await db
+          .ref(`users/${itemOwnerId}/${userCollectionName}/${itemId}`)
+          .get();
+
+        if (itemSnap.val() == null) {
+          return sendError('Item not found.');
+        }
+      } else {
         const sharedItem = await this.getSharedItemById(
           itemOwnerId,
           itemId,
@@ -193,8 +321,6 @@ export class SharedService {
         }
       }
 
-      const db = admin.database();
-      const userCollectionName = dbEndpoints.userCollections[itemType];
       const userRef: Reference = db.ref(`users/${currentUserId}`);
       const userData: IUser = (await userRef.get()).val();
 
@@ -202,8 +328,10 @@ export class SharedService {
         return sendError('Could not find user.');
       }
 
-      if (!content) {
-        return sendError('Comment cannot be empty.');
+      const contentError = commentContentError(content);
+
+      if (contentError) {
+        return sendError(contentError);
       }
 
       const id = nanoid(12);
@@ -220,13 +348,11 @@ export class SharedService {
 
       await newCommentRef.set(newComment);
 
-      const user = {
-        id: currentUserId,
-        name: userData.displayName,
-        photoURL: userData.photoURL,
-      };
-
-      const newCommentWithUser: ICommentResponse = { ...newComment, user };
+      const newCommentWithUser: ICommentResponse = this.toResponseComment(
+        newComment,
+        { name: userData.displayName, photoURL: userData.photoURL },
+        currentUserId,
+      );
 
       this.eventEmitter.emit(
         'analytics.track',
@@ -241,8 +367,10 @@ export class SharedService {
     }
   }
 
+  // Only the author of a comment may edit it (the apps offer edit only on one's own comments).
   async updateCommentAPI(
     itemType: ItemType,
+    userId: string,
     ownerId: string,
     itemId: string,
     commentId: string,
@@ -251,15 +379,20 @@ export class SharedService {
     limit?: string | number,
   ): Promise<IDataResponse<queryReturnType>> {
     try {
-      if (isPublic) {
-        const sharedItem = await this.getSharedItemById(
-          ownerId,
-          itemId,
-          itemType,
-        );
-        if (!sharedItem) {
-          return sendError('Shared item not found.');
-        }
+      if (!userId || !is_id(commentId)) {
+        return sendError('Comment does not exist.');
+      }
+
+      if (
+        !(await this.canViewItemComments(itemType, ownerId, itemId, userId))
+      ) {
+        return sendError('Shared item not found.');
+      }
+
+      const contentError = commentContentError(content);
+
+      if (contentError) {
+        return sendError(contentError);
       }
 
       const db = admin.database();
@@ -273,18 +406,27 @@ export class SharedService {
         return sendError('Comment does not exist.');
       }
 
+      if (commentSnapshot.val()?.uid !== userId) {
+        return sendError('You can only change your own comments.');
+      }
+
       const newComment = { ...commentSnapshot.val(), content, isEdited: true };
 
       await commentRef.set(newComment);
 
-      return sendResponse(newComment);
+      // The stored uid of the author is not sent back: the client keeps the comment it already
+      // has (author, `isOwn`) and takes the new content from this.
+      const commentWithoutUid = { ...newComment };
+      delete commentWithoutUid.uid;
+
+      return sendResponse(commentWithoutUid);
     } catch (e) {
       console.log(e);
       return sendError('Error while trying to update the comment.');
     }
   }
 
-  // TODO: check for comment owner, maybe guard, maybe not. not complex, just a simple id check against token id.
+  // Only the author of a comment may delete it (the apps offer delete only on one's own comments).
   async deleteComment(
     itemType: ItemType,
     userId: string,
@@ -295,15 +437,14 @@ export class SharedService {
     limit?: string | number,
   ): Promise<IDataResponse<queryReturnType>> {
     try {
-      if (isPublic) {
-        const sharedItem = await this.getSharedItemById(
-          ownerId,
-          itemId,
-          itemType,
-        );
-        if (!sharedItem) {
-          return sendError('Shared item not found.');
-        }
+      if (!userId || !is_id(commentId)) {
+        return sendError('Comment does not exist.');
+      }
+
+      if (
+        !(await this.canViewItemComments(itemType, ownerId, itemId, userId))
+      ) {
+        return sendError('Shared item not found.');
       }
 
       const db = admin.database();
@@ -316,6 +457,10 @@ export class SharedService {
 
       if (!commentSnapshot.exists()) {
         return sendError('Comment does not exist.');
+      }
+
+      if (commentSnapshot.val()?.uid !== userId) {
+        return sendError('You can only change your own comments.');
       }
 
       await commentRef.remove();
@@ -355,6 +500,8 @@ export class SharedService {
           userId,
           itemId,
           item.comments,
+          undefined,
+          userId,
         );
 
         return {
@@ -373,7 +520,8 @@ export class SharedService {
   }
 
   // TODO: check if you can limit the number of comments taken on the query instead later, less comments pulled from the DB
-  // TODO: this should have a guard to see if the item is shared. If not, it shouldn't work.
+  // The comments of an item are returned only to its owner, or to anyone when the item is shared.
+  // An item the caller may not view looks the same as one that does not exist: no comments.
   async getCommentsById(
     itemType: ItemType,
     itemId: string,
@@ -388,7 +536,10 @@ export class SharedService {
     const db = admin.database();
     const uid = ownerId ? ownerId : userId;
 
-    if (!uid) {
+    if (
+      !uid ||
+      !(await this.canViewItemComments(itemType, uid, itemId, userId))
+    ) {
       return { comments: [], commentsLength: 0 };
     }
 
@@ -409,6 +560,7 @@ export class SharedService {
           itemId,
           commentsFromDB,
           limit,
+          userId,
         );
 
         return { comments, commentsLength: commentsFromDB.length };
@@ -448,43 +600,65 @@ export class SharedService {
     userId: string,
     workspaceId?: string,
   ): Promise<IDataResponse<LikeIntF[]>> {
+    // A link that resolves to no item has nothing to like.
+    if (!itemId) {
+      throw new NotFoundException('Item not found');
+    }
+
+    const rootDb = workspaceId ? '/workspaces' : '/users';
+    const parentCollection = workspaceId ? workspaceId : ownerUid;
+    const collection = workspaceId
+      ? dbEndpoints.workspaceCollections[itemType]
+      : dbEndpoints.userCollections[itemType];
+
+    // The ids go into a database path: nothing but plain ids may reach it.
+    if (
+      typeof parentCollection !== 'string' ||
+      !is_id(parentCollection) ||
+      typeof itemId !== 'string' ||
+      !is_id(itemId)
+    ) {
+      throw new BadRequestException('Invalid item path');
+    }
+
     try {
-      if (!itemId) {
-        throw new Error(`Item id is missing`);
-      }
-
       const db = admin.database();
-      const rootDb = workspaceId ? '/workspaces' : '/users';
-      const parentCollection = workspaceId ? workspaceId : ownerUid;
-      const collection = workspaceId
-        ? dbEndpoints.workspaceCollections[itemType]
-        : dbEndpoints.userCollections[itemType];
-
       const itemRef = db.ref(
         `${rootDb}/${parentCollection}/${collection}/${itemId}`,
       );
       const itemSnapshot = await itemRef.get();
 
       if (!itemSnapshot.exists()) {
-        throw new Error(
-          `Item doesn't exit for /${rootDb}/${ownerUid}/${collection}/${itemId}`,
-        );
+        throw new NotFoundException('Item not found');
       }
 
-      const itemData: ImageViewModel | VideoViewModel = itemSnapshot.val();
-      const likes = itemData?.likes || [];
-      const isLikedIndex = likes.findIndex((x) => x.uid === userId);
+      // Read, change and write of the likes happens in one transaction: two people liking at the
+      // same moment both end up in the list. A legacy value (the number 0) or anything else that
+      // is not a list counts as no likes.
+      const { snapshot } = await itemRef
+        .child('likes')
+        .transaction((current): LikeIntF[] => {
+          const likes: LikeIntF[] = formatDataToArray(current);
+          const isLikedIndex = likes.findIndex((x) => x?.uid === userId);
 
-      if (isLikedIndex === -1) {
-        likes.push({ uid: userId, timestamp: Date.now() });
-      } else {
-        likes.splice(isLikedIndex, 1);
-      }
+          if (isLikedIndex === -1) {
+            likes.push({ uid: userId, timestamp: Date.now() });
+          } else {
+            likes.splice(isLikedIndex, 1);
+          }
 
-      await itemRef.update({ likes });
+          return likes;
+        });
 
-      return sendResponse(likes);
+      // The caller gets the count and their own like back, not the uids of the other likers.
+      return sendResponse(
+        toPublicLikes(formatDataToArray(snapshot.val()), userId),
+      );
     } catch (e) {
+      // A missing item is the caller's answer (404), not a failed write.
+      if (e instanceof NotFoundException) {
+        throw e;
+      }
       console.log(e);
       return sendError('Could not register a Like...', e.message);
     }

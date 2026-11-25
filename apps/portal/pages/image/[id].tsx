@@ -220,6 +220,7 @@ tw-items-center tw-justify-center tw-bg-blue-grey tw-h-600px"
                 </div>
 
                 <VideoComments
+                  itemType="image"
                   itemId={image?.dbData?.id as any}
                   userId={user?.id}
                   itemOwnerId={user?.id}

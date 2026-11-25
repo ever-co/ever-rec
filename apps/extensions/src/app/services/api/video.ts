@@ -61,7 +61,6 @@ const updateVideoDataAPI = async (
   title: string | undefined,
   parentId: string | false,
   trash: boolean,
-  likes: { uid: string; timestamp: number }[],
   views: number,
 ): Promise<IEditorVideo> => {
   return api.put(`/api/v1/video/single-data`, {
@@ -70,7 +69,6 @@ const updateVideoDataAPI = async (
     parentId,
     trash,
     views,
-    likes,
   });
 };
 

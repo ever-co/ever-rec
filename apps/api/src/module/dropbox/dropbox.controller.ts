@@ -16,6 +16,11 @@ import { ConfigService } from '@nestjs/config';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { UserGuard } from '../auth/guards/user.guard';
+import {
+  newOAuthBinding,
+  readOAuthBinding,
+  setOAuthBindingCookie,
+} from '../../services/shared/oauth-state.service';
 import { DropboxService } from './dropbox.service';
 
 @Controller('dropbox')
@@ -45,16 +50,25 @@ export class DropboxController {
   @Get('/complete-oauth')
   @Redirect()
   async completeOAuth(@Req() req, @Query() query, @Res() res) {
+    let completed;
     try {
-      await this.dropBoxService.completeOAuth(query.state, query.code);
+      completed = await this.dropBoxService.completeOAuth(
+        query.state,
+        query.code,
+        readOAuthBinding(req, 'dropbox'),
+      );
     } catch (e) {
       res.status(500).send(e);
     }
 
+    const integrationsUrl = `${this.configService.get<string>(
+      'WEBSITE_URL',
+    )}/media/integrations`;
     return {
-      url: `${this.configService.get<string>(
-        'WEBSITE_URL',
-      )}/media/integrations`,
+      url:
+        completed === null
+          ? `${integrationsUrl}?error=invalid_state`
+          : integrationsUrl,
     };
   }
 
@@ -82,7 +96,20 @@ export class DropboxController {
 
   @UseGuards(AuthGuard)
   @Get('sign-in')
-  async generateAuthUrl(@Req() req) {
-    return this.dropBoxService.generateAuthUrl(req.user?.id);
+  async generateAuthUrl(@Req() req, @Res({ passthrough: true }) res) {
+    const binding = newOAuthBinding();
+    const result = await this.dropBoxService.generateAuthUrl(
+      req.user?.id,
+      binding,
+    );
+    if (typeof result === 'string') {
+      setOAuthBindingCookie(
+        res,
+        'dropbox',
+        binding,
+        this.configService.get<string>('API_BASE_URL'),
+      );
+    }
+    return result;
   }
 }

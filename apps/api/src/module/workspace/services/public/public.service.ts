@@ -5,9 +5,14 @@ import {
   IWorkspaceInviteData,
   IWorkspaceInvite,
 } from '../../Interfaces/Invites';
-import { IWorkspace } from '../../Interfaces/Workspace';
+import { IWorkspace, IWorkspaceUser } from '../../Interfaces/Workspace';
 import { sendError, sendResponse } from 'src/services/utils/sendResponse';
+import { parseCollectionToArray } from 'src/services/utils/helpers';
 import { Injectable } from '@nestjs/common';
+
+/** The display name of a user record, else the local part of its email; none without either. */
+const nameOf = (user: IUser | null): string | null =>
+  user?.displayName || user?.email?.split('@')[0] || null;
 
 @Injectable()
 export class WorkspacePublicService {
@@ -28,24 +33,30 @@ export class WorkspacePublicService {
         return sendError("Couldn't find the workspace for this invite");
       }
 
-      // Get workspace inviter name/email
+      // Get workspace inviter name/email. A deleted account has no record any more.
       const userRef = db.ref(`users/${workspaceInviteData.inviterId}`);
-      const userData: IUser = (await userRef.get()).val();
-      const workspaceInviter =
-        userData?.displayName || userData.email.split('@')[0];
+      const userData: IUser | null = (await userRef.get()).val();
+      const workspaceInviter = nameOf(userData) ?? '';
 
       // Get workspace name
       const workspaceRef = db.ref(
         `workspaces/${workspaceInviteData.workspaceId}`,
       );
-      const workspaceData: IWorkspace = (await workspaceRef.get()).val();
+      const workspaceData: IWorkspace | null = (await workspaceRef.get()).val();
+      if (!workspaceData) {
+        // The workspace was deleted while its invite was left behind.
+        // tslint:disable-next-line: quotemark
+        return sendError("Couldn't find the workspace for this invite");
+      }
       const workspaceName = workspaceData.name;
 
       // Get workspace members
       let workspaceMembers = [];
 
-      const workspaceMembersData = workspaceData?.members;
-      if (workspaceMembersData) {
+      const workspaceMembersData = parseCollectionToArray<IWorkspaceUser>(
+        workspaceData.members,
+      ).filter((member) => member?.id);
+      if (workspaceMembersData.length) {
         const workspaceMembersPromises = workspaceMembersData.map(
           async (workspaceMember) => {
             const workspaceUserRef = db.ref(`users/${workspaceMember.id}`);
@@ -61,11 +72,9 @@ export class WorkspacePublicService {
               return null;
             }
 
-            const memberUser: IUser = snap.value.val();
-            const displayName =
-              memberUser?.displayName || memberUser.email.split('@')[0];
-
-            return displayName;
+            // A member without a record (a deleted account) or without a name is skipped.
+            const memberUser: IUser | null = snap.value.val();
+            return nameOf(memberUser);
           })
           .filter((x) => x !== null);
       }

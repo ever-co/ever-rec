@@ -1,0 +1,484 @@
+/**
+ * The chapter routes take the workspace from `?workspaceId=`. They used to trust it, so any
+ * signed-in user could read, rewrite or switch off the chapters of a video in a workspace they do
+ * not belong to. Now a workspace id must belong to a workspace the user administers or is a member
+ * of; no id (the personal library) is unchanged.
+ *
+ * The routes are the real controller behind the real `AuthGuard`; only the database, the token
+ * check and the chapter service are replaced.
+ */
+import { INestApplication } from '@nestjs/common';
+import { Test } from '@nestjs/testing';
+import request from 'supertest';
+import { TokenService } from '../../auth/services/tokens';
+import { VideoChapterService } from '../services/chapter.service';
+import { MAX_CHAPTERS } from '../utilities/chapterPayload';
+import { VideoChapterController } from './chapter.controller';
+
+jest.mock('../../auth/services/tokens', () => ({ TokenService: class {} }));
+jest.mock('../services/chapter.service', () => ({
+  VideoChapterService: class {},
+}));
+
+const mockDb: { data: Record<string, unknown>; reads: string[] } = {
+  data: {},
+  reads: [],
+};
+jest.mock('firebase-admin', () => ({
+  database: () => ({
+    ref: (path: string) => ({
+      get: async () => {
+        mockDb.reads.push(path);
+        const [root, id, child] = path.split('/');
+        const workspace = mockDb.data[`${root}/${id}`] as
+          | Record<string, unknown>
+          | undefined;
+        const value = child ? workspace?.[child] : workspace;
+        return { val: () => value ?? null };
+      },
+    }),
+  }),
+}));
+
+describe('VideoChapterController workspace access', () => {
+  let app: INestApplication;
+  const getChapters = jest.fn();
+  const saveChapters = jest.fn();
+  const enableChapters = jest.fn();
+
+  beforeAll(async () => {
+    const moduleRef = await Test.createTestingModule({
+      controllers: [VideoChapterController],
+      providers: [
+        {
+          provide: TokenService,
+          useValue: {
+            processToken: async (token: string, req: any) => {
+              if (!token.startsWith('uid-')) throw new Error('bad token');
+              req.user = { id: token };
+            },
+          },
+        },
+        {
+          provide: VideoChapterService,
+          useValue: { getChapters, saveChapters, enableChapters },
+        },
+      ],
+    }).compile();
+
+    app = moduleRef.createNestApplication({ logger: false });
+    await app.init();
+  });
+
+  afterAll(async () => {
+    await app.close();
+  });
+
+  beforeEach(() => {
+    jest.spyOn(console, 'log').mockImplementation(() => undefined);
+    mockDb.reads = [];
+    mockDb.data = {
+      'workspaces/ws1': {
+        admin: 'uid-admin',
+        members: [
+          { id: 'uid-admin' },
+          { id: 'uid-member' },
+          { id: 'uid-reader' },
+          { id: 'uid-teamer' },
+        ],
+        teams: [{ id: 'team1', members: [{ id: 'uid-teamer' }] }],
+        folders: [
+          {
+            id: 'folderRead',
+            access: { members: [{ uid: 'uid-member', access: 'READ' }] },
+          },
+        ],
+        videos: {
+          v1: { id: 'v1' },
+          // The reader may only read it.
+          vRead: {
+            id: 'vRead',
+            access: {
+              members: [
+                { uid: 'uid-reader', access: 'READ' },
+                { uid: 'uid-member', access: 'WRITE' },
+              ],
+            },
+          },
+          // Restricted to a team the member is not in.
+          vTeam: {
+            id: 'vTeam',
+            access: { teams: [{ teamId: 'team1', access: 'WRITE' }] },
+          },
+          // In a folder the member may only read.
+          vInFolder: { id: 'vInFolder', parentId: 'folderRead' },
+        },
+      },
+    };
+    getChapters.mockReset().mockResolvedValue({ status: true, data: [] });
+    saveChapters.mockReset().mockResolvedValue({ status: true, data: [] });
+    enableChapters.mockReset().mockResolvedValue({ status: true });
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  const as = (uid: string) => ({ Authorization: `Bearer ${uid}` });
+  const get = (uid: string, query: string, videoId = 'v1') =>
+    request(app.getHttpServer())
+      .get(`/video/chapter/${videoId}${query}`)
+      .set(as(uid));
+  const save = (uid: string, query: string, videoId = 'v1') =>
+    request(app.getHttpServer())
+      .post(`/video/chapter/save-changes/${videoId}${query}`)
+      .set(as(uid))
+      .field('chapters', '[]')
+      .field('chaptersBlobs', '[]');
+  const enable = (uid: string, query: string, videoId = 'v1') =>
+    request(app.getHttpServer())
+      .post(`/video/chapter/enable-chapters/${videoId}${query}`)
+      .set(as(uid))
+      .send({ chaptersEnabled: false });
+
+  describe('a signed-in user who is not in the workspace', () => {
+    it('cannot read the chapters', async () => {
+      await get('uid-stranger', '?workspaceId=ws1').expect(403);
+      expect(getChapters).not.toHaveBeenCalled();
+    });
+
+    it('cannot save chapters', async () => {
+      await save('uid-stranger', '?workspaceId=ws1').expect(403);
+      expect(saveChapters).not.toHaveBeenCalled();
+    });
+
+    it('cannot switch chapters on or off', async () => {
+      await enable('uid-stranger', '?workspaceId=ws1').expect(403);
+      expect(enableChapters).not.toHaveBeenCalled();
+    });
+
+    it('gets 403 for a workspace that does not exist', async () => {
+      await get('uid-member', '?workspaceId=missing').expect(403);
+      expect(getChapters).not.toHaveBeenCalled();
+    });
+
+    it('gets 403, without a database read, for an id that is not a plain id', async () => {
+      await get('uid-member', '?workspaceId=ws1%2Fmembers').expect(403);
+      expect(mockDb.reads).toEqual([]);
+    });
+
+    it('gets 403 when the workspace id is repeated', async () => {
+      await get('uid-member', '?workspaceId=ws1&workspaceId=ws1').expect(403);
+      expect(getChapters).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('a workspace member and the admin', () => {
+    it('can read the chapters', async () => {
+      await get('uid-member', '?workspaceId=ws1').expect(200);
+      expect(getChapters).toHaveBeenCalledWith('uid-member', 'v1', 'ws1');
+    });
+
+    it('can save chapters', async () => {
+      await save('uid-member', '?workspaceId=ws1').expect(201);
+      expect(saveChapters).toHaveBeenCalledTimes(1);
+    });
+
+    it('the admin can switch chapters off', async () => {
+      await enable('uid-admin', '?workspaceId=ws1').expect(201);
+      expect(enableChapters).toHaveBeenCalledWith(
+        'uid-admin',
+        'v1',
+        false,
+        'ws1',
+      );
+    });
+  });
+
+  describe('the permissions of the video itself', () => {
+    it('let a member who may only read the video read its chapters', async () => {
+      await get('uid-reader', '?workspaceId=ws1', 'vRead').expect(200);
+      expect(getChapters).toHaveBeenCalledTimes(1);
+    });
+
+    it('refuse to save or switch chapters for a member who may only read the video', async () => {
+      await save('uid-reader', '?workspaceId=ws1', 'vRead').expect(403);
+      await enable('uid-reader', '?workspaceId=ws1', 'vRead').expect(403);
+      expect(saveChapters).not.toHaveBeenCalled();
+      expect(enableChapters).not.toHaveBeenCalled();
+    });
+
+    it('let a member who may write the video save its chapters', async () => {
+      await save('uid-member', '?workspaceId=ws1', 'vRead').expect(201);
+      expect(saveChapters).toHaveBeenCalledTimes(1);
+    });
+
+    it('refuse a member who is in none of the teams the video lists', async () => {
+      await get('uid-member', '?workspaceId=ws1', 'vTeam').expect(403);
+      await save('uid-member', '?workspaceId=ws1', 'vTeam').expect(403);
+      expect(getChapters).not.toHaveBeenCalled();
+      expect(saveChapters).not.toHaveBeenCalled();
+    });
+
+    it('let a member of a listed team with WRITE save its chapters', async () => {
+      await save('uid-teamer', '?workspaceId=ws1', 'vTeam').expect(201);
+      expect(saveChapters).toHaveBeenCalledTimes(1);
+    });
+
+    it('refuse to save chapters of a video in a folder the member may only read', async () => {
+      await save('uid-member', '?workspaceId=ws1', 'vInFolder').expect(403);
+      expect(saveChapters).not.toHaveBeenCalled();
+    });
+
+    it('refuse a video id that matches no video of the workspace, for the admin too', async () => {
+      await get('uid-admin', '?workspaceId=ws1', 'missing').expect(403);
+      await enable('uid-admin', '?workspaceId=ws1', 'missing').expect(403);
+      expect(getChapters).not.toHaveBeenCalled();
+      expect(enableChapters).not.toHaveBeenCalled();
+    });
+
+    it('let the workspace admin save chapters of any video', async () => {
+      await save('uid-admin', '?workspaceId=ws1', 'vTeam').expect(201);
+      expect(saveChapters).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('the personal library (no workspace id)', () => {
+    it.each(['', '?workspaceId='])(
+      'still works for any signed-in user with query "%s"',
+      async (query) => {
+        await get('uid-stranger', query).expect(200);
+        await save('uid-stranger', query).expect(201);
+        await enable('uid-stranger', query).expect(201);
+        expect(mockDb.reads).toEqual([]);
+      },
+    );
+
+    // The video id goes into a database path, so it must be a plain id here too.
+    it.each(['a%2Fb', 'v1%2Fchapters', 'a.b'])(
+      'refuses the video id %s with 400',
+      async (videoId) => {
+        await get('uid-member', '', videoId).expect(400);
+        await save('uid-member', '', videoId).expect(400);
+        await enable('uid-member', '', videoId).expect(400);
+        expect(getChapters).not.toHaveBeenCalled();
+        expect(saveChapters).not.toHaveBeenCalled();
+        expect(enableChapters).not.toHaveBeenCalled();
+      },
+    );
+  });
+
+  describe('the chapters sent when saving', () => {
+    const saveWith = (chapters: string, chaptersBlobs = '[]') =>
+      request(app.getHttpServer())
+        .post('/video/chapter/save-changes/v1')
+        .set(as('uid-member'))
+        .field('chapters', chapters)
+        .field('chaptersBlobs', chaptersBlobs);
+
+    // What the portal and the extension editors send for each chapter.
+    const editorChapter = {
+      id: 'a1',
+      content: 'Intro',
+      timestamp: '00:00',
+      timestampSeconds: 0,
+      thumbnailURL: '',
+      refName: '',
+    };
+
+    it('are passed to the service as lists, shaped as the editors send them', async () => {
+      const chapters = [
+        editorChapter,
+        {
+          ...editorChapter,
+          id: 'b2',
+          timestamp: '01:05',
+          timestampSeconds: 65,
+          thumbnailURL: 'https://storage.example/b2.jpg?Signature=x',
+          refName: 'b2.jpg',
+        },
+      ];
+
+      await saveWith(JSON.stringify(chapters)).expect(201);
+      expect(saveChapters.mock.calls[0].slice(0, 4)).toStrictEqual([
+        'uid-member',
+        'v1',
+        chapters,
+        [],
+      ]);
+    });
+
+    it('give a chapter with no thumbnail URL an empty one before the service sees it', async () => {
+      const withoutURL = {
+        id: 'a1',
+        content: 'Intro',
+        timestamp: '00:00',
+        timestampSeconds: 0,
+        refName: '',
+      };
+
+      await saveWith(JSON.stringify([withoutURL])).expect(201);
+      expect(saveChapters.mock.calls[0][2]).toStrictEqual([
+        { ...withoutURL, thumbnailURL: '' },
+      ]);
+    });
+
+    it('reach the service without any field the editors do not send', async () => {
+      const extra = { ...editorChapter, isAdmin: true, views: { a: 1 } };
+
+      await saveWith(JSON.stringify([extra]), JSON.stringify([extra]))
+        .attach('blobs', Buffer.alloc(16, 1), {
+          filename: 'a1.jpg',
+          contentType: 'image/jpeg',
+        })
+        .expect(201);
+      expect(saveChapters).toHaveBeenCalledTimes(1);
+      const [, , chapters, chaptersBlobs] = saveChapters.mock.calls[0];
+      expect(chapters).toStrictEqual([editorChapter]);
+      expect(chaptersBlobs).toStrictEqual([editorChapter]);
+    });
+
+    it.each([
+      ['not JSON', '{oops', '[]'],
+      ['not a list', '{"id":"a1"}', '[]'],
+      [
+        'a chapter id that is not a plain id',
+        '[{"id":"../x","timestamp":"00:00"}]',
+        '[]',
+      ],
+      [
+        'a thumbnail name with a path in it',
+        '[{"id":"a1","timestamp":"00:00","refName":"../../x/videos/a.mp4"}]',
+        '[]',
+      ],
+      ['a blob list that is not JSON', '[]', '{oops'],
+      [
+        'a timestamp that is an object',
+        '[{"id":"a1","content":"x","timestamp":{"a":1}}]',
+        '[]',
+      ],
+      ['a chapter with no timestamp', '[{"id":"a1","content":"x"}]', '[]'],
+      [
+        'a timestampSeconds that is a string',
+        '[{"id":"a1","timestamp":"00:05","timestampSeconds":"5"}]',
+        '[]',
+      ],
+      [
+        'a thumbnail URL that is not text',
+        '[{"id":"a1","timestamp":"00:00","thumbnailURL":{"a":1}}]',
+        '[]',
+      ],
+    ])('are refused with 400 when %s', async (_name, chapters, blobs) => {
+      await saveWith(chapters, blobs).expect(400);
+      expect(saveChapters).not.toHaveBeenCalled();
+    });
+
+    it('are refused with 400 when a blob entry has a timestamp that is an object', async () => {
+      await saveWith('[]', '[{"id":"a1","timestamp":{"a":1}}]')
+        .attach('blobs', Buffer.alloc(16, 1), {
+          filename: 'a1.jpg',
+          contentType: 'image/jpeg',
+        })
+        .expect(400);
+      expect(saveChapters).not.toHaveBeenCalled();
+    });
+
+    it('are refused with 400 when a field is missing', async () => {
+      await request(app.getHttpServer())
+        .post('/video/chapter/save-changes/v1')
+        .set(as('uid-member'))
+        .field('chapters', '[]')
+        .expect(400);
+      expect(saveChapters).not.toHaveBeenCalled();
+    });
+  });
+
+  // The service pairs the n-th thumbnail with the n-th entry of `chaptersBlobs`, and multer keeps
+  // every uploaded file in memory, so the count and the size of the thumbnails are capped.
+  describe('the thumbnails sent when saving', () => {
+    // The editors send 1000x562 JPEG thumbnails of well under 1 MB.
+    const MAX_THUMBNAIL_BYTES = 2 * 1024 * 1024;
+    const blobList = (count: number) =>
+      JSON.stringify(
+        Array.from({ length: count }, (_, index) => ({
+          id: `chapter${index}`,
+          content: `Chapter ${index}`,
+          timestamp: '00:00',
+        })),
+      );
+    const thumbnails = (count: number, size = 16) =>
+      Array.from({ length: count }, () => Buffer.alloc(size, 1));
+    const saveWithThumbnails = (chaptersBlobs: string, files: Buffer[]) =>
+      files.reduce(
+        (req, file, index) =>
+          req.attach('blobs', file, {
+            filename: `thumbnail${index}.jpg`,
+            contentType: 'image/jpeg',
+          }),
+        request(app.getHttpServer())
+          .post('/video/chapter/save-changes/v1')
+          .set(as('uid-member'))
+          .field('chapters', '[]')
+          .field('chaptersBlobs', chaptersBlobs),
+      );
+
+    it('reach the service when there is one for each chapter', async () => {
+      await saveWithThumbnails(blobList(2), thumbnails(2)).expect(201);
+      expect(saveChapters).toHaveBeenCalledTimes(1);
+      expect(saveChapters.mock.calls[0][4]).toHaveLength(2);
+    });
+
+    // Multer's parser counts a file that reaches the cap as over it.
+    it('reach the service when one is just under the cap', async () => {
+      await saveWithThumbnails(
+        blobList(1),
+        thumbnails(1, MAX_THUMBNAIL_BYTES - 1),
+      ).expect(201);
+      expect(saveChapters).toHaveBeenCalledTimes(1);
+    });
+
+    it('are refused with 400 when there are more of them than chapters', async () => {
+      await saveWithThumbnails(blobList(1), thumbnails(2)).expect(400);
+      expect(saveChapters).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      [2, 1],
+      [1, 0],
+    ])(
+      'are refused with 400 when %i chapters come with %i thumbnails',
+      async (chapterCount, fileCount) => {
+        await saveWithThumbnails(
+          blobList(chapterCount),
+          thumbnails(fileCount),
+        ).expect(400);
+        expect(saveChapters).not.toHaveBeenCalled();
+      },
+    );
+
+    it('are refused with 413 when one is larger than the cap', async () => {
+      await saveWithThumbnails(
+        blobList(1),
+        thumbnails(1, MAX_THUMBNAIL_BYTES + 1),
+      ).expect(413);
+      expect(saveChapters).not.toHaveBeenCalled();
+    });
+
+    it('are refused with 400 while uploading when there are more than MAX_CHAPTERS', async () => {
+      const response = await saveWithThumbnails(
+        blobList(MAX_CHAPTERS),
+        thumbnails(MAX_CHAPTERS + 1),
+      ).expect(400);
+      // Refused by the upload limit, not by the count check after every file was read.
+      expect(response.body.message).toMatch(/too many files/i);
+      expect(saveChapters).not.toHaveBeenCalled();
+    });
+  });
+
+  it('gives an anonymous request 401', async () => {
+    await request(app.getHttpServer())
+      .get('/video/chapter/v1?workspaceId=ws1')
+      .expect(401);
+    expect(getChapters).not.toHaveBeenCalled();
+  });
+});

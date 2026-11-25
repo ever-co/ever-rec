@@ -7,9 +7,9 @@ import { VideoService } from '../video/video.service';
 import { AtlassianApiService } from 'src/services/atlassian/atlassian.api.service';
 import { Readable } from 'stream';
 import { ConfigService } from '@nestjs/config';
+import { OAuthStateService } from 'src/services/shared/oauth-state.service';
 const FormData = require('form-data');
 const getRawBody = require('raw-body');
-const fetch = require('node-fetch');
 
 @Injectable()
 export class AtlassianService {
@@ -19,6 +19,7 @@ export class AtlassianService {
     private readonly videoService: VideoService,
     private readonly atlassianApiService: AtlassianApiService,
     private readonly configService: ConfigService,
+    private readonly oauthStateService: OAuthStateService,
   ) {}
 
   async createJiraIssue(req): Promise<any> {
@@ -151,7 +152,7 @@ export class AtlassianService {
     ).filter((i) => i !== fail);
   }
 
-  async generateJiraAuthUrl(uid): Promise<any> {
+  async generateJiraAuthUrl(uid, binding: string): Promise<any> {
     const userData = await this.getUserData(uid);
     if (userData && userData.jiraAPISCredentials) {
       return {
@@ -160,11 +161,21 @@ export class AtlassianService {
           'You have already Jira integrated. Please refresh the page and try again.',
       };
     } else {
-      return this.atlassianApiService.generateOauthLink(uid);
+      return this.atlassianApiService.generateOauthLink(uid, binding);
     }
   }
 
-  async completeJiraOAuth(uid: string, code: string): Promise<any> {
+  async completeJiraOAuth(
+    state: string,
+    code: string,
+    binding?: string,
+  ): Promise<any> {
+    // The state is a one-time value issued for a signed-in user to the browser that asked for it
+    // (`binding`). Anything else: no exchange, no write.
+    const uid = await this.oauthStateService.consume(state, 'jira', binding);
+    if (!uid) {
+      return null;
+    }
     const res: any = await this.atlassianApiService.getAccessToken(code);
     if (res && res.status && res.status == ResStatusEnum.success && res.data) {
       const access_token = res.data.access_token;
@@ -399,38 +410,45 @@ export class AtlassianService {
     };
   }
 
+  /**
+   * The file of an item, read from the bucket. A streamed video is read from its master file too,
+   * never from its stored downloadUrl: the server must not fetch a URL a client could have written.
+   * It has no file (false) while its master file is not in the bucket yet, while that file is still
+   * the cut before a trim or a reset (`masterStale`), or when the bucket cannot be read.
+   */
   async getStreamFromFile(res, type = 'image') {
     const collection = type === 'image' ? 'screenshots' : 'videos';
     const userVal = res.dbData;
     const bucket = admin.storage().bucket();
     const streamData = userVal?.streamData;
 
-    if (!streamData) {
-      const readableStream = await bucket.file(
-        `users/${userVal.uid}/${collection}/${res.dbData.refName}`,
-      );
+    if (streamData?.masterStale) {
+      // It may still hold what the owner cut out.
+      return false;
+    }
+
+    const readableStream = await bucket.file(
+      `users/${userVal.uid}/${collection}/${res.dbData.refName}`,
+    );
+    const read = async () => {
+      if (streamData && !(await readableStream.exists())[0]) {
+        return false;
+      }
       const metadata = (await readableStream.getMetadata())[0];
       const buffer = await getRawBody(readableStream.createReadStream());
       return { buffer, size: metadata.size, name: metadata.name };
-    } else {
-      const steamResponse = await fetch(streamData.downloadUrl)
-        .then((res) => res.buffer())
-        .then((buffer) => {
-          return buffer;
-        })
-        .catch((err) => {
-          console.log(err, 'stream error');
-          return false;
-        });
-      if (steamResponse) {
-        return {
-          buffer: steamResponse,
-          size: steamResponse.byteLength,
-          name: new Date().getTime() + '.mp4',
-        };
-      }
+    };
+
+    if (!streamData) {
+      return read();
     }
-    return false;
+    try {
+      return await read();
+    } catch (error) {
+      // The issue or card is created without the video, as when it was fetched by link.
+      console.error(error);
+      return false;
+    }
   }
 
   async createTrelloCard(uid: string, req: any): Promise<any> {

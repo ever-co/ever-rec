@@ -22,8 +22,30 @@ import {
 } from '../Interfaces/Files';
 import { equal } from 'assert';
 import { WorkspaceSharedService } from './shared.service';
-import { evaluateAccess } from '../guards/utils';
+import { canAccessFolderById, evaluateAccess } from '../guards/utils';
 import { IUser } from 'src/interfaces/IUser';
+import { planFolderMove } from './folder-move';
+import {
+  changeWorkspaceFolders,
+  moveWorkspaceItem,
+} from './change-workspace-collection';
+
+// The first of the collections that holds `itemId` as an item. Own keys only: an id such as
+// `constructor` or `toString` is found on every plain object, and must not count as an item.
+function findOwnItem(
+  collections: Record<string, any>[],
+  itemId: string,
+): { collection: Record<string, any>; item: any } | undefined {
+  for (const collection of collections) {
+    const item = Object.prototype.hasOwnProperty.call(collection, itemId)
+      ? collection[itemId]
+      : undefined;
+    if (item && typeof item === 'object') {
+      return { collection, item };
+    }
+  }
+  return undefined;
+}
 
 @Injectable()
 export class WorkspaceFoldersService {
@@ -43,8 +65,8 @@ export class WorkspaceFoldersService {
     parentId: string | false = false,
   ): Promise<IDataResponse<IWorkspaceFolder[] | null>> {
     try {
-      const { workspaceVal, workspaceRef } =
-        await this.utilitiesService.getWorkspaceById(workspaceId);
+      // Throws for a workspace that does not exist, so no folder list is written for it.
+      await this.utilitiesService.getWorkspaceById(workspaceId);
       const newNestLevel = parentId === false ? 0 : nestLevel + 1;
 
       if (newNestLevel > 2) {
@@ -67,16 +89,17 @@ export class WorkspaceFoldersService {
         nestLevel: newNestLevel,
         color,
       };
-      const updatedFolders = {
-        ...workspaceVal.folders,
-        [id]: newFolder,
-      };
+      const result = await changeWorkspaceFolders(workspaceId, (folders) => ({
+        items: [...folders, newFolder],
+      }));
 
-      await workspaceRef.update({ folders: updatedFolders });
+      if (result.ok === false) {
+        return sendError(
+          result.message || 'Error while trying to add workspace folder.',
+        );
+      }
 
-      return sendResponse<IWorkspaceFolder[]>(
-        parseCollectionToArray(updatedFolders),
-      );
+      return sendResponse<IWorkspaceFolder[]>(result.items);
     } catch (e) {
       console.log(e);
       return sendError(
@@ -89,26 +112,45 @@ export class WorkspaceFoldersService {
     uid: string,
     workspaceId: string,
     folderId: string,
-    updatedFolder: IWorkspaceFolder,
+    changes: Pick<Partial<IWorkspaceFolder>, 'name' | 'color'>,
   ): Promise<
     IDataResponse<{ folders: IWorkspaceFolder[]; favFolders } | null>
   > {
     try {
-      const { workspaceVal, workspaceRef, db } =
-        await this.utilitiesService.getWorkspaceById(workspaceId);
+      const { db } = await this.utilitiesService.getWorkspaceById(workspaceId);
       const favFoldersRef = db.ref(`users/${uid}/favoriteFolders`);
       const favFoldersSnap = await favFoldersRef.get();
       const favFolders = favFoldersSnap.val();
-      const folders = parseCollectionToArray(workspaceVal.folders);
-      const folderIndex = folders.findIndex((x) => x.id === folderId);
 
-      if (folderIndex === -1) {
-        return sendError('Folder not found.');
+      const result = await changeWorkspaceFolders(workspaceId, (stored) => {
+        const folderIndex = stored.findIndex((x) => x.id === folderId);
+
+        if (folderIndex === -1) {
+          return { error: 'Folder not found.' };
+        }
+
+        // Only the approved fields change; the stored folder keeps everything else, `access`
+        // included (permissions are changed on their own route) and the item count the server
+        // keeps.
+        const changedFolder: IWorkspaceFolder = { ...stored[folderIndex] };
+        for (const key of ['name', 'color'] as const) {
+          if (changes?.[key] !== undefined && changes[key] !== null) {
+            (changedFolder as any)[key] = changes[key];
+          }
+        }
+        stored[folderIndex] = changedFolder;
+
+        return { items: stored };
+      });
+
+      if (result.ok === false) {
+        return sendError(
+          result.message || 'Error while trying to update workspace folder.',
+        );
       }
 
-      folders[folderIndex] = updatedFolder;
-      // TODO make sure updatedFolder only changes a set approved values
-      //  think about ADMIN, permissions etc
+      const folders = result.items;
+      const updatedFolder = folders.find((x) => x.id === folderId);
 
       const parsedFavWorkspaceFolders = favFolders?.workspaces
         ? parseCollectionToArray(favFolders.workspaces[workspaceId])
@@ -121,10 +163,7 @@ export class WorkspaceFoldersService {
         parsedFavWorkspaceFolders[favFolderIndex].name = updatedFolder.name;
       }
 
-      await Promise.all([
-        workspaceRef.update({ folders: parseCollectionToIdValueObj(folders) }),
-        favFoldersRef.set(favFolders),
-      ]);
+      await favFoldersRef.set(favFolders);
 
       return sendResponse<{
         folders: IWorkspaceFolder[];
@@ -138,6 +177,36 @@ export class WorkspaceFoldersService {
     }
   }
 
+  // Moves a folder, with its subfolders and items, under another folder or to the top level.
+  async moveFolder(
+    workspaceId: string,
+    folderId: string,
+    newParentId: string | false,
+  ): Promise<IDataResponse<IWorkspaceFolder[] | null>> {
+    try {
+      const result = await changeWorkspaceFolders(workspaceId, (folders) => {
+        const plan = planFolderMove(folders, folderId, newParentId);
+
+        if (!plan.ok) {
+          return { error: plan.message };
+        }
+
+        return plan.changed ? { items: plan.folders } : {};
+      });
+
+      if (result.ok === false) {
+        return sendError(
+          result.message || 'Error while trying to move workspace folder.',
+        );
+      }
+
+      return sendResponse<IWorkspaceFolder[]>(result.items);
+    } catch (e) {
+      console.log(e);
+      return sendError('Error while trying to move workspace folder.');
+    }
+  }
+
   async deleteFolder(
     uid: string,
     workspaceId: string,
@@ -147,11 +216,8 @@ export class WorkspaceFoldersService {
     IDataResponse<(IWorkspace & { favFolders: IFavoriteFolders }) | null>
   > {
     try {
-      const { workspaceVal, workspaceRef, db } =
+      const { workspaceVal, workspaceRef } =
         await this.utilitiesService.getWorkspaceById(workspaceId);
-      const folders = parseCollectionToArray(workspaceVal.folders);
-      const screenshots = parseCollectionToArray(workspaceVal.screenshots);
-      const videos = parseCollectionToArray(workspaceVal.videos);
 
       const favFolders =
         await this.foldersSharedService.addRemoveFavoriteService(
@@ -162,11 +228,47 @@ export class WorkspaceFoldersService {
           true,
         );
 
-      const { updatedFolders, deletedFolders } =
-        this.utilitiesService.removeChildFoldersRecursive(folders, [folderId]);
+      // The folder and its subfolders leave the stored folder list in one transaction. Their items
+      // move to the top level, so they no longer count in the folders above the deleted one.
+      let deletedFolders: IWorkspaceFolder[] = [];
+      const result = await changeWorkspaceFolders(workspaceId, (folders) => {
+        // The stored parent, not `currentFolderId` from the request: the folder may have been
+        // moved meanwhile, and the counts to lower are those of the folders above it now.
+        const deletedFolder = folders.find((x) => x.id === folderId);
+        const parentId = deletedFolder?.parentId || false;
+        // The folder's stored count, which includes its subfolders, as a folder move uses it: not
+        // the items read above, since an item uploaded into the folder or moved out of it meanwhile
+        // has already changed the counts in its own transaction.
+        const movedItems =
+          typeof deletedFolder?.items === 'number' &&
+          Number.isFinite(deletedFolder.items)
+            ? deletedFolder.items
+            : 0;
+        const removed = this.utilitiesService.removeChildFoldersRecursive(
+          folders,
+          [folderId],
+        );
+        deletedFolders = removed.deletedFolders;
+
+        // Recursively remove item count based on removed items
+        return {
+          items: this.utilitiesService.changeFolderItemCountRecursive(
+            removed.updatedFolders,
+            parentId,
+            0 - movedItems,
+          ),
+        };
+      });
+
+      if (result.ok === false) {
+        return sendError(
+          result.message || 'Error while trying to delete workspace folder.',
+        );
+      }
+
+      const updatedFolders = result.items;
 
       // Remove parentId of items from deletedFolders
-      let changeCount = 0;
       const deletedFolderIds = await promiseAllSettled(
         deletedFolders.map(async (deletedFolder) => {
           if (deletedFolder.isFavoredBy) {
@@ -183,38 +285,37 @@ export class WorkspaceFoldersService {
         }),
       );
 
-      const updatedScreenshots = screenshots.map((screenshot) => {
+      // The items move from the lists stored now, not the ones read above: an item uploaded into a
+      // deleted folder meanwhile would keep a folder that is gone. Only their `parentId` is
+      // written: a write of the whole lists would undo every item added, changed or deleted.
+      const [storedScreenshots, storedVideos] = await Promise.all([
+        workspaceRef.child('screenshots').get(),
+        workspaceRef.child('videos').get(),
+      ]);
+      const movedItems: Record<string, false> = {};
+      const updatedScreenshots = parseCollectionToArray(
+        storedScreenshots.val(),
+      ).map((screenshot) => {
         if (deletedFolderIds.includes(screenshot.parentId)) {
-          changeCount--;
+          movedItems[`screenshots/${screenshot.id}/parentId`] = false;
           return { ...screenshot, parentId: false };
         }
         return screenshot;
       });
 
-      const updatedVideos = videos.map((video) => {
-        if (deletedFolderIds.includes(video.parentId)) {
-          changeCount--;
-          return { ...video, parentId: false };
-        }
-        return video;
-      });
-
-      const updatedScreenshotsMap =
-        parseCollectionToIdValueObj(updatedScreenshots);
-      const updatedVideosMap = parseCollectionToIdValueObj(updatedVideos);
-
-      // Recursively remove item count based on removed items
-      this.utilitiesService.changeFolderItemCountRecursive(
-        updatedFolders,
-        currentFolderId,
-        changeCount,
+      const updatedVideos = parseCollectionToArray(storedVideos.val()).map(
+        (video) => {
+          if (deletedFolderIds.includes(video.parentId)) {
+            movedItems[`videos/${video.id}/parentId`] = false;
+            return { ...video, parentId: false };
+          }
+          return video;
+        },
       );
 
-      await workspaceRef.update({
-        folders: parseCollectionToIdValueObj(updatedFolders),
-        screenshots: updatedScreenshotsMap,
-        videos: updatedVideosMap,
-      });
+      if (Object.keys(movedItems).length > 0) {
+        await workspaceRef.update(movedItems);
+      }
 
       const updatedWorkspace = await this.utilitiesService.parseWorkspaceItems({
         ...workspaceVal,
@@ -237,15 +338,19 @@ export class WorkspaceFoldersService {
     }
   }
 
+  /**
+   * Moves the items `itemIds` into the folder `toMoveFolderId`. Each item is counted out of the
+   * folder it is stored in, not out of the `fromFolderId` a client sends (still accepted by the
+   * route, for older clients): that one may be wrong, or out of date after a move made meanwhile.
+   */
   async moveItemsToFolder(
     user: IUser,
     workspaceId: string,
     itemIds: string[],
     toMoveFolderId: string | false,
-    fromFolderId: string | false,
   ): Promise<IDataResponse<IWorkspace | null>> {
     try {
-      const { workspaceVal, workspaceRef } =
+      const { workspaceVal } =
         await this.utilitiesService.getWorkspaceById(workspaceId);
 
       // This makes sure even if we have no videos/images in workspace (undefined)
@@ -253,12 +358,28 @@ export class WorkspaceFoldersService {
       // it will be converted to object for us to work with.
       const screenshots = parseCollectionToIdValueObj(workspaceVal.screenshots);
       const videos = parseCollectionToIdValueObj(workspaceVal.videos);
-      let folders = parseCollectionToArray(workspaceVal.folders);
+      // Only the moved items are written, each in a transaction of its own, and the folder counts
+      // in one transaction: a write of the whole workspace read above would undo every change made
+      // meanwhile, a member removed or a folder taken away from a member included.
+      const toMove: Array<{
+        collection: Record<string, any>;
+        collectionName: 'screenshots' | 'videos';
+        itemId: string;
+      }> = [];
 
-      for (let i = 0; i < itemIds.length; i++) {
-        const itemId = itemIds[i];
-        const collection = screenshots[itemId] ? screenshots : videos;
-        const item = collection[itemId];
+      // Each item once, however often the request names it.
+      for (const itemId of new Set(itemIds)) {
+        const found = findOwnItem([screenshots, videos], itemId);
+
+        // An id that is in neither collection is not moved: writing to it would create an item
+        // that holds only a `parentId`, and change the folder counts for something that is not there.
+        if (!found) {
+          return sendError('Item not found.');
+        }
+        const { collection, item } = found;
+        const collectionName =
+          collection === screenshots ? 'screenshots' : 'videos';
+
         let hasAccess =
           workspaceVal?.admin === user?.id || item?.uid === user?.id;
 
@@ -271,12 +392,65 @@ export class WorkspaceFoldersService {
           );
         }
 
-        if (hasAccess) {
-          collection[itemId] = {
-            ...item,
-            parentId: toMoveFolderId,
-          };
+        // Moving an item out of a folder changes that folder: the user needs WRITE on the folder
+        // the item is in now (its stored `parentId`, not `fromFolderId` from the body), as on the
+        // single-data route. The destination is checked by the folder guard on the route.
+        if (
+          hasAccess &&
+          !canAccessFolderById(
+            item?.parentId,
+            workspaceVal,
+            user,
+            PermissionAccessEnum.WRITE,
+          )
+        ) {
+          hasAccess = false;
+        }
 
+        if (hasAccess) {
+          toMove.push({ collection, collectionName, itemId });
+        } else {
+          return sendError('Insuffucient permissions');
+        }
+      }
+
+      // Each item changes folder in a transaction of its own, which answers the folder it was in:
+      // two moves of one item at the same time each see where the other left it, and an item
+      // deleted meanwhile is not written.
+      const moves = await Promise.all(
+        toMove.map(({ collectionName, itemId }) =>
+          moveWorkspaceItem(
+            workspaceId,
+            collectionName,
+            itemId,
+            toMoveFolderId,
+          ),
+        ),
+      );
+      const movedFrom: Array<string | false> = [];
+      toMove.forEach(({ collection, itemId }, i) => {
+        const move = moves[i];
+        if (move.ok === false) {
+          return;
+        }
+        if (move.moved) {
+          movedFrom.push(move.from);
+        }
+        if (move.item) {
+          collection[itemId] = move.item;
+        } else {
+          delete collection[itemId];
+        }
+      });
+
+      // Only the items whose folder changed count: out of the folder each one was in, into the
+      // destination. Nothing changed, nothing is written.
+      const counted = await changeWorkspaceFolders(workspaceId, (stored) => {
+        if (movedFrom.length === 0) {
+          return {};
+        }
+        let folders = stored;
+        for (const from of movedFrom) {
           // Recursively add item count to parent folders
           folders = this.utilitiesService.changeFolderItemCountRecursive(
             folders,
@@ -287,26 +461,27 @@ export class WorkspaceFoldersService {
           // Recursively remove item count to parent folders
           folders = this.utilitiesService.changeFolderItemCountRecursive(
             folders,
-            fromFolderId,
+            from,
             -1,
           );
-        } else {
-          return sendError('Insuffucient permissions');
         }
+
+        return { items: folders };
+      });
+
+      if (counted.ok === false || moves.some((move) => move.ok === false)) {
+        return sendError('Error while trying to move items to new folder.');
       }
 
       const updatedWorkspace = {
         ...workspaceVal,
-        folders,
+        folders: counted.items,
         screenshots,
         videos,
       };
 
-      await workspaceRef.update(updatedWorkspace);
-
-      const parsedWorkspace = await this.utilitiesService.parseWorkspaceItems(
-        updatedWorkspace,
-      );
+      const parsedWorkspace =
+        await this.utilitiesService.parseWorkspaceItems(updatedWorkspace);
 
       return sendResponse(parsedWorkspace);
     } catch (e) {

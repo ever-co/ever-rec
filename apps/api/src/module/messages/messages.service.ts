@@ -69,7 +69,7 @@ export class MessagesService {
             'WEBSITE_URL',
           )}/image/shared/${resData.sharedLink}`;
         } else {
-          const sharedCode = await this.videoService.share(uid, id);
+          const sharedCode = await this.imageService.share(uid, id);
           sharedLink = `${this.configService.get<string>(
             'WEBSITE_URL',
           )}/image/shared/${sharedCode}`;

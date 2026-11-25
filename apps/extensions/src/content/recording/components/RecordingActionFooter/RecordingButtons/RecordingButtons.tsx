@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import ControllerButton from '@/content/overlay/components/recordingContent/controllerButton/ControllerButton';
 import IRecordingActionsProps from '@/content/recording/interfaces/IRecordingActionsProps';
 
@@ -12,7 +13,9 @@ const RecordingButtons: React.FC<IRecordingActionsProps> = ({
   muteOrUnmute,
   cancelRecording,
 }) => {
+  const { t } = useTranslation();
   const subFolder = '/recordingWindowIcons';
+  const canMute = !microphoneMuted && microphoneEnabled;
 
   return (
     <div id="recording-window-overwrite" className="rec-main">
@@ -21,6 +24,7 @@ const RecordingButtons: React.FC<IRecordingActionsProps> = ({
         onClick={stopRecording}
         subFoldersWithPrefix={subFolder}
         imgSource="button-stop-red-fill.svg"
+        label={t('ext.recordingControls.stop')}
       ></ControllerButton>
       {recordingStatus === 'recording' ? (
         <ControllerButton
@@ -28,6 +32,7 @@ const RecordingButtons: React.FC<IRecordingActionsProps> = ({
           onClick={pauseRecording}
           subFoldersWithPrefix={subFolder}
           imgSource="button-pause-grey.svg"
+          label={t('ext.recordingControls.pause')}
         ></ControllerButton>
       ) : (
         <ControllerButton
@@ -35,30 +40,28 @@ const RecordingButtons: React.FC<IRecordingActionsProps> = ({
           onClick={resumeRecording}
           subFoldersWithPrefix={subFolder}
           imgSource="button-play-grey.svg"
+          label={t('ext.recordingControls.resume')}
         ></ControllerButton>
       )}
-      {!microphoneMuted && microphoneEnabled && (
-        <ControllerButton
-          className="micButton"
-          onClick={() => muteOrUnmute(true)}
-          subFoldersWithPrefix={subFolder}
-          imgSource="button-unmute.svg"
-        />
-      )}
-      {(microphoneMuted || !microphoneEnabled) && (
-        <ControllerButton
-          className="micButton"
-          onClick={() => muteOrUnmute(false)}
-          subFoldersWithPrefix={subFolder}
-          imgSource="button-mute.svg"
-          disabled={!microphoneEnabled}
-        ></ControllerButton>
-      )}
+      {/* One mounted button, so keyboard focus survives a mute toggle. */}
+      <ControllerButton
+        className="micButton"
+        onClick={() => muteOrUnmute(canMute)}
+        subFoldersWithPrefix={subFolder}
+        imgSource={canMute ? 'button-unmute.svg' : 'button-mute.svg'}
+        disabled={!microphoneEnabled}
+        label={
+          canMute
+            ? t('ext.recordingControls.mute')
+            : t('ext.recordingControls.unmute')
+        }
+      ></ControllerButton>
       <ControllerButton
         className="binButton"
         onClick={cancelRecording}
         subFoldersWithPrefix={subFolder}
         imgSource="button-bin-grey.svg"
+        label={t('ext.recordingControls.cancel')}
       ></ControllerButton>
     </div>
   );

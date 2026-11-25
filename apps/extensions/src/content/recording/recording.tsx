@@ -7,6 +7,8 @@ import CameraOnlyScreen from './screens/cameraOnlyScreen/CameraOnlyScreen';
 import DesktopCaptureScreen from './screens/desktopCaptureScreen/DesktopCaptureScreen';
 import '@/content/popup/assets/tailwind.scss';
 import '@/app/utilities/initiateSentryReact';
+// Without this, useTranslation on this page returns the raw keys.
+import '../../../i18n/config';
 
 const Recording: React.FC = () => {
   //? add authentication?

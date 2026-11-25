@@ -11,14 +11,24 @@ import AppButton2 from 'components/controls/AppButton2';
 import CommentElement, { IComment } from '../CommentElement/CommentElement';
 import { errorMessage, infoMessage } from 'app/services/helpers/toastMessages';
 import { useTranslation } from 'react-i18next';
+import { ItemType } from 'app/interfaces/ItemType';
 
 interface IProps {
   userId: string;
   itemOwnerId: string;
   itemId: string;
+  itemType?: ItemType;
+  // Comments are stored under a user's own item; workspace items have no comment storage, so
+  // the box is not shown (and nothing is requested) for them.
+  isWorkspace?: boolean;
 }
 
-const VideoComments: FC<IProps> = ({ userId, itemOwnerId, itemId }) => {
+const VideoCommentsBox: FC<Omit<IProps, 'isWorkspace'>> = ({
+  userId,
+  itemOwnerId,
+  itemId,
+  itemType = 'video',
+}) => {
   const { t } = useTranslation();
   const [showNotification, setShowNotification] = useState(true);
   const [comments, setComments] = useState<IComment[] | null>(null);
@@ -30,14 +40,14 @@ const VideoComments: FC<IProps> = ({ userId, itemOwnerId, itemId }) => {
     if (!itemId || !itemOwnerId) return;
 
     const response = await getUpdatedComments(
-      'video',
+      itemType,
       itemId,
       false,
       itemOwnerId,
     );
     setComments(response.comments);
     return response.comments;
-  }, [itemId, itemOwnerId]);
+  }, [itemId, itemOwnerId, itemType]);
 
   useEffect(() => {
     getComments();
@@ -61,7 +71,7 @@ const VideoComments: FC<IProps> = ({ userId, itemOwnerId, itemId }) => {
     setAddCommentDisabled(true);
 
     const response = await addComment(
-      'video',
+      itemType,
       itemOwnerId,
       itemId,
       userComment,
@@ -102,7 +112,7 @@ const VideoComments: FC<IProps> = ({ userId, itemOwnerId, itemId }) => {
     if (!newCommentValue) return;
 
     const response = await updateComment(
-      'video',
+      itemType,
       itemOwnerId,
       itemId,
       comment.id,
@@ -129,7 +139,7 @@ const VideoComments: FC<IProps> = ({ userId, itemOwnerId, itemId }) => {
     if (!userId || !itemId || !commentId || !itemOwnerId) return;
 
     const response = await deleteComment(
-      'video',
+      itemType,
       itemOwnerId,
       itemId,
       commentId,
@@ -198,5 +208,8 @@ const VideoComments: FC<IProps> = ({ userId, itemOwnerId, itemId }) => {
     </div>
   );
 };
+
+const VideoComments: FC<IProps> = ({ isWorkspace, ...props }) =>
+  isWorkspace ? null : <VideoCommentsBox {...props} />;
 
 export default VideoComments;

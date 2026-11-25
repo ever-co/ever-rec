@@ -24,6 +24,8 @@
       "inviteLinkError": "Could not create the workspace invite link.",
       "copyError": "Could not copy.",
       "add3Chapters": "Please add at least 3 chapters.",
+      "tooManyChapters": "A video can have at most {{max}} chapters. Remove some to save.",
+      "chapterTitleTooLong": "Chapter titles can have at most {{max}} characters. Shorten the long ones to save.",
       "chaptersSaved": "Chapters saved successfully.",
       "noSourceURL": "This image doesn't have a source URL.",
       "problemDeletingVideo": "There was a problem trying to delete your video.",
@@ -108,6 +110,7 @@
     "dropFiles": "Drop the files here...",
     "logoDescription": "Upload a logo or avatar to your workspace. JPG or PNG format only. The maximum file size is 30 KB.",
     "invitedToJoin": "has invited you to join",
+    "joinWorkspaceOnRec": "workspace <1>{{workspaceName}}</1> on Rec.",
     "workspaceMembers": "Workspace Members",
     "teamMembers": "Team Members",
     "teams": "Teams",
@@ -275,9 +278,242 @@
     "bin": "Trash",
     "back": "Back",
     "profileSettings": "Profile Settings",
+    "everPlatform": "Ever Platform",
     "companyProfile": "Company Profile"
   },
   "page": {
+    "everPlatform": {
+      "title": "Ever Platform",
+      "loading": "Loading…",
+      "unavailable": "This page is not available.",
+      "statistics": {
+        "title": "Anonymous usage statistics",
+        "description": "This installation sends counts and feature flags only, never names, e-mails or files. You can turn it off here or with EVER_STATS_ENABLED=false.",
+        "docs": "What is sent, and how to verify it",
+        "toggle": "Send anonymous usage statistics",
+        "turnedOn": "Anonymous usage statistics are on.",
+        "turnedOff": "Anonymous usage statistics are off: nothing is sent.",
+        "cloudManaged": "Managed by Ever Cloud",
+        "stateOn": "On",
+        "stateOff": "Off",
+        "reason": {
+          "env": "set by the server configuration",
+          "ui": "switched off in Settings",
+          "cloud-managed": "managed by Ever Cloud"
+        },
+        "nextSend": "Next report",
+        "lastSent": "Last report sent",
+        "instanceId": "Instance id",
+        "keyId": "Statistics key id",
+        "installSource": "Install source",
+        "country": "Country",
+        "keyUnreadable": "The statistics key of this installation cannot be read (REC_JWT_SECRET changed?): nothing is sent until you reset the instance identity.",
+        "sendNow": "Send now",
+        "sent": "Done: see the last payload below.",
+        "recount": "Recount now",
+        "recountStarted": "Recount started; the counts update in a few minutes.",
+        "reset": "Reset instance identity",
+        "resetTitle": "Reset the instance identity?",
+        "resetConfirm": "This installation gets a new random instance id and a new statistics key, and the list of past reports is cleared. Ever Platform will see it as a new installation.",
+        "resetDone": "The instance identity was reset.",
+        "resetHint": "Ever Platform knows this instance id with another key: reset the instance identity.",
+        "whatIsSent": "What is sent",
+        "lastPayload": "Last payload",
+        "noReport": "No report has been sent yet."
+      },
+      "errors": {
+        "generic": "That did not work. Please try again.",
+        "stats_disabled": "Anonymous usage statistics are switched off: nothing was sent.",
+        "rate_limited": "Send now can be used once every 10 minutes.",
+        "cloud_managed": "Managed by Ever Cloud: this switch cannot be changed here.",
+        "no_destination": "The statistics address of this server cannot be used: nothing was sent.",
+        "busy": "Another report is being sent right now. Try again in a few minutes.",
+        "refused_until_upgrade": "Ever Platform does not accept the reports of this version: nothing is sent until Rec is upgraded."
+      },
+      "tabs": {
+        "statistics": "Statistics",
+        "connection": "Connection",
+        "link": "Organization link",
+        "integrations": "Integrations & data",
+        "managed": "Maintenance operations",
+        "audit": "Audit"
+      },
+      "connect": {
+        "docs": "What is sent, when, and how to verify it",
+        "operatedByCloud": "Operated by Ever Cloud",
+        "refresh": "Refresh",
+        "refreshed": "Refreshed.",
+        "retry": "Try again",
+        "noWorkspace": "You do not administer any workspace yet. The admin of a workspace links it to an Ever organization here.",
+        "status": {
+          "not_connected": "Not connected",
+          "active": "Connected",
+          "pending_approval": "Waiting for approval in app.ever.co",
+          "revoked": "Revoked in Ever Platform",
+          "disconnected": "Disconnected"
+        },
+        "connection": {
+          "title": "Connect this installation to Ever Platform",
+          "description": "Connect with a code from app.ever.co: workspaces can then be linked to an Ever organization (ever.co/<handle>), and the organization can enable integrations after a recorded consent. Nothing is sent until you connect, and Ever Rec keeps working the same whatever happens to the connection.",
+          "code": "Connect code",
+          "workspace": "First workspace to link (one you administer)",
+          "whatIsSent": "Connecting sends:",
+          "sentProduct": "the product (Ever Rec) and its version ({{version}})",
+          "sentInstallSource": "how it was installed ({{source}})",
+          "sentWorkspace": "the id and name of the workspace you pick",
+          "sentKey": "the public key of this installation's connection key",
+          "notSent": "No address of this installation, no user, no e-mail and no file is sent.",
+          "connect": "Connect this installation",
+          "connected": "Connected.",
+          "status": "Status",
+          "platform": "Ever Platform",
+          "instanceId": "Installation id in Ever Platform",
+          "keyId": "Connection key id",
+          "lastHeartbeat": "Last heartbeat",
+          "linkedWorkspaces": "Linked workspaces",
+          "publicUrl": "Public address of this installation",
+          "publicUrlHint": "Sent only after the organization enabled \"Installation address\" in app.ever.co.",
+          "savePublicUrl": "Save address",
+          "publicUrlSaved": "The address was saved and sent.",
+          "rotate": "Rotate connection key",
+          "rotateTitle": "Rotate the connection key?",
+          "rotateConfirm": "A new connection key is created and used once Ever Platform accepted it. The anonymous usage statistics are not affected.",
+          "rotated": "The connection key was rotated.",
+          "disconnect": "Disconnect",
+          "disconnectTitle": "Disconnect from Ever Platform?",
+          "disconnectConfirm": "Ever Platform is told, then every integration is switched off, every workspace link is ended and the entitlements are deleted here. Ever Rec itself and the anonymous usage statistics are not affected. You can connect again with a new code.",
+          "disconnected": "Disconnected."
+        },
+        "link": {
+          "description": "Link this workspace to its Ever organization with a link code from app.ever.co.",
+          "notConnected": "This installation is not connected to Ever Platform: its operator connects it first.",
+          "link": "Link workspace",
+          "linked": "The workspace is linked.",
+          "sameOrg": "The workspace is linked. Another workspace of this installation is linked to the same organization.",
+          "state": "State",
+          "plan": "Plan",
+          "linkedAt": "Linked",
+          "states": {
+            "active": "Linked",
+            "suspended": "Suspended by Ever Platform",
+            "orphaned": "Orphaned",
+            "unlinked": "Unlinked"
+          },
+          "unlink": "Unlink",
+          "unlinkTitle": "Unlink this workspace?",
+          "unlinkConfirm": "Ever Platform is told, and the integrations of this link stop. The workspace and its content stay as they are.",
+          "unlinked": "The workspace is unlinked."
+        },
+        "ladder": {
+          "grace": "Entitlements could not be refreshed since {{date}}. Ever Platform features keep working for now.",
+          "paused": "Ever Platform features are paused: the entitlements could not be refreshed for more than 30 days. Ever Rec itself keeps working.",
+          "revoked": "Ever Platform revoked this installation. Ever Rec itself keeps working.",
+          "reconnect": "Reconnect to Ever Platform"
+        },
+        "integrations": {
+          "description": "Nothing is enabled here: each integration is enabled by the organization in app.ever.co, after a recorded consent, and can be switched off here at any time.",
+          "showScope": "Show scope",
+          "enable": "Enable…",
+          "openConsent": "Open the consent screen in app.ever.co",
+          "disable": "Disable",
+          "accept": "Accept",
+          "decline": "Decline",
+          "allowed": "Allowed for every workspace",
+          "deniedByEnv": "Denied by the server configuration",
+          "pendingRevoke": "Switched off here; Ever Platform is told as soon as it can be reached.",
+          "states": {
+            "available": "Available",
+            "enabled": "Enabled",
+            "disabled": "Disabled",
+            "revoked": "Revoked",
+            "revoked_remote": "Revoked in app.ever.co",
+            "denied_by_policy": "Denied by policy",
+            "pending_operator": "Waiting for the operator",
+            "declined": "Declined",
+            "coming_soon": "Coming soon",
+            "not_available": "Not available"
+          },
+          "consentState": {
+            "denied_by_policy": "This integration is denied by the policy of this installation.",
+            "coming_soon": "This integration is not available yet.",
+            "not_connected": "This installation is not connected to Ever Platform."
+          },
+          "directions": {
+            "to_ever": "Sent to Ever Platform",
+            "from_ever": "Received from Ever Platform"
+          },
+          "scope": {
+            "field": "Data",
+            "direction": "Direction",
+            "frequency": "When",
+            "purpose": "Why",
+            "retention": "Kept"
+          }
+        },
+        "audit": {
+          "empty": "Nothing recorded yet.",
+          "at": "When",
+          "action": "What",
+          "actor": "Who",
+          "details": "Details",
+          "more": "Load more"
+        },
+        "errors": {
+          "invalid_connect_code": "A connect code reads EVC-XXXX-XXXX-XXXX.",
+          "invalid_link_code": "A link code reads EVL-XXXX-XXXX-XXXX.",
+          "already_connected": "This installation is already connected.",
+          "already_linked": "This workspace is already linked.",
+          "not_connected": "This installation is not connected to Ever Platform.",
+          "not_linked": "This workspace is not linked.",
+          "not_workspace_admin": "Pick a workspace you administer.",
+          "at_rest_key_default": "Set your own REC_JWT_SECRET first: the connection key is stored encrypted with a key derived from it.",
+          "no_platform_url": "The Ever Platform address of this server (EVER_PLATFORM_API_URL) cannot be used.",
+          "consent_required": "The address is sent only after the organization enabled \"Installation address\" in app.ever.co.",
+          "invalid_url": "Enter an https address without credentials, query or fragment.",
+          "denied_by_env": "The server configuration (EVER_CONNECT_INTEGRATIONS_DENY) denies this integration.",
+          "denied_by_policy": "This integration is denied by the policy of this installation.",
+          "not_pending_operator": "This integration is not waiting for the operator.",
+          "invalid_managed": "Check the kinds, the window (HH:MM, UTC) and the backup directory (an absolute path).",
+          "connect_code_refused": "Ever Platform did not accept this connect code (unknown, already used or expired). Create a new one in app.ever.co.",
+          "entitlement_unverified": "Ever Platform sent a document that does not verify, so nothing was stored. Try again later.",
+          "platform_unavailable": "Ever Platform is not available right now. Try again later.",
+          "platform_unreachable": "Ever Platform cannot be reached from this server. Check its outbound connection and try again.",
+          "platform_timeout": "Ever Platform did not answer in time. Try again later.",
+          "platform_rate_limited": "Ever Platform asks this server to wait before the next request. Try again later.",
+          "platform_refused": "Ever Platform refused the request.",
+          "platform_keys_unverified": "The signing keys of Ever Platform do not verify, so nothing was stored. Try again later.",
+          "platform_answer_too_large": "Ever Platform sent an answer that is too large. Try again later.",
+          "platform_egress_refused": "This server did not follow an address outside Ever Platform. Try again later.",
+          "connection_revoked": "Ever Platform revoked the connection of this installation. Connect again with a new code.",
+          "rate_limited": "Too many requests. Try again in a minute."
+        },
+        "managed": {
+          "description": "An owner of the linked organization can ask from app.ever.co for a health report, a backup or a check of the last backup. Nothing runs unless the organization enabled \"Maintenance operations\" in app.ever.co and you opt in here, for the kinds you allow, in your window. Updates are not run from here.",
+          "optIn": "Allow maintenance operations requested from app.ever.co",
+          "window": "Window",
+          "backupDir": "Backup directory (an absolute path on this server)",
+          "backupDirSet": "Set (not shown); type a new path to change it",
+          "whatTheyGet": "Ever Platform receives the status, the version and sizes only: never a path, a file name or any data.",
+          "save": "Save",
+          "saved": "Saved.",
+          "kinds": {
+            "health_report": "Health report",
+            "backup": "Backup",
+            "restore_check": "Check the last backup",
+            "update": "Update"
+          },
+          "days": {
+            "0": "Sun",
+            "1": "Mon",
+            "2": "Tue",
+            "3": "Wed",
+            "4": "Thu",
+            "5": "Fri",
+            "6": "Sat"
+          }
+        }
+      }
+    },
     "install": {
       "completedGuide": "You have completed this guide!",
       "clickRightSideExtension": "Click the extension icon on the right side of the address bar to start using this tool.",
@@ -324,6 +560,8 @@
       "copyToClipboard": "Copy to Clipboard",
       "generateShareableLink": "Generate a Shareable Link",
       "shareableLink": "Shareable link:",
+      "copyEmbedCode": "Copy embed code",
+      "embedCodeCopied": "Embed code copied",
       "remove": "Remove",
       "copy": "Copy",
       "processing": "Processing...",
@@ -348,6 +586,9 @@
       "chaptersDes": "Here, you can check and jump to different chapters of this video.",
       "editBrackets": "(edited)",
       "addChapter": "Add Chapter",
+      "copyChapters": "Copy chapters as timestamps",
+      "chaptersCopied": "Chapters copied",
+      "chaptersCopyError": "Could not copy the chapters.",
       "chapterContentPlaceholder": "Type your chapter content here...",
       "chapterIsFirst": "(e.g., Introduction)",
       "chaptersSection": {
@@ -550,6 +791,45 @@
         "newPasswordColon": "New Password:",
         "newPasswordConfirm": "Confirm New Password *",
         "setNewPassword": "Set New Password"
+      },
+      "everId": {
+        "continue": "Continue with Ever ID",
+        "createAccountTitle": "Create your Ever Rec account",
+        "createAccountIntro": "You will sign in to this account with your Ever ID. Check your details, accept the terms and confirm.",
+        "name": "Name",
+        "email": "E-mail",
+        "create": "Create account",
+        "cancel": "Cancel",
+        "errors": {
+          "generic": "Ever ID sign-in did not work. Please try again.",
+          "invalid_state": "This sign-in took too long or was already used. Please try again.",
+          "token_invalid": "Your Ever ID sign-in could not be verified. Please try again.",
+          "email_unverified": "Please verify your e-mail address in Ever ID first, then try again.",
+          "reauth_required": "Please sign in to Ever ID again to connect it to this account.",
+          "account_exists": "An Ever Rec account with this e-mail already exists. Sign in the usual way, then connect Ever ID in Settings.",
+          "signup_disabled": "New accounts cannot be created with Ever ID here. Create an account with your e-mail first, then connect Ever ID in Settings.",
+          "provider_error": "Ever ID cannot be reached right now. Please try again later.",
+          "pending_expired": "This confirmation has expired. Please start again.",
+          "invalid_code": "This sign-in link has expired. Please sign in again.",
+          "subject_linked": "This Ever ID is already connected to another Ever Rec account.",
+          "last_sign_in_method": "Ever ID is the only way to sign in to this account. Set a password first, then disconnect it.",
+          "wrong_account": "This confirmation belongs to another account.",
+          "rate_limited": "Too many attempts. Please wait a minute and try again."
+        },
+        "settings": {
+          "title": "Connected sign-in methods",
+          "description": "Sign in to Ever Rec with your Ever ID.",
+          "connect": "Connect Ever ID",
+          "disconnect": "Disconnect",
+          "connectedAs": "Ever ID: {{email}}",
+          "none": "No Ever ID is connected to this account.",
+          "confirmTitle": "Connect this Ever ID to your account?",
+          "accountEmail": "Your Ever Rec account",
+          "everIdEmail": "Your Ever ID",
+          "confirm": "Connect",
+          "connected": "Ever ID connected.",
+          "disconnected": "Ever ID disconnected."
+        }
       }
     },
     "register": {
@@ -621,6 +901,32 @@
       "saveEachFile": "Ask where to save each file before downloading.",
       "saveEachFileDescription": "Note: To use this feature, you need to allow the extension to manage downloads when the permission request window pops up. Also, only when this option is turned on can you specify a default subfolder to save screenshots to your local disk. It defaults to the Downloads folder if you don’t specify a subfolder.",
       "addDateAndUrl": "Add date and URL to the top of a screenshot."
+    },
+    "everConnect": {
+      "provision": {
+        "title": "Create your Ever Rec workspace",
+        "loading": "Checking the link from app.ever.co…",
+        "missing": "This link is incomplete. Start again from app.ever.co.",
+        "question": "Create workspace {{name}} linked to ever.co/{{handle}} in Ever Rec?",
+        "create": "Create",
+        "decline": "Decline",
+        "signInHint": "Sign in with the same Ever ID you used on app.ever.co to create the workspace.",
+        "continueWithEverId": "Continue with Ever ID",
+        "mismatch": "Sign in with the same Ever ID you used on app.ever.co.",
+        "created": "Your workspace is ready.",
+        "declined": "Nothing was created.",
+        "errors": {
+          "generic": "That did not work. Please try again from app.ever.co.",
+          "intent_expired": "This link has expired. Start again from app.ever.co.",
+          "intent_consumed": "This link was already used.",
+          "invalid_intent": "This link is not valid. Start again from app.ever.co.",
+          "wrong_audience": "This link is not for Ever Rec.",
+          "product_mismatch": "This link is not for Ever Rec.",
+          "instance_mismatch": "This link is for another Ever Rec installation.",
+          "invalid_txn": "This confirmation is not valid. Start again from app.ever.co.",
+          "not_connected": "This Ever Rec installation is not connected to Ever Platform."
+        }
+      }
     }
   },
   "modals": {

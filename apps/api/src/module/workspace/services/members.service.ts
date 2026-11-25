@@ -6,6 +6,7 @@ import * as admin from 'firebase-admin';
 import { IUser } from 'src/interfaces/IUser';
 import { sendError, sendResponse } from '../../../services/utils/sendResponse';
 import { parseCollectionToArray } from '../../../services/utils/helpers';
+import { changeWorkspaceMembers } from './change-workspace-collection';
 
 @Injectable()
 export class WorkspaceMembersService {
@@ -17,19 +18,27 @@ export class WorkspaceMembersService {
     workspaceId: string,
   ): Promise<IDataResponse<IWorkspace | null>> {
     try {
-      const { workspaceVal, workspaceRef } =
+      const { workspaceVal } =
         await this.utilitiesService.getWorkspaceById(workspaceId);
-      const members = workspaceVal.members || [];
-      members.push({ id: uid });
-
-      await workspaceRef.update({ members });
-      const workspace = await this.utilitiesService.parseWorkspaceItems(
-        workspaceVal,
+      // In the transaction every writer of the member list shares, from the stored list: a member
+      // is stored once, and one added or removed meanwhile is kept.
+      const added = await changeWorkspaceMembers(workspaceId, (members) =>
+        members.some((member) => member.id === uid)
+          ? {}
+          : { items: [...members, { id: uid }] },
       );
+      if (added.ok === false) {
+        return this.utilitiesService.sendError(
+          added.message || 'Error while trying to add workspace member.',
+        );
+      }
+
+      const workspace =
+        await this.utilitiesService.parseWorkspaceItems(workspaceVal);
 
       return this.utilitiesService.sendResponse<IWorkspace>({
         ...workspace,
-        members,
+        members: added.items,
       });
     } catch (e) {
       console.log(e);
@@ -43,26 +52,25 @@ export class WorkspaceMembersService {
     uid: string,
     workspaceId: string,
   ): Promise<IDataResponse<IWorkspace | null>> {
-    const { workspaceVal, workspaceRef } =
+    const { workspaceVal } =
       await this.utilitiesService.getWorkspaceById(workspaceId);
-    const members: IWorkspaceUser[] = workspaceVal.members || [];
-    const index = members.findIndex((x) => x.id === uid);
-
-    if (index === -1) {
+    const removed = await changeWorkspaceMembers(workspaceId, (members) =>
+      members.some((member) => member.id === uid)
+        ? { items: members.filter((member) => member.id !== uid) }
+        : { error: 'User not a member of this workspace.' },
+    );
+    if (removed.ok === false) {
       return this.utilitiesService.sendError(
-        'User not a member of this workspace.',
+        removed.message || 'Error while trying to remove workspace member.',
       );
     }
 
-    members.splice(index, 1);
-
-    await workspaceRef.update({ members });
     const workspace: IWorkspace =
       await this.utilitiesService.parseWorkspaceItems(workspaceVal);
 
     return this.utilitiesService.sendResponse<IWorkspace>({
       ...workspace,
-      members,
+      members: removed.items,
     });
   }
 
@@ -75,20 +83,30 @@ export class WorkspaceMembersService {
     let startIndex = 0;
     let endIndex = 20;
 
-    if (limit) {
-      startIndex = +limit - 20;
-      endIndex = +limit;
+    // `limit` is the end of the window. A start below zero would make `slice` count from the end
+    // of the list and return nothing for a short limit, so the window never starts before 0.
+    const limitNumber = Math.floor(Number(limit));
+    if (Number.isFinite(limitNumber) && limitNumber > 0) {
+      startIndex = Math.max(0, limitNumber - 20);
+      endIndex = limitNumber;
     }
 
-    const usersToParse = workspace.members.slice(startIndex, endIndex);
+    // A workspace without members is stored without the key, and Firebase can return a sparse
+    // array as an object, so normalise before slicing.
+    const members = parseCollectionToArray<IWorkspaceUser>(
+      workspace?.members,
+    ).filter((member) => member?.id);
+    const usersToParse = members.slice(startIndex, endIndex);
     const result = usersToParse.map((workspaceUser) => {
+      // A member whose user record no longer exists (e.g. a deleted account) must not break the
+      // list for everyone else: show them with the same placeholders used for empty profiles.
       const userFomDB = parsedUsers.find((y) => y.id === workspaceUser.id);
 
       return {
         id: workspaceUser.id,
-        displayName: userFomDB.displayName || 'Anonymous',
-        email: userFomDB.email || 'No Email',
-        photoURL: userFomDB.photoURL,
+        displayName: userFomDB?.displayName || 'Anonymous',
+        email: userFomDB?.email || 'No Email',
+        photoURL: userFomDB?.photoURL,
       };
     });
 

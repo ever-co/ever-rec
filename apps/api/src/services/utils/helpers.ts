@@ -54,8 +54,12 @@ export const evaluateAccessType = (
   }
   switch (requiredAccess) {
     case PermissionAccessEnum.READ:
+      // Read is implied by write and admin. Anything else (missing or malformed
+      // access values) must not grant read.
       return (
-        givenAccess === PermissionAccessEnum.READ || PermissionAccessEnum.WRITE
+        givenAccess === PermissionAccessEnum.READ ||
+        givenAccess === PermissionAccessEnum.WRITE ||
+        givenAccess === PermissionAccessEnum.ADMIN
       );
     case PermissionAccessEnum.WRITE:
       return givenAccess === PermissionAccessEnum.WRITE;

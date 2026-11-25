@@ -3,6 +3,10 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { IDataResponse } from '../../../interfaces/_types';
 import { sendError, sendResponse } from '../../../services/utils/sendResponse';
 import { FirebaseAdminService } from '../../firebase/services/firebase-admin.service';
+import {
+  EVER_COUNTER_EVENTS,
+  storedMediaUnder,
+} from '../../../common/events/ever-counters.events';
 
 export interface IUserMetadata {
   displayName: string | null;
@@ -278,8 +282,17 @@ export class UserProfileService {
 
       const bucket = this.firebaseAdminService.getStorageBucket();
       const userFolder = `users/${userId}`;
+      // The bytes of the account's screenshots and videos, subtracted once the files are gone.
+      const removedMedia = await storedMediaUnder(
+        this.eventEmitter,
+        bucket,
+        `${userFolder}/`,
+      );
 
       await bucket.deleteFiles({ prefix: userFolder });
+      for (const media of removedMedia) {
+        this.eventEmitter.emit(EVER_COUNTER_EVENTS.mediaDeleted, media);
+      }
 
       this.logger.log(
         `All user files deleted successfully for user: ${userId}`,

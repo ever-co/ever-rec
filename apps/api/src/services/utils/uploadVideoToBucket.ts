@@ -74,10 +74,13 @@ export async function uploadVideoToBucket({
     const fileBuffer = await fs.readFile(fullFilepath);
     await bucketRef.save(fileBuffer);
 
-    await fs.unlink(fullFilepath);
-
     return bucketRef;
   } catch (err) {
     console.error(err);
+  } finally {
+    // The temporary file goes whether or not the bucket was written, so a failed upload does not
+    // stay on the API disk for good. A file that cannot be removed must not hide a write: the
+    // caller still gets the file it wrote (an upload that replaced a newer cut must be told).
+    await fs.unlink(fullFilepath).catch((err) => console.error(err));
   }
 }

@@ -3,6 +3,7 @@ import { emailRule, requiredRule } from '@/app/rules';
 import { signinUserWithCreds } from '@/app/services/auth';
 import AppButton from '@/content/components/controls/appButton/AppButton';
 import AppInput from '@/content/components/controls/appInput/AppInput';
+import EverIdLoginButton from '@/content/components/everId/EverIdLoginButton';
 import React, { useEffect, useState } from 'react';
 
 
@@ -78,6 +79,8 @@ const PanelLogin: React.FC = () => {
       disabled={!valid}
       className="tw-mt-8"
       >Login</AppButton>
+
+      <EverIdLoginButton className="tw-mt-4" />
     </div>
 
   );

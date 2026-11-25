@@ -16,6 +16,7 @@ import { CanAccessWorkspaceGuard } from '../guards/CanAccessWorkspace.guard';
 import { FoldersSharedService } from '../../../services/shared/folders.shared.service';
 import { PermissionAccessEnum } from '../Interfaces/Workspace';
 import { CanAccessFolder } from '../decorators/CanAccessFolder.decorator';
+import { CanChangePermissions } from '../decorators/CanChangePermissions.decorator';
 import { WorkspaceSharedService } from '../services/shared.service';
 import { User } from '../../auth/decorators/user.decorator';
 import { CreateFolderDto } from '../dto/folders/create-folder.dto';
@@ -23,6 +24,8 @@ import { ParseOptionalId, ValidateId } from '../pipes/validate-id.pipe';
 import { UpdateFolderDto } from '../dto/folders/update-folder.dto';
 import { DeleteFolderDto } from '../dto/folders/delete-folder.dto';
 import { MoveItemsDto } from '../dto/folders/move-items.dto';
+import { MoveFolderDto } from '../dto/folders/move-folder.dto';
+import { CanAccessDestinationFolder } from '../decorators/CanAccessDestinationFolder.decorator';
 import { UpdateFolderMemberPermissionsDto } from '../dto/folders/update-member-permissions.dto';
 
 @Controller('workspace/:workspaceId/folders')
@@ -65,8 +68,20 @@ export class WorkspaceFoldersController {
       user.id,
       workspaceId,
       folderId,
-      folder,
+      { name: folder.name, color: folder.color },
     );
+  }
+
+  // WRITE on the folder being moved (and every folder above it) and on the destination.
+  @CanAccessFolder(PermissionAccessEnum.WRITE)
+  @CanAccessDestinationFolder(PermissionAccessEnum.WRITE)
+  @Put(':folderId/move')
+  async moveWorkspaceFolder(
+    @Param('workspaceId', ValidateId) workspaceId: string,
+    @Param('folderId', ValidateId) folderId: string,
+    @Body() { parentId }: MoveFolderDto,
+  ) {
+    return this.foldersService.moveFolder(workspaceId, folderId, parentId);
   }
 
   @CanAccessFolder(PermissionAccessEnum.WRITE)
@@ -90,15 +105,15 @@ export class WorkspaceFoldersController {
   async moveItemsToFolder(
     @Param('workspaceId', ValidateId) workspaceId: string,
     @Param('folderId', ParseOptionalId) toMoveFolderId: string | false,
-    @Body() { fromFolderId, itemIds }: MoveItemsDto,
+    @Body() { itemIds }: MoveItemsDto,
     @User() user: IRequestUser,
   ) {
+    // The body's `fromFolderId` is not used: each item moves out of the folder it is stored in.
     return this.foldersService.moveItemsToFolder(
       user,
       workspaceId,
       itemIds,
       toMoveFolderId,
-      fromFolderId,
     );
   }
 
@@ -118,7 +133,7 @@ export class WorkspaceFoldersController {
   }
 
   @Post(':folderId/permissions')
-  @CanAccessFolder(PermissionAccessEnum.ADMIN)
+  @CanChangePermissions('folder')
   async changeFolderMemberPermission(
     @Param('workspaceId', ValidateId) workspaceId: string,
     @Param('folderId', ValidateId) folderId: string,

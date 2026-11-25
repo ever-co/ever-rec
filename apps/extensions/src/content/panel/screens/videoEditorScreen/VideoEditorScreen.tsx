@@ -487,13 +487,15 @@ const VideoEditorScreen: FC<IProps> = ({ isWorkspace = false, workspace }) => {
           />
         </div>
 
-        <div className={styles.videoCommentsWrapper}>
-          <VideoComments
-            userId={user?.id}
-            itemOwnerId={user?.id}
-            itemId={video?.dbData?.id || ''}
-          />
-        </div>
+        {!isWorkspace && (
+          <div className={styles.videoCommentsWrapper}>
+            <VideoComments
+              userId={user?.id}
+              itemOwnerId={user?.id}
+              itemId={video?.dbData?.id || ''}
+            />
+          </div>
+        )}
       </div>
 
       {/*

@@ -18,6 +18,10 @@ CREATE ZIP FOLDER
 
 - find **`build/dev`** folder (will be created automatically under project root) to test builds under development mode
 
+## UNIT TESTS
+
+- run `pnpm --filter ever-rec-extension test` (Jest with jsdom and Testing Library; tests live in `__tests__` folders under `src`)
+
 ## TEST EXTENSION
 
 ### Google Chrome

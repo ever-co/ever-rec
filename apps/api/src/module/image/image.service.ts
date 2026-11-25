@@ -1,7 +1,12 @@
 import * as admin from 'firebase-admin';
 import sharp from 'sharp';
 import moment from 'moment';
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { nanoid } from 'nanoid';
 import { Reference } from '@firebase/database-types';
 import { SharedService } from '../../services/shared/shared.service';
@@ -22,7 +27,18 @@ import {
 import { FoldersSharedService } from '../../services/shared/folders.shared.service';
 import { IFavoriteFolders } from '../../interfaces/Folders';
 import { sendError, sendResponse } from 'src/services/utils/sendResponse';
+import { toPublicLikes } from '../../services/utils/likes';
+import {
+  PUBLIC_IMAGE_FIELDS,
+  PublicImgData,
+  toPublicItemData,
+} from '../../services/utils/publicItemData';
 import { EditorGateway } from '../editor-websocket-module/editor.gateway';
+import { is_id } from '../workspace/validators/id.validator';
+import {
+  EVER_COUNTER_EVENTS,
+  storedBytes,
+} from '../../common/events/ever-counters.events';
 @Injectable()
 export class ImageService {
   private readonly config;
@@ -56,7 +72,31 @@ export class ImageService {
     return imgRef;
   }
 
+  // 404 unless `imageId` is an image of this user. The id must already be a plain id.
+  async assertOwnImageExists(uid: string, imageId: string): Promise<void> {
+    const snap = await admin
+      .database()
+      .ref(`users/${uid}/screenshots/${imageId}`)
+      .get();
+    if (!snap.exists()) {
+      throw new NotFoundException('Image not found');
+    }
+  }
+
   async share(uid: string, imageId: string): Promise<string> {
+    // A link is only made for an image the caller owns: no record for an unknown or foreign id.
+    // Checked outside the try block below, which swallows errors.
+    if (
+      !uid ||
+      typeof imageId !== 'string' ||
+      !is_id(imageId) ||
+      (
+        await admin.database().ref(`users/${uid}/screenshots/${imageId}`).get()
+      ).val() == null
+    ) {
+      throw new ForbiddenException('Access to this image is not allowed');
+    }
+
     try {
       const db = admin.database();
       const query = `${uid}|${imageId}`;
@@ -126,7 +166,8 @@ export class ImageService {
   async getImageBySharedId(
     link: string,
     isWorkspace: boolean,
-  ): Promise<{ image: { owner: any; dbData: DbImgData } }> {
+    viewerUid?: string,
+  ): Promise<{ image: { owner: any; dbData: PublicImgData } }> {
     try {
       const db = admin.database();
       const sharedRootDb = isWorkspace ? 'sharedWorkspaceItems' : 'shared';
@@ -159,31 +200,41 @@ export class ImageService {
         /*  const views = imageData.views ? imageData.views + 1 : 1;
         imgDataRef.update({ views }); */
 
-        const ownerRef = db.ref(`users/${imageData.uid}`);
+        // A personal share belongs to the user the share record names: the item's own `uid` field
+        // can be written by its owner and says nothing about who owns the link. A workspace item is
+        // only ever written by the API, so its `uid` (the uploader) is trusted.
+        const ownerUid = isWorkspace ? imageData.uid : shared.uid;
+        const ownerRef = db.ref(`users/${ownerUid}`);
         const ownerSnap = await ownerRef.get();
         const ownerVal = ownerSnap.val();
+        // No email: anyone with the link can read this. A deleted account has no record any more.
         const owner = {
-          email: ownerVal.email,
-          displayName: ownerVal.displayName,
-          photoURL: ownerVal.photoURL,
-          id: imageData.uid,
+          displayName: ownerVal?.displayName,
+          photoURL: ownerVal?.photoURL,
+          id: ownerUid,
         };
 
         const views = Array.isArray(imageData.views)
           ? imageData.views.length
           : 0;
 
+        // Anyone with the link reads this answer, so it carries only the fields the share page
+        // reads. The viewers (names, emails) go to the owner only, through
+        // `shared/get-view-info`; the Drive and Dropbox copies (owner's emails) never go out.
+        const publicData = toPublicItemData(imageData, PUBLIC_IMAGE_FIELDS);
+
         return {
           image: {
             owner,
             dbData: {
               id: shared.imageId,
-              ...imageSnapshot.val(),
+              ...publicData,
               views,
               link: sharedLink[0],
               commentsLength: imageData.comments?.length || 0,
               comments: null,
-              uid: imageData.uid,
+              likes: toPublicLikes(imageData.likes, viewerUid),
+              uid: ownerUid,
             },
           },
         };
@@ -327,6 +378,10 @@ export class ImageService {
         editorImage.ref = metadata;
         editorImage.url = downloadUrl;
         editorImage.dbData = dbData;
+        this.eventEmitter.emit(EVER_COUNTER_EVENTS.mediaCreated, {
+          kind: 'screenshot',
+          bytes: Number(metadata.size) || 0,
+        });
       }
 
       this.eventEmitter.emit('analytics.track', 'Image Uploaded', {
@@ -402,7 +457,9 @@ export class ImageService {
                 originalImage,
                 markers,
               } = value;
-              const comments = db.ref(`users/${uid}/videos/${id}/comments`);
+              const comments = db.ref(
+                `users/${uid}/screenshots/${id}/comments`,
+              );
               const newComments = await comments.get();
               const retrievedComments = newComments.val();
 
@@ -569,6 +626,10 @@ export class ImageService {
         editorImage.ref = metadata;
         editorImage.url = downloadUrl;
         editorImage.dbData = dbData;
+        this.eventEmitter.emit(EVER_COUNTER_EVENTS.mediaCreated, {
+          kind: 'screenshot',
+          bytes: Number(metadata.size) || 0,
+        });
       }
       this.eventEmitter.emit('analytics.track', 'Screenshot Uploaded', {
         userId: uid,
@@ -677,12 +738,22 @@ export class ImageService {
     id: string,
     parentId: string | false,
     trash: boolean,
-    likes: { uid: string; timestamp: number }[],
+    // Not written: likes are only changed by the like route, one caller toggling their own.
+    // Kept so the position of the other arguments does not change.
+    _likes: unknown,
     title?: string,
     stage?: any,
     originalImage?: string,
     markers?: string,
   ): Promise<IEditorImage> {
+    // The id goes into a database path: a sub-path such as `<id>/likes` would let this update
+    // write inside the likes or comments of the image.
+    if (typeof id !== 'string' || !is_id(id)) {
+      throw new BadRequestException('Invalid image id');
+    }
+    // An update of an image that does not exist would create a partial record: 404 instead.
+    await this.assertOwnImageExists(uid, id);
+
     const db = admin.database();
     const dbImageRef = db.ref(`users/${uid}/screenshots/${id}`);
 
@@ -690,14 +761,14 @@ export class ImageService {
       ...(title !== undefined ? { title } : {}),
       ...(parentId !== undefined ? { parentId } : {}),
       ...(trash !== undefined ? { trash } : {}),
-      ...(likes !== undefined ? { likes } : { likes: 0 }),
       ...(stage !== undefined ? { stage } : {}),
       ...(originalImage !== undefined ? { originalImage } : {}),
       ...(markers !== undefined ? { markers } : {}),
     });
 
+    // A personal image: only its owner (the caller, checked above) receives the update.
     if (markers !== undefined) {
-      this.editorGateway.emitMarkerUpdate(uid, id, markers);
+      this.editorGateway.emitMarkerUpdate([uid], uid, id, markers);
     }
 
     return this.getImageByIdPrivate(uid, id);
@@ -721,6 +792,10 @@ export class ImageService {
       `users/${uid}/screenshots/thumbnails/${refName}`,
     );
 
+    const everStatsBytes = await storedBytes(
+      this.eventEmitter,
+      storageScreenRef,
+    );
     await Promise.all([
       this.deleteSharedImageByImageId(uid, imageId),
       screenRef.remove(),
@@ -728,6 +803,10 @@ export class ImageService {
       storageOriginalScreenRef.delete(),
       storageThumbnailScreenRef.delete(),
     ]);
+    this.eventEmitter.emit(EVER_COUNTER_EVENTS.mediaDeleted, {
+      kind: 'screenshot',
+      bytes: everStatsBytes,
+    });
 
     this.eventEmitter.emit('analytics.track', 'Image Trashed', {
       userId: uid,

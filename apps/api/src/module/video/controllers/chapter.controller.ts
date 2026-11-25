@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -12,17 +13,31 @@ import {
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { AuthGuard } from 'src/module/auth/guards/auth.guard';
+import {
+  CanAccessWorkspaceQueryGuard,
+  WorkspaceVideoAccess,
+} from 'src/module/workspace/guards/CanAccessWorkspaceQuery.guard';
+import { PermissionAccessEnum } from 'src/module/workspace/Interfaces/Workspace';
+import { ValidateId } from 'src/module/workspace/pipes/validate-id.pipe';
 import { VideoChapterService } from '../services/chapter.service';
+import { MAX_CHAPTERS, parseChapterList } from '../utilities/chapterPayload';
+
+/**
+ * Largest chapter thumbnail, in bytes. The editors send 1000x562 JPEG
+ * thumbnails, which stay well under it.
+ */
+const MAX_CHAPTER_THUMBNAIL_BYTES = 2 * 1024 * 1024;
 
 @Controller('video/chapter')
 export class VideoChapterController {
   constructor(private videoChapterService: VideoChapterService) {}
 
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, CanAccessWorkspaceQueryGuard)
+  @WorkspaceVideoAccess(PermissionAccessEnum.READ)
   @Get('/:videoId')
   async getChapters(
     @Req() request,
-    @Param('videoId') videoId: string,
+    @Param('videoId', ValidateId) videoId: string,
     @Query('workspaceId') workspaceId: string,
   ) {
     return await this.videoChapterService.getChapters(
@@ -32,18 +47,38 @@ export class VideoChapterController {
     );
   }
 
-  @UseGuards(AuthGuard)
-  @UseInterceptors(FilesInterceptor('blobs'))
+  @UseGuards(AuthGuard, CanAccessWorkspaceQueryGuard)
+  @WorkspaceVideoAccess(PermissionAccessEnum.WRITE)
+  // Multer keeps every uploaded file in memory, so the count and the size of
+  // the thumbnails are capped while they are read: a file that reaches the cap
+  // gets a 413 and more than MAX_CHAPTERS files a 400.
+  @UseInterceptors(
+    FilesInterceptor('blobs', MAX_CHAPTERS, {
+      limits: { files: MAX_CHAPTERS, fileSize: MAX_CHAPTER_THUMBNAIL_BYTES },
+    }),
+  )
   @Post('save-changes/:videoId')
   async saveChapters(
     @Req() request,
-    @Param('videoId') videoId: string,
+    @Param('videoId', ValidateId) videoId: string,
     @Query('workspaceId') workspaceId: string,
     @Body() body: { chapters: string; chaptersBlobs: string },
     @UploadedFiles() thumbnailFiles: Array<Express.Multer.File>,
   ) {
-    const chapters = JSON.parse(body.chapters);
-    const chaptersBlobs = JSON.parse(body.chaptersBlobs);
+    const chapters = parseChapterList(body?.chapters, 'chapters');
+    const chaptersBlobs = parseChapterList(
+      body?.chaptersBlobs,
+      'chaptersBlobs',
+    );
+
+    // The service pairs the n-th thumbnail with the n-th entry of
+    // chaptersBlobs, so there must be exactly one thumbnail for each entry.
+    const thumbnailCount = thumbnailFiles?.length ?? 0;
+    if (thumbnailCount !== chaptersBlobs.length) {
+      throw new BadRequestException(
+        `"blobs" must hold one thumbnail for each entry of "chaptersBlobs" (got ${thumbnailCount} for ${chaptersBlobs.length})`,
+      );
+    }
 
     return await this.videoChapterService.saveChapters(
       request.user?.id,
@@ -55,12 +90,13 @@ export class VideoChapterController {
     );
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, CanAccessWorkspaceQueryGuard)
+  @WorkspaceVideoAccess(PermissionAccessEnum.WRITE)
   @Post('enable-chapters/:videoId')
   async enableChapters(
     @Req() request,
     @Body() body: { chaptersEnabled: boolean },
-    @Param('videoId') videoId: string,
+    @Param('videoId', ValidateId) videoId: string,
     @Query('workspaceId') workspaceId: string,
   ) {
     return await this.videoChapterService.enableChapters(

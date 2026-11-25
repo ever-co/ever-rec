@@ -5,22 +5,19 @@
     "users": {
       "$userId": {
         ".read": "$userId === auth.uid",
-        ".write": "$userId === auth.uid",
         "screenshots": {
           ".indexOn": [
             "parentId",
             "trash"
           ],
-          ".read": "$userId === auth.uid",
-          ".write": "$userId === auth.uid"
+          ".read": "$userId === auth.uid"
         },
         "videos": {
           ".indexOn": [
             "parentId",
             "trash"
           ],
-          ".read": "$userId === auth.uid",
-          ".write": "$userId === auth.uid"
+          ".read": "$userId === auth.uid"
         },
         "profile": {
           ".read": true,
@@ -33,21 +30,78 @@
         "uidImageId",
         "uid"
       ],
-      ".read": "auth != null",
-      ".write": "auth != null"
+      ".read": false,
+      ".write": false
     },
     "sharedVideos": {
       ".indexOn": [
         "uidVideoId",
-        "uid"
+        "uid",
+        "videoId"
       ],
-      ".read": "auth != null",
-      ".write": "auth != null"
+      ".read": false,
+      ".write": false
     },
     "sharedWorkspaceItems": {
-      ".indexOn": "queryField",
-      ".read": "auth != null",
-      ".write": "auth != null"
+      ".indexOn": [
+        "queryField",
+        "itemId"
+      ],
+      ".read": false,
+      ".write": false
+    },
+    "whiteboards": {
+      "mainCollection": {
+        ".indexOn": ["admin"]
+      },
+      ".read": false,
+      ".write": false
+    },
+    "ever_identities": {
+      ".read": false,
+      ".write": false
+    },
+    "ever_identities_by_uid": {
+      ".read": false,
+      ".write": false
+    },
+    "ever_id_pending": {
+      ".indexOn": ["expiresAt"],
+      ".read": false,
+      ".write": false
+    },
+    "ever_id_pending_signup": {
+      ".indexOn": ["expiresAt"],
+      ".read": false,
+      ".write": false
+    },
+    "ever_id_pending_connect": {
+      ".indexOn": ["expiresAt"],
+      ".read": false,
+      ".write": false
+    },
+    "ever_id_handoff": {
+      ".indexOn": ["expiresAt"],
+      ".read": false,
+      ".write": false
+    },
+    "ever_id_sessions": {
+      ".indexOn": ["expiresAt", "subjectKey"],
+      ".read": false,
+      ".write": false
+    },
+    "ever_id_logout_jti": {
+      ".indexOn": ["expiresAt"],
+      ".read": false,
+      ".write": false
+    },
+    "oauthStates": {
+      ".read": false,
+      ".write": false
+    },
+    "ever_connect": {
+      ".read": false,
+      ".write": false
     }
   }
 }

@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import { errorHandler } from './helpers/errors';
+import { errorHandler, requestErrorHandler } from './helpers/errors';
 import IEditorVideo, {
   DbFolderData,
   DbVideoData,
@@ -93,7 +93,6 @@ const updateVideoData = async ({
   parentId,
   trash,
   views,
-  likes,
 }: DbVideoData): Promise<IEditorVideo | undefined> => {
   try {
     return await updateVideoDataAPI(
@@ -101,7 +100,6 @@ const updateVideoData = async ({
       title,
       parentId as string | false,
       trash,
-      likes,
       views,
     );
   } catch (error: any) {
@@ -461,10 +459,15 @@ const createVideoTemplate = async (url: string): Promise<Blob | null> => {
   });
 };
 
+// The API answers 400 or 404 when the video cannot be liked (a deleted video, for example).
 const likeVideoOwn = async (videoId: string, workspaceId?: string) => {
-  const response = await likeVideoOwnAPI(videoId, workspaceId);
-  const data = iDataResponseParser(response);
-  return data;
+  try {
+    const response = await likeVideoOwnAPI(videoId, workspaceId);
+    return iDataResponseParser(response);
+  } catch (error: any) {
+    requestErrorHandler(error);
+    return null;
+  }
 };
 
 export {

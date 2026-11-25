@@ -1,0 +1,23 @@
+{
+  "moduleFileExtensions": [
+    "js",
+    "json",
+    "ts"
+  ],
+  "rootDir": "..",
+  "roots": [
+    "<rootDir>/src",
+    "<rootDir>/test"
+  ],
+  "testEnvironment": "node",
+  "testRegex": ".integration-spec.ts$",
+  "testTimeout": 60000,
+  "maxWorkers": 1,
+  "moduleNameMapper": {
+    "^src/(.*)$": "<rootDir>/src/$1"
+  },
+  "transform": {
+    "^.+\\.(t|j)s$": "ts-jest"
+  },
+  "resolver": "<rootDir>/test/jest-node-resolver.js"
+}

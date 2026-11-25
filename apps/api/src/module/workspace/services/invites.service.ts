@@ -1,11 +1,17 @@
 import { IUser } from 'src/interfaces/IUser';
 import * as admin from 'firebase-admin';
 import { nanoid } from 'nanoid';
-import { IWorkspaceUser } from '../Interfaces/Workspace';
+import { IWorkspace, IWorkspaceUser } from '../Interfaces/Workspace';
 import { WorkspaceUtilitiesService } from './utilities.service';
 import { IDataResponse } from 'src/interfaces/_types';
 import { IWorkspaceInvite } from '../Interfaces/Invites';
 import { Injectable } from '@nestjs/common';
+import { parseCollectionToArray } from 'src/services/utils/helpers';
+import { addUserWorkspaceId } from './user-workspace-ids';
+
+/** The answer for an invite, or the workspace of an invite, that no longer exists. */
+// tslint:disable-next-line: quotemark
+const WORKSPACE_NOT_FOUND = "Couldn't find the workspace for this invite";
 
 @Injectable()
 export class WorkspaceInvitesService {
@@ -61,42 +67,76 @@ export class WorkspaceInvitesService {
       const workspaceInviteRef = db.ref(
         `workspaceInvites/${workspaceInviteId}`,
       );
-      const workspaceInviteData: IWorkspaceInvite = (
+      const workspaceInviteData: IWorkspaceInvite | null = (
         await workspaceInviteRef.get()
       ).val();
-      const userRef = db.ref(`users/${uid}`);
-      const userData: IUser = (await userRef.get()).val();
-      const userWorkspaces = userData.workspaceIds
-        ? Object.values(userData.workspaceIds)
-        : [];
+      const workspaceId = workspaceInviteData?.workspaceId;
+      if (!workspaceId) {
+        return this.utilitiesService.sendError(WORKSPACE_NOT_FOUND);
+      }
+
+      const userData: IUser | null = (await db.ref(`users/${uid}`).get()).val();
+      if (!userData) {
+        // No user record (for example an account deleted while its session is still valid).
+        return this.utilitiesService.sendError(
+          'There was a problem joining the workspace',
+        );
+      }
 
       const newMember = {
         id: uid,
       };
 
-      const workspaceId = workspaceInviteData.workspaceId;
-      const workspaceMembersRef = db.ref(`workspaces/${workspaceId}/members`);
-      const workspaceMembersData: IWorkspaceUser[] =
-        (await workspaceMembersRef.get()).val() || [];
+      // Add the member in one transaction on the workspace, so that a workspace deleted before or
+      // during the join is not recreated as a stub holding only `members` (no name, no admin).
+      let hasAlreadyJoined = false;
+      const workspaceRef = db.ref(`workspaces/${workspaceId}`);
+      const { committed, snapshot } = await workspaceRef.transaction(
+        (current: IWorkspace | null) => {
+          // The update function may run more than once; only the last run counts.
+          hasAlreadyJoined = false;
+          if (current === null || current === undefined) {
+            // The first run may see `null` for a workspace that exists (the local guess); the
+            // server then rejects the write and runs it again with the real value. Returning
+            // `null` writes nothing when the workspace really is gone, where an abort here would
+            // refuse every join.
+            return null;
+          }
 
-      const isAlreadyMember = workspaceMembersData.some(
-        (member) => member.id === uid,
+          const members = parseCollectionToArray<IWorkspaceUser>(
+            current.members,
+          ).filter(Boolean);
+          if (members.some((member) => member.id === uid)) {
+            hasAlreadyJoined = true;
+            return undefined; // abort: nothing to write
+          }
+
+          return { ...current, members: [...members, newMember] };
+        },
       );
-      if (isAlreadyMember) {
+
+      if (!snapshot.exists()) {
+        // The workspace was deleted while its invite was left behind.
+        return this.utilitiesService.sendError(WORKSPACE_NOT_FOUND);
+      }
+
+      if (hasAlreadyJoined) {
         return this.utilitiesService.sendResponse({
           workspaceId,
           hasAlreadyJoined: true,
         });
       }
 
-      // Update workspace members
-      const newMembers = [...workspaceMembersData, newMember];
-      const workspaceRef = db.ref(`workspaces/${workspaceId}`);
-      await workspaceRef.update({ members: newMembers });
+      if (!committed) {
+        return this.utilitiesService.sendError(
+          'There was a problem joining the workspace',
+        );
+      }
 
-      // Update users joined workspaces
-      const newUserWorkspaces = [...userWorkspaces, workspaceId];
-      await userRef.update({ workspaceIds: newUserWorkspaces });
+      // Add the workspace to the user's list, now that the membership is stored. A transaction on
+      // the list itself, not a write of the list read before the join: that write dropped an id
+      // added meanwhile and listed this one twice when it was already there.
+      await addUserWorkspaceId(uid, workspaceId);
 
       return this.utilitiesService.sendResponse({
         workspaceId,

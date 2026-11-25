@@ -1,5 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import {
+  ACCOUNT_EVENTS,
+  AccountDeletedEvent,
+} from '../../../common/events/account.events';
 import { IDataResponse } from '../../../interfaces/_types';
 import { SharedService } from '../../../services/shared/shared.service';
 import { sendError, sendResponse } from '../../../services/utils/sendResponse';
@@ -16,7 +20,11 @@ import { RegisterChain } from './register';
 import { RequestPasswordChain } from './password-reset/password-request.chain';
 import { PasswordUpdateChain } from './password-update/password-update.chain';
 import { UpdateUserProfileChain } from './update-user-profile/update-user-profile.chain';
-import { IUpdateUserProfileProps, IUploadAvatarProfileProps, WorkflowProfileType } from './update-user-profile/interfaces/update-user-profile.interface';
+import {
+  IUpdateUserProfileProps,
+  IUploadAvatarProfileProps,
+  WorkflowProfileType,
+} from './update-user-profile/interfaces/update-user-profile.interface';
 
 /**
  * Re-exported from `AuthenticationService` rather than restated.
@@ -68,8 +76,8 @@ export class AuthOrchestratorService {
     private readonly registerChain: RegisterChain,
     private readonly requestPasswordChain: RequestPasswordChain,
     private readonly passwordUpdateChain: PasswordUpdateChain,
-    private readonly updateUserProfileChain: UpdateUserProfileChain
-  ) { }
+    private readonly updateUserProfileChain: UpdateUserProfileChain,
+  ) {}
 
   // ==================== AUTHENTICATION METHODS ====================
 
@@ -126,13 +134,18 @@ export class AuthOrchestratorService {
   async updateUserData(
     updateData: IUpdateUserProfileProps,
   ): Promise<IDataResponse> {
-    return this.updateUserProfileChain.execute(updateData, WorkflowProfileType.NAME);
+    return this.updateUserProfileChain.execute(
+      updateData,
+      WorkflowProfileType.NAME,
+    );
   }
 
   /**
    * Upload user avatar
    */
-  async uploadAvatar(uploadData: IUploadAvatarProfileProps): Promise<IDataResponse> {
+  async uploadAvatar(
+    uploadData: IUploadAvatarProfileProps,
+  ): Promise<IDataResponse> {
     return this.updateUserProfileChain.execute(
       uploadData,
       WorkflowProfileType.AVATAR,
@@ -145,7 +158,10 @@ export class AuthOrchestratorService {
   async changeUserEmail(
     updateData: IUpdateUserProfileProps,
   ): Promise<IDataResponse> {
-    return this.updateUserProfileChain.execute(updateData, WorkflowProfileType.EMAIL);
+    return this.updateUserProfileChain.execute(
+      updateData,
+      WorkflowProfileType.EMAIL,
+    );
   }
 
   /**
@@ -170,6 +186,13 @@ export class AuthOrchestratorService {
         this.userService.deleteUser(uid),
       ]);
 
+      // The sign-in account is gone: the other modules remove what they keep for it (such as the
+      // Ever ID links), awaited here.
+      await this.emitAccountDeleted(uid);
+
+      // Only once the sign-in account is gone: a failed deletion keeps the record intact.
+      await this.userService.deleteUserRecord(uid);
+
       this.eventEmitter.emit(
         'analytics.track',
         'User deleted! All user files deleted!',
@@ -183,6 +206,19 @@ export class AuthOrchestratorService {
       this.logger.error(`Failed to delete user: ${uid}`, error);
       return sendError(
         'Error while trying to delete user or user files!',
+        error,
+      );
+    }
+  }
+
+  /** Runs the handlers of {@link ACCOUNT_EVENTS.deleted}; a failure is logged, not thrown. */
+  private async emitAccountDeleted(uid: string): Promise<void> {
+    const event: AccountDeletedEvent = { uid };
+    try {
+      await this.eventEmitter.emitAsync(ACCOUNT_EVENTS.deleted, event);
+    } catch (error: any) {
+      this.logger.error(
+        `Failed to remove the data other modules keep for user: ${uid}`,
         error,
       );
     }
@@ -220,8 +256,11 @@ export class AuthOrchestratorService {
   /**
    * Generate email verification link
    */
-  async generateEmailVerificationLink(email: string): Promise<IDataResponse> {
-    return this.emailService.generateEmailVerificationLink(email);
+  async generateEmailVerificationLink(
+    email: string,
+    idToken: string,
+  ): Promise<IDataResponse> {
+    return this.emailService.generateEmailVerificationLink(email, idToken);
   }
 
   /**
@@ -234,8 +273,11 @@ export class AuthOrchestratorService {
   /**
    * Resend verification email
    */
-  async resendVerificationEmail(email: string): Promise<IDataResponse> {
-    return this.emailService.resendVerificationEmail(email);
+  async resendVerificationEmail(
+    email: string,
+    idToken: string,
+  ): Promise<IDataResponse> {
+    return this.emailService.resendVerificationEmail(email, idToken);
   }
 
   // ==================== UTILITY METHODS ====================

@@ -5,9 +5,10 @@ import { EmailService } from './email.service';
 import { FoldersSharedService } from '../../services/shared/folders.shared.service';
 import { HttpModule } from 'nestjs-http-promise';
 import { AuthModule } from '../auth/auth.module';
+import { StreamServiceModule } from '../video-services/streamService.module';
 
 @Module({
-  imports: [HttpModule, AuthModule],
+  imports: [HttpModule, AuthModule, StreamServiceModule],
   providers: [EmailService, FirebaseClient, FoldersSharedService],
   controllers: [EmailController],
 })

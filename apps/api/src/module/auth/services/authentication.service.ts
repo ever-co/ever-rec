@@ -327,10 +327,26 @@ export class AuthenticationService {
         );
       }
 
-      // Invalidate previous sessions as a best practice when password changes
+      // Invalidate previous sessions as a best practice when password changes.
+      // This also revokes the tokens `updatePassword` just answered with.
       await this.firebaseAdminService.revokeUserSessions(
         changePasswordData.uid,
       );
+
+      // Sign in again with the new password: only a session opened after the
+      // revocation has tokens that still verify, so the caller stays signed in.
+      // The password is already changed here. If this sign-in fails, the change
+      // still stands, so answer success without tokens: an error would skip the
+      // next provider and its rollback, while the old password no longer works.
+      // The caller then signs in again with the new password.
+      const session = await this.firebaseAuthService
+        .login(changePasswordData.email, changePasswordData.newPassword)
+        .catch((error: any) => {
+          this.logger.warn(
+            `Password changed for user ${changePasswordData.uid}, but the sign-in with the new password failed: ${error?.message}`,
+          );
+          return null;
+        });
 
       this.logger.log(
         `Password changed successfully for user: ${changePasswordData.uid}`,
@@ -338,9 +354,9 @@ export class AuthenticationService {
 
       return sendResponse({
         message: 'Password changed successfully!',
-        idToken: updateResult.data?.idToken,
-        refreshToken: updateResult.data?.refreshToken,
-        expiresAt: getExpirationTime(updateResult.data?.expiresIn),
+        idToken: session?.idToken,
+        refreshToken: session?.refreshToken,
+        expiresAt: session ? getExpirationTime(session.expiresIn) : undefined,
       });
     } catch (error: any) {
       return this.handleAuthError(error);

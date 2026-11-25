@@ -15,6 +15,7 @@ import {
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { AuthGuard, IRequestUser } from '../../auth/guards/auth.guard';
 import { IsWorkspaceAdminGuard } from '../guards/IsWorkspaceAdmin.guard';
+import { CanAccessWorkspaceGuard } from '../guards/CanAccessWorkspace.guard';
 import { WorkspaceTeamsService } from '../services/teams.service';
 import { User } from '../../auth/decorators/user.decorator';
 import { ValidateId } from '../pipes/validate-id.pipe';
@@ -24,7 +25,7 @@ import { AddTeamMemberDto } from '../dto/teams/add-member.dto';
 import { DeleteTeamMemberDto } from '../dto/teams/delete-member.dto';
 
 @Controller('workspace/:workspaceId/teams')
-@UseGuards(AuthGuard)
+@UseGuards(AuthGuard, CanAccessWorkspaceGuard)
 @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
 export class WorkspaceTeamsController {
   constructor(private readonly teamsService: WorkspaceTeamsService) {
@@ -46,7 +47,9 @@ export class WorkspaceTeamsController {
     return this.teamsService.getTeams(workspaceId);
   }
 
+  // Same rule as the other routes that change a team: only the workspace admin.
   @Put(':teamId')
+  @UseGuards(IsWorkspaceAdminGuard)
   @UseInterceptors(
     FileFieldsInterceptor([
       { name: 'avatar', maxCount: 1 },

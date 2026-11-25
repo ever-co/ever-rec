@@ -21,7 +21,7 @@ export const saveVideoChaptersAPI = async (
   const chaptersBlobURL = chapters.filter((chapter) =>
     chapter.thumbnailURL.includes('blob'),
   );
-  const thumbnailBlobPromises = chapters.map((chapter) =>
+  const thumbnailBlobPromises = chaptersBlobURL.map((chapter) =>
     fetch(chapter.thumbnailURL).then((r) => r.blob()),
   );
   const thumbnailBlobs = await Promise.all(thumbnailBlobPromises);
