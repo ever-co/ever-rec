@@ -140,6 +140,24 @@ describe('verification mail routes', () => {
       expect(sendVerificationEmail).toHaveBeenCalledWith('good-token');
     });
 
+    it('uses the refreshed ID token when the session token had expired', async () => {
+      refreshToken.mockImplementation(async (token: string, req: any) => {
+        if (token !== 'good-refresh') throw new Error('invalid refresh token');
+        req.user = { id: 'uid-me', email: OWN_EMAIL };
+        return { idToken: 'fresh-token', refreshToken: 'next-refresh', expiresAt: '0' };
+      });
+
+      const res = await request(app.getHttpServer())
+        .post(route)
+        .set('idtoken', 'expired-token')
+        .set('refreshtoken', 'good-refresh')
+        .send({ email: OWN_EMAIL });
+
+      expect(res.status).toBe(201);
+      expect(sendVerificationEmail).toHaveBeenCalledTimes(1);
+      expect(sendVerificationEmail).toHaveBeenCalledWith('fresh-token');
+    });
+
     it('answers the same for an already verified address, without sending', async () => {
       const unverified = await request(app.getHttpServer())
         .post(route)
