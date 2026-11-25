@@ -85,8 +85,10 @@ describe('workspace media counter events', () => {
     );
 
     expect(result.status).toBe('success');
+    // Stored under a name of its own: the new record's id.
+    const id = (result.data as { dbData: { id: string } }).dbData.id;
     expect(
-      mockFirebase.bucket.objects.has('workspaces/ws-1/screenshots/shot.png'),
+      mockFirebase.bucket.objects.has(`workspaces/ws-1/screenshots/${id}.png`),
     ).toBe(true);
     expect(created).toEqual([{ kind: 'screenshot', bytes: 1234 }]);
   });

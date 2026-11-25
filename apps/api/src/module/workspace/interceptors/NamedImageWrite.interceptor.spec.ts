@@ -1,10 +1,12 @@
 /**
- * `PUT files/image`, `POST files/image` and `POST files/image/add-from-personal` write an image
- * file under a name taken from the request (`refName` / `location`, `fullFileName`, or the file
- * name of the personal image), not under an image id. The id-based permission check never saw that
- * image, so any workspace member could replace the file of an image they only have read access to,
- * or overwrite it (and its original) by uploading under the same name. These routes must apply the
- * same WRITE rule to the image the name belongs to.
+ * `PUT files/image`, `POST files/image` and `POST files/image/add-from-personal` name an image
+ * file from the request (`refName` / `location`, `fullFileName`, or the file name of the personal
+ * image), not an image id. The id-based permission check never saw that image, so any workspace
+ * member could replace the file of an image they only have read access to, or overwrite it (and
+ * its original) by uploading under the same name. These routes must apply the same WRITE rule to
+ * the image the name belongs to. `POST files/image` stores a new image, so it refuses (409) a name
+ * that any image of the workspace already has: two records under one name share one set of files,
+ * and deleting either one deleted them. `PUT files/image` is the route that replaces a file.
  *
  * The routes are the real controller behind the real guards and interceptor; only the database,
  * the token check and the storage behind the handlers are replaced. The fake storage records every
@@ -67,6 +69,8 @@ describe('writing an image by name', () => {
         return { status: true };
       },
     ),
+    // Writes under the personal file name, so a refused copy shows as files that stay unchanged
+    // (the service itself stores the copy under a name of its own).
     moveItemFromPersonalToWorkspace: jest.fn(
       async (uid: string, ws: string, itemId: string) => {
         const refName =
@@ -267,24 +271,28 @@ describe('writing an image by name', () => {
   });
 
   describe('POST image (upload)', () => {
-    it('lets a member with write permission overwrite the image under its name', async () => {
+    it('refuses (409) the name of an image the member may write, and the file and its original are unchanged', async () => {
       await upload('uid-writer', { fullFileName: 'restricted.png' }).expect(
-        201,
-      );
-      expect(files['ws1/restricted.png']).toBe(NEW);
-    });
-
-    it('refuses a member with only read permission, and the file and its original are unchanged', async () => {
-      await upload('uid-reader', { fullFileName: 'restricted.png' }).expect(
-        403,
+        409,
       );
       expect(files['ws1/restricted.png']).toBe(OLD);
       expect(files['ws1/originals/restricted.png']).toBe(OLD);
       expect(filesService.addImageFromFile).not.toHaveBeenCalled();
     });
 
-    it('lets the workspace admin upload under that name', async () => {
-      await upload('uid-admin', { fullFileName: 'restricted.png' }).expect(201);
+    it('refuses (409) the name for a member with only read permission, and the file and its original are unchanged', async () => {
+      await upload('uid-reader', { fullFileName: 'restricted.png' }).expect(
+        409,
+      );
+      expect(files['ws1/restricted.png']).toBe(OLD);
+      expect(files['ws1/originals/restricted.png']).toBe(OLD);
+      expect(filesService.addImageFromFile).not.toHaveBeenCalled();
+    });
+
+    it('refuses (409) the name for the workspace admin too', async () => {
+      await upload('uid-admin', { fullFileName: 'restricted.png' }).expect(409);
+      expect(files['ws1/restricted.png']).toBe(OLD);
+      expect(filesService.addImageFromFile).not.toHaveBeenCalled();
     });
 
     it('refuses a user who is not a member of the workspace', async () => {
@@ -302,9 +310,28 @@ describe('writing an image by name', () => {
       expect(files['ws1/fresh.png']).toBe(NEW);
     });
 
-    it('keeps letting a member upload over an image that has no permissions of its own', async () => {
-      await upload('uid-reader', { fullFileName: 'open.png' }).expect(201);
-      expect(files['ws1/open.png']).toBe(NEW);
+    it('refuses (409) the name of an image that has no permissions of its own', async () => {
+      await upload('uid-reader', { fullFileName: 'open.png' }).expect(409);
+      expect(files['ws1/open.png']).toBe(OLD);
+      expect(filesService.addImageFromFile).not.toHaveBeenCalled();
+    });
+
+    it('refuses (409) the name of an image in the trash', async () => {
+      mockDb.data.workspaces.ws1.screenshots.img4 = {
+        id: 'img4',
+        refName: 'trashed.png',
+        trash: true,
+      };
+      await upload('uid-reader', { fullFileName: 'trashed.png' }).expect(409);
+      expect(filesService.addImageFromFile).not.toHaveBeenCalled();
+    });
+
+    it('still checks the folder in the body first: no write access to it is a 403, whatever the name', async () => {
+      await upload('uid-reader', {
+        fullFileName: 'open.png',
+        folderId: 'f1',
+      }).expect(403);
+      expect(filesService.addImageFromFile).not.toHaveBeenCalled();
     });
 
     it('treats the name of another workspace as a new name, and leaves that workspace alone', async () => {
@@ -368,9 +395,13 @@ describe('writing an image by name', () => {
       },
     );
 
-    it('lets a member with write permission copy a personal image over the one with that name', async () => {
+    it('lets a member with write permission add a personal image whose name a workspace image has', async () => {
+      // The service stores the copy under a name of its own (see shared-file-names.spec.ts), so
+      // the image with that name keeps its file.
       await addFromPersonal('uid-writer', 'itemId=p1').expect(201);
-      expect(files['ws1/restricted.png']).toBe('personal copy');
+      expect(
+        filesService.moveItemFromPersonalToWorkspace,
+      ).toHaveBeenCalledTimes(1);
     });
 
     it('hands the checked file name to the copy, so it cannot change after the check', async () => {
