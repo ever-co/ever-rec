@@ -14,7 +14,11 @@ import {
   sendForceTimeUpdateEvent,
 } from 'misc/customEvents';
 import { ascendTimestampSecondsSort } from 'misc/videoChapterHelperFunctions';
-import { CHAPTER_MIN_CHAPTERS } from 'misc/appConstConfig';
+import {
+  CHAPTER_MAX_CHAPTERS,
+  CHAPTER_MAX_CONTENT_LENGTH,
+  CHAPTER_MIN_CHAPTERS,
+} from 'misc/appConstConfig';
 import { nanoid } from 'nanoid';
 import {
   getVideoChapters,
@@ -179,6 +183,35 @@ const useVideoChapters = ({
     async (showNotification = true) => {
       if (chapters.length < CHAPTER_MIN_CHAPTERS)
         return showNotification && infoMessage(t('hooks.toasts.add3Chapters'));
+
+      // The API refuses these, so say what to fix before sending anything.
+      if (chapters.length > CHAPTER_MAX_CHAPTERS)
+        return (
+          showNotification &&
+          infoMessage(
+            t('hooks.toasts.tooManyChapters', {
+              max: CHAPTER_MAX_CHAPTERS,
+              defaultValue:
+                'A video can have at most {{max}} chapters. Remove some to save.',
+            }),
+          )
+        );
+
+      if (
+        chapters.some(
+          (chapter) => chapter.content.length > CHAPTER_MAX_CONTENT_LENGTH,
+        )
+      )
+        return (
+          showNotification &&
+          infoMessage(
+            t('hooks.toasts.chapterTitleTooLong', {
+              max: CHAPTER_MAX_CONTENT_LENGTH,
+              defaultValue:
+                'Chapter titles can have at most {{max}} characters. Shorten the long ones to save.',
+            }),
+          )
+        );
 
       const invalidChapterIds = chapters
         .filter((chapter) => chapter.content === '')
