@@ -20,8 +20,10 @@ import {
   FakeReference,
   InMemoryFirebaseApp,
 } from '../../../../test/support/in-memory-firebase';
+import { EVER_COUNTER_EVENTS } from '../../../common/events/ever-counters.events';
 import { FoldersSharedService } from '../../../services/shared/folders.shared.service';
 import { parseCollectionToArray } from '../../../services/utils/helpers';
+import { WorkspaceFilesController } from '../controllers/files.controller';
 import { WorkspaceFoldersController } from '../controllers/folders.controller';
 import { WorkspaceFilesService } from './files.service';
 import { WorkspaceFoldersService } from './folders.service';
@@ -770,7 +772,7 @@ describe('overlapping writes to a workspace', () => {
     it('does not bring back an item deleted before its move is written', async () => {
       const [moved, deleted] = await overlap(
         move(['shot1'], 'fold2', false),
-        () => filesService.deleteImage('ws1', 'shot1', false),
+        () => filesService.deleteImage('ws1', 'shot1'),
       );
 
       expect(moved.status).toBe('success');
@@ -779,6 +781,95 @@ describe('overlapping writes to a workspace', () => {
       expect(stored('screenshots/shot1')).toBeNull();
       expect(counts()).toEqual({ fold1: 1, fold2: 0, fold3: 0 });
     });
+  });
+
+  describe('deleting an item counts it once, out of the folder it is stored in', () => {
+    let controller: WorkspaceFilesController;
+    let deletions: number;
+    // The deletes as the routes get them: `folderId` is what the client sends.
+    const deleteImage = (imageId: string, folderId: string | false) => () =>
+      controller.deleteImage('ws1', { imageId, folderId });
+    const deleteVideo = (videoId: string) => () =>
+      controller.deleteVideo('ws1', { videoId });
+    const counts = () =>
+      Object.fromEntries(folders().map((x) => [x.id, x.items]));
+    // fold1 counts shot1; fold3 is in fold2 and holds vid1, which both of them count.
+    const imageDeleted = { fold1: 0, fold2: 1, fold3: 1 };
+    const videoDeleted = { fold1: 1, fold2: 0, fold3: 0 };
+
+    beforeEach(async () => {
+      const events = new EventEmitter2();
+      deletions = 0;
+      events.on(EVER_COUNTER_EVENTS.mediaDeleted, () => (deletions += 1));
+      controller = new WorkspaceFilesController(
+        new WorkspaceFilesService(
+          utilities,
+          // A deleted video's streaming asset goes with it.
+          { deleteAsset: async () => undefined } as any,
+          new WorkspaceShareService(utilities, new EventEmitter2()),
+          {} as any,
+          events,
+          {} as any,
+        ),
+        sharedService,
+      );
+      await mockFirebase.db
+        .ref(`${WORKSPACE}/screenshots/shot1/parentId`)
+        .set('fold1');
+      await mockFirebase.db
+        .ref(`${WORKSPACE}/folders/fold3`)
+        .update({ parentId: 'fold2', nestLevel: 1, items: 1 });
+      await mockFirebase.db.ref(`${WORKSPACE}/folders/fold2/items`).set(1);
+      await mockFirebase.db.ref(`${WORKSPACE}/videos/vid1`).set({
+        id: 'vid1',
+        uid: 'uid-admin',
+        title: 'Clip',
+        refName: 'clip.mp4',
+        parentId: 'fold3',
+      });
+    });
+
+    it('counts an image out of the folder it is stored in, not the folderId in the query', async () => {
+      const deleted = await deleteImage('shot1', 'fold2')();
+
+      expect(deleted.status).toBe('success');
+      expect(stored('screenshots/shot1')).toBeNull();
+      expect(counts()).toEqual(imageDeleted);
+    });
+
+    it('changes no count for an image at the top level, whatever folderId the query names', async () => {
+      await mockFirebase.db
+        .ref(`${WORKSPACE}/screenshots/shot1/parentId`)
+        .set(false);
+
+      const deleted = await deleteImage('shot1', 'fold1')();
+
+      expect(deleted.status).toBe('success');
+      expect(stored('screenshots/shot1')).toBeNull();
+      expect(counts()).toEqual({ fold1: 1, fold2: 1, fold3: 1 });
+    });
+
+    it('counts a video out of its folder and the folders above it', async () => {
+      const deleted = await deleteVideo('vid1')();
+
+      expect(deleted.status).toBe('success');
+      expect(stored('videos/vid1')).toBeNull();
+      expect(counts()).toEqual(videoDeleted);
+    });
+
+    it.each([
+      ['an image', deleteImage('shot1', 'fold1'), imageDeleted],
+      ['a video', deleteVideo('vid1'), videoDeleted],
+    ])(
+      'counts %s deleted twice at the same time (a double submit) once',
+      async (_name, remove, after) => {
+        const [first, second] = await overlap(remove, remove);
+
+        expect([first.status, second.status]).toEqual(['success', 'success']);
+        expect(counts()).toEqual(after);
+        expect(deletions).toBe(1);
+      },
+    );
   });
 
   it('answers an error when the folder permission cannot be stored', async () => {

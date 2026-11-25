@@ -778,14 +778,69 @@ export class WorkspaceFilesService {
   }
 
   /**
+   * Removes the item `itemId` of `workspaces/<workspaceId>/<collection>` in one transaction on the
+   * item, then lowers the item count of the folder it was stored in and of every folder above that
+   * one. The folder is the one in the item's record, never one a request names: the client's view
+   * may be stale (the item moved meanwhile), and a query can name any folder. Only the delete whose
+   * transaction removed the item counts it, so of two deletes of one item at the same time the
+   * other finds it gone and changes no count.
+   *
+   * `removed`: this delete removed the item. `counted`: false when the folder counts could not be
+   * changed. Throws when the removal does not commit.
+   */
+  private async removeWorkspaceItem(
+    workspaceId: string,
+    collection: 'screenshots' | 'videos',
+    itemId: string,
+  ): Promise<{ removed: boolean; counted: boolean }> {
+    // What the last run saw: the run whose write is stored.
+    const seen: { item: { parentId?: unknown } | null } = { item: null };
+    const result = await admin
+      .database()
+      .ref(`workspaces/${workspaceId}/${collection}/${itemId}`)
+      .transaction((current: unknown) => {
+        seen.item =
+          current && typeof current === 'object'
+            ? (current as { parentId?: unknown })
+            : null;
+        // Always `null`, never an abort: the first run may get the local guess (`null` for an item
+        // that is stored), and its write is checked against the stored item and run again with it
+        // (see `changeWorkspaceCollection`).
+        return null;
+      });
+    if (!result.committed) {
+      throw new Error('The item could not be removed.');
+    }
+    if (!seen.item) {
+      // Removed meanwhile, by a delete that counted it.
+      return { removed: false, counted: true };
+    }
+
+    const parentId = seen.item.parentId;
+    if (typeof parentId !== 'string' || parentId === '') {
+      // At the top level: no folder counts it.
+      return { removed: true, counted: true };
+    }
+    const counted = await changeWorkspaceFolders(workspaceId, (folders) => ({
+      items: this.utilitiesService.changeFolderItemCountRecursive(
+        folders,
+        parentId,
+        -1,
+      ),
+    }));
+    return { removed: true, counted: counted.ok };
+  }
+
+  /**
    * Deletes the image `imageId` and the stored files of that image. The storage names come from
    * the image's own record, never from the request: the route's permission check is made on
-   * `imageId`, so a client-supplied file name could otherwise delete another image's file.
+   * `imageId`, so a client-supplied file name could otherwise delete another image's file. The
+   * folder counts that lose the image are those of the folder in its record (see
+   * `removeWorkspaceItem`).
    */
   async deleteImage(
     workspaceId: string,
     imageId: string,
-    folderId: string | false,
   ): Promise<IDataResponse<string | null>> {
     try {
       const db = admin.database();
@@ -830,22 +885,19 @@ export class WorkspaceFilesService {
         console.log('Error deleting video from reference: ' + refName);
       });
 
-      await imageReference.remove();
-      this.eventEmitter.emit(EVER_COUNTER_EVENTS.mediaDeleted, {
-        kind: 'screenshot',
-        bytes: everStatsBytes,
-      });
+      const { removed, counted } = await this.removeWorkspaceItem(
+        workspaceId,
+        'screenshots',
+        imageId,
+      );
+      if (removed) {
+        this.eventEmitter.emit(EVER_COUNTER_EVENTS.mediaDeleted, {
+          kind: 'screenshot',
+          bytes: everStatsBytes,
+        });
+      }
 
-      // Update folder item count recursively, in one transaction on the folder list
-      const counted = await changeWorkspaceFolders(workspaceId, (folders) => ({
-        items: this.utilitiesService.changeFolderItemCountRecursive(
-          folders,
-          folderId,
-          -1,
-        ),
-      }));
-
-      if (counted.ok === false) {
+      if (!counted) {
         return sendError(
           'The image was deleted, but the folder item count could not be updated.',
         );
@@ -861,7 +913,8 @@ export class WorkspaceFilesService {
   /**
    * Deletes the video `videoId` and the stored file of that video. The storage name comes from the
    * video's own record, never from the request: the route's permission check is made on `videoId`,
-   * so a client-supplied file name could otherwise delete another video's file.
+   * so a client-supplied file name could otherwise delete another video's file. The folder counts
+   * that lose the video are those of the folder in its record (see `removeWorkspaceItem`).
    */
   async deleteVideo(
     workspaceId: string,
@@ -908,11 +961,17 @@ export class WorkspaceFilesService {
         );
       });
 
-      await videoRef.remove();
-      this.eventEmitter.emit(EVER_COUNTER_EVENTS.mediaDeleted, {
-        kind: 'video',
-        bytes: everStatsBytes,
-      });
+      const { removed, counted } = await this.removeWorkspaceItem(
+        workspaceId,
+        'videos',
+        videoId,
+      );
+      if (removed) {
+        this.eventEmitter.emit(EVER_COUNTER_EVENTS.mediaDeleted, {
+          kind: 'video',
+          bytes: everStatsBytes,
+        });
+      }
 
       this.eventEmitter.emit(
         'analytics.track',
@@ -923,6 +982,11 @@ export class WorkspaceFilesService {
         },
       );
 
+      if (!counted) {
+        return sendError(
+          'The video was deleted, but the folder item count could not be updated.',
+        );
+      }
       return sendResponse('Video deleted successfully');
     } catch (error: any) {
       console.log(error);

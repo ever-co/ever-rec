@@ -12,6 +12,11 @@ export class DeleteImageDto {
   @IsId()
   imageId: string;
 
+  /**
+   * Sent by older clients, but not used: the folder counts that lose the image are those of the
+   * folder recorded for `imageId`. The client's view may be stale (the image moved meanwhile), and
+   * a query can name any folder.
+   */
   @IsOptionalId()
   folderId: string | false = false;
 }
