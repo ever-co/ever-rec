@@ -90,7 +90,7 @@ const render = async (element: React.ReactElement) => {
   }
 };
 
-const tabLabels = () => [...container.querySelectorAll('.ant-tabs-tab')].map((tab) => tab.textContent);
+const tabLabels = () => Array.from(container.querySelectorAll('.ant-tabs-tab')).map((tab) => tab.textContent);
 
 const message = (key: string): unknown => key.split('.').reduce((node: any, part) => (node == null ? undefined : node[part]), en);
 
