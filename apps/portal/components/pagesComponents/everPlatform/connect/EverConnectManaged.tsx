@@ -5,6 +5,8 @@ import { getManaged, IManagedSettings, IManagedWindow, setManaged } from 'app/se
 import { formatTime, useErrorMessage } from './shared';
 
 const DAYS = [0, 1, 2, 3, 4, 5, 6];
+// English day names, shown only if a locale lacks the key; the typed `t` also needs a default for a computed key.
+const DAY_FALLBACK = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 /**
  * *Maintenance operations* (the operator of a self-hosted installation only): whether an
@@ -52,7 +54,7 @@ const EverConnectManaged: React.FC = () => {
           optIn,
           kinds,
           // The first window is edited here; any other window set before is kept.
-          windows: [slot, ...settings.windows.slice(1)],
+          windows: [slot, ...(settings?.windows.slice(1) ?? [])],
           ...(backupDir.trim() ? { backupDir: backupDir.trim() } : {}),
         }),
       );
@@ -88,7 +90,7 @@ const EverConnectManaged: React.FC = () => {
         <Checkbox.Group
           value={slot.days}
           onChange={(values) => setSlot({ ...slot, days: values as number[] })}
-          options={DAYS.map((day) => ({ value: day, label: t(`page.everPlatform.connect.managed.days.${day}`) }))}
+          options={DAYS.map((day) => ({ value: day, label: t(`page.everPlatform.connect.managed.days.${day}`, DAY_FALLBACK[day]) }))}
         />
         <Input className="tw-w-24" value={slot.from} onChange={(event) => setSlot({ ...slot, from: event.target.value })} />
         <Input className="tw-w-24" value={slot.to} onChange={(event) => setSlot({ ...slot, to: event.target.value })} />
