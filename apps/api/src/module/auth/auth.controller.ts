@@ -206,8 +206,14 @@ export class AuthController {
   /**
    * The caller's own session token, as `AuthGuard` reads it. Used to ask
    * Firebase to mail the verification message to the signed-in address.
+   * When the guard let the request in by refreshing an expired ID token, the
+   * fresh token is the one Firebase accepts.
    */
   private getSessionIdToken(request: Request): string {
+    const refreshed = (request as Request & { refreshedIdToken?: string })
+      ?.refreshedIdToken;
+    if (refreshed) return refreshed;
+
     const authHeader = request?.headers?.['authorization'];
     const bearer =
       typeof authHeader === 'string' ? authHeader.split(' ')[1] : undefined;
