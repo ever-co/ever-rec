@@ -6,6 +6,7 @@ import * as admin from 'firebase-admin';
 import { IUser } from 'src/interfaces/IUser';
 import { sendError, sendResponse } from '../../../services/utils/sendResponse';
 import { parseCollectionToArray } from '../../../services/utils/helpers';
+import { changeWorkspaceMembers } from './change-workspace-collection';
 
 @Injectable()
 export class WorkspaceMembersService {
@@ -17,19 +18,27 @@ export class WorkspaceMembersService {
     workspaceId: string,
   ): Promise<IDataResponse<IWorkspace | null>> {
     try {
-      const { workspaceVal, workspaceRef } =
+      const { workspaceVal } =
         await this.utilitiesService.getWorkspaceById(workspaceId);
-      const members = workspaceVal.members || [];
-      members.push({ id: uid });
-
-      await workspaceRef.update({ members });
-      const workspace = await this.utilitiesService.parseWorkspaceItems(
-        workspaceVal,
+      // In the transaction every writer of the member list shares, from the stored list: a member
+      // is stored once, and one added or removed meanwhile is kept.
+      const added = await changeWorkspaceMembers(workspaceId, (members) =>
+        members.some((member) => member.id === uid)
+          ? {}
+          : { items: [...members, { id: uid }] },
       );
+      if (added.ok === false) {
+        return this.utilitiesService.sendError(
+          added.message || 'Error while trying to add workspace member.',
+        );
+      }
+
+      const workspace =
+        await this.utilitiesService.parseWorkspaceItems(workspaceVal);
 
       return this.utilitiesService.sendResponse<IWorkspace>({
         ...workspace,
-        members,
+        members: added.items,
       });
     } catch (e) {
       console.log(e);
@@ -43,26 +52,25 @@ export class WorkspaceMembersService {
     uid: string,
     workspaceId: string,
   ): Promise<IDataResponse<IWorkspace | null>> {
-    const { workspaceVal, workspaceRef } =
+    const { workspaceVal } =
       await this.utilitiesService.getWorkspaceById(workspaceId);
-    const members: IWorkspaceUser[] = workspaceVal.members || [];
-    const index = members.findIndex((x) => x.id === uid);
-
-    if (index === -1) {
+    const removed = await changeWorkspaceMembers(workspaceId, (members) =>
+      members.some((member) => member.id === uid)
+        ? { items: members.filter((member) => member.id !== uid) }
+        : { error: 'User not a member of this workspace.' },
+    );
+    if (removed.ok === false) {
       return this.utilitiesService.sendError(
-        'User not a member of this workspace.',
+        removed.message || 'Error while trying to remove workspace member.',
       );
     }
 
-    members.splice(index, 1);
-
-    await workspaceRef.update({ members });
     const workspace: IWorkspace =
       await this.utilitiesService.parseWorkspaceItems(workspaceVal);
 
     return this.utilitiesService.sendResponse<IWorkspace>({
       ...workspace,
-      members,
+      members: removed.items,
     });
   }
 

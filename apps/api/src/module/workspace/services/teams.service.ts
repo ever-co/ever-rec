@@ -5,11 +5,22 @@ import { WorkspaceUtilitiesService } from './utilities.service';
 import { Injectable } from '@nestjs/common';
 import { IDataResponse } from 'src/interfaces/_types';
 import { sendError, sendResponse } from 'src/services/utils/sendResponse';
-import { promiseAllSettled } from 'src/services/utils/helpers';
+import {
+  parseCollectionToArray,
+  promiseAllSettled,
+} from 'src/services/utils/helpers';
 import { IWorkspaceUser } from '../Interfaces/Workspace';
 import { Optional } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { EVER_COUNTER_EVENTS } from '../../../common/events/ever-counters.events';
+import { changeWorkspaceTeams } from './change-workspace-collection';
+
+const teamNotFound = (teamId: string, workspaceId: string) =>
+  `Team with id '${teamId}' was not found in workspace with id '${workspaceId}'.`;
+
+/** The members of a team, as a list (Firebase can return a sparse array as an object). */
+const membersOf = (team: IWorkspaceTeam): IWorkspaceUser[] =>
+  parseCollectionToArray<IWorkspaceUser>(team.members).filter(Boolean);
 
 @Injectable()
 export class WorkspaceTeamsService {
@@ -20,10 +31,8 @@ export class WorkspaceTeamsService {
 
   async addTeam(uid: string, workspaceId: string, teamName: string) {
     try {
-      const { workspaceVal, workspaceRef } =
-        await this.utilitiesService.getWorkspaceById(workspaceId);
-
-      const teams: IWorkspaceTeam[] = workspaceVal.teams || [];
+      // The workspace must exist.
+      await this.utilitiesService.getWorkspaceById(workspaceId);
 
       const id = nanoid(28);
       const newTeam: IWorkspaceTeam = {
@@ -34,14 +43,20 @@ export class WorkspaceTeamsService {
         workspaceId,
       };
 
-      teams.push(newTeam);
-
-      // Only `teams`: a write of the whole workspace read above would undo every change made
-      // meanwhile, a member removed or a folder taken away from a member included.
-      await workspaceRef.update({ teams });
+      // Only `teams`, in the transaction every writer of the team list shares: a write of a list
+      // read earlier would undo every change made meanwhile, a team member removed included.
+      const added = await changeWorkspaceTeams(workspaceId, (teams) => ({
+        items: [...teams, newTeam],
+      }));
+      if (added.ok === false) {
+        return sendError(
+          'Error while trying to add a workspace Team.',
+          added.message,
+        );
+      }
       this.eventEmitter?.emit(EVER_COUNTER_EVENTS.teamCreated, {});
 
-      return sendResponse(teams);
+      return sendResponse(added.items);
     } catch (e) {
       console.log(e);
       return sendError(
@@ -77,11 +92,10 @@ export class WorkspaceTeamsService {
     thumbnail?: any,
   ): Promise<IDataResponse<IWorkspaceTeam | null>> {
     try {
-      const { workspaceVal, workspaceRef } =
-        await this.utilitiesService.getWorkspaceById(workspaceId);
+      // The workspace must exist.
+      await this.utilitiesService.getWorkspaceById(workspaceId);
       let avatarUrl: string;
       let thumbnailUrl: string;
-      let updatedTeam = null;
 
       if (avatar) {
         const { file } = await this.utilitiesService.uploadImageInBucket(
@@ -113,28 +127,35 @@ export class WorkspaceTeamsService {
         )[0];
       }
 
-      const teams = workspaceVal.teams || [];
-      this.checkIfTeamExists(teams, teamId, workspaceId);
-
-      const newTeams = teams.map((team) => {
-        if (team.id === teamId) {
-          updatedTeam = {
-            ...team,
-            name: name || team.name || null,
-            avatar: avatarUrl || team.avatar || null,
-            thumbnail: thumbnailUrl || team.thumbnail || null,
-          };
-
-          return updatedTeam;
+      // Only `teams`, in the transaction every writer of the team list shares.
+      const updated = await changeWorkspaceTeams(workspaceId, (teams) => {
+        if (!teams.some((team) => team.id === teamId)) {
+          return { error: teamNotFound(teamId, workspaceId) };
         }
 
-        return team;
+        return {
+          items: teams.map((team) =>
+            team.id === teamId
+              ? {
+                  ...team,
+                  name: name || team.name || null,
+                  avatar: avatarUrl || team.avatar || null,
+                  thumbnail: thumbnailUrl || team.thumbnail || null,
+                }
+              : team,
+          ),
+        };
       });
+      if (updated.ok === false) {
+        return sendError(
+          'Error while trying to update Team from workspace',
+          updated.message,
+        );
+      }
 
-      // Only `teams`, never the whole workspace read above.
-      await workspaceRef.update({ teams: newTeams });
-
-      return sendResponse(updatedTeam);
+      return sendResponse(
+        updated.items.find((team) => team.id === teamId) ?? null,
+      );
     } catch (e) {
       console.log(e);
       return sendError(
@@ -147,17 +168,21 @@ export class WorkspaceTeamsService {
   async deleteTeam(workspaceId: string, teamId: string) {
     try {
       const bucket = admin.storage().bucket();
-      const { workspaceVal, workspaceRef } =
-        await this.utilitiesService.getWorkspaceById(workspaceId);
+      // The workspace must exist.
+      await this.utilitiesService.getWorkspaceById(workspaceId);
 
-      const teams = workspaceVal.teams || [];
-
-      const deleteIndex = this.checkIfTeamExists(teams, teamId, workspaceId);
-
-      teams.splice(deleteIndex, 1);
-
-      // Only `teams`, never the whole workspace read above.
-      await workspaceRef.update({ teams });
+      // Only `teams`, in the transaction every writer of the team list shares.
+      const deleted = await changeWorkspaceTeams(workspaceId, (teams) =>
+        teams.some((team) => team.id === teamId)
+          ? { items: teams.filter((team) => team.id !== teamId) }
+          : { error: teamNotFound(teamId, workspaceId) },
+      );
+      if (deleted.ok === false) {
+        return sendError(
+          'Error while trying to remove Team from workspace',
+          deleted.message,
+        );
+      }
       this.eventEmitter?.emit(EVER_COUNTER_EVENTS.teamDeleted, {});
 
       bucket
@@ -171,7 +196,7 @@ export class WorkspaceTeamsService {
           );
         });
 
-      return sendResponse(teams);
+      return sendResponse(deleted.items);
     } catch (e) {
       console.log(e);
       return sendError(
@@ -183,30 +208,38 @@ export class WorkspaceTeamsService {
 
   async leaveTeam(workspaceId: string, uid: string, teamId: string) {
     try {
-      const { workspaceVal, workspaceRef } =
+      const { workspaceVal } =
         await this.utilitiesService.getWorkspaceById(workspaceId);
 
       if (workspaceVal.admin === uid) {
         return sendError('The workspace Admin cannot leave his created team.');
       }
 
-      const teams = workspaceVal.teams || [];
-      const index = teams.findIndex((t) => t.id === teamId);
+      // Only `teams`, in the transaction every writer of the team list shares.
+      const left = await changeWorkspaceTeams(workspaceId, (teams) => {
+        const team = teams.find((t) => t.id === teamId);
+        if (!team) {
+          return { error: 'Could not find the team for the workspace' };
+        }
 
-      if (index === -1) {
-        return sendError('Could not find the team for the workspace');
+        const members = membersOf(team);
+        if (!members.some((member) => member.id === uid)) {
+          return {}; // not in the team: nothing to store
+        }
+
+        return {
+          items: teams.map((t) =>
+            t.id === teamId
+              ? { ...t, members: members.filter((member) => member.id !== uid) }
+              : t,
+          ),
+        };
+      });
+      if (left.ok === false) {
+        return left.message
+          ? sendError(left.message)
+          : sendError('Could not Leave Team from workspace');
       }
-
-      const members = teams[index]?.members || [];
-      const newMembers = members.filter((member) => member.id !== uid);
-
-      teams[index] = {
-        ...teams[index],
-        members: newMembers,
-      };
-
-      // Only `teams`, never the whole workspace read above.
-      await workspaceRef.update({ teams });
 
       return sendResponse(uid);
     } catch (e) {
@@ -309,7 +342,7 @@ export class WorkspaceTeamsService {
 
   async addMember(workspaceId: string, teamId: string, newMemberId: string) {
     try {
-      const { workspaceVal, workspaceRef } =
+      const { workspaceVal } =
         await this.utilitiesService.getWorkspaceById(workspaceId);
 
       // Check if to be added member is already a member in the workspace
@@ -324,34 +357,36 @@ export class WorkspaceTeamsService {
         );
       }
 
-      const teams = workspaceVal.teams || [];
-      this.checkIfTeamExists(teams, teamId, workspaceId);
-
-      const newTeams = teams.map((team) => {
-        if (team.id === teamId) {
-          const newTeamMembers = [...team.members];
-
-          const alreadyMember = newTeamMembers.findIndex(
-            (member) => member.id === newMemberId,
-          );
-          if (alreadyMember >= 0) {
-            throw new Error(
-              `Member with uid '${newMemberId}' is already a member of Team with id '${teamId}'`,
-            );
-          }
-
-          newTeamMembers.push({ id: newMemberId });
-
-          return { ...team, members: newTeamMembers };
+      // Only `teams`, in the transaction every writer of the team list shares.
+      const added = await changeWorkspaceTeams(workspaceId, (teams) => {
+        const team = teams.find((t) => t.id === teamId);
+        if (!team) {
+          return { error: teamNotFound(teamId, workspaceId) };
         }
 
-        return team;
+        const members = membersOf(team);
+        if (members.some((member) => member.id === newMemberId)) {
+          return {
+            error: `Member with uid '${newMemberId}' is already a member of Team with id '${teamId}'`,
+          };
+        }
+
+        return {
+          items: teams.map((t) =>
+            t.id === teamId
+              ? { ...t, members: [...members, { id: newMemberId }] }
+              : t,
+          ),
+        };
       });
+      if (added.ok === false) {
+        return sendError(
+          'Error while trying to add member in the Team.',
+          added.message,
+        );
+      }
 
-      // Only `teams`, never the whole workspace read above.
-      await workspaceRef.update({ teams: newTeams });
-
-      return sendResponse(newTeams);
+      return sendResponse(added.items);
     } catch (e) {
       console.log(e);
       return sendError(
@@ -363,7 +398,7 @@ export class WorkspaceTeamsService {
 
   async deleteMember(workspaceId: string, teamId: string, memberId: string) {
     try {
-      const { workspaceVal, workspaceRef } =
+      const { workspaceVal } =
         await this.utilitiesService.getWorkspaceById(workspaceId);
       const worskpaceMembers = workspaceVal.members || [];
       const memberIndex = worskpaceMembers.findIndex(
@@ -376,33 +411,40 @@ export class WorkspaceTeamsService {
         );
       }
 
-      const teams = workspaceVal.teams || [];
-      this.checkIfTeamExists(teams, teamId, workspaceId);
-
-      const newTeams = teams.map((team) => {
-        if (team.id === teamId) {
-          const foundIndex = team.members.findIndex(
-            (member) => member.id === memberId,
-          );
-
-          if (foundIndex === -1) {
-            throw new Error(
-              `Member with uid '${memberId}' is not a member of Team with id '${teamId}'`,
-            );
-          }
-
-          team.members.splice(foundIndex, 1);
-
-          return team;
+      // Only `teams`, in the transaction every writer of the team list shares: the member stays
+      // out of the team whatever else changes the list meanwhile.
+      const removed = await changeWorkspaceTeams(workspaceId, (teams) => {
+        const team = teams.find((t) => t.id === teamId);
+        if (!team) {
+          return { error: teamNotFound(teamId, workspaceId) };
         }
 
-        return team;
+        const members = membersOf(team);
+        if (!members.some((member) => member.id === memberId)) {
+          return {
+            error: `Member with uid '${memberId}' is not a member of Team with id '${teamId}'`,
+          };
+        }
+
+        return {
+          items: teams.map((t) =>
+            t.id === teamId
+              ? {
+                  ...t,
+                  members: members.filter((member) => member.id !== memberId),
+                }
+              : t,
+          ),
+        };
       });
+      if (removed.ok === false) {
+        return sendError(
+          'Error while trying to remove member from the Team.',
+          removed.message,
+        );
+      }
 
-      // Only `teams`, never the whole workspace read above.
-      await workspaceRef.update({ teams: newTeams });
-
-      return sendResponse(newTeams);
+      return sendResponse(removed.items);
     } catch (e) {
       console.log(e);
       return sendError(
@@ -410,22 +452,5 @@ export class WorkspaceTeamsService {
         e.message,
       );
     }
-  }
-
-  // Helper Methods
-  private checkIfTeamExists(
-    teams: IWorkspaceTeam[],
-    teamId: string,
-    workspaceId: string,
-  ) {
-    const teamIndex = teams.findIndex((team) => team.id === teamId);
-
-    if (teamIndex === -1) {
-      throw new Error(
-        `Team with id '${teamId}' was not found in workspace with id '${workspaceId}'.`,
-      );
-    }
-
-    return teamIndex;
   }
 }
