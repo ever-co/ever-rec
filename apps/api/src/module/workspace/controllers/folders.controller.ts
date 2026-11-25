@@ -105,15 +105,15 @@ export class WorkspaceFoldersController {
   async moveItemsToFolder(
     @Param('workspaceId', ValidateId) workspaceId: string,
     @Param('folderId', ParseOptionalId) toMoveFolderId: string | false,
-    @Body() { fromFolderId, itemIds }: MoveItemsDto,
+    @Body() { itemIds }: MoveItemsDto,
     @User() user: IRequestUser,
   ) {
+    // The body's `fromFolderId` is not used: each item moves out of the folder it is stored in.
     return this.foldersService.moveItemsToFolder(
       user,
       workspaceId,
       itemIds,
       toMoveFolderId,
-      fromFolderId,
     );
   }
 

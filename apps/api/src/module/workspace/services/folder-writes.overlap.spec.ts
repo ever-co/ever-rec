@@ -6,7 +6,10 @@
  * the admin had just taken away. The folder list is now changed in one transaction on
  * `workspaces/<id>/folders`, and the other writers write only the children they change. The member
  * list and the team list are changed the same way, in transactions on `workspaces/<id>/members` and
- * `workspaces/<id>/teams`, so a member who left or was taken out of a team is not put back.
+ * `workspaces/<id>/teams`, so a member who left or was taken out of a team is not put back. A move
+ * of items changes each item's folder in a transaction of its own and counts only the items whose
+ * folder changed, from the folder each one was in, so a move sent twice or two moves of one item
+ * keep every count exact.
  *
  * `overlap(first, second)` runs `second` from start to end right after `first` reads anything of
  * the workspace for the first time: `second` lands between that read and the writes `first` makes.
@@ -19,10 +22,12 @@ import {
 } from '../../../../test/support/in-memory-firebase';
 import { FoldersSharedService } from '../../../services/shared/folders.shared.service';
 import { parseCollectionToArray } from '../../../services/utils/helpers';
+import { WorkspaceFoldersController } from '../controllers/folders.controller';
 import { WorkspaceFilesService } from './files.service';
 import { WorkspaceFoldersService } from './folders.service';
 import { WorkspaceInvitesService } from './invites.service';
 import { WorkspaceMembersService } from './members.service';
+import { WorkspaceShareService } from './share.service';
 import { WorkspaceSharedService } from './shared.service';
 import { WorkspaceTeamsService } from './teams.service';
 import { WorkspaceUtilitiesService } from './utilities.service';
@@ -124,7 +129,8 @@ describe('overlapping writes to a workspace', () => {
     filesService = new WorkspaceFilesService(
       utilities,
       {} as any,
-      {} as any,
+      // A deleted image's share links go with it.
+      new WorkspaceShareService(utilities, new EventEmitter2()),
       {} as any,
       new EventEmitter2(),
       {} as any,
@@ -258,14 +264,7 @@ describe('overlapping writes to a workspace', () => {
     ],
     [
       'moving items into a folder',
-      () =>
-        foldersService.moveItemsToFolder(
-          admin,
-          'ws1',
-          ['shot1'],
-          'fold2',
-          false,
-        ),
+      () => foldersService.moveItemsToFolder(admin, 'ws1', ['shot1'], 'fold2'),
       () => {
         expect(stored('screenshots/shot1/parentId')).toBe('fold2');
         expect(folder('fold2')?.items).toBe(1);
@@ -348,14 +347,7 @@ describe('overlapping writes to a workspace', () => {
   > = [
     [
       'moving items',
-      () =>
-        foldersService.moveItemsToFolder(
-          admin,
-          'ws1',
-          ['shot1'],
-          'fold2',
-          false,
-        ),
+      () => foldersService.moveItemsToFolder(admin, 'ws1', ['shot1'], 'fold2'),
       () => expect(stored('screenshots/shot1/parentId')).toBe('fold2'),
     ],
     [
@@ -690,6 +682,103 @@ describe('overlapping writes to a workspace', () => {
     // The move counted the item in fold2; the delete takes it out of fold2 again.
     expect(folder('fold2')?.items).toBe(0);
     expect(stored('screenshots/shot1/parentId')).toBe(false);
+  });
+
+  describe('moving items counts each item once, from the folder it is stored in', () => {
+    let controller: WorkspaceFoldersController;
+    // The move as the route gets it: `fromFolderId` is what the client sends.
+    const move =
+      (itemIds: string[], to: string | false, fromFolderId: string | false) =>
+      () =>
+        controller.moveItemsToFolder(
+          'ws1',
+          to,
+          { itemIds, fromFolderId },
+          admin as any,
+        );
+    const counts = () =>
+      Object.fromEntries(folders().map((x) => [x.id, x.items]));
+    // fold1 counts one item from the start (see the workspace above); shot1 is at the top level.
+    const movedIntoFold2 = () => {
+      expect(stored('screenshots/shot1')).toMatchObject({
+        id: 'shot1',
+        parentId: 'fold2',
+      });
+      expect(counts()).toEqual({ fold1: 1, fold2: 1, fold3: 0 });
+    };
+
+    beforeEach(() => {
+      controller = new WorkspaceFoldersController(
+        foldersService,
+        favoritesService,
+        sharedService,
+      );
+    });
+
+    it('counts a move sent again (a retry) once', async () => {
+      const first = await move(['shot1'], 'fold2', false)();
+      const again = await move(['shot1'], 'fold2', false)();
+
+      expect([first.status, again.status]).toEqual(['success', 'success']);
+      movedIntoFold2();
+    });
+
+    it('counts a move sent twice at the same time (a double submit) once', async () => {
+      const [first, second] = await overlap(
+        move(['shot1'], 'fold2', false),
+        move(['shot1'], 'fold2', false),
+      );
+
+      expect([first.status, second.status]).toEqual(['success', 'success']);
+      movedIntoFold2();
+    });
+
+    it('counts an id named twice in one move once', async () => {
+      const moved = await move(['shot1', 'shot1'], 'fold2', false)();
+
+      expect(moved.status).toBe('success');
+      movedIntoFold2();
+    });
+
+    it('counts the item out of the folder it is in, not the fromFolderId in the body', async () => {
+      await mockFirebase.db
+        .ref(`${WORKSPACE}/screenshots/shot1/parentId`)
+        .set('fold3');
+      await mockFirebase.db.ref(`${WORKSPACE}/folders/fold3/items`).set(1);
+
+      const moved = await move(['shot1'], 'fold2', 'fold1')();
+
+      expect(moved.status).toBe('success');
+      movedIntoFold2();
+    });
+
+    it('counts two moves of one item at the same time from where each found it', async () => {
+      // The move into fold3 lands while the move into fold2 reads: the item is in fold3 when the
+      // move into fold2 changes its folder.
+      const [intoFold2, intoFold3] = await overlap(
+        move(['shot1'], 'fold2', false),
+        move(['shot1'], 'fold3', false),
+      );
+
+      expect([intoFold2.status, intoFold3.status]).toEqual([
+        'success',
+        'success',
+      ]);
+      movedIntoFold2();
+    });
+
+    it('does not bring back an item deleted before its move is written', async () => {
+      const [moved, deleted] = await overlap(
+        move(['shot1'], 'fold2', false),
+        () => filesService.deleteImage('ws1', 'shot1', false),
+      );
+
+      expect(moved.status).toBe('success');
+      expect(deleted.status).toBe('success');
+      // Not an item that holds only a `parentId`, and not counted.
+      expect(stored('screenshots/shot1')).toBeNull();
+      expect(counts()).toEqual({ fold1: 1, fold2: 0, fold3: 0 });
+    });
   });
 
   it('answers an error when the folder permission cannot be stored', async () => {

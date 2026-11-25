@@ -112,6 +112,78 @@ export async function changeWorkspaceCollection<T extends { id?: string }>(
   };
 }
 
+/**
+ * What `moveWorkspaceItem` did. `ok`: `item` is the item stored now (`null` when none is stored),
+ * `moved` that its folder changed, from the folder `from`. Not `ok`: the write did not commit.
+ */
+export type ItemMoveResult =
+  | {
+      ok: true;
+      moved: boolean;
+      from: string | false;
+      item: Record<string, unknown> | null;
+    }
+  | { ok: false };
+
+/**
+ * Puts the item `itemId` of `workspaces/<workspaceId>/<collection>` into the folder `parentId`, in
+ * one transaction on the item. It answers the folder the item was in when it moved, so a caller
+ * counts the item out of that folder (not the one a request names), and only when its folder
+ * changed: an item already in `parentId` (a move sent again, an id named twice, a move made
+ * meanwhile) is not counted twice. An item that is not stored (deleted meanwhile) is not written: a
+ * write of its `parentId` alone would bring it back as an item that holds only a `parentId`.
+ */
+export async function moveWorkspaceItem(
+  workspaceId: string,
+  collection: 'screenshots' | 'videos',
+  itemId: string,
+  parentId: string | false,
+): Promise<ItemMoveResult> {
+  // What the last run saw: the run whose write is stored.
+  const seen: { stored: boolean; from: string | false } = {
+    stored: false,
+    from: false,
+  };
+  let result: { committed: boolean; snapshot: { val(): unknown } };
+
+  try {
+    result = await admin
+      .database()
+      .ref(`workspaces/${workspaceId}/${collection}/${itemId}`)
+      .transaction((current: unknown) => {
+        seen.stored = !!current && typeof current === 'object';
+        seen.from = false;
+        if (!seen.stored) {
+          // Not stored, or the first run's local guess (`null` for an item that exists): written
+          // back as seen, never an abort (see `changeWorkspaceCollection`). `null` writes nothing;
+          // for an item that is stored the write is run again with it.
+          return current === undefined ? null : current;
+        }
+        const item = current as { parentId?: string | false };
+        seen.from = item.parentId || false;
+        return seen.from === parentId ? current : { ...item, parentId };
+      });
+  } catch (e) {
+    // Not committed (retried too often, or cancelled by another write of the same path).
+    console.log(e);
+    return { ok: false };
+  }
+
+  if (!result.committed) {
+    return { ok: false };
+  }
+  const item = result.snapshot.val();
+  return {
+    ok: true,
+    moved: seen.stored && seen.from !== parentId,
+    from: seen.from,
+    item:
+      seen.stored && item && typeof item === 'object'
+        ? (item as Record<string, unknown>)
+        : null,
+  };
+}
+
 /** `changeWorkspaceCollection` for the folder list, which every folder writer goes through. */
 export function changeWorkspaceFolders(
   workspaceId: string,
