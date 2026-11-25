@@ -483,7 +483,13 @@ export class FakeStorageFile {
 
   get metadata() {
     const bytes = this.bucket.objects.get(this.name);
-    return bytes ? { name: this.name, size: String(bytes.length) } : undefined;
+    return bytes
+      ? {
+          name: this.name,
+          size: String(bytes.length),
+          generation: this.bucket.generationOf(bytes),
+        }
+      : undefined;
   }
 
   async save(data: Buffer | string): Promise<void> {
@@ -497,7 +503,23 @@ export class FakeStorageFile {
     return [metadata];
   }
 
-  async delete(): Promise<void> {
+  /**
+   * With `ifGenerationMatch`, as in Cloud Storage: an object that is not stored is a 404, and one
+   * stored with another generation (written again since) a 412 that leaves it stored.
+   */
+  async delete(
+    options: { ifGenerationMatch?: string | number } = {},
+  ): Promise<void> {
+    if (options.ifGenerationMatch !== undefined) {
+      const bytes = this.bucket.objects.get(this.name);
+      if (!bytes)
+        throw Object.assign(new Error('No such object'), { code: 404 });
+      if (
+        this.bucket.generationOf(bytes) !== String(options.ifGenerationMatch)
+      ) {
+        throw Object.assign(new Error('Precondition failed'), { code: 412 });
+      }
+    }
     this.bucket.objects.delete(this.name);
   }
 
@@ -522,6 +544,20 @@ export class FakeStorageFile {
 /** A Cloud Storage bucket, enough for the counters and the recount. */
 export class InMemoryBucket {
   readonly objects = new Map<string, Buffer>();
+  // Each write stores new bytes (also a test's own `objects.set`), so the generation is that of
+  // the stored bytes: a file written again has another one.
+  private readonly generations = new WeakMap<Buffer, string>();
+  private lastGeneration = 0;
+
+  /** The generation of the stored `bytes`, as Cloud Storage gives it in the metadata. */
+  generationOf(bytes: Buffer): string {
+    let generation = this.generations.get(bytes);
+    if (generation === undefined) {
+      generation = String((this.lastGeneration += 1));
+      this.generations.set(bytes, generation);
+    }
+    return generation;
+  }
 
   file(name: string): FakeStorageFile {
     return new FakeStorageFile(this, name);

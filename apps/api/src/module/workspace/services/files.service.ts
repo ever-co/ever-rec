@@ -4,6 +4,7 @@ import {
   ForbiddenException,
   HttpException,
   Injectable,
+  Logger,
 } from '@nestjs/common';
 import {
   canAccessFolderById,
@@ -68,9 +69,23 @@ const typeParser = {
   },
 };
 
+/** What the cleanup of a deleted item needs of one of its stored files (a `File` of the bucket). */
+interface ItemFile {
+  readonly name: string;
+  getMetadata(): Promise<unknown>;
+  delete(options: { ifGenerationMatch: string | number }): Promise<unknown>;
+}
+
+/** The generation a stored file has, or null when it is not stored. */
+type Generation = string | number | null;
+
+const errorCode = (error: unknown): number =>
+  Number((error as { code?: unknown } | null)?.code);
+
 @Injectable()
 export class WorkspaceFilesService {
   private readonly config;
+  private readonly logger = new Logger(WorkspaceFilesService.name);
 
   constructor(
     private readonly utilitiesService: WorkspaceUtilitiesService,
@@ -832,6 +847,68 @@ export class WorkspaceFilesService {
   }
 
   /**
+   * The generation `file` is stored with, read before the record that names it is removed (see
+   * `deleteUnlessReplaced`). Null when it is not stored: the cleanup skips it. Also null, and
+   * logged, when its metadata cannot be read: without its generation a file stored under the same
+   * name later could not be told from it, so it is kept.
+   */
+  private async storedGeneration(file: ItemFile): Promise<Generation> {
+    try {
+      const [metadata] = (await file.getMetadata()) as Array<{
+        generation?: unknown;
+      }>;
+      const generation = metadata?.generation;
+      if (
+        (typeof generation === 'string' && generation !== '') ||
+        typeof generation === 'number'
+      ) {
+        return generation;
+      }
+      console.log('No generation stored for ' + file.name + '; it is kept.');
+    } catch (error) {
+      if (errorCode(error) === 404) {
+        this.logger.debug(`${file.name} is not stored; nothing to delete.`);
+      } else {
+        console.log('Error reading ' + file.name + '; it is kept.', error);
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Deletes `file`, a file of an item whose record this request removed, only while it still has
+   * `generation`, the one read before the removal. Once the record is gone its name is free: the
+   * upload routes take the name from the client (`fullFileName`) and refuse only a name a record
+   * still holds, so an upload can store new files under it before this runs. That upload changes
+   * the generation, the precondition fails (412) and its files stay. A file gone already (404) is
+   * left as it is. Any other error rejects. Resolves at once for a file that was not stored.
+   */
+  private async deleteUnlessReplaced(
+    file: ItemFile,
+    generation: Generation,
+  ): Promise<void> {
+    if (generation === null) {
+      return;
+    }
+    try {
+      await file.delete({ ifGenerationMatch: generation });
+    } catch (error) {
+      const code = errorCode(error);
+      if (code === 412) {
+        this.logger.debug(
+          `${file.name} was stored again after its record was removed; it is kept.`,
+        );
+        return;
+      }
+      if (code === 404) {
+        this.logger.debug(`${file.name} is gone already.`);
+        return;
+      }
+      throw error;
+    }
+  }
+
+  /**
    * Deletes the image `imageId` and the stored files of that image. The storage names come from
    * the image's own record, never from the request: the route's permission check is made on
    * `imageId`, so a client-supplied file name could otherwise delete another image's file. The
@@ -855,6 +932,27 @@ export class WorkspaceFilesService {
         return sendError('Error while trying to delete an image', 'Not found');
       }
 
+      const imageStorageRef = bucket.file(
+        `workspaces/${workspaceId}/screenshots/${refName}`,
+      );
+      const imageThumbnailStorageRef = bucket.file(
+        `workspaces/${workspaceId}/screenshots/thumbnails/${refName}`,
+      );
+      const imageOriginalStorageRef = bucket.file(
+        `workspaces/${workspaceId}/screenshots/originals/${refName}`,
+      );
+      // Read while the record still holds the name, so the cleanup deletes these files and not
+      // the files of an upload under the same name once the record is gone (see
+      // `deleteUnlessReplaced`).
+      const [imageGeneration, thumbnailGeneration, originalGeneration] =
+        await Promise.all(
+          [
+            imageStorageRef,
+            imageThumbnailStorageRef,
+            imageOriginalStorageRef,
+          ].map((file) => this.storedGeneration(file)),
+        );
+
       // The record goes first. Only the delete that removed it deletes the files and reports their
       // size: a delete of the same image at the same time finds it gone, so the size is read before
       // any of its files goes, and a removal that does not commit leaves the image whole.
@@ -864,33 +962,30 @@ export class WorkspaceFilesService {
         imageId,
       );
       if (removed) {
-        const imageStorageRef = bucket.file(
-          `workspaces/${workspaceId}/screenshots/${refName}`,
-        );
-        const imageThumbnailStorageRef = bucket.file(
-          `workspaces/${workspaceId}/screenshots/thumbnails/${refName}`,
-        );
-
-        const imageOriginalStorageRef = bucket.file(
-          `workspaces/${workspaceId}/screenshots/originals/${refName}`,
-        );
-
         const everStatsBytes = await storedBytes(
           this.eventEmitter,
           imageStorageRef,
         );
         this.workspaceShareService.deleteLinkById(workspaceId, imageId);
 
-        imageStorageRef.delete().catch(() => {
-          console.log('Error deleting image from reference: ' + refName);
-        });
-        imageThumbnailStorageRef.delete().catch(() => {
+        this.deleteUnlessReplaced(imageStorageRef, imageGeneration).catch(
+          () => {
+            console.log('Error deleting image from reference: ' + refName);
+          },
+        );
+        this.deleteUnlessReplaced(
+          imageThumbnailStorageRef,
+          thumbnailGeneration,
+        ).catch(() => {
           console.log(
             'Error deleting image thumbnail from reference: ' + refName,
           );
         });
 
-        imageOriginalStorageRef.delete().catch(() => {
+        this.deleteUnlessReplaced(
+          imageOriginalStorageRef,
+          originalGeneration,
+        ).catch(() => {
           console.log('Error deleting video from reference: ' + refName);
         });
 
@@ -934,6 +1029,16 @@ export class WorkspaceFilesService {
         return sendError('Error while trying to delete a video', 'Not found');
       }
 
+      const refName: unknown = videoData.refName;
+      const fileRef =
+        typeof refName === 'string' && refName !== ''
+          ? bucket.file(`workspaces/${workspaceId}/videos/${refName}`)
+          : null;
+      // Read while the record still holds the name (see `deleteImage`).
+      const fileGeneration = fileRef
+        ? await this.storedGeneration(fileRef)
+        : null;
+
       // The record goes first; only the delete that removed it deletes the files (see `deleteImage`).
       const { removed, counted } = await this.removeWorkspaceItem(
         workspaceId,
@@ -943,18 +1048,16 @@ export class WorkspaceFilesService {
       if (removed) {
         this.workspaceShareService.deleteLinkById(workspaceId, videoId);
 
-        const refName: unknown = videoData.refName;
         let everStatsBytes = 0;
-        if (typeof refName === 'string' && refName !== '') {
-          const fileRef = bucket.file(
-            `workspaces/${workspaceId}/videos/${refName}`,
-          );
+        if (fileRef) {
           everStatsBytes = await storedBytes(this.eventEmitter, fileRef);
-          fileRef.delete().catch(() => {
+          this.deleteUnlessReplaced(fileRef, fileGeneration).catch(() => {
             console.log('Error deleting video from reference: ' + refName);
           });
         }
 
+        // Named by the video's id, which no other item gets: an upload under the same file name
+        // stores nothing here.
         bucket
           .deleteFiles({
             prefix: `workspaces/${workspaceId}/videosThumbnails/${videoId}/`,
