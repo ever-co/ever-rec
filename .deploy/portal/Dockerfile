@@ -59,9 +59,27 @@ RUN cd apps/portal && pnpm install --frozen-lockfile
 
 # Build the project
 COPY --from=builder /app/out/full/ .
-# Next.js inlines NEXT_PUBLIC_* when it builds, so this switch is read here (not at run time).
+# Next.js inlines NEXT_PUBLIC_* when it builds, so every one of them must be set HERE, in the stage that
+# runs `pnpm build`. The ARGs at the top of this file are global: a stage sees one only after it declares
+# it again, so before this block the browser bundle was built with an empty API address.
+ARG NEXT_PUBLIC_EXTENSION_NAME
+ARG NEXT_PUBLIC_EXTENSION_ID
+ARG NEXT_PUBLIC_GOOGLE_CLIENT_ID
+ARG NEXT_PUBLIC_EXTENSION_REDIRECT_URL
+ARG NEXT_PUBLIC_API_BASE_URL
+ARG NEXT_PUBLIC_WEBSITE_URL
+ARG NEXT_PUBLIC_STATIC_FILES_URL
+ARG NEXT_PUBLIC_SENTRY_DSN
 ARG NEXT_PUBLIC_EVER_CONNECT_ENABLED
-ENV NEXT_PUBLIC_EVER_CONNECT_ENABLED=${NEXT_PUBLIC_EVER_CONNECT_ENABLED}
+ENV NEXT_PUBLIC_EXTENSION_NAME=${NEXT_PUBLIC_EXTENSION_NAME} \
+    NEXT_PUBLIC_EXTENSION_ID=${NEXT_PUBLIC_EXTENSION_ID} \
+    NEXT_PUBLIC_GOOGLE_CLIENT_ID=${NEXT_PUBLIC_GOOGLE_CLIENT_ID} \
+    NEXT_PUBLIC_EXTENSION_REDIRECT_URL=${NEXT_PUBLIC_EXTENSION_REDIRECT_URL} \
+    NEXT_PUBLIC_API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL} \
+    NEXT_PUBLIC_WEBSITE_URL=${NEXT_PUBLIC_WEBSITE_URL} \
+    NEXT_PUBLIC_STATIC_FILES_URL=${NEXT_PUBLIC_STATIC_FILES_URL} \
+    NEXT_PUBLIC_SENTRY_DSN=${NEXT_PUBLIC_SENTRY_DSN} \
+    NEXT_PUBLIC_EVER_CONNECT_ENABLED=${NEXT_PUBLIC_EVER_CONNECT_ENABLED}
 # Build the apps
 RUN pnpm build --filter=ever-rec-portal...
 # Prune dev deps
@@ -77,6 +95,17 @@ RUN apk add --no-cache cairo giflib libjpeg-turbo pango pixman
 
 USER node
 WORKDIR /app
+
+# Same values at run time (server-side code reads process.env); a stage needs its own ARG lines.
+ARG NEXT_PUBLIC_EXTENSION_NAME
+ARG NEXT_PUBLIC_EXTENSION_ID
+ARG NEXT_PUBLIC_GOOGLE_CLIENT_ID
+ARG NEXT_PUBLIC_EXTENSION_REDIRECT_URL
+ARG NEXT_PUBLIC_API_BASE_URL
+ARG NEXT_PUBLIC_WEBSITE_URL
+ARG NEXT_PUBLIC_STATIC_FILES_URL
+ARG NEXT_PUBLIC_SENTRY_DSN
+ARG SENTRY_ORG
 
 ENV NODE_ENV=production
 ENV NEXT_PUBLIC_EXTENSION_NAME=${NEXT_PUBLIC_EXTENSION_NAME}

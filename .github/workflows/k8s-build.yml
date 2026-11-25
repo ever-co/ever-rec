@@ -1,0 +1,64 @@
+name: k8s-build
+# Images for Ever's own Rec deployment on ever-k8s (ArgoCD apps ever-rec-<env> in ever-co/k8s-gitops).
+# The in-cluster builder (ci-builds) runs this file on every push to develop, stage and main; Argo CD Image
+# Updater then rolls the new digest out. It reads GitHub Variables but never secret values, so nothing
+# below may need a secret: every NEXT_PUBLIC_* value is public (it ships in the browser bundle), and the
+# API gets its Firebase and other credentials at run time from OpenBao, not at build time.
+on:
+  workflow_dispatch:
+  push:
+    branches: [develop, stage, main]
+concurrency:
+  group: k8s-build-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: read
+  packages: write
+jobs:
+  build:
+    runs-on: ${{ vars.RUNNER_LINUX_X64_4 || 'ubuntu-latest' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - image: ever-rec-api
+            dockerfile: .deploy/api/Dockerfile
+          - image: ever-rec-portal
+            dockerfile: .deploy/portal/Dockerfile
+    steps:
+      - uses: actions/checkout@v7
+      - uses: docker/setup-buildx-action@v4
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      # One host pair per environment. The portal bakes these into its bundle (NEXT_PUBLIC_* is inlined
+      # at build time), so a portal image only works against the API host it was built for.
+      - id: t
+        run: |
+          case "${GITHUB_REF_NAME}" in
+            develop) echo "tag=dev" >> "$GITHUB_OUTPUT"; echo "api=https://apidev.rec.so" >> "$GITHUB_OUTPUT"; echo "web=https://appdev.rec.so" >> "$GITHUB_OUTPUT" ;;
+            stage) echo "tag=stage" >> "$GITHUB_OUTPUT"; echo "api=https://apistage.rec.so" >> "$GITHUB_OUTPUT"; echo "web=https://appstage.rec.so" >> "$GITHUB_OUTPUT" ;;
+            main) echo "tag=prod" >> "$GITHUB_OUTPUT"; echo "api=https://api.rec.so" >> "$GITHUB_OUTPUT"; echo "web=https://app.rec.so" >> "$GITHUB_OUTPUT" ;;
+            *) echo "tag=${GITHUB_REF_NAME//\//-}" >> "$GITHUB_OUTPUT"; echo "api=https://apidev.rec.so" >> "$GITHUB_OUTPUT"; echo "web=https://appdev.rec.so" >> "$GITHUB_OUTPUT" ;;
+          esac
+      # Keep comments ABOVE `build-args:`: a `#` line inside the block scalar becomes a malformed build-arg.
+      # The API ignores these args (its Dockerfile declares only the FIREBASE_* ones, left empty here).
+      - uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: ${{ matrix.dockerfile }}
+          push: true
+          build-args: |
+            NEXT_PUBLIC_API_BASE_URL=${{ steps.t.outputs.api }}
+            NEXT_PUBLIC_STATIC_FILES_URL=${{ steps.t.outputs.api }}
+            NEXT_PUBLIC_WEBSITE_URL=${{ steps.t.outputs.web }}
+            NEXT_PUBLIC_GOOGLE_CLIENT_ID=${{ vars.NEXT_PUBLIC_GOOGLE_CLIENT_ID }}
+            NEXT_PUBLIC_SENTRY_DSN=${{ vars.NEXT_PUBLIC_SENTRY_DSN }}
+            NEXT_PUBLIC_EVER_CONNECT_ENABLED=${{ vars.NEXT_PUBLIC_EVER_CONNECT_ENABLED }}
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}:${{ steps.t.outputs.tag }}
+            ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}:sha-${{ github.sha }}
+          cache-from: type=registry,ref=ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}:buildcache
+          cache-to: type=registry,ref=ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}:buildcache,mode=min
