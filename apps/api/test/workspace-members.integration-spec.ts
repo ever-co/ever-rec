@@ -179,8 +179,10 @@ describe('members leaving a workspace at the same time, on the emulators', () =>
 
       expect(first.status).toBe('success');
       expect(second.status).toBe('success');
-      expect((await workspaceIdsOf('uid-a')).sort()).toEqual(
-        ['ws1', first.data?.id, second.data?.id].sort(),
+      const listed = await workspaceIdsOf('uid-a');
+      expect(listed).toHaveLength(3);
+      expect(listed).toEqual(
+        expect.arrayContaining(['ws1', first.data?.id, second.data?.id]),
       );
     });
 

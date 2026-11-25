@@ -36,7 +36,7 @@ async function changeUserWorkspaceIds(
       // local guess (`null` for a list that exists), and an abort is final: a no-op decided on
       // that guess would stand. A write is checked against the stored list and run again with it
       // when they differ. A missing list stays missing.
-      return current === undefined ? null : current;
+      return current ?? null;
     });
 }
 
