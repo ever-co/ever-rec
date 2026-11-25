@@ -859,6 +859,12 @@ describe('Ever ID sign-in (e2e)', () => {
 
       const token = await issuer.logoutToken({ sid: 'sid-expired-reference-person' });
       expect((await logout(token)).status).toBe(200);
+      // The storage entry behind every reference of the session is gone...
+      const { id } = JSON.parse(
+        Buffer.from(second.body.refreshToken.split('.')[1], 'base64url').toString(),
+      );
+      expect((await t.firebase.db.ref(`tokens/${id}`).get()).exists()).toBe(false);
+      // ...so its newest reference no longer refreshes.
       expect((await refresh(second.body.refreshToken)).status).toBeGreaterThanOrEqual(400);
     }, 20000);
 
