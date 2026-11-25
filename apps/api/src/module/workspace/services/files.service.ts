@@ -4,6 +4,7 @@ import {
   ForbiddenException,
   HttpException,
   Injectable,
+  Logger,
 } from '@nestjs/common';
 import {
   canAccessFolderById,
@@ -68,9 +69,23 @@ const typeParser = {
   },
 };
 
+/** What the cleanup of a deleted item needs of one of its stored files (a `File` of the bucket). */
+interface ItemFile {
+  readonly name: string;
+  getMetadata(): Promise<unknown>;
+  delete(options: { ifGenerationMatch: string | number }): Promise<unknown>;
+}
+
+/** The generation a stored file has, or null when it is not stored. */
+type Generation = string | number | null;
+
+const errorCode = (error: unknown): number =>
+  Number((error as { code?: unknown } | null)?.code);
+
 @Injectable()
 export class WorkspaceFilesService {
   private readonly config;
+  private readonly logger = new Logger(WorkspaceFilesService.name);
 
   constructor(
     private readonly utilitiesService: WorkspaceUtilitiesService,
@@ -778,14 +793,131 @@ export class WorkspaceFilesService {
   }
 
   /**
+   * Removes the item `itemId` of `workspaces/<workspaceId>/<collection>` in one transaction on the
+   * item, then lowers the item count of the folder it was stored in and of every folder above that
+   * one. The folder is the one in the item's record, never one a request names: the client's view
+   * may be stale (the item moved meanwhile), and a query can name any folder. Only the delete whose
+   * transaction removed the item counts it, so of two deletes of one item at the same time the
+   * other finds it gone and changes no count.
+   *
+   * `removed`: this delete removed the item. `counted`: false when the folder counts could not be
+   * changed. Throws when the removal does not commit.
+   */
+  private async removeWorkspaceItem(
+    workspaceId: string,
+    collection: 'screenshots' | 'videos',
+    itemId: string,
+  ): Promise<{ removed: boolean; counted: boolean }> {
+    // What the last run saw: the run whose write is stored.
+    const seen: { item: { parentId?: unknown } | null } = { item: null };
+    const result = await admin
+      .database()
+      .ref(`workspaces/${workspaceId}/${collection}/${itemId}`)
+      .transaction((current: unknown) => {
+        seen.item =
+          current && typeof current === 'object'
+            ? (current as { parentId?: unknown })
+            : null;
+        // Always `null`, never an abort: the first run may get the local guess (`null` for an item
+        // that is stored), and its write is checked against the stored item and run again with it
+        // (see `changeWorkspaceCollection`).
+        return null;
+      });
+    if (!result.committed) {
+      throw new Error('The item could not be removed.');
+    }
+    if (!seen.item) {
+      // Removed meanwhile, by a delete that counted it.
+      return { removed: false, counted: true };
+    }
+
+    const parentId = seen.item.parentId;
+    if (typeof parentId !== 'string' || parentId === '') {
+      // At the top level: no folder counts it.
+      return { removed: true, counted: true };
+    }
+    const counted = await changeWorkspaceFolders(workspaceId, (folders) => ({
+      items: this.utilitiesService.changeFolderItemCountRecursive(
+        folders,
+        parentId,
+        -1,
+      ),
+    }));
+    return { removed: true, counted: counted.ok };
+  }
+
+  /**
+   * The generation `file` is stored with, read before the record that names it is removed (see
+   * `deleteUnlessReplaced`). Null when it is not stored: the cleanup skips it. Also null, and
+   * logged, when its metadata cannot be read: without its generation a file stored under the same
+   * name later could not be told from it, so it is kept.
+   */
+  private async storedGeneration(file: ItemFile): Promise<Generation> {
+    try {
+      const [metadata] = (await file.getMetadata()) as Array<{
+        generation?: unknown;
+      }>;
+      const generation = metadata?.generation;
+      if (
+        (typeof generation === 'string' && generation !== '') ||
+        typeof generation === 'number'
+      ) {
+        return generation;
+      }
+      console.log('No generation stored for ' + file.name + '; it is kept.');
+    } catch (error) {
+      if (errorCode(error) === 404) {
+        this.logger.debug(`${file.name} is not stored; nothing to delete.`);
+      } else {
+        console.log('Error reading ' + file.name + '; it is kept.', error);
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Deletes `file`, a file of an item whose record this request removed, only while it still has
+   * `generation`, the one read before the removal. Once the record is gone its name is free: the
+   * upload routes take the name from the client (`fullFileName`) and refuse only a name a record
+   * still holds, so an upload can store new files under it before this runs. That upload changes
+   * the generation, the precondition fails (412) and its files stay. A file gone already (404) is
+   * left as it is. Any other error rejects. Resolves at once for a file that was not stored.
+   */
+  private async deleteUnlessReplaced(
+    file: ItemFile,
+    generation: Generation,
+  ): Promise<void> {
+    if (generation === null) {
+      return;
+    }
+    try {
+      await file.delete({ ifGenerationMatch: generation });
+    } catch (error) {
+      const code = errorCode(error);
+      if (code === 412) {
+        this.logger.debug(
+          `${file.name} was stored again after its record was removed; it is kept.`,
+        );
+        return;
+      }
+      if (code === 404) {
+        this.logger.debug(`${file.name} is gone already.`);
+        return;
+      }
+      throw error;
+    }
+  }
+
+  /**
    * Deletes the image `imageId` and the stored files of that image. The storage names come from
    * the image's own record, never from the request: the route's permission check is made on
-   * `imageId`, so a client-supplied file name could otherwise delete another image's file.
+   * `imageId`, so a client-supplied file name could otherwise delete another image's file. The
+   * folder counts that lose the image are those of the folder in its record (see
+   * `removeWorkspaceItem`).
    */
   async deleteImage(
     workspaceId: string,
     imageId: string,
-    folderId: string | false,
   ): Promise<IDataResponse<string | null>> {
     try {
       const db = admin.database();
@@ -806,46 +938,64 @@ export class WorkspaceFilesService {
       const imageThumbnailStorageRef = bucket.file(
         `workspaces/${workspaceId}/screenshots/thumbnails/${refName}`,
       );
-
       const imageOriginalStorageRef = bucket.file(
         `workspaces/${workspaceId}/screenshots/originals/${refName}`,
       );
-
-      const everStatsBytes = await storedBytes(
-        this.eventEmitter,
-        imageStorageRef,
-      );
-      this.workspaceShareService.deleteLinkById(workspaceId, imageId);
-
-      imageStorageRef.delete().catch(() => {
-        console.log('Error deleting image from reference: ' + refName);
-      });
-      imageThumbnailStorageRef.delete().catch(() => {
-        console.log(
-          'Error deleting image thumbnail from reference: ' + refName,
+      // Read while the record still holds the name, so the cleanup deletes these files and not
+      // the files of an upload under the same name once the record is gone (see
+      // `deleteUnlessReplaced`).
+      const [imageGeneration, thumbnailGeneration, originalGeneration] =
+        await Promise.all(
+          [
+            imageStorageRef,
+            imageThumbnailStorageRef,
+            imageOriginalStorageRef,
+          ].map((file) => this.storedGeneration(file)),
         );
-      });
 
-      imageOriginalStorageRef.delete().catch(() => {
-        console.log('Error deleting video from reference: ' + refName);
-      });
+      // The record goes first. Only the delete that removed it deletes the files and reports their
+      // size: a delete of the same image at the same time finds it gone, so the size is read before
+      // any of its files goes, and a removal that does not commit leaves the image whole.
+      const { removed, counted } = await this.removeWorkspaceItem(
+        workspaceId,
+        'screenshots',
+        imageId,
+      );
+      if (removed) {
+        const everStatsBytes = await storedBytes(
+          this.eventEmitter,
+          imageStorageRef,
+        );
+        this.workspaceShareService.deleteLinkById(workspaceId, imageId);
 
-      await imageReference.remove();
-      this.eventEmitter.emit(EVER_COUNTER_EVENTS.mediaDeleted, {
-        kind: 'screenshot',
-        bytes: everStatsBytes,
-      });
+        this.deleteUnlessReplaced(imageStorageRef, imageGeneration).catch(
+          () => {
+            console.log('Error deleting image from reference: ' + refName);
+          },
+        );
+        this.deleteUnlessReplaced(
+          imageThumbnailStorageRef,
+          thumbnailGeneration,
+        ).catch(() => {
+          console.log(
+            'Error deleting image thumbnail from reference: ' + refName,
+          );
+        });
 
-      // Update folder item count recursively, in one transaction on the folder list
-      const counted = await changeWorkspaceFolders(workspaceId, (folders) => ({
-        items: this.utilitiesService.changeFolderItemCountRecursive(
-          folders,
-          folderId,
-          -1,
-        ),
-      }));
+        this.deleteUnlessReplaced(
+          imageOriginalStorageRef,
+          originalGeneration,
+        ).catch(() => {
+          console.log('Error deleting video from reference: ' + refName);
+        });
 
-      if (counted.ok === false) {
+        this.eventEmitter.emit(EVER_COUNTER_EVENTS.mediaDeleted, {
+          kind: 'screenshot',
+          bytes: everStatsBytes,
+        });
+      }
+
+      if (!counted) {
         return sendError(
           'The image was deleted, but the folder item count could not be updated.',
         );
@@ -861,7 +1011,8 @@ export class WorkspaceFilesService {
   /**
    * Deletes the video `videoId` and the stored file of that video. The storage name comes from the
    * video's own record, never from the request: the route's permission check is made on `videoId`,
-   * so a client-supplied file name could otherwise delete another video's file.
+   * so a client-supplied file name could otherwise delete another video's file. The folder counts
+   * that lose the video are those of the folder in its record (see `removeWorkspaceItem`).
    */
   async deleteVideo(
     workspaceId: string,
@@ -878,41 +1029,56 @@ export class WorkspaceFilesService {
         return sendError('Error while trying to delete a video', 'Not found');
       }
 
-      this.workspaceShareService.deleteLinkById(workspaceId, videoId);
-
       const refName: unknown = videoData.refName;
-      let everStatsBytes = 0;
-      if (typeof refName === 'string' && refName !== '') {
-        const fileRef = bucket.file(
-          `workspaces/${workspaceId}/videos/${refName}`,
-        );
-        everStatsBytes = await storedBytes(this.eventEmitter, fileRef);
-        fileRef.delete().catch(() => {
-          console.log('Error deleting video from reference: ' + refName);
+      const fileRef =
+        typeof refName === 'string' && refName !== ''
+          ? bucket.file(`workspaces/${workspaceId}/videos/${refName}`)
+          : null;
+      // Read while the record still holds the name (see `deleteImage`).
+      const fileGeneration = fileRef
+        ? await this.storedGeneration(fileRef)
+        : null;
+
+      // The record goes first; only the delete that removed it deletes the files (see `deleteImage`).
+      const { removed, counted } = await this.removeWorkspaceItem(
+        workspaceId,
+        'videos',
+        videoId,
+      );
+      if (removed) {
+        this.workspaceShareService.deleteLinkById(workspaceId, videoId);
+
+        let everStatsBytes = 0;
+        if (fileRef) {
+          everStatsBytes = await storedBytes(this.eventEmitter, fileRef);
+          this.deleteUnlessReplaced(fileRef, fileGeneration).catch(() => {
+            console.log('Error deleting video from reference: ' + refName);
+          });
+        }
+
+        // Named by the video's id, which no other item gets: an upload under the same file name
+        // stores nothing here.
+        bucket
+          .deleteFiles({
+            prefix: `workspaces/${workspaceId}/videosThumbnails/${videoId}/`,
+          })
+          .catch((error) => {
+            console.log('Error deleting video chapters:', error);
+          });
+
+        const assetId = videoData?.streamData?.assetId;
+        const serviceType = videoData?.streamData?.serviceType;
+        this.streamService.deleteAsset(assetId, serviceType).catch(() => {
+          console.log(
+            `Error deleting asset from service ${serviceType}: ${assetId}`,
+          );
+        });
+
+        this.eventEmitter.emit(EVER_COUNTER_EVENTS.mediaDeleted, {
+          kind: 'video',
+          bytes: everStatsBytes,
         });
       }
-
-      bucket
-        .deleteFiles({
-          prefix: `workspaces/${workspaceId}/videosThumbnails/${videoId}/`,
-        })
-        .catch((error) => {
-          console.log('Error deleting video chapters:', error);
-        });
-
-      const assetId = videoData?.streamData?.assetId;
-      const serviceType = videoData?.streamData?.serviceType;
-      this.streamService.deleteAsset(assetId, serviceType).catch(() => {
-        console.log(
-          `Error deleting asset from service ${serviceType}: ${assetId}`,
-        );
-      });
-
-      await videoRef.remove();
-      this.eventEmitter.emit(EVER_COUNTER_EVENTS.mediaDeleted, {
-        kind: 'video',
-        bytes: everStatsBytes,
-      });
 
       this.eventEmitter.emit(
         'analytics.track',
@@ -923,6 +1089,11 @@ export class WorkspaceFilesService {
         },
       );
 
+      if (!counted) {
+        return sendError(
+          'The video was deleted, but the folder item count could not be updated.',
+        );
+      }
       return sendResponse('Video deleted successfully');
     } catch (error: any) {
       console.log(error);

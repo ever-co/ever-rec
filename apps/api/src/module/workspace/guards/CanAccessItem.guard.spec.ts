@@ -330,7 +330,7 @@ describe('save-original item permission', () => {
       expect(deleteImage).not.toHaveBeenCalled();
       // ...and the writer gets through, with that same id reaching the handler.
       await remove('uid-writer', 'imageId=img1').expect(200);
-      expect(deleteImage).toHaveBeenCalledWith('ws1', 'img1', false);
+      expect(deleteImage).toHaveBeenCalledWith('ws1', 'img1');
     });
   });
 });

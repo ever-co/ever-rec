@@ -11,20 +11,28 @@
  * folder changed, from the folder each one was in, so a move sent twice or two moves of one item
  * keep every count exact. A folder delete lowers the folders above it by the item count stored in
  * the folder when the delete is made, so an item uploaded into it or moved out of it meanwhile is
- * taken off once.
+ * taken off once. A deleted image or video loses its files only while they have the generation
+ * read before its record was removed, so an upload under the same name once the record is gone
+ * keeps the files it wrote.
  *
  * `overlap(first, second)` runs `second` from start to end right after `first` reads anything of
  * the workspace for the first time: `second` lands between that read and the writes `first` makes.
  */
+import { Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
   FakeQuery,
   FakeReference,
+  FakeStorageFile,
   InMemoryFirebaseApp,
 } from '../../../../test/support/in-memory-firebase';
+import { EVER_COUNTER_EVENTS } from '../../../common/events/ever-counters.events';
+import { IUser } from '../../../interfaces/IUser';
 import { FoldersSharedService } from '../../../services/shared/folders.shared.service';
 import { parseCollectionToArray } from '../../../services/utils/helpers';
+import { WorkspaceFilesController } from '../controllers/files.controller';
 import { WorkspaceFoldersController } from '../controllers/folders.controller';
+import { canWriteVideoByName, findImagesByFileName } from '../guards/utils';
 import { WorkspaceFilesService } from './files.service';
 import { WorkspaceFoldersService } from './folders.service';
 import { WorkspaceInvitesService } from './invites.service';
@@ -824,7 +832,7 @@ describe('overlapping writes to a workspace', () => {
     it('does not bring back an item deleted before its move is written', async () => {
       const [moved, deleted] = await overlap(
         move(['shot1'], 'fold2', false),
-        () => filesService.deleteImage('ws1', 'shot1', false),
+        () => filesService.deleteImage('ws1', 'shot1'),
       );
 
       expect(moved.status).toBe('success');
@@ -832,6 +840,376 @@ describe('overlapping writes to a workspace', () => {
       // Not an item that holds only a `parentId`, and not counted.
       expect(stored('screenshots/shot1')).toBeNull();
       expect(counts()).toEqual({ fold1: 1, fold2: 0, fold3: 0 });
+    });
+  });
+
+  describe('deleting an item counts it once, out of the folder it is stored in', () => {
+    let controller: WorkspaceFilesController;
+    let deletions: number;
+    // The size each `media.deleted` reports.
+    let sizes: number[];
+    // The deletes as the routes get them: `folderId` is what the client sends.
+    const deleteImage = (imageId: string, folderId: string | false) => () =>
+      controller.deleteImage('ws1', { imageId, folderId });
+    const deleteVideo = (videoId: string) => () =>
+      controller.deleteVideo('ws1', { videoId });
+    const counts = () =>
+      Object.fromEntries(folders().map((x) => [x.id, x.items]));
+    // fold1 counts shot1; fold3 is in fold2 and holds vid1, which both of them count.
+    const imageDeleted = { fold1: 0, fold2: 1, fold3: 1 };
+    const videoDeleted = { fold1: 1, fold2: 0, fold3: 0 };
+    // The stored files of shot1 (100 bytes) and vid1 (300 bytes).
+    const imageFile = `${WORKSPACE}/screenshots/earlier.png`;
+    const videoFile = `${WORKSPACE}/videos/clip.mp4`;
+    const isStored = (file: string) => mockFirebase.bucket.objects.has(file);
+
+    // Runs `second` from start to end when `first` starts the transaction that removes the item at
+    // `path`: after `first` has read the item, before it removes it.
+    async function whenRemoving<A, B>(
+      path: string,
+      first: () => Promise<A>,
+      second: () => Promise<B>,
+    ): Promise<[A, B]> {
+      let secondRun: Promise<B> | undefined;
+      const { transaction } = FakeReference.prototype;
+      jest
+        .spyOn(FakeReference.prototype, 'transaction')
+        .mockImplementation(async function (this: FakeReference, ...args) {
+          if (!secondRun && pathOf(this) === `${WORKSPACE}/${path}`) {
+            await (secondRun = second());
+          }
+          return transaction.apply(this, args);
+        });
+      const firstResult = await first();
+      return [firstResult, await (secondRun ?? second())];
+    }
+
+    beforeEach(async () => {
+      const events = new EventEmitter2();
+      deletions = 0;
+      sizes = [];
+      events.on(
+        EVER_COUNTER_EVENTS.mediaDeleted,
+        (event: { bytes: number }) => {
+          deletions += 1;
+          sizes.push(event.bytes);
+        },
+      );
+      await mockFirebase.bucket.file(imageFile).save(Buffer.alloc(100, 1));
+      await mockFirebase.bucket.file(videoFile).save(Buffer.alloc(300, 1));
+      controller = new WorkspaceFilesController(
+        new WorkspaceFilesService(
+          utilities,
+          // A deleted video's streaming asset goes with it.
+          { deleteAsset: () => Promise.resolve() } as any,
+          new WorkspaceShareService(utilities, new EventEmitter2()),
+          {} as any,
+          events,
+          {} as any,
+        ),
+        sharedService,
+      );
+      await mockFirebase.db
+        .ref(`${WORKSPACE}/screenshots/shot1/parentId`)
+        .set('fold1');
+      await mockFirebase.db
+        .ref(`${WORKSPACE}/folders/fold3`)
+        .update({ parentId: 'fold2', nestLevel: 1, items: 1 });
+      await mockFirebase.db.ref(`${WORKSPACE}/folders/fold2/items`).set(1);
+      await mockFirebase.db.ref(`${WORKSPACE}/videos/vid1`).set({
+        id: 'vid1',
+        uid: 'uid-admin',
+        title: 'Clip',
+        refName: 'clip.mp4',
+        parentId: 'fold3',
+      });
+    });
+
+    it('counts an image out of the folder it is stored in, not the folderId in the query', async () => {
+      const deleted = await deleteImage('shot1', 'fold2')();
+
+      expect(deleted.status).toBe('success');
+      expect(stored('screenshots/shot1')).toBeNull();
+      expect(counts()).toEqual(imageDeleted);
+    });
+
+    it('changes no count for an image at the top level, whatever folderId the query names', async () => {
+      await mockFirebase.db
+        .ref(`${WORKSPACE}/screenshots/shot1/parentId`)
+        .set(false);
+
+      const deleted = await deleteImage('shot1', 'fold1')();
+
+      expect(deleted.status).toBe('success');
+      expect(stored('screenshots/shot1')).toBeNull();
+      expect(counts()).toEqual({ fold1: 1, fold2: 1, fold3: 1 });
+    });
+
+    it('counts a video out of its folder and the folders above it', async () => {
+      const deleted = await deleteVideo('vid1')();
+
+      expect(deleted.status).toBe('success');
+      expect(stored('videos/vid1')).toBeNull();
+      expect(counts()).toEqual(videoDeleted);
+    });
+
+    it.each([
+      ['an image', deleteImage('shot1', 'fold1'), imageDeleted],
+      ['a video', deleteVideo('vid1'), videoDeleted],
+    ])(
+      'counts %s deleted twice at the same time (a double submit) once',
+      async (_name, remove, after) => {
+        const [first, second] = await overlap(remove, remove);
+
+        expect([first.status, second.status]).toEqual(['success', 'success']);
+        expect(counts()).toEqual(after);
+        expect(deletions).toBe(1);
+      },
+    );
+
+    it.each([
+      [
+        'an image',
+        'screenshots/shot1',
+        deleteImage('shot1', 'fold1'),
+        imageFile,
+        100,
+      ],
+      ['a video', 'videos/vid1', deleteVideo('vid1'), videoFile, 300],
+    ])(
+      'reports the size of %s deleted twice at the same time once, read before its file goes',
+      async (_name, item, remove, file, size) => {
+        // The second delete runs while the first one has read the item and not removed it yet.
+        const [first, second] = await whenRemoving(item, remove, remove);
+
+        expect([first.status, second.status]).toEqual(['success', 'success']);
+        expect(sizes).toEqual([size]);
+        expect(isStored(file)).toBe(false);
+      },
+    );
+
+    it.each([
+      [
+        'an image',
+        'screenshots/shot1',
+        deleteImage('shot1', 'fold1'),
+        imageFile,
+      ],
+      ['a video', 'videos/vid1', deleteVideo('vid1'), videoFile],
+    ])(
+      'keeps %s whole when its removal does not commit',
+      async (_name, item, remove, file) => {
+        // The removal is refused, as when an overlapping write of the item cancels it.
+        const { transaction } = FakeReference.prototype;
+        jest
+          .spyOn(FakeReference.prototype, 'transaction')
+          .mockImplementation(function (this: FakeReference, ...args) {
+            if (pathOf(this) === `${WORKSPACE}/${item}`) {
+              return Promise.reject(new Error('set'));
+            }
+            return transaction.apply(this, args);
+          });
+
+        const deleted = await remove();
+
+        expect(deleted.status).toBe('error');
+        expect(stored(item)).not.toBeNull();
+        expect(isStored(file)).toBe(true);
+        expect(counts()).toEqual({ fold1: 1, fold2: 1, fold3: 1 });
+        expect(sizes).toEqual([]);
+      },
+    );
+
+    describe('deletes the files of the removed item, not those of an upload under its name', () => {
+      const thumbnailFile = `${WORKSPACE}/screenshots/thumbnails/earlier.png`;
+      const originalFile = `${WORKSPACE}/screenshots/originals/earlier.png`;
+      // A chapter image of vid1: named by the video's id, not by its file name.
+      const chapterFile = `${WORKSPACE}/videosThumbnails/vid1/chapter.png`;
+      const imageFiles = [imageFile, thumbnailFile, originalFile];
+      const generationOf = (file: string) =>
+        mockFirebase.bucket.file(file).metadata?.generation;
+      const workspace = async () =>
+        (await mockFirebase.db.ref(WORKSPACE).get()).val();
+      // The cleanup's deletes, which the delete does not wait for, settle.
+      const settled = () => new Promise((resolve) => setImmediate(resolve));
+      // What the delete logged as a failure, or as a file it kept.
+      const failures = () =>
+        jest
+          .mocked(console.log)
+          .mock.calls.map((call) => String(call[0]))
+          .filter((message) => /Error|kept/.test(message));
+      let debug: jest.SpyInstance;
+
+      beforeEach(async () => {
+        await mockFirebase.bucket.file(thumbnailFile).save(Buffer.alloc(10, 1));
+        await mockFirebase.bucket.file(originalFile).save(Buffer.alloc(100, 1));
+        await mockFirebase.bucket.file(chapterFile).save(Buffer.alloc(5, 1));
+        debug = jest
+          .spyOn(Logger.prototype, 'debug')
+          .mockImplementation(() => undefined);
+      });
+
+      // Runs `between` from start to end right after the transaction that removes the item at
+      // `path` commits: no record holds the item's file name, and its files are not deleted yet.
+      async function afterRemoval<A, B>(
+        path: string,
+        first: () => Promise<A>,
+        between: () => Promise<B>,
+      ): Promise<[A, B]> {
+        let betweenRun: Promise<B> | undefined;
+        const { transaction } = FakeReference.prototype;
+        jest
+          .spyOn(FakeReference.prototype, 'transaction')
+          .mockImplementation(async function (this: FakeReference, ...args) {
+            const result = await transaction.apply(this, args);
+            if (
+              !betweenRun &&
+              result.committed &&
+              pathOf(this) === `${WORKSPACE}/${path}`
+            ) {
+              await (betweenRun = between());
+            }
+            return result;
+          });
+        const firstResult = await first();
+        await settled();
+        if (!betweenRun) {
+          throw new Error(`${path} was not removed`);
+        }
+        return [firstResult, await betweenRun];
+      }
+
+      it('keeps the files of an image uploaded under the same name once the record is removed', async () => {
+        const before = imageFiles.map(generationOf);
+
+        const [deleted, uploaded] = await afterRemoval(
+          'screenshots/shot1',
+          deleteImage('shot1', 'fold1'),
+          async () => {
+            // No record holds the name now, so the upload's name check lets it through.
+            expect(
+              findImagesByFileName(await workspace(), 'earlier.png'),
+            ).toEqual([]);
+            return filesService.addImageFromFile(
+              'uid-member',
+              'ws1',
+              {} as Express.Multer.File,
+              'Replacement',
+              'earlier.png',
+              'fold1',
+            );
+          },
+        );
+
+        expect([deleted.status, uploaded.status]).toEqual([
+          'success',
+          'success',
+        ]);
+        expect(screenshotTitles()).toEqual(['Replacement']);
+        // The files the upload wrote, after the generations the delete read.
+        expect(imageFiles.filter(isStored)).toEqual(imageFiles);
+        expect(
+          imageFiles.map(generationOf).filter((x) => before.includes(x)),
+        ).toEqual([]);
+        expect(failures()).toEqual([]);
+        expect(debug).toHaveBeenCalledTimes(3);
+        expect(debug).toHaveBeenCalledWith(
+          `${originalFile} was stored again after its record was removed; it is kept.`,
+        );
+      });
+
+      it('keeps the file of a video uploaded under the same name once the record is removed', async () => {
+        const member = { id: 'uid-member' } as IUser;
+        const replacement = Buffer.alloc(400, 2);
+
+        const [deleted] = await afterRemoval(
+          'videos/vid1',
+          deleteVideo('vid1'),
+          async () => {
+            // No record holds the name now, so the upload's name check lets it through.
+            expect(
+              canWriteVideoByName(await workspace(), member, 'clip.mp4'),
+            ).toBe(true);
+            // What the upload stores: its file, then its record.
+            await mockFirebase.bucket.file(videoFile).save(replacement);
+            await mockFirebase.db.ref(`${WORKSPACE}/videos/vid2`).set({
+              id: 'vid2',
+              uid: 'uid-member',
+              title: 'Replacement',
+              refName: 'clip.mp4',
+              parentId: false,
+            });
+          },
+        );
+
+        expect(deleted.status).toBe('success');
+        expect(stored('videos/vid2/refName')).toBe('clip.mp4');
+        expect(mockFirebase.bucket.objects.get(videoFile)).toEqual(replacement);
+        // The removed video's own chapter images go.
+        expect(isStored(chapterFile)).toBe(false);
+        expect(failures()).toEqual([]);
+      });
+
+      it.each([
+        ['an image', deleteImage('shot1', 'fold1'), imageFiles],
+        ['a video', deleteVideo('vid1'), [videoFile, chapterFile]],
+      ])(
+        'deletes every stored file of %s that nothing replaced',
+        async (_name, remove, files) => {
+          const deleted = await remove();
+          await settled();
+
+          expect(deleted.status).toBe('success');
+          expect(files.filter(isStored)).toEqual([]);
+          expect(failures()).toEqual([]);
+        },
+      );
+
+      it('skips a file of the image that is not stored', async () => {
+        await mockFirebase.bucket.file(originalFile).delete();
+        const deletes = jest.spyOn(FakeStorageFile.prototype, 'delete');
+
+        const deleted = await deleteImage('shot1', 'fold1')();
+        await settled();
+
+        expect(deleted.status).toBe('success');
+        expect(
+          deletes.mock.contexts.map((file) => (file as FakeStorageFile).name),
+        ).toEqual([imageFile, thumbnailFile]);
+        expect(imageFiles.filter(isStored)).toEqual([]);
+        expect(failures()).toEqual([]);
+      });
+
+      it('leaves a file that is gone by the time it would be deleted', async () => {
+        const [deleted] = await afterRemoval(
+          'screenshots/shot1',
+          deleteImage('shot1', 'fold1'),
+          () => mockFirebase.bucket.file(thumbnailFile).delete(),
+        );
+
+        expect(deleted.status).toBe('success');
+        expect(imageFiles.filter(isStored)).toEqual([]);
+        expect(failures()).toEqual([]);
+        expect(debug).toHaveBeenCalledWith(`${thumbnailFile} is gone already.`);
+      });
+
+      it('logs any other failure of a delete, as before', async () => {
+        jest
+          .spyOn(FakeStorageFile.prototype, 'delete')
+          .mockRejectedValue(
+            Object.assign(new Error('Unavailable'), { code: 503 }),
+          );
+
+        const deleted = await deleteImage('shot1', 'fold1')();
+        await settled();
+
+        expect(deleted.status).toBe('success');
+        expect(failures()).toEqual([
+          'Error deleting image from reference: earlier.png',
+          'Error deleting image thumbnail from reference: earlier.png',
+          'Error deleting video from reference: earlier.png',
+        ]);
+      });
     });
   });
 

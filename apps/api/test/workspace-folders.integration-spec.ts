@@ -2,13 +2,16 @@
  * Writers of a workspace's folder list that run at the same time, through the real Firebase Admin
  * SDK on the Realtime Database emulator. Each one changes the list in a transaction, so none of
  * them undoes another: every item count, new folder and permission change is kept, and a move of
- * items keeps a member removal made meanwhile. A moved item is counted once, out of the folder it is
- * stored in.
+ * items keeps a member removal made meanwhile. A moved or deleted item is counted once, out of the
+ * folder it is stored in.
  */
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import * as admin from 'firebase-admin';
 import { FoldersSharedService } from '../src/services/shared/folders.shared.service';
 import { parseCollectionToArray } from '../src/services/utils/helpers';
+import { WorkspaceFilesController } from '../src/module/workspace/controllers/files.controller';
 import { changeWorkspaceFolders } from '../src/module/workspace/services/change-workspace-collection';
+import { WorkspaceFilesService } from '../src/module/workspace/services/files.service';
 import { WorkspaceFoldersService } from '../src/module/workspace/services/folders.service';
 import { WorkspaceMembersService } from '../src/module/workspace/services/members.service';
 import { WorkspaceSharedService } from '../src/module/workspace/services/shared.service';
@@ -242,5 +245,67 @@ describe('folder writers at the same time, on the emulators', () => {
     expect(await stored('screenshots/shot1')).toBeNull();
     expect(await stored('screenshots/shot2/parentId')).toBe('fold2');
     expect((await storedFolders()).find((x) => x.id === 'fold2').items).toBe(1);
+  });
+
+  it('counts each deleted item once, out of the folder it is stored in', async () => {
+    // shot1 is the item fold1 counts; vid1 is in fold3, which is in fold2: both count it.
+    await app
+      .database()
+      .ref('workspaces/ws1')
+      .update({
+        'screenshots/shot1': {
+          id: 'shot1',
+          uid: 'uid-admin',
+          refName: 'shot1.png',
+          parentId: 'fold1',
+        },
+        'videos/vid1': {
+          id: 'vid1',
+          uid: 'uid-admin',
+          refName: 'vid1.mp4',
+          parentId: 'fold3',
+        },
+        'folders/fold2/items': 1,
+        'folders/fold3': {
+          id: 'fold3',
+          name: 'Inner',
+          parentId: 'fold2',
+          nestLevel: 1,
+          items: 1,
+        },
+      });
+    const files = new WorkspaceFilesController(
+      new WorkspaceFilesService(
+        utilities,
+        { deleteAsset: () => Promise.resolve() } as any,
+        { deleteLinkById: () => Promise.resolve() } as any,
+        {} as any,
+        new EventEmitter2(),
+        {} as any,
+      ),
+      shared,
+    );
+
+    // Each delete sent twice at once (a double submit); the image's from a view that shows it in
+    // fold2.
+    const deletes = await Promise.all([
+      files.deleteImage('ws1', { imageId: 'shot1', folderId: 'fold2' }),
+      files.deleteImage('ws1', { imageId: 'shot1', folderId: 'fold2' }),
+      files.deleteVideo('ws1', { videoId: 'vid1' }),
+      files.deleteVideo('ws1', { videoId: 'vid1' }),
+    ]);
+
+    expect(deletes.map((x) => x.status)).toEqual([
+      'success',
+      'success',
+      'success',
+      'success',
+    ]);
+    expect(await stored('screenshots/shot1')).toBeNull();
+    expect(await stored('videos/vid1')).toBeNull();
+    const counts = Object.fromEntries(
+      (await storedFolders()).map((x) => [x.id, x.items]),
+    );
+    expect(counts).toEqual({ fold1: 0, fold2: 0, fold3: 0 });
   });
 });
