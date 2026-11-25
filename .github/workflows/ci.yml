@@ -111,6 +111,10 @@ jobs:
         run: pnpm install --frozen-lockfile --ignore-scripts
       - name: Unit tests
         run: pnpm --filter ever-rec-portal test
+      # `next build` fails on any type error, and nothing else in CI builds the portal: three errors
+      # broke every portal image from 2026-11-19 until ever-co/ever-rec#254. Same tsconfig as the build.
+      - name: Type check (what next build checks)
+        run: pnpm --filter ever-rec-portal exec tsc --noEmit -p tsconfig.json
 
   egress:
     name: Egress audit (anonymous usage statistics)
