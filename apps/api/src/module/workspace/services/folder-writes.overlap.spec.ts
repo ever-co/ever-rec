@@ -9,7 +9,9 @@
  * `workspaces/<id>/teams`, so a member who left or was taken out of a team is not put back. A move
  * of items changes each item's folder in a transaction of its own and counts only the items whose
  * folder changed, from the folder each one was in, so a move sent twice or two moves of one item
- * keep every count exact.
+ * keep every count exact. A folder delete lowers the folders above it by the item count stored in
+ * the folder when the delete is made, so an item uploaded into it or moved out of it meanwhile is
+ * taken off once.
  *
  * `overlap(first, second)` runs `second` from start to end right after `first` reads anything of
  * the workspace for the first time: `second` lands between that read and the writes `first` makes.
@@ -682,6 +684,58 @@ describe('overlapping writes to a workspace', () => {
     // The move counted the item in fold2; the delete takes it out of fold2 again.
     expect(folder('fold2')?.items).toBe(0);
     expect(stored('screenshots/shot1/parentId')).toBe(false);
+  });
+
+  describe('deleting a folder lowers the folders above it by the items stored in it', () => {
+    // fold1 is under a parent folder and holds shot1, which the parent counts too.
+    beforeEach(async () => {
+      await mockFirebase.db.ref(`${WORKSPACE}/folders/parent`).set({
+        id: 'parent',
+        name: 'Parent',
+        creator: 'uid-admin',
+        parentId: false,
+        nestLevel: 0,
+        items: 1,
+      });
+      await mockFirebase.db
+        .ref(`${WORKSPACE}/folders/fold1`)
+        .update({ parentId: 'parent', nestLevel: 1 });
+      await mockFirebase.db
+        .ref(`${WORKSPACE}/screenshots/shot1/parentId`)
+        .set('fold1');
+    });
+
+    const deleteFold1 = () =>
+      foldersService.deleteFolder('uid-admin', 'ws1', 'fold1', 'parent');
+
+    it('takes an item uploaded into the folder meanwhile out of the parent', async () => {
+      const [deleted, uploaded] = await overlap(deleteFold1, upload);
+
+      expect(deleted.status).toBe('success');
+      expect(uploaded.status).toBe('success');
+      expect(folder('fold1')).toBeUndefined();
+      // Both items moved to the top level; the parent holds none of them.
+      expect(
+        parseCollectionToArray<any>(stored('screenshots')).map(
+          (x) => x?.parentId,
+        ),
+      ).toEqual([false, false]);
+      expect(folder('parent')?.items).toBe(0);
+    });
+
+    it('takes an item moved out of the folder meanwhile out of the parent once', async () => {
+      const [deleted, moved] = await overlap(deleteFold1, () =>
+        foldersService.moveItemsToFolder(admin, 'ws1', ['shot1'], 'fold3'),
+      );
+
+      expect(deleted.status).toBe('success');
+      expect(moved.status).toBe('success');
+      expect(folder('fold1')).toBeUndefined();
+      expect(stored('screenshots/shot1/parentId')).toBe('fold3');
+      expect(folder('fold3')?.items).toBe(1);
+      // The move took the item out of the parent; the delete must not take it out again.
+      expect(folder('parent')?.items).toBe(0);
+    });
   });
 
   describe('moving items counts each item once, from the folder it is stored in', () => {
