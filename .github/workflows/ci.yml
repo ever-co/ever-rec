@@ -40,6 +40,8 @@ jobs:
         run: pnpm --filter ever-rec-api exec jest src/module/ever-connect
       - name: Unit tests (workspaces)
         run: pnpm --filter ever-rec-api exec jest src/module/workspace
+      - name: Unit tests (videos and chapters)
+        run: pnpm --filter ever-rec-api exec jest src/module/video
 
   api-e2e:
     name: API end-to-end tests (sign-in providers, existing sign-in routes)

@@ -19,6 +19,7 @@ import {
 import { PermissionAccessEnum } from 'src/module/workspace/Interfaces/Workspace';
 import { ValidateId } from 'src/module/workspace/pipes/validate-id.pipe';
 import { VideoChapterService } from '../services/chapter.service';
+import { parseChapterList } from '../utilities/chapterPayload';
 
 @Controller('video/chapter')
 export class VideoChapterController {
@@ -50,8 +51,11 @@ export class VideoChapterController {
     @Body() body: { chapters: string; chaptersBlobs: string },
     @UploadedFiles() thumbnailFiles: Array<Express.Multer.File>,
   ) {
-    const chapters = JSON.parse(body.chapters);
-    const chaptersBlobs = JSON.parse(body.chaptersBlobs);
+    const chapters = parseChapterList(body?.chapters, 'chapters');
+    const chaptersBlobs = parseChapterList(
+      body?.chaptersBlobs,
+      'chaptersBlobs',
+    );
 
     return await this.videoChapterService.saveChapters(
       request.user?.id,
