@@ -2,7 +2,8 @@
  * Writers of a workspace's folder list that run at the same time, through the real Firebase Admin
  * SDK on the Realtime Database emulator. Each one changes the list in a transaction, so none of
  * them undoes another: every item count, new folder and permission change is kept, and a move of
- * items keeps a member removal made meanwhile.
+ * items keeps a member removal made meanwhile. A moved item is counted once, out of the folder it is
+ * stored in.
  */
 import * as admin from 'firebase-admin';
 import { FoldersSharedService } from '../src/services/shared/folders.shared.service';
@@ -173,7 +174,6 @@ describe('folder writers at the same time, on the emulators', () => {
         'ws1',
         ['shot1', 'shot2'],
         'fold2',
-        false,
       ),
       members.removeMemberFromWorkspace('uid-leaving', 'ws1'),
     ]);
@@ -186,5 +186,61 @@ describe('folder writers at the same time, on the emulators', () => {
     expect(await stored('screenshots/shot1/parentId')).toBe('fold2');
     expect(await stored('screenshots/shot2/parentId')).toBe('fold2');
     expect((await storedFolders()).find((x) => x.id === 'fold2').items).toBe(2);
+  });
+
+  it('counts each moved item once, from the folder it is stored in', async () => {
+    // shot1 is the item fold1 counts; shot2 stays at the top level.
+    await app
+      .database()
+      .ref('workspaces/ws1/screenshots/shot1/parentId')
+      .set('fold1');
+
+    // The same move twice at once (a double submit), one of them naming shot1 twice.
+    const moves = await Promise.all([
+      folders.moveItemsToFolder(
+        { id: 'uid-admin' },
+        'ws1',
+        ['shot1', 'shot1', 'shot2'],
+        'fold2',
+      ),
+      folders.moveItemsToFolder(
+        { id: 'uid-admin' },
+        'ws1',
+        ['shot1', 'shot2'],
+        'fold2',
+      ),
+    ]);
+
+    expect(moves.map((x) => x.status)).toEqual(['success', 'success']);
+    expect(await stored('screenshots/shot1/parentId')).toBe('fold2');
+    expect(await stored('screenshots/shot2/parentId')).toBe('fold2');
+    const counts = Object.fromEntries(
+      (await storedFolders()).map((x) => [x.id, x.items]),
+    );
+    expect(counts).toEqual({ fold1: 0, fold2: 2 });
+  });
+
+  it('does not bring back an item deleted before its move is written', async () => {
+    // shot1 is deleted right after the move reads the workspace.
+    const { getWorkspaceById } = utilities;
+    jest
+      .spyOn(utilities, 'getWorkspaceById')
+      .mockImplementation(async (workspaceId: string) => {
+        const read = await getWorkspaceById.call(utilities, workspaceId);
+        await app.database().ref('workspaces/ws1/screenshots/shot1').remove();
+        return read;
+      });
+
+    const moved = await folders.moveItemsToFolder(
+      { id: 'uid-admin' },
+      'ws1',
+      ['shot1', 'shot2'],
+      'fold2',
+    );
+
+    expect(moved.status).toBe('success');
+    expect(await stored('screenshots/shot1')).toBeNull();
+    expect(await stored('screenshots/shot2/parentId')).toBe('fold2');
+    expect((await storedFolders()).find((x) => x.id === 'fold2').items).toBe(1);
   });
 });

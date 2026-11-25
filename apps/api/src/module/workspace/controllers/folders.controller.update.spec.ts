@@ -386,7 +386,6 @@ describe('moving items out of a folder (the real move handler)', () => {
         'ws1',
         [itemId as string],
         to as string | false,
-        'fold1',
       );
       expect(res.status).toBe('error');
       expect(parentOf(itemId as string)).toBe('fold1');
@@ -399,7 +398,6 @@ describe('moving items out of a folder (the real move handler)', () => {
       'ws1',
       ['own'],
       'fold2',
-      false,
     );
     expect(res.status).toBe('error');
     expect(parentOf('own')).toBe('fold1');
@@ -412,7 +410,6 @@ describe('moving items out of a folder (the real move handler)', () => {
       'ws1',
       ['own'],
       'fold2',
-      false,
     );
     expect(res.status).toBe('success');
     expect(parentOf('own')).toBe('fold2');
@@ -424,7 +421,6 @@ describe('moving items out of a folder (the real move handler)', () => {
       'ws1',
       ['writers'],
       'fold2',
-      'fold1',
     );
     expect(res.status).toBe('success');
     expect(parentOf('writers')).toBe('fold2');
@@ -436,7 +432,6 @@ describe('moving items out of a folder (the real move handler)', () => {
       'ws1',
       ['own', 'granted'],
       false,
-      'fold1',
     );
     expect(res.status).toBe('success');
     expect(parentOf('own')).toBe(false);
@@ -457,7 +452,6 @@ describe('moving items out of a folder (the real move handler)', () => {
       'ws1',
       ['missing'],
       'fold2',
-      'fold1',
     );
     expect(res.status).toBe('error');
     expectNothingWritten(before);
@@ -472,7 +466,6 @@ describe('moving items out of a folder (the real move handler)', () => {
         'ws1',
         [itemId],
         'fold2',
-        'fold1',
       );
       expect(res.status).toBe('error');
       expectNothingWritten(before);
@@ -487,7 +480,6 @@ describe('moving items out of a folder (the real move handler)', () => {
       'ws1',
       ['own', 'missing'],
       'fold2',
-      'fold1',
     );
     expect(res.status).toBe('error');
     expect(parentOf('own')).toBe('fold1');
@@ -503,7 +495,6 @@ describe('moving items out of a folder (the real move handler)', () => {
       'ws1',
       ['clip'],
       'fold2',
-      false,
     );
     expect(res.status).toBe('success');
     expect(mockDb.dump('workspaces/ws1/videos/clip')).toEqual({
