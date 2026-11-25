@@ -90,6 +90,10 @@ describe('Dropbox connection', () => {
 
     app = moduleRef.createNestApplication({ logger: false });
     await app.init();
+    // Listen once, here. Given a server that is not listening, supertest starts it for one request
+    // and closes it when that request ends, which resets the other callback of the race test below
+    // while it is still in flight (`read ECONNRESET` on Linux).
+    await app.listen(0, '127.0.0.1');
     oauthState = moduleRef.get(OAuthStateService);
   });
 
