@@ -7,6 +7,7 @@ import { Tooltip } from 'antd';
 import { VideoCustomEventsEnum } from '@/content/utilities/misc/customEvents';
 import { windowEventListenerHandler } from '@/content/utilities/misc/windowEventListenerHandler';
 import { useTranslation } from 'react-i18next';
+import { CHAPTER_MAX_CONTENT_LENGTH } from '@/content/utilities/misc/appConstConfig';
 
 const s = styles;
 
@@ -131,6 +132,7 @@ const VideoChapterContentInput: FC<IProps> = ({
         onBlur={(e) => handleBlur(title)}
         onPressEnter={() => handleBlur(title)}
         status={status}
+        maxLength={CHAPTER_MAX_CONTENT_LENGTH}
       />
     </Tooltip>
   );

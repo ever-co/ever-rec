@@ -120,6 +120,8 @@
       "inviteLinkError": "Could not create the workspace invite link.",
       "copyError": "Could not copy.",
       "add3Chapters": "Please add at least 3 chapters.",
+      "tooManyChapters": "A video can have at most {{max}} chapters. Remove some to save.",
+      "chapterTitleTooLong": "Chapter titles can have at most {{max}} characters. Shorten the long ones to save.",
       "chaptersSaved": "Chapters saved successfully.",
       "noSourceURL": "This image doesn't have a source URL.",
       "problemDeletingVideo": "There was a problem trying to delete your video.",
