@@ -319,12 +319,14 @@ describe('workspace folder routes: update, delete and move-items', () => {
 
 describe('moving items out of a folder (the real move handler)', () => {
   let service: WorkspaceFoldersService;
+  let changeCount: jest.Mock;
   const user = (id: string) => ({ id }) as any;
   const parentOf = (itemId: string) =>
     mockDb.dump(`workspaces/ws1/screenshots/${itemId}/parentId`);
 
   beforeEach(async () => {
     jest.spyOn(console, 'log').mockImplementation(() => undefined);
+    changeCount = jest.fn((folders: unknown) => folders);
     mockDb = new InMemoryDatabase();
     await mockDb.ref('workspaces/ws1').set({
       admin: 'uid-admin',
@@ -361,7 +363,7 @@ describe('moving items out of a folder (the real move handler)', () => {
         const workspaceRef = mockDb.ref('workspaces/ws1');
         return { workspaceVal: (await workspaceRef.get()).val(), workspaceRef };
       },
-      changeFolderItemCountRecursive: (folders: unknown) => folders,
+      changeFolderItemCountRecursive: changeCount,
       parseWorkspaceItems: async (value: unknown) => value,
     };
     service = new WorkspaceFoldersService(utilities as any, {} as any);
@@ -439,5 +441,76 @@ describe('moving items out of a folder (the real move handler)', () => {
     expect(res.status).toBe('success');
     expect(parentOf('own')).toBe(false);
     expect(parentOf('granted')).toBe(false);
+  });
+
+  // An id that is not an item writes nothing: no item, no folder count.
+  const expectNothingWritten = (before: unknown) => {
+    expect(mockDb.dump('workspaces/ws1')).toEqual(before);
+    expect(mockDb.dump('workspaces/ws1/videos')).toBeNull();
+    expect(changeCount).not.toHaveBeenCalled();
+  };
+
+  it('does not create an item for an id that does not exist, even for the admin', async () => {
+    const before = mockDb.dump('workspaces/ws1');
+    const res = await service.moveItemsToFolder(
+      user('uid-admin'),
+      'ws1',
+      ['missing'],
+      'fold2',
+      'fold1',
+    );
+    expect(res.status).toBe('error');
+    expectNothingWritten(before);
+  });
+
+  it.each(['constructor', 'toString', 'hasOwnProperty', '__proto__'])(
+    'does not treat the inherited property %s as an item',
+    async (itemId) => {
+      const before = mockDb.dump('workspaces/ws1');
+      const res = await service.moveItemsToFolder(
+        user('uid-admin'),
+        'ws1',
+        [itemId],
+        'fold2',
+        'fold1',
+      );
+      expect(res.status).toBe('error');
+      expectNothingWritten(before);
+      expect(({} as any).parentId).toBeUndefined();
+    },
+  );
+
+  it('saves nothing when one id of several does not exist', async () => {
+    const before = mockDb.dump('workspaces/ws1');
+    const res = await service.moveItemsToFolder(
+      user('uid-admin'),
+      'ws1',
+      ['own', 'missing'],
+      'fold2',
+      'fold1',
+    );
+    expect(res.status).toBe('error');
+    expect(parentOf('own')).toBe('fold1');
+    expectNothingWritten(before);
+  });
+
+  it('still moves a video the same way', async () => {
+    await mockDb
+      .ref('workspaces/ws1/videos/clip')
+      .set({ id: 'clip', uid: 'uid-writer', parentId: false });
+    const res = await service.moveItemsToFolder(
+      user('uid-writer'),
+      'ws1',
+      ['clip'],
+      'fold2',
+      false,
+    );
+    expect(res.status).toBe('success');
+    expect(mockDb.dump('workspaces/ws1/videos/clip')).toEqual({
+      id: 'clip',
+      uid: 'uid-writer',
+      parentId: 'fold2',
+    });
+    expect(changeCount).toHaveBeenCalledWith(expect.anything(), 'fold2', 1);
   });
 });

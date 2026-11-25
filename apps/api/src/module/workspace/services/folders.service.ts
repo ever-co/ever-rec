@@ -27,6 +27,23 @@ import { IUser } from 'src/interfaces/IUser';
 import { planFolderMove } from './folder-move';
 import { changeWorkspaceFolders } from './change-workspace-collection';
 
+// The first of the collections that holds `itemId` as an item. Own keys only: an id such as
+// `constructor` or `toString` is found on every plain object, and must not count as an item.
+function findOwnItem(
+  collections: Record<string, any>[],
+  itemId: string,
+): { collection: Record<string, any>; item: any } | undefined {
+  for (const collection of collections) {
+    const item = Object.prototype.hasOwnProperty.call(collection, itemId)
+      ? collection[itemId]
+      : undefined;
+    if (item && typeof item === 'object') {
+      return { collection, item };
+    }
+  }
+  return undefined;
+}
+
 @Injectable()
 export class WorkspaceFoldersService {
   constructor(
@@ -339,10 +356,17 @@ export class WorkspaceFoldersService {
 
       for (let i = 0; i < itemIds.length; i++) {
         const itemId = itemIds[i];
-        const collection = screenshots[itemId] ? screenshots : videos;
+        const found = findOwnItem([screenshots, videos], itemId);
+
+        // An id that is in neither collection is not moved: writing to it would create an item
+        // that holds only a `parentId`, and change the folder counts for something that is not there.
+        if (!found) {
+          return sendError('Item not found.');
+        }
+        const { collection, item } = found;
         const collectionName =
           collection === screenshots ? 'screenshots' : 'videos';
-        const item = collection[itemId];
+
         let hasAccess =
           workspaceVal?.admin === user?.id || item?.uid === user?.id;
 
