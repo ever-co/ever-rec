@@ -276,11 +276,31 @@ describe('VideoChapterController workspace access', () => {
         .field('chapters', chapters)
         .field('chaptersBlobs', chaptersBlobs);
 
-    it('are passed to the service as lists', async () => {
-      const chapters = [{ id: 'a1', content: 'Intro' }];
+    // What the portal and the extension editors send for each chapter.
+    const editorChapter = {
+      id: 'a1',
+      content: 'Intro',
+      timestamp: '00:00',
+      timestampSeconds: 0,
+      thumbnailURL: '',
+      refName: '',
+    };
+
+    it('are passed to the service as lists, shaped as the editors send them', async () => {
+      const chapters = [
+        editorChapter,
+        {
+          ...editorChapter,
+          id: 'b2',
+          timestamp: '01:05',
+          timestampSeconds: 65,
+          thumbnailURL: 'https://storage.example/b2.jpg?Signature=x',
+          refName: 'b2.jpg',
+        },
+      ];
 
       await saveWith(JSON.stringify(chapters)).expect(201);
-      expect(saveChapters.mock.calls[0].slice(0, 4)).toEqual([
+      expect(saveChapters.mock.calls[0].slice(0, 4)).toStrictEqual([
         'uid-member',
         'v1',
         chapters,
@@ -288,18 +308,78 @@ describe('VideoChapterController workspace access', () => {
       ]);
     });
 
+    it('give a chapter with no thumbnail URL an empty one before the service sees it', async () => {
+      const withoutURL = {
+        id: 'a1',
+        content: 'Intro',
+        timestamp: '00:00',
+        timestampSeconds: 0,
+        refName: '',
+      };
+
+      await saveWith(JSON.stringify([withoutURL])).expect(201);
+      expect(saveChapters.mock.calls[0][2]).toStrictEqual([
+        { ...withoutURL, thumbnailURL: '' },
+      ]);
+    });
+
+    it('reach the service without any field the editors do not send', async () => {
+      const extra = { ...editorChapter, isAdmin: true, views: { a: 1 } };
+
+      await saveWith(JSON.stringify([extra]), JSON.stringify([extra]))
+        .attach('blobs', Buffer.alloc(16, 1), {
+          filename: 'a1.jpg',
+          contentType: 'image/jpeg',
+        })
+        .expect(201);
+      expect(saveChapters).toHaveBeenCalledTimes(1);
+      const [, , chapters, chaptersBlobs] = saveChapters.mock.calls[0];
+      expect(chapters).toStrictEqual([editorChapter]);
+      expect(chaptersBlobs).toStrictEqual([editorChapter]);
+    });
+
     it.each([
       ['not JSON', '{oops', '[]'],
       ['not a list', '{"id":"a1"}', '[]'],
-      ['a chapter id that is not a plain id', '[{"id":"../x"}]', '[]'],
+      [
+        'a chapter id that is not a plain id',
+        '[{"id":"../x","timestamp":"00:00"}]',
+        '[]',
+      ],
       [
         'a thumbnail name with a path in it',
-        '[{"id":"a1","refName":"../../x/videos/a.mp4"}]',
+        '[{"id":"a1","timestamp":"00:00","refName":"../../x/videos/a.mp4"}]',
         '[]',
       ],
       ['a blob list that is not JSON', '[]', '{oops'],
+      [
+        'a timestamp that is an object',
+        '[{"id":"a1","content":"x","timestamp":{"a":1}}]',
+        '[]',
+      ],
+      ['a chapter with no timestamp', '[{"id":"a1","content":"x"}]', '[]'],
+      [
+        'a timestampSeconds that is a string',
+        '[{"id":"a1","timestamp":"00:05","timestampSeconds":"5"}]',
+        '[]',
+      ],
+      [
+        'a thumbnail URL that is not text',
+        '[{"id":"a1","timestamp":"00:00","thumbnailURL":{"a":1}}]',
+        '[]',
+      ],
     ])('are refused with 400 when %s', async (_name, chapters, blobs) => {
       await saveWith(chapters, blobs).expect(400);
+      expect(saveChapters).not.toHaveBeenCalled();
+    });
+
+    it('are refused with 400 when a blob entry has a timestamp that is an object', async () => {
+      await saveWith('[]', '[{"id":"a1","timestamp":{"a":1}}]')
+        .attach('blobs', Buffer.alloc(16, 1), {
+          filename: 'a1.jpg',
+          contentType: 'image/jpeg',
+        })
+        .expect(400);
       expect(saveChapters).not.toHaveBeenCalled();
     });
 
@@ -323,6 +403,7 @@ describe('VideoChapterController workspace access', () => {
         Array.from({ length: count }, (_, index) => ({
           id: `chapter${index}`,
           content: `Chapter ${index}`,
+          timestamp: '00:00',
         })),
       );
     const thumbnails = (count: number, size = 16) =>
