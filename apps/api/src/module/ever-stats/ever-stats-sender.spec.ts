@@ -95,6 +95,16 @@ function setup(apiUrl: string | null, now = Date.UTC(2026, 10, 12, 9, 0, 0)) {
 }
 
 describe('statistics sender', () => {
+  // Each setup() builds a collector, whose StatsValidator compiles the statistics schemas with Ajv.
+  // The first compile of the run is cold and the slowest step of this spec on a loaded CI runner,
+  // so it is paid here, outside the timed tests. The first test reuses this validator.
+  let validator: StatsValidator;
+
+  beforeAll(() => {
+    setup(null);
+    validator = new StatsValidator();
+  });
+
   it('signs the exact bytes it stores and sends, with the published headers', async () => {
     const platform = await stub(() => ({ status: 202 }));
     try {
@@ -128,7 +138,7 @@ describe('statistics sender', () => {
       expect(got.headers['content-type']).toBe('application/json');
       expect(got.headers.cookie).toBeUndefined();
       expect(got.headers.authorization).toBeUndefined();
-      expect(new StatsValidator().checkBytes(got.body, 'rec').ok).toBe(true);
+      expect(validator.checkBytes(got.body, 'rec').ok).toBe(true);
     } finally {
       await platform.close();
     }
