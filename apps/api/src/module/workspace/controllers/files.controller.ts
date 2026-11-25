@@ -21,6 +21,10 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { TMP_PATH } from '../../../enums/tmpPathsEnums';
 import { RemoveUploadInterceptor } from '../../../common/interceptors/remove-upload.interceptor';
+import {
+  UPLOAD_FILE_BYTES,
+  uploadOptions,
+} from '../../../common/uploads/upload-limits';
 import { WorkspaceFilesService } from '../services/files.service';
 import { CanAccessFolder } from '../decorators/CanAccessFolder.decorator';
 import { CanChangePermissions } from '../decorators/CanChangePermissions.decorator';
@@ -125,18 +129,23 @@ export class WorkspaceFilesController {
   @Post('video')
   @CanAccessFolder(PermissionAccessEnum.WRITE)
   @UseInterceptors(
-    FileInterceptor('file', {
-      limits: { fileSize: 1024 * 1024 * 1024 },
-      storage: diskStorage({
-        destination: (req, file, callback) => {
-          callback(null, TMP_PATH);
+    FileInterceptor(
+      'file',
+      uploadOptions(
+        { fileSize: UPLOAD_FILE_BYTES.video },
+        {
+          storage: diskStorage({
+            destination: (req, file, callback) => {
+              callback(null, TMP_PATH);
+            },
+            filename: (req, file, cb) => {
+              const randomName = uuidv4();
+              return cb(null, randomName);
+            },
+          }),
         },
-        filename: (req, file, cb) => {
-          const randomName = uuidv4();
-          return cb(null, randomName);
-        },
-      }),
-    }),
+      ),
+    ),
     // The upload goes however the request ends, also when the body fails validation (400).
     RemoveUploadInterceptor,
     // After the file interceptor: it needs the parsed multipart body.
@@ -169,7 +178,13 @@ export class WorkspaceFilesController {
     checkBodyFolder: true,
     mustBeNew: true,
   })
-  @UseInterceptors(FileInterceptor('file'), NamedImageWriteInterceptor)
+  @UseInterceptors(
+    FileInterceptor(
+      'file',
+      uploadOptions({ fileSize: UPLOAD_FILE_BYTES.image }),
+    ),
+    NamedImageWriteInterceptor,
+  )
   async uploadNewImageFromFile(
     @Param('workspaceId', ValidateId) workspaceId: string,
     @Body() updateImage: UploadImageDto,
@@ -275,7 +290,13 @@ export class WorkspaceFilesController {
       req.body?.refName ? req.body.refName : req.body?.location,
     mustExist: true,
   })
-  @UseInterceptors(FileInterceptor('blob'), NamedImageWriteInterceptor)
+  @UseInterceptors(
+    FileInterceptor(
+      'blob',
+      uploadOptions({ fileSize: UPLOAD_FILE_BYTES.image }),
+    ),
+    NamedImageWriteInterceptor,
+  )
   async updateWorkspaceImage(
     @Param('workspaceId', ValidateId) workspaceId: string,
     @Body() body: UpdateImageDto,

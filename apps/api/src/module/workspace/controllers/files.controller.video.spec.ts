@@ -432,6 +432,10 @@ describe('workspace video routes', () => {
       );
       expect(new Interceptor().multer.limits).toEqual({
         fileSize: 1024 * 1024 * 1024,
+        files: 1,
+        fields: 20,
+        fieldSize: 64 * 1024,
+        parts: 22,
       });
     });
   });

@@ -17,6 +17,10 @@ import {
 } from '@nestjs/swagger';
 import { PipelineService } from 'src/common/pipeline/pipeline.service';
 import { PipelineType } from 'src/common/pipeline/types';
+import {
+  UPLOAD_FILE_BYTES,
+  uploadOptions,
+} from 'src/common/uploads/upload-limits';
 import { RefreshToken } from '../auth/decorators/refresh-token.decorator';
 import { User } from '../auth/decorators/user.decorator';
 import { AuthGuard, IRequestUser } from '../auth/guards/auth.guard';
@@ -36,7 +40,12 @@ export class CamshotController {
 
   @Post('upload/file')
   @UseGuards(AuthGuard)
-  @UseInterceptors(FileInterceptor('file', { limits: { fileSize: 10 * 1024 * 1024 } }))
+  @UseInterceptors(
+    FileInterceptor(
+      'file',
+      uploadOptions({ fileSize: UPLOAD_FILE_BYTES.picture }),
+    ),
+  )
   @ApiOperation({ summary: 'Upload an image file (camshot)' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({ type: CamshotUploadDto })

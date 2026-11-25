@@ -20,6 +20,10 @@ import { IsWorkspaceAdminGuard } from '../guards/IsWorkspaceAdmin.guard';
 import { CanAccessFolder } from '../decorators/CanAccessFolder.decorator';
 import { PermissionAccessEnum } from '../Interfaces/Workspace';
 import { FileInterceptor } from '@nestjs/platform-express';
+import {
+  UPLOAD_FILE_BYTES,
+  uploadOptions,
+} from '../../../common/uploads/upload-limits';
 import { User } from '../../auth/decorators/user.decorator';
 import { ValidateId } from '../pipes/validate-id.pipe';
 import { CreateWorkspaceDto } from '../dto/workspaces/create-workspace.dto';
@@ -103,7 +107,12 @@ export class WorkspacesController {
 
   @Post(':workspaceId/avatar')
   @UseGuards(IsWorkspaceAdminGuard)
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(
+    FileInterceptor(
+      'file',
+      uploadOptions({ fileSize: UPLOAD_FILE_BYTES.picture }),
+    ),
+  )
   async changeWorkspaceAvatar(
     @Param('workspaceId', ValidateId) workspaceId: string,
     @UploadedFile() file: Express.Multer.File,
@@ -113,7 +122,12 @@ export class WorkspacesController {
 
   @Post(':workspaceId/thumbnail')
   @UseGuards(IsWorkspaceAdminGuard)
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(
+    FileInterceptor(
+      'file',
+      uploadOptions({ fileSize: UPLOAD_FILE_BYTES.picture }),
+    ),
+  )
   async changeWorkspaceThumbnail(
     @Param('workspaceId', ValidateId) workspaceId: string,
     @UploadedFile() file: Express.Multer.File,

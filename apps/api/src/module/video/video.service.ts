@@ -722,12 +722,17 @@ export class VideoService {
     return this.getVideoByIdPrivate(uid, id);
   }
 
-  async updateVideo(uid: string, blob: any, refName: string): Promise<string> {
+  async updateVideo(
+    uid: string,
+    blob: Express.Multer.File,
+    refName: string,
+  ): Promise<string> {
     const bucket = admin.storage().bucket();
-    const buffer = blob.buffer;
     const fileRef = bucket.file(`users/${uid}/videos/${refName}`);
 
-    await fileRef.save(buffer);
+    // The route writes the video to the API disk: it is streamed to the bucket from there, never
+    // read into memory.
+    await bucket.upload(blob.path, { destination: fileRef });
 
     // create a new signed url so that the browser doesn't cache the video url with previous data ranges
     const newConfig = this.config;

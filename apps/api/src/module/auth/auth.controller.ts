@@ -11,6 +11,10 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import {
+  UPLOAD_FILE_BYTES,
+  uploadOptions,
+} from '../../common/uploads/upload-limits';
 import type { Request } from 'express';
 import { IDataResponse } from '../../interfaces/_types';
 import { SharedService } from '../../services/shared/shared.service';
@@ -98,7 +102,12 @@ export class AuthController {
 
   @UseGuards(AuthGuard)
   @Put('user-data')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(
+    FileInterceptor(
+      'file',
+      uploadOptions({ fileSize: UPLOAD_FILE_BYTES.picture }),
+    ),
+  )
   async updateUserData(
     @User() user: IRequestUser,
     @Body() body: UpdateUserDto,
@@ -115,7 +124,12 @@ export class AuthController {
 
   @UseGuards(AuthGuard)
   @Post('upload-avatar')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(
+    FileInterceptor(
+      'file',
+      uploadOptions({ fileSize: UPLOAD_FILE_BYTES.picture }),
+    ),
+  )
   async updateUserAvatar(
     @User() user: IRequestUser,
     @UploadedFile() file: Express.Multer.File,

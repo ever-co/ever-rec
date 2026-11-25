@@ -13,6 +13,10 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import {
+  UPLOAD_FILE_BYTES,
+  uploadOptions,
+} from '../../../common/uploads/upload-limits';
 import { AuthGuard, IRequestUser } from '../../auth/guards/auth.guard';
 import { IsWorkspaceAdminGuard } from '../guards/IsWorkspaceAdmin.guard';
 import { CanAccessWorkspaceGuard } from '../guards/CanAccessWorkspace.guard';
@@ -51,10 +55,13 @@ export class WorkspaceTeamsController {
   @Put(':teamId')
   @UseGuards(IsWorkspaceAdminGuard)
   @UseInterceptors(
-    FileFieldsInterceptor([
-      { name: 'avatar', maxCount: 1 },
-      { name: 'thumbnail', maxCount: 1 },
-    ]),
+    FileFieldsInterceptor(
+      [
+        { name: 'avatar', maxCount: 1 },
+        { name: 'thumbnail', maxCount: 1 },
+      ],
+      uploadOptions({ files: 2, fileSize: UPLOAD_FILE_BYTES.picture }),
+    ),
   )
   async updateTeam(
     @Param('workspaceId', ValidateId) workspaceId: string,

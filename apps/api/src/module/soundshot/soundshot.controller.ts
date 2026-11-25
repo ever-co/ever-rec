@@ -15,6 +15,10 @@ import {
 } from '@nestjs/swagger';
 import { PipelineService } from 'src/common/pipeline/pipeline.service';
 import { PipelineType } from 'src/common/pipeline/types';
+import {
+  UPLOAD_FILE_BYTES,
+  uploadOptions,
+} from 'src/common/uploads/upload-limits';
 import { IDataResponse } from 'src/interfaces/_types';
 import { sendResponse } from 'src/services/utils/sendResponse';
 import { RefreshToken } from '../auth/decorators/refresh-token.decorator';
@@ -34,7 +38,12 @@ export class SoundshotController {
 
   @Post('upload/file')
   @UseGuards(AuthGuard)
-  @UseInterceptors(FileInterceptor('file', { limits: { fileSize: 100 * 1024 * 1024 } }))
+  @UseInterceptors(
+    FileInterceptor(
+      'file',
+      uploadOptions({ fileSize: UPLOAD_FILE_BYTES.audio }),
+    ),
+  )
   @ApiOperation({ summary: 'Upload an audio file (soundshot)' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({ type: SoundshotUploadDto })
