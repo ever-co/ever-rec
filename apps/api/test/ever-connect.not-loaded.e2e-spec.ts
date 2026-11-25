@@ -51,31 +51,36 @@ describe.each([
 });
 
 describe('loaded but not connected', () => {
+  let t: ConnectTestApp;
+
+  // The first boot in this file with the connection on: it requires (and ts-jest compiles) the
+  // whole ever-connect module tree, so it runs in a hook, closed in `afterAll`, and nothing of the
+  // test can outlive the Jest environment.
+  beforeAll(async () => {
+    t = await createConnectTestApp({ env: { EVER_CONNECT_ENABLED: 'true' } });
+  });
+  afterAll(() => t?.close());
+
   it('sends nothing until the operator connects', async () => {
-    const t = await createConnectTestApp({ env: { EVER_CONNECT_ENABLED: 'true' } });
-    try {
-      const token = await t.signIn(OPERATOR_UID);
-      expect((await t.http().get('/api/v1/ever-connect/health').set('idToken', token)).status).toBe(200);
-      expect((await t.http().get('/api/v1/ever-connect/status').set('idToken', token)).status).toBe(200);
-      expect((await t.http().get('/api/v1/ever-connect/integrations').set('idToken', token)).status).toBe(200);
-      const scheduler = t.get(
-        require('../src/module/ever-connect/services/ever-connect-scheduler.service')
-          .EverConnectSchedulerService,
-      );
-      await scheduler.boot();
-      // Only local jobs (the watch of the stored connection, the clean-up of exports).
-      expect(scheduler.scheduled.sort()).toEqual(['sweep', 'watch']);
-      scheduler.stop();
-      await scheduler.heartbeat();
-      await scheduler.refresh();
-      expect(t.platform.requests).toEqual([]);
-      // Provisioning routes exist only with EVER_CONNECT_PROVISION_ENABLED=true; there is no
-      // pending-events route.
-      for (const path of ['/api/v1/ever-connect/events/pending', '/api/v1/ever-connect/provision/intent']) {
-        expect((await t.http().post(path).set('idToken', token).send({})).status).toBe(404);
-      }
-    } finally {
-      await t.close();
+    const token = await t.signIn(OPERATOR_UID);
+    expect((await t.http().get('/api/v1/ever-connect/health').set('idToken', token)).status).toBe(200);
+    expect((await t.http().get('/api/v1/ever-connect/status').set('idToken', token)).status).toBe(200);
+    expect((await t.http().get('/api/v1/ever-connect/integrations').set('idToken', token)).status).toBe(200);
+    const scheduler = t.get(
+      require('../src/module/ever-connect/services/ever-connect-scheduler.service')
+        .EverConnectSchedulerService,
+    );
+    await scheduler.boot();
+    // Only local jobs (the watch of the stored connection, the clean-up of exports).
+    expect(scheduler.scheduled.sort()).toEqual(['sweep', 'watch']);
+    scheduler.stop();
+    await scheduler.heartbeat();
+    await scheduler.refresh();
+    expect(t.platform.requests).toEqual([]);
+    // Provisioning routes exist only with EVER_CONNECT_PROVISION_ENABLED=true; there is no
+    // pending-events route.
+    for (const path of ['/api/v1/ever-connect/events/pending', '/api/v1/ever-connect/provision/intent']) {
+      expect((await t.http().post(path).set('idToken', token).send({})).status).toBe(404);
     }
   });
 });
