@@ -786,6 +786,8 @@ describe('overlapping writes to a workspace', () => {
   describe('deleting an item counts it once, out of the folder it is stored in', () => {
     let controller: WorkspaceFilesController;
     let deletions: number;
+    // The size each `media.deleted` reports.
+    let sizes: number[];
     // The deletes as the routes get them: `folderId` is what the client sends.
     const deleteImage = (imageId: string, folderId: string | false) => () =>
       controller.deleteImage('ws1', { imageId, folderId });
@@ -796,16 +798,50 @@ describe('overlapping writes to a workspace', () => {
     // fold1 counts shot1; fold3 is in fold2 and holds vid1, which both of them count.
     const imageDeleted = { fold1: 0, fold2: 1, fold3: 1 };
     const videoDeleted = { fold1: 1, fold2: 0, fold3: 0 };
+    // The stored files of shot1 (100 bytes) and vid1 (300 bytes).
+    const imageFile = `${WORKSPACE}/screenshots/earlier.png`;
+    const videoFile = `${WORKSPACE}/videos/clip.mp4`;
+    const isStored = (file: string) => mockFirebase.bucket.objects.has(file);
+
+    // Runs `second` from start to end when `first` starts the transaction that removes the item at
+    // `path`: after `first` has read the item, before it removes it.
+    async function whenRemoving<A, B>(
+      path: string,
+      first: () => Promise<A>,
+      second: () => Promise<B>,
+    ): Promise<[A, B]> {
+      let secondRun: Promise<B> | undefined;
+      const { transaction } = FakeReference.prototype;
+      jest
+        .spyOn(FakeReference.prototype, 'transaction')
+        .mockImplementation(async function (this: FakeReference, ...args) {
+          if (!secondRun && pathOf(this) === `${WORKSPACE}/${path}`) {
+            await (secondRun = second());
+          }
+          return transaction.apply(this, args);
+        });
+      const firstResult = await first();
+      return [firstResult, await (secondRun ?? second())];
+    }
 
     beforeEach(async () => {
       const events = new EventEmitter2();
       deletions = 0;
-      events.on(EVER_COUNTER_EVENTS.mediaDeleted, () => (deletions += 1));
+      sizes = [];
+      events.on(
+        EVER_COUNTER_EVENTS.mediaDeleted,
+        (event: { bytes: number }) => {
+          deletions += 1;
+          sizes.push(event.bytes);
+        },
+      );
+      await mockFirebase.bucket.file(imageFile).save(Buffer.alloc(100, 1));
+      await mockFirebase.bucket.file(videoFile).save(Buffer.alloc(300, 1));
       controller = new WorkspaceFilesController(
         new WorkspaceFilesService(
           utilities,
           // A deleted video's streaming asset goes with it.
-          { deleteAsset: async () => undefined } as any,
+          { deleteAsset: () => Promise.resolve() } as any,
           new WorkspaceShareService(utilities, new EventEmitter2()),
           {} as any,
           events,
@@ -868,6 +904,59 @@ describe('overlapping writes to a workspace', () => {
         expect([first.status, second.status]).toEqual(['success', 'success']);
         expect(counts()).toEqual(after);
         expect(deletions).toBe(1);
+      },
+    );
+
+    it.each([
+      [
+        'an image',
+        'screenshots/shot1',
+        deleteImage('shot1', 'fold1'),
+        imageFile,
+        100,
+      ],
+      ['a video', 'videos/vid1', deleteVideo('vid1'), videoFile, 300],
+    ])(
+      'reports the size of %s deleted twice at the same time once, read before its file goes',
+      async (_name, item, remove, file, size) => {
+        // The second delete runs while the first one has read the item and not removed it yet.
+        const [first, second] = await whenRemoving(item, remove, remove);
+
+        expect([first.status, second.status]).toEqual(['success', 'success']);
+        expect(sizes).toEqual([size]);
+        expect(isStored(file)).toBe(false);
+      },
+    );
+
+    it.each([
+      [
+        'an image',
+        'screenshots/shot1',
+        deleteImage('shot1', 'fold1'),
+        imageFile,
+      ],
+      ['a video', 'videos/vid1', deleteVideo('vid1'), videoFile],
+    ])(
+      'keeps %s whole when its removal does not commit',
+      async (_name, item, remove, file) => {
+        // The removal is refused, as when an overlapping write of the item cancels it.
+        const { transaction } = FakeReference.prototype;
+        jest
+          .spyOn(FakeReference.prototype, 'transaction')
+          .mockImplementation(function (this: FakeReference, ...args) {
+            if (pathOf(this) === `${WORKSPACE}/${item}`) {
+              return Promise.reject(new Error('set'));
+            }
+            return transaction.apply(this, args);
+          });
+
+        const deleted = await remove();
+
+        expect(deleted.status).toBe('error');
+        expect(stored(item)).not.toBeNull();
+        expect(isStored(file)).toBe(true);
+        expect(counts()).toEqual({ fold1: 1, fold2: 1, fold3: 1 });
+        expect(sizes).toEqual([]);
       },
     );
   });

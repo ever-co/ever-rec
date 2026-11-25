@@ -855,42 +855,45 @@ export class WorkspaceFilesService {
         return sendError('Error while trying to delete an image', 'Not found');
       }
 
-      const imageStorageRef = bucket.file(
-        `workspaces/${workspaceId}/screenshots/${refName}`,
-      );
-      const imageThumbnailStorageRef = bucket.file(
-        `workspaces/${workspaceId}/screenshots/thumbnails/${refName}`,
-      );
-
-      const imageOriginalStorageRef = bucket.file(
-        `workspaces/${workspaceId}/screenshots/originals/${refName}`,
-      );
-
-      const everStatsBytes = await storedBytes(
-        this.eventEmitter,
-        imageStorageRef,
-      );
-      this.workspaceShareService.deleteLinkById(workspaceId, imageId);
-
-      imageStorageRef.delete().catch(() => {
-        console.log('Error deleting image from reference: ' + refName);
-      });
-      imageThumbnailStorageRef.delete().catch(() => {
-        console.log(
-          'Error deleting image thumbnail from reference: ' + refName,
-        );
-      });
-
-      imageOriginalStorageRef.delete().catch(() => {
-        console.log('Error deleting video from reference: ' + refName);
-      });
-
+      // The record goes first. Only the delete that removed it deletes the files and reports their
+      // size: a delete of the same image at the same time finds it gone, so the size is read before
+      // any of its files goes, and a removal that does not commit leaves the image whole.
       const { removed, counted } = await this.removeWorkspaceItem(
         workspaceId,
         'screenshots',
         imageId,
       );
       if (removed) {
+        const imageStorageRef = bucket.file(
+          `workspaces/${workspaceId}/screenshots/${refName}`,
+        );
+        const imageThumbnailStorageRef = bucket.file(
+          `workspaces/${workspaceId}/screenshots/thumbnails/${refName}`,
+        );
+
+        const imageOriginalStorageRef = bucket.file(
+          `workspaces/${workspaceId}/screenshots/originals/${refName}`,
+        );
+
+        const everStatsBytes = await storedBytes(
+          this.eventEmitter,
+          imageStorageRef,
+        );
+        this.workspaceShareService.deleteLinkById(workspaceId, imageId);
+
+        imageStorageRef.delete().catch(() => {
+          console.log('Error deleting image from reference: ' + refName);
+        });
+        imageThumbnailStorageRef.delete().catch(() => {
+          console.log(
+            'Error deleting image thumbnail from reference: ' + refName,
+          );
+        });
+
+        imageOriginalStorageRef.delete().catch(() => {
+          console.log('Error deleting video from reference: ' + refName);
+        });
+
         this.eventEmitter.emit(EVER_COUNTER_EVENTS.mediaDeleted, {
           kind: 'screenshot',
           bytes: everStatsBytes,
@@ -931,42 +934,43 @@ export class WorkspaceFilesService {
         return sendError('Error while trying to delete a video', 'Not found');
       }
 
-      this.workspaceShareService.deleteLinkById(workspaceId, videoId);
-
-      const refName: unknown = videoData.refName;
-      let everStatsBytes = 0;
-      if (typeof refName === 'string' && refName !== '') {
-        const fileRef = bucket.file(
-          `workspaces/${workspaceId}/videos/${refName}`,
-        );
-        everStatsBytes = await storedBytes(this.eventEmitter, fileRef);
-        fileRef.delete().catch(() => {
-          console.log('Error deleting video from reference: ' + refName);
-        });
-      }
-
-      bucket
-        .deleteFiles({
-          prefix: `workspaces/${workspaceId}/videosThumbnails/${videoId}/`,
-        })
-        .catch((error) => {
-          console.log('Error deleting video chapters:', error);
-        });
-
-      const assetId = videoData?.streamData?.assetId;
-      const serviceType = videoData?.streamData?.serviceType;
-      this.streamService.deleteAsset(assetId, serviceType).catch(() => {
-        console.log(
-          `Error deleting asset from service ${serviceType}: ${assetId}`,
-        );
-      });
-
+      // The record goes first; only the delete that removed it deletes the files (see `deleteImage`).
       const { removed, counted } = await this.removeWorkspaceItem(
         workspaceId,
         'videos',
         videoId,
       );
       if (removed) {
+        this.workspaceShareService.deleteLinkById(workspaceId, videoId);
+
+        const refName: unknown = videoData.refName;
+        let everStatsBytes = 0;
+        if (typeof refName === 'string' && refName !== '') {
+          const fileRef = bucket.file(
+            `workspaces/${workspaceId}/videos/${refName}`,
+          );
+          everStatsBytes = await storedBytes(this.eventEmitter, fileRef);
+          fileRef.delete().catch(() => {
+            console.log('Error deleting video from reference: ' + refName);
+          });
+        }
+
+        bucket
+          .deleteFiles({
+            prefix: `workspaces/${workspaceId}/videosThumbnails/${videoId}/`,
+          })
+          .catch((error) => {
+            console.log('Error deleting video chapters:', error);
+          });
+
+        const assetId = videoData?.streamData?.assetId;
+        const serviceType = videoData?.streamData?.serviceType;
+        this.streamService.deleteAsset(assetId, serviceType).catch(() => {
+          console.log(
+            `Error deleting asset from service ${serviceType}: ${assetId}`,
+          );
+        });
+
         this.eventEmitter.emit(EVER_COUNTER_EVENTS.mediaDeleted, {
           kind: 'video',
           bytes: everStatsBytes,

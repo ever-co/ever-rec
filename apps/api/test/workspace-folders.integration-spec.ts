@@ -277,8 +277,8 @@ describe('folder writers at the same time, on the emulators', () => {
     const files = new WorkspaceFilesController(
       new WorkspaceFilesService(
         utilities,
-        { deleteAsset: async () => undefined } as any,
-        { deleteLinkById: async () => undefined } as any,
+        { deleteAsset: () => Promise.resolve() } as any,
+        { deleteLinkById: () => Promise.resolve() } as any,
         {} as any,
         new EventEmitter2(),
         {} as any,
