@@ -12,6 +12,7 @@ import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import { TokenService } from '../../auth/services/tokens';
 import { VideoChapterService } from '../services/chapter.service';
+import { MAX_CHAPTERS } from '../utilities/chapterPayload';
 import { VideoChapterController } from './chapter.controller';
 
 jest.mock('../../auth/services/tokens', () => ({ TokenService: class {} }));
@@ -308,6 +309,87 @@ describe('VideoChapterController workspace access', () => {
         .set(as('uid-member'))
         .field('chapters', '[]')
         .expect(400);
+      expect(saveChapters).not.toHaveBeenCalled();
+    });
+  });
+
+  // The service pairs the n-th thumbnail with the n-th entry of `chaptersBlobs`, and multer keeps
+  // every uploaded file in memory, so the count and the size of the thumbnails are capped.
+  describe('the thumbnails sent when saving', () => {
+    // The editors send 1000x562 JPEG thumbnails of well under 1 MB.
+    const MAX_THUMBNAIL_BYTES = 2 * 1024 * 1024;
+    const blobList = (count: number) =>
+      JSON.stringify(
+        Array.from({ length: count }, (_, index) => ({
+          id: `chapter${index}`,
+          content: `Chapter ${index}`,
+        })),
+      );
+    const thumbnails = (count: number, size = 16) =>
+      Array.from({ length: count }, () => Buffer.alloc(size, 1));
+    const saveWithThumbnails = (chaptersBlobs: string, files: Buffer[]) =>
+      files.reduce(
+        (req, file, index) =>
+          req.attach('blobs', file, {
+            filename: `thumbnail${index}.jpg`,
+            contentType: 'image/jpeg',
+          }),
+        request(app.getHttpServer())
+          .post('/video/chapter/save-changes/v1')
+          .set(as('uid-member'))
+          .field('chapters', '[]')
+          .field('chaptersBlobs', chaptersBlobs),
+      );
+
+    it('reach the service when there is one for each chapter', async () => {
+      await saveWithThumbnails(blobList(2), thumbnails(2)).expect(201);
+      expect(saveChapters).toHaveBeenCalledTimes(1);
+      expect(saveChapters.mock.calls[0][4]).toHaveLength(2);
+    });
+
+    // Multer's parser counts a file that reaches the cap as over it.
+    it('reach the service when one is just under the cap', async () => {
+      await saveWithThumbnails(
+        blobList(1),
+        thumbnails(1, MAX_THUMBNAIL_BYTES - 1),
+      ).expect(201);
+      expect(saveChapters).toHaveBeenCalledTimes(1);
+    });
+
+    it('are refused with 400 when there are more of them than chapters', async () => {
+      await saveWithThumbnails(blobList(1), thumbnails(2)).expect(400);
+      expect(saveChapters).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      [2, 1],
+      [1, 0],
+    ])(
+      'are refused with 400 when %i chapters come with %i thumbnails',
+      async (chapterCount, fileCount) => {
+        await saveWithThumbnails(
+          blobList(chapterCount),
+          thumbnails(fileCount),
+        ).expect(400);
+        expect(saveChapters).not.toHaveBeenCalled();
+      },
+    );
+
+    it('are refused with 413 when one is larger than the cap', async () => {
+      await saveWithThumbnails(
+        blobList(1),
+        thumbnails(1, MAX_THUMBNAIL_BYTES + 1),
+      ).expect(413);
+      expect(saveChapters).not.toHaveBeenCalled();
+    });
+
+    it('are refused with 400 while uploading when there are more than MAX_CHAPTERS', async () => {
+      const response = await saveWithThumbnails(
+        blobList(MAX_CHAPTERS),
+        thumbnails(MAX_CHAPTERS + 1),
+      ).expect(400);
+      // Refused by the upload limit, not by the count check after every file was read.
+      expect(response.body.message).toMatch(/too many files/i);
       expect(saveChapters).not.toHaveBeenCalled();
     });
   });
