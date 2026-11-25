@@ -11,6 +11,7 @@ import { SlackBoltService } from 'src/services/slack/slack-bolt.service';
 import { VideoService } from '../video/video.service';
 import { ConfigService } from '@nestjs/config';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { OAuthStateService } from '../../services/shared/oauth-state.service';
 
 @Injectable()
 export class SlackService {
@@ -20,31 +21,37 @@ export class SlackService {
     private readonly slackService: SlackBoltService,
     private readonly configService: ConfigService,
     private eventEmitter: EventEmitter2,
+    private readonly oauthStateService: OAuthStateService,
   ) {}
 
   /**
    * @internal
    */
-  async storeInstallationInformation(query) {
+  async storeInstallationInformation(query, binding?: string) {
     const { code, state } = query;
 
     try {
       if (code && state) {
+        // The state is a one-time value issued for a signed-in user to the browser that asked
+        // for it (`binding`). Anything else: no exchange, no write.
+        const uid = await this.oauthStateService.consume(
+          state,
+          'slack',
+          binding,
+        );
+        if (!uid) {
+          return null;
+        }
         const result = await this.slackService.slackAuthorizeToken(code);
-        if (
-          result &&
-          result.authed_user &&
-          result.authed_user.access_token &&
-          state
-        ) {
-          const userRef = admin.database().ref(`users/${state}`);
+        if (result && result.authed_user && result.authed_user.access_token) {
+          const userRef = admin.database().ref(`users/${uid}`);
           await userRef.update({
             slackToken: result.authed_user.access_token,
             isSlackIntegrate: true,
             slackBotToken: result.access_token,
           });
           await this.eventEmitter.emit('analytics.track', 'Slack Integrated', {
-            userId: state,
+            userId: uid,
           });
           return result;
         }
@@ -199,7 +206,7 @@ export class SlackService {
     }
   }
 
-  public async getSlackLoginUrl(uid: string) {
+  public async getSlackLoginUrl(uid: string, binding: string) {
     const userData = await this.getUserData(uid);
     if (userData && userData.slackBotToken && userData.isSlackIntegrate) {
       return {
@@ -208,7 +215,7 @@ export class SlackService {
           'You have already slack integrated. Please refresh the page and try again.',
       };
     } else {
-      return this.slackService.slackLoginUrl(uid);
+      return this.slackService.slackLoginUrl(uid, binding);
     }
   }
 

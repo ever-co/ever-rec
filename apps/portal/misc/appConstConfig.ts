@@ -2,5 +2,8 @@ export const CHAPTER_MIN_CHAPTERS = 3;
 export const CHAPTER_MIN_REQUIRED_SECONDS = 10;
 export const CHAPTER_MIN_VIDEO_LENGTH =
   CHAPTER_MIN_CHAPTERS * CHAPTER_MIN_REQUIRED_SECONDS;
+// Same limits the API enforces when chapters are saved.
+export const CHAPTER_MAX_CHAPTERS = 200;
+export const CHAPTER_MAX_CONTENT_LENGTH = 1000;
 export const CHAPTER_THUMBNAIL_WIDTH = 1000;
 export const CHAPTER_THUMBNAIL_HEIGHT = 562;

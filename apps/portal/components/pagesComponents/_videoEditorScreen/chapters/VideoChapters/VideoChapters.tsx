@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from 'react';
+import { FC, useEffect, useMemo, useState } from 'react';
 import classNames from 'classnames';
 import styles from './VideoChapters.module.scss';
 import VideoChapter from '../VideoChapter/VideoChapter';
@@ -17,12 +17,16 @@ import {
   timestampFormat,
 } from 'misc/videoChapterHelperFunctions';
 import {
+  CHAPTER_MAX_CHAPTERS,
   CHAPTER_MIN_REQUIRED_SECONDS,
   CHAPTER_MIN_VIDEO_LENGTH,
 } from 'misc/appConstConfig';
 import AppSpinnerLocal from 'components/containers/appSpinnerLocal/AppSpinnerLocal';
 import { IChapter } from 'app/interfaces/IChapter';
 import { useTranslation } from 'react-i18next';
+import { buildChapterTimestampList } from 'app/utilities/chapterTimestampList';
+import { errorHandler } from 'app/services/helpers/errors';
+import { successMessage } from 'app/services/helpers/toastMessages';
 
 const s = styles;
 
@@ -193,6 +197,26 @@ const VideoChapters: FC<IVideoChaptersProps> = ({
     setHasChangesHandler,
   ]);
 
+  const chapterTimestampList = useMemo(
+    () => buildChapterTimestampList(chapters),
+    [chapters],
+  );
+
+  const copyChapterList = async () => {
+    if (!chapterTimestampList) return;
+
+    try {
+      await window.navigator.clipboard.writeText(chapterTimestampList);
+      successMessage(t('page.video.chaptersCopied'));
+    } catch (e) {
+      errorHandler(new Error(t('page.video.chaptersCopyError')));
+    }
+  };
+
+  // The API refuses more than CHAPTER_MAX_CHAPTERS chapters per video.
+  const addDisabled =
+    addChapterDisabled || chapters.length >= CHAPTER_MAX_CHAPTERS;
+
   const chapterElements = chapters.map((chapter, index: number) => {
     const isChapterActive = chapterActive && chapterActive.id === chapter.id;
 
@@ -246,6 +270,23 @@ const VideoChapters: FC<IVideoChaptersProps> = ({
         {chapterElements}
       </div>
 
+      {chapterTimestampList && (
+        <div
+          className={classNames(
+            s.CopyChaptersWrapper,
+            isHorizontalUI && s.CopyChaptersWrapperHorizontal,
+          )}
+        >
+          <button
+            type="button"
+            onClick={copyChapterList}
+            className={s.CopyChaptersButton}
+          >
+            {t('page.video.copyChapters')}
+          </button>
+        </div>
+      )}
+
       {!isPublic && (
         <div
           className={classNames(
@@ -255,12 +296,12 @@ const VideoChapters: FC<IVideoChaptersProps> = ({
         >
           <button
             onClick={() =>
-              !addChapterDisabled &&
+              !addDisabled &&
               chapterAdd(videoTime.timestamp, videoTime.timestampSeconds)
             }
             className={classNames(
               s.ChapterButton,
-              addChapterDisabled && s.ChapterButtonDisabled,
+              addDisabled && s.ChapterButtonDisabled,
             )}
           >
             {t('page.video.addChapter')}

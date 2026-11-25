@@ -22,6 +22,11 @@ const createThumbnailUrl = (playbackId: string) => {
   return `https://image.mux.com/${playbackId}/thumbnail.png`;
 };
 
+// The static MP4 rendition, which assets get from `mp4_support` (see getDirectUpload).
+const createDownloadUrl = (playbackId: string) => {
+  return `https://stream.mux.com/${playbackId}/high.mp4`;
+};
+
 @Injectable()
 export class MuxService {
   private readonly Video: InstanceType<typeof Mux>['Video'];
@@ -38,13 +43,15 @@ export class MuxService {
     this.Video = VideoMux;
   }
 
-  async getDirectUpload(): Promise<{ url: string; id: string }> {
+  async getDirectUpload(uid: string): Promise<{ url: string; id: string }> {
     try {
       const upload = await this.Video.Uploads.create({
         cors_origin: '*',
         new_asset_settings: {
           playback_policy: 'public',
           mp4_support: 'standard',
+          // Binds the asset to the uploader, see StreamServiceService.assertAssetOwnedBy.
+          passthrough: uid,
         },
       });
 
@@ -143,6 +150,53 @@ export class MuxService {
       console.error(error);
       return { downloadStatus: PSEnum.ERRORED, downloadUrl: '' };
     }
+  }
+
+  /**
+   * The playback and thumbnail URLs of an asset, built from what Mux reports for it, or null when
+   * Mux has no such asset or it has no public playback id.
+   */
+  async getStreamLinks(
+    assetId: string,
+  ): Promise<{ playbackUrl: string; thumbnailUrl: string } | null> {
+    try {
+      const asset = await this.Video.Assets.get(assetId);
+      const playbackId = asset?.playback_ids?.[0]?.id;
+
+      return playbackId
+        ? {
+            playbackUrl: createPlaybackUrl(playbackId),
+            thumbnailUrl: createThumbnailUrl(playbackId),
+          }
+        : null;
+    } catch (error) {
+      console.log(error);
+      return null;
+    }
+  }
+
+  /**
+   * The MP4 download URL of an asset, built from what Mux reports for it, or null when Mux has no
+   * such asset or it has no public playback id.
+   */
+  async getDownloadUrl(assetId: string): Promise<string | null> {
+    try {
+      const asset = await this.Video.Assets.get(assetId);
+      const playbackId = asset?.playback_ids?.[0]?.id;
+
+      return playbackId ? createDownloadUrl(playbackId) : null;
+    } catch (error) {
+      console.log(error);
+      return null;
+    }
+  }
+
+  /** The uid the asset was created for (its passthrough), or null when it has none. */
+  async getAssetOwner(assetId: string): Promise<string | null> {
+    const asset = await this.Video.Assets.get(assetId);
+    return typeof asset?.passthrough === 'string' && asset.passthrough
+      ? asset.passthrough
+      : null;
   }
 
   async deleteAsset(assetId: string): Promise<void> {

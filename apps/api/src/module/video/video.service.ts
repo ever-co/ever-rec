@@ -1,6 +1,12 @@
 import { Reference } from '@firebase/database-types';
 import type { FullMetadata } from '@firebase/storage';
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import * as admin from 'firebase-admin';
 import moment from 'moment';
@@ -27,6 +33,26 @@ import { SharedService } from '../../services/shared/shared.service';
 import { fixVideoWithFFMPEG } from '../../services/utils/fixVideoWithFFMPEG';
 import { sendError, sendResponse } from '../../services/utils/sendResponse';
 import { StreamServiceService } from '../video-services/streamService.service';
+import { is_id } from '../workspace/validators/id.validator';
+import { toPublicLikes } from '../../services/utils/likes';
+import {
+  PUBLIC_VIDEO_FIELDS,
+  PublicVideoData,
+  toPublicItemData,
+} from '../../services/utils/publicItemData';
+import {
+  EVER_COUNTER_EVENTS,
+  storedBytes,
+} from '../../common/events/ever-counters.events';
+
+// One file name inside the owner's folder: the stored-file-name rule of the email service, with
+// no folder part at all.
+const isPlainFileName = (value: unknown): value is string =>
+  typeof value === 'string' &&
+  value.length > 0 &&
+  value !== '.' &&
+  value !== '..' &&
+  !/[\\/]/.test(value);
 
 @Injectable()
 export class VideoService {
@@ -44,9 +70,31 @@ export class VideoService {
     };
   }
 
+  // 404 unless `videoId` is a video of this user. The id must already be a plain id.
+  async assertOwnVideoExists(uid: string, videoId: string): Promise<void> {
+    const snap = await admin
+      .database()
+      .ref(`users/${uid}/videos/${videoId}`)
+      .get();
+    if (!snap.exists()) {
+      throw new NotFoundException('Video not found');
+    }
+  }
+
   async share(uid: string, videoId: string): Promise<string> {
     let link = '';
     const db = admin.database();
+
+    // A link is only made for a video the caller owns: no record for an unknown or foreign id.
+    if (
+      !uid ||
+      typeof videoId !== 'string' ||
+      !is_id(videoId) ||
+      (await db.ref(`users/${uid}/videos/${videoId}`).get()).val() == null
+    ) {
+      throw new ForbiddenException('Access to this video is not allowed');
+    }
+
     const sharedRef: Reference = db.ref('sharedVideos');
     // TODO: types
     const sharedData: any = (
@@ -111,9 +159,14 @@ export class VideoService {
   async getVideoBySharedId(
     link: string,
     isWorkspace: boolean,
+    viewerUid?: string,
   ): Promise<
     IDataResponse<{
-      video: { owner: IUserShort; dbData: DbVideoData; url: string };
+      video: {
+        owner: Omit<IUserShort, 'email'>;
+        dbData: PublicVideoData;
+        url: string;
+      };
     }>
   > {
     try {
@@ -157,30 +210,38 @@ export class VideoService {
           sharedLink = fileResponse[0];
         }
 
-        const uid = videoData?.uid ? videoData?.uid : sharedData?.uid;
+        // A personal share belongs to the user the share record names: the item's own `uid` field
+        // can be written by its owner and says nothing about who owns the link. A workspace item is
+        // only ever written by the API, so its `uid` (the uploader) is trusted.
+        const uid = isWorkspace ? videoData.uid : sharedData.uid;
         const ownerRef = db.ref(`users/${uid}`);
         const ownerData = (await ownerRef.get()).val();
+        // No email: anyone with the link can read this. A deleted account has no record any more.
         const owner = {
-          email: ownerData.email,
-          displayName: ownerData.displayName,
-          photoURL: ownerData.photoURL,
+          displayName: ownerData?.displayName,
+          photoURL: ownerData?.photoURL,
           id: uid,
         };
 
         const allViews = formatDataToArray(videoData.views);
         const chapters = parseCollectionToArray(videoData.chapters);
+        // Anyone with the link reads this answer, so it carries only the fields the share and
+        // embed pages read. The viewers (names, emails) go to the owner only, through
+        // `shared/get-view-info`; the Drive and Dropbox copies (owner's emails) never go out.
+        const publicData = toPublicItemData(videoData, PUBLIC_VIDEO_FIELDS);
 
         return sendResponse({
           video: {
             owner,
             dbData: {
-              ...videoData,
+              ...publicData,
               id: videoData.id,
               views: allViews.length,
               link: sharedLink,
               commentsLength: videoData.comments?.length || 0,
               comments: null,
               chapters,
+              likes: toPublicLikes(videoData.likes, viewerUid),
               uid,
             },
             url: sharedLink,
@@ -235,6 +296,10 @@ export class VideoService {
         editorVideo.ref = metadata;
         editorVideo.url = downloadUrl;
         editorVideo.dbData = dbData;
+        this.eventEmitter.emit(EVER_COUNTER_EVENTS.mediaCreated, {
+          kind: 'video',
+          bytes: Number(metadata.size) || 0,
+        });
       }
 
       this.eventEmitter.emit('analytics.track', 'Video Uploaded', {
@@ -246,6 +311,10 @@ export class VideoService {
       return editorVideo;
     } catch (error) {
       console.log(error);
+      // Not an empty 201: the client must learn that the video was not saved.
+      throw new InternalServerErrorException(
+        'There was a problem uploading the video.',
+      );
     }
   }
 
@@ -295,6 +364,10 @@ export class VideoService {
         editorVideo.dbData = dbData;
         editorVideo.ref = metadata;
         editorVideo.url = downloadUrl;
+        this.eventEmitter.emit(EVER_COUNTER_EVENTS.mediaCreated, {
+          kind: 'video',
+          bytes: Number(metadata.size) || 0,
+        });
       }
 
       this.eventEmitter.emit('analytics.track', 'Video Uploaded', {
@@ -625,16 +698,25 @@ export class VideoService {
     id: string,
     parentId: string | false,
     trash: boolean,
-    likes: { uid: string; timestamp: number }[],
+    // Not written: likes are only changed by the like route, one caller toggling their own.
+    // Kept so the position of the other arguments does not change.
+    _likes: unknown,
     title?: string,
   ): Promise<void> {
+    // The id goes into a database path: a sub-path such as `<id>/likes` would let this update
+    // write inside the likes or comments of the video.
+    if (typeof id !== 'string' || !is_id(id)) {
+      throw new BadRequestException('Invalid video id');
+    }
+    // An update of a video that does not exist would create a partial record: 404 instead.
+    await this.assertOwnVideoExists(uid, id);
+
     const db = admin.database();
     const dbVideoRef = db.ref(`users/${uid}/videos/${id}`);
     await dbVideoRef.update({
       ...(title !== undefined ? { title } : {}),
       ...(parentId !== undefined ? { parentId } : {}),
       ...(trash !== undefined ? { trash } : {}),
-      ...(likes !== undefined ? { likes } : { likes: 0 }),
     });
 
     return this.getVideoByIdPrivate(uid, id);
@@ -685,6 +767,10 @@ export class VideoService {
       });
 
       const storageScreenRef = bucket.file(`users/${uid}/videos/${refName}`);
+      const everStatsBytes = await storedBytes(
+        this.eventEmitter,
+        storageScreenRef,
+      );
       storageScreenRef.delete().catch(() => {
         console.log('Error deleting video from reference: ' + refName);
       });
@@ -698,6 +784,10 @@ export class VideoService {
         });
 
       await videoRef.remove();
+      this.eventEmitter.emit(EVER_COUNTER_EVENTS.mediaDeleted, {
+        kind: 'video',
+        bytes: everStatsBytes,
+      });
 
       this.eventEmitter.emit('analytics.track', 'Video Trashed', {
         userId: uid,
@@ -960,35 +1050,42 @@ export class VideoService {
     return link;
   }
 
+  // Saves the frame a client captured as the poster of a video of the caller: the thumbnail of
+  // the video's emails. Clients send the name as `fullFileName`; `fullFilename` is also taken.
   async setPoster(
     uid: string,
-    templateBase64: any,
-    { fullFilename, videoId }: { fullFilename: string; videoId: string },
-  ): Promise<string | false> {
-    let link: string | false = false;
-
-    if (templateBase64 && fullFilename) {
-      const res = await uploadVideoToBucket({
-        uid,
-        fullFilepath: templateBase64,
-        fullFilename,
-        itemTypePath: 'videoPosters',
-      });
-      const downloadUrl = (await res.getSignedUrl(this.config))[0];
-
-      if (downloadUrl) {
-        const db = admin.database();
-        const dbImageRef = db.ref(`users/${uid}/videos/${videoId}`);
-
-        await dbImageRef.update({
-          ...(fullFilename && { posterRef: fullFilename }),
-        });
-
-        link = downloadUrl;
-      }
-      return link;
-    } else {
-      return link;
+    poster: Express.Multer.File | undefined,
+    {
+      fullFileName,
+      fullFilename,
+      videoId,
+    }: { fullFileName?: unknown; fullFilename?: unknown; videoId?: unknown },
+  ): Promise<string> {
+    const name = fullFileName ?? fullFilename;
+    if (!poster?.buffer?.length) {
+      throw new BadRequestException('A poster image is required');
     }
+    if (!isPlainFileName(name)) {
+      throw new BadRequestException(
+        'The poster name must be a plain file name',
+      );
+    }
+    if (typeof videoId !== 'string' || !is_id(videoId)) {
+      throw new BadRequestException('Invalid video id');
+    }
+    await this.assertOwnVideoExists(uid, videoId);
+
+    const file = admin
+      .storage()
+      .bucket()
+      .file(`users/${uid}/videoPosters/${name}`);
+    await file.save(poster.buffer, { contentType: poster.mimetype });
+
+    await admin
+      .database()
+      .ref(`users/${uid}/videos/${videoId}`)
+      .update({ posterRef: name });
+
+    return (await file.getSignedUrl(this.config))[0];
   }
 }

@@ -14,6 +14,7 @@ import {
   UseGuards,
   UseInterceptors,
   BadRequestException,
+  ForbiddenException,
   UnsupportedMediaTypeException,
 } from '@nestjs/common';
 import {
@@ -24,9 +25,13 @@ import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
 import { diskStorage } from 'multer';
 import { IDataResponse } from 'src/interfaces/_types';
-import { UniqueViewsSharedService } from 'src/services/shared/uniqueViews.shared.service';
+import {
+  IViewInfo,
+  UniqueViewsSharedService,
+} from 'src/services/shared/uniqueViews.shared.service';
+import { getClientIp } from 'src/services/utils/clientIp';
 import { fileExtensionMap } from 'src/services/utils/fileExtensionMap';
-import { IUniqueView } from 'src/services/utils/models/shared.model';
+import { parseBooleanFlag } from 'src/services/utils/parseBooleanFlag';
 import { v4 as uuidv4 } from 'uuid';
 import { TMP_PATH } from '../../enums/tmpPathsEnums';
 import { FoldersSharedService } from '../../services/shared/folders.shared.service';
@@ -34,12 +39,22 @@ import { SharedService } from '../../services/shared/shared.service';
 import { RefreshToken } from '../auth/decorators/refresh-token.decorator';
 import { User } from '../auth/decorators/user.decorator';
 import { AuthGuard, IRequestUser } from '../auth/guards/auth.guard';
+import { OptionalAuthGuard } from '../auth/guards/optional-auth.guard';
 import { UserGuard } from '../auth/guards/user.guard';
 import { ContextUploader } from './services/uploader/context.uploader';
 import { VideoService } from './video.service';
 import { sendResponse } from 'src/services/utils/sendResponse';
 import { IVideoPayload } from './view.models/video.model';
 import IEditorVideo from 'src/interfaces/IEditorVideo';
+import {
+  CanAccessWorkspaceBodyGuard,
+  WorkspaceVideoAccess,
+} from '../workspace/guards/CanAccessWorkspaceQuery.guard';
+import { PermissionAccessEnum } from '../workspace/Interfaces/Workspace';
+import { ValidateId } from '../workspace/pipes/validate-id.pipe';
+import { isWorkspaceMember } from '../workspace/guards/CanAccessWorkspace.guard';
+import { is_id } from '../workspace/validators/id.validator';
+import { RemoveUploadInterceptor } from '../../common/interceptors/remove-upload.interceptor';
 
 @Controller('video')
 export class VideoController {
@@ -49,18 +64,22 @@ export class VideoController {
     private readonly foldersSharedService: FoldersSharedService,
     private readonly uniqueViewsSharedService: UniqueViewsSharedService,
     private readonly contextUploader: ContextUploader,
-  ) { }
+  ) {}
 
   @UseGuards(AuthGuard)
   @Get('share/:id')
-  async share(@Param('id') id: string, @Req() request): Promise<string> {
+  async share(
+    @Param('id', ValidateId) id: string,
+    @Req() request,
+  ): Promise<string> {
+    await this.videoService.assertOwnVideoExists(request.user?.id, id);
     return await this.videoService.share(request.user?.id, id);
   }
 
   @UseGuards(AuthGuard)
   @Delete('deleteLink/:link')
   async delete(
-    @Param('link') link: string,
+    @Param('link', ValidateId) link: string,
     @Req() request,
   ): Promise<void | { message: string }> {
     try {
@@ -72,13 +91,19 @@ export class VideoController {
 
   @UseGuards(AuthGuard)
   @Delete('deleteLinkById/:id')
-  async deleteById(@Param('id') id: string, @Req() request): Promise<void> {
+  async deleteById(
+    @Param('id', ValidateId) id: string,
+    @Req() request,
+  ): Promise<void> {
     await this.videoService.deleteLinkById(request.user?.id, id);
   }
 
   @UseGuards(AuthGuard)
   @Get('/api/:link')
-  async getVideoAPI(@Param('link') link: string, @Req() request): Promise<any> {
+  async getVideoAPI(
+    @Param('link', ValidateId) link: string,
+    @Req() request,
+  ): Promise<any> {
     return await this.sharedService.getItemById(
       'video',
       link,
@@ -91,9 +116,9 @@ export class VideoController {
   @UseGuards(AuthGuard)
   @Delete('/user/:ownerId/:itemId/comments/:commentId')
   async deleteComment(
-    @Param('itemId') itemId: string,
-    @Param('commentId') commentId: string,
-    @Param('ownerId') ownerId: string,
+    @Param('itemId', ValidateId) itemId: string,
+    @Param('commentId', ValidateId) commentId: string,
+    @Param('ownerId', ValidateId) ownerId: string,
     @Query('limit') limit: string,
     @Query('isPublic') isPublicQuery: string,
     @Req() request,
@@ -121,7 +146,7 @@ export class VideoController {
   @Post('/:ownerId/comment')
   @UseInterceptors(FileFieldsInterceptor([{ name: 'comment', maxCount: 1 }]))
   async postNewComment(
-    @Param('ownerId') ownerId: string,
+    @Param('ownerId', ValidateId) ownerId: string,
     @Req() request,
     @Body() body,
   ) {
@@ -148,9 +173,9 @@ export class VideoController {
   @UseGuards(AuthGuard)
   @Put('/user/:ownerId/:itemId/comment/:commentId')
   async updateComment(
-    @Param('itemId') itemId: string,
-    @Param('commentId') commentId: string,
-    @Param('ownerId') ownerId: string,
+    @Param('itemId', ValidateId) itemId: string,
+    @Param('commentId', ValidateId) commentId: string,
+    @Param('ownerId', ValidateId) ownerId: string,
     @Req() req,
     @Body() body,
     @Res() res,
@@ -163,6 +188,7 @@ export class VideoController {
 
     const result = await this.sharedService.updateCommentAPI(
       'video',
+      req.user?.id,
       ownerId,
       itemId,
       commentId,
@@ -177,7 +203,7 @@ export class VideoController {
   @UseGuards(UserGuard)
   @Post('/:link/comments')
   async getUpdatedComments(
-    @Param('link') itemId: string,
+    @Param('link', ValidateId) itemId: string,
     @Body() body,
     @Req() req,
     @Res() res,
@@ -201,22 +227,41 @@ export class VideoController {
     return res.send(result);
   }
 
-  @UseGuards(AuthGuard)
+  // A workspace video needs READ on the video and on its folder; no workspace id is the caller's
+  // own library.
+  @UseGuards(AuthGuard, CanAccessWorkspaceBodyGuard)
+  @WorkspaceVideoAccess(PermissionAccessEnum.READ)
   @Post(':videoId/like-own')
   async likeOwn(
     @Req() request,
-    @Param('videoId') videoId: string,
+    @Param('videoId', ValidateId) videoId: string,
     @Body() body: { workspaceId?: string },
   ) {
     const userId = request.user?.id;
     const workspaceId = body?.workspaceId;
+
+    // The workspace id comes from the body and goes into a database path: it must be a plain id of
+    // a workspace the caller belongs to. Without one, the like goes to the caller's own video.
+    if (
+      workspaceId !== undefined &&
+      workspaceId !== null &&
+      workspaceId !== ''
+    ) {
+      if (
+        typeof workspaceId !== 'string' ||
+        !is_id(workspaceId) ||
+        !(await isWorkspaceMember(userId, workspaceId))
+      ) {
+        throw new ForbiddenException('Access to this workspace is not allowed');
+      }
+    }
 
     const result = await this.sharedService.likeItem(
       'video',
       videoId,
       userId,
       userId,
-      workspaceId,
+      workspaceId || undefined,
     );
 
     return result;
@@ -226,9 +271,10 @@ export class VideoController {
   @Post(':sharedId/like')
   async like(
     @Req() request,
-    @Param('sharedId') sharedId: string,
-    @Query('isWorkspace') isWorkspace: boolean,
+    @Param('sharedId', ValidateId) sharedId: string,
+    @Query('isWorkspace') isWorkspaceQuery: string,
   ) {
+    const isWorkspace = parseBooleanFlag(isWorkspaceQuery);
     const sharedVideo = await this.sharedService.getSharedItemBySharedId(
       'video',
       sharedId,
@@ -251,6 +297,7 @@ export class VideoController {
   @UseGuards(AuthGuard)
   @UseInterceptors(
     FileInterceptor('blob', {
+      limits: { fileSize: 1024 * 1024 * 1024 },
       storage: diskStorage({
         destination: (req, file, callback) => {
           callback(null, TMP_PATH);
@@ -261,6 +308,8 @@ export class VideoController {
         },
       }),
     }),
+    // Multer has already written the upload to TMP_PATH: it goes however the request ends.
+    RemoveUploadInterceptor,
   )
   @Post('upload')
   async uploadVideo(
@@ -303,6 +352,8 @@ export class VideoController {
         },
       }),
     }),
+    // Also when @RefreshToken() refuses (401) or no uploader takes the token (empty answer).
+    RemoveUploadInterceptor,
   )
   @Post('upload/file')
   async uploadFile(
@@ -351,13 +402,16 @@ export class VideoController {
 
   @UseGuards(AuthGuard)
   @Get('folder/:folderId')
-  async getFolderById(@Req() req, @Param('folderId') folderId: string) {
+  async getFolderById(
+    @Req() req,
+    @Param('folderId', ValidateId) folderId: string,
+  ) {
     return await this.videoService.getFolderById(req.user?.id, folderId);
   }
 
   @UseGuards(AuthGuard)
   @Get('single/:id')
-  async getVideoByIdPrivate(@Req() req, @Param('id') id: string) {
+  async getVideoByIdPrivate(@Req() req, @Param('id', ValidateId) id: string) {
     return await this.videoService.getVideoByIdPrivate(req.user?.id, id, 'get');
   }
 
@@ -411,27 +465,59 @@ export class VideoController {
     return await this.videoService.getAllShared(req.user?.id);
   }
 
+  // Open to anyone with the link; a signed-in viewer is only read to mark their own like.
+  @UseGuards(UserGuard)
   @Get('shared/single/:sharedId')
   async getSharedImageBySharedId(
     @Req() req,
-    @Param('sharedId') sharedId: string,
-    @Query('isWorkspace') isWorkspace: boolean,
+    @Param('sharedId', ValidateId) sharedId: string,
+    @Query('isWorkspace') isWorkspace: string,
   ) {
-    return await this.videoService.getVideoBySharedId(sharedId, isWorkspace);
+    return await this.videoService.getVideoBySharedId(
+      sharedId,
+      parseBooleanFlag(isWorkspace),
+      req.user?.id,
+    );
   }
 
+  // Counts a view of a shared video. The body only names the share link; the item, the viewer
+  // (the optional sign-in) and the address all come from the server.
+  @UseGuards(OptionalAuthGuard)
   @Post('shared/view-info')
   async addUniqueViewInfo(
-    @Body() reqBody,
-  ): Promise<IDataResponse<{ uniqueViewsDb: IUniqueView[]; views: number }>> {
-    return await this.uniqueViewsSharedService.addUniqueView({ ...reqBody });
+    @Req() req,
+    @Body() body: { sharedId?: unknown; isWorkspace?: unknown },
+  ): Promise<IDataResponse<IViewInfo>> {
+    return await this.uniqueViewsSharedService.addUniqueView({
+      sharedId: body?.sharedId,
+      itemType: 'video',
+      isWorkspace: parseBooleanFlag(body?.isWorkspace),
+      viewer: req.user ?? null,
+      ip: getClientIp(req),
+    });
   }
 
+  // The viewers of a video go to its owner (or a workspace member) only; anyone else gets the count.
+  @UseGuards(OptionalAuthGuard)
   @Post('shared/get-view-info')
   async getUniqueViewInfo(
-    @Body() reqBody,
-  ): Promise<IDataResponse<IUniqueView[]>> {
-    return await this.uniqueViewsSharedService.getUniqueView({ ...reqBody });
+    @Req() req,
+    @Body()
+    body: {
+      sharedId?: unknown;
+      itemId?: unknown;
+      workspaceId?: unknown;
+      isWorkspace?: unknown;
+    },
+  ): Promise<IDataResponse<IViewInfo>> {
+    return await this.uniqueViewsSharedService.getUniqueView({
+      itemType: 'video',
+      sharedId: body?.sharedId,
+      itemId: body?.itemId,
+      workspaceId: body?.workspaceId,
+      isWorkspace: parseBooleanFlag(body?.isWorkspace),
+      userId: req.user?.id ?? null,
+    });
   }
 
   @UseGuards(AuthGuard)
@@ -481,21 +567,27 @@ export class VideoController {
   @UseGuards(AuthGuard)
   @Get('getPosterRef/:id')
   async poster(
-    @Param('id') id: string,
+    @Param('id', ValidateId) id: string,
     @Req() request,
   ): Promise<string | false> {
     return await this.videoService.getPoster(request.user?.id, id);
   }
 
-  // TODO: Fix
   @UseGuards(AuthGuard)
   @Post('setPosterRef')
   @UseInterceptors(FileInterceptor('templateBase64'))
   async uploadPoster(
     @Req() req,
     @Body() posterBody,
-    @UploadedFile() templateBase64: any,
-  ) {
+    @UploadedFile() templateBase64: Express.Multer.File | undefined,
+  ): Promise<string> {
+    // The poster is a frame the client captured from the video: an image and nothing else.
+    if (!templateBase64) {
+      throw new BadRequestException('A poster image is required');
+    }
+    if (!templateBase64.mimetype?.startsWith('image/')) {
+      throw new UnsupportedMediaTypeException('The poster must be an image');
+    }
     return await this.videoService.setPoster(req.user?.id, templateBase64, {
       ...posterBody,
     });
@@ -505,12 +597,12 @@ export class VideoController {
   @Post('folders/:folderId/favorite')
   async addFolderToFavorites(
     @Req() req,
-    @Param() param,
+    @Param('folderId', ValidateId) folderId: string,
     @Body() body: { forceRemove?: boolean },
   ) {
     return await this.foldersSharedService.addRemoveFavFolder(
       req.user.id,
-      param.folderId,
+      folderId,
       'video',
       undefined,
       body?.forceRemove,

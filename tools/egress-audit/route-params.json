@@ -1,0 +1,8 @@
+{
+  "id": "egress-audit-item",
+  "workspaceId": "egress-audit-workspace",
+  "imageId": "egress-audit-image",
+  "videoId": "egress-audit-video",
+  "whiteboardID": "egress-audit-whiteboard",
+  "workspaceInviteId": "egress-audit-invite"
+}

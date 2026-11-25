@@ -11,8 +11,8 @@ import { AuthModule } from './module/auth/auth.module';
 import { DriveModule } from './module/drive/drive.module';
 import { DropboxModule } from './module/dropbox/dropbox.module';
 import { EditorWebsocketModule } from './module/editor-websocket-module/editor-websocket.module';
-import { EditorGateway } from './module/editor-websocket-module/editor.gateway';
 import { EmailModule } from './module/email/email.module';
+import { EverIdModule } from './module/ever-id/ever-id.module';
 import { FirebaseModule } from './module/firebase/firebase.module';
 import { ImageModule } from './module/image/image.module';
 import { LogModule } from './module/log/log.module';
@@ -25,6 +25,7 @@ import { WorkspaceModule } from './module/workspace/workspace.module';
 import { PipelineModule } from './common/pipeline/pipeline.module';
 import { SoundshotModule } from './module/soundshot/soundshot.module';
 import { CamshotModule } from './module/camshot/camshot.module';
+import { everPlatformModules } from './common/ever-platform/modules';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { CamshotModule } from './module/camshot/camshot.module';
     FirebaseModule,
     AdminModule,
     AuthModule,
+    EverIdModule,
     TermsModule,
     ImageModule,
     VideoModule,
@@ -52,12 +54,14 @@ import { CamshotModule } from './module/camshot/camshot.module';
     EditorWebsocketModule,
     PipelineModule,
     SoundshotModule,
-    CamshotModule
+    CamshotModule,
+    // Optional anonymous usage statistics (docs/ever-platform): read after ConfigModule.forRoot()
+    // above has loaded the .env file; EVER_STATS_ENABLED=false leaves them out.
+    ...everPlatformModules(),
   ],
   controllers: [AppController],
   providers: [
     AppService,
-    EditorGateway,
     {
       provide: APP_FILTER,
       useClass: SentryGlobalFilter,

@@ -7,8 +7,6 @@ import { ItemType } from '@/app/interfaces/ItemTypes';
 import { Id } from 'react-toastify';
 import { IUser } from '@/app/interfaces/IUserData';
 import { getItemUniqueViewsAPI } from './api/imageandvideo';
-import { DbVideoData } from '../interfaces/IEditorVideo';
-import { DbImgData } from '../interfaces/IEditorImage';
 import { iDataResponseParser } from './helpers/iDataResponseParser';
 
 export const sendItem = async (
@@ -50,18 +48,13 @@ export const sendItem = async (
   }
 };
 
+// The viewers come back for the owner of the item only; the count is for everybody.
 export const getItemUniqueViews = async (
-  user: IUser,
-  itemData: DbImgData | DbVideoData,
+  itemId: string,
   itemType: ItemType,
-  isWorkspace: boolean,
+  workspaceId?: string,
 ) => {
-  const res = await getItemUniqueViewsAPI(
-    user,
-    itemData,
-    itemType,
-    isWorkspace,
-  );
+  const res = await getItemUniqueViewsAPI(itemId, itemType, workspaceId);
   const data = iDataResponseParser(res);
   return data;
 };

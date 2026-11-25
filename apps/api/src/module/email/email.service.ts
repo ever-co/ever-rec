@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import * as postmark from 'postmark';
 import { ConfigService } from '@nestjs/config';
 import { PostmarkTemplate } from 'src/config/email';
-import { IDataResponse, ItemType } from '../../interfaces/_types';
+import { IDataResponse } from '../../interfaces/_types';
+import { is_id } from '../workspace/validators/id.validator';
 import * as admin from 'firebase-admin';
-import { getAuth } from 'firebase-admin/auth';
+import { getAuth, UserRecord } from 'firebase-admin/auth';
 import {
   AuthError,
   confirmPasswordReset,
@@ -13,18 +14,83 @@ import {
 import { FirebaseClient } from 'src/services/firebase/firebase.client';
 import { sendError, sendResponse } from 'src/services/utils/sendResponse';
 import { IWorkspaceInvite } from '../workspace/Interfaces/Invites';
-import { IWorkspace } from '../workspace/Interfaces/Workspace';
+import { isWorkspaceMember } from '../workspace/guards/CanAccessWorkspace.guard';
+import { StreamServiceService } from '../video-services/streamService.service';
+
+/** The kinds of item that can be mailed as a link. */
+export type SendableItemType = 'image' | 'video';
+
+const SIGNED_URL_CONFIG = {
+  action: 'read' as const,
+  expires: '03-01-2500',
+};
+
+/** A stored file name: text that cannot step out of the owner's folder. */
+const isStoredFileName = (value: unknown): value is string =>
+  typeof value === 'string' &&
+  value.length > 0 &&
+  !value.split('/').some((part) => part === '..' || part === '');
 
 enum ResStatusEnum {
   error = 'error',
   success = 'success',
 }
 
+const RESET_EMAIL_SENT_MESSAGE =
+  'Password reset instructions sent. Check your email.';
+const RESET_LIMIT_MESSAGE =
+  'Reset password limit exceeded, please try again later.';
+const RESET_EMAIL_FAILED_MESSAGE =
+  'Could not send the e-mail, please try again later.';
+
+/** Firebase's codes for an address with no account. */
+const NO_ACCOUNT_CODES = ['auth/user-not-found', 'auth/email-not-found'];
+
+/**
+ * Identity Toolkit's codes for too many reset requests. firebase-admin maps neither, so they come
+ * as `auth/internal-error` with the server's code in the message.
+ */
+const RESET_LIMIT_SERVER_CODES = [
+  'RESET_PASSWORD_EXCEED_LIMIT',
+  'TOO_MANY_ATTEMPTS_TRY_LATER',
+];
+
+/** The error's code (a Firebase string or a Postmark number), for the log. */
+const errorCodeOf = (error: unknown): string => {
+  const code = (error as { code?: unknown } | null)?.code;
+  return typeof code === 'string' || typeof code === 'number'
+    ? String(code)
+    : 'unknown';
+};
+
+const isNoAccountError = (error: unknown): boolean =>
+  NO_ACCOUNT_CODES.includes(errorCodeOf(error));
+
+/** The code of a Firebase reset-limit error, or null for any other error. */
+const resetLimitCodeOf = (error: unknown): string | null => {
+  const code = errorCodeOf(error);
+  if (code === 'auth/quota-exceeded') {
+    return code;
+  }
+  if (code !== 'auth/internal-error') {
+    return null;
+  }
+  const message = (error as { message?: unknown }).message;
+  return typeof message === 'string'
+    ? (RESET_LIMIT_SERVER_CODES.find((serverCode) =>
+        message.includes(serverCode),
+      ) ?? null)
+    : null;
+};
+
 @Injectable()
 export class EmailService {
+  private readonly logger = new Logger(EmailService.name);
+
   constructor(
     private readonly firebaseClient: FirebaseClient,
     private readonly configService: ConfigService,
+    private readonly streamService: StreamServiceService,
   ) {}
 
   async sendWelcomeEmail({ email }: { email: string }): Promise<any> {
@@ -56,26 +122,70 @@ export class EmailService {
     }
   }
 
+  /**
+   * Mails a password reset link. An address with no account gets the same answer as a real send
+   * and no mail, so the form does not tell anyone which addresses have accounts. Each other failure
+   * gets its own answer, and the log names its code, never the address.
+   */
   async sendResetPasswordEmail(email: string): Promise<IDataResponse> {
+    const sent: IDataResponse = {
+      status: ResStatusEnum.success,
+      message: RESET_EMAIL_SENT_MESSAGE,
+      error: null,
+      data: null,
+    };
+
+    let user: UserRecord;
     try {
-      const auth = admin.auth();
+      user = await admin.auth().getUserByEmail(email);
+    } catch (error) {
+      if (isNoAccountError(error)) {
+        return sent;
+      }
+      return this.resetEmailNotSent(
+        'look-up',
+        errorCodeOf(error),
+        RESET_EMAIL_FAILED_MESSAGE,
+      );
+    }
+
+    if (user?.providerData[0]?.providerId === 'google.com') {
+      return {
+        status: ResStatusEnum.error,
+        message: 'You cannot change Google account password.',
+        error: null,
+        data: null,
+      };
+    }
+
+    let originalLink: string;
+    try {
+      originalLink = await getAuth().generatePasswordResetLink(email);
+    } catch (error) {
+      if (isNoAccountError(error)) {
+        return sent;
+      }
+      const limitCode = resetLimitCodeOf(error);
+      return limitCode
+        ? this.resetEmailNotSent('reset link', limitCode, RESET_LIMIT_MESSAGE)
+        : this.resetEmailNotSent(
+            'reset link',
+            errorCodeOf(error),
+            RESET_EMAIL_FAILED_MESSAGE,
+          );
+    }
+
+    const indexOfLink = originalLink.indexOf('oobCode');
+    const customLink = originalLink.slice(indexOfLink);
+
+    const resetLink =
+      this.configService.get<string>('WEBSITE_URL') +
+      `/auth/new-password?${customLink}`;
+
+    try {
       const client = new postmark.ServerClient(
         this.configService.get<string>('POSTMARK_CLIENT_TOKEN'),
       );
-      const user = await auth.getUserByEmail(email);
-
-      if (user?.providerData[0]?.providerId === 'google.com') {
-        throw { message: 'You cannot change Google account password.' };
-      }
-
-      const originalLink = await getAuth().generatePasswordResetLink(email);
-      const indexOfLink = originalLink.indexOf('oobCode');
-      const customLink = originalLink.slice(indexOfLink);
-
-      const resetLink =
-        this.configService.get<string>('WEBSITE_URL') +
-        `/auth/new-password?${customLink}`;
-
       await client.sendEmailWithTemplate({
         From: this.configService.get<string>('POSTMARK_SENDER_EMAIL'),
         To: email,
@@ -84,21 +194,30 @@ export class EmailService {
           reset_url: resetLink,
         },
       });
-
-      return {
-        status: ResStatusEnum.success,
-        message: 'Password reset instructions sent. Check your email.',
-        error: null,
-        data: null,
-      };
     } catch (error) {
-      return {
-        status: ResStatusEnum.error,
-        message: 'Reset password limit exceeded, please try again later.',
-        error: null,
-        data: null,
-      };
+      return this.resetEmailNotSent(
+        'send',
+        errorCodeOf(error),
+        RESET_EMAIL_FAILED_MESSAGE,
+      );
     }
+
+    return sent;
+  }
+
+  /** Logs why a reset e-mail was not sent (the step and the error code) and answers `message`. */
+  private resetEmailNotSent(
+    step: string,
+    code: string,
+    message: string,
+  ): IDataResponse {
+    this.logger.warn(`Password reset e-mail not sent (${step}): ${code}`);
+    return {
+      status: ResStatusEnum.error,
+      message,
+      error: null,
+      data: null,
+    };
   }
 
   async verifyCode(oobCode: string): Promise<IDataResponse> {
@@ -147,6 +266,105 @@ export class EmailService {
     }
   }
 
+  /**
+   * The links of a shared item for the mail, read from the item itself, or null when `itemLink` is
+   * not a share record of `uid` (or its item is gone or in the trash). Nothing a caller sends
+   * decides what the mail links to. The links are signed with the same long expiry the owner's own
+   * lists use, so the mail keeps working after the day a shared-page link lasts.
+   */
+  async resolveSharedItem(
+    uid: string,
+    itemType: SendableItemType,
+    itemLink: string,
+  ): Promise<{ itemPublicLink: string; templateUrl: string | false } | null> {
+    if (
+      typeof uid !== 'string' ||
+      !is_id(uid) ||
+      typeof itemLink !== 'string' ||
+      !is_id(itemLink)
+    ) {
+      return null;
+    }
+
+    const db = admin.database();
+    const isImage = itemType === 'image';
+    const sharedSnap = await db
+      .ref(`${isImage ? 'shared' : 'sharedVideos'}/${itemLink}`)
+      .get();
+    const shared = sharedSnap.val();
+    const itemId = shared?.[isImage ? 'imageId' : 'videoId'];
+
+    if (
+      !shared ||
+      shared.uid !== uid ||
+      typeof itemId !== 'string' ||
+      !is_id(itemId)
+    ) {
+      return null;
+    }
+
+    const item = (
+      await db
+        .ref(`users/${uid}/${isImage ? 'screenshots' : 'videos'}/${itemId}`)
+        .get()
+    ).val();
+
+    if (!item || item.trash) {
+      return null;
+    }
+
+    const bucket = admin.storage().bucket();
+    const sign = async (path: string): Promise<string> =>
+      (await bucket.file(path).getSignedUrl(SIGNED_URL_CONFIG))[0];
+
+    if (isImage) {
+      return isStoredFileName(item.refName)
+        ? {
+            itemPublicLink: await sign(
+              `users/${uid}/screenshots/${item.refName}`,
+            ),
+            templateUrl: false,
+          }
+        : null;
+    }
+
+    // The URLs saved with a streamed video are written by its owner (the save route stores what
+    // the client sends), so they are never mailed. The links are asked of the streaming provider
+    // for the saved asset id, which must name an asset the provider knows.
+    const streamData = item.streamData;
+
+    if (streamData) {
+      const { assetId, serviceType } = streamData;
+
+      if (typeof assetId !== 'string' || !is_id(assetId)) {
+        return null;
+      }
+
+      const links = await this.streamService.getStreamLinks(
+        assetId,
+        serviceType,
+      );
+
+      return links?.playbackUrl
+        ? {
+            itemPublicLink: links.playbackUrl,
+            templateUrl: links.thumbnailUrl || false,
+          }
+        : null;
+    }
+
+    if (!isStoredFileName(item.refName)) {
+      return null;
+    }
+
+    return {
+      itemPublicLink: await sign(`users/${uid}/videos/${item.refName}`),
+      templateUrl: isStoredFileName(item.posterRef)
+        ? await sign(`users/${uid}/videoPosters/${item.posterRef}`)
+        : false,
+    };
+  }
+
   async sendItems({
     emails,
     itemLink,
@@ -158,7 +376,7 @@ export class EmailService {
   }: {
     emails: string[];
     itemLink: string;
-    itemType: ItemType;
+    itemType: SendableItemType;
     itemPublicLink: string;
     message: string | undefined;
     userDisplayName: string | null;
@@ -216,14 +434,58 @@ export class EmailService {
     }
   }
 
+  /**
+   * The workspace of the invite `inviteId`, or null when the invite or its workspace is missing,
+   * or when `uid` is neither the admin nor a member of that workspace. Only someone in a workspace
+   * may mail its invite, and the workspace name in the mail is read from the workspace itself.
+   */
+  async resolveInviteWorkspace(
+    uid: string,
+    inviteId: string,
+  ): Promise<{ workspaceId: string; workspaceName: string } | null> {
+    // The invite id goes straight into a database path, so only plain ids may reach it.
+    if (
+      typeof uid !== 'string' ||
+      !uid ||
+      typeof inviteId !== 'string' ||
+      !is_id(inviteId)
+    ) {
+      return null;
+    }
+
+    const db = admin.database();
+    const invite: IWorkspaceInvite | null = (
+      await db.ref(`workspaceInvites/${inviteId}`).get()
+    ).val();
+    const workspaceId = invite?.workspaceId;
+
+    // A missing workspace has no admin and no members, so it fails the membership check too.
+    if (
+      typeof workspaceId !== 'string' ||
+      !is_id(workspaceId) ||
+      !(await isWorkspaceMember(uid, workspaceId))
+    ) {
+      return null;
+    }
+
+    const name = (await db.ref(`workspaces/${workspaceId}/name`).get()).val();
+
+    return {
+      workspaceId,
+      workspaceName: typeof name === 'string' ? name : '',
+    };
+  }
+
   async sendWorkspaceInviteLink({
     emails,
     inviteId,
     inviterDisplayName,
+    workspaceName,
   }: {
     emails: string[];
     inviteId: string;
     inviterDisplayName: string;
+    workspaceName: string;
   }) {
     try {
       const client = new postmark.ServerClient(
@@ -232,8 +494,6 @@ export class EmailService {
       const inviteLink =
         this.configService.get<string>('WEBSITE_URL') +
         `/workspace/invite/${inviteId}`;
-
-      const workspaceName = await this.getWorkspaceName(inviteId);
 
       const templates: postmark.TemplatedMessage[] = [];
       emails.forEach(async (email) => {
@@ -262,21 +522,5 @@ export class EmailService {
       console.log(e.message);
       return sendError('Could not send email.', e.message);
     }
-  }
-
-  // Helpers
-  async getWorkspaceName(inviteId: string) {
-    const db = admin.database();
-    const workspaceInviteRef = db.ref(`workspaceInvites/${inviteId}`);
-    const workspaceInviteData: IWorkspaceInvite = (
-      await workspaceInviteRef.get()
-    ).val();
-    const workspaceRef = db.ref(
-      `workspaces/${workspaceInviteData.workspaceId}`,
-    );
-    const workspaceData: IWorkspace = (await workspaceRef.get()).val();
-    const workspaceName = workspaceData?.name;
-
-    return workspaceName ? workspaceName : '';
   }
 }

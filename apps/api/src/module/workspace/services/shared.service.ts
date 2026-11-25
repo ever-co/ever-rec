@@ -9,17 +9,10 @@ import {
   IDbWorkspaceVideoData,
 } from 'src/module/workspace/Interfaces/Files';
 import { IWorkspaceFolder } from 'src/module/workspace/Interfaces/Folders';
-import * as admin from 'firebase-admin';
 import { PermissionAccessEnum } from 'src/module/workspace/Interfaces/Workspace';
-import {
-  dbEndpoints,
-  PermissionCollectionType,
-} from 'src/services/shared/shared.service';
-import {
-  parseCollectionToArray,
-  parseCollectionToIdValueObj,
-} from 'src/services/utils/helpers';
+import { PermissionCollectionType } from 'src/services/shared/shared.service';
 import { sendError, sendResponse } from 'src/services/utils/sendResponse';
+import { changeWorkspaceCollection } from './change-workspace-collection';
 
 @Injectable()
 export class WorkspaceSharedService {
@@ -38,29 +31,40 @@ export class WorkspaceSharedService {
     } | null>
   > {
     try {
-      const db = admin.database();
-      const itemsRef = db.ref(
-        `workspaces/${workspaceId}/${permissionItemType}`,
-      );
-      const itemsSnap = await itemsRef.get();
-      const itemsVal: IWorkspaceFolder[] = parseCollectionToArray(
-        itemsSnap.val(),
-      );
+      // One transaction on the whole list, which the folder writers share: a write of a list read
+      // earlier would undo an item count, a folder or another permission changed meanwhile.
+      const result = await changeWorkspaceCollection<
+        IDbWorkspaceImageData | IDbWorkspaceVideoData | IWorkspaceFolder
+      >(workspaceId, permissionItemType, (itemsVal) => {
+        if (!itemsVal.some((x) => x.id === itemId)) {
+          return { error: 'No such item' };
+        }
 
-      const { collection, item } =
-        permissionType === 'member'
-          ? await this.updateMemberPermissions(
-              itemsVal,
-              itemId,
-              id,
-              write,
-              read,
-            )
-          : await this.updateTeamPermissions(itemsVal, itemId, id, write, read);
+        const { collection } =
+          permissionType === 'member'
+            ? this.updateMemberPermissions(
+                itemsVal as PermissionCollectionType,
+                itemId,
+                id,
+                write,
+                read,
+              )
+            : this.updateTeamPermissions(
+                itemsVal as PermissionCollectionType,
+                itemId,
+                id,
+                write,
+                read,
+              );
 
-      const reversedItems = parseCollectionToIdValueObj(collection);
+        return { items: collection };
+      });
 
-      itemsRef.set(reversedItems);
+      if (result.ok === false) {
+        return sendError('Error while trying to update file permissions');
+      }
+
+      const item = result.items.find((x) => x.id === itemId);
 
       return sendResponse<{
         item: IDbWorkspaceImageData | IDbWorkspaceVideoData | IWorkspaceFolder;
@@ -102,16 +106,17 @@ export class WorkspaceSharedService {
   };
 
   // TODO: maybe create shared workspace service and start extracting there these shared workspace services.
-  async updateMemberPermissions(
+  // Synchronous: it runs inside the transaction of `updatePermissions`.
+  updateMemberPermissions(
     collectionProp: PermissionCollectionType,
     itemId: string | false,
     uid: string,
     write: boolean,
     read: boolean,
-  ): Promise<{
+  ): {
     collection: PermissionCollectionType;
     item: IDbWorkspaceImageData | IDbWorkspaceVideoData | IWorkspaceFolder;
-  }> {
+  } {
     const { collection, itemIndex, access } =
       this.initializePermissionsMetadata(write, itemId, collectionProp);
 
@@ -156,16 +161,17 @@ export class WorkspaceSharedService {
     return { collection, item: collection[itemIndex] };
   }
 
-  async updateTeamPermissions(
+  // Synchronous: it runs inside the transaction of `updatePermissions`.
+  updateTeamPermissions(
     collectionProp: PermissionCollectionType,
     itemId: string | false,
     teamId: string,
     write: boolean,
     read: boolean,
-  ): Promise<{
+  ): {
     collection: PermissionCollectionType;
     item: IDbWorkspaceImageData | IDbWorkspaceVideoData | IWorkspaceFolder;
-  }> {
+  } {
     const { collection, itemIndex, access } =
       this.initializePermissionsMetadata(write, itemId, collectionProp);
 

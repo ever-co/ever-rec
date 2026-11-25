@@ -8,6 +8,7 @@ import {
   initialChapters,
 } from '@/content/panel/hooks/useVideoChapters';
 import {
+  CHAPTER_MAX_CHAPTERS,
   CHAPTER_MIN_REQUIRED_SECONDS,
   CHAPTER_MIN_VIDEO_LENGTH,
 } from '@/content/utilities/misc/appConstConfig';
@@ -193,6 +194,10 @@ const VideoChapters: FC<IVideoChaptersProps> = ({
     setHasChangesHandler,
   ]);
 
+  // The API refuses more than CHAPTER_MAX_CHAPTERS chapters per video.
+  const addDisabled =
+    addChapterDisabled || chapters.length >= CHAPTER_MAX_CHAPTERS;
+
   const chapterElements = chapters.map((chapter, index: number) => {
     const isChapterActive =
       chapterActive !== null && chapterActive.id === chapter.id;
@@ -256,12 +261,12 @@ const VideoChapters: FC<IVideoChaptersProps> = ({
       >
         <button
           onClick={() =>
-            !addChapterDisabled &&
+            !addDisabled &&
             chapterAdd(videoTime.timestamp, videoTime.timestampSeconds)
           }
           className={classNames(
             s.ChapterButton,
-            addChapterDisabled && s.ChapterButtonDisabled,
+            addDisabled && s.ChapterButtonDisabled,
           )}
         >
           {t('page.video.addChapter')}{' '}

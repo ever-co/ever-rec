@@ -201,7 +201,8 @@ export class WorkspaceUtilitiesService {
       stage,
       originalImage,
     } = props;
-    const id = nanoid(24);
+    // The caller's id: a copy from personal storage is stored under a file name made from it.
+    const id = props.id || nanoid(24);
     const newImageRef = db.ref(`workspaces/${workspaceId}/screenshots/${id}`);
 
     const newImage: IDbWorkspaceImageData = {

@@ -157,7 +157,14 @@
       cursor: pointer;
     }
 
-    .rec-container:hover {
+    .main-buttons [role='button']:focus-visible {
+      outline: 2px solid #5b4dbe;
+      outline-offset: 2px;
+    }
+
+    // :focus-within reveals the pen tools for keyboard users, who never hover.
+    .rec-container:hover,
+    .rec-container:focus-within {
       width: 350px;
       .penButton,
       .eraserButton,
@@ -204,6 +211,15 @@
         border-radius: 200px;
       }
 
+      input:focus-visible::-webkit-slider-thumb {
+        box-shadow: 0 0 0 2px #fff, 0 0 0 4px #5b4dbe;
+      }
+
+      // Firefox. A rule of its own: one unknown pseudo-element drops a whole list.
+      input:focus-visible::-moz-range-thumb {
+        box-shadow: 0 0 0 2px #fff, 0 0 0 4px #5b4dbe;
+      }
+
       img {
         position: absolute;
         z-index: 99999999;
@@ -216,7 +232,9 @@
       opacity: 1;
     }
 
-    .show-slider {
+    // show-slider follows the mouse, show-slider-keyboard keyboard focus.
+    .show-slider,
+    .show-slider-keyboard {
       visibility: visible;
       opacity: 1;
     }

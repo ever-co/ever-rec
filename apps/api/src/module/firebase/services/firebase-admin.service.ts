@@ -132,10 +132,16 @@ export class FirebaseAdminService {
   }
 
   /**
-   * Verify ID token
+   * Verify ID token. Without `checkRevoked` only the signature and the expiry are checked, so the
+   * token of a deleted, disabled or signed-out account still passes; with it, the account is looked
+   * up too and such a token is refused (`auth/user-not-found`, `auth/user-disabled`,
+   * `auth/id-token-revoked`).
    */
-  async verifyIdToken(idToken: string): Promise<DecodedIdToken> {
-    return this.auth.verifyIdToken(idToken);
+  async verifyIdToken(
+    idToken: string,
+    checkRevoked = false,
+  ): Promise<DecodedIdToken> {
+    return this.auth.verifyIdToken(idToken, checkRevoked);
   }
 
   /**

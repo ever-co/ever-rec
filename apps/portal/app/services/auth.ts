@@ -39,6 +39,8 @@ import {
 } from './api/email';
 import { errorMessage, successMessage } from './helpers/toastMessages';
 import { iDataResponseParser } from './helpers/iDataResponseParser';
+import { exchangeEverIdCodeAPI } from './api/everId';
+import { clearEverIdBinding, readEverIdBinding } from './everIdBinding';
 
 const processUserData = (userData: IUserData | null): IUser | null => {
   if (userData?.idToken && userData?.refreshToken) {
@@ -156,6 +158,38 @@ export const googleAuthorization = async (
   return response;
 };
 
+/**
+ * Completes an Ever ID sign-in: exchanges the one-time code from the sign-in redirect for the
+ * session (with the value this tab stored when it started the sign-in), then stores it exactly
+ * like a Google sign-in (cookies, extension, welcome e-mail).
+ */
+export const everIdAuthorization = async (
+  code: string,
+): Promise<IDataResponse> => {
+  const response: IDataResponse = await exchangeEverIdCodeAPI(
+    code,
+    readEverIdBinding(),
+  );
+  clearEverIdBinding();
+
+  if (response.status == 'success') {
+    const userData = response.data as IUserData;
+    updateExtensionAuthData(userData);
+    processUserData(userData);
+    handleResponse(response);
+
+    if (response.data.isNewUser) {
+      try {
+        await sendWelcomeEmailAPI(userData.email);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  }
+
+  return response;
+};
+
 export const signOut = (skipMessage?: boolean) => {
   removeCookies(); // removes tokens
   localStorage.removeItem('driveUser');
@@ -262,7 +296,18 @@ export const changeUserPassword = async (
   oldPassword: string,
   newPassword: string,
 ) => {
-  return await changeUserPasswordAPI(email, oldPassword, newPassword);
+  const response = await changeUserPasswordAPI(email, oldPassword, newPassword);
+
+  // The change revokes every session of the account, this one too. Keep the
+  // tokens of the session the API opened after that, as a sign-in does.
+  const idToken = response?.data?.idToken;
+  const refreshToken = response?.data?.refreshToken;
+  if (response?.status === 'success' && idToken && refreshToken) {
+    storeUserTokens({ idToken, refreshToken });
+    updateExtensionAuthData({ idToken, refreshToken });
+  }
+
+  return response;
 };
 
 export const deleteUser = async (): Promise<void> => {

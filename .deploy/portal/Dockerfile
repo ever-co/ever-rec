@@ -8,6 +8,9 @@ ARG NEXT_PUBLIC_API_BASE_URL
 ARG NEXT_PUBLIC_WEBSITE_URL
 ARG NEXT_PUBLIC_STATIC_FILES_URL=${NEXT_PUBLIC_API_BASE_URL}
 ARG NEXT_PUBLIC_SENTRY_DSN
+# Ever Platform connection tabs (Settings -> Ever Platform): shown only when built with `true` and the
+# API has the connection loaded. No default: unset keeps them hidden.
+ARG NEXT_PUBLIC_EVER_CONNECT_ENABLED
 ARG SENTRY_ORG=ever-co
 
 FROM node:26.12.1-alpine AS base
@@ -39,6 +42,9 @@ WORKDIR /app
 
 ENV NODE_ENV=build
 ENV NEXT_BUILD_OUTPUT=standalone
+# canvas compiles with node-gyp (no musl prebuild); build it against this image's own Node headers
+# (/usr/local/include/node) instead of downloading them from nodejs.org on every build (failed twice on 10-24/25).
+ENV npm_config_nodedir=/usr/local
 
 # Install python3
 RUN apk add --no-cache python3 pkgconfig build-base
@@ -53,6 +59,27 @@ RUN cd apps/portal && pnpm install --frozen-lockfile
 
 # Build the project
 COPY --from=builder /app/out/full/ .
+# Next.js inlines NEXT_PUBLIC_* when it builds, so every one of them must be set HERE, in the stage that
+# runs `pnpm build`. The ARGs at the top of this file are global: a stage sees one only after it declares
+# it again, so before this block the browser bundle was built with an empty API address.
+ARG NEXT_PUBLIC_EXTENSION_NAME
+ARG NEXT_PUBLIC_EXTENSION_ID
+ARG NEXT_PUBLIC_GOOGLE_CLIENT_ID
+ARG NEXT_PUBLIC_EXTENSION_REDIRECT_URL
+ARG NEXT_PUBLIC_API_BASE_URL
+ARG NEXT_PUBLIC_WEBSITE_URL
+ARG NEXT_PUBLIC_STATIC_FILES_URL
+ARG NEXT_PUBLIC_SENTRY_DSN
+ARG NEXT_PUBLIC_EVER_CONNECT_ENABLED
+ENV NEXT_PUBLIC_EXTENSION_NAME=${NEXT_PUBLIC_EXTENSION_NAME} \
+    NEXT_PUBLIC_EXTENSION_ID=${NEXT_PUBLIC_EXTENSION_ID} \
+    NEXT_PUBLIC_GOOGLE_CLIENT_ID=${NEXT_PUBLIC_GOOGLE_CLIENT_ID} \
+    NEXT_PUBLIC_EXTENSION_REDIRECT_URL=${NEXT_PUBLIC_EXTENSION_REDIRECT_URL} \
+    NEXT_PUBLIC_API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL} \
+    NEXT_PUBLIC_WEBSITE_URL=${NEXT_PUBLIC_WEBSITE_URL} \
+    NEXT_PUBLIC_STATIC_FILES_URL=${NEXT_PUBLIC_STATIC_FILES_URL} \
+    NEXT_PUBLIC_SENTRY_DSN=${NEXT_PUBLIC_SENTRY_DSN} \
+    NEXT_PUBLIC_EVER_CONNECT_ENABLED=${NEXT_PUBLIC_EVER_CONNECT_ENABLED}
 # Build the apps
 RUN pnpm build --filter=ever-rec-portal...
 # Prune dev deps
@@ -68,6 +95,17 @@ RUN apk add --no-cache cairo giflib libjpeg-turbo pango pixman
 
 USER node
 WORKDIR /app
+
+# Same values at run time (server-side code reads process.env); a stage needs its own ARG lines.
+ARG NEXT_PUBLIC_EXTENSION_NAME
+ARG NEXT_PUBLIC_EXTENSION_ID
+ARG NEXT_PUBLIC_GOOGLE_CLIENT_ID
+ARG NEXT_PUBLIC_EXTENSION_REDIRECT_URL
+ARG NEXT_PUBLIC_API_BASE_URL
+ARG NEXT_PUBLIC_WEBSITE_URL
+ARG NEXT_PUBLIC_STATIC_FILES_URL
+ARG NEXT_PUBLIC_SENTRY_DSN
+ARG SENTRY_ORG
 
 ENV NODE_ENV=production
 ENV NEXT_PUBLIC_EXTENSION_NAME=${NEXT_PUBLIC_EXTENSION_NAME}

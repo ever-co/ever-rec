@@ -1,11 +1,14 @@
-import { ConflictException, Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { IDataResponse } from '../../../interfaces/_types';
 import { sendError, sendResponse } from '../../../services/utils/sendResponse';
-import { FirebaseAdminService } from '../../firebase/services/firebase-admin.service';
 import { FirebaseAuthService } from '../../firebase/services/firebase-auth.service';
 import { UserService } from './user.service';
 import { PASSWORD_RESET_EMAIL_STRATEGY, PasswordResetEmailStrategy } from './password-reset/password-reset.strategy';
 import { ResStatusEnum } from '../../../enums/ResStatusEnum';
+
+/** Same answer for every address state, so the route reveals nothing. */
+const GENERIC_VERIFICATION_MESSAGE =
+  'If this address still needs verification, a verification email has been sent';
 
 @Injectable()
 export class EmailService {
@@ -15,7 +18,6 @@ export class EmailService {
     @Inject(PASSWORD_RESET_EMAIL_STRATEGY)
     private readonly passwordResetStrategy: PasswordResetEmailStrategy,
     private readonly firebaseAuthService: FirebaseAuthService,
-    private readonly firebaseAdminService: FirebaseAdminService,
     private readonly userService: UserService,
   ) { }
 
@@ -72,38 +74,48 @@ export class EmailService {
   }
 
   /**
-   * Generate email verification link
+   * Send the verification mail to the signed-in caller's own address.
+   *
+   * The Firebase action link (it carries the one-time code that marks the
+   * address verified) is never returned to the client: it only travels in the
+   * mail, so whoever asks must be able to read that mailbox. The answer is the
+   * same whether or not the address is already verified.
+   *
+   * The caller's email is checked against the session by `EmailOwnershipGuard`
+   * before this runs.
    */
-  async generateEmailVerificationLink(email: string): Promise<IDataResponse> {
+  private async sendOwnVerificationEmail(
+    email: string,
+    idToken: string,
+  ): Promise<IDataResponse> {
     try {
-      this.logger.log(`Generating email verification link for: ${email}`);
-
       const user = await this.userService.getUserByEmail(email);
 
-      if (user.emailVerified) {
-        throw new ConflictException('Email already verified');
+      if (!user.emailVerified) {
+        const result =
+          await this.firebaseAuthService.sendVerificationEmail(idToken);
+
+        if (!result.success) {
+          this.logger.error('Failed to send verification email', result.error);
+          return sendError('Failed to send verification email');
+        }
       }
 
-      const link =
-        await this.firebaseAdminService.generateEmailVerificationLink(email);
-
-      this.logger.log(
-        `Email verification link generated successfully for: ${email}`,
-      );
-
-      return sendResponse({ link });
+      return sendResponse({ message: GENERIC_VERIFICATION_MESSAGE });
     } catch (error: any) {
-      this.logger.error(
-        `Failed to generate email verification link for: ${email}`,
-        error,
-      );
-
-      if (error instanceof ConflictException) {
-        throw error;
-      }
-
-      return sendError('Failed to generate verification link', error);
+      this.logger.error('Failed to send verification email', error);
+      return sendError('Failed to send verification email', error);
     }
+  }
+
+  /**
+   * Send the verification mail (formerly returned the verification link).
+   */
+  async generateEmailVerificationLink(
+    email: string,
+    idToken: string,
+  ): Promise<IDataResponse> {
+    return this.sendOwnVerificationEmail(email, idToken);
   }
 
   /**
@@ -147,37 +159,10 @@ export class EmailService {
   /**
    * Resend verification email
    */
-  async resendVerificationEmail(email: string): Promise<IDataResponse> {
-    try {
-      this.logger.log(`Resending verification email to: ${email}`);
-
-      // Check if email is already verified
-      const { data: isVerified } = await this.verifyEmail(email);
-      if (isVerified) {
-        throw new ConflictException('Email is already verified');
-      }
-
-      // Generate new verification link
-      const link =
-        await this.firebaseAdminService.generateEmailVerificationLink(email);
-
-      this.logger.log(`Verification email resent successfully to: ${email}`);
-
-      return sendResponse({
-        message: 'Verification email resent successfully',
-        link,
-      });
-    } catch (error: any) {
-      this.logger.error(
-        `Failed to resend verification email to: ${email}`,
-        error,
-      );
-
-      if (error instanceof ConflictException) {
-        throw error;
-      }
-
-      return sendError('Failed to resend verification email', error);
-    }
+  async resendVerificationEmail(
+    email: string,
+    idToken: string,
+  ): Promise<IDataResponse> {
+    return this.sendOwnVerificationEmail(email, idToken);
   }
 }

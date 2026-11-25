@@ -178,17 +178,8 @@ export const updateItemDataWorkspaceAPI = async (
   data: IDbWorkspaceVideoData | IDbWorkspaceImageData,
   itemType: ItemType,
 ): Promise<IDataResponse<IWorkspaceVideo | null>> => {
-  const {
-    id,
-    title,
-    parentId,
-    trash,
-    likes,
-    views,
-    stage,
-    originalImage,
-    markers,
-  } = data;
+  const { id, title, parentId, trash, views, stage, originalImage, markers } =
+    data;
 
   return api.put(
     `/api/v1/workspace/${workspaceId}/files/${itemType}/${id}/single-data`,
@@ -196,7 +187,6 @@ export const updateItemDataWorkspaceAPI = async (
       title,
       parentId,
       trash,
-      likes,
       views,
       stage,
       originalImage,
@@ -209,9 +199,12 @@ export const saveOriginalWSImageAPI = async (
   fullFileName: string,
   workspaceId: string,
 ): Promise<string> => {
-  return api.post(`/api/v1/workspace/${workspaceId}/save-original`, {
-    fullFileName,
-  });
+  // The API declares this route as `workspace/:workspaceId/files/:workspaceId/save-original`
+  // (the same param name twice), so the handler reads the workspace id from the last segment.
+  return api.post(
+    `/api/v1/workspace/${workspaceId}/files/${workspaceId}/save-original`,
+    { fullFileName },
+  );
 };
 
 export const deleteWorkspaceImageAPI = async (

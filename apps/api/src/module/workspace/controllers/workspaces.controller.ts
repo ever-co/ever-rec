@@ -41,6 +41,7 @@ export class WorkspacesController {
 
   @Get('single/:workspaceId')
   @CanAccessFolder(PermissionAccessEnum.READ)
+  @UseGuards(CanAccessWorkspaceGuard)
   async getSingleWorkspace(
     @Param('workspaceId', ValidateId) workspaceId: string,
     @Query() { folderId }: GetWorkspaceDto,

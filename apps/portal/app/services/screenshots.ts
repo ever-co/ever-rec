@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import { errorHandler } from './helpers/errors';
+import { errorHandler, requestErrorHandler } from './helpers/errors';
 import IEditorImage, {
   DbImgData,
   IDbFolderData,
@@ -321,7 +321,6 @@ const updateImageData = async ({
   title,
   parentId,
   trash,
-  likes,
   views,
   stage,
   originalImage,
@@ -333,7 +332,6 @@ const updateImageData = async ({
       title,
       parentId,
       trash,
-      likes,
       views,
       stage,
       originalImage as any,
@@ -602,10 +600,15 @@ const sendWhatsAppMessage = async (
   }
 };
 
+// The API answers 400 or 404 when the item cannot be liked (a broken link, a deleted item).
 const likeImage = async (sharedLinkId: string, isWorkspace: boolean) => {
-  const response = await likeImageAPI(sharedLinkId, isWorkspace);
-  const data = iDataResponseParser(response);
-  return data;
+  try {
+    const response = await likeImageAPI(sharedLinkId, isWorkspace);
+    return iDataResponseParser(response);
+  } catch (error: any) {
+    requestErrorHandler(error);
+    return null;
+  }
 };
 
 export {

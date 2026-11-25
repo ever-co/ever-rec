@@ -4,6 +4,7 @@ import { RefreshTokenContext } from './refresh/refresh-token.context';
 import { MergeTokenPolicy } from './policies/merge-token.policy';
 import { FirebaseRefreshStrategy } from './refresh/firebase-refresh.strategy';
 import { FirebaseValidateStrategy } from './refresh/validations/firebase-validate.strategy';
+import { EverIdRefreshStrategy } from './refresh/ever-id-refresh.strategy';
 
 @Injectable()
 export class TokenStrategyChain {
@@ -13,7 +14,8 @@ export class TokenStrategyChain {
   constructor(
     private readonly firebaseRefreshStrategy: FirebaseRefreshStrategy,
     private readonly firebaseValidateStrategy: FirebaseValidateStrategy,
-    private readonly mergeTokenPolicy: MergeTokenPolicy) {
+    private readonly mergeTokenPolicy: MergeTokenPolicy,
+    private readonly everIdRefreshStrategy: EverIdRefreshStrategy) {
     this.refresh = this.firebaseRefreshStrategy;
     this.validate = this.firebaseValidateStrategy;
   }
@@ -21,6 +23,11 @@ export class TokenStrategyChain {
   public async resolveRefresh(refreshToken: string, request: any): Promise<RefreshResponse> {
     if (!refreshToken) {
       throw new BadRequestException('Refresh token is required');
+    }
+    // Sessions opened by an Ever ID sign-in keep one revocable reference (no-op unless configured).
+    const everId = await this.everIdRefreshStrategy.match(refreshToken);
+    if (everId) {
+      return this.everIdRefreshStrategy.refresh(refreshToken, request, everId);
     }
     const context = new RefreshTokenContext(refreshToken, request, this.mergeTokenPolicy);
     return this.refresh.resolve(context);

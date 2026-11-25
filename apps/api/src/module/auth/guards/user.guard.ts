@@ -19,7 +19,8 @@ export class UserGuard implements CanActivate {
   ) {}
 
   async processToken(token: string, request: any): Promise<void> {
-    const user = await getAuth().verifyIdToken(token);
+    // `checkRevoked`: the token of a deleted, disabled or signed-out account gives no user.
+    const user = await getAuth().verifyIdToken(token, true);
 
     request.user = {
       id: user.uid,

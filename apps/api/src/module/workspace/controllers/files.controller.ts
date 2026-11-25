@@ -20,10 +20,23 @@ import { diskStorage } from 'multer';
 import { v4 as uuidv4 } from 'uuid';
 
 import { TMP_PATH } from '../../../enums/tmpPathsEnums';
+import { RemoveUploadInterceptor } from '../../../common/interceptors/remove-upload.interceptor';
 import { WorkspaceFilesService } from '../services/files.service';
 import { CanAccessFolder } from '../decorators/CanAccessFolder.decorator';
+import { CanChangePermissions } from '../decorators/CanChangePermissions.decorator';
 import { PermissionAccessEnum } from '../Interfaces/Workspace';
-import { CanAccessItem } from '../decorators/CanAccessItem.decorator';
+import {
+  CanAccessItem,
+  ItemByFileName,
+  ItemMustExist,
+} from '../decorators/CanAccessItem.decorator';
+import { NamedImageWrite } from '../decorators/NamedImageWrite.decorator';
+import {
+  CHECKED_IMAGE_FILE_NAME,
+  NamedImageWriteInterceptor,
+} from '../interceptors/NamedImageWrite.interceptor';
+import { getPersonalImageFileName } from '../guards/utils';
+import { CanAccessDestinationFolder } from '../decorators/CanAccessDestinationFolder.decorator';
 import { WorkspaceSharedService } from '../services/shared.service';
 import { AuthGuard, IRequestUser } from '../../auth/guards/auth.guard';
 import { CanAccessWorkspaceGuard } from '../guards/CanAccessWorkspace.guard';
@@ -37,6 +50,7 @@ import { DeleteImageDto } from '../dto/files/delete-image.dto';
 import { DeleteVideoDto } from '../dto/files/delete-video.dto';
 import { UpdateFileMemberPermissionsDto } from '../dto/files/update-member-permissions.dto';
 import { ValidateId } from '../pipes/validate-id.pipe';
+import { WorkspaceVideoWriteInterceptor } from '../interceptors/video-write.interceptor';
 
 @Controller('workspace/:workspaceId/files')
 @UseGuards(AuthGuard, CanAccessWorkspaceGuard)
@@ -65,19 +79,28 @@ export class WorkspaceFilesController {
     );
   }
 
+  // The copy is stored under a name of its own (see `moveItemFromPersonalToWorkspace`). The
+  // personal image's file name is still checked as before: refused when it belongs to a workspace
+  // image the caller may not write. A folder id in the query is read by the folder guard.
   @Post('image/add-from-personal')
   @CanAccessFolder(PermissionAccessEnum.WRITE)
+  @NamedImageWrite({ fileName: getPersonalImageFileName, nameOptional: true })
+  @UseInterceptors(NamedImageWriteInterceptor)
   async addImageToWorkspaceFromPersonal(
+    @Req() req,
     @Param('workspaceId', ValidateId) workspaceId: string,
     @User() user: IRequestUser,
     @Query() { itemId, folderId }: MovePersonalItemDto,
   ) {
+    // The personal image's name was read and checked before the handler ran; the copy must use
+    // that same name, or the check would not apply to what is written.
     return this.filesService.moveItemFromPersonalToWorkspace(
       user.id,
       workspaceId,
       itemId,
       'image',
       folderId,
+      req[CHECKED_IMAGE_FILE_NAME] ?? null,
     );
   }
 
@@ -103,6 +126,7 @@ export class WorkspaceFilesController {
   @CanAccessFolder(PermissionAccessEnum.WRITE)
   @UseInterceptors(
     FileInterceptor('file', {
+      limits: { fileSize: 1024 * 1024 * 1024 },
       storage: diskStorage({
         destination: (req, file, callback) => {
           callback(null, TMP_PATH);
@@ -113,6 +137,10 @@ export class WorkspaceFilesController {
         },
       }),
     }),
+    // The upload goes however the request ends, also when the body fails validation (400).
+    RemoveUploadInterceptor,
+    // After the file interceptor: it needs the parsed multipart body.
+    WorkspaceVideoWriteInterceptor,
   )
   async uploadNewVideoFromFile(
     @Param('workspaceId', ValidateId) workspaceId: string,
@@ -130,9 +158,18 @@ export class WorkspaceFilesController {
     );
   }
 
+  // Stores a new image, its thumbnail and its original under `fullFileName`: refused (409) when an
+  // image of the workspace already has that name (`PUT image` replaces a file). The body
+  // (multipart) is only parsed by the file interceptor, so the folder in the body is checked by the
+  // interceptor after it.
   @Post('image')
   @CanAccessFolder(PermissionAccessEnum.WRITE)
-  @UseInterceptors(FileInterceptor('file'))
+  @NamedImageWrite({
+    fileName: (req) => req.body?.fullFileName,
+    checkBodyFolder: true,
+    mustBeNew: true,
+  })
+  @UseInterceptors(FileInterceptor('file'), NamedImageWriteInterceptor)
   async uploadNewImageFromFile(
     @Param('workspaceId', ValidateId) workspaceId: string,
     @Body() updateImage: UploadImageDto,
@@ -150,6 +187,7 @@ export class WorkspaceFilesController {
   }
 
   @CanAccessItem(PermissionAccessEnum.WRITE, 'image')
+  @ItemByFileName()
   @Post(':workspaceId/save-original')
   async saveOriginalWorkspaceImage(
     @Param('workspaceId') workspaceId: string,
@@ -165,30 +203,29 @@ export class WorkspaceFilesController {
   @CanAccessItem(PermissionAccessEnum.WRITE, 'image')
   async deleteImage(
     @Param('workspaceId', ValidateId) workspaceId: string,
-    @Query() { imageId, refName: filename, folderId }: DeleteImageDto,
+    @Query() { imageId }: DeleteImageDto,
   ) {
-    const parentFolderId =
-      folderId === 'false' || folderId === undefined ? false : folderId;
-
-    return await this.filesService.deleteImage(
-      workspaceId,
-      imageId,
-      filename,
-      parentFolderId,
-    );
+    // `refName` and `folderId` in the query are accepted for older clients but not used: the files
+    // to delete are the ones recorded for `imageId`, the image the guard checked, and the folder
+    // counts that lose it are those of the folder it is stored in.
+    return await this.filesService.deleteImage(workspaceId, imageId);
   }
 
   @Delete('video/single')
   @CanAccessItem(PermissionAccessEnum.WRITE, 'video')
   async deleteVideo(
     @Param('workspaceId', ValidateId) workspaceId: string,
-    @Query() { videoId, refName }: DeleteVideoDto,
+    @Query() { videoId }: DeleteVideoDto,
   ) {
-    return await this.filesService.deleteVideo(workspaceId, videoId, refName);
+    // `refName` in the query is accepted for older clients but not used: the files to delete are
+    // the ones recorded for `videoId`, the video the guard checked.
+    return await this.filesService.deleteVideo(workspaceId, videoId);
   }
 
   @Put('image/:imageId/single-data')
   @CanAccessItem(PermissionAccessEnum.WRITE, 'image')
+  @ItemMustExist()
+  @CanAccessDestinationFolder(PermissionAccessEnum.WRITE)
   async updateItemDataImage(
     @Req() req,
     @Param('workspaceId', ValidateId) workspaceId: string,
@@ -202,7 +239,6 @@ export class WorkspaceFilesController {
       imageId,
       body.parentId,
       body.trash,
-      body.likes,
       body.title,
       body.stage,
       body.originalImage,
@@ -212,6 +248,8 @@ export class WorkspaceFilesController {
 
   @Put('video/:videoId/single-data')
   @CanAccessItem(PermissionAccessEnum.WRITE, 'video')
+  @ItemMustExist()
+  @CanAccessDestinationFolder(PermissionAccessEnum.WRITE)
   async updateItemDataVideo(
     @Req() req,
     @Param('workspaceId', ValidateId) workspaceId: string,
@@ -225,14 +263,19 @@ export class WorkspaceFilesController {
       videoId,
       body.parentId,
       body.trash,
-      body.likes,
       body.title,
     );
   }
 
+  // Replaces the file of the image stored under `refName` (or `location`). The image is resolved
+  // from that name only, never from an id in the query, and must exist in this workspace.
   @Put('image')
-  @CanAccessItem(PermissionAccessEnum.WRITE, 'image')
-  @UseInterceptors(FileInterceptor('blob'))
+  @NamedImageWrite({
+    fileName: (req) =>
+      req.body?.refName ? req.body.refName : req.body?.location,
+    mustExist: true,
+  })
+  @UseInterceptors(FileInterceptor('blob'), NamedImageWriteInterceptor)
   async updateWorkspaceImage(
     @Param('workspaceId', ValidateId) workspaceId: string,
     @Body() body: UpdateImageDto,
@@ -253,7 +296,7 @@ export class WorkspaceFilesController {
   }
 
   @Post(':itemId/permissions')
-  @CanAccessFolder(PermissionAccessEnum.ADMIN)
+  @CanChangePermissions('item')
   async updateFilePermissions(
     @Param('workspaceId', ValidateId) workspaceId: string,
     @Param('itemId', ValidateId) itemId: string,

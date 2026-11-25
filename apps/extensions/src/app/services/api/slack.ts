@@ -19,7 +19,8 @@ const slackPostMessage = async (
 };
 
 const slackLoginUrl = (): Promise<any> => {
-    return api.get(`${API_PREFIX}/login-url`);
+    // The API sets a cookie that ties the connection to this browser.
+    return api.get(`${API_PREFIX}/login-url`, { withCredentials: true });
 };
 
 const slackDisconnect = (): Promise<any> => {

@@ -17,8 +17,12 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
-import { UniqueViewsSharedService } from 'src/services/shared/uniqueViews.shared.service';
-import { IUniqueView } from 'src/services/utils/models/shared.model';
+import {
+  IViewInfo,
+  UniqueViewsSharedService,
+} from 'src/services/shared/uniqueViews.shared.service';
+import { getClientIp } from 'src/services/utils/clientIp';
+import { parseBooleanFlag } from 'src/services/utils/parseBooleanFlag';
 import { sendResponse } from 'src/services/utils/sendResponse';
 import { IDataResponse } from '../../interfaces/_types';
 import IEditorImage, { IDbFolder } from '../../interfaces/IEditorImage';
@@ -30,10 +34,12 @@ import {
 import { RefreshToken } from '../auth/decorators/refresh-token.decorator';
 import { User } from '../auth/decorators/user.decorator';
 import { AuthGuard, IRequestUser } from '../auth/guards/auth.guard';
+import { OptionalAuthGuard } from '../auth/guards/optional-auth.guard';
 import { UserGuard } from '../auth/guards/user.guard';
 import { ImageService } from './image.service';
 import { ContextUploader } from './uploader/context.uploader';
 import { IImagePayload } from './view.models/image.model';
+import { ValidateId } from '../workspace/pipes/validate-id.pipe';
 
 // TODO: add return type on all endpoints
 
@@ -45,7 +51,7 @@ export class ImageController {
     private readonly foldersSharedService: FoldersSharedService,
     private readonly uniqueViewsSharedService: UniqueViewsSharedService,
     private readonly contextUploader: ContextUploader,
-  ) { }
+  ) {}
 
   // This one is for deleting shared Images AND videos from user when he delets account.
   // Probably can be in a better place but for now will be here.
@@ -58,14 +64,18 @@ export class ImageController {
 
   @UseGuards(AuthGuard)
   @Get('share/:id')
-  async share(@Param('id') id: string, @Req() request): Promise<string> {
+  async share(
+    @Param('id', ValidateId) id: string,
+    @Req() request,
+  ): Promise<string> {
+    await this.imageService.assertOwnImageExists(request.user.id, id);
     return await this.imageService.share(request.user.id, id);
   }
 
   @UseGuards(AuthGuard)
   @Delete('deleteLink/:link')
   async delete(
-    @Param('link') link: string,
+    @Param('link', ValidateId) link: string,
     @Req() request,
   ): Promise<void | { message: string }> {
     try {
@@ -77,14 +87,17 @@ export class ImageController {
 
   @UseGuards(AuthGuard)
   @Delete('deleteLinkById/:id')
-  async deleteById(@Param('id') id: string, @Req() request): Promise<void> {
+  async deleteById(
+    @Param('id', ValidateId) id: string,
+    @Req() request,
+  ): Promise<void> {
     await this.imageService.deleteSharedImageByImageId(request.user.id, id);
   }
 
   @UseGuards(AuthGuard)
   @Get('/api/:link')
   async getImageREST(
-    @Param('link') link: string,
+    @Param('link', ValidateId) link: string,
     @Req() request,
     @Res() res,
   ): Promise<queryReturnType> {
@@ -102,9 +115,9 @@ export class ImageController {
   @UseGuards(AuthGuard)
   @Delete('/user/:ownerId/:link/comments/:commentId')
   async deleteComment(
-    @Param('link') link: string,
-    @Param('commentId') commentId: string,
-    @Param('ownerId') ownerId: string,
+    @Param('link', ValidateId) link: string,
+    @Param('commentId', ValidateId) commentId: string,
+    @Param('ownerId', ValidateId) ownerId: string,
     @Query('limit') limit: string,
     @Query('isPublic') isPublicQuery: string,
     @Req() request,
@@ -131,7 +144,7 @@ export class ImageController {
   @UseGuards(AuthGuard)
   @Post('/:userId/comment')
   async postNewComment(
-    @Param('userId') userId: string,
+    @Param('userId', ValidateId) userId: string,
     @Req() request,
     @Body() body,
   ) {
@@ -155,9 +168,9 @@ export class ImageController {
   @UseGuards(AuthGuard)
   @Put('/user/:ownerId/:itemId/comment/:commentId')
   async updateComment(
-    @Param('itemId') itemId: string,
-    @Param('commentId') commentId: string,
-    @Param('ownerId') ownerId: string,
+    @Param('itemId', ValidateId) itemId: string,
+    @Param('commentId', ValidateId) commentId: string,
+    @Param('ownerId', ValidateId) ownerId: string,
     @Req() req,
     @Body() body,
     @Res() res,
@@ -170,6 +183,7 @@ export class ImageController {
 
     const result = await this.sharedService.updateCommentAPI(
       'image',
+      req.user?.id,
       ownerId,
       itemId,
       commentId,
@@ -184,7 +198,7 @@ export class ImageController {
   @UseGuards(UserGuard)
   @Post('/:link/comments')
   async getUpdatedComments(
-    @Param('link') itemId: string,
+    @Param('link', ValidateId) itemId: string,
     @Body() body,
     @Req() req,
     @Res() res,
@@ -212,9 +226,10 @@ export class ImageController {
   async like(
     @Req() request,
     @Res() res,
-    @Param('linkId') linkId: string,
-    @Query('isWorkspace') isWorkspace: boolean,
+    @Param('linkId', ValidateId) linkId: string,
+    @Query('isWorkspace') isWorkspaceQuery: string,
   ) {
+    const isWorkspace = parseBooleanFlag(isWorkspaceQuery);
     const sharedImage = await this.sharedService.getSharedItemBySharedId(
       'image',
       linkId,
@@ -258,13 +273,15 @@ export class ImageController {
 
   @UseGuards(AuthGuard)
   @Get('editor/:id')
-  async getEditorImage(@Req() req, @Param('id') id: string) {
+  async getEditorImage(@Req() req, @Param('id', ValidateId) id: string) {
     return await this.imageService.getUploadedFileByDbId(req.user?.id, id);
   }
 
   @UseGuards(AuthGuard)
   @Post('upload/file')
-  @UseInterceptors(FileInterceptor('file', { limits: { fileSize: 10 * 1024 * 1024 } }))
+  @UseInterceptors(
+    FileInterceptor('file', { limits: { fileSize: 10 * 1024 * 1024 } }),
+  )
   async uploadFile(
     @User() user: IRequestUser,
     @Body() body: IImagePayload,
@@ -308,14 +325,14 @@ export class ImageController {
   @Get('folder/:folderId')
   async getFolderById(
     @Req() req,
-    @Param('folderId') folderId: string,
+    @Param('folderId', ValidateId) folderId: string,
   ): Promise<IDataResponse<IDbFolder | null>> {
     return await this.imageService.getFolderById(req.user?.id, folderId);
   }
 
   @UseGuards(AuthGuard)
   @Get('single/:id')
-  async getImageByIdPrivate(@Req() req, @Param('id') id: string) {
+  async getImageByIdPrivate(@Req() req, @Param('id', ValidateId) id: string) {
     return await this.imageService.getImageByIdPrivate(req.user?.id, id, 'get');
   }
 
@@ -372,27 +389,59 @@ export class ImageController {
     return await this.imageService.getAllShared(req.user?.id);
   }
 
+  // Open to anyone with the link; a signed-in viewer is only read to mark their own like.
+  @UseGuards(UserGuard)
   @Get('shared/single/:sharedId')
   async getSharedImageBySharedId(
     @Req() req,
-    @Param('sharedId') sharedId: string,
-    @Query('isWorkspace') isWorkspace: boolean,
+    @Param('sharedId', ValidateId) sharedId: string,
+    @Query('isWorkspace') isWorkspace: string,
   ) {
-    return await this.imageService.getImageBySharedId(sharedId, isWorkspace);
+    return await this.imageService.getImageBySharedId(
+      sharedId,
+      parseBooleanFlag(isWorkspace),
+      req.user?.id,
+    );
   }
 
+  // Counts a view of a shared image. The body only names the share link; the item, the viewer
+  // (the optional sign-in) and the address all come from the server.
+  @UseGuards(OptionalAuthGuard)
   @Post('shared/view-info')
   async addUniqueViewInfo(
-    @Body() reqBody,
-  ): Promise<IDataResponse<{ uniqueViewsDb: IUniqueView[]; views: number }>> {
-    return await this.uniqueViewsSharedService.addUniqueView({ ...reqBody });
+    @Req() req,
+    @Body() body: { sharedId?: unknown; isWorkspace?: unknown },
+  ): Promise<IDataResponse<IViewInfo>> {
+    return await this.uniqueViewsSharedService.addUniqueView({
+      sharedId: body?.sharedId,
+      itemType: 'image',
+      isWorkspace: parseBooleanFlag(body?.isWorkspace),
+      viewer: req.user ?? null,
+      ip: getClientIp(req),
+    });
   }
 
+  // The viewers of an image go to its owner (or a workspace member) only; anyone else gets the count.
+  @UseGuards(OptionalAuthGuard)
   @Post('shared/get-view-info')
   async getUniqueViewInfo(
-    @Body() reqBody,
-  ): Promise<IDataResponse<IUniqueView[]>> {
-    return await this.uniqueViewsSharedService.getUniqueView({ ...reqBody });
+    @Req() req,
+    @Body()
+    body: {
+      sharedId?: unknown;
+      itemId?: unknown;
+      workspaceId?: unknown;
+      isWorkspace?: unknown;
+    },
+  ): Promise<IDataResponse<IViewInfo>> {
+    return await this.uniqueViewsSharedService.getUniqueView({
+      itemType: 'image',
+      sharedId: body?.sharedId,
+      itemId: body?.itemId,
+      workspaceId: body?.workspaceId,
+      isWorkspace: parseBooleanFlag(body?.isWorkspace),
+      userId: req.user?.id ?? null,
+    });
   }
 
   @UseGuards(AuthGuard)
@@ -443,12 +492,12 @@ export class ImageController {
   @Post('folders/:folderId/favorite')
   async addFolderToFavorites(
     @Req() req,
-    @Param() param,
+    @Param('folderId', ValidateId) folderId: string,
     @Body() body: { forceRemove?: boolean },
   ) {
     return await this.foldersSharedService.addRemoveFavFolder(
       req.user.id,
-      param.folderId,
+      folderId,
       'image',
       undefined,
       body?.forceRemove,

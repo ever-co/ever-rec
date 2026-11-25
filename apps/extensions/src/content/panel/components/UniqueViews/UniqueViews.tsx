@@ -40,24 +40,39 @@ const UniqueViews: React.FC<IUniqueViewsProps> = ({
 
   useEffect(() => {
     const getUniqueViews = async () => {
-      if (!item || !item?.dbData || !shouldFetch.current) return;
-
-      setLoading(true);
-      const uniqueViewsDb = await getItemUniqueViews(
-        user,
-        item.dbData,
-        itemType,
-        isWorkspace,
-      );
-
-      uniqueViewsDb && setUniqueViews(uniqueViewsDb);
+      // The viewers are only returned to the owner, so nobody else asks for them.
+      if (!isOwner || !item?.dbData?.id || !shouldFetch.current) return;
 
       shouldFetch.current = false;
-      setLoading(false);
+      setLoading(true);
+
+      try {
+        // Only ids are sent: the API checks who is asking.
+        const workspaceId = isWorkspace
+          ? (item.dbData as any).workspaceIds?.[0]
+          : undefined;
+        const viewInfo = await getItemUniqueViews(
+          item.dbData.id,
+          itemType,
+          workspaceId,
+        );
+
+        if (viewInfo) {
+          setUniqueViews(viewInfo.uniqueViewsDb || []);
+        } else {
+          // Let a later change of user or item ask again.
+          shouldFetch.current = true;
+        }
+      } catch (e) {
+        console.log(e);
+        shouldFetch.current = true;
+      } finally {
+        setLoading(false);
+      }
     };
 
     getUniqueViews();
-  }, [isWorkspace, item, itemType, user]);
+  }, [isOwner, isWorkspace, item, itemType, user]);
 
   let views: number;
   if (Array.isArray(item?.dbData?.views)) {

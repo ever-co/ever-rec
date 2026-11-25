@@ -5,7 +5,10 @@ import { ItemType } from 'app/interfaces/ItemType';
 import AppSvg from 'components/elements/AppSvg';
 import AppButton from 'components/controls/AppButton';
 import IEditorImage from 'app/interfaces/IEditorImage';
-import { successMessage } from 'app/services/helpers/toastMessages';
+import {
+  errorMessage,
+  successMessage,
+} from 'app/services/helpers/toastMessages';
 import { useTranslation } from 'react-i18next';
 
 interface IShareItemModalProps {
@@ -39,7 +42,14 @@ const ShareItemModal: React.FC<IShareItemModalProps> = ({
   const shareLink = `${publicSite}/${itemType}/shared/${linkFromItem}${workspaceParam}`;
 
   const copyLinkHandler = async () => {
-    await navigator.clipboard.writeText(shareLink);
+    // The clipboard can be refused (no permission, insecure context). Only report
+    // success when the link was really written.
+    try {
+      await navigator.clipboard.writeText(shareLink);
+    } catch (e) {
+      errorMessage(t('hooks.toasts.shareLinkCopyError'));
+      return;
+    }
 
     copied();
     successMessage(t('toasts.copied'));
