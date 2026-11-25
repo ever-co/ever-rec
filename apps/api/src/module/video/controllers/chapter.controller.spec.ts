@@ -267,6 +267,46 @@ describe('VideoChapterController workspace access', () => {
     );
   });
 
+  describe('the chapters sent when saving', () => {
+    const saveWith = (chapters: string, chaptersBlobs = '[]') =>
+      request(app.getHttpServer())
+        .post('/video/chapter/save-changes/v1')
+        .set(as('uid-member'))
+        .field('chapters', chapters)
+        .field('chaptersBlobs', chaptersBlobs);
+
+    it('are passed to the service as lists', async () => {
+      const chapters = [{ id: 'a1', content: 'Intro' }];
+
+      await saveWith(JSON.stringify(chapters)).expect(201);
+      expect(saveChapters.mock.calls[0].slice(0, 4)).toEqual([
+        'uid-member',
+        'v1',
+        chapters,
+        [],
+      ]);
+    });
+
+    it.each([
+      ['not JSON', '{oops', '[]'],
+      ['not a list', '{"id":"a1"}', '[]'],
+      ['a chapter id that is not a plain id', '[{"id":"../x"}]', '[]'],
+      ['a blob list that is not JSON', '[]', '{oops'],
+    ])('are refused with 400 when %s', async (_name, chapters, blobs) => {
+      await saveWith(chapters, blobs).expect(400);
+      expect(saveChapters).not.toHaveBeenCalled();
+    });
+
+    it('are refused with 400 when a field is missing', async () => {
+      await request(app.getHttpServer())
+        .post('/video/chapter/save-changes/v1')
+        .set(as('uid-member'))
+        .field('chapters', '[]')
+        .expect(400);
+      expect(saveChapters).not.toHaveBeenCalled();
+    });
+  });
+
   it('gives an anonymous request 401', async () => {
     await request(app.getHttpServer())
       .get('/video/chapter/v1?workspaceId=ws1')
