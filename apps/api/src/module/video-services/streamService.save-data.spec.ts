@@ -4,6 +4,8 @@
  * previously stored asset with the server's own provider credentials. So a caller may only store
  * an asset that was created for them: a foreign asset is refused (403) before anything is written
  * or deleted, an unknown service type or a malformed id is a 400, and their own asset still saves.
+ * A request without the video file (no `blob` part, or JSON) is a 400 too, before anything is
+ * written, deleted or uploaded: it used to read `blob.mimetype` of nothing and answer 500.
  * The download link is the streaming provider's, never the `downloadUrl` the client sends: the
  * Jira and Trello export used to fetch that URL from the server.
  *
@@ -225,6 +227,22 @@ describe('stream save-data routes', () => {
     });
   };
 
+  /** The same form without its `blob` part, or the fields sent as JSON. */
+  const saveWithoutFile = (
+    path: string,
+    fields: Record<string, string>,
+    as: 'form' | 'json' = 'form',
+  ) => {
+    let req = request(app.getHttpServer())
+      .post(`/stream/save-data${path}`)
+      .set({ Authorization: 'Bearer uid-me' });
+    if (as === 'json') return req.send(fields);
+    for (const [key, value] of Object.entries(fields)) {
+      req = req.field(key, value);
+    }
+    return req;
+  };
+
   const fields = (assetId: string, serviceType = 'mux') => ({
     videoTitle: 'Title',
     videoDuration: '3',
@@ -279,6 +297,17 @@ describe('stream save-data routes', () => {
       expect(mux.getAssetOwner).not.toHaveBeenCalled();
       expect(mockDb.writes).toEqual([]);
     });
+
+    it.each(['form', 'json'] as const)(
+      'refuses a request without a video file (%s), writing nothing and uploading nothing',
+      async (as) => {
+        const res = await saveWithoutFile('', fields('mine'), as).expect(400);
+        expect(res.body.message).toBe('A video file is required');
+        expect(mux.getAssetOwner).not.toHaveBeenCalled();
+        expect(mockDb.writes).toEqual([]);
+        expect(mockUpload).not.toHaveBeenCalled();
+      },
+    );
   });
 
   describe('POST stream/save-data/:videoId', () => {
@@ -318,6 +347,24 @@ describe('stream save-data routes', () => {
       expect(mockDb.writes).toEqual([]);
       expect(mux.deleteAsset).not.toHaveBeenCalled();
     });
+
+    it.each(['form', 'json'] as const)(
+      'refuses a request without a video file (%s), without writing, deleting or uploading',
+      async (as) => {
+        const res = await saveWithoutFile('/vid1', fields('mine'), as).expect(
+          400,
+        );
+        expect(res.body.message).toBe('A video file is required');
+        expect(mux.getAssetOwner).not.toHaveBeenCalled();
+        expect(mockDb.writes).toEqual([]);
+        expect(mux.deleteAsset).not.toHaveBeenCalled();
+        expect(mockUpload).not.toHaveBeenCalled();
+        expect(mockDb.data.users['uid-me'].videos.vid1.streamData).toEqual({
+          serviceType: 'mux',
+          assetId: 'old-asset',
+        });
+      },
+    );
   });
 
   describe('the stored download link', () => {
