@@ -43,6 +43,7 @@ const redirect = (router: NextRouter) => {
     profile, // from extension popup
     shImage, // from shared image page
     shVideo, // from shared video page
+    dataExport, // from the data export page (middleware.ts)
   } = router.query;
 
   if (justInstalled) {
@@ -54,6 +55,12 @@ const redirect = (router: NextRouter) => {
 
   // If there is no extension param go to web portal
   if (!ext || !isBrowserCompatible) {
+    // Back to the export the person opened from app.ever.co (a job id only, never an address).
+    if (typeof dataExport === 'string' && /^[A-Za-z0-9_-]{1,64}$/.test(dataExport)) {
+      router.push(`/settings/data-export?job=${dataExport}`);
+      return;
+    }
+
     if (workspaceInvite) {
       router.push(`${panelRoutes.workspaceInvite}/${workspaceInvite}`);
       return;

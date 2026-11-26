@@ -59,7 +59,10 @@ function scheduler(
     integrations as any,
     links as any,
     feed as any,
-    { syncExistingLinks: jest.fn(async () => undefined) } as any,
+    {
+      syncExistingLinks: jest.fn(async () => undefined),
+      retryIncompleteDeletions: jest.fn(async () => 0),
+    } as any,
     { retryPendingCompletes: jest.fn(async () => undefined) } as any,
   );
   return { service, calls, feed, connect };

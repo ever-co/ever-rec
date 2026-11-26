@@ -207,6 +207,8 @@ export interface PersonRequestRecord {
   reasonCode?: string;
   /** For `exported`: the portal page where the account downloads its export. */
   exportUrl?: string;
+  /** A deletion that was started and did not complete: run again with the heartbeat, then answered `deleted`. */
+  incomplete?: boolean;
   decidedAt?: number;
   answeredAt?: number;
   /** `answered`, or `not_needed:<status>:<code>` when Ever Platform will not take the answer. */

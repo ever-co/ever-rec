@@ -12,7 +12,7 @@ jest.mock('jwt-decode', () => ({
   }),
 }));
 
-import { isPublicSharedPath, middleware } from '../middleware';
+import { isPublicSharedPath, middleware, signInSearchFor } from '../middleware';
 
 function makeRequest(pathname: string, cookies: Record<string, string> = {}) {
   const nextUrl: any = {
@@ -90,5 +90,25 @@ describe('middleware', () => {
 
   it('keeps redirecting /auth to /auth/login', () => {
     expect(middleware(makeRequest('/auth'))).toEqual({ kind: 'redirect', pathname: '/auth/login' });
+  });
+
+  it('sends a signed-out visit of the export page to sign-in', () => {
+    expect(middleware(makeRequest('/settings/data-export'))).toEqual({ kind: 'redirect', pathname: '/auth/login' });
+  });
+});
+
+describe('signInSearchFor', () => {
+  const url = (pathname: string, search: string) => ({ pathname, searchParams: new URLSearchParams(search) });
+
+  it('keeps the job of the export page through the sign-in', () => {
+    expect(signInSearchFor(url('/settings/data-export', '?job=01KJOB_1-a'))).toBe('?dataExport=01KJOB_1-a');
+  });
+
+  it('keeps nothing else: another page, no job, or a job that is not an id', () => {
+    expect(signInSearchFor(url('/media/shared', '?job=01KJOB'))).toBe('');
+    expect(signInSearchFor(url('/settings/data-export', ''))).toBe('');
+    expect(signInSearchFor(url('/settings/data-export', '?job=https://evil.example/x'))).toBe('');
+    expect(signInSearchFor(url('/settings/data-export', '?job=a%2Fb'))).toBe('');
+    expect(signInSearchFor({ pathname: '/settings/data-export' })).toBe('');
   });
 });

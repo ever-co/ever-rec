@@ -13,6 +13,24 @@ export function isPublicSharedPath(pathname: string): boolean {
   return PUBLIC_SHARED_ROUTE.test(pathname);
 }
 
+/** A job id of a person's export (what Ever Platform names it by): letters, digits, `_` and `-`. */
+export const EXPORT_JOB_ID = /^[A-Za-z0-9_-]{1,64}$/;
+
+/**
+ * The query the sign-in page gets for a signed-out visit: the export page
+ * (`/settings/data-export?job=<id>`, the address Ever Platform shows the person) keeps its job as
+ * `dataExport`, so the sign-in returns there; anything else gets none. A job id only, never an
+ * address.
+ */
+export function signInSearchFor(url: {
+  pathname: string;
+  searchParams?: { get(name: string): string | null };
+}): string {
+  if (url.pathname !== '/settings/data-export') return '';
+  const job = url.searchParams?.get('job') ?? '';
+  return EXPORT_JOB_ID.test(job) ? `?dataExport=${job}` : '';
+}
+
 export function middleware(request: NextRequest) {
   const refreshToken = request.cookies.get('refreshToken');
   const idToken = request.cookies.get('idToken');
@@ -42,7 +60,7 @@ export function middleware(request: NextRequest) {
   } else {
     const urlNext = request.nextUrl.clone();
     urlNext.pathname = '/auth/login';
-    urlNext.search = '';
+    urlNext.search = signInSearchFor(request.nextUrl);
     return NextResponse.redirect(urlNext);
   }
 }

@@ -322,6 +322,7 @@ export class EverConnectSchedulerService
     await this.links.retryPendingUnlinks();
     await this.integrations.retryFailedSends();
     await this.person.syncExistingLinks();
+    await this.person.retryIncompleteDeletions();
     await this.provision.retryPendingCompletes();
   }
 

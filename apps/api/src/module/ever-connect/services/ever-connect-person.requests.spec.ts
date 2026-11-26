@@ -186,6 +186,33 @@ describe('a person export request', () => {
     ).not.toContain('person@');
   });
 
+  it('an exported answer sent again after its export expired makes the export again, at the same address', async () => {
+    const t = setup({ EVER_CONNECT_PERSON_EXPORT_ENABLED: 'true' });
+    t.ackErrors.push(new ProblemError(503, 'unavailable'));
+    await expect(
+      t.service.onExportRequested(t.request('job-e5')),
+    ).rejects.toBeInstanceOf(ProblemError);
+    t.db.write(
+      [
+        ...EVER_CONNECT_PATHS.personExports.split('/'),
+        'job-e5',
+        'uid-person',
+        'expiresAt',
+      ],
+      1,
+    );
+    await t.service.onExportRequested(t.request('job-e5'));
+    expect(t.acks).toEqual([
+      {
+        job_id: 'job-e5',
+        result: 'exported',
+        export_url: 'https://rec.example.test/settings/data-export?job=job-e5',
+      },
+    ]);
+    const own = (await t.service.download('job-e5', 'uid-person')) as any;
+    expect(own.profile.displayName).toBe('Person');
+  });
+
   it('switched on without an https portal: failed / export_not_available', async () => {
     const t = setup({
       EVER_CONNECT_PERSON_EXPORT_ENABLED: 'true',
@@ -245,11 +272,35 @@ describe('a person deletion request', () => {
     expect(t.acks).toEqual([{ job_id: 'job-d4', ...PENDING_DELETION }]);
   });
 
-  it('switched on, and the account deletion does not complete: failed / account_deletion_pending', async () => {
+  it('switched on, and the account deletion does not complete: pending now, run again with the heartbeat, then deleted', async () => {
     const t = setup({ EVER_CONNECT_PERSON_DELETION_ENABLED: 'true' });
     t.deleter.delete.mockResolvedValueOnce(false);
     await t.service.onDeletionRequested(t.request('job-d5'));
     expect(t.acks).toEqual([{ job_id: 'job-d5', ...PENDING_DELETION }]);
+    expect(t.stored('job-d5').incomplete).toBe(true);
+
+    // The next run fails as well: nothing new is sent.
+    t.deleter.delete.mockRejectedValueOnce(new Error('auth/internal-error'));
+    expect(await t.service.retryIncompleteDeletions()).toBe(0);
+    expect(t.acks).toHaveLength(1);
+
+    // Then it completes: Ever Platform receives the final answer the pending one left room for.
+    expect(await t.service.retryIncompleteDeletions()).toBe(1);
+    expect(t.deleter.delete).toHaveBeenCalledTimes(3);
+    expect(t.acks[1]).toEqual({ job_id: 'job-d5', result: 'deleted' });
+    expect(t.stored('job-d5').incomplete).toBeUndefined();
+    expect(await t.service.retryIncompleteDeletions()).toBe(0);
+    expect(t.acks).toHaveLength(2);
+  });
+
+  it('switched on: an account that became a workspace admin after the first check is kept', async () => {
+    const t = setup({ EVER_CONNECT_PERSON_DELETION_ENABLED: 'true' });
+    const hold = jest.spyOn(t.service, 'holdFor');
+    hold.mockResolvedValueOnce(null).mockResolvedValueOnce('workspace_admin');
+    await t.service.onDeletionRequested(t.request('job-d6'));
+    expect(t.deleter.delete).not.toHaveBeenCalled();
+    expect(t.acks).toEqual([{ job_id: 'job-d6', ...PENDING_DELETION }]);
+    expect(t.stored('job-d6').incomplete).toBeUndefined();
   });
 });
 
@@ -267,6 +318,16 @@ describe('a request read again', () => {
     await t.service.onDeletionRequested(t.request('job-r1'));
     expect(t.acks).toHaveLength(1);
     expect(t.audit.write).toHaveBeenCalledTimes(1);
+  });
+
+  it('an answer that could not be sent is sent again with the heartbeat', async () => {
+    const t = setup();
+    t.ackErrors.push(new ProblemError(503, 'unavailable'));
+    await expect(
+      t.service.onExportRequested(t.request('job-r4')),
+    ).rejects.toBeInstanceOf(ProblemError);
+    expect(await t.service.retryIncompleteDeletions()).toBe(1);
+    expect(t.acks).toEqual([{ job_id: 'job-r4', ...EXPORT_NOT_AVAILABLE }]);
   });
 
   it('an answer Ever Platform refuses is not sent again', async () => {

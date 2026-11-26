@@ -60,6 +60,8 @@ interface Decided {
   result: PersonRequestResult;
   reasonCode?: string;
   exportUrl?: string;
+  /** A deletion that was started and did not complete: run again later. */
+  incomplete?: boolean;
 }
 
 /** The accounts stay until they are deleted in Rec; Ever Platform keeps the request open. */
@@ -445,11 +447,22 @@ export class EverConnectPersonService {
     for (const [key, uid] of Object.entries(record.identities ?? {})) {
       await this.unlink(key, uid);
     }
-    const deleter = this.accountDeleter;
-    if (!this.config.personDeletionEnabled || !deleter) {
+    if (!this.config.personDeletionEnabled || !this.accountDeleter) {
       return pendingDeletion();
     }
-    // All or none: every account is checked before any is deleted.
+    return this.deleteAccounts(uids);
+  }
+
+  /**
+   * Deletes the accounts by Rec's own account deletion: all or none are held. Every account is
+   * checked before any is deleted, and each again right before its own deletion (an account that
+   * became a workspace's admin meanwhile is kept). A deletion that did not complete is marked
+   * `incomplete` and run again by {@link retryIncompleteDeletions}: Rec's account deletion can
+   * run again on an account it already partly deleted.
+   */
+  private async deleteAccounts(uids: string[]): Promise<Decided> {
+    const deleter = this.accountDeleter;
+    if (!deleter) return pendingDeletion();
     for (const uid of uids) {
       const hold = await this.holdFor(uid);
       if (hold) {
@@ -457,8 +470,12 @@ export class EverConnectPersonService {
         return pendingDeletion();
       }
     }
-    // Rec's account deletion can run again on an account already (partly) deleted.
     for (const uid of uids) {
+      const hold = await this.holdFor(uid);
+      if (hold) {
+        this.logger.warn(`A person's accounts were kept (${hold}).`);
+        return pendingDeletion();
+      }
       let deleted = false;
       try {
         deleted = await deleter.delete(uid);
@@ -467,9 +484,66 @@ export class EverConnectPersonService {
           `A person's account could not be deleted (${errorCode(error)}).`,
         );
       }
-      if (!deleted) return pendingDeletion();
+      if (!deleted) return { ...pendingDeletion(), incomplete: true };
     }
     return { result: 'deleted' };
+  }
+
+  /**
+   * Runs again the account deletions that did not complete (while deletions are switched on), and
+   * sends Ever Platform the final `deleted` once they did; also sends again any decided answer that
+   * has not reached Ever Platform. Called with the heartbeat; answers how many requests it settled.
+   */
+  async retryIncompleteDeletions(): Promise<number> {
+    const all = ((
+      await this.store.db().ref(EVER_CONNECT_PATHS.personRequests).get()
+    ).val() ?? {}) as Record<string, PersonRequestRecord>;
+    let settled = 0;
+    for (const [jobId, stored] of Object.entries(all)) {
+      if (!isDbKey(jobId) || !stored?.result) continue;
+      const ref = this.store
+        .db()
+        .ref(`${EVER_CONNECT_PATHS.personRequests}/${jobId}`);
+      let record = stored;
+      if (
+        record.incomplete &&
+        record.kind === 'deletion' &&
+        this.config.personDeletionEnabled
+      ) {
+        const decided = await this.deleteAccounts(accountsOf(record));
+        if (decided.incomplete) continue;
+        // Settled: deleted (a new, final answer to send), or held (the pending answer stands).
+        const update =
+          decided.result === 'deleted'
+            ? {
+                result: decided.result,
+                reasonCode: null,
+                incomplete: null,
+                decidedAt: this.clock(),
+                answeredAt: null,
+                outcome: null,
+              }
+            : { incomplete: null };
+        await ref.update(update);
+        record = (((await ref.get()).val() ?? record) as PersonRequestRecord);
+        if (decided.result === 'deleted') {
+          await this.audit.write('person.deletion', 'platform', {
+            result: 'deleted',
+            accounts: accountsOf(record).length,
+          });
+        }
+      }
+      if (record.answeredAt) continue;
+      try {
+        await this.answer(ref, jobId, record);
+        settled += 1;
+      } catch (error) {
+        this.logger.warn(
+          `A person request's receipt could not be sent (${errorCode(error)}); sent again later.`,
+        );
+      }
+    }
+    return settled;
   }
 
   /** Removes one matched Ever ID link (index entry first: a retry still finds it) and its person link. */
@@ -481,9 +555,11 @@ export class EverConnectPersonService {
     await this.store
       .db()
       .ref(`${EVER_ID_LINK_ROOTS.links}/${key}`)
-      .transaction((current: IdentityRow | null) =>
-        !current ? null : current.uid === uid ? null : undefined,
-      );
+      .transaction((current: IdentityRow | null) => {
+        // Removed only while it still belongs to this account; linked to another meanwhile, it stays.
+        if (!current || current.uid === uid) return null;
+        return undefined;
+      });
     await this.removeLink(uid);
   }
 
@@ -528,13 +604,24 @@ export class EverConnectPersonService {
       );
       return exportNotAvailable();
     }
+    await this.makeExports(jobId, uids, record);
+    return { result: 'exported', exportUrl };
+  }
+
+  /**
+   * One export per account the person's Ever IDs are linked to, each with that account's own links
+   * only, each downloadable by that account only, for {@link PERSON_EXPORT_TTL_MS}.
+   */
+  private async makeExports(
+    jobId: string,
+    uids: string[],
+    record: PersonRequestRecord,
+  ): Promise<void> {
     const links = ((
       await this.store.db().ref(EVER_ID_LINK_ROOTS.links).get()
     ).val() ?? {}) as Record<string, IdentityRow>;
     const identities = Object.entries(record.identities ?? {});
     const now = this.clock();
-    // One export per account the person's Ever IDs are linked to, each with that account's own
-    // links only, each downloadable by that account only.
     for (const uid of uids) {
       const own = identities
         .filter(([key, owner]) => owner === uid && links[key]?.uid === uid)
@@ -552,7 +639,25 @@ export class EverConnectPersonService {
         ),
       });
     }
-    return { result: 'exported', exportUrl };
+  }
+
+  /**
+   * Before an `exported` answer is sent (again): the exports it names are made again when one has
+   * expired or is gone, so the address never leads to nothing. The address stays the same.
+   */
+  private async keepExportsAvailable(
+    jobId: string,
+    record: PersonRequestRecord,
+  ): Promise<void> {
+    const uids = accountsOf(record);
+    const now = this.clock();
+    for (const uid of uids) {
+      const stored = await this.store.personExport(jobId, uid);
+      if (!stored || !(stored.expiresAt > now)) {
+        await this.makeExports(jobId, uids, record);
+        return;
+      }
+    }
   }
 
   /** Sends the decided answer, until Ever Platform recorded it (or will never take it). */
@@ -562,6 +667,7 @@ export class EverConnectPersonService {
     record: PersonRequestRecord,
   ): Promise<void> {
     const result = record.result as PersonRequestResult;
+    if (result === 'exported') await this.keepExportsAvailable(jobId, record);
     let outcome = 'answered';
     try {
       await this.client.run((client) =>

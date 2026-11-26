@@ -156,7 +156,8 @@ e-mail address):
   `EVER_OPERATOR_UIDS`) or administers a workspace (Rec's account deletion leaves workspaces as they
   are: hand the workspace over or delete it first). Kept, or switched off (the default), the receipt
   is `failed` with `account_deletion_pending`: the request stays open on Ever Platform, and the person
-  deletes the account in Rec.
+  deletes the account in Rec. A deletion that started and did not complete is answered the same way
+  and run again with the heartbeat; once it completes, Ever Platform receives `deleted`.
 
 An Ever ID this installation does not know gets the receipt `no_account`. Each request is decided
 once (`ever_connect/person_requests/<id>`, kept 90 days after the answer): a request read again gets
