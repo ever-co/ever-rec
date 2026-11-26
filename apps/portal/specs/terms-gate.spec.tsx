@@ -166,6 +166,71 @@ describe('TermsGate', () => {
     );
   });
 
+  it('reloads the required documents after a refused save, so a retry sends the current texts', async () => {
+    getStatus.mockResolvedValueOnce({
+      satisfied: false,
+      blocking: [pendingTos],
+      notices: [],
+      current: [],
+    });
+    const newer = {
+      ...pendingTos,
+      requiredVersion: '1.2.0',
+      requiredSha256: 'b'.repeat(64),
+    };
+    getStatus.mockResolvedValueOnce({
+      satisfied: false,
+      blocking: [newer],
+      notices: [],
+      current: [],
+    });
+    accept
+      .mockRejectedValueOnce(new Error('400'))
+      .mockResolvedValueOnce(satisfied);
+    await act(async () => root.render(<TermsGate />));
+
+    await act(async () => {
+      (
+        container.querySelector(
+          '[data-testid="terms-accept"]',
+        ) as HTMLButtonElement
+      ).click();
+    });
+    await act(async () => {
+      (
+        container.querySelector(
+          '[data-testid="terms-accept"]',
+        ) as HTMLButtonElement
+      ).click();
+    });
+
+    expect(getStatus).toHaveBeenCalledTimes(2);
+    expect(accept).toHaveBeenLastCalledWith([
+      {
+        documentId: 'tos:ever-rec',
+        version: '1.2.0',
+        sha256: 'b'.repeat(64),
+        locale: 'en',
+      },
+    ]);
+    expect(container.querySelector('[data-testid="modal"]')).toBeNull();
+  });
+
+  it('links a document with a relative url to its text on rec.so', async () => {
+    getStatus.mockResolvedValue({
+      satisfied: false,
+      blocking: [{ ...pendingTos, url: '/legal/tos' }],
+      notices: [],
+      current: [],
+    });
+
+    await act(async () => root.render(<TermsGate />));
+
+    expect(container.querySelector('a')?.getAttribute('href')).toBe(
+      'https://rec.so/tos',
+    );
+  });
+
   it('shows nothing when the user is up to date, signed out, or the status cannot be read', async () => {
     getStatus.mockResolvedValue(satisfied);
     await act(async () => root.render(<TermsGate />));

@@ -7,6 +7,7 @@ import { acceptTermsAPI, getTermsStatusAPI } from 'app/services/api/auth';
 import { signOut } from 'app/services/auth';
 import { ITermsStatus } from 'app/interfaces/ITermsAcceptance';
 import AuthAC from 'store/auth/actions/AuthAC';
+import { legalDocumentUrl } from 'app/services/helpers/legalDocumentUrl';
 import { panelRoutes, preRoutes } from 'components/_routes';
 
 /**
@@ -62,6 +63,11 @@ const TermsGate: FC = () => {
       setStatus(next);
     } catch {
       setError(t('page.termsReaccept.failed'));
+      // The texts may have changed while the dialog was open (the server then refuses the old version):
+      // reload what is required now, so the next "I agree" sends the current documents.
+      getTermsStatusAPI(locale)
+        .then((next) => setStatus(next))
+        .catch(() => undefined);
     } finally {
       setBusy(false);
     }
@@ -101,13 +107,13 @@ const TermsGate: FC = () => {
       <ul data-testid="terms-documents">
         {blocking.map((doc) => (
           <li key={doc.documentId}>
-            {doc.url ? (
-              <a href={doc.url} target="_blank" rel="noopener noreferrer">
-                {doc.title || doc.documentId}
-              </a>
-            ) : (
-              doc.title || doc.documentId
-            )}{' '}
+            <a
+              href={legalDocumentUrl(doc, doc.documentId)}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {doc.title || doc.documentId}
+            </a>{' '}
             <small>
               {doc.acceptedVersion
                 ? t('page.termsReaccept.updated', {

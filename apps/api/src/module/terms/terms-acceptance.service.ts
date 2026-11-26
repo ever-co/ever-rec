@@ -169,17 +169,20 @@ export class TermsAcceptanceService {
     this.assertClaimsArePublished(claims);
     const locale = claims[0]?.locale;
     const required = this.getRequiredDocuments(locale);
-    for (const claim of claims) {
+    // Each claim is recorded with the locale of the text that was actually shown: when the UI locale has no
+    // published translation, `required` holds the English fallback, and that is what the person read.
+    const validated = claims.map((claim) => {
       const current = required.find((doc) => doc.documentId === claim.documentId);
       if (!current || current.version !== claim.version || current.sha256 !== claim.sha256) {
         throw new BadRequestException(
           `Terms acceptance must be for the current text: ${claim.documentId}@${claim.version} is not what is required now.`,
         );
       }
-    }
+      return { ...claim, locale: current.locale };
+    });
 
     const before = await this.status(uid, locale);
-    const outstanding = claims.filter((claim) =>
+    const outstanding = validated.filter((claim) =>
       [...before.blocking, ...before.notices].some((doc) => doc.documentId === claim.documentId),
     );
     if (outstanding.length) {

@@ -75,6 +75,36 @@ describe('TermsAcceptanceService status and reaccept', () => {
     );
   });
 
+  it('records the locale of the text that was shown, not the UI locale', async () => {
+    const service = newService();
+    // No French translation is published: the required documents are the English fallback.
+    const fallback = service.getRequiredDocuments('fr');
+    expect(fallback.every((doc) => doc.locale === 'en')).toBe(true);
+
+    await service.reaccept(
+      'uid-1',
+      fallback.map(({ documentId, version, sha256 }) => ({
+        documentId,
+        version,
+        sha256,
+        locale: 'fr',
+      })),
+      {},
+    );
+
+    expect((await service.history('uid-1')).map((r) => r.locale)).toEqual(
+      fallback.map(() => 'en'),
+    );
+  });
+
+  it('links each required document to its published text on the Rec website', () => {
+    const service = newService();
+
+    for (const doc of service.getRequiredDocuments('en')) {
+      expect(doc.url).toBe(`https://rec.so/${doc.documentId.split(':')[0]}`);
+    }
+  });
+
   it('refuses a digest that was never published', async () => {
     const service = newService();
     const [first, ...rest] = claimsFrom(service);
