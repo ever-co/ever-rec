@@ -842,14 +842,17 @@ describe('Ever ID sign-in (e2e)', () => {
     });
 
     it('ends a refreshed session after its sign-in reference has expired', async () => {
-      // References live 4 s here, so the one recorded at sign-in expires while the session lives on.
+      // References live 6 s. `exp` counts whole seconds, so a reference issued at t has between 5 and 6 s.
+      // Refreshing at t+3 s leaves the sign-in reference >= 2 s of slack; waiting until t+6.3 s expires it
+      // while the refreshed one (issued at about t+3 s) still has >= 1.7 s left.
       await t.close();
-      t = await createTestApp({ env: onEnv(issuer, { REC_JWT_EXPIRES_IN: '4s' }) });
+      t = await createTestApp({ env: onEnv(issuer, { REC_JWT_EXPIRES_IN: '6s' }) });
       const session = await signUp('expired-reference-person');
-      await new Promise((resolve) => setTimeout(resolve, 2500));
+      const issuedAt = Date.now();
+      await new Promise((resolve) => setTimeout(resolve, 3000));
       const first = await refresh(session.refreshToken);
       expect(first.status).toBe(200);
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, Math.max(0, issuedAt + 6300 - Date.now())));
       // The sign-in reference has expired...
       expect((await refresh(session.refreshToken)).status).toBeGreaterThanOrEqual(400);
       // ...while the session itself is alive: its current reference still refreshes, and the reference
@@ -866,7 +869,7 @@ describe('Ever ID sign-in (e2e)', () => {
       expect((await t.firebase.db.ref(`tokens/${id}`).get()).exists()).toBe(false);
       // ...so its newest reference no longer refreshes.
       expect((await refresh(second.body.refreshToken)).status).toBeGreaterThanOrEqual(400);
-    }, 20000);
+    }, 30000);
 
     it('ends a session without a session id on a subject-only logout', async () => {
       issuer.nextClaims = { sub: 'no-sid-person', sid: undefined };
