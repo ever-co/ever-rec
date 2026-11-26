@@ -117,7 +117,7 @@ jobs:
         run: pnpm --filter ever-rec-portal exec tsc --noEmit -p tsconfig.json
 
   egress:
-    name: Egress audit (anonymous usage statistics)
+    name: Egress audit (anonymous usage statistics, Ever Platform connection)
     # Docker with NET_RAW and NET_ADMIN is needed for the capture.
     runs-on: ${{ vars.RUNNER_LINUX_X64_8 || 'ubuntu-latest' }}
     timeout-minutes: 120
@@ -163,9 +163,9 @@ jobs:
           if [ "$code" -ne 1 ]; then echo "::error::a route list missing a page must fail the check"; exit 1; fi
       # The steps below run even when a check above failed, so that one red check does not hide
       # the result of the others (the audit legs need the images and the secrets of this run).
-      - name: 'Static: the statistics code never guesses where it runs'
+      - name: 'Static: the Ever Platform modules never guess where they run'
         if: ${{ !cancelled() }}
-        run: node "$EGRESS_AUDIT" cloud-inference --dirs apps/api/src/module/ever-stats,apps/api/src/module/ever-instance,apps/api/src/common/ever-platform
+        run: node "$EGRESS_AUDIT" cloud-inference --dirs apps/api/src/module/ever-stats,apps/api/src/module/ever-instance,apps/api/src/module/ever-connect,apps/api/src/common/ever-platform
       - name: Build the API image under test and the emulators image
         if: ${{ !cancelled() }}
         run: |
@@ -183,10 +183,10 @@ jobs:
             echo "$key"
             echo 'REC_AUDIT_KEY_END'
           } >> "$GITHUB_ENV"
-      - name: 'off: statistics off (EVER_STATS_ENABLED=false)'
+      - name: 'off: statistics off (EVER_STATS_ENABLED=false), connection not loaded'
         if: ${{ !cancelled() }}
         run: node "$EGRESS_AUDIT" --config "$AUDIT_CONFIG" --mode off --legs api --artifacts "$AUDIT_ARTIFACTS" --verbose
-      - name: 'loaded_off: loaded, switched off by the operator'
+      - name: 'loaded_off: statistics loaded and switched off by the operator; connection loaded, not connected'
         if: ${{ !cancelled() }}
         run: node "$EGRESS_AUDIT" --config "$AUDIT_CONFIG" --mode loaded_off --legs api --artifacts "$AUDIT_ARTIFACTS" --verbose
       - name: 'positive_stats: on, against the mock platform'
@@ -204,6 +204,24 @@ jobs:
             exit 1
           fi
           echo "The control failed as it must (exit 1)."
+      - name: 'positive_connect: connected with EVER_CONNECT_CODE, against the mock platform: only its calls'
+        if: ${{ !cancelled() }}
+        run: node "$EGRESS_AUDIT" --config "$AUDIT_CONFIG" --mode positive_connect --legs api --artifacts "$AUDIT_ARTIFACTS" --verbose
+      - name: 'Control: positive_connect without the mock platform must fail'
+        if: ${{ !cancelled() }}
+        run: |
+          set +e
+          node "$EGRESS_AUDIT" --config "$AUDIT_CONFIG" --mode positive_connect --no-mock --legs api --artifacts "$AUDIT_ARTIFACTS" --verbose
+          code=$?
+          set -e
+          if [ "$code" -ne 1 ]; then
+            echo "::error::without the mock platform the audit must report a violation (exit 1); it exited $code"
+            exit 1
+          fi
+          echo "The control failed as it must (exit 1)."
+      - name: 'connect_off_signin_on: connection off, Ever ID sign-in configured: no call while nobody signs in'
+        if: ${{ !cancelled() }}
+        run: node "$EGRESS_AUDIT" --config "$AUDIT_CONFIG" --mode connect_off_signin_on --legs api --artifacts "$AUDIT_ARTIFACTS" --verbose
       - name: 'The scheduler: not loaded in off, and in loaded_off it asked after the switch-off'
         if: ${{ !cancelled() }}
         run: |
