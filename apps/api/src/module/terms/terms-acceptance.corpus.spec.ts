@@ -51,6 +51,52 @@ describe('Ever Rec terms corpus', () => {
     expect(status.current).toEqual(['privacy:ever-rec']);
   });
 
+  it('falls back to the English texts for a locale with no translation (fr)', () => {
+    // @ever-co/legal 0.7.1 publishes the Ever Rec documents in English only.
+    const french = getRequiredTermsDocuments('fr');
+
+    expect(
+      french.map(({ documentId, version, sha256, locale }) => ({
+        documentId,
+        version,
+        sha256,
+        locale,
+      })),
+    ).toEqual(
+      required.map(({ documentId, version, sha256 }) => ({
+        documentId,
+        version,
+        sha256,
+        locale: 'en',
+      })),
+    );
+  });
+
+  it('blocks an acceptance of the current version whose text digest differs', () => {
+    const accepted = [
+      {
+        documentId: 'tos:ever-rec',
+        version: byId['tos:ever-rec'].version,
+        sha256: 'b'.repeat(64),
+        acceptedAt: '2026-11-26T09:53:10.000Z',
+      },
+      {
+        documentId: 'privacy:ever-rec',
+        version: byId['privacy:ever-rec'].version,
+        sha256: byId['privacy:ever-rec'].sha256,
+        acceptedAt: '2026-11-26T09:53:10.000Z',
+      },
+    ];
+
+    const status = evaluateAcceptance(required, accepted as any);
+
+    expect(status.satisfied).toBe(false);
+    expect(
+      status.blocking.map((doc) => `${doc.documentId}:${doc.reason}`),
+    ).toEqual(['tos:ever-rec:text-mismatch']);
+    expect(status.current).toEqual(['privacy:ever-rec']);
+  });
+
   it('blocks someone who never accepted anything', () => {
     const status = evaluateAcceptance(required, []);
 
