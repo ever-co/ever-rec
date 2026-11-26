@@ -1,0 +1,192 @@
+// The Ever app switcher in the sidebar header. Rec's own tokens: Roboto, ink #383c44, muted #6e6e6e, the
+// lavender-grey hover #f5f4f7 and the purple #5b4dbe for focus and the current app.
+
+$ink: #383c44;
+$muted: #6e6e6e;
+$hover: #f5f4f7;
+$accent: #5b4dbe;
+$hairline: rgba(56, 60, 68, 0.08);
+$ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+
+.root {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  // The mark's left edge lines up with where the Rec logo used to start.
+  margin-left: -4px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+  transition: background-color 120ms $ease-out;
+
+  &:hover,
+  &[aria-expanded='true'] {
+    background: $hover;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $accent;
+    outline-offset: 2px;
+  }
+}
+
+.mark {
+  display: block;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .mark {
+    animation: ever-mark-turn 9s linear infinite;
+  }
+}
+
+@keyframes ever-mark-turn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 1050;
+  width: 18rem;
+  max-width: calc(100vw - 16px);
+  padding: 4px;
+  border: 1px solid $hairline;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 16px 40px rgba(112, 144, 176, 0.2);
+  color: $ink;
+  font-family: Roboto, Helvetica, Arial, sans-serif;
+  text-align: start;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .panel {
+    animation: ever-apps-open 160ms $ease-out;
+  }
+}
+
+@keyframes ever-apps-open {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+.title {
+  margin: 0;
+  padding: 8px 8px 4px;
+  color: $muted;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+}
+
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 4px 8px;
+  border-radius: 8px;
+  color: $ink;
+  text-decoration: none;
+}
+
+a.row {
+  cursor: pointer;
+  transition: background-color 120ms $ease-out;
+
+  &:hover {
+    background: $hover;
+    color: $ink;
+  }
+
+  &:focus-visible {
+    background: $hover;
+    outline: 2px solid $accent;
+    outline-offset: -2px;
+  }
+}
+
+// A white tile behind every logo: the Platform and Demand marks are dark on a transparent background.
+.tile {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  padding: 1px;
+  border-radius: 6px;
+  background: #fff;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
+  color: $ink;
+  font-size: 12px;
+}
+
+.tile img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.name,
+.line {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.name {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+}
+
+.line {
+  color: $muted;
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.check {
+  flex-shrink: 0;
+  color: $accent;
+  font-size: 16px;
+}
+
+.separator {
+  height: 1px;
+  margin: 4px 8px;
+  background: $hairline;
+}

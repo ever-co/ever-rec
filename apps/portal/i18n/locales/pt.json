@@ -78,6 +78,22 @@
     "profile": "Perfil",
     "administration": "Administração"
   },
+  "everApps": {
+    "title": "Aplicativos",
+    "switchLabel": "Mudar para outra plataforma ou aplicativo Ever",
+    "add": "Adicionar",
+    "addLabel": "Adicione seus próprios aplicativos no Ever Platform",
+    "lines": {
+      "platform": "Uma conta para todos os aplicativos Ever",
+      "works": "Agentes de IA que tocam o seu negócio",
+      "teams": "Gestão de trabalho e projetos",
+      "gauzy": "ERP, CRM e RH em um só aplicativo",
+      "rec": "Captura e gravação de tela",
+      "traduora": "Gestão de traduções para equipes",
+      "demand": "Comércio e marketplaces sob demanda",
+      "tech": "Engenheiros e agentes operados para contratar"
+    }
+  },
   "notFound": {
     "workspace": {
       "heading": "Nenhum Espaço de Trabalho Encontrado",
