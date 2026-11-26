@@ -2,9 +2,14 @@
  * `status` + `reaccept`: a signed-in user without a record (a sign-up whose write failed, as on 2026-11-26 when
  * production had no Firestore) is blocked until they accept the current texts, and only the current texts count.
  *
+ * `recordAtSignUp`: a sign-up whose record fails keeps its account, and the failure is sent to Sentry as well as
+ * logged (#276).
+ *
  * The Firestore adapter is swapped for the package's in-memory adapter, so the real recorder, corpus checks and
  * status evaluation run unchanged.
  */
+jest.mock('@sentry/nestjs', () => ({ captureException: jest.fn() }));
+
 import { BadRequestException } from '@nestjs/common';
 
 jest.mock('terms-acceptance/firebase', () => {
@@ -15,6 +20,7 @@ jest.mock('terms-acceptance/firebase', () => {
   };
 });
 
+import * as Sentry from '@sentry/nestjs';
 import { TermsAcceptanceService } from './terms-acceptance.service';
 import { corpus } from './terms-acceptance.corpus';
 
@@ -212,5 +218,55 @@ describe('TermsAcceptanceService status and reaccept', () => {
     await expect(
       service.reaccept('uid-1', [{ ...first, version: '0.0.1' }], {}),
     ).rejects.toBeInstanceOf(BadRequestException);
+  });
+});
+
+describe('TermsAcceptanceService.recordAtSignUp', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it('stores the record and sends nothing when the write works', async () => {
+    const service = newService();
+
+    await expect(
+      service.recordAtSignUp('uid-1', claimsFrom(service), {}, 'email'),
+    ).resolves.toBe(true);
+
+    expect((await service.status('uid-1', 'en')).satisfied).toBe(true);
+    expect(Sentry.captureException).not.toHaveBeenCalled();
+  });
+
+  it.each(['email', 'ever-id'] as const)(
+    'does not throw and reports to Sentry when the write fails (%s sign-up)',
+    async (flow) => {
+      const service = newService();
+      const failure = new Error(
+        '7 PERMISSION_DENIED: Cloud Firestore API has not been used',
+      );
+      jest.spyOn(service, 'record').mockRejectedValueOnce(failure);
+
+      await expect(
+        service.recordAtSignUp('uid-1', claimsFrom(service), {}, flow),
+      ).resolves.toBe(false);
+
+      expect(Sentry.captureException).toHaveBeenCalledWith(failure, {
+        level: 'error',
+        tags: { area: 'terms-acceptance', flow: `${flow}-signup` },
+      });
+      // The uid stays out of Sentry.
+      expect(
+        JSON.stringify((Sentry.captureException as jest.Mock).mock.calls),
+      ).not.toContain('uid-1');
+    },
+  );
+
+  it('reports a non-Error rejection as an Error', async () => {
+    const service = newService();
+    jest.spyOn(service, 'record').mockRejectedValueOnce('quota');
+
+    await service.recordAtSignUp('uid-1', claimsFrom(service), {}, 'email');
+
+    const [reported] = (Sentry.captureException as jest.Mock).mock.calls[0];
+    expect(reported).toBeInstanceOf(Error);
+    expect(reported.message).toBe('quota');
   });
 });

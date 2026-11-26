@@ -152,7 +152,7 @@ export class TermsAcceptanceService {
     uid: string,
     claims: ITermsAcceptanceClaim[],
     context: { ip?: string | null; userAgent?: string | null },
-    flow: 'password' | 'ever-id',
+    flow: 'email' | 'ever-id',
   ): Promise<boolean> {
     try {
       await this.record(uid, claims, { method: 'signup-checkbox', ...context });
@@ -167,7 +167,7 @@ export class TermsAcceptanceService {
    * The alert for a sign-up without its terms record. Sentry is a no-op when `SENTRY_DSN` is not set; the uid
    * goes only into the log line, not to Sentry.
    */
-  reportUnrecorded(uid: string, flow: 'password' | 'ever-id', error: unknown): void {
+  reportUnrecorded(uid: string, flow: 'email' | 'ever-id', error: unknown): void {
     const message = error instanceof Error ? error.message : String(error);
     this.logger.error(`Terms acceptance not recorded (${flow} sign-up) for user ${uid}: ${message}`);
     Sentry.captureException(error instanceof Error ? error : new Error(message), {

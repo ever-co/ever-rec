@@ -1,5 +1,5 @@
 /**
- * Password sign-up: a failed terms record never fails the sign-up, and it raises the Sentry alert (#276). The
+ * E-mail and password sign-up: a failed terms record never fails the sign-up, and it raises the Sentry alert (#276). The
  * real TermsAcceptanceService runs on the package's in-memory adapter.
  */
 jest.mock('@sentry/nestjs', () => ({ captureException: jest.fn() }));
@@ -95,7 +95,7 @@ describe('AuthenticationService.register and the terms record', () => {
     expect(userService.addUserToDb).toHaveBeenCalledTimes(1);
     expect(Sentry.captureException).toHaveBeenCalledWith(expect.any(Error), {
       level: 'error',
-      tags: { area: 'terms-acceptance', flow: 'password-signup' },
+      tags: { area: 'terms-acceptance', flow: 'email-signup' },
     });
     // The sign-in gate will ask again: nothing is on file yet.
     expect((await terms.status('uid-1', 'en')).satisfied).toBe(false);

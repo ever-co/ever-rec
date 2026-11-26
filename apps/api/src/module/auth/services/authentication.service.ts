@@ -160,7 +160,7 @@ export class AuthenticationService {
             ip: registerData.ip ?? null,
             userAgent: registerData.userAgent ?? null,
           },
-          'password',
+          'email',
         );
       }
 
