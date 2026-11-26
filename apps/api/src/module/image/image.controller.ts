@@ -18,7 +18,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import {
   UPLOAD_FILE_BYTES,
   uploadOptions,
-} from 'src/common/uploads/upload-limits';
+} from 'src/common/multipart/upload-limits';
 import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
 import {

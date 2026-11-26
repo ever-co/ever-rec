@@ -59,7 +59,7 @@ import {
   MAX_UPLOAD_FIELD_BYTES,
   UPLOAD_FILE_BYTES,
   uploadOptions,
-} from '../../common/uploads/upload-limits';
+} from '../../common/multipart/upload-limits';
 
 @Controller('video')
 export class VideoController {

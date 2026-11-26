@@ -16,7 +16,7 @@ import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import {
   UPLOAD_FILE_BYTES,
   uploadOptions,
-} from '../../../common/uploads/upload-limits';
+} from '../../../common/multipart/upload-limits';
 import { AuthGuard, IRequestUser } from '../../auth/guards/auth.guard';
 import { IsWorkspaceAdminGuard } from '../guards/IsWorkspaceAdmin.guard';
 import { CanAccessWorkspaceGuard } from '../guards/CanAccessWorkspace.guard';

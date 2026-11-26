@@ -22,7 +22,7 @@ import { fileExtensionMap } from 'src/services/utils/fileExtensionMap';
 import {
   UPLOAD_FILE_BYTES,
   uploadOptions,
-} from 'src/common/uploads/upload-limits';
+} from 'src/common/multipart/upload-limits';
 
 @Controller('stream')
 export class StreamServiceController {

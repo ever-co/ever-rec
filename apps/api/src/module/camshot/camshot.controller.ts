@@ -20,7 +20,7 @@ import { PipelineType } from 'src/common/pipeline/types';
 import {
   UPLOAD_FILE_BYTES,
   uploadOptions,
-} from 'src/common/uploads/upload-limits';
+} from 'src/common/multipart/upload-limits';
 import { RefreshToken } from '../auth/decorators/refresh-token.decorator';
 import { User } from '../auth/decorators/user.decorator';
 import { AuthGuard, IRequestUser } from '../auth/guards/auth.guard';

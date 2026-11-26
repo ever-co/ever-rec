@@ -15,7 +15,7 @@ import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import {
   UPLOAD_FILE_BYTES,
   uploadOptions,
-} from '../../../common/uploads/upload-limits';
+} from '../../../common/multipart/upload-limits';
 import { AuthGuard } from '../../auth/guards/auth.guard';
 import { WhiteboardTeamService } from '../services/teams.service';
 

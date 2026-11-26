@@ -1,5 +1,8 @@
 import type { MulterModuleOptions as MulterOptions } from '@nestjs/platform-express';
 
+// This folder must not be named `uploads`: .dockerignore leaves every `uploads` folder out of the
+// image build, and the API image would then fail to compile.
+
 const KiB = 1024;
 const MiB = 1024 * KiB;
 

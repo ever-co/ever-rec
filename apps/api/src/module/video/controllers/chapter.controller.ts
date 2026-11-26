@@ -12,7 +12,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { uploadOptions } from 'src/common/uploads/upload-limits';
+import { uploadOptions } from 'src/common/multipart/upload-limits';
 import { AuthGuard } from 'src/module/auth/guards/auth.guard';
 import {
   CanAccessWorkspaceQueryGuard,

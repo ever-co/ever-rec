@@ -14,7 +14,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import {
   UPLOAD_FILE_BYTES,
   uploadOptions,
-} from '../../common/uploads/upload-limits';
+} from '../../common/multipart/upload-limits';
 import type { Request } from 'express';
 import { IDataResponse } from '../../interfaces/_types';
 import { SharedService } from '../../services/shared/shared.service';

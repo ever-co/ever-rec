@@ -18,7 +18,7 @@ import { PipelineType } from 'src/common/pipeline/types';
 import {
   UPLOAD_FILE_BYTES,
   uploadOptions,
-} from 'src/common/uploads/upload-limits';
+} from 'src/common/multipart/upload-limits';
 import { IDataResponse } from 'src/interfaces/_types';
 import { sendResponse } from 'src/services/utils/sendResponse';
 import { RefreshToken } from '../auth/decorators/refresh-token.decorator';

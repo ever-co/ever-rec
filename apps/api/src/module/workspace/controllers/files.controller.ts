@@ -24,7 +24,7 @@ import { RemoveUploadInterceptor } from '../../../common/interceptors/remove-upl
 import {
   UPLOAD_FILE_BYTES,
   uploadOptions,
-} from '../../../common/uploads/upload-limits';
+} from '../../../common/multipart/upload-limits';
 import { WorkspaceFilesService } from '../services/files.service';
 import { CanAccessFolder } from '../decorators/CanAccessFolder.decorator';
 import { CanChangePermissions } from '../decorators/CanChangePermissions.decorator';

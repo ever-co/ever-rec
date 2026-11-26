@@ -23,7 +23,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import {
   UPLOAD_FILE_BYTES,
   uploadOptions,
-} from '../../../common/uploads/upload-limits';
+} from '../../../common/multipart/upload-limits';
 import { User } from '../../auth/decorators/user.decorator';
 import { ValidateId } from '../pipes/validate-id.pipe';
 import { CreateWorkspaceDto } from '../dto/workspaces/create-workspace.dto';
