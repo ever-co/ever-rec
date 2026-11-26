@@ -16,6 +16,7 @@ import {
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { EVER_COUNTER_EVENTS } from '../src/common/events/ever-counters.events';
 import { EverIdLinkService } from '../src/module/ever-id/services/ever-id-link.service';
+import { TermsAcceptanceService } from '../src/module/terms/terms-acceptance.service';
 import { MockOidcIssuer } from './mock-oidc/mock-oidc-issuer';
 import { createTestApp, TestApp } from './support/test-app';
 
@@ -488,6 +489,38 @@ describe('Ever ID sign-in (e2e)', () => {
       expect(t.firebase.authService.users.size).toBe(0);
       expect(t.firebase.db.dump('users')).toBeNull();
       expect(t.firebase.db.dump('ever_identities')).toBeNull();
+    });
+
+    it('keeps the account and raises the alert when the terms record fails (#276)', async () => {
+      const failure = new Error('7 PERMISSION_DENIED: Cloud Firestore API has not been used');
+      jest
+        .spyOn(TermsAcceptanceService.prototype, 'record')
+        .mockRejectedValueOnce(failure);
+      const alert = jest.spyOn(TermsAcceptanceService.prototype, 'reportUnrecorded');
+      // The claims the portal's confirmation screen posts.
+      const terms = t.app
+        .get(TermsAcceptanceService)
+        .getRequiredDocuments('en')
+        .map(({ documentId, version, sha256, locale }) => ({ documentId, version, sha256, locale }));
+
+      issuer.nextClaims = { sub: 'unrecorded-person' };
+      const landing = await authorize();
+      const confirm = await request(server())
+        .post('/api/v1/auth/ever-id/sign-up/confirm')
+        .send({
+          pending: landing.searchParams.get('confirm'),
+          termsAccepted: true,
+          terms,
+          binding: PORTAL_BINDING,
+        });
+      expect(confirm.status).toBe(200);
+      const session = await exchange(confirm.body.code);
+      expect(session.status).toBe(201);
+      const person = session.body.data;
+
+      expect(t.firebase.db.dump(`users/${person.id}`)).not.toBeNull();
+      expect(alert).toHaveBeenCalledWith(person.id, 'ever-id', failure);
+      expect(t.firebase.acceptances).toEqual([]);
     });
 
     it('counts a new account once it is linked, never one whose sign-up was undone', async () => {

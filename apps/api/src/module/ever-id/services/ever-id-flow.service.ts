@@ -417,18 +417,14 @@ export class EverIdFlowService {
     this.userService.countCreatedUser();
 
     if (acceptance.terms?.length) {
-      try {
-        await this.termsAcceptanceService.record(uid, acceptance.terms, {
-          method: 'signup-checkbox',
-          ip: acceptance.ip ?? null,
-          userAgent: acceptance.userAgent ?? null,
-        });
-      } catch (error) {
-        // Same rule as the password sign-up: the account stands, the failure is logged.
-        this.logger.error(
-          `Terms acceptance not recorded: ${error instanceof Error ? error.message : 'error'}`,
-        );
-      }
+      // Same rule as the password sign-up: the account stands; the failure is logged, sent to Sentry, and the
+      // sign-in gate asks again.
+      await this.termsAcceptanceService.recordAtSignUp(
+        uid,
+        acceptance.terms,
+        { ip: acceptance.ip ?? null, userAgent: acceptance.userAgent ?? null },
+        'ever-id',
+      );
     }
 
     await this.links.touch(pending.issuer, pending.subject);

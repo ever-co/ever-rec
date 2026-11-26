@@ -14,6 +14,7 @@ import '../styles/antd.scss';
 import '../styles/items.scss';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import Index from './_index';
+import TermsGate from 'components/shared/TermsGate';
 import '../i18n/config';
 
 export type NextApplicationPage<P = any, IP = P> = NextPage<P, IP> & {
@@ -27,6 +28,7 @@ function CustomApp({ Component, pageProps }: AppProps) {
         clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ''}
       >
         <Index />
+        <TermsGate />
         <Head>
           <title>Rec</title>
           <link rel="shortcut icon" href="/icons/16.png" />
