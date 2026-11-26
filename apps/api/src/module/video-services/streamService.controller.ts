@@ -7,10 +7,12 @@ import {
   Param,
   Post,
   Req,
+  UnsupportedMediaTypeException,
   UploadedFile,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
+import { unlink } from 'fs/promises';
 import { AuthGuard } from '../../module/auth/guards/auth.guard';
 import { VideoServicesEnum } from '../../enums/StreamingServicesEnums';
 import IEditorVideo, { IStreamingDbData } from '../../interfaces/IEditorVideo';
@@ -35,6 +37,28 @@ function requireVideoFile(
   if (!blob) {
     throw new BadRequestException('A video file is required');
   }
+}
+
+/**
+ * The extension the recording is stored and converted under, looked up as on the upload routes: a
+ * type we have none for is refused (415) before anything is written, uploaded or deleted. It used
+ * to be stored as `<id>undefined`, a name ffmpeg cannot convert to. These routes have no
+ * RemoveUploadInterceptor (the bucket upload reads the file in the background), so the temporary
+ * file of a refused upload is removed here.
+ */
+async function requireVideoExtension(
+  blob: Express.Multer.File,
+): Promise<string> {
+  const fileExtension = fileExtensionMap[blob.mimetype];
+  if (!fileExtension) {
+    if (blob.path) {
+      await unlink(blob.path).catch(() => undefined);
+    }
+    throw new UnsupportedMediaTypeException(
+      `Unsupported media type: ${blob.mimetype}`,
+    );
+  }
+  return fileExtension;
 }
 
 @Controller('stream')
@@ -92,7 +116,7 @@ export class StreamServiceController {
     @UploadedFile() blob: Express.Multer.File | undefined,
   ): Promise<IEditorVideo | null> {
     requireVideoFile(blob);
-    const fileExtension = fileExtensionMap[blob.mimetype];
+    const fileExtension = await requireVideoExtension(blob);
 
     const uid = request.user?.id;
     return this.streamService.saveVideoData(
@@ -131,7 +155,7 @@ export class StreamServiceController {
     @UploadedFile() blob: Express.Multer.File | undefined,
   ): Promise<IEditorVideo | null> {
     requireVideoFile(blob);
-    const fileExtension = fileExtensionMap[blob.mimetype];
+    const fileExtension = await requireVideoExtension(blob);
 
     const uid = request.user?.id;
     return this.streamService.updateVideoData(
