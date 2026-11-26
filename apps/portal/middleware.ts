@@ -55,6 +55,9 @@ export function middleware(request: NextRequest) {
       console.log('Invalid token');
       const urlNext = request.nextUrl.clone();
       urlNext.pathname = '/auth/login';
+      // The export page keeps its job through the sign-in here too (other pages keep their query as before).
+      const exportSearch = signInSearchFor(request.nextUrl);
+      if (exportSearch) urlNext.search = exportSearch;
       return NextResponse.redirect(urlNext);
     }
   } else {

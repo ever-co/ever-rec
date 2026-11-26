@@ -9,7 +9,8 @@ import { NotFoundException } from '@nestjs/common';
 import { ProblemError } from '@ever-co/connect-sdk';
 import { InMemoryFirebaseApp } from '../../../../test/support/in-memory-firebase';
 import { readEverConnectConfig } from '../ever-connect.config';
-import { EVER_CONNECT_PATHS } from '../ever-connect.types';
+import { EVER_CONNECT_PATHS, PERSON_REQUEST_KEPT_MS } from '../ever-connect.types';
+import { EverConnectStoreService } from './ever-connect-store.service';
 import {
   EverConnectPersonService,
   hashesOf,
@@ -110,6 +111,7 @@ function setup(env: Record<string, string> = {}) {
     subject_hashes: [hashOf(subject)],
   });
   return {
+    firebase,
     db,
     acks,
     ackErrors,
@@ -327,6 +329,27 @@ describe('a person deletion request', () => {
     hold.mockResolvedValue(null);
     expect(await t.service.retryIncompleteDeletions()).toBe(1);
     expect(t.acks[1]).toEqual({ job_id: 'job-d7', result: 'deleted' });
+  });
+
+  it('the sweep keeps a deletion still to finish, so the heartbeat can finish it later', async () => {
+    const t = setup({ EVER_CONNECT_PERSON_DELETION_ENABLED: 'true' });
+    t.deleter.delete.mockResolvedValueOnce(false);
+    await t.service.onDeletionRequested(t.request('job-d8'));
+    expect(t.stored('job-d8').incomplete).toBe(true);
+    const done = t.stored('job-d8');
+    // Long after: the unfinished request stays, a finished one of the same age goes.
+    t.db.write([...EVER_CONNECT_PATHS.personRequests.split('/'), 'job-old'], {
+      ...done,
+      incomplete: null,
+      result: 'no_account',
+    });
+    const store = new EverConnectStoreService(t.firebase as any);
+    const later = (done.answeredAt as number) + 3 * PERSON_REQUEST_KEPT_MS;
+    expect(await store.sweepPersonRequests(later)).toBe(1);
+    expect(t.stored('job-old')).toBeNull();
+    expect(t.stored('job-d8').incomplete).toBe(true);
+    expect(await t.service.retryIncompleteDeletions()).toBe(1);
+    expect(t.acks[1]).toEqual({ job_id: 'job-d8', result: 'deleted' });
   });
 
   it('switched on: an account that became a workspace admin after the first check is kept', async () => {

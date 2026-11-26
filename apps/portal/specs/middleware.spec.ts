@@ -12,6 +12,7 @@ jest.mock('jwt-decode', () => ({
   }),
 }));
 
+import { NextResponse } from 'next/server';
 import { isPublicSharedPath, middleware, signInSearchFor } from '../middleware';
 
 function makeRequest(pathname: string, cookies: Record<string, string> = {}) {
@@ -94,6 +95,38 @@ describe('middleware', () => {
 
   it('sends a signed-out visit of the export page to sign-in', () => {
     expect(middleware(makeRequest('/settings/data-export'))).toEqual({ kind: 'redirect', pathname: '/auth/login' });
+  });
+});
+
+describe('the export page through the sign-in', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  const visit = (cookies: Record<string, string>) => {
+    const nextUrl: any = {
+      pathname: '/settings/data-export',
+      search: '?job=01KJOB',
+      searchParams: new URLSearchParams('?job=01KJOB'),
+      clone() {
+        return { ...nextUrl };
+      },
+    };
+    middleware({
+      nextUrl,
+      cookies: { get: (name: string) => (cookies[name] ? { value: cookies[name] } : undefined) },
+    } as any);
+    return (NextResponse.redirect as jest.Mock).mock.calls[0][0];
+  };
+
+  it('signed out: the sign-in gets the job as dataExport', () => {
+    const target = visit({});
+    expect(target.pathname).toBe('/auth/login');
+    expect(target.search).toBe('?dataExport=01KJOB');
+  });
+
+  it('with an unreadable token: the same', () => {
+    const target = visit({ refreshToken: 'r', idToken: 'bad' });
+    expect(target.pathname).toBe('/auth/login');
+    expect(target.search).toBe('?dataExport=01KJOB');
   });
 });
 
