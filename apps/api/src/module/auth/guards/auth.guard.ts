@@ -44,7 +44,12 @@ export class AuthGuard implements CanActivate {
           throw new UnauthorizedException('Unauthorized user');
         }
 
-        await this.tokenService.refreshToken(refreshToken, request);
+        const refreshed = await this.tokenService.refreshToken(refreshToken, request);
+        // The header's ID token has expired; handlers that pass the session token on (the
+        // verification mail asks Firebase with it) must use the fresh one.
+        if (refreshed?.idToken) {
+          request.refreshedIdToken = refreshed.idToken;
+        }
 
         return true;
       } catch {

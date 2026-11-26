@@ -841,6 +841,33 @@ describe('Ever ID sign-in (e2e)', () => {
       }
     });
 
+    it('ends a refreshed session after its sign-in reference has expired', async () => {
+      // References live 4 s here, so the one recorded at sign-in expires while the session lives on.
+      await t.close();
+      t = await createTestApp({ env: onEnv(issuer, { REC_JWT_EXPIRES_IN: '4s' }) });
+      const session = await signUp('expired-reference-person');
+      await new Promise((resolve) => setTimeout(resolve, 2500));
+      const first = await refresh(session.refreshToken);
+      expect(first.status).toBe(200);
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // The sign-in reference has expired...
+      expect((await refresh(session.refreshToken)).status).toBeGreaterThanOrEqual(400);
+      // ...while the session itself is alive: its current reference still refreshes, and the reference
+      // that refresh returns is seconds old when the logout lands, so only the logout can end it.
+      const second = await refresh(first.body.refreshToken);
+      expect(second.status).toBe(200);
+
+      const token = await issuer.logoutToken({ sid: 'sid-expired-reference-person' });
+      expect((await logout(token)).status).toBe(200);
+      // The storage entry behind every reference of the session is gone...
+      const { id } = JSON.parse(
+        Buffer.from(second.body.refreshToken.split('.')[1], 'base64url').toString(),
+      );
+      expect((await t.firebase.db.ref(`tokens/${id}`).get()).exists()).toBe(false);
+      // ...so its newest reference no longer refreshes.
+      expect((await refresh(second.body.refreshToken)).status).toBeGreaterThanOrEqual(400);
+    }, 20000);
+
     it('ends a session without a session id on a subject-only logout', async () => {
       issuer.nextClaims = { sub: 'no-sid-person', sid: undefined };
       const landing = await authorize();
