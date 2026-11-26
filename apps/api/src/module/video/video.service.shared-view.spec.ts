@@ -55,6 +55,7 @@ jest.mock('firebase-admin', () => {
     database: () => ({ ref }),
     storage: () => ({
       bucket: () => ({
+        name: 'rec-test.appspot.com',
         file: (path: string) => ({
           getSignedUrl: async () => [`signed:${path}`],
         }),
@@ -191,6 +192,75 @@ describe('VideoService shared view and update', () => {
       expect(result.data.video.url).toBe(
         'signed:users/uid-owner/videos/a.webm',
       );
+    });
+
+    // Every viewer's browser loads the chapter thumbnails of the share page, so a thumbnail URL
+    // saved before the save check goes out only when it is a signed link of the API's own bucket.
+    describe('the chapter thumbnails', () => {
+      const ownURL =
+        'https://storage.googleapis.com/rec-test.appspot.com/users/uid-owner/videosThumbnails/vid1/keep.jpg?GoogleAccessId=rec%40rec-test.iam.gserviceaccount.com&Expires=16725225600&Signature=c2lnbmVk';
+      const chapter = (id: string, thumbnailURL: string) => ({
+        id,
+        content: 'Intro',
+        timestamp: '00:00',
+        timestampSeconds: 0,
+        thumbnailURL,
+        refName: `${id}.jpg`,
+      });
+      const blanked = (id: string) => ({
+        id,
+        content: 'Intro',
+        timestamp: '00:00',
+        timestampSeconds: 0,
+        thumbnailURL: '',
+      });
+
+      it.each([
+        ['a foreign host', 'https://other.example/p.jpg'],
+        ['an .svg on a foreign host', 'https://other.example/p.svg'],
+        ['a javascript: URL', 'javascript:alert(document.cookie)'],
+        [
+          'another bucket on the storage host',
+          'https://storage.googleapis.com/other-bucket/x.jpg',
+        ],
+      ])('blank %s, with no thumbnail name', async (_name, url) => {
+        mockDb.data.users['uid-owner'].videos.vid1.chapters = {
+          abc: chapter('abc', url),
+        };
+
+        const result = await service.getVideoBySharedId('link1', false);
+
+        expect(result.data.video.dbData.chapters).toStrictEqual([
+          blanked('abc'),
+        ]);
+        expect(JSON.stringify(result)).not.toMatch(/other[.-]|javascript:/);
+      });
+
+      it('keep a signed link of the API’s own bucket', async () => {
+        mockDb.data.users['uid-owner'].videos.vid1.chapters = {
+          keep: chapter('keep', ownURL),
+          abc: chapter('abc', 'https://other.example/p.svg'),
+        };
+
+        const result = await service.getVideoBySharedId('link1', false);
+
+        expect(result.data.video.dbData.chapters).toStrictEqual([
+          chapter('keep', ownURL),
+          blanked('abc'),
+        ]);
+      });
+
+      it('are checked for a workspace item too', async () => {
+        mockDb.data.workspaces.ws1.videos.item1.chapters = [
+          chapter('abc', 'https://other.example/p.svg'),
+        ];
+
+        const result = await service.getVideoBySharedId('wlink', true);
+
+        expect(result.data.video.dbData.chapters).toStrictEqual([
+          blanked('abc'),
+        ]);
+      });
     });
   });
 
