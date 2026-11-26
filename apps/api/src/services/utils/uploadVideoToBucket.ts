@@ -1,6 +1,8 @@
 import * as admin from 'firebase-admin';
+import { createReadStream } from 'fs';
 import * as fs from 'fs/promises';
 import { join } from 'path';
+import { pipeline } from 'stream/promises';
 import { TMP_PATH_FIXED } from 'src/enums/tmpPathsEnums';
 import { fixVideoWithFFMPEG } from './fixVideoWithFFMPEG';
 
@@ -71,8 +73,15 @@ export async function uploadVideoToBucket({
       `${rootPath}/${itemTypePath}/${bucketFilename}`,
     );
 
-    const fileBuffer = await fs.readFile(fullFilepath);
-    await bucketRef.save(fileBuffer);
+    // Streamed from the API disk, never read into memory whole: a few large uploads at once would
+    // hold gigabytes in the API, and a file over 2 GiB could not be read at all. No options, as the
+    // in-memory save had none, so the bucket file gets the content type read from its name. The
+    // pipeline settles once the upload is complete or failed (a file that cannot be read fails it
+    // and ends the bucket write), before the temporary file is removed below.
+    await pipeline(
+      createReadStream(fullFilepath),
+      bucketRef.createWriteStream(),
+    );
 
     return bucketRef;
   } catch (err) {
