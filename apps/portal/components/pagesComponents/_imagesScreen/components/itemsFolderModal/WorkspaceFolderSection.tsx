@@ -74,7 +74,7 @@ const WorkspaceFolderSection: React.FC<IFolderSectionProps> = ({
   if (folders?.length > 0) {
     folderSection = (
       <>
-        <h2 className="tw-mb-6 tw-text-2xl tw-font-semibold">
+        <h2 className="tw-mb-4 tw-text-base tw-font-semibold">
           {t('modals.selectFolder')}
         </h2>
         <Folder
@@ -91,7 +91,7 @@ const WorkspaceFolderSection: React.FC<IFolderSectionProps> = ({
   } else if (items.every((x) => x.dbData?.parentId === false)) {
     folderSection = (
       <>
-        <h3 className="tw-mb-6 tw-text-2xl tw-font-semibold">
+        <h3 className="tw-mb-4 tw-text-base tw-font-semibold">
           {t('common.donthaveFolder')}
         </h3>
       </>

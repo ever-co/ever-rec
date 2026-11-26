@@ -20,22 +20,19 @@ const DeleteFolderModal: React.FC<IDeleteScreenshotModalProps> = ({
       open={visible}
       onCancel={onCancel}
       footer={
-        <div className="tw-flex tw-justify-end tw-mt-14">
+        <div className="tw-flex tw-justify-end tw-gap-2 tw-mt-6">
           <AppButton
             onClick={onCancel}
             bgColor="tw-bg-app-grey-darker"
             outlined
-            className="tw-px-8 tw-mx-4 tw-pb-1 tw-pt-1"
           >
             {t('common.cancel')}
           </AppButton>
-          <AppButton onClick={onOk} className="tw-px-8 tw-pb-1 tw-pt-1">
-            {t('modals.deleteFolder')}
-          </AppButton>
+          <AppButton onClick={onOk}>{t('modals.deleteFolder')}</AppButton>
         </div>
       }
     >
-      <h2 className="tw-mb-6 tw-text-2xl tw-font-semibold">
+      <h2 className="tw-mb-0 tw-text-base tw-font-semibold">
         {t('modals.deleteFolderQuestion')}
       </h2>
     </Modal>

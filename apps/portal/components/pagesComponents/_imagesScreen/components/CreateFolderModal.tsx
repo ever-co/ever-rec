@@ -136,26 +136,21 @@ const CreateFolderModal: React.FC<ICreateFolderModalProps> = ({
       open={visible}
       onCancel={onCancel}
       footer={
-        <div className="tw-flex tw-justify-end tw-mt-4">
+        <div className="tw-flex tw-justify-end tw-gap-2 tw-mt-6">
           <AppButton
             onClick={onCancel}
             bgColor="tw-bg-app-grey-darker"
             outlined
-            className="tw-px-8 tw-mx-4 tw-pb-1 tw-pt-1"
           >
             {t('common.cancel')}
           </AppButton>
-          <AppButton
-            onClick={onOkHandler}
-            className="tw-px-8 tw-pb-1 tw-pt-1"
-            disabled={!valid}
-          >
+          <AppButton onClick={onOkHandler} disabled={!valid}>
             {t('modals.create')}
           </AppButton>
         </div>
       }
     >
-      <h2 className="tw-mb-6 tw-text-2xl tw-font-semibold">
+      <h2 className="tw-mb-4 tw-text-base tw-font-semibold">
         {t('modals.createAFolder')}
       </h2>
       <AppInput
@@ -164,10 +159,10 @@ const CreateFolderModal: React.FC<ICreateFolderModalProps> = ({
         errors={folderName.errors}
         onChange={folderNameChangeHandler}
         rules={folderNameRules}
-        inputClass="tw-bg-transparent tw-placeholder-black"
+        inputClass="tw-bg-transparent"
         maxLength={35}
       />
-      <div className="tw-mt-4 tw-text-lg tw-ml-1">
+      <div className="tw-mt-4 tw-text-sm">
         {t('modals.selectFolder')}{' '}
         <span className="tw-font-semibold" style={{ color: color }}>
           {t('modals.color')}
@@ -175,9 +170,11 @@ const CreateFolderModal: React.FC<ICreateFolderModalProps> = ({
       </div>
       <div className="tw-flex tw-items-center tw-space-x-4"></div>
       <div className="tw-my-4 tw-flex tw-w-full tw-justify-center tw-h-25px tw-items-center">
-        <p className="tw-mt-1 tw-mr-1">{t('modals.custom')}</p>{' '}
+        <p className="tw-mt-1 tw-mr-1 tw-text-sm tw-text-muted-foreground">
+          {t('modals.custom')}
+        </p>{' '}
         <ColorPicker color={color} setColor={handleColor} />
-        <p className="tw-h-7 tw-w-[1px] tw-mt-1 tw-bg-black tw-mx-2"></p>{' '}
+        <p className="tw-h-7 tw-w-[1px] tw-mt-1 tw-bg-border tw-mx-2"></p>{' '}
         {colorPalet.map((item, index) => (
           <div key={index}>
             <ColorElement

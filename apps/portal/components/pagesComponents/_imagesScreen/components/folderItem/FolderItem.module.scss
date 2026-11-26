@@ -1,18 +1,18 @@
-@import 'pagesScss/partials/_colors.scss';
-
+// The folder tile of the library: a card with a hairline. The folder's own colour stays on its icon.
 .mainWrapper {
-  border: 2px solid $grey-light04;
-  font-family: Roboto;
-  font-size: 16px;
+  border: 1px solid hsl(var(--border));
+  font-size: 14px;
   font-weight: 500;
-  line-height: 24px;
-  letter-spacing: 0.01em;
+  line-height: 20px;
   text-align: left;
-  background-color: #fdfdfd;
-  transition: all 0.1s ease-in-out;
+  background-color: hsl(var(--card));
+  color: hsl(var(--foreground));
+  transition:
+    border-color 150ms var(--ease-out),
+    background-color 150ms var(--ease-out);
   padding: 0.5rem 0.75rem;
   padding-right: 0;
-  border-radius: 0.375rem;
+  border-radius: 10px;
   width: 250px;
   cursor: pointer;
   height: 58px;
@@ -20,14 +20,17 @@
 
 .mainWrapper:hover,
 .mainWrapper.active {
-  border-color: $primary-violet;
-  background-color: $primary-violet10;
-  color: #000000;
+  border-color: hsl(var(--foreground) / 0.25);
 
   & .svgWrapper {
-    color: #000000;
-    fill: #000000;
+    color: hsl(var(--foreground));
   }
+}
+
+// An item card is being dragged over the folder: a 2px accent ring (the hairline plus 1px).
+.mainWrapper.dragOver {
+  border-color: hsl(var(--brand));
+  box-shadow: 0 0 0 1px hsl(var(--brand));
 }
 
 .folderContent {
@@ -39,13 +42,14 @@
 }
 
 .folderIconWrapper {
-  margin-right: 10px;
+  margin-right: 8px;
   margin-bottom: 1px;
 }
 
 .folderName {
-  font-size: 1rem;
-  font-weight: 600;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.25rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -53,26 +57,30 @@
 
 .favoriteWrapper {
   display: flex;
+  align-items: center;
 }
 
 .favoriteWrapper .starSvg {
-  margin-right: 5px;
+  margin-right: 4px;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
 .svgWrapper {
-  color: #888888;
-  fill: #888888;
-  height: 100%;
+  color: hsl(var(--muted-foreground));
   display: flex;
   align-items: center;
   justify-content: center;
   height: 2.5rem;
-  border-radius: 9999px;
   cursor: pointer;
   padding: 0 0.75rem;
+  transition: color 150ms var(--ease-out);
+
+  // The dots are drawn in a fixed grey: they take the button's text colour instead.
+  svg path {
+    fill: currentColor;
+  }
 }
 
 .svg {
@@ -80,11 +88,10 @@
 }
 
 .lowerText {
-  font-family: Roboto;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   font-weight: 400;
-  line-height: 24px;
-  letter-spacing: 0.01em;
+  line-height: 20px;
+  color: hsl(var(--muted-foreground));
   text-align: left;
   white-space: nowrap;
   overflow: hidden;
@@ -92,16 +99,26 @@
 }
 
 .spinnerWrapper {
-  width: 23px;
-  height: 23px;
+  width: 24px;
+  height: 24px;
 }
 
+// Kept for the "more" menu of pages/media/favorites.tsx, which still names it. The menu itself is
+// skinned once, in styles/antd.scss.
 .gradientBackground {
-  background: radial-gradient(circle at 50% 50%, #b198f8 0%, #e0dfe7 59%);
+  background: hsl(var(--popover));
 }
 
+// The colour row of the "more" menu holds the swatches; the row itself is not an action, so it
+// keeps the default cursor and does not light up on hover (the doubled class outweighs the menu's
+// hover rule without `!important`).
 .menuNormalCursor {
   cursor: default;
+}
+
+.menuNormalCursor.menuNormalCursor.menuNormalCursor:hover {
+  background-color: transparent;
+  color: inherit;
 }
 
 .headerContainer {

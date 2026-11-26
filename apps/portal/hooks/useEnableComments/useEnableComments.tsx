@@ -476,52 +476,33 @@ const useEnableComments = ({
       commentValue === editCommentState.commentContent;
 
     return (
-      <div className="tw-flex tw-flex-col tw-justify-between tw-min-h-500px tw-w-395px">
+      <div className={styles.template}>
         {comments.length === 0 ? (
-          <div className="tw-flex tw-flex-col tw-justify-center tw-align-center">
-            <h6
-              ref={commentsHeaderRef}
-              className="tw-text-primary-purple tw-font-bold tw-m-4"
-            >
+          <div className={styles.empty}>
+            <h6 ref={commentsHeaderRef} className={styles.emptyTitle}>
               {t('hooks.noComments')}
             </h6>
-            <span className="tw-inline-flex tw-justify-center">
-              <img
-                src="/contentImages/comments-icon.svg"
-                alt="no comments"
-                className="tw-pt-177px tw-w-50p"
-              />
+            <span className={styles.emptyPicture}>
+              <img src="/contentImages/comments-icon.svg" alt="no comments" />
             </span>
           </div>
         ) : (
-          <div className="tw-overflow-x-hidden scroll-div tw-max-h-395px tw-px-2 tw-pl-2 tw-mr-2 tw-mt-2">
+          <div className={classNames(styles.list, 'scroll-div')}>
             {comments.map((comment: any, index: number) => (
               <div
                 className={classNames(
                   styles.wrapper,
-                  'tw-px-1 tw-flex tw-flex-col tw-mb-13px tw-rounded-md',
-                  'tw-pt-1 hover:tw-bg-light-grey hover:tw-shadow hover:tw-cursor-pointer',
-                  index === comments.length - 1
-                    ? 'tw-bg-blue-grey tw-rounded-md tw-p-1 tw-w-105p tw--ml-2point5p'
-                    : '',
+                  index === comments.length - 1 ? styles.latest : '',
                 )}
                 key={comment.id}
               >
                 {index === comments.length - 1 && (
-                  <span
-                    className="tw-pl-3 tw-text-sm tw-italic tw-text-app-grey tw-mb-2 mx-xl:tw-ml-2"
-                    ref={lastestComment}
-                  >
+                  <span className={styles.latestLabel} ref={lastestComment}>
                     {t('hooks.latestComment')}
                   </span>
                 )}
-                <div className="tw-flex tw-ml-2 tw-mr-2">
-                  <div
-                    className={classNames(
-                      index === comments.length - 1 ? 'tw-ml-2' : '',
-                      'tw-min-w-40px tw-mt-2 tw-w-40px tw-h-40px tw-mr-2',
-                    )}
-                  >
+                <div className={styles.commentBody}>
+                  <div className={styles.avatar}>
                     <img
                       src={
                         comment.user?.photoURL
@@ -529,35 +510,18 @@ const useEnableComments = ({
                           : `/sign/default-profile.svg`
                       }
                       alt=""
-                      className="tw-w-full tw-h-full tw-rounded-full"
                     />
                   </div>
-                  <div
-                    title={comment.content}
-                    className="tw-font-roboto tw-font-semibold tw-color-black tw-mt-2 tw-break-words"
-                  >
+                  <div title={comment.content} className={styles.commentText}>
                     {comment.content}
                   </div>
                 </div>
-                <div className="tw-flex tw-justify-between lg:tw-ml-2 mx-xl:tw-ml-2 tw-ml-10px tw-mt-10px">
-                  <div
-                    className={classNames(
-                      index === comments.length - 1 ? 'tw-ml-1' : '',
-                      'tw-text-app-grey-darker tw-text-sm',
-                    )}
-                  >
-                    {comment.timestamp}
-                  </div>
+                <div className={styles.commentMeta}>
+                  <div className={styles.timestamp}>{comment.timestamp}</div>
                   {comment.isOwn && user?.id && (
-                    <div
-                      className={classNames(
-                        styles.editDeleteWrapper,
-                        'tw-ml-2 mx-xl:tw-mr-6',
-                      )}
-                    >
+                    <div className={styles.editDeleteWrapper}>
                       <div
-                        className="tw-text-app-grey-darker default:tw-mr-5px tw-text-sm tw-cursor-pointer
-sm:tw-mr-13px lg:tw-mr-5px xl:tw-mr-13px"
+                        className={styles.editLink}
                         onClick={() =>
                           editCommentInit(comment.id, comment.content)
                         }
@@ -565,7 +529,7 @@ sm:tw-mr-13px lg:tw-mr-5px xl:tw-mr-13px"
                         {t('common.edit')}
                       </div>
                       <div
-                        className="tw-text-red lg:tw-mr-2 tw-text-sm tw-cursor-pointer"
+                        className={styles.deleteLink}
                         onClick={() => openCommentDeleteModal(comment.id)}
                       >
                         {t('common.delete')}
@@ -575,20 +539,14 @@ sm:tw-mr-13px lg:tw-mr-5px xl:tw-mr-13px"
                 </div>
               </div>
             ))}
-            <div className="tw-flex tw-justify-around">
+            <div className={styles.pager}>
               {loadButtonsState.loadLess && (
-                <div
-                  className="tw-underline tw-text-blue tw-cursor-pointer tw-my-2"
-                  onClick={loadLessComments}
-                >
+                <div className={styles.pagerLink} onClick={loadLessComments}>
                   {t('hooks.prev')}
                 </div>
               )}
               {loadButtonsState.loadMore && (
-                <div
-                  className="tw-underline tw-text-blue tw-cursor-pointer tw-my-2"
-                  onClick={loadMoreComments}
-                >
+                <div className={styles.pagerLink} onClick={loadMoreComments}>
                   {t('hooks.next')}
                 </div>
               )}
@@ -597,24 +555,18 @@ sm:tw-mr-13px lg:tw-mr-5px xl:tw-mr-13px"
         )}
 
         {showCommentTextBox ? (
-          <form
-            className="tw-flex tw-justify-center tw-w-full tw-mt-1 tw-px-2"
-            onSubmit={commentSubmitHandler}
-          >
-            <div className="tw-bottom-13px tw-border tw-border-solid tw-border-primary-purple tw-box-border tw-rounded-md tw-w-full tw-p-5px">
+          <form className={styles.form} onSubmit={commentSubmitHandler}>
+            <div className={styles.composer}>
               <textarea
-                className={classNames(
-                  styles.textareaStyle,
-                  'tw-w-full tw-h-40px tw-resize-none tw-indent-1 tw-pl-2 tw-pt-2',
-                )}
+                className={styles.textareaStyle}
                 name="comment"
                 placeholder={t('page.video.commentsSection.placeholder')}
                 value={commentValue}
                 onChange={commentOnChange}
                 ref={textAreaRef}
               />
-              <div className="tw-flex tw-justify-between tw-items-end">
-                <div className="tw-flex">
+              <div className={styles.composerRow}>
+                <div className={styles.composerTools}>
                   <Tooltip placement="topLeft" title="Emoji">
                     {emojiContainer}
                   </Tooltip>
@@ -624,12 +576,9 @@ sm:tw-mr-13px lg:tw-mr-5px xl:tw-mr-13px"
                   /> */}
                 </div>
 
-                <div className="tw-flex">
+                <div className={styles.composerActions}>
                   <button
-                    className={classNames(
-                      'tw-bg-primary-purple tw-rounded-md tw-text-white tw-p-5px tw-m-3px tw-cursor-pointer hover:tw-font-bold tw-w-100px',
-                      commentInEditAndUnchanged && 'tw-bg-app-grey',
-                    )}
+                    className={styles.submitButton}
                     role="submit"
                     ref={textAreaSubmitBtnRef}
                     disabled={commentInEditAndUnchanged}
@@ -642,7 +591,7 @@ sm:tw-mr-13px lg:tw-mr-5px xl:tw-mr-13px"
                   </button>
                   <div
                     onClick={cancelComment}
-                    className="tw-bg-white tw-rounded-md tw-text-primary-purple tw-p-5px tw-m-3px tw-cursor-pointer hover:tw-font-bold tw-border tw-border-solid tw-border-primary-purple hover:tw-bg-light-gray tw-w-90px tw-text-center"
+                    className={styles.cancelButton}
                     id="cancel-comments"
                   >
                     {t('common.cancel')}
@@ -652,7 +601,7 @@ sm:tw-mr-13px lg:tw-mr-5px xl:tw-mr-13px"
             </div>
           </form>
         ) : (
-          <div className="tw-px-2">
+          <div>
             {/* TODO */}
             {/* {!isPublic && (
               <button
@@ -673,7 +622,7 @@ tw-border-primary-purple tw-rounded-md tw-border-solid tw-border tw-text-primary
 
                   setShowCommentTextBox(true);
                 }}
-                className="tw-w-full tw-flex tw-justify-center tw-items-center tw-bg-primary-purple tw-rounded-md tw-text-white tw-h-45px hover:tw-bg-primary-light-purple hover:tw-underline"
+                className={styles.openButton}
               >
                 {t('hooks.leaveYourComments')}
               </button>
@@ -682,7 +631,7 @@ tw-border-primary-purple tw-rounded-md tw-border-solid tw-border tw-text-primary
                 onClick={() =>
                   router.push(preRoutes.auth + panelRoutes.login + urlParams)
                 }
-                className="tw-w-full tw-flex tw-justify-center tw-items-center tw-bg-primary-purple tw-rounded-md tw-text-white tw-h-55px hover:tw-bg-primary-light-purple hover:tw-underline"
+                className={styles.openButton}
               >
                 {t('hooks.loginToComment')}
               </button>

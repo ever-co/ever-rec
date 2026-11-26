@@ -10,6 +10,7 @@ import EverConnectConnection, { AdminWorkspace } from './connect/EverConnectConn
 import EverConnectIntegrations from './connect/EverConnectIntegrations';
 import EverConnectManaged from './connect/EverConnectManaged';
 import EverConnectOrganizationLink from './connect/EverConnectOrganizationLink';
+import { MUTED_TEXT, SELECT } from './connect/shared';
 
 interface Availability {
   statistics: boolean;
@@ -61,16 +62,16 @@ const EverPlatformTabs: React.FC<{ uid: string | undefined }> = ({ uid }) => {
     };
   }, [uid]);
 
-  if (!available) return <p data-testid="ever-platform-loading">{t('page.everPlatform.loading')}</p>;
+  if (!available) return <p data-testid="ever-platform-loading" className={MUTED_TEXT}>{t('page.everPlatform.loading')}</p>;
   if (!available.statistics && !available.connect) {
-    return <p data-testid="ever-platform-unavailable">{t('page.everPlatform.unavailable')}</p>;
+    return <p data-testid="ever-platform-unavailable" className={MUTED_TEXT}>{t('page.everPlatform.unavailable')}</p>;
   }
 
   const picker =
     workspaces.length > 1 ? (
       <Select
         data-testid="ever-connect-workspace-picker"
-        className="tw-mb-4 tw-min-w-[240px]"
+        className={`tw-mb-6 tw-min-w-[240px] ${SELECT}`}
         value={workspaceId}
         onChange={(value: string) => setWorkspaceId(value)}
         options={workspaces.map((workspace) => ({ value: workspace.id, label: workspace.name }))}
@@ -83,7 +84,7 @@ const EverPlatformTabs: React.FC<{ uid: string | undefined }> = ({ uid }) => {
         {render(workspaceId)}
       </>
     ) : (
-      <p data-testid="ever-connect-no-workspace">{t('page.everPlatform.connect.noWorkspace')}</p>
+      <p data-testid="ever-connect-no-workspace" className={MUTED_TEXT}>{t('page.everPlatform.connect.noWorkspace')}</p>
     );
 
   const items = [
@@ -132,7 +133,11 @@ const EverPlatformTabs: React.FC<{ uid: string | undefined }> = ({ uid }) => {
   ];
 
   return (
-    <div data-testid="ever-platform-tabs">
+    <div
+      data-testid="ever-platform-tabs"
+      // Underline tabs: a gap between the labels, the panel flush with the page title.
+      className="[&_.ant-tabs-nav-list]:tw-gap-6 [&_.ant-tabs_.ant-tabs-content-holder]:tw-m-0 [&_.ant-tabs_.ant-tabs-nav]:tw-mb-6"
+    >
       <Tabs items={items} destroyInactiveTabPane />
     </div>
   );

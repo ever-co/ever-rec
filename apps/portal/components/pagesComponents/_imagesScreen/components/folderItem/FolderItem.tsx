@@ -268,8 +268,6 @@ const FolderItem: React.FC<IFolderItemProps> = ({
 
   const moreMenu = (
     <Menu
-      className={classNames(styles.gradientBackground)}
-      style={{ padding: 5 }}
       onClick={(e) => {
         e.domEvent.stopPropagation();
         setIsDropdownVisible(false);
@@ -277,30 +275,31 @@ const FolderItem: React.FC<IFolderItemProps> = ({
     >
       {workspace && workspace.admin === user?.id && (
         <Menu.Item
-          style={{ margin: 10 }}
-          className="tw-bg-white tw-rounded-xl"
-          icon={<AppSvg path={'/common/permissions.svg'} size="18px" />}
+          icon={
+            <AppSvg
+              path={'/common/permissions.svg'}
+              size="16px"
+              className="[&_svg]:tw-fill-current"
+            />
+          }
           key="menu_item_change_permission"
           onClick={() => setShowPermissionModal(true)}
         >
-          <span className="tw-text-base tw-font-semibold">
-            {t('common.folderActions.editPermission')}
-          </span>
+          <span>{t('common.folderActions.editPermission')}</span>
         </Menu.Item>
       )}
       <Menu.Item
-        style={{ margin: 10 }}
-        className="tw-bg-white tw-rounded-xl"
         icon={
           <AppSvg
             path={isFavorite ? '/common/star.svg' : '/common/star_filled.svg'}
-            size="18px"
+            size="16px"
+            className="[&_path]:tw-stroke-current"
           />
         }
         key="menu_item_add_to_favs"
         onClick={(e) => addToFavs()}
       >
-        <span className="tw-text-base tw-font-semibold">
+        <span>
           {isFavorite
             ? t('common.folderActions.removeFavorites')
             : t('common.folderActions.addToFavorites')}
@@ -309,31 +308,29 @@ const FolderItem: React.FC<IFolderItemProps> = ({
 
       {canEdit && (
         <Menu.Item
-          style={{ margin: 10 }}
-          className="tw-bg-white tw-rounded-xl"
-          icon={<AppSvg path="/common/Edit.svg" size="18px" />}
+          icon={<AppSvg path="/common/Edit.svg" size="16px" />}
           key="menu_item_change_name"
           onClick={(e) => {
             openFolderModal();
           }}
         >
-          <span className="tw-text-base tw-font-semibold">
-            {t('common.folderActions.changeFolderName')}
-          </span>
+          <span>{t('common.folderActions.changeFolderName')}</span>
         </Menu.Item>
       )}
 
       {canEdit && (
         <Menu.Item
-          style={{ margin: 10 }}
-          className="tw-bg-white tw-rounded-xl"
           icon={
-            <AppSvg path="/common/trash-v2.svg" bgColor="#FF2116" size="18px" />
+            <AppSvg
+              path="/common/trash-v2.svg"
+              size="16px"
+              className="tw-text-destructive-text [&_svg]:tw-fill-current"
+            />
           }
           key="menu_item_delete_folder"
           onClick={() => setShowDeleteModal(true)}
         >
-          <span className="tw-text-base tw-font-semibold tw-text-picker-red">
+          <span className="tw-text-destructive-text">
             {t('common.folderActions.deleteFolder')}
           </span>
         </Menu.Item>
@@ -342,13 +339,9 @@ const FolderItem: React.FC<IFolderItemProps> = ({
       {canEdit && (
         <Menu.Item
           key="color"
-          className={classNames(
-            'tw-bg-white tw-rounded-xl',
-            styles.menuNormalCursor,
-          )}
-          style={{ margin: 10 }}
+          className={styles.menuNormalCursor}
         >
-          <div className="tw-text-center tw-font-semibold">
+          <div className="tw-text-center tw-text-xs tw-font-medium tw-text-muted-foreground">
             {t('common.folderActions.changeFolderColor')}
           </div>
           <div className="tw-flex tw-w-full tw-justify-center tw-h-25px tw-items-center">
@@ -377,7 +370,8 @@ const FolderItem: React.FC<IFolderItemProps> = ({
       <div
         className={classNames(
           styles.mainWrapper,
-          (isDropdownVisible || isDragOver) && styles.active,
+          isDropdownVisible && styles.active,
+          isDragOver && styles.dragOver,
         )}
         style={{ height: '58px' }}
         onDragOver={handleDragOver}

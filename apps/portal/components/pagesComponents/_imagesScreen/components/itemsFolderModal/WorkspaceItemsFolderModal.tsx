@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { Modal } from 'antd';
 import AppButton from 'components/controls/AppButton';
 import { RootStateOrAny, useDispatch, useSelector } from 'react-redux';
-import AppSvg from '../../../../elements/AppSvg';
 import {
   IWorkspaceDbFolder,
   IWorkspaceImage,
@@ -118,23 +117,15 @@ const WorkspaceItemsFolderModal: React.FC<IItemsFolderModalProps> = ({
       open={visible}
       onCancel={onCancel}
       destroyOnClose={true}
-      closeIcon={
-        <AppSvg path="/common/close-icon.svg" className="modalCloseButton" />
-      }
       footer={
-        <div className="tw-flex tw-justify-end tw-mt-14">
-          <AppButton
-            onClick={moveHandler}
-            className="tw-px-8 tw-pb-1 tw-pt-1"
-            disabled={!valid}
-          >
+        <div className="tw-flex tw-justify-end tw-gap-2 tw-mt-6">
+          <AppButton onClick={moveHandler} disabled={!valid}>
             {t('page.image.move')}
           </AppButton>
           <AppButton
             onClick={onCancel}
             bgColor="tw-bg-app-grey-darker"
             outlined
-            className="tw-px-8 tw-mx-4 tw-pb-1 tw-pt-1"
           >
             {t('page.image.cancel')}
           </AppButton>

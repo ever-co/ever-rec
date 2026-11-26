@@ -159,18 +159,17 @@ const CreateJiraTicketModal: React.FC<ICreateJiraTicketModalProps> = ({
       open={true}
       onCancel={onCancel}
       footer={
-        <div className="tw-flex tw-justify-end tw-mt-8">
+        <div className="tw-flex tw-justify-end tw-gap-2 tw-mt-6">
           <AppButton
             onClick={onCancel}
-            bgColor="tw-bg-app-grey-darker"
             outlined
-            className="tw-px-8 tw-mx-4 tw-pb-1 tw-pt-1"
+            className="tw-flex tw-h-9 tw-items-center tw-justify-center tw-px-4 tw-py-0"
           >
             {t('common.cancel')}
           </AppButton>
           <AppButton
             onClick={handleOnsubmit}
-            className="tw-px-8 tw-pb-1 tw-pt-1"
+            className="tw-flex tw-h-9 tw-items-center tw-justify-center tw-px-4 tw-py-0"
             disabled={loading}
           >
             {t('common.create')}
@@ -178,24 +177,23 @@ const CreateJiraTicketModal: React.FC<ICreateJiraTicketModalProps> = ({
         </div>
       }
     >
-      <h2 className="tw-mb-4 tw-text-2xl tw-font-semibold">
+      <h2 className="tw-mb-4 tw-text-base tw-font-semibold">
         {t('modals.createJira')}
       </h2>
 
-      <label>{t('modals.selectResource')}</label>
+      <label className="tw-mb-1 tw-block tw-text-sm tw-text-muted-foreground">
+        {t('modals.selectResource')}
+      </label>
       <Select
         value={selectedResource}
         size="large"
         placeholder={t('modals.selectAOption')}
         style={{ marginBottom: '1rem' }}
-        className="tw-mb-8 tw-w-full tw-bg-white tw-rounded"
+        className="tw-mb-8 tw-w-full tw-rounded-md tw-border tw-border-solid tw-border-input [&.ant-select-focused]:tw-border-ring [&.ant-select-focused]:tw-ring-2 [&.ant-select-focused]:tw-ring-ring/20"
         notFoundContent={
           !resource ? (
             <div style={{ width: '23px', height: '23px', margin: '1rem auto' }}>
-              <AppSpinnerLocal
-                circleColor="#5b4dbe"
-                circleInnerColor="#ffffff"
-              />
+              <AppSpinnerLocal />
             </div>
           ) : undefined
         }
@@ -217,14 +215,16 @@ const CreateJiraTicketModal: React.FC<ICreateJiraTicketModalProps> = ({
           ))}
       </Select>
 
-      <label>{t('modals.selectProject')}</label>
+      <label className="tw-mb-1 tw-block tw-text-sm tw-text-muted-foreground">
+        {t('modals.selectProject')}
+      </label>
 
       <Select
         value={selectedProject}
         size="large"
         placeholder={t('modals.selectAOption')}
         style={{ marginBottom: '1rem' }}
-        className="tw-w-full tw-bg-white tw-rounded"
+        className="tw-w-full tw-rounded-md tw-border tw-border-solid tw-border-input [&.ant-select-focused]:tw-border-ring [&.ant-select-focused]:tw-ring-2 [&.ant-select-focused]:tw-ring-ring/20"
         onChange={(value: string) => {
           setError(null);
           setSelectedProject(value);
@@ -243,14 +243,16 @@ const CreateJiraTicketModal: React.FC<ICreateJiraTicketModalProps> = ({
           ))}
       </Select>
 
-      <label>{t('modals.selectIssueType')}</label>
+      <label className="tw-mb-1 tw-block tw-text-sm tw-text-muted-foreground">
+        {t('modals.selectIssueType')}
+      </label>
 
       <Select
         value={selectedIssueType}
         size="large"
         placeholder={t('modals.selectAOption')}
         style={{ marginBottom: '1rem' }}
-        className="tw-w-full tw-bg-white tw-rounded"
+        className="tw-w-full tw-rounded-md tw-border tw-border-solid tw-border-input [&.ant-select-focused]:tw-border-ring [&.ant-select-focused]:tw-ring-2 [&.ant-select-focused]:tw-ring-ring/20"
         onChange={(value) => {
           setError(null);
           setSelectedIssueType(value);
@@ -272,7 +274,6 @@ const CreateJiraTicketModal: React.FC<ICreateJiraTicketModalProps> = ({
         value={title}
         placeholder={t('modals.titleSummary')}
         className="tw-mb-2 tw-w-full"
-        inputClass="tw-bg-transparent tw-border-mid-grey tw-placeholder-black"
         onChange={(e) => setSelectedTitle(e.value)}
       />
 
@@ -281,7 +282,7 @@ const CreateJiraTicketModal: React.FC<ICreateJiraTicketModalProps> = ({
         canResize={false}
         placeholder={t('modals.cardDescription')}
         className="tw-mt-6 tw-w-full"
-        inputClass="scroll-div tw-outline-none tw-bg-transparent tw-border-mid-grey tw-placeholder-black"
+        inputClass="scroll-div"
         onChange={(e) => setSelectedDescription(e.value)}
       />
 

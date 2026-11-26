@@ -65,7 +65,7 @@ interface Props {
 }
 
 const RiImageEditLine = (): JSX.Element => (
-  <AppSvg path="/images/annotate-screenshot.svg" size="22px" />
+  <AppSvg path="/images/annotate-screenshot.svg" size="16px" />
 );
 
 const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
@@ -408,35 +408,36 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
   const moreMenu = (
     <Menu>
       <Menu.Item
-        icon={<AppSvg size="18px" path="/images/file_download_black.svg" />}
+        icon={<AppSvg size="16px" path="/images/file_download_black.svg" />}
         onClick={pdfSave}
         key="menu_item_pdf"
       >
-        <span className="tw-text-xs">{t('page.image.downloadAsPDF')}</span>
+        <span>{t('page.image.downloadAsPDF')}</span>
       </Menu.Item>
 
       <Menu.Item
-        icon={<AppSvg size="18px" path="/images/copy_black.svg" />}
+        icon={<AppSvg size="16px" path="/images/copy_black.svg" />}
         onClick={clipboardCopy}
         key="menu_item_copy"
       >
-        <span className="tw-text-xs">{t('page.image.copyToClipboard')}</span>
+        <span>{t('page.image.copyToClipboard')}</span>
       </Menu.Item>
 
       <Menu.Item
-        icon={<AppSvg size="18px" path="/images/Outline.svg" />}
+        icon={<AppSvg size="16px" path="/images/Outline.svg" />}
         onClick={() => openEmailModal(image)}
         key="menu_item_email"
       >
-        <span className="tw-text-xs">{t('page.image.email')}</span>
+        <span>{t('page.image.email')}</span>
       </Menu.Item>
 
       <Menu.Item
-        icon={<AppSvg size="18px" path="/images/trash.svg" />}
+        danger
+        icon={<AppSvg size="16px" path="/images/trash.svg" />}
         onClick={() => openDeleteModal(image)}
         key="menu_item_delete"
       >
-        <span className="tw-text-xs">{t('page.image.deleteImage')}</span>
+        <span>{t('page.image.deleteImage')}</span>
       </Menu.Item>
     </Menu>
   );
@@ -465,15 +466,17 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
 
   return (
     <>
-      <div className="tw-bg-blue-grey tw-rounded-2lg tw-py-0 tw-px-0 tw-shadow-md">
-        <Tabs selectedTabClassName="react-tabs__tab--selected tw-text-primary-purple tw-font-bold">
-          <TabList className="tw-flex tw-mb-0">
-            <Tab
-              className="tw-flex tw-justify-center tw-items-center tw-w-1/2 tw-h-50px tw-cursor-pointer tw-outline-none"
-              onClick={hideEmojis}
-            >
-              <div className="tw-mr-2">
-                <AppSvg path="/images/icon-Manage-light.svg" size="25px" />
+      <div className={styles.managePanel}>
+        <Tabs
+          selectedTabClassName={classNames(
+            'react-tabs__tab--selected',
+            styles.manageTabSelected,
+          )}
+        >
+          <TabList className={styles.manageTabList}>
+            <Tab className={styles.manageTab} onClick={hideEmojis}>
+              <div>
+                <AppSvg path="/images/icon-Manage-light.svg" size="16px" />
               </div>
               <div>{t('page.image.manage')}</div>
             </Tab>
@@ -485,10 +488,12 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
             </Tab> */}
           </TabList>
           <TabPanel selectedClassName={styles.selectedTabPanel}>
-            <ImageActionsCard className="tw-rounded-t-none">
-              <div>
+            <ImageActionsCard>
+              <div className="tw-text-muted-foreground">
                 {t('page.image.currentlySavedIn')}
-                <strong className="tw-ml-1.5">{currentlySavedIn}</strong>
+                <strong className="tw-ml-1.5 tw-font-medium tw-text-foreground">
+                  {currentlySavedIn}
+                </strong>
               </div>
               <button
                 type="button"
@@ -497,23 +502,18 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
               >
                 <div className={styles.moveToFolderInner}>
                   <div>{t('page.image.moveToFolder')}</div>
-                  <AppSvg
-                    size="24px"
-                    path="/images/right-arrow.svg"
-                    className="tw-ml-4"
-                  />
+                  <AppSvg size="16px" path="/images/right-arrow.svg" />
                 </div>
               </button>
             </ImageActionsCard>
             <ImageActionsCard>
-              <div className=" tw-grid tw-gap-4 tw-grid-cols-3 tw-justify-items-center across-btns:tw-gap-1 across-btns:tw-grid-rows-1 across-btns:tw-place-items-center">
+              <div className="tw-grid tw-gap-2 tw-grid-cols-3 across-btns:tw-gap-1">
                 <ImageActionItem
                   title={t('page.image.download')}
                   icon={IoMdDownload}
                   onClick={() => handleLocalSave(image)}
                   outerClassName={styles.containerImageAction}
                   circleClassName={styles.innerCircle}
-                  iconColor="#5B4DBE"
                 />
 
                 <ImageActionItem
@@ -522,7 +522,6 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
                   onClick={goToEdit}
                   outerClassName={styles.containerImageAction}
                   circleClassName={styles.innerCircle}
-                  iconColor="#5B4DBE"
                 />
 
                 <Dropdown
@@ -535,7 +534,6 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
                     icon={FiMoreHorizontal}
                     outerClassName={styles.containerImageAction}
                     circleClassName={styles.innerCircle}
-                    iconColor="#5B4DBE"
                   />
                 </Dropdown>
               </div>
@@ -544,27 +542,29 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
               {sharedLink ? (
                 <div>
                   <div className="tw-flex tw-items-center tw-justify-between tw-mb-2">
-                    <div className="tw-font-semibold tw-text-sm tw-text-center">
+                    <div className="tw-font-medium tw-text-sm">
                       {t('page.image.shareableLink')}
                     </div>
                     <AppButton
                       onClick={removeSharedLink}
-                      bgColor="tw-bg-red"
-                      className="tw-pt-0 tw-pb-0 tw-pl-2 tw-pr-2"
+                      bgColor="tw-bg-transparent"
+                      twTextColor="tw-text-destructive-text"
+                      twPadding="tw-px-2 tw-py-1"
                     >
-                      <span className="tw-text-xs tw-text-white">
+                      <span className="tw-text-xs">
                         {t('page.image.remove')}
                       </span>
                     </AppButton>
                   </div>
 
-                  <div className="tw-text-xs tw-mb-3 tw-break-words">
+                  <div className="tw-mb-3 tw-rounded-md tw-bg-muted tw-px-3 tw-py-2 tw-text-xs tw-text-muted-foreground tw-break-all">
                     {sharedLink}
                   </div>
 
                   <AppButton
                     onClick={copyLinkHandler}
                     full
+                    outlined
                     className={styles.generateLink}
                   >
                     {shareLoadingState ? (
@@ -573,7 +573,10 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
                       </div>
                     ) : (
                       <>
-                        <IoCopyOutline size={25} className="tw-mr-2" />
+                        <IoCopyOutline
+                          size={16}
+                          className="tw-text-muted-foreground"
+                        />
                         {t('page.image.copy')}
                       </>
                     )}
@@ -581,12 +584,13 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
                 </div>
               ) : (
                 <div>
-                  <div className="tw-font-semibold tw-text-sm tw-mb-2 tw-text-center">
+                  <div className="tw-font-medium tw-text-sm tw-mb-2">
                     {t('page.image.shareYourImage')}
                   </div>
                   <AppButton
                     onClick={generateShareableLink}
                     full
+                    outlined
                     className={styles.generateLink}
                   >
                     {shareLoadingState ? (
@@ -603,7 +607,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
 
             {!workspace && (
               <ImageActionsCard>
-                <div className="tw-font-semibold tw-text-sm tw-mb-2 tw-text-center">
+                <div className="tw-font-medium tw-text-sm tw-mb-2">
                   {t('page.image.saveToCloud')}{' '}
                 </div>
                 <div className={styles.cloudProvidersWrapper}>
@@ -616,7 +620,8 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
                     {driveOperationLoading ? (
                       <AppButton
                         className={styles.appButton}
-                        twPadding="tw-px-0 tw-py-3"
+                        bgColor="tw-bg-transparent"
+                        twPadding="tw-px-0 tw-py-0"
                         twRounded="tw-rounded-none"
                         onClick={() => void 0}
                       >
@@ -628,7 +633,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
                           )}
                         >
                           <div className={styles.localAppSpinnerWrapper}>
-                            <AppSpinnerLocal circleInnerColor="#5b4dbe" />
+                            <AppSpinnerLocal />
                           </div>
                         </div>
                         <div className={styles.providerText}>
@@ -640,7 +645,8 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
                     ) : (
                       <AppButton
                         className={styles.appButton}
-                        twPadding="tw-px-0 tw-py-3"
+                        bgColor="tw-bg-transparent"
+                        twPadding="tw-px-0 tw-py-0"
                         twRounded="tw-rounded-none"
                         onClick={
                           driveImageId && driveUser
@@ -653,7 +659,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
                         >
                           <AppSvg
                             path="/images/google-drive-logo.svg"
-                            size="25px"
+                            size="16px"
                           />
                           <div className={styles.providerText}>
                             {driveImageId && driveUser ? (
@@ -673,7 +679,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
                         onMouseLeave={onMouseLeaveCloudButtonsHandler}
                         className={styles.deleteDriveItemBtn}
                       >
-                        <AppSvg size="24px" path="/images/delete-bin.svg" />
+                        <AppSvg size="16px" path="/images/delete-bin.svg" />
                       </AppButton>
                     )}
                   </div>
@@ -689,7 +695,8 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
                           ? openImageOnDropBox()
                           : openUploadToDropBoxCloudModal('dropbox')
                       }
-                      twPadding="tw-px-0 tw-py-3"
+                      bgColor="tw-bg-transparent"
+                      twPadding="tw-px-0 tw-py-0"
                       className={styles.appButton}
                       twRounded="tw-rounded-none"
                     >
@@ -702,7 +709,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
                           )}
                         >
                           <div className={styles.localAppSpinnerWrapper}>
-                            <AppSpinnerLocal circleInnerColor="#5b4dbe" />
+                            <AppSpinnerLocal />
                           </div>
                           <div className={styles.providerText}>
                             <div className={styles.openImageText}>
@@ -714,7 +721,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
                         <div
                           className={classNames(styles.svgWrapper, 'tw-flex')}
                         >
-                          <AppSvg path="/images/dropbox-logo.svg" size="25px" />
+                          <AppSvg path="/images/dropbox-logo.svg" size="16px" />
                           <div className={styles.providerText}>
                             {dropBoxImageId
                               ? t('page.image.openImage')
@@ -729,7 +736,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
                         onMouseLeave={onMouseLeaveCloudButtonsHandler}
                         className={styles.deleteDriveItemBtn}
                       >
-                        <AppSvg size="24px" path="/images/delete-bin.svg" />
+                        <AppSvg size="16px" path="/images/delete-bin.svg" />
                       </AppButton>
                     )}
                   </div>

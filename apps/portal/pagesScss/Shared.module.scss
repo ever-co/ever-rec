@@ -1,14 +1,50 @@
 @import 'pagesScss/partials/_colors.scss';
 
+// The library pages follow Ever Works' page pattern: under the top bar, a content area with a
+// 24px side gutter (16px on phones, 32px from `xl`), a 24px page title and 14px section titles
+// with their controls on the right. `--page-gutter` is set on each block that uses it, so a block
+// is right wherever it is placed.
+@mixin page-gutter {
+  --page-gutter: 1.5rem;
+
+  @media (max-width: 767px) {
+    --page-gutter: 1rem;
+  }
+
+  @media (min-width: 1200px) {
+    --page-gutter: 2rem;
+  }
+}
+
+// A section's heading row: the title on the left, its controls (sort, bulk actions) on the right.
+// The 48px content box holds the selection bar, so the grid below does not move when it appears.
+@mixin section-header {
+  @include page-gutter;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 3.75rem;
+  padding: 0.75rem var(--page-gutter) 0;
+}
+
+@mixin section-title {
+  margin: 0;
+  color: hsl(var(--foreground));
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.25rem;
+}
+
 .mainSection {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   height: 100%;
+  min-height: 0;
 }
 
 .foldersDashboardCard {
-  padding-top: 0 !important;
+  padding-top: 0;
 }
 
 .foldersSectionMainHeader {
@@ -16,63 +52,71 @@
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid $grey-light05;
 }
 
 .pageHeadingWrapper {
+  @include page-gutter;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 1rem;
   width: 100%;
-  border-bottom: 1px solid $grey-light05;
-  padding: 1rem 2rem;
+  padding: 1.5rem var(--page-gutter) 0;
 }
 
 .pageMainSectionWrapper {
-  font-size: 1rem;
-  font-weight: 600;
-  padding: 1rem 2rem;
+  @include section-header;
+
+  h3 {
+    @include section-title;
+  }
 }
 
 .mainHeader {
-  font-family: Roboto;
-  font-size: 1rem;
+  color: hsl(var(--foreground));
+  font-size: 1.5rem;
   font-weight: 600;
-  line-height: 33px;
-  letter-spacing: 0.25px;
-  text-align: left;
-  color: #2a292f;
+  line-height: 2rem;
+  letter-spacing: -0.01em;
 }
 
 .foldersHeadingContainer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 2rem;
-  font-weight: bold;
+  @include section-header;
+
+  h3 {
+    @include section-title;
+  }
 }
 
 .foldersScrollableDiv {
+  @include page-gutter;
   display: flex;
   flex-wrap: wrap;
   gap: 1rem;
-
-  padding: 0rem 1rem 1rem 2rem;
-  max-height: 135px;
+  max-height: 9rem;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  // 2px above and below, so a tile's focus or selection ring is not cut by the scroll box. On the
+  // right the gutter includes the scrollbar (8px, see styles/base.scss).
+  padding: 2px calc(var(--page-gutter) - 0.5rem) 2px var(--page-gutter);
 }
 
+// The items section fills what is left of the page; its grid scrolls inside it.
 .contentDashboardCard {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
   padding-bottom: 0;
   overflow: hidden;
 }
 
 .trashedItemsHeaderContainer {
-  padding: 1rem 2rem;
+  @include page-gutter;
+  padding: 0.75rem var(--page-gutter) 0.5rem;
 }
 
 .recentlyDeleted {
-  font-size: 1rem;
-  font-weight: 600;
+  @include section-title;
 }
 
 .levelOneHeight {

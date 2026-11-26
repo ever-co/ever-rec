@@ -166,7 +166,7 @@ const SharedImage: React.FC<ISharedItem> = ({ user }) => {
         image && (
           <>
             <AppContainer
-              className={classNames(styles.appContainer, 'tw-pt-10')}
+              className={classNames(styles.appContainer, 'tw-pt-8')}
             >
               <Row
                 gutter={30}
@@ -177,15 +177,13 @@ const SharedImage: React.FC<ISharedItem> = ({ user }) => {
                     <div
                       className={classNames(
                         styles.imageWrapper,
-                        'tw-w-full tw-py-5 tw-px-5 tw-rounded-md tw-bg-blue-grey tw-shadow-round-sm',
+                        'tw-w-full tw-p-3 tw-rounded-xl',
                       )}
                     >
                       <div
                         className="tw-overflow-y-scroll
-tw-scrollbar-thin tw-scrollbar-thumb-gray-400 tw-scrollbar-track-gray-100
-tw-scrollbar-thumb-rounded-full tw-scrollbar-track-rounded-full
-tw-rounded-2lg tw-flex
-tw-items-center tw-justify-center tw-bg-blue-grey tw-h-500px"
+tw-rounded-md tw-flex
+tw-items-center tw-justify-center tw-h-500px"
                       >
                         {image && (
                           // eslint-disable-next-line @next/next/no-img-element
@@ -204,22 +202,25 @@ tw-items-center tw-justify-center tw-bg-blue-grey tw-h-500px"
                       </div>
                     </div>
 
-                    <div className="tw-flex tw-mt-7 tw-mb-5">
-                      <div className="tw-flex tw-justify-between tw-mb-20px tw-w-full tw-items-center">
-                        <h3 className="tw-text-3xl tw-mb-0 tw-max-w-90p tw-line-clamp-2">
-                          <span className="default:tw-text-2xl lg:tw-text-4xl">
-                            {image.dbData?.title}
-                          </span>
+                    <div className="tw-flex tw-mt-4 tw-mb-3">
+                      <div className="tw-flex tw-justify-between tw-w-full tw-items-center">
+                        <h3 className="tw-mb-0 tw-max-w-90p tw-line-clamp-2 tw-text-xl tw-font-semibold tw-text-foreground">
+                          <span>{image.dbData?.title}</span>
                         </h3>
                         {user && (
                           <div
-                            className="tw-cursor-pointer tw-min-w-35px"
+                            className={classNames(
+                              'tw-flex tw-size-9 tw-shrink-0 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-md tw-transition-colors tw-duration-150 hover:tw-bg-accent',
+                              isLiked
+                                ? 'tw-text-destructive-text'
+                                : 'tw-text-muted-foreground hover:tw-text-foreground',
+                            )}
                             onClick={onItemLike}
                           >
                             {isLiked ? (
-                              <AiFillHeart color="#E6320C" size={35} />
+                              <AiFillHeart size={20} />
                             ) : (
-                              <AiOutlineHeart color="#E6320C" size={35} />
+                              <AiOutlineHeart size={20} />
                             )}
                           </div>
                         )}
@@ -229,15 +230,15 @@ tw-items-center tw-justify-center tw-bg-blue-grey tw-h-500px"
                     <div className="tw-flex default:tw-justify-between mx-md:tw-flex-wrap">
                       <UserShortInfo
                         user={itemOwner as any}
-                        avaSize={80}
-                        fullNameClasses="tw-text-xl tw-font-semibold"
-                        emailClasses="tw-text-base"
+                        avaSize={40}
+                        fullNameClasses="tw-text-sm tw-font-medium tw-truncate"
+                        emailClasses="tw-text-xs"
                         disableGoToProfile
                       />
                       <div className="tw-ml-auto tw-flex tw-flex-col default:tw-justify-center mx-sm:tw-mt-10px mx-sm:tw-w-full mx-sm:tw-flex mx-sm:tw-items-end ">
                         <div className="tw-flex tw-flex-col tw-items-center">
-                          <div className="tw-font-sm tw-flex tw-flex-wrap tw-justify-end tw-mt-4 tw-items-center">
-                            <div className="tw-text-app-grey-darker tw-mr-2 tw-whitespace-nowrap">{`${
+                          <div className="tw-flex tw-flex-wrap tw-justify-end tw-items-center tw-text-[13px] tw-text-muted-foreground">
+                            <div className="tw-mr-2 tw-whitespace-nowrap">{`${
                               likes?.length || 'No'
                             } likes`}</div>
                             <div className="tw-mr-2">&bull;</div>
@@ -250,7 +251,7 @@ tw-items-center tw-justify-center tw-bg-blue-grey tw-h-500px"
                               isPublic
                             />
                             <div className="tw-mr-2">&bull;</div>
-                            <div className="tw-font-sm tw-flex tw-justify-end tw-text-app-grey-darker tw-whitespace-nowrap">
+                            <div className="tw-flex tw-justify-end tw-whitespace-nowrap">
                               {created}
                             </div>
                           </div>
@@ -262,8 +263,8 @@ tw-items-center tw-justify-center tw-bg-blue-grey tw-h-500px"
 
                 {!isWorkspace && (
                   <Col xs={8} lg={8} xl={7} md={8} className="mx-lg:tw-my-30px">
-                    <div className="tw-bg-blue-grey tw-rounded-2lg tw-py-6 tw-px-4 tw-shadow-md">
-                      <div className="tw-bg-white tw-flex tw-flex-col tw-justify-between tw-rounded-b-md tw-rounded-tl-md tw-p-3">
+                    <div className="tw-rounded-xl tw-border tw-border-solid tw-border-border tw-bg-card tw-p-3">
+                      <div className="tw-flex tw-flex-col tw-justify-between">
                         {commentsTemplate}
                       </div>
                     </div>

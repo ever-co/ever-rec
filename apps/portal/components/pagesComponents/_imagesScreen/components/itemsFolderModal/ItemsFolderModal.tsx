@@ -14,7 +14,6 @@ import IEditorVideo, {
 import { MixedItemType } from 'app/interfaces/ItemType';
 import FolderSection from './FolderSection';
 import PanelAC from '../../../../../store/panel/actions/PanelAC';
-import AppSvg from '../../../../elements/AppSvg';
 import {
   decreaseFolderItems,
   increaseFolderItems,
@@ -186,16 +185,9 @@ const ItemsFolderModal: React.FC<IItemsFolderModalProps> = ({
     <Modal
       open={visible}
       onCancel={onCancel}
-      closeIcon={
-        <AppSvg path="/common/close-icon.svg" className="modalCloseButton" />
-      }
       footer={
-        <div className="tw-flex tw-justify-end tw-mt-14">
-          <AppButton
-            onClick={moveHandler}
-            className="tw-px-8 tw-pb-1 tw-pt-1"
-            disabled={!valid}
-          >
+        <div className="tw-flex tw-justify-end tw-gap-2 tw-mt-6">
+          <AppButton onClick={moveHandler} disabled={!valid}>
             {t('page.image.move')}
           </AppButton>
           <AppButton
@@ -205,7 +197,6 @@ const ItemsFolderModal: React.FC<IItemsFolderModalProps> = ({
             }}
             bgColor="tw-bg-app-grey-darker"
             outlined
-            className="tw-px-8 tw-mx-4 tw-pb-1 tw-pt-1"
           >
             {t('page.image.cancel')}
           </AppButton>

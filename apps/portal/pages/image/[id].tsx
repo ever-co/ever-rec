@@ -111,7 +111,7 @@ const Image: React.FC = () => {
       {image && (
         <>
           <TopMenuBar user={user} fromPage="image" />
-          <AppContainer className={classNames(styles.appContainer, 'tw-pt-10')}>
+          <AppContainer className={classNames(styles.appContainer, 'tw-pt-8')}>
             <Row
               gutter={30}
               style={{
@@ -133,15 +133,13 @@ const Image: React.FC = () => {
                   <div
                     className={classNames(
                       styles.imageWrapper,
-                      'tw-w-full tw-py-5 tw-px-5 tw-rounded-md tw-bg-blue-grey tw-shadow-round-sm',
+                      'tw-w-full tw-p-3 tw-rounded-xl',
                     )}
                   >
                     <div
                       className="tw-overflow-y-scroll
-tw-scrollbar-thin tw-scrollbar-thumb-gray-400 tw-scrollbar-track-gray-100
-tw-scrollbar-thumb-rounded-full tw-scrollbar-track-rounded-full
-tw-rounded-2lg tw-flex
-tw-items-center tw-justify-center tw-bg-blue-grey tw-h-600px"
+tw-rounded-md tw-flex
+tw-items-center tw-justify-center tw-h-600px"
                     >
                       {image && (
                         // eslint-disable-next-line @next/next/no-img-element
@@ -160,14 +158,13 @@ tw-items-center tw-justify-center tw-bg-blue-grey tw-h-600px"
                     </div>
                   </div>
 
-                  <div className="tw-flex tw-mt-2 tw-mb-3">
+                  <div className="tw-flex tw-mt-4 tw-mb-3">
                     <div className="tw-flex tw-justify-between tw-w-full tw-items-center">
                       {titleContainer}
                       {!editTitle && (
                         <BsPencil
-                          color="#6E6E6E"
-                          size={25}
-                          className="tw-ml-3 tw-cursor-pointer tw-min-w-25px tw-text-dark-grey"
+                          size={16}
+                          className="tw-ml-3 tw-cursor-pointer tw-shrink-0 tw-text-muted-foreground tw-transition-colors tw-duration-150 hover:tw-text-foreground"
                           onClick={() => setTitleFocus()}
                         />
                       )}
@@ -177,28 +174,26 @@ tw-items-center tw-justify-center tw-bg-blue-grey tw-h-600px"
                   <div className="tw-flex default:tw-justify-between mx-lg:tw-flex-wrap">
                     <UserShortInfo
                       user={user}
-                      avaSize={80}
-                      fullNameClasses="tw-text-xl tw-font-semibold"
-                      emailClasses="tw-text-base"
+                      avaSize={40}
+                      fullNameClasses="tw-text-sm tw-font-medium tw-truncate"
+                      emailClasses="tw-text-xs"
                     />
                     <div className="tw-ml-auto tw-flex tw-flex-col default:tw-justify-center mx-lg:tw-mt-25px mx-sm:tw-w-full mx-sm:tw-flex mx-sm:tw-items-end ">
                       <div className="tw-flex tw-flex-col tw-items-end">
                         <div className="tw-flex tw-justify-end">
                           <div
-                            className="tw-flex tw-cursor-pointer"
+                            className="tw-flex tw-cursor-pointer tw-items-center tw-text-muted-foreground tw-transition-colors tw-duration-150 hover:tw-text-foreground"
                             onClick={() => copySourceURL(image)}
                           >
                             <IoLinkOutline
-                              size={20}
-                              className="tw-min-w-20px tw-text-app-grey-darker tw-mr-2"
+                              size={16}
+                              className="tw-shrink-0 tw-mr-2"
                             />
-                            <div className="tw-text-app-grey-darker tw-text-sm ">
-                              Source URL
-                            </div>
+                            <div className="tw-text-[13px]">Source URL</div>
                           </div>
                         </div>
-                        <div className="tw-font-sm tw-flex tw-flex-wrap tw-justify-end tw-mt-4 tw-items-center ">
-                          <div className="tw-text-app-grey-darker tw-mr-2 tw-whitespace-nowrap">{`${
+                        <div className="tw-flex tw-flex-wrap tw-justify-end tw-mt-2 tw-items-center tw-text-[13px] tw-text-muted-foreground">
+                          <div className="tw-mr-2 tw-whitespace-nowrap">{`${
                             image.dbData?.likes?.length || 'No'
                           } likes`}</div>
                           <div className="tw-mr-2">&bull;</div>
@@ -210,7 +205,7 @@ tw-items-center tw-justify-center tw-bg-blue-grey tw-h-600px"
                             hasBorderStyle={false}
                           />
                           <div className="tw-mr-2">&bull;</div>
-                          <div className="tw-font-sm tw-flex tw-justify-end tw-text-app-grey-darker tw-whitespace-nowrap">
+                          <div className="tw-flex tw-justify-end tw-whitespace-nowrap">
                             {created}
                           </div>
                         </div>

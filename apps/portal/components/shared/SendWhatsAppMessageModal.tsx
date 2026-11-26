@@ -109,12 +109,7 @@ const SendWhatsAppMessageModal: React.FC<ISlackChannelModalProps> = ({
       onCancel={onCancel}
       footer={
         <div className={styles.headerContainer}>
-          <AppButton
-            onClick={onCancel}
-            bgColor={styles.bgColor}
-            outlined
-            className={styles.btn}
-          >
+          <AppButton onClick={onCancel} outlined className={styles.btn}>
             {t('common.cancel')}
           </AppButton>
           <AppButton

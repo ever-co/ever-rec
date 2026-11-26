@@ -1,77 +1,105 @@
-@import 'pagesScss/partials/_colors.scss';
-
+// Settings → Profile: one centered column (the width of the Preferences page), sections
+// separated by hairlines.
 .profileContainer {
   display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
   width: 100%;
-  height: 100%;
-  padding-left: 2rem;
-  background-color: white;
+  min-height: 0;
+  padding: 2rem 1rem;
+  overflow-y: auto;
+
+  @media screen and (min-width: 768px) {
+    padding: 2rem;
+  }
 
   .profileSettings {
     display: flex;
     flex-direction: column;
-    width: 70%;
-    padding-top: 2rem;
-    padding-right: 1.625rem;
+    flex-shrink: 0;
+    width: 100%;
+    max-width: 44rem;
 
     .profileSettingsMain {
       display: flex;
-      gap: 2rem;
-      margin-bottom: 1rem;
+      flex-direction: column;
 
       .profilePhoto {
+        padding-bottom: 1.5rem;
+
         h1 {
-          font-weight: bold;
-          margin-bottom: 1rem;
+          margin: 0 0 2rem;
+          color: hsl(var(--foreground));
+          font-size: 1.5rem;
+          font-weight: 600;
+          line-height: 2rem;
         }
 
-        div:first-of-type {
+        // The picture and its "Edit" action, side by side.
+        & > div {
           display: flex;
-          flex-direction: column;
           align-items: center;
-          gap: 0.5rem;
+          gap: 1rem;
 
-          span {
-            color: $primary-violet;
+          & > span {
+            display: inline-flex;
+            align-items: center;
+            height: 2rem;
+            padding: 0 0.75rem;
+            border: 1px solid hsl(var(--input));
+            border-radius: calc(var(--radius) - 2px);
+            color: hsl(var(--foreground));
+            font-size: 0.8125rem;
+            font-weight: 500;
             cursor: pointer;
+            transition: background-color 150ms var(--ease-out);
+
+            &:hover {
+              background-color: hsl(var(--accent));
+            }
           }
         }
       }
 
       .profileDetails {
-        margin-top: 2rem;
         width: 100%;
       }
     }
 
+    // The danger zone: a bordered block, the action is a destructive button.
     .profileDeleteAccount {
-      padding: 1rem 0;
-      border-top: 1px solid $primary-violet20;
-      border-bottom: 1px solid $primary-violet20;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-top: 1.5rem;
+      padding: 1rem;
+      border: 1px solid hsl(var(--border));
+      border-radius: 0.75rem;
+      color: hsl(var(--foreground));
+      font-size: 0.875rem;
+      font-weight: 500;
     }
 
     .profileSignOut {
-      width: 70px;
-      font-weight: bold;
-      margin-top: 1rem;
-      margin-left: 1rem;
+      display: inline-flex;
+      align-items: center;
+      align-self: flex-start;
+      height: 2rem;
+      margin-top: 1.5rem;
+      padding: 0 0.75rem;
+      border: 1px solid hsl(var(--input));
+      border-radius: calc(var(--radius) - 2px);
+      color: hsl(var(--foreground));
+      font-size: 0.8125rem;
+      font-weight: 500;
       cursor: pointer;
+      transition: background-color 150ms var(--ease-out);
+
+      &:hover {
+        background-color: hsl(var(--accent));
+      }
     }
-  }
-}
-
-@media screen and (max-width: 1000px) {
-  .profileContainer {
-    flex-direction: column;
-
-    .profileSettings {
-      width: 100%;
-    }
-  }
-}
-
-@media screen and (max-width: 450px) {
-  .profileSettingsMain {
-    flex-direction: column;
   }
 }

@@ -59,7 +59,7 @@ const FolderSection: React.FC<IFolderSectionProps> = ({
   if (explorerData.allFolders.length > 0) {
     folderSection = (
       <>
-        <h2 className="tw-mb-6 tw-text-2xl tw-font-semibold">
+        <h2 className="tw-mb-4 tw-text-base tw-font-semibold">
           {t('page.image.selectFolder')}
         </h2>
         <Folder
@@ -78,7 +78,7 @@ const FolderSection: React.FC<IFolderSectionProps> = ({
   } else if (item?.dbData?.parentId === false) {
     folderSection = (
       <>
-        <h3 className="tw-mb-6 tw-text-2xl tw-font-semibold">
+        <h3 className="tw-mb-4 tw-text-base tw-font-semibold">
           {t('common.donthaveFolder')}
         </h3>
       </>

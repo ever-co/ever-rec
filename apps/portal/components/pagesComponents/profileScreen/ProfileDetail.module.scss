@@ -1,39 +1,79 @@
-@import 'pagesScss/partials/_colors.scss';
-
+// A settings row: the label on the left, the value and the row's action on the right.
 .profileDetail {
   position: relative;
-  display: flex;
-  justify-content: space-between;
+  display: grid;
   align-items: center;
+  gap: 0.5rem;
   width: 100%;
-  height: 60px;
-  min-width: 300px;
-  padding: 0 1rem;
-  border-radius: 0.5rem;
-  transition: background-color 0.2s ease;
-  gap: 1rem;
+  min-height: 4rem;
+  padding: 1rem 0;
+  border-top: 1px solid hsl(var(--border));
+  color: hsl(var(--foreground));
+  font-size: 0.875rem;
+  line-height: 1.25rem;
   cursor: pointer;
 
-  &:hover {
-    background-color: $primary-violet20;
-
-    .profileDetailRightArrow {
-      background-color: $primary-violet40;
-    }
+  @media screen and (min-width: 768px) {
+    grid-template-columns: 14rem minmax(0, 1fr);
+    gap: 2rem;
   }
 
-  div:first-of-type {
+  // The label.
+  & > span {
+    font-weight: 500;
+  }
+
+  &:hover .profileDetailRightArrow {
+    border-color: hsl(var(--foreground) / 0.25);
+    background-color: hsl(var(--accent));
+    color: hsl(var(--foreground));
+  }
+
+  & > div {
     display: flex;
     align-items: center;
     gap: 1rem;
+    min-width: 0;
 
+    // The value.
+    & > span {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    // The row's action, drawn as a small outline button.
     .profileDetailRightArrow {
-      padding: 0.5rem;
-      border-radius: 0.5rem;
+      display: flex;
+      flex-shrink: 0;
+      align-items: center;
+      justify-content: center;
+      width: 2rem;
+      height: 2rem;
+      margin-left: auto;
+      border: 1px solid hsl(var(--input));
+      border-radius: calc(var(--radius) - 2px);
+      color: hsl(var(--muted-foreground));
+      transition:
+        background-color 150ms var(--ease-out),
+        border-color 150ms var(--ease-out),
+        color 150ms var(--ease-out);
+
+      svg {
+        display: block;
+      }
     }
   }
 }
 
 .profileDetailDisabled {
   opacity: 0.5;
+  cursor: not-allowed;
+
+  &:hover .profileDetailRightArrow {
+    border-color: hsl(var(--input));
+    background-color: transparent;
+    color: hsl(var(--muted-foreground));
+  }
 }

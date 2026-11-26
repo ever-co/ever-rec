@@ -1,11 +1,10 @@
+// The old manage column of the single video page (SingleVideoPageManageAreaTemplate-old).
+// Same parts as pagesScss/image/Image.module.scss, on the shared Ever tokens.
+
 .appContainer {
-  min-height: calc(100vh - 5rem);
-  background: radial-gradient(
-    ellipse at 25% 92%,
-    rgba(101, 99, 255, 0.35) 0%,
-    rgba(236, 234, 244, 0.4) 42%,
-    rgba(236, 234, 244, 0.7) 100%
-  );
+  // The top bar above is 56px high.
+  min-height: calc(100vh - 3.5rem);
+  background: hsl(var(--background));
 }
 
 .comingSoon {
@@ -16,41 +15,101 @@
   }
 }
 
+// An action of the manage column (Download, Email, More): an outline button with a quiet icon.
 .containerVideoAction {
-  background: #f5f4f7 !important;
-  transition: background-color 0.3s ease;
+  transition:
+    background-color 150ms var(--ease-out),
+    border-color 150ms var(--ease-out);
 
   & .innerCircle {
-    background: #d8d8d8 !important;
-    transition: background-color 0.3s ease;
-    border: 1px solid white;
+    color: hsl(var(--muted-foreground));
+    transition: color 150ms var(--ease-out);
+
+    // Icons injected from /public carry their own ink: they take the text colour here.
+    :global(.injected-svg) path {
+      fill: currentColor;
+    }
   }
 
   &:hover {
-    background: #d8d8d8 !important;
+    background: hsl(var(--accent));
 
     & .innerCircle {
-      background: #f5f4f7 !important;
+      color: hsl(var(--foreground));
     }
   }
 }
 
+// The stage the player sits on.
 .videoWrapper {
-  background: radial-gradient(
-    ellipse at 50% 100%,
-    rgba(163, 132, 252, 0.5) 0%,
-    rgba(236, 234, 244, 0.4) 44%,
-    rgba(236, 234, 244, 0.4) 100%
-  );
+  border: 1px solid hsl(var(--border));
+  background: hsl(var(--muted));
+}
+
+// The manage column: one card with a hairline, its sections divided by hairlines.
+.managePanel {
+  border: 1px solid hsl(var(--border));
+  border-radius: calc(var(--radius) + 2px);
+  background: hsl(var(--card));
+  color: hsl(var(--card-foreground));
+}
+
+.manageTabList {
+  display: flex;
+  margin: 0;
+  padding: 0;
+  border-bottom: 1px solid hsl(var(--border));
+}
+
+// Underline tabs: Manage, Chapters, Comments.
+.manageTab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 33.3333%;
+  height: 3rem;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.875rem;
+  font-weight: 500;
+  list-style: none;
+  cursor: pointer;
+  transition: color 150ms var(--ease-out);
+
+  &:hover {
+    color: hsl(var(--foreground));
+  }
+
+  // The tab icons from /public are drawn in the old violet: they take the tab's text colour.
+  .iconContainer :global(.injected-svg) path {
+    fill: currentColor;
+  }
+}
+
+// react-tabs paints its selected tab white with black text: both come from the tokens here.
+.manageTabSelected.manageTabSelected {
+  border-radius: 0;
+  background: transparent;
+  box-shadow: inset 0 -2px 0 hsl(var(--foreground));
+  color: hsl(var(--foreground));
+  font-weight: 600;
+}
+
+// The Chapters and Comments panels of the column.
+.managePanelBody {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .cloudProvidersWrapper {
-  border-radius: 5px;
+  border: 1px solid hsl(var(--input));
+  border-radius: calc(var(--radius) - 2px);
   overflow: hidden;
   display: flex;
   position: relative;
   width: 100%;
-  height: 51px;
+  height: 36px;
 
   .providerText,
   .deleteDriveItemBtn {
@@ -61,10 +120,11 @@
   .hoveredHidden {
     min-width: 0 !important;
     width: 0 !important;
+    border-left-width: 0 !important;
     opacity: 0;
     z-index: 1;
     visibility: hidden;
-    transition: all 0.2s ease-in-out;
+    transition: opacity 150ms var(--ease-out);
   }
 
   .hoveredActive {
@@ -74,34 +134,45 @@
     z-index: 10;
     visibility: visible;
     opacity: 1;
-    transition: all 0.2s ease-in-out;
+    transition: opacity 150ms var(--ease-out);
 
     & .providerText {
       width: 85%;
       opacity: 1;
-      transition: opacity 0.2s ease-in;
-      margin-left: 10px;
-      color: white;
+      transition: opacity 150ms var(--ease-out);
+      margin-left: 8px;
+      color: hsl(var(--foreground));
     }
 
     & .deleteDriveItemBtn {
       width: 15%;
+      min-width: 36px;
       opacity: 1;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-left: 2px;
-      background: #d32f2f;
-      transition: opacity 0.2s ease-in;
-      border-top-left-radius: 0px;
-      border-bottom-left-radius: 0px;
+      padding: 0;
+      background: hsl(var(--destructive));
+      color: hsl(var(--destructive-foreground));
+      transition:
+        opacity 150ms var(--ease-out),
+        background-color 150ms var(--ease-out);
+      border-radius: 0;
+
+      &:hover {
+        background: hsl(var(--destructive) / 0.9);
+      }
     }
   }
 
   .cloudProviderButton {
     width: 50%;
     min-width: 50%;
-    transition: all 0.2s ease-in-out;
+    transition: opacity 150ms var(--ease-out);
+
+    & + .cloudProviderButton {
+      border-left: 1px solid hsl(var(--border));
+    }
 
     & .openVideoText {
       white-space: nowrap;
@@ -116,7 +187,6 @@
   justify-content: center !important;
   position: relative;
   align-items: center;
-  background: #5b4dbe;
 }
 
 .svgWrapper {
@@ -124,9 +194,15 @@
   align-items: center;
   justify-content: center;
 
+  // The provider marks in /public are drawn in white (for the old violet button): they take the
+  // text colour, so they show on the card in the light and the dark theme.
+  :global(.injected-svg) path {
+    fill: currentColor;
+  }
+
   &.loadingSpinner {
-    width: 25px;
-    height: 25px;
+    width: 16px;
+    height: 16px;
   }
 }
 
@@ -134,21 +210,39 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #f5f4f7;
-  border-radius: 5px;
-  color: #9b9b9b;
-  padding-left: 25px;
-  padding-right: 25px;
+  border: 1px solid hsl(var(--input));
+  background-color: transparent;
+  border-radius: calc(var(--radius) - 2px);
+  color: hsl(var(--foreground));
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding-left: 12px;
+  padding-right: 12px;
   cursor: pointer;
-  margin-top: 10px;
-  font-family: 'Roboto', sans-serif;
+  margin-top: 12px;
   font-style: normal;
-  height: 60px;
+  height: 36px;
+  transition:
+    background-color 150ms var(--ease-out),
+    border-color 150ms var(--ease-out);
+
+  &:hover {
+    background-color: hsl(var(--accent));
+  }
 
   & .moveToFolderInner {
     width: 100%;
     display: flex;
     justify-content: space-between;
+    align-items: center;
+
+    :global(.injected-svg) {
+      color: hsl(var(--muted-foreground));
+
+      path {
+        fill: currentColor;
+      }
+    }
   }
 }
 
@@ -161,79 +255,37 @@
 
 .generateLink {
   text-align: center;
-  height: 51px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .localAppSpinnerWrapper {
-  width: 25px;
-  height: 25px;
+  width: 16px;
+  height: 16px;
   .localAppSpinner {
     width: 80%;
     height: 80%;
   }
 }
 
+// A ring in the text colour of its place, so it shows on any ground in both themes.
 .loadingSpinner {
   font-size: 5px;
   margin-right: 0.5rem;
   text-indent: -9999em;
   width: 4.5em;
   height: 4.5em;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
   border-radius: 50%;
-  background: #5b4dbe;
-  background: -moz-linear-gradient(
-    left,
-    #5b4dbe 10%,
-    rgba(255, 255, 255, 0) 42%
-  );
-  background: -webkit-linear-gradient(
-    left,
-    #5b4dbe 10%,
-    rgba(255, 255, 255, 0) 42%
-  );
-  background: -o-linear-gradient(left, #5b4dbe 10%, rgba(255, 255, 255, 0) 42%);
-  background: -ms-linear-gradient(
-    left,
-    #5b4dbe 10%,
-    rgba(255, 255, 255, 0) 42%
-  );
-  background: linear-gradient(
-    to right,
-    #5b4dbe 10%,
-    rgba(255, 255, 255, 0) 42%
-  );
   position: relative;
-  -webkit-animation: load3 1.4s infinite linear;
-  animation: load3 1.4s infinite linear;
+  -webkit-animation: load3 0.8s infinite linear;
+  animation: load3 0.8s infinite linear;
   -webkit-transform: translateZ(0);
   -ms-transform: translateZ(0);
   transform: translateZ(0);
-}
-.loadingSpinner:before {
-  width: 50%;
-  height: 50%;
-  background: #5b4dbe;
-  border-radius: 100% 0 0 0;
-  position: absolute;
-  top: 0;
-  left: 0;
-  content: '';
-}
-.loadingSpinner:after {
-  background: #eaeafb;
-  width: 75%;
-  height: 75%;
-  border-radius: 50%;
-  content: '';
-  margin: auto;
-  position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  right: 0;
 }
 @-webkit-keyframes load3 {
   0% {
@@ -257,7 +309,8 @@
 }
 
 .iconContainer {
-  margin-right: 0.5rem;
+  display: flex;
+  align-items: center;
 }
 
 @media screen and (max-width: 1535px) {

@@ -25,7 +25,7 @@ const ImageActionItem = React.forwardRef<
       icon,
       outerClassName,
       circleClassName,
-      iconColor = 'black',
+      iconColor = 'currentColor',
       additionalClass,
       className,
       ...buttonProps
@@ -41,9 +41,10 @@ const ImageActionItem = React.forwardRef<
           className={classNames(
             className,
             outerClassName,
-            `tw-flex tw-flex-col tw-items-center tw-justify-center tw-select-none tw-rounded-md tw-py-13px ${additionalClass ? `tw-w-max` : `tw-w-full`}`,
-            'tw-m-0 tw-border-0 tw-bg-transparent tw-text-inherit [font:inherit]',
-            'focus-visible:!tw-outline focus-visible:!tw-outline-2 focus-visible:!tw-outline-offset-2 focus-visible:!tw-outline-primary-purple',
+            // An outline button, 36px high: a quiet icon, then the label.
+            `tw-flex tw-h-9 tw-items-center tw-justify-center tw-gap-1.5 tw-select-none tw-rounded-md tw-px-2 ${additionalClass ? `tw-w-max` : `tw-w-full`}`,
+            'tw-m-0 tw-border tw-border-solid tw-border-input tw-bg-transparent tw-text-foreground [font:inherit] tw-transition-colors tw-duration-150 hover:tw-bg-accent',
+            'focus-visible:!tw-outline focus-visible:!tw-outline-2 focus-visible:!tw-outline-offset-2 focus-visible:!tw-outline-ring',
           )}
           title={title}
         >
@@ -51,15 +52,15 @@ const ImageActionItem = React.forwardRef<
             aria-hidden="true"
             className={classNames(
               circleClassName,
-              'inner-circle tw-rounded-full tw-w-12 tw-h-12 tw-flex tw-items-center tw-justify-center tw-mb-2 tw-cursor-pointer',
+              'inner-circle tw-flex tw-shrink-0 tw-items-center tw-justify-center tw-cursor-pointer',
             )}
           >
             {React.createElement(
               icon as React.FC<{ size: string; color: string }>,
-              { size: '22px', color: iconColor },
+              { size: '16px', color: iconColor },
             )}
           </span>
-          <span className="tw-block tw-whitespace-nowrap tw-text-ellipsis tw-overflow-hidden tw-w-full tw-px-1 tw-leading-none tw-font-semibold tw-text-sm tw-cursor-pointer tw-text-center">
+          <span className="tw-block tw-min-w-0 tw-whitespace-nowrap tw-text-ellipsis tw-overflow-hidden tw-leading-5 tw-font-medium tw-text-[13px] tw-cursor-pointer tw-text-center">
             {title}
           </span>
         </button>

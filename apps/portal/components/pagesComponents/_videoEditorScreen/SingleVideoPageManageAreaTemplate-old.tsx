@@ -62,8 +62,7 @@ import VideoChapters from 'components/pagesComponents/_videoEditorScreen/chapter
 import useVideoChapters from 'hooks/useVideoChapters';
 import { Trans, useTranslation } from 'react-i18next';
 
-const tabClassesTw =
-  'tw-flex tw-justify-center tw-items-center tw-w-1/3 tw-h-50px tw-cursor-pointer tw-outline-none';
+const tabClassesTw = styles.manageTab;
 
 interface IEmailModalProps {
   state: boolean;
@@ -387,18 +386,19 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
   const moreMenu = (
     <Menu>
       <Menu.Item
-        icon={<AppSvg size="18px" path="/images/trash.svg" />}
+        danger
+        icon={<AppSvg size="16px" path="/images/trash.svg" />}
         onClick={() => openDeleteModal(video)}
         key="menu_item_delete"
       >
-        <span className="tw-text-xs">{t('unique.deleteVideo')}</span>
+        <span>{t('unique.deleteVideo')}</span>
       </Menu.Item>
       <Menu.Item
-        icon={<AppSvg size="18px" path="/common/collection.svg" />}
+        icon={<AppSvg size="16px" path="/common/collection.svg" />}
         onClick={() => updateChaptersEnabled()}
         key="menu_item_chapters_enabled"
       >
-        <span className="tw-text-xs">
+        <span>
           {t('page.video.actionsSection.chaptersToggle', {
             action: chaptersEnabled
               ? t('page.video.actionsSection.disable')
@@ -463,9 +463,14 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
 
   return (
     <>
-      <div className="tw-bg-blue-grey tw-rounded-2lg mx-xl:tw-px-0 tw-py-0 tw-px-0 tw-shadow-md ">
-        <Tabs selectedTabClassName="react-tabs__tab--selected tw-text-primary-purple tw-font-bold">
-          <TabList className="tw-flex tw-mb-0 ">
+      <div className={styles.managePanel}>
+        <Tabs
+          selectedTabClassName={classNames(
+            'react-tabs__tab--selected',
+            styles.manageTabSelected,
+          )}
+        >
+          <TabList className={styles.manageTabList}>
             <Tab
               className={tabClassesTw}
               onClick={() => {
@@ -474,25 +479,21 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
               }}
             >
               <div className={styles.iconContainer}>
-                <AppSvg path="/images/icon-Manage-light.svg" size="25px" />
+                <AppSvg path="/images/icon-Manage-light.svg" size="16px" />
               </div>
               <div>{t('common.manage')}</div>
             </Tab>
             <Tab className={tabClassesTw}>
               <div className={styles.iconContainer}>
-                <AppSvg
-                  path="/common/collection.svg"
-                  size="22px"
-                  bgColor="#5b4dbe"
-                />
+                <AppSvg path="/common/collection.svg" size="16px" />
               </div>
-              <div className="tw-flex tw-gap-1">
+              <div className="tw-flex tw-items-center tw-gap-1">
                 <span>{t('page.video.actionsSection.chapters')} </span>
                 {hasChanges && (
                   <AppSvg
                     path="/common/circle-solid.svg"
-                    size="10px"
-                    bgColor="#5b4dbe"
+                    size="8px"
+                    bgColor="hsl(var(--brand))"
                   />
                 )}
               </div>
@@ -502,14 +503,14 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
               onClick={() => hasChanges && saveChanges(false)}
             >
               <div className={styles.iconContainer}>
-                <AppSvg path="/images/comments.svg" size="25px" />
+                <AppSvg path="/images/comments.svg" size="16px" />
               </div>
               <div>{t('common.comments')}</div>
             </Tab>
           </TabList>
           <TabPanel>
-            <ImageActionsCard className="tw-rounded-t-none">
-              <div>
+            <ImageActionsCard>
+              <div className="tw-text-muted-foreground [&_strong]:tw-font-medium [&_strong]:tw-text-foreground">
                 <Trans
                   values={{ currentlySavedIn: currentlySavedIn }}
                   i18nKey="page.image.currentlySavedInOnly"

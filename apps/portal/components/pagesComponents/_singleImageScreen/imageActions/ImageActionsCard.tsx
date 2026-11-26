@@ -9,7 +9,8 @@ const ImageActionsCard: React.FC<props> = ({ children, className = '' }) => {
   return (
     <div
       className={classNames(
-        'tw-rounded-2lg tw-bg-white tw-shadow-app-blocks tw-p-5 tw-mb-3 tw-overflow-hidden',
+        // A section of the manage column: no ground of its own, a hairline between sections.
+        'tw-border-0 tw-border-b tw-border-solid tw-border-border tw-p-4 tw-text-sm last:tw-border-b-0',
         className,
       )}
     >
