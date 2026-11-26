@@ -1,5 +1,6 @@
 import { ConfigService } from '@nestjs/config';
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -23,6 +24,18 @@ import {
   UPLOAD_FILE_BYTES,
   uploadOptions,
 } from 'src/common/multipart/upload-limits';
+
+/**
+ * Both save routes need the recording itself: a form without its `blob` part, or a JSON body,
+ * is the client's mistake (400), refused before anything is written or uploaded.
+ */
+function requireVideoFile(
+  blob: Express.Multer.File | undefined,
+): asserts blob is Express.Multer.File {
+  if (!blob) {
+    throw new BadRequestException('A video file is required');
+  }
+}
 
 @Controller('stream')
 export class StreamServiceController {
@@ -76,8 +89,9 @@ export class StreamServiceController {
   async saveVideoData(
     @Req() request,
     @Body() body: IStreamingDbData,
-    @UploadedFile() blob: Express.Multer.File,
+    @UploadedFile() blob: Express.Multer.File | undefined,
   ): Promise<IEditorVideo | null> {
+    requireVideoFile(blob);
     const fileExtension = fileExtensionMap[blob.mimetype];
 
     const uid = request.user?.id;
@@ -114,8 +128,9 @@ export class StreamServiceController {
     @Req() request,
     @Body() body: IStreamingDbData,
     @Param('videoId') videoId: string,
-    @UploadedFile() blob: Express.Multer.File,
+    @UploadedFile() blob: Express.Multer.File | undefined,
   ): Promise<IEditorVideo | null> {
+    requireVideoFile(blob);
     const fileExtension = fileExtensionMap[blob.mimetype];
 
     const uid = request.user?.id;
