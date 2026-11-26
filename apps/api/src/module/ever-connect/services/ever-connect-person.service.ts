@@ -470,12 +470,15 @@ export class EverConnectPersonService {
         return pendingDeletion();
       }
     }
+    let started = false;
     for (const uid of uids) {
       const hold = await this.holdFor(uid);
       if (hold) {
         this.logger.warn(`A person's accounts were kept (${hold}).`);
-        return pendingDeletion();
+        // Once one account is gone, the others are deleted as soon as nothing holds them.
+        return started ? { ...pendingDeletion(), incomplete: true } : pendingDeletion();
       }
+      started = true;
       let deleted = false;
       try {
         deleted = await deleter.delete(uid);
@@ -511,22 +514,18 @@ export class EverConnectPersonService {
         this.config.personDeletionEnabled
       ) {
         const decided = await this.deleteAccounts(accountsOf(record));
-        if (decided.incomplete) continue;
-        // Settled: deleted (a new, final answer to send), or held (the pending answer stands).
-        const update =
-          decided.result === 'deleted'
-            ? {
-                result: decided.result,
-                reasonCode: null,
-                incomplete: null,
-                decidedAt: this.clock(),
-                answeredAt: null,
-                outcome: null,
-              }
-            : { incomplete: null };
-        await ref.update(update);
-        record = (((await ref.get()).val() ?? record) as PersonRequestRecord);
+        // Not done yet (failed again, or held): the pending answer stands, and the next heartbeat
+        // tries again; a deletion that was started is finished once nothing holds the accounts.
         if (decided.result === 'deleted') {
+          await ref.update({
+            result: decided.result,
+            reasonCode: null,
+            incomplete: null,
+            decidedAt: this.clock(),
+            answeredAt: null,
+            outcome: null,
+          });
+          record = ((await ref.get()).val() ?? record) as PersonRequestRecord;
           await this.audit.write('person.deletion', 'platform', {
             result: 'deleted',
             accounts: accountsOf(record).length,
@@ -617,15 +616,19 @@ export class EverConnectPersonService {
     uids: string[],
     record: PersonRequestRecord,
   ): Promise<void> {
-    const links = ((
-      await this.store.db().ref(EVER_ID_LINK_ROOTS.links).get()
-    ).val() ?? {}) as Record<string, IdentityRow>;
     const identities = Object.entries(record.identities ?? {});
+    // The matched links only, each read by its key.
+    const links: Record<string, IdentityRow | null> = {};
+    for (const [key] of identities) {
+      links[key] = ((
+        await this.store.db().ref(`${EVER_ID_LINK_ROOTS.links}/${key}`).get()
+      ).val() ?? null) as IdentityRow | null;
+    }
     const now = this.clock();
     for (const uid of uids) {
       const own = identities
         .filter(([key, owner]) => owner === uid && links[key]?.uid === uid)
-        .map(([key]) => links[key]);
+        .map(([key]) => links[key] as IdentityRow);
       const bundle = await this.bundleFor(uid, own);
       await this.store.setPersonExport(jobId, uid, {
         uid,
@@ -649,15 +652,13 @@ export class EverConnectPersonService {
     jobId: string,
     record: PersonRequestRecord,
   ): Promise<void> {
-    const uids = accountsOf(record);
     const now = this.clock();
-    for (const uid of uids) {
+    const stale: string[] = [];
+    for (const uid of accountsOf(record)) {
       const stored = await this.store.personExport(jobId, uid);
-      if (!stored || !(stored.expiresAt > now)) {
-        await this.makeExports(jobId, uids, record);
-        return;
-      }
+      if (!stored || !(stored.expiresAt > now)) stale.push(uid);
     }
+    if (stale.length) await this.makeExports(jobId, stale, record);
   }
 
   /** Sends the decided answer, until Ever Platform recorded it (or will never take it). */

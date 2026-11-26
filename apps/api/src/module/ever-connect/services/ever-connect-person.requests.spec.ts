@@ -293,6 +293,42 @@ describe('a person deletion request', () => {
     expect(t.acks).toHaveLength(2);
   });
 
+  it('two accounts, the second held once the first is gone: the second is deleted once nothing holds it', async () => {
+    const t = setup({ EVER_CONNECT_PERSON_DELETION_ENABLED: 'true' });
+    t.db.write(['users', 'uid-second'], { displayName: 'Second' });
+    t.db.write(['ever_identities', 'k2'], {
+      issuer: ISSUER,
+      subject: 'subject-2',
+      uid: 'uid-second',
+    });
+    const both = {
+      ...t.request('job-d7'),
+      subject_hashes: [hashOf('subject-1'), hashOf('subject-2')],
+    };
+    const hold = jest.spyOn(t.service, 'holdFor');
+    // Both pass the first check; then the second has become a workspace admin.
+    hold
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce('workspace_admin');
+    await t.service.onDeletionRequested(both);
+    expect(t.deleter.delete).toHaveBeenCalledTimes(1);
+    expect(t.acks).toEqual([{ job_id: 'job-d7', ...PENDING_DELETION }]);
+    expect(t.stored('job-d7').incomplete).toBe(true);
+
+    // Still held at the next heartbeat: nothing new.
+    hold.mockResolvedValueOnce('workspace_admin');
+    expect(await t.service.retryIncompleteDeletions()).toBe(0);
+    expect(t.acks).toHaveLength(1);
+
+    // Handed over: both are deleted (the first again, which Rec's deletion allows) and deleted is sent.
+    hold.mockReset();
+    hold.mockResolvedValue(null);
+    expect(await t.service.retryIncompleteDeletions()).toBe(1);
+    expect(t.acks[1]).toEqual({ job_id: 'job-d7', result: 'deleted' });
+  });
+
   it('switched on: an account that became a workspace admin after the first check is kept', async () => {
     const t = setup({ EVER_CONNECT_PERSON_DELETION_ENABLED: 'true' });
     const hold = jest.spyOn(t.service, 'holdFor');

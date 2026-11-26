@@ -276,7 +276,8 @@ export class EverConnectStoreService {
 
   /**
    * Deletes the person requests answered more than {@link PERSON_REQUEST_KEPT_MS} ago (until then a
-   * request read again gets the same answer); answers how many.
+   * request read again gets the same answer), and any received twice as long ago that never got an
+   * answer through; answers how many.
    */
   async sweepPersonRequests(now: number): Promise<number> {
     const all =
@@ -288,7 +289,9 @@ export class EverConnectStoreService {
         ([, record]) =>
           !record ||
           (typeof record.answeredAt === 'number' &&
-            record.answeredAt < now - PERSON_REQUEST_KEPT_MS),
+            record.answeredAt < now - PERSON_REQUEST_KEPT_MS) ||
+          (typeof record.receivedAt === 'number' &&
+            record.receivedAt < now - 2 * PERSON_REQUEST_KEPT_MS),
       )
       .map(([jobId]) => jobId);
     if (old.length) {
