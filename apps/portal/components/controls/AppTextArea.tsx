@@ -50,7 +50,7 @@ const AppTextArea: React.FC<AppTextAreaProps> = ({
   const renderErrors = () => {
     if (errors?.length) {
       return (
-        <div className="tw-p-1 tw-text-danger tw-w-full tw-text-xs tw-leading-2 tw-relative tw-z-10">
+        <div className="tw-p-1 tw-text-destructive-text tw-w-full tw-text-xs tw-leading-2 tw-relative tw-z-10">
           {errors[0]}
         </div>
       );
@@ -76,7 +76,7 @@ const AppTextArea: React.FC<AppTextAreaProps> = ({
           name={label}
           placeholder={placeholder}
           className={classNames(
-            'tw-py-2 tw-px-1 tw-w-full tw-text-base tw-border-b tw-border-black tw-bg-transparent tw-placeholder-black',
+            'tw-min-h-20 tw-py-2 tw-w-full tw-rounded-md tw-border tw-border-solid tw-border-input tw-bg-transparent tw-px-3 tw-text-sm tw-text-foreground tw-outline-none tw-transition-[border-color,box-shadow] tw-duration-150 placeholder:tw-text-muted-foreground focus:tw-border-ring focus:tw-ring-2 focus:tw-ring-ring/20',
             inputClass,
           )}
           onChange={(e) => inputChangeHandler(e.target.value)}

@@ -36,7 +36,7 @@ const AppSelect: React.FC<AppSelectProps> = ({
   const renderErrors = () => {
     if (errors?.length) {
       return (
-        <div className="tw-p-1 tw-text-danger tw-w-full tw-text-xs tw-leading-2">
+        <div className="tw-p-1 tw-text-destructive-text tw-w-full tw-text-xs tw-leading-2">
           {errors[0]}
         </div>
       );
@@ -68,11 +68,7 @@ const AppSelect: React.FC<AppSelectProps> = ({
           onChange={(e) => onChange(e.target.value)}
           value={value}
           className={classNames(
-            `tw-py-2 tw-px-1 tw-w-full tw-text-base tw-border-b tw-border-black tw-form-select tw-form-select-sm text-gray-700
-                        tw-bg-white tw-bg-clip-padding tw-bg-no-repeat
-                        tw-border tw-border-solid tw-border-gray-300 tw-rounded
-                        tw-focus:bg-white tw-transition tw-ease-in-out tw-0
-                        tw-focus:outline-none tw-bg-transparent`,
+            'tw-h-10 tw-w-full tw-rounded-md tw-border tw-border-solid tw-border-input tw-bg-card tw-px-3 tw-text-sm tw-text-foreground tw-outline-none tw-transition-[border-color,box-shadow] tw-duration-150 placeholder:tw-text-muted-foreground focus:tw-border-ring focus:tw-ring-2 focus:tw-ring-ring/20',
             inputClass,
           )}
         >

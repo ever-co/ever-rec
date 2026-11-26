@@ -64,13 +64,13 @@ const AppNumberSelector: React.FC<IAppNumberSelectorProps> = ({
       {!valuesArr ? (
         <div className={classNames('tw-flex tw-items-center ', className)}>
           <div
-            className="tw-cursor-pointer tw-flex tw-items-center tw-justify-center tw-text-black "
+            className="tw-cursor-pointer tw-flex tw-items-center tw-justify-center tw-text-foreground "
             onClick={increase}
           >
             <Image src={zoomIn} width={20} height={20} alt={'plus'} />
           </div>
 
-          <div className="tw-flex tw-items-center  tw-justify-center tw-text-black ">
+          <div className="tw-flex tw-items-center  tw-justify-center tw-text-foreground ">
             <span className="tw-text-xs tw-select-none">{value}</span>
             {suffix && (
               <div className="tw-select-none tw-text-xs">{suffix}</div>
@@ -78,7 +78,7 @@ const AppNumberSelector: React.FC<IAppNumberSelectorProps> = ({
           </div>
 
           <div
-            className="tw-cursor-pointer tw-flex tw-items-center tw-justify-center tw-text-black "
+            className="tw-cursor-pointer tw-flex tw-items-center tw-justify-center tw-text-foreground "
             onClick={decrease}
           >
             <Image src={zoomOut} width={20} height={20} alt={'plus'} />
@@ -92,13 +92,13 @@ const AppNumberSelector: React.FC<IAppNumberSelectorProps> = ({
           )}
         >
           <div
-            className="tw-cursor-pointer tw-flex tw-items-center tw-justify-center tw-text-black "
+            className="tw-cursor-pointer tw-flex tw-items-center tw-justify-center tw-text-foreground "
             onClick={increase}
           >
             <Image src={zoomIn} width={20} height={20} alt={'plus'} />
           </div>
 
-          <div className="tw-flex tw-items-center tw-justify-center tw-text-black ">
+          <div className="tw-flex tw-items-center tw-justify-center tw-text-foreground ">
             <span className="tw-text-sm tw-select-none">{value}</span>
             {suffix && (
               <div className="tw-select-none tw-text-xs">{suffix}</div>
@@ -106,7 +106,7 @@ const AppNumberSelector: React.FC<IAppNumberSelectorProps> = ({
           </div>
 
           <div
-            className="tw-cursor-pointer tw-flex tw-items-center tw-justify-center tw-text-black "
+            className="tw-cursor-pointer tw-flex tw-items-center tw-justify-center tw-text-foreground "
             onClick={decrease}
           >
             <Image src={zoomOut} width={20} height={20} alt={'minus'} />

@@ -10,14 +10,14 @@ export interface IAppTagProps {
 const AppTag: React.FC<IAppTagProps> = ({
   text,
   classsName,
-  bgColor = 'tw-bg-green',
+  bgColor = 'tw-bg-[hsl(var(--success-muted))] tw-text-success',
 }) => {
   return (
     <div
       className={classNames(
         classsName,
         bgColor,
-        'tw-px-5 tw-font-semibold tw-text-sm tw-h-6 tw-flex tw-w-max tw-items-center tw-rounded-5',
+        'tw-px-2 tw-font-medium tw-text-xs tw-h-6 tw-flex tw-w-max tw-items-center tw-rounded-md',
       )}
     >
       <div>{text}</div>
