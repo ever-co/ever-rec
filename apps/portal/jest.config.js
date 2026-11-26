@@ -8,6 +8,8 @@ const createJestConfig = nextJest({ dir: __dirname });
 module.exports = createJestConfig({
   displayName: 'portal',
   testEnvironment: '<rootDir>/specs/jsdom-environment.js',
+  // Packages that only expose a subpath through their `exports` map (Radix does).
+  resolver: '<rootDir>/specs/jest-resolver.js',
   testMatch: ['<rootDir>/specs/**/*.spec.{ts,tsx}'],
   moduleDirectories: ['node_modules', '<rootDir>/'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],

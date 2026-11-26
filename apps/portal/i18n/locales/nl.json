@@ -164,16 +164,16 @@
     "deleteWorkspace": "Verwijder werkruimte"
   },
   "header": {
-    "searchFiles": "Zoek bestanden...",
+    "searchFiles": "Zoek bestanden",
     "help": "Helpcentrum",
-    "helpSoon": "Helpcentrum binnenkort beschikbaar!",
+    "helpSoon": "Helpcentrum binnenkort beschikbaar",
     "notifications": "Meldingen",
-    "notificationsSoon": "Meldingen binnenkort beschikbaar!",
+    "notificationsSoon": "Meldingen binnenkort beschikbaar",
     "companySettings": "Bedrijfsinstellingen",
     "user": {
       "addNewCompany": "Voeg nieuw bedrijf toe",
       "installChrome": "Installeer Chrome-extensie",
-      "availableSoon": "Binnenkort beschikbaar in de Chrome Web Store!",
+      "availableSoon": "Binnenkort beschikbaar in de Chrome Web Store",
       "signout": "Uitloggen"
     }
   },

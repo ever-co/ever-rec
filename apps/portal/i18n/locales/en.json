@@ -164,16 +164,16 @@
     "deleteWorkspace": "Delete Workspace"
   },
   "header": {
-    "searchFiles": "Search files...",
+    "searchFiles": "Search files",
     "help": "Help Center",
-    "helpSoon": "Help Center coming soon!",
+    "helpSoon": "Help Center coming soon",
     "notifications": "Notifications",
-    "notificationsSoon": "Notifications coming soon!",
+    "notificationsSoon": "Notifications coming soon",
     "companySettings": "Company Settings",
     "user": {
       "addNewCompany": "Add New Company",
       "installChrome": "Install Chrome Extension",
-      "availableSoon": "Available in the Chrome Web Store soon!",
+      "availableSoon": "Available in the Chrome Web Store soon",
       "signout": "Sign Out"
     }
   },

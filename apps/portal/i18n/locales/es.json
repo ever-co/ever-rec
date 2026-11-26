@@ -164,16 +164,16 @@
     "deleteWorkspace": "Eliminar espacio de trabajo"
   },
   "header": {
-    "searchFiles": "Buscar archivos...",
+    "searchFiles": "Buscar archivos",
     "help": "Centro de ayuda",
-    "helpSoon": "¡Centro de ayuda próximamente!",
+    "helpSoon": "Centro de ayuda próximamente",
     "notifications": "Notificaciones",
-    "notificationsSoon": "¡Notificaciones próximamente!",
+    "notificationsSoon": "Notificaciones próximamente",
     "companySettings": "Configuración de la empresa",
     "user": {
       "addNewCompany": "Añadir nueva empresa",
       "installChrome": "Instalar extensión de Chrome",
-      "availableSoon": "¡Disponible pronto en la Chrome Web Store!",
+      "availableSoon": "Disponible pronto en la Chrome Web Store",
       "signout": "Cerrar sesión"
     }
   },

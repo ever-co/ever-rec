@@ -164,16 +164,16 @@
     "deleteWorkspace": "Изтрий работното пространство"
   },
   "header": {
-    "searchFiles": "Търсене на файлове...",
+    "searchFiles": "Търсене на файлове",
     "help": "Помощен център",
-    "helpSoon": "Помощен център очаквайте скоро!",
+    "helpSoon": "Помощен център очаквайте скоро",
     "notifications": "Известия",
-    "notificationsSoon": "Известия очаквайте скоро!",
+    "notificationsSoon": "Известия очаквайте скоро",
     "companySettings": "Настройки на компанията",
     "user": {
       "addNewCompany": "Добави нова компания",
       "installChrome": "Инсталирай разширение за Chrome",
-      "availableSoon": "Очаквайте скоро в уеб магазина на Chrome!",
+      "availableSoon": "Очаквайте скоро в уеб магазина на Chrome",
       "signout": "Изход"
     }
   },

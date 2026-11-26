@@ -164,16 +164,16 @@
     "deleteWorkspace": "حذف مساحة العمل"
   },
   "header": {
-    "searchFiles": "البحث في الملفات...",
+    "searchFiles": "البحث في الملفات",
     "help": "مركز المساعدة",
-    "helpSoon": "مركز المساعدة قريباً!",
+    "helpSoon": "مركز المساعدة قريباً",
     "notifications": "الإشعارات",
-    "notificationsSoon": "الإشعارات قريباً!",
+    "notificationsSoon": "الإشعارات قريباً",
     "companySettings": "إعدادات الشركة",
     "user": {
       "addNewCompany": "إضافة شركة جديدة",
       "installChrome": "تثبيت إضافة كروم",
-      "availableSoon": "ستتوفر في متجر كروم الإلكتروني قريباً!",
+      "availableSoon": "ستتوفر في متجر كروم الإلكتروني قريباً",
       "signout": "تسجيل الخروج"
     }
   },

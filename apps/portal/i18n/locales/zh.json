@@ -164,16 +164,16 @@
     "deleteWorkspace": "删除工作区"
   },
   "header": {
-    "searchFiles": "搜索文件...",
+    "searchFiles": "搜索文件",
     "help": "帮助中心",
-    "helpSoon": "帮助中心即将推出！",
+    "helpSoon": "帮助中心即将推出",
     "notifications": "通知",
-    "notificationsSoon": "通知功能即将推出！",
+    "notificationsSoon": "通知功能即将推出",
     "companySettings": "公司设置",
     "user": {
       "addNewCompany": "添加新公司",
       "installChrome": "安装Chrome扩展程序",
-      "availableSoon": "即将上架Chrome网上应用店！",
+      "availableSoon": "即将上架Chrome网上应用店",
       "signout": "退出登录"
     }
   },

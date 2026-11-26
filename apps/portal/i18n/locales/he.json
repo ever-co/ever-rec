@@ -164,16 +164,16 @@
     "deleteWorkspace": "מחק סביבת עבודה"
   },
   "header": {
-    "searchFiles": "חפש קבצים...",
+    "searchFiles": "חפש קבצים",
     "help": "מרכז עזרה",
-    "helpSoon": "מרכז העזרה יהיה זמין בקרוב!",
+    "helpSoon": "מרכז העזרה יהיה זמין בקרוב",
     "notifications": "התראות",
-    "notificationsSoon": "התראות יהיו זמינות בקרוב!",
+    "notificationsSoon": "התראות יהיו זמינות בקרוב",
     "companySettings": "הגדרות חברה",
     "user": {
       "addNewCompany": "הוסף חברה חדשה",
       "installChrome": "התקן תוסף לכרום",
-      "availableSoon": "זמין בקרוב בחנות האינטרנט של כרום!",
+      "availableSoon": "זמין בקרוב בחנות האינטרנט של כרום",
       "signout": "התנתק"
     }
   },

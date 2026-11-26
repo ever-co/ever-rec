@@ -164,16 +164,16 @@
     "deleteWorkspace": "Arbeitsbereich löschen"
   },
   "header": {
-    "searchFiles": "Dateien durchsuchen...",
+    "searchFiles": "Dateien durchsuchen",
     "help": "Hilfecenter",
-    "helpSoon": "Hilfecenter in Kürze verfügbar!",
+    "helpSoon": "Hilfecenter in Kürze verfügbar",
     "notifications": "Benachrichtigungen",
-    "notificationsSoon": "Benachrichtigungen in Kürze verfügbar!",
+    "notificationsSoon": "Benachrichtigungen in Kürze verfügbar",
     "companySettings": "Unternehmenseinstellungen",
     "user": {
       "addNewCompany": "Neues Unternehmen hinzufügen",
       "installChrome": "Chrome-Erweiterung installieren",
-      "availableSoon": "Bald im Chrome Web Store verfügbar!",
+      "availableSoon": "Bald im Chrome Web Store verfügbar",
       "signout": "Abmelden"
     }
   },
