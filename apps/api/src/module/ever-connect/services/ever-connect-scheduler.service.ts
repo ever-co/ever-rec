@@ -219,6 +219,7 @@ export class EverConnectSchedulerService
   /** Deletes expired exports, connected or not (local only). */
   private async sweepJob(): Promise<number> {
     await this.store.sweepPersonExports(this.clock()).catch(() => 0);
+    await this.store.sweepPersonRequests(this.clock()).catch(() => 0);
     return SWEEP_MS;
   }
 

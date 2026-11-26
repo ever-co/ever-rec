@@ -17,6 +17,7 @@ function scheduler(
     envCode: jest.fn(async () => null),
     patchConnection: jest.fn(async () => undefined),
     sweepPersonExports: jest.fn(async () => 0),
+    sweepPersonRequests: jest.fn(async () => 0),
   };
   const lease = {
     acquire: jest.fn(async () => true),

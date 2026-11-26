@@ -45,6 +45,19 @@ export interface EverConnectConfig {
   everIdIssuer: string;
   /** `EVER_CONNECT_PROVISION_ENABLED` (exactly `true`): the cloud provision routes exist. */
   provisionEnabled: boolean;
+  /**
+   * `EVER_CONNECT_PERSON_EXPORT_ENABLED` (exactly `true`): a person's export request from Ever
+   * Platform is answered with an export the person downloads in the portal (`WEBSITE_URL`, https).
+   * Off, the answer is `failed` with `export_not_available` and no export is made.
+   */
+  personExportEnabled: boolean;
+  /**
+   * `EVER_CONNECT_PERSON_DELETION_ENABLED` (exactly `true`): a person's deletion request from Ever
+   * Platform deletes the matched Rec accounts through Rec's own account deletion, when nothing
+   * holds them. Off, only the Ever ID links go and the answer is `failed` with
+   * `account_deletion_pending`.
+   */
+  personDeletionEnabled: boolean;
   /** The version Rec reports (`apps/api/package.json`). */
   version: string;
   /** Numbers of the platform contract; products may lower them, never raise them. */
@@ -207,6 +220,18 @@ export function readEverConnectConfig(env: Env, warn: Warn): EverConnectConfig {
       env,
       warn,
     ),
+    personExportEnabled: readBoolStrict(
+      'EVER_CONNECT_PERSON_EXPORT_ENABLED',
+      false,
+      env,
+      warn,
+    ),
+    personDeletionEnabled: readBoolStrict(
+      'EVER_CONNECT_PERSON_DELETION_ENABLED',
+      false,
+      env,
+      warn,
+    ),
     version: apiVersion(),
     timings: {
       heartbeatIntervalMs: CONSTANTS.heartbeat_interval_s * 1000,
@@ -231,6 +256,8 @@ export function describeConfig(config: EverConnectConfig): string {
     `deny=${[...config.denied].join('+') || 'none'}`,
     `env_code=${config.envCode ? 'set' : 'unset'}`,
     `provision=${config.provisionEnabled ? 'on' : 'off'}`,
+    `person_export=${config.personExportEnabled ? 'on' : 'off'}`,
+    `person_deletion=${config.personDeletionEnabled ? 'on' : 'off'}`,
   ].join(' ');
 }
 
@@ -248,6 +275,8 @@ export function everConnectConfigFactory(
     'API_BASE_URL',
     'WEBSITE_URL',
     'EVER_CONNECT_PROVISION_ENABLED',
+    'EVER_CONNECT_PERSON_EXPORT_ENABLED',
+    'EVER_CONNECT_PERSON_DELETION_ENABLED',
     'EVER_ID_ISSUER_URL',
     'EVER_ID_ISSUER',
   ];

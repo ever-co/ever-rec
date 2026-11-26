@@ -1,6 +1,12 @@
-import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  Logger,
+  NotFoundException,
+  Optional,
+} from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
-import { subjectHash } from '@ever-co/connect-sdk';
+import { RequestRefusedError, subjectHash } from '@ever-co/connect-sdk';
 import {
   EVER_IDENTITY_EVENTS,
   EverIdentityLinkEvent,
@@ -11,8 +17,18 @@ import {
 } from '../../ever-instance/ever-instance.settings';
 import { EVER_ID_LINK_ROOTS } from '../../ever-id/services/ever-id-link.service';
 import { open, seal } from '../ever-connect.crypto';
-import { EVER_CONNECT_EVENTS, EVER_CONNECT_PATHS } from '../ever-connect.types';
-import { EVER_CONNECT_CLOCK, EverConnectClock } from '../ever-connect.tokens';
+import {
+  EVER_CONNECT_EVENTS,
+  EVER_CONNECT_PATHS,
+  PersonRequestRecord,
+  PersonRequestResult,
+} from '../ever-connect.types';
+import {
+  EVER_CONNECT_ACCOUNT_DELETER,
+  EVER_CONNECT_CLOCK,
+  EverConnectAccountDeleter,
+  EverConnectClock,
+} from '../ever-connect.tokens';
 import { EverConnectAuditService } from './ever-connect-audit.service';
 import {
   EverConnectClientService,
@@ -25,6 +41,84 @@ import { EverConnectStoreService, isDbKey } from './ever-connect-store.service';
 
 /** How long a person's export stays downloadable. */
 export const PERSON_EXPORT_TTL_MS = 7 * 24 * 3600 * 1000;
+
+/** The portal page where a signed-in account downloads its export (`?job=<id>`). */
+export const PERSON_EXPORT_PAGE = '/settings/data-export';
+
+/** A person request as it arrives on the feed (`ever.registry.person.*_requested`). */
+export interface PersonRequestData {
+  job_id?: unknown;
+  subject_hash?: unknown;
+  subject_hashes?: unknown;
+}
+
+/** Why an account is kept rather than deleted for Ever Platform (logged by code only). */
+export type PersonDeletionHold = 'operator' | 'workspace_admin';
+
+/** What a request was decided to be answered with. */
+interface Decided {
+  result: PersonRequestResult;
+  reasonCode?: string;
+  exportUrl?: string;
+}
+
+/** The accounts stay until they are deleted in Rec; Ever Platform keeps the request open. */
+const pendingDeletion = (): Decided => ({
+  result: 'failed',
+  reasonCode: 'account_deletion_pending',
+});
+
+/** No export is offered; Ever Platform keeps the request open. */
+const exportNotAvailable = (): Decided => ({
+  result: 'failed',
+  reasonCode: 'export_not_available',
+});
+
+const SUBJECT_HASH = /^[0-9a-f]{64}$/;
+
+/** The subject hashes of a request (`subject_hashes`, and the older single `subject_hash`). */
+export function hashesOf(data: PersonRequestData | null | undefined): string[] {
+  const many = data?.subject_hashes;
+  const one = data?.subject_hash;
+  const values: unknown[] = [
+    ...(Array.isArray(many) ? many : []),
+    ...(one !== undefined ? [one] : []),
+  ];
+  return [
+    ...new Set(
+      values
+        .filter((value): value is string => typeof value === 'string')
+        .map((value) => value.toLowerCase())
+        .filter((value) => SUBJECT_HASH.test(value)),
+    ),
+  ];
+}
+
+/** The accounts a stored request matched, each once. */
+export function accountsOf(record: PersonRequestRecord): string[] {
+  return [...new Set(Object.values(record.identities ?? {}))].filter(isDbKey);
+}
+
+/**
+ * The address of a person's export in the portal (`WEBSITE_URL`): https only, without credentials,
+ * at most 2048 characters (what Ever Platform accepts); `null` otherwise.
+ */
+export function personExportUrl(portalUrl: string, jobId: string): string | null {
+  let url: URL;
+  try {
+    url = new URL(portalUrl);
+  } catch {
+    return null;
+  }
+  if (url.protocol !== 'https:' || !url.hostname || url.username || url.password) {
+    return null;
+  }
+  const path = url.pathname.endsWith('/')
+    ? url.pathname.slice(0, -1)
+    : url.pathname;
+  const address = `${url.origin}${path}${PERSON_EXPORT_PAGE}?job=${encodeURIComponent(jobId)}`;
+  return address.length <= 2048 ? address : null;
+}
 
 /** A stored Ever ID link (`ever_identities/{key}`), as far as this module reads it. */
 interface IdentityRow {
@@ -61,6 +155,9 @@ export class EverConnectPersonService {
     @Inject(EVER_INSTANCE_SETTINGS)
     private readonly settings: EverInstanceSettings,
     @Inject(EVER_CONNECT_CONFIG) private readonly config: EverConnectConfig,
+    @Optional()
+    @Inject(EVER_CONNECT_ACCOUNT_DELETER)
+    private readonly accountDeleter?: EverConnectAccountDeleter,
   ) {}
 
   /** Person links are reported only while connected and `ever_id_login` is enabled. */
@@ -263,100 +360,236 @@ export class EverConnectPersonService {
       .map(([key, row]) => ({ key, ...row }));
   }
 
-  /**
-   * `ever.registry.person.deletion_requested`: the person's Ever ID links to Rec accounts are
-   * removed (and their person links); the Rec account itself stays for the person to delete in
-   * Rec. Answers `anonymised` with `identity_unlinked`, or `no_account`.
-   */
-  async onDeletionRequested(data: {
-    job_id: string;
-    subject_hash?: string;
-    subject_hashes?: string[];
-  }): Promise<void> {
-    const hashes = [
-      ...(data.subject_hashes ?? []),
-      ...(data.subject_hash ? [data.subject_hash] : []),
-    ];
-    const matches = await this.matching(hashes);
-    for (const match of matches) {
-      // The account's index entry first: if a later step fails, a retry still finds the identity.
-      await this.store
-        .db()
-        .ref(`${EVER_ID_LINK_ROOTS.byUid}/${match.uid}/${match.key}`)
-        .remove();
-      await this.store
-        .db()
-        .ref(`${EVER_ID_LINK_ROOTS.links}/${match.key}`)
-        .transaction((current: IdentityRow | null) =>
-          !current ? null : current.uid === match.uid ? null : undefined,
-        );
-      await this.removeLink(match.uid);
-    }
-    await this.client.run((client) =>
-      client.instances.ack(
-        matches.length
-          ? {
-              job_id: data.job_id,
-              result: 'anonymised',
-              detail: { reason_code: 'identity_unlinked' },
-            }
-          : { job_id: data.job_id, result: 'no_account' },
-      ),
-    );
-    await this.audit.write('person.deletion', 'platform', {
-      result: matches.length ? 'anonymised' : 'no_account',
-    });
+  /** `ever.registry.person.deletion_requested`. See {@link handleRequest}. */
+  async onDeletionRequested(data: PersonRequestData): Promise<void> {
+    await this.handleRequest('deletion', data);
+  }
+
+  /** `ever.registry.person.export_requested`. See {@link handleRequest}. */
+  async onExportRequested(data: PersonRequestData): Promise<void> {
+    await this.handleRequest('export', data);
   }
 
   /**
-   * `ever.registry.person.export_requested`: a JSON bundle of the matched account (profile, Ever ID
-   * links, workspace memberships, own item metadata without files), stored encrypted for 7 days and
-   * downloadable by that account only. Answers `exported`, or `no_account`.
+   * A person's deletion or export request, matched by the hashes of their Ever IDs (never by
+   * e-mail), decided once and answered with a receipt (`POST /v1/instances/me/ack`):
+   *
+   * - **Deletion**: the matched Ever ID links go (and their person links). With
+   *   `EVER_CONNECT_PERSON_DELETION_ENABLED`, the matched accounts are then deleted by Rec's own
+   *   account deletion, unless one of them is held ({@link holdFor}): `deleted`. Otherwise
+   *   `failed` with `account_deletion_pending`: the accounts stay until they are deleted in Rec, and
+   *   Ever Platform keeps the request open.
+   * - **Export**: with `EVER_CONNECT_PERSON_EXPORT_ENABLED` and an https portal (`WEBSITE_URL`),
+   *   one encrypted export per matched account, downloadable by that account only for 7 days at
+   *   the portal page the receipt names (`exported`). Otherwise `failed` with
+   *   `export_not_available`.
+   * - Nothing matched: `no_account`.
+   *
+   * The match and the decision are stored (`ever_connect/person_requests/{jobId}`), so a request
+   * read again is answered the same way, and only until Ever Platform recorded the answer. A
+   * refusal by Ever Platform (it did not ask this installation, or holds another final answer) is
+   * not sent again; anything else throws, and the feed reads the event again later.
    */
-  async onExportRequested(data: {
-    job_id: string;
-    subject_hashes?: string[];
-  }): Promise<void> {
-    const matches = await this.matching(data.subject_hashes ?? []);
-    const uids = [...new Set(matches.map((match) => match.uid))].filter(
-      isDbKey,
-    );
-    if (!uids.length || !isDbKey(data.job_id)) {
-      await this.client.run((client) =>
-        client.instances.ack({ job_id: data.job_id, result: 'no_account' }),
+  private async handleRequest(
+    kind: PersonRequestRecord['kind'],
+    data: PersonRequestData,
+  ): Promise<void> {
+    const jobId = data?.job_id;
+    if (!isDbKey(jobId)) {
+      this.logger.warn(
+        `A person's ${kind} request without a usable job id was ignored.`,
       );
-      await this.audit.write('person.export', 'platform', {
-        result: 'no_account',
-      });
       return;
     }
+    const ref = this.store
+      .db()
+      .ref(`${EVER_CONNECT_PATHS.personRequests}/${jobId}`);
+    let record = ((await ref.get()).val() ??
+      null) as PersonRequestRecord | null;
+    if (record && record.kind !== kind) {
+      this.logger.warn('A person request was read again as another kind; ignored.');
+      return;
+    }
+    if (!record) {
+      const matches = await this.matching(hashesOf(data));
+      const identities = Object.fromEntries(
+        matches
+          .filter((match) => isDbKey(match.key) && isDbKey(match.uid))
+          .map((match) => [match.key, match.uid]),
+      );
+      record = { kind, receivedAt: this.clock(), identities };
+      await ref.set(record);
+    }
+    if (!record.result) {
+      const decided =
+        kind === 'deletion'
+          ? await this.decideDeletion(record)
+          : await this.decideExport(jobId, record);
+      const update = { ...decided, decidedAt: this.clock() };
+      await ref.update(update);
+      record = { ...record, ...update };
+      const action = kind === 'deletion' ? 'person.deletion' : 'person.export';
+      await this.audit.write(action, 'platform', {
+        result: decided.result,
+        ...(decided.reasonCode ? { reason: decided.reasonCode } : {}),
+        accounts: accountsOf(record).length,
+      });
+    }
+    if (!record.answeredAt) await this.answer(ref, jobId, record);
+  }
+
+  /** A deletion: the Ever ID links go; the accounts too when switched on and nothing holds them. */
+  private async decideDeletion(record: PersonRequestRecord): Promise<Decided> {
+    const uids = accountsOf(record);
+    if (!uids.length) return { result: 'no_account' };
+    for (const [key, uid] of Object.entries(record.identities ?? {})) {
+      await this.unlink(key, uid);
+    }
+    const deleter = this.accountDeleter;
+    if (!this.config.personDeletionEnabled || !deleter) {
+      return pendingDeletion();
+    }
+    // All or none: every account is checked before any is deleted.
+    for (const uid of uids) {
+      const hold = await this.holdFor(uid);
+      if (hold) {
+        this.logger.warn(`A person's accounts were kept (${hold}).`);
+        return pendingDeletion();
+      }
+    }
+    // Rec's account deletion can run again on an account already (partly) deleted.
+    for (const uid of uids) {
+      let deleted = false;
+      try {
+        deleted = await deleter.delete(uid);
+      } catch (error) {
+        this.logger.warn(
+          `A person's account could not be deleted (${errorCode(error)}).`,
+        );
+      }
+      if (!deleted) return pendingDeletion();
+    }
+    return { result: 'deleted' };
+  }
+
+  /** Removes one matched Ever ID link (index entry first: a retry still finds it) and its person link. */
+  private async unlink(key: string, uid: string): Promise<void> {
+    await this.store
+      .db()
+      .ref(`${EVER_ID_LINK_ROOTS.byUid}/${uid}/${key}`)
+      .remove();
+    await this.store
+      .db()
+      .ref(`${EVER_ID_LINK_ROOTS.links}/${key}`)
+      .transaction((current: IdentityRow | null) =>
+        !current ? null : current.uid === uid ? null : undefined,
+      );
+    await this.removeLink(uid);
+  }
+
+  /**
+   * Why an account must not be deleted for Ever Platform, `null` when it may be. Reads only.
+   *
+   * - `operator`: the account operates this installation.
+   * - `workspace_admin`: the account administers a workspace. Rec's account deletion leaves
+   *   workspaces as they are, so the workspace (and what it holds, which may be other people's)
+   *   would stay without its admin: the person hands it over or deletes it in Rec first.
+   */
+  async holdFor(uid: string): Promise<PersonDeletionHold | null> {
+    if (this.settings.operatorUids.has(uid)) return 'operator';
+    const user = (await this.store.db().ref(`users/${uid}`).get()).val() as {
+      workspaceIds?: unknown;
+    } | null;
+    // No record: a deletion that removed it already (it goes last), or an account without one.
+    if (!user) return null;
+    const ids: unknown[] = Array.isArray(user.workspaceIds)
+      ? user.workspaceIds
+      : Object.values((user.workspaceIds ?? {}) as Record<string, unknown>);
+    for (const id of new Set(ids)) {
+      if (!isDbKey(id)) continue;
+      const workspace = await this.store.workspace(id);
+      if (workspace?.admin === uid) return 'workspace_admin';
+    }
+    return null;
+  }
+
+  /** An export: one per matched account, when switched on and the portal can serve it. */
+  private async decideExport(
+    jobId: string,
+    record: PersonRequestRecord,
+  ): Promise<Decided> {
+    const uids = accountsOf(record);
+    if (!uids.length) return { result: 'no_account' };
+    if (!this.config.personExportEnabled) return exportNotAvailable();
+    const exportUrl = personExportUrl(this.config.portalUrl, jobId);
+    if (!exportUrl) {
+      this.logger.warn(
+        'A person export was not made: WEBSITE_URL is not an https address the person can open.',
+      );
+      return exportNotAvailable();
+    }
+    const links = ((
+      await this.store.db().ref(EVER_ID_LINK_ROOTS.links).get()
+    ).val() ?? {}) as Record<string, IdentityRow>;
+    const identities = Object.entries(record.identities ?? {});
+    const now = this.clock();
     // One export per account the person's Ever IDs are linked to, each with that account's own
     // links only, each downloadable by that account only.
-    const now = this.clock();
     for (const uid of uids) {
-      const bundle = await this.bundleFor(
-        uid,
-        matches.filter((match) => match.uid === uid),
-      );
-      await this.store.setPersonExport(data.job_id, uid, {
+      const own = identities
+        .filter(([key, owner]) => owner === uid && links[key]?.uid === uid)
+        .map(([key]) => links[key]);
+      const bundle = await this.bundleFor(uid, own);
+      await this.store.setPersonExport(jobId, uid, {
         uid,
         createdAt: now,
         expiresAt: now + PERSON_EXPORT_TTL_MS,
         bundleEnc: seal(
           JSON.stringify(bundle),
           this.settings.recJwtSecret,
-          `${data.job_id}:${uid}`,
+          `${jobId}:${uid}`,
           'person-export',
         ),
       });
     }
-    await this.client.run((client) =>
-      client.instances.ack({ job_id: data.job_id, result: 'exported' }),
-    );
-    await this.audit.write('person.export', 'platform', {
-      result: 'exported',
-      accounts: uids.length,
-    });
+    return { result: 'exported', exportUrl };
+  }
+
+  /** Sends the decided answer, until Ever Platform recorded it (or will never take it). */
+  private async answer(
+    ref: { update(value: object): Promise<unknown> },
+    jobId: string,
+    record: PersonRequestRecord,
+  ): Promise<void> {
+    const result = record.result as PersonRequestResult;
+    let outcome = 'answered';
+    try {
+      await this.client.run((client) =>
+        client.instances.ack({
+          job_id: jobId,
+          result,
+          ...(result === 'failed' && record.reasonCode
+            ? { detail: { reason_code: record.reasonCode } }
+            : {}),
+          ...(result === 'exported' && record.exportUrl
+            ? { export_url: record.exportUrl }
+            : {}),
+        }),
+      );
+    } catch (error) {
+      const refused =
+        error instanceof RequestRefusedError ||
+        (platformAnswered(error) &&
+          error.status !== 401 &&
+          error.status !== 429 &&
+          error.status < 500);
+      if (!refused) throw error;
+      outcome = `not_needed:${errorCode(error)}`.slice(0, 64);
+      this.logger.warn(
+        `A person request's receipt was not taken (${errorCode(error)}); it is not sent again.`,
+      );
+    }
+    await ref.update({ answeredAt: this.clock(), outcome });
   }
 
   private async bundleFor(uid: string, identities: IdentityRow[]) {

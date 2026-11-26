@@ -10,6 +10,8 @@ import {
   IntegrationRecord,
   LinkRecord,
   PersonExportRecord,
+  PersonRequestRecord,
+  PERSON_REQUEST_KEPT_MS,
   PolicyRecord,
   PublicUrlRecord,
   RecIntegrationKey,
@@ -270,6 +272,31 @@ export class EverConnectStoreService {
         .update(Object.fromEntries(expired.map((key) => [key, null])));
     }
     return expired.length;
+  }
+
+  /**
+   * Deletes the person requests answered more than {@link PERSON_REQUEST_KEPT_MS} ago (until then a
+   * request read again gets the same answer); answers how many.
+   */
+  async sweepPersonRequests(now: number): Promise<number> {
+    const all =
+      (await this.read<Record<string, PersonRequestRecord>>(
+        EVER_CONNECT_PATHS.personRequests,
+      )) ?? {};
+    const old = Object.entries(all)
+      .filter(
+        ([, record]) =>
+          !record ||
+          (typeof record.answeredAt === 'number' &&
+            record.answeredAt < now - PERSON_REQUEST_KEPT_MS),
+      )
+      .map(([jobId]) => jobId);
+    if (old.length) {
+      await this.db()
+        .ref(EVER_CONNECT_PATHS.personRequests)
+        .update(Object.fromEntries(old.map((jobId) => [jobId, null])));
+    }
+    return old.length;
   }
 
   /** Reads a workspace record (the product's own data; read only). */

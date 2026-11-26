@@ -117,6 +117,33 @@ describe('ever-connect config', () => {
     ).toBe(true);
   });
 
+  it('a person export or deletion does more than unlink only when its switch is exactly true', () => {
+    const off = read({});
+    expect([off.personExportEnabled, off.personDeletionEnabled]).toEqual([
+      false,
+      false,
+    ]);
+    expect(describeConfig(off)).toContain('person_export=off');
+    expect(describeConfig(off)).toContain('person_deletion=off');
+    const loose = read({
+      EVER_CONNECT_PERSON_EXPORT_ENABLED: 'yes',
+      EVER_CONNECT_PERSON_DELETION_ENABLED: 'TRUE',
+    });
+    expect([loose.personExportEnabled, loose.personDeletionEnabled]).toEqual([
+      false,
+      false,
+    ]);
+    const on = read({
+      EVER_CONNECT_PERSON_EXPORT_ENABLED: 'true',
+      EVER_CONNECT_PERSON_DELETION_ENABLED: 'true',
+    });
+    expect([on.personExportEnabled, on.personDeletionEnabled]).toEqual([
+      true,
+      true,
+    ]);
+    expect(describeConfig(on)).toContain('person_deletion=on');
+  });
+
   it('connect codes: the SDK pattern, normalised', () => {
     expect(normaliseConnectCode('EVC-0000-1111-2222')).toBe(
       'EVC-0000-1111-2222',

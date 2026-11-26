@@ -59,6 +59,7 @@ export const config = {
     '/settings/drive',
     '/settings/profile',
     '/settings/ever-platform',
+    '/settings/data-export',
     '/settings/password',
     '/settings/slack',
     '/image/:path*',

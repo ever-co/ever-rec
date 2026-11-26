@@ -142,14 +142,25 @@ When a person who linked an Ever ID to a Rec account asks app.ever.co to export 
 ID, the request reaches this installation through the event feed (as a hash of the Ever ID, never an
 e-mail address):
 
-- **Export**: a JSON file with the account's profile (name, e-mail, photo), its Ever ID links, its
-  workspaces and the list of its own images and videos (titles and dates, no files), stored encrypted
-  for 7 days and downloadable only by that account (`GET /api/v1/ever-connect/me/exports/<id>`).
-  Ever Platform receives the receipt `exported`.
-- **Deletion**: the Ever ID links of the account are removed; the Rec account itself stays, for the
-  person to delete in Rec. Ever Platform receives the receipt `anonymised`.
+- **Export** (`EVER_CONNECT_PERSON_EXPORT_ENABLED=true`, and `WEBSITE_URL` an https address): a JSON
+  file with the account's profile (name, e-mail, photo), its Ever ID links, its workspaces and the
+  list of its own images and videos (titles and dates, no files), stored encrypted for 7 days and
+  downloadable only by that account. Ever Platform receives the receipt `exported` with the portal
+  page where the person downloads it (`<WEBSITE_URL>/settings/data-export?job=<id>`, which reads
+  `GET /api/v1/ever-connect/me/exports/<id>`). Switched off (the default), no export is made and the
+  receipt is `failed` with `export_not_available`.
+- **Deletion**: the Ever ID links of the account are removed in every case. With
+  `EVER_CONNECT_PERSON_DELETION_ENABLED=true`, the account is then deleted the way *Settings* deletes
+  it (its shares, files, sign-in account and record), and Ever Platform receives `deleted`. The
+  account is kept when it operates this installation (`SUPER_ADMIN_ACCOUNT_UID`,
+  `EVER_OPERATOR_UIDS`) or administers a workspace (Rec's account deletion leaves workspaces as they
+  are: hand the workspace over or delete it first). Kept, or switched off (the default), the receipt
+  is `failed` with `account_deletion_pending`: the request stays open on Ever Platform, and the person
+  deletes the account in Rec.
 
-An Ever ID this installation does not know gets the receipt `no_account`.
+An Ever ID this installation does not know gets the receipt `no_account`. Each request is decided
+once (`ever_connect/person_requests/<id>`, kept 90 days after the answer): a request read again gets
+the same receipt, sent until Ever Platform recorded it.
 
 ## Settings
 
@@ -165,6 +176,9 @@ An Ever ID this installation does not know gets the receipt `no_account`.
 | `SUPER_ADMIN_ACCOUNT_UID`, `EVER_OPERATOR_UIDS` | | who operates the installation |
 | `NEXT_PUBLIC_EVER_CONNECT_ENABLED` (portal, at build time) | unset | `true` shows the Connect tabs, which also need the API's connection loaded |
 | `EVER_CONNECT_PROVISION_ENABLED` | unset (off) | `true` (Ever Rec cloud only) opens the provision routes for workspaces started from app.ever.co |
+| `EVER_CONNECT_PERSON_EXPORT_ENABLED` | unset (off) | `true` answers a person's export request with an export the account downloads in the portal ([above](#a-persons-export-and-deletion-requests)) |
+| `EVER_CONNECT_PERSON_DELETION_ENABLED` | unset (off) | `true` deletes the accounts a person's deletion request matches, unless one is held ([above](#a-persons-export-and-deletion-requests)) |
+| `WEBSITE_URL` | | the portal's address; an export is offered only when it is https |
 
 The portal reads `NEXT_PUBLIC_EVER_CONNECT_ENABLED` when it is built (`.deploy/portal/Dockerfile`
 build argument), not when it runs.
