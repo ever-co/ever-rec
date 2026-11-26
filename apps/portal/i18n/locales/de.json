@@ -78,6 +78,22 @@
     "profile": "Profil",
     "administration": "Verwaltung"
   },
+  "everApps": {
+    "title": "Apps",
+    "switchLabel": "Zu einer anderen Ever-Plattform oder -App wechseln",
+    "add": "Hinzufügen",
+    "addLabel": "Eigene Apps in Ever Platform hinzufügen",
+    "lines": {
+      "platform": "Ein Konto für jede Ever-App",
+      "works": "KI-Agenten, die Ihr Unternehmen führen",
+      "teams": "Arbeits- und Projektmanagement",
+      "gauzy": "ERP, CRM und HR in einer App",
+      "rec": "Screenshots und Bildschirmaufnahmen",
+      "traduora": "Übersetzungsmanagement für Teams",
+      "demand": "Handel und On-Demand-Marktplätze",
+      "tech": "Ingenieure und betreute Agenten zum Beauftragen"
+    }
+  },
   "notFound": {
     "workspace": {
       "heading": "Kein Arbeitsbereich gefunden",

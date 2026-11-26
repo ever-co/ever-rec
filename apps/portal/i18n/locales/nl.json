@@ -78,6 +78,22 @@
     "profile": "Profiel",
     "administration": "Beheer"
   },
+  "everApps": {
+    "title": "Apps",
+    "switchLabel": "Overschakelen naar een ander Ever-platform of een andere Ever-app",
+    "add": "Toevoegen",
+    "addLabel": "Toevoegen van uw eigen apps in Ever Platform",
+    "lines": {
+      "platform": "Eén account voor elke Ever-app",
+      "works": "AI-agents die uw bedrijf runnen",
+      "teams": "Werk- en projectbeheer",
+      "gauzy": "ERP, CRM en HR in één app",
+      "rec": "Schermafbeeldingen en schermopnames",
+      "traduora": "Vertaalbeheer voor teams",
+      "demand": "Handel en on-demand marktplaatsen",
+      "tech": "Engineers en beheerde agents om in te huren"
+    }
+  },
   "notFound": {
     "workspace": {
       "heading": "Geen werkruimte gevonden",
