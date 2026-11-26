@@ -35,6 +35,7 @@ function setup(env: Record<string, string> = {}) {
   const db = firebase.db;
   const acks: any[] = [];
   const ackErrors: unknown[] = [];
+  const hooks: { onAck?: (body: any) => Promise<void> } = {};
   const client = {
     run: async (call: (client: any) => Promise<unknown>) =>
       call({
@@ -42,6 +43,7 @@ function setup(env: Record<string, string> = {}) {
           ack: async (body: unknown) => {
             if (ackErrors.length) throw ackErrors.shift();
             acks.push(body);
+            if (hooks.onAck) await hooks.onAck(body);
           },
           personLinks: { remove: async () => undefined },
         },
@@ -113,6 +115,7 @@ function setup(env: Record<string, string> = {}) {
   return {
     firebase,
     db,
+    hooks,
     acks,
     ackErrors,
     audit,
@@ -329,6 +332,51 @@ describe('a person deletion request', () => {
     hold.mockResolvedValue(null);
     expect(await t.service.retryIncompleteDeletions()).toBe(1);
     expect(t.acks[1]).toEqual({ job_id: 'job-d7', result: 'deleted' });
+  });
+
+  it('a pending answer whose deletion finished while it was being sent does not hide the final one', async () => {
+    const t = setup({ EVER_CONNECT_PERSON_DELETION_ENABLED: 'true' });
+    t.deleter.delete.mockResolvedValueOnce(false);
+    // While the pending answer is on its way, the heartbeat finishes the deletion (and its own
+    // final answer does not get through).
+    t.hooks.onAck = async (body) => {
+      if (body.result !== 'failed') return;
+      t.hooks.onAck = undefined;
+      t.ackErrors.push(new ProblemError(503, 'unavailable'));
+      expect(await t.service.retryIncompleteDeletions()).toBe(0);
+    };
+    await t.service.onDeletionRequested(t.request('job-d9'));
+    expect(t.stored('job-d9')).toMatchObject({ result: 'deleted' });
+    expect(t.stored('job-d9').answeredAt).toBeUndefined();
+    // The next heartbeat sends the final answer.
+    expect(await t.service.retryIncompleteDeletions()).toBe(1);
+    expect(t.acks).toEqual([
+      { job_id: 'job-d9', ...PENDING_DELETION },
+      { job_id: 'job-d9', result: 'deleted' },
+    ]);
+  });
+
+  it('a deletion finished long after the request came is kept until its final answer gets through', async () => {
+    const t = setup();
+    const store = new EverConnectStoreService(t.firebase as any);
+    const now = Date.UTC(2027, 6, 1);
+    const day = 24 * 3600 * 1000;
+    const base = [...EVER_CONNECT_PATHS.personRequests.split('/')];
+    t.db.write([...base, 'job-late'], {
+      kind: 'deletion',
+      receivedAt: now - 300 * day,
+      result: 'deleted',
+      decidedAt: now - day,
+    });
+    t.db.write([...base, 'job-stale'], {
+      kind: 'export',
+      receivedAt: now - 300 * day,
+      result: 'failed',
+      decidedAt: now - 200 * day,
+    });
+    expect(await store.sweepPersonRequests(now)).toBe(1);
+    expect(t.stored('job-late')).not.toBeNull();
+    expect(t.stored('job-stale')).toBeNull();
   });
 
   it('the sweep keeps a deletion still to finish, so the heartbeat can finish it later', async () => {

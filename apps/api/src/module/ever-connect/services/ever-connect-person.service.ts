@@ -663,7 +663,11 @@ export class EverConnectPersonService {
 
   /** Sends the decided answer, until Ever Platform recorded it (or will never take it). */
   private async answer(
-    ref: { update(value: object): Promise<unknown> },
+    ref: {
+      transaction(
+        update: (current: PersonRequestRecord | null) => unknown,
+      ): Promise<unknown>;
+    },
     jobId: string,
     record: PersonRequestRecord,
   ): Promise<void> {
@@ -696,7 +700,17 @@ export class EverConnectPersonService {
         `A person request's receipt was not taken (${errorCode(error)}); it is not sent again.`,
       );
     }
-    await ref.update({ answeredAt: this.clock(), outcome });
+    // Recorded as answered only while the stored decision is still the one just sent: the heartbeat
+    // may have finished the deletion meanwhile (now `deleted`, still to send).
+    const answeredAt = this.clock();
+    await ref.transaction((current: PersonRequestRecord | null) => {
+      // A first attempt may see no value (the local cache): answering it as is lets the
+      // database retry with the stored one.
+      if (current === null) return null;
+      return current.result === result
+        ? { ...current, answeredAt, outcome }
+        : undefined;
+    });
   }
 
   private async bundleFor(uid: string, identities: IdentityRow[]) {

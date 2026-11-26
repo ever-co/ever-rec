@@ -276,7 +276,7 @@ export class EverConnectStoreService {
 
   /**
    * Deletes the person requests answered more than {@link PERSON_REQUEST_KEPT_MS} ago (until then a
-   * request read again gets the same answer), and any received twice as long ago that never got an
+   * request read again gets the same answer), and any decided twice as long ago that never got an
    * answer through; answers how many. A deletion still to finish (`incomplete`) is kept until it is
    * done: the heartbeat's retry needs its record.
    */
@@ -286,15 +286,18 @@ export class EverConnectStoreService {
         EVER_CONNECT_PATHS.personRequests,
       )) ?? {};
     const old = Object.entries(all)
-      .filter(
-        ([, record]) =>
-          !record ||
-          (record.incomplete !== true &&
-            ((typeof record.answeredAt === 'number' &&
-              record.answeredAt < now - PERSON_REQUEST_KEPT_MS) ||
-              (typeof record.receivedAt === 'number' &&
-                record.receivedAt < now - 2 * PERSON_REQUEST_KEPT_MS))),
-      )
+      .filter(([, record]) => {
+        if (!record) return true;
+        if (record.incomplete === true) return false;
+        if (typeof record.answeredAt === 'number') {
+          return record.answeredAt < now - PERSON_REQUEST_KEPT_MS;
+        }
+        // Not answered yet: counted from its latest decision (a deletion finished late is decided
+        // again), never from when the request arrived.
+        const since =
+          typeof record.decidedAt === 'number' ? record.decidedAt : record.receivedAt;
+        return typeof since === 'number' && since < now - 2 * PERSON_REQUEST_KEPT_MS;
+      })
       .map(([jobId]) => jobId);
     if (old.length) {
       await this.db()
