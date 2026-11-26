@@ -7,6 +7,28 @@ import { IChapter } from '@/content/panel/hooks/useVideoChapters';
 
 const s = styles;
 
+/** The host of the signed storage links the API makes for chapter thumbnails. */
+const STORAGE_HOST = 'storage.googleapis.com';
+
+/**
+ * Whether a chapter thumbnail URL may be loaded: a frame the editor just captured (a `blob:`
+ * URL) or an https link on the storage host. Any other URL would tell its host who watched.
+ */
+const isBlobURL = (url: string) => url.startsWith('blob:');
+const isStorageURL = (url: string) => {
+  try {
+    const parsed = new URL(url);
+    return (
+      parsed.protocol === 'https:' &&
+      parsed.host === STORAGE_HOST &&
+      !parsed.username &&
+      !parsed.password
+    );
+  } catch {
+    return false;
+  }
+};
+
 interface IProps {
   isHorizontalUI?: boolean;
   isFirst: boolean;
@@ -31,11 +53,13 @@ const VideoChapter: FC<IProps> = ({
   };
 
   let thumbnailURL = 'images/panel/videos/chapter-placeholder.jpg';
+  const chapterURL =
+    typeof chapter.thumbnailURL === 'string' ? chapter.thumbnailURL : '';
   if (
-    (!!chapter.thumbnailURL && !!chapter.refName) ||
-    chapter.thumbnailURL.includes('blob')
+    isBlobURL(chapterURL) ||
+    (!!chapter.refName && isStorageURL(chapterURL))
   ) {
-    thumbnailURL = chapter.thumbnailURL;
+    thumbnailURL = chapterURL;
   }
 
   return (

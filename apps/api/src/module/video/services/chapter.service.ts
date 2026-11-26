@@ -8,6 +8,7 @@ import {
   promiseAllSettled,
 } from 'src/services/utils/helpers';
 import { IChapter } from 'src/interfaces/IChapter';
+import { keepOwnThumbnails } from '../utilities/chapterThumbnail';
 
 @Injectable()
 export class VideoChapterService {
@@ -33,8 +34,10 @@ export class VideoChapterService {
         `${rootDb}/${parentCollection}/videos/${videoId}/chapters`,
       );
 
-      const chapterData: IChapter[] = parseCollectionToArray(
-        (await chapterRef.get()).val(),
+      // Chapters saved before the thumbnail check may hold a URL on any host.
+      const chapterData: IChapter[] = keepOwnThumbnails(
+        parseCollectionToArray((await chapterRef.get()).val()),
+        () => admin.storage().bucket().name,
       );
 
       return sendResponse(chapterData);
@@ -111,8 +114,9 @@ export class VideoChapterService {
         });
       }
 
-      // Map the rest of the chapters
-      chaptersData.forEach((chapter) => {
+      // Map the rest of the chapters. They keep a thumbnail URL only when it is a signed link
+      // the API made: every viewer's browser loads it, the share page's included.
+      keepOwnThumbnails(chaptersData, () => bucket.name).forEach((chapter) => {
         if (!mappedChapters[chapter.id]) {
           mappedChapters[chapter.id] = chapter;
         }
