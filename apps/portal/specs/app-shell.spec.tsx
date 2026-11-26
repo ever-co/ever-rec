@@ -107,9 +107,9 @@ beforeAll(() => {
   (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
   // Radix measures and scrolls its menus; jsdom has none of these.
   (globalThis as any).ResizeObserver = class {
-    observe() {}
-    unobserve() {}
-    disconnect() {}
+    observe = jest.fn();
+    unobserve = jest.fn();
+    disconnect = jest.fn();
   };
   Element.prototype.scrollIntoView = jest.fn();
   (Element.prototype as any).hasPointerCapture = jest.fn(() => false);
