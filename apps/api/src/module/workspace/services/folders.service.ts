@@ -24,7 +24,11 @@ import { equal } from 'assert';
 import { WorkspaceSharedService } from './shared.service';
 import { canAccessFolderById, evaluateAccess } from '../guards/utils';
 import { IUser } from 'src/interfaces/IUser';
-import { planFolderMove } from './folder-move';
+import {
+  MAX_FOLDER_NEST_LEVEL,
+  nestLevelUnder,
+  planFolderMove,
+} from './folder-move';
 import {
   changeWorkspaceFolders,
   moveWorkspaceItem,
@@ -67,31 +71,38 @@ export class WorkspaceFoldersService {
     try {
       // Throws for a workspace that does not exist, so no folder list is written for it.
       await this.utilitiesService.getWorkspaceById(workspaceId);
-      const newNestLevel = parentId === false ? 0 : nestLevel + 1;
-
-      if (newNestLevel > 2) {
-        return sendError('Maximum folder nest level exceeded.');
-      }
 
       const created = new Date().toISOString();
       const id = nanoid(28);
-      const newFolder: IWorkspaceFolder = {
-        id,
-        creator: uid,
-        isPublic: false,
-        name,
-        parentId,
-        created,
-        updated: created,
-        items: 0,
-        children: [],
-        rootFolderId: false,
-        nestLevel: newNestLevel,
-        color,
-      };
-      const result = await changeWorkspaceFolders(workspaceId, (folders) => ({
-        items: [...folders, newFolder],
-      }));
+      // The level comes from the stored parent, not from the `nestLevel` of the request (still
+      // accepted, for older clients): a wrong one would put a folder deeper than the limit, and a
+      // parent that is not stored would leave a folder no list shows.
+      const result = await changeWorkspaceFolders(workspaceId, (folders) => {
+        const newNestLevel = nestLevelUnder(folders, parentId);
+
+        if (newNestLevel === undefined) {
+          return { error: 'Parent folder not found.' };
+        }
+        if (newNestLevel > MAX_FOLDER_NEST_LEVEL) {
+          return { error: 'Maximum folder nest level exceeded.' };
+        }
+
+        const newFolder: IWorkspaceFolder = {
+          id,
+          creator: uid,
+          isPublic: false,
+          name,
+          parentId,
+          created,
+          updated: created,
+          items: 0,
+          children: [],
+          rootFolderId: false,
+          nestLevel: newNestLevel,
+          color,
+        };
+        return { items: [...folders, newFolder] };
+      });
 
       if (result.ok === false) {
         return sendError(
