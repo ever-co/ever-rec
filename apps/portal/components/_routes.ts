@@ -20,6 +20,7 @@ export const panelRoutes = {
   images: '/images',
   videos: '/videos',
   profile: '/profile',
+  preferences: '/preferences',
   everPlatform: '/ever-platform',
   edit: '/edit',
   shared: '/shared',

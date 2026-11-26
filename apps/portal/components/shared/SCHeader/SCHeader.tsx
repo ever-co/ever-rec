@@ -1,29 +1,27 @@
 import { FC, ChangeEvent, useRef } from 'react';
-import styles from './SCHeader.module.scss';
-import classNames from 'classnames';
-import Image from 'next/legacy/image';
-import { NextRouter, useRouter } from 'next/router';
-import { useSelector, RootStateOrAny, useDispatch } from 'react-redux';
-import { Dropdown, Menu, Tooltip } from 'antd';
-import { IUser } from 'app/interfaces/IUserData';
-import { panelRoutes, preRoutes } from 'components/_routes';
-import AppSvg from 'components/elements/AppSvg';
-import UserShortInfo from 'components/containers/dashboardLayout/elements/UserShortInfo/UserShortInfo';
-import { useCreateWorkspace } from 'hooks/useCreateWorkspaceHandler';
-import AuthAC from 'store/auth/actions/AuthAC';
-import PanelAC from 'app/store/panel/actions/PanelAC';
-import { signOut } from 'app/services/auth';
-import { Dispatch } from 'redux';
-import { infoMessage } from 'app/services/helpers/toastMessages';
-// import { languages } from '@i18n/constants';
-import { languages } from '../../../i18n/constants';
-
+import { useRouter } from 'next/router';
 import { useTranslation } from 'react-i18next';
+import {
+  Bell,
+  CircleHelp,
+  Menu as MenuIcon,
+  Search,
+  Settings,
+  UserPlus,
+} from 'lucide-react';
+import { panelRoutes, preRoutes } from 'components/_routes';
+import { infoMessage } from 'app/services/helpers/toastMessages';
+import { useMenuItems } from 'misc/menuItems';
+import { Button } from 'components/ui/button';
+import { Hint } from 'components/ui/tooltip';
+import ThemeToggle from 'components/shell/ThemeToggle';
+import { useShell } from 'components/shell/ShellContext';
 
 interface ISCHeaderProps {
   filterValue?: string | null;
   showSearch?: boolean;
   text?: string;
+  /** No longer drawn here: the person's picture is in the block at the foot of the sidebar. */
   userPhotoURL?: string | null;
   isWorkspace?: boolean;
   isWorkspaceAdmin?: boolean;
@@ -31,9 +29,13 @@ interface ISCHeaderProps {
   onInviteMembersButtonClick?: () => void;
 }
 
+/**
+ * The top bar of a page (shared Ever shell, A1): the search or the page's title on the left;
+ * the product's controls, notifications, help and the one theme icon on the right. The person's
+ * menu and the language choice live in the sidebar's user block and in Preferences.
+ */
 const SCHeader: FC<ISCHeaderProps> = ({
   filterValue,
-  userPhotoURL,
   text,
   showSearch = true,
   isWorkspace = false,
@@ -41,20 +43,12 @@ const SCHeader: FC<ISCHeaderProps> = ({
   onFilterChange,
   onInviteMembersButtonClick,
 }) => {
-  const { t, i18n } = useTranslation();
-  const toggleLanguage = (code: string) => {
-    i18n.changeLanguage(code);
-  };
+  const { t } = useTranslation();
   const clickedNotifications = useRef(false); // to be removed when implemented
   const clickedHelpCenter = useRef(false); // to be removed when implemented
   const router = useRouter();
-  const dispatch = useDispatch();
-  const user = useSelector((state: RootStateOrAny) => state.auth.user);
-  const { Modal: CreateWSModal, setShowCreateWorkspaceModal } =
-    useCreateWorkspace();
-
-  const goToProfilePage = () =>
-    router.push(preRoutes.settings + panelRoutes.profile);
+  const { setDrawerOpen } = useShell();
+  const { mainMenuItems, settingsMenuItems } = useMenuItems();
 
   const goToWorkspace = () => {
     const { workspaceId } = router.query;
@@ -64,52 +58,91 @@ const SCHeader: FC<ISCHeaderProps> = ({
     );
   };
 
-  const moreMenu = renderMoreMenuJSX(
-    user,
-    goToProfilePage,
-    () => setShowCreateWorkspaceModal(true),
-    () => signOutHandler(dispatch, router),
-    (str: any) => t(str),
-  );
-  const languagesMenu = languagesList((code) => toggleLanguage(code));
-
-  const photoURL = userPhotoURL ?? '/sign/default-profile.svg';
+  // A page that has nothing to search (`filterValue === null`) shows its name instead of a
+  // disabled field.
+  const canSearch = showSearch && filterValue !== null;
+  const routeTitle = [...mainMenuItems, ...settingsMenuItems].find(
+    (item) => item.type !== 'back' && router.asPath.includes(item.route),
+  )?.title;
+  const title = text ?? (canSearch ? undefined : routeTitle);
 
   return (
-    <div className={styles.appHeader}>
-      {showSearch ? (
-        <div className={styles.search}>
-          <AppSvg path="/new-design-v2/search.svg" />
-
-          <input
-            value={filterValue ?? ''}
-            type="text"
-            placeholder={t('header.searchFiles')}
-            className={styles.appInput}
-            onChange={onFilterChange}
-            disabled={filterValue === null}
-          />
-        </div>
-      ) : (
-        <div className="tw-text-3xl tw-font-bold">{text}</div>
-      )}
-      <div className={styles.actions}>
-        <Dropdown
-          trigger={['click']}
-          placement="bottomRight"
-          overlay={languagesMenu}
+    <header className="tw-flex tw-h-14 tw-shrink-0 tw-items-center tw-justify-between tw-gap-3 tw-border-0 tw-border-b tw-border-solid tw-border-border tw-px-4 md:tw-px-6">
+      <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-2">
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          className="-tw-ml-1 md:tw-hidden"
+          aria-label={t('shell.openNavigation')}
+          onClick={() => setDrawerOpen(true)}
         >
-          <div
-            className={classNames(styles.actionButton, styles.profileButton)}
-          >
-            <p>{t('common.language')}</p>
-            <AppSvg path="/new-design-v2/down-caret.svg" size="20px" />
-          </div>
-        </Dropdown>
+          <MenuIcon />
+        </Button>
 
-        <Tooltip title={t('header.notifications')} placement="bottom">
-          <div
-            className={styles.actionButton}
+        {canSearch ? (
+          <label className="tw-flex tw-h-8 tw-w-full tw-max-w-sm tw-items-center tw-gap-2 tw-rounded-md tw-border tw-border-solid tw-border-border tw-bg-card tw-px-2.5 tw-text-sm tw-text-muted-foreground tw-transition-colors tw-duration-150 focus-within:tw-border-ring focus-within:tw-ring-2 focus-within:tw-ring-ring/20">
+            <Search className="tw-size-4 tw-shrink-0" aria-hidden="true" />
+            <input
+              value={filterValue ?? ''}
+              type="search"
+              placeholder={t('header.searchFiles')}
+              aria-label={t('header.searchFiles')}
+              className="tw-min-w-0 tw-flex-1 tw-bg-transparent tw-text-sm tw-text-foreground tw-outline-none [&::-webkit-search-cancel-button]:tw-appearance-none"
+              onChange={onFilterChange}
+            />
+          </label>
+        ) : (
+          title && (
+            <h1 className="tw-truncate tw-text-base tw-font-semibold tw-text-foreground">
+              {title}
+            </h1>
+          )
+        )}
+      </div>
+
+      <div className="tw-flex tw-shrink-0 tw-items-center tw-gap-1">
+        {isWorkspace && (
+          <>
+            <Button
+              size="sm"
+              className="tw-mr-1 tw-hidden sm:tw-inline-flex"
+              onClick={onInviteMembersButtonClick}
+            >
+              <UserPlus />
+              {t('workspace.inviteTeammates')}
+            </Button>
+            <Hint label={t('workspace.inviteTeammates')}>
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                className="sm:tw-hidden"
+                aria-label={t('workspace.inviteTeammates')}
+                onClick={onInviteMembersButtonClick}
+              >
+                <UserPlus />
+              </Button>
+            </Hint>
+
+            {isWorkspaceAdmin && (
+              <Hint label={t('header.companySettings')}>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  aria-label={t('header.companySettings')}
+                  onClick={goToWorkspace}
+                >
+                  <Settings />
+                </Button>
+              </Hint>
+            )}
+          </>
+        )}
+
+        <Hint label={t('header.notifications')}>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            aria-label={t('header.notifications')}
             onClick={() => {
               clickedNotifications.current === false &&
                 infoMessage(t('header.notificationsSoon'));
@@ -117,13 +150,15 @@ const SCHeader: FC<ISCHeaderProps> = ({
               clickedNotifications.current = true;
             }}
           >
-            <AppSvg path="/new-design-v2/notifications.svg" size="20px" />
-          </div>
-        </Tooltip>
+            <Bell />
+          </Button>
+        </Hint>
 
-        <Tooltip title={t('header.help')} placement="bottom">
-          <div
-            className={styles.actionButton}
+        <Hint label={t('header.help')}>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            aria-label={t('header.help')}
             onClick={() => {
               clickedHelpCenter.current === false &&
                 infoMessage(t('header.helpSoon'));
@@ -131,180 +166,14 @@ const SCHeader: FC<ISCHeaderProps> = ({
               clickedHelpCenter.current = true;
             }}
           >
-            <AppSvg path="/new-design-v2/question-mark.svg" size="20px" />
-          </div>
-        </Tooltip>
+            <CircleHelp />
+          </Button>
+        </Hint>
 
-        {isWorkspace && (
-          <>
-            <button
-              className={styles.CTAButton}
-              onClick={onInviteMembersButtonClick}
-            >
-              {t('workspace.inviteTeammates')}
-            </button>
-
-            {isWorkspaceAdmin && (
-              <Tooltip title={t('header.companySettings')} placement="bottom">
-                <div className={styles.actionButton} onClick={goToWorkspace}>
-                  <AppSvg
-                    path="/new-design-v2/settings-wheel.svg"
-                    size="20px"
-                  />
-                </div>
-              </Tooltip>
-            )}
-          </>
-        )}
-
-        <Dropdown
-          trigger={['click']}
-          placement="bottomRight"
-          overlay={moreMenu}
-        >
-          <div
-            className={classNames(styles.actionButton, styles.profileButton)}
-          >
-            <Image
-              src={photoURL}
-              alt=""
-              width={25}
-              height={25}
-              className={styles.profilePicture}
-            />
-            <AppSvg path="/new-design-v2/down-caret.svg" size="20px" />
-          </div>
-        </Dropdown>
+        <ThemeToggle className="tw-size-8" />
       </div>
-
-      {CreateWSModal}
-    </div>
+    </header>
   );
 };
 
 export default SCHeader;
-
-const renderMoreMenuJSX = (
-  user: IUser,
-  goToProfilePage: () => void,
-  addNewCompany: () => void,
-  signOut: () => void,
-  t: (key: string) => string,
-) => {
-  return (
-    <Menu className={styles.profileMenu}>
-      <Menu.Item
-        key="profile"
-        className={styles.menuItem}
-        onClick={goToProfilePage}
-      >
-        <UserShortInfo user={user} />
-        <AppSvg
-          path="/new-design-v2/right-caret.svg"
-          size="10px"
-          color="black"
-          style={{ position: 'absolute', top: 'calc(50% - 5px)', right: '5%' }}
-        />
-      </Menu.Item>
-
-      <Menu.Item
-        key="company"
-        className={styles.menuItem}
-        icon={
-          <AppSvg path="/new-design-v2/plus.svg" size="19px" color="#5b4dbe" />
-        }
-        onClick={addNewCompany}
-      >
-        <span className={styles.menuItemSpan}>
-          {t('header.user.addNewCompany')}
-        </span>
-      </Menu.Item>
-
-      <Menu.Item
-        key="install"
-        className={styles.menuItem}
-        icon={
-          <AppSvg
-            path="/new-design-v2/add-extension.svg"
-            size="18px"
-            color="#5b4dbe"
-          />
-        }
-        onClick={() => infoMessage(t('header.user.availableSoon'))}
-      >
-        <span className={styles.menuItemSpan}>
-          {t('header.user.installChrome')}
-        </span>
-      </Menu.Item>
-
-      <Menu.Item
-        key="notifications"
-        className={classNames(styles.menuItem, styles.menuItemHidden)}
-        icon={
-          <AppSvg
-            path="/new-design-v2/notifications.svg"
-            size="20px"
-            color="#5b4dbe"
-          />
-        }
-        onClick={() => infoMessage(t('header.notificationsSoon'))}
-      >
-        <span className={styles.menuItemSpan}>{t('header.notifications')}</span>
-      </Menu.Item>
-
-      <Menu.Item
-        key="help-center"
-        className={classNames(styles.menuItem, styles.menuItemHidden)}
-        icon={
-          <AppSvg
-            path="/new-design-v2/question-mark.svg"
-            size="20px"
-            color="#5b4dbe"
-          />
-        }
-        onClick={() => infoMessage(t('header.helpSoon'))}
-      >
-        <span className={styles.menuItemSpan}>{t('header.help')}</span>
-      </Menu.Item>
-
-      <Menu.Item key="signout" className={styles.menuItem} onClick={signOut}>
-        <span className={styles.menuItemSpan} style={{ marginLeft: 0 }}>
-          {t('header.user.signout')}
-        </span>
-      </Menu.Item>
-    </Menu>
-  );
-};
-export const languagesList = (toggleLanguage: (code: string) => void) => {
-  return (
-    <Menu
-      style={{
-        height: '400px',
-        overflowY: 'scroll',
-      }}
-    >
-      {languages.map((lang) => (
-        <Menu.Item
-          key={lang.code}
-          onClick={() => toggleLanguage(lang.code)}
-          style={{
-            padding: '0.5rem 1.25rem',
-          }}
-        >
-          <span>{lang.text}</span>
-        </Menu.Item>
-      ))}
-    </Menu>
-  );
-};
-
-const signOutHandler = (dispatch: Dispatch, router: NextRouter) => {
-  signOut();
-
-  dispatch(AuthAC.setUser({ user: null }));
-  dispatch(PanelAC.resetExplorerDataLoader());
-  dispatch(PanelAC.resetExplorerDataLoaderVideos());
-  dispatch(PanelAC.resetWorkspaces());
-
-  router.push(preRoutes.auth + panelRoutes.login);
-};

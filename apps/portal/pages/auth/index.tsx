@@ -19,9 +19,8 @@ import {
 } from 'app/services/helpers/toastMessages';
 import redirect from 'misc/redirect';
 import { useTranslation } from 'react-i18next';
-import { languagesList } from 'components/shared/SCHeader/SCHeader';
-import AppSvg from 'components/elements/AppSvg';
-import { Dropdown } from 'antd';
+import LanguageMenu from 'components/shell/LanguageMenu';
+import ThemeToggle from 'components/shell/ThemeToggle';
 
 type SignFlowName = 'login' | 'register' | 'resetPassword' | 'newResetPassword';
 
@@ -41,7 +40,7 @@ const Auth: React.FC<SignFlowComponent> = ({ children, componentType }) => {
   const [params, setParams] = useState('');
   const { features, newFeatures } = useFeatures();
   const currentPathname = router.pathname.match(panelRoutes.login);
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const flowLinks: FlowLink[] = [
     {
       name: 'login',
@@ -89,28 +88,15 @@ const Auth: React.FC<SignFlowComponent> = ({ children, componentType }) => {
       }
     }
   };
-  const toggleLanguage = (code: string) => {
-    i18n.changeLanguage(code);
-  };
-
   const filteredLinks = (): FlowLink[] => {
     return flowLinks.filter((link) => link.name !== componentType);
   };
-  const languagesMenu = languagesList((code) => toggleLanguage(code));
 
   return (
     <div className="mx-lg:tw-grid-cols-1 tw-inline-grid tw-grid-cols-2 tw-p-4 tw-min-h-screen tw-w-screen">
-      <div className="tw-absolute tw-top-5 tw-left-5 ">
-        <Dropdown
-          trigger={['click']}
-          placement="bottomRight"
-          overlay={languagesMenu}
-        >
-          <div className=" tw-px-4 tw-py-2 tw-flex tw-cursor-pointer tw-border tw-rounded-md tw-border-[#5b4dbe]/20">
-            <p>{t('common.language')}</p>
-            <AppSvg path="/new-design-v2/down-caret.svg" size="20px" />
-          </div>
-        </Dropdown>
+      <div className="tw-absolute tw-left-5 tw-top-5 tw-z-10 tw-flex tw-items-center tw-gap-1">
+        <LanguageMenu variant="compact" />
+        <ThemeToggle className="tw-size-8" />
       </div>
       <div className="tw-flex tw-flex-col tw-items-center">
         <div className="tw-flex-1 tw-pt-16 tw-relative">

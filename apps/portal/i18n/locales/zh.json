@@ -624,6 +624,17 @@
       "saveEachFile": "下载前询问每个文件的保存位置。",
       "saveEachFileDescription": "注意：要使用此功能，您需要在权限请求窗口弹出时允许扩展程序管理下载。此外，只有当此选项打开时，您才能指定默认子文件夹来将截图保存到本地磁盘。如果您不指定子文件夹，则默认为“下载”文件夹。",
       "addDateAndUrl": "在截图顶部添加日期和URL。"
+    },
+    "appearance": {
+      "description": "Ever Rec 在此浏览器中的外观和语言",
+      "theme": "主题",
+      "themeHint": "仅适用于此浏览器",
+      "light": "浅色",
+      "dark": "深色",
+      "system": "跟随系统",
+      "languageHint": "应用在此浏览器中使用的语言",
+      "saving": "保存截图",
+      "savingHint": "浏览器扩展的文件格式、下载文件夹和 Google 云端硬盘链接"
     }
   },
   "modals": {
@@ -802,5 +813,25 @@
     "videoDeletedAndRedirect": "视频已成功删除。正在重定向到您的工作区...",
     "videoMovedToTrashAndRedirecting": "视频已成功移至回收站。正在重定向到“我的视频”...",
     "joinedWorkspaceSuccess": "已成功加入工作区。正在重定向到新工作区..."
+  },
+  "shell": {
+    "myLibrary": "我的媒体库",
+    "workspaces": "工作区",
+    "noOtherWorkspace": "没有其他工作区",
+    "switchWorkspace": "切换工作区",
+    "account": "账户",
+    "accountMenu": "账户菜单",
+    "backToApp": "返回应用",
+    "collapseSidebar": "收起侧边栏",
+    "expandSidebar": "展开侧边栏",
+    "openNavigation": "打开导航",
+    "closeNavigation": "关闭导航",
+    "switchToDark": "切换到深色主题",
+    "switchToLight": "切换到浅色主题",
+    "showStarredFolders": "显示已加星标的文件夹",
+    "hideStarredFolders": "隐藏已加星标的文件夹",
+    "noStarredFolders": "没有已加星标的文件夹",
+    "members": "{{count}} 位成员",
+    "members_other": "{{count}} 位成员"
   }
 }

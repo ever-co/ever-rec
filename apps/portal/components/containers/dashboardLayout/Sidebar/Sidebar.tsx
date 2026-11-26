@@ -1,34 +1,46 @@
-import { FC, useCallback, useRef, useState } from 'react';
-import styles from './Sidebar.module.scss';
+import { FC, useCallback, useState } from 'react';
 import { useRouter } from 'next/router';
 import { RootStateOrAny, useDispatch, useSelector } from 'react-redux';
-import classNames from 'classnames';
 import Link from 'next/link';
-import Logo from '../../../elements/Logo';
+import { useTranslation } from 'react-i18next';
+import { ChevronDown, PanelLeft } from 'lucide-react';
 import SidebarMenuItem from '../elements/SidebarMenuItems/SidebarMenuItem';
-import DashboardCard from '../elements/DashboardCard';
-import SidebarWorkspaces from '../SidebarWorkspaces/SidebarWorkspaces';
 import AppSpinner from 'components/containers/appSpinner/AppSpinner';
 import UploadWorkspaceImageModal from 'components/pagesComponents/_imagesScreen/components/uploadWorkspaceImageModal/UploadWorkspaceImageModal';
 import PanelAC from '../../../../app/store/panel/actions/PanelAC';
 import { getExplorerData } from 'app/services/screenshots';
 import { getExplorerDataVideo } from 'app/services/videos';
-import { panelRoutes, preRoutes } from '../../../_routes';
 import { IMainMenuItem, useMenuItems } from 'misc/menuItems';
-import useClickOrKeyOutside from 'hooks/useClickOrKeyOutside';
 import { useCreateWorkspace } from 'hooks/useCreateWorkspaceHandler';
-import { useTranslation } from 'react-i18next';
+import { cn } from 'app/utilities/cn';
+import SidebarBrand from 'components/shell/SidebarBrand';
+import WorkspaceSwitcher from 'components/shell/WorkspaceSwitcher';
+import StarredFolders from 'components/shell/StarredFolders';
+import UserBlock from 'components/shell/UserBlock';
+import { useShell } from 'components/shell/ShellContext';
+import { Hint } from 'components/ui/tooltip';
 
 interface IProps {
   isProfilePage?: boolean;
   isWorkspaceSettingsPage?: boolean;
+  /** Drawn inside the phone drawer: always expanded, whatever the desktop choice is. */
+  inDrawer?: boolean;
 }
 
-const Sidebar: FC<IProps> = ({ isProfilePage, isWorkspaceSettingsPage }) => {
+/**
+ * The app sidebar (shared Ever shell, A1/A2/A6): the Ever mark and the workspace switcher in its
+ * header, the navigation, and the person's block at its foot.
+ */
+const Sidebar: FC<IProps> = ({
+  isProfilePage,
+  isWorkspaceSettingsPage,
+  inDrawer = false,
+}) => {
   const { t } = useTranslation();
   const router = useRouter();
   const dispatch = useDispatch();
-  const favFoldersRef = useRef(null);
+  const shell = useShell();
+  const collapsed = inDrawer ? false : shell.collapsed;
   const { mainMenuItems, getWorkspaceSettingsMenuItems, settingsMenuItems } =
     useMenuItems();
   const explorerData = useSelector(
@@ -37,27 +49,17 @@ const Sidebar: FC<IProps> = ({ isProfilePage, isWorkspaceSettingsPage }) => {
   const explorerDataVideos = useSelector(
     (state: RootStateOrAny) => state.panel.explorerDataVideos,
   );
-  const [showFavoriteFolders, setShowFavoriteFolders] = useState(false);
-  const [showWorkspaceImageModal, setShowWorkspaceImageModal] = useState(false); //? not fully implemented
+  const [showStarredFolders, setShowStarredFolders] = useState(false);
+  const [showWorkspaceImageModal] = useState(false); //? not fully implemented
   const [loaderState, setLoaderState] = useState(false);
   const { Modal: CreateWSModal, setShowCreateWorkspaceModal } =
     useCreateWorkspace(true);
-
-  useClickOrKeyOutside(
-    favFoldersRef,
-    () => {
-      setShowFavoriteFolders(false);
-    },
-    'Escape',
-  );
 
   const sidebarItemClicked = async (item: any) => {
     // Reset active workspace on each route except workspace routes and starred folders UI
     if (item.type !== 'favFolders' && !item?.isWorkspaceRoute) {
       dispatch(PanelAC.setActiveWorkspace({ activeWorkspace: null } as any));
     }
-
-    item.type === 'favFolders' && setShowFavoriteFolders(true);
 
     // Lets bring him back to root folder on My Images/My Videos click to avoid issues with favorite folders navigations
     if (item.type === 'images') {
@@ -90,7 +92,7 @@ const Sidebar: FC<IProps> = ({ isProfilePage, isWorkspaceSettingsPage }) => {
     [router], // Dependency array
   );
 
-  let menuItems;
+  let menuItems: IMainMenuItem[];
 
   if (isWorkspaceSettingsPage) {
     const { workspaceId } = router.query;
@@ -104,70 +106,138 @@ const Sidebar: FC<IProps> = ({ isProfilePage, isWorkspaceSettingsPage }) => {
     (item: any) => () => handleItemClick(item),
     [handleItemClick],
   );
+
+  const isSettings = isProfilePage || isWorkspaceSettingsPage;
+  const backItem = isSettings
+    ? menuItems.find((item) => item.type === 'back')
+    : undefined;
+  const navItems = menuItems.filter((item) => item !== backItem);
+  const collapseLabel = collapsed
+    ? t('shell.expandSidebar')
+    : t('shell.collapseSidebar');
+
+  const collapseButton = !inDrawer && (
+    <Hint label={collapseLabel} side={collapsed ? 'right' : 'bottom'}>
+      <button
+        type="button"
+        aria-label={collapseLabel}
+        aria-expanded={!collapsed}
+        onClick={shell.toggleCollapsed}
+        className="tw-flex tw-size-8 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-bg-transparent tw-text-muted-foreground tw-outline-none tw-transition-colors tw-duration-150 hover:tw-bg-sidebar-accent hover:tw-text-sidebar-accent-foreground focus-visible:tw-ring-2 focus-visible:tw-ring-ring"
+      >
+        <PanelLeft className="tw-size-4 rtl:tw-rotate-180" aria-hidden="true" />
+      </button>
+    </Hint>
+  );
+
   return (
-    <DashboardCard className={classNames(styles.dashboardCard)}>
-      <SidebarWorkspaces
-        addNewWorkspaceClicked={() => setShowCreateWorkspaceModal(true)}
-      />
-
-      <div className={styles.sidebarContainer}>
-        <div className={`${styles.sidebarWrapper} tw-px-4`}>
-          <div className={styles.logoWrapper}>
-            <Logo
-              className="tw-w-full"
-              onClick={() => router.push(preRoutes.media + panelRoutes.images)}
-            />
-          </div>
-
-          {/* <hr className={styles.lineSeparator} /> */}
-
-          {(isProfilePage || isWorkspaceSettingsPage) && (
-            <div className={styles.sidebarHeading}>
-              <h1>
-                {isProfilePage
-                  ? t('sidebar.profile')
-                  : t('sidebar.administration')}
-              </h1>
-            </div>
-          )}
-
-          <div>
-            {/* <div ref={favFoldersRef}>
-              <FavFoldersSidebarSection
-                visible={showFavoriteFolders}
-                setVisible={setShowFavoriteFolders}
-              />
-            </div>*/}
-            {/* <WhiteboardsButton
-              isActive={isActive}
-              setFavFoldersVisible={setFavFoldersVisible}
-            /> */}
-            <div className="tw-mt-20">
-              {menuItems.map((item: any) => {
-                const handleClick = createClickHandler(item);
-                const key = item.id || item.route; // use unique key if available
-
-                return (
-                  <Link href={item.route} key={key}>
-                    <SidebarMenuItem
-                      icon={item.icon}
-                      title={item.title}
-                      active={isActive(item)}
-                      onClick={handleClick}
-                    />
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
-        </div>
+    <aside
+      className={cn(
+        'tw-flex tw-h-full tw-shrink-0 tw-flex-col tw-bg-sidebar tw-text-sidebar-foreground',
+        inDrawer ? 'tw-w-full' : collapsed ? 'tw-w-16' : 'tw-w-60',
+      )}
+    >
+      <div
+        className={cn(
+          'tw-flex tw-shrink-0 tw-items-center tw-gap-1',
+          collapsed ? 'tw-flex-col tw-px-3 tw-pb-1 tw-pt-3' : 'tw-h-16 tw-px-3',
+        )}
+      >
+        <SidebarBrand className={collapsed ? 'tw-size-10' : undefined} />
+        <WorkspaceSwitcher
+          collapsed={collapsed}
+          onAddWorkspace={() => setShowCreateWorkspaceModal(true)}
+        />
+        {collapseButton}
       </div>
 
-      {/* <CreateNewWorkspaceModal
-        onOk={createWorkspaceHandler}
-        onClose={() => setShowAddWorkspaceModal(false)}
-        visible={showAddWorkspaceModal}
-      /> */}
+      <nav
+        aria-label={isSettings ? t('sidebar.administration') : undefined}
+        className={cn(
+          'tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-gap-0.5 tw-overflow-y-auto tw-py-2',
+          collapsed ? 'tw-items-center tw-px-3' : 'tw-px-3',
+        )}
+      >
+        {backItem && (
+          <>
+            <Link href={backItem.route} className="tw-block">
+              <SidebarMenuItem
+                icon={backItem.icon}
+                title={backItem.title}
+                active={false}
+                collapsed={collapsed}
+                onClick={createClickHandler(backItem)}
+              />
+            </Link>
+            {!collapsed && (
+              <div className="tw-px-2.5 tw-pb-2 tw-pt-6 tw-text-xs tw-text-muted-foreground">
+                {isProfilePage
+                  ? t('shell.account')
+                  : t('sidebar.administration')}
+              </div>
+            )}
+          </>
+        )}
+
+        {navItems.map((item) => {
+          const key = (item as any).id || item.route; // use unique key if available
+          const isStarred = item.type === 'favFolders';
+          const starredLabel = showStarredFolders
+            ? t('shell.hideStarredFolders')
+            : t('shell.showStarredFolders');
+
+          return (
+            <div key={key} className={collapsed ? undefined : 'tw-w-full'}>
+              <Link href={item.route} className="tw-block">
+                <SidebarMenuItem
+                  icon={item.icon}
+                  title={item.title}
+                  active={isActive(item)}
+                  collapsed={collapsed}
+                  onClick={createClickHandler(item)}
+                  trailing={
+                    isStarred ? (
+                      <button
+                        type="button"
+                        aria-label={starredLabel}
+                        aria-expanded={showStarredFolders}
+                        onClick={(event) => {
+                          // The row is a link; the chevron only opens the list.
+                          event.preventDefault();
+                          event.stopPropagation();
+                          setShowStarredFolders((open) => !open);
+                        }}
+                        className="-tw-mr-1 tw-flex tw-size-6 tw-shrink-0 tw-items-center tw-justify-center tw-rounded tw-bg-transparent tw-text-muted-foreground tw-outline-none hover:tw-text-foreground focus-visible:tw-ring-2 focus-visible:tw-ring-ring"
+                      >
+                        <ChevronDown
+                          className={cn(
+                            'tw-size-4 tw-transition-transform tw-duration-150',
+                            showStarredFolders && 'tw-rotate-180',
+                          )}
+                          aria-hidden="true"
+                        />
+                      </button>
+                    ) : undefined
+                  }
+                />
+              </Link>
+              {isStarred && showStarredFolders && !collapsed && (
+                <StarredFolders />
+              )}
+            </div>
+          );
+        })}
+      </nav>
+
+      <div
+        className={cn(
+          'tw-shrink-0 tw-border-0 tw-border-t tw-border-solid tw-border-sidebar-border tw-p-3',
+          collapsed && 'tw-flex tw-justify-center',
+        )}
+      >
+        <UserBlock collapsed={collapsed} />
+      </div>
+
       {CreateWSModal}
 
       <UploadWorkspaceImageModal
@@ -177,28 +247,8 @@ const Sidebar: FC<IProps> = ({ isProfilePage, isWorkspaceSettingsPage }) => {
       />
 
       <AppSpinner show={loaderState} />
-    </DashboardCard>
+    </aside>
   );
 };
 
 export default Sidebar;
-
-// Used to go to unfinished whiteboards section of the project.
-// const WhiteboardsButton: FC<any> = ({ isActive, setFavFoldersVisible }) => {
-//   return (
-//     <div className="tw-mb-30px">
-//       <Link href={topMenuItems[0].route} passHref>
-//         <SidebarMenuItem
-//           className="!tw-bg-sub-btn  hover:!tw-bg-white"
-//           title={topMenuItems[0].title}
-//           icon={topMenuItems[0].icon}
-//           active={isActive(topMenuItems[0])}
-//           onClick={() => {
-//             topMenuItems[0].type === 'favFolders' && setFavFoldersVisible(true);
-//           }}
-//           key={`menu_item${topMenuItems[0]}`}
-//         />
-//       </Link>
-//     </div>
-//   );
-// };

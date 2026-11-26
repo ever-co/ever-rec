@@ -624,6 +624,17 @@
       "saveEachFile": "שאל היכן לשמור כל קובץ לפני ההורדה.",
       "saveEachFileDescription": "הערה: כדי להשתמש בתכונה זו, עליך לאפשר לתוסף לנהל הורדות כאשר חלון בקשת ההרשאה מופיע. רק כאשר אפשרות זו מופעלת, תוכל לציין תיקיית משנה ברירת מחדל לשמירת צילומי מסך בדיסק המקומי שלך. ברירת המחדל היא תיקיית ההורדות אם לא תציין תיקיית משנה.",
       "addDateAndUrl": "הוסף תאריך וכתובת URL בראש צילום המסך."
+    },
+    "appearance": {
+      "description": "המראה והשפה של Ever Rec בדפדפן הזה",
+      "theme": "ערכת נושא",
+      "themeHint": "חל על הדפדפן הזה בלבד",
+      "light": "בהירה",
+      "dark": "כהה",
+      "system": "מערכת",
+      "languageHint": "שפת האפליקציה בדפדפן הזה",
+      "saving": "שמירת צילומי מסך",
+      "savingHint": "פורמט קובץ, תיקיית הורדות וקישורי Google Drive עבור תוסף הדפדפן"
     }
   },
   "modals": {
@@ -802,5 +813,27 @@
     "videoDeletedAndRedirect": "הסרטון נמחק בהצלחה. מעביר אותך לסביבת העבודה שלך...",
     "videoMovedToTrashAndRedirecting": "הסרטון הועבר לאשפה בהצלחה. מעביר אותך ל'הסרטונים שלי'...",
     "joinedWorkspaceSuccess": "הצטרפת לסביבת העבודה בהצלחה. מעביר אותך לסביבת העבודה החדשה..."
+  },
+  "shell": {
+    "myLibrary": "הספרייה שלי",
+    "workspaces": "סביבות עבודה",
+    "noOtherWorkspace": "אין סביבת עבודה נוספת",
+    "switchWorkspace": "החלפת סביבת עבודה",
+    "account": "חשבון",
+    "accountMenu": "תפריט החשבון",
+    "backToApp": "חזרה לאפליקציה",
+    "collapseSidebar": "כיווץ סרגל הצד",
+    "expandSidebar": "הרחבת סרגל הצד",
+    "openNavigation": "פתיחת הניווט",
+    "closeNavigation": "סגירת הניווט",
+    "switchToDark": "מעבר לערכת נושא כהה",
+    "switchToLight": "מעבר לערכת נושא בהירה",
+    "showStarredFolders": "הצגת תיקיות מסומנות בכוכב",
+    "hideStarredFolders": "הסתרת תיקיות מסומנות בכוכב",
+    "noStarredFolders": "אין תיקיות מסומנות בכוכב",
+    "members": "{{count}} חברים",
+    "members_one": "חבר אחד",
+    "members_two": "שני חברים",
+    "members_other": "{{count}} חברים"
   }
 }

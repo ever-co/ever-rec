@@ -10,31 +10,7 @@
   box-shadow: inset;
 }
 
-.scroll-div::-webkit-scrollbar {
-  width: 5px;
-  height: 10px;
-  border-radius: 99px;
-  cursor: pointer;
-}
-
-.scroll-div-unique-views::-webkit-scrollbar {
-  width: 5px;
-  height: 10px;
-  border-radius: 99px;
-  cursor: pointer;
-}
-
-.scroll-div::-webkit-scrollbar-track {
-  background: #D8D8D8;
-  border-radius: 99px;
-  cursor: pointer;
-}
-
-.scroll-div::-webkit-scrollbar-thumb {
-  border-radius: 99px;
-  background: #5b4dbe;
-  cursor: pointer;
-}
+// Scrollbars (`.scroll-div` and everything else) are styled once, in base.scss.
 
 @keyframes show-up {
   from {

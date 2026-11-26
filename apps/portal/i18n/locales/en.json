@@ -927,6 +927,17 @@
           "not_connected": "This Ever Rec installation is not connected to Ever Platform."
         }
       }
+    },
+    "appearance": {
+      "description": "How Ever Rec looks and reads on this browser",
+      "theme": "Theme",
+      "themeHint": "Applies to this browser only",
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System",
+      "languageHint": "The language of the app on this browser",
+      "saving": "Saving screenshots",
+      "savingHint": "File format, download folder and Google Drive links for the browser extension"
     }
   },
   "modals": {
@@ -1105,5 +1116,26 @@
     "videoDeletedAndRedirect": "Video deleted successfully. Redirecting to your workspace...",
     "videoMovedToTrashAndRedirecting": "Video moved to Trash successfully. Redirecting to My Videos...",
     "joinedWorkspaceSuccess": "Successfully joined the workspace. Redirecting to the new workspace..."
+  },
+  "shell": {
+    "myLibrary": "My library",
+    "workspaces": "Workspaces",
+    "noOtherWorkspace": "No other workspace",
+    "switchWorkspace": "Switch workspace",
+    "account": "Account",
+    "accountMenu": "Account menu",
+    "backToApp": "Back to app",
+    "collapseSidebar": "Collapse sidebar",
+    "expandSidebar": "Expand sidebar",
+    "openNavigation": "Open navigation",
+    "closeNavigation": "Close navigation",
+    "switchToDark": "Switch to dark theme",
+    "switchToLight": "Switch to light theme",
+    "showStarredFolders": "Show starred folders",
+    "hideStarredFolders": "Hide starred folders",
+    "noStarredFolders": "No starred folders",
+    "members": "{{count}} members",
+    "members_one": "{{count}} member",
+    "members_other": "{{count}} members"
   }
 }

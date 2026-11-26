@@ -1,61 +1,108 @@
-import { FC, ReactNode } from 'react';
-import styles from './DashboardLayout.module.scss';
-import classNames from 'classnames';
-import { Col, Row } from 'antd';
-import useGetXXL from 'hooks/useGetXXL';
+import { FC, ReactNode, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import { X } from 'lucide-react';
 import Sidebar from './Sidebar/Sidebar';
+import { useShell } from 'components/shell/ShellContext';
+import { cn } from 'app/utilities/cn';
 
 interface IProps {
   children?: ReactNode;
   isProfilePage?: boolean;
   isWorkspaceSettingsPage?: boolean;
+  /**
+   * The assistant panel (shared Ever shell, A7): it sits between the sidebar and the page.
+   * Nothing serves an assistant in Ever Rec yet, so no page passes one; the layout is ready for it.
+   */
+  assistant?: ReactNode;
 }
 
+/**
+ * The shared Ever app shell (A1): a full-height sidebar on the window colour, and the page in a
+ * panel beside it. On phones the sidebar is a drawer, opened from the page's top bar.
+ */
 const DashboardLayout: FC<IProps> = ({
   children,
   isProfilePage = false,
   isWorkspaceSettingsPage = false,
+  assistant,
 }) => {
-  const { dimensionsDashboard } = useGetXXL();
+  const { t } = useTranslation();
+  const { drawerOpen, setDrawerOpen } = useShell();
+
+  // Escape closes the drawer; the page behind it does not scroll while it is open.
+  useEffect(() => {
+    if (!drawerOpen) return;
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setDrawerOpen(false);
+    };
+    document.addEventListener('keydown', onKeyDown);
+
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [drawerOpen, setDrawerOpen]);
 
   return (
-    <div className={classNames(styles.dashboardLayoutWrapper, 'scroll-div')}>
-      <Row
-        gutter={20}
-        className="tw-bg-blue-grey tw-w-full"
-        style={{
-          margin: '0',
-          padding: '0 !important',
-          height: '100%',
-        }}
-      >
-        <Col
-          span={24}
-          sm={24}
-          md={10}
-          lg={8}
-          xl={6}
-          xxl={dimensionsDashboard.sidebar}
-          style={{ position: 'relative', paddingLeft: 0, paddingRight: 0 }}
-        >
-          <Sidebar
-            isProfilePage={isProfilePage}
-            isWorkspaceSettingsPage={isWorkspaceSettingsPage}
-          />
-        </Col>
+    <div className="tw-flex tw-h-[100dvh] tw-w-full tw-overflow-hidden tw-bg-sidebar tw-text-foreground">
+      {/* Desktop sidebar */}
+      <div className="tw-hidden tw-h-full tw-shrink-0 md:tw-block">
+        <Sidebar
+          isProfilePage={isProfilePage}
+          isWorkspaceSettingsPage={isWorkspaceSettingsPage}
+        />
+      </div>
 
-        <Col
-          span={24}
-          sm={24}
-          md={14}
-          lg={16}
-          xl={18}
-          xxl={dimensionsDashboard.items}
-          style={{ height: '100%', paddingLeft: 0, paddingRight: 0 }}
+      {/* Phone drawer */}
+      <div
+        className={cn(
+          'tw-fixed tw-inset-0 tw-z-[900] md:tw-hidden',
+          drawerOpen ? 'tw-visible' : 'tw-invisible',
+        )}
+        aria-hidden={!drawerOpen}
+      >
+        <div
+          className={cn(
+            'tw-absolute tw-inset-0 tw-bg-[hsl(var(--overlay)/var(--overlay-opacity))] tw-transition-opacity tw-duration-200',
+            drawerOpen ? 'tw-opacity-100' : 'tw-opacity-0',
+          )}
+          onClick={() => setDrawerOpen(false)}
+        />
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={t('shell.openNavigation')}
+          className={cn(
+            'tw-absolute tw-inset-y-0 tw-left-0 tw-flex tw-w-[18rem] tw-max-w-[85vw] tw-border-0 tw-border-r tw-border-solid tw-border-sidebar-border tw-bg-sidebar tw-transition-transform tw-duration-200 tw-ease-out rtl:tw-left-auto rtl:tw-right-0',
+            drawerOpen
+              ? 'tw-translate-x-0'
+              : '-tw-translate-x-full rtl:tw-translate-x-full',
+          )}
         >
-          {children}
-        </Col>
-      </Row>
+          {drawerOpen && (
+            <>
+              <Sidebar
+                inDrawer
+                isProfilePage={isProfilePage}
+                isWorkspaceSettingsPage={isWorkspaceSettingsPage}
+              />
+              <button
+                type="button"
+                aria-label={t('shell.closeNavigation')}
+                onClick={() => setDrawerOpen(false)}
+                className="tw-absolute tw-right-3 tw-top-4 tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-md tw-bg-transparent tw-text-muted-foreground tw-outline-none hover:tw-bg-sidebar-accent hover:tw-text-foreground focus-visible:tw-ring-2 focus-visible:tw-ring-ring rtl:tw-left-3 rtl:tw-right-auto"
+              >
+                <X className="tw-size-4" aria-hidden="true" />
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+
+      {assistant}
+
+      {/* The page panel */}
+      <div className="tw-relative tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-overflow-hidden tw-bg-background md:tw-my-2 md:tw-mr-2 md:tw-rounded-xl md:tw-shadow-[0_0_0_1px_hsl(var(--border)),var(--shadow-sm)]">
+        {children}
+      </div>
     </div>
   );
 };
