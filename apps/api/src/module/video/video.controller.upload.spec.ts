@@ -181,6 +181,98 @@ describe('POST video/upload', () => {
     expect(readdirSync(TMP_PATH)).toEqual([]);
   });
 
+  // These types have a file extension, but ffmpeg cannot write a video under it (`.xdr`, `.xtp`,
+  // `.pdf`): the upload used to be probed and converted, then failed with a 500 or an error body.
+  // A part without a Content-Type is reported as text/plain.
+  describe.each([
+    ['POST video/upload', '/video/upload', 'blob'],
+    ['POST video/upload/file', '/video/upload/file', 'file'],
+  ])('the type of the video on %s', (_, route, field) => {
+    const send = (contentType: string) =>
+      request(app.getHttpServer())
+        .post(route)
+        .set({ Authorization: 'Bearer uid-owner', 'x-refresh-token': 'rt' })
+        .field('title', 'A video')
+        .attach(field, Buffer.from('not-a-video'), {
+          filename: field,
+          contentType,
+        });
+
+    /** The same form, written by hand: its file part has no Content-Type header at all. */
+    const sendWithoutContentType = () => {
+      const boundary = 'ever-rec-spec-boundary';
+      return request(app.getHttpServer())
+        .post(route)
+        .set({
+          Authorization: 'Bearer uid-owner',
+          'x-refresh-token': 'rt',
+          'Content-Type': `multipart/form-data; boundary=${boundary}`,
+        })
+        .send(
+          `--${boundary}\r\nContent-Disposition: form-data; name="title"\r\n\r\nA video\r\n` +
+            `--${boundary}\r\nContent-Disposition: form-data; name="${field}"; filename="${field}"\r\n\r\nnot-a-video\r\n` +
+            `--${boundary}--\r\n`,
+        );
+    };
+
+    const expectNothingConverted = () => {
+      expect(mockFix).not.toHaveBeenCalled();
+      expect(mockUpload).not.toHaveBeenCalled();
+      expect(mockContextUpload).not.toHaveBeenCalled();
+      expect(readdirSync(TMP_PATH)).toEqual([]);
+    };
+
+    it.each(['text/plain', 'application/octet-stream', 'application/pdf'])(
+      'refuses %s with a 415 and removes the upload',
+      async (type) => {
+        const res = await send(type).expect(415);
+
+        expect(res.body.message).toBe(`Unsupported media type: ${type}`);
+        expectNothingConverted();
+      },
+    );
+
+    it('refuses a file part without a Content-Type (read as text/plain) with a 415 and removes the upload', async () => {
+      const res = await sendWithoutContentType().expect(415);
+
+      expect(res.body.message).toBe('Unsupported media type: text/plain');
+      expectNothingConverted();
+    });
+
+    it.each([
+      ['video/mp4', '.mp4'],
+      ['video/webm', '.webm'],
+      ['video/quicktime', '.mov'],
+      ['video/ogg', '.ogg'],
+      ['audio/ogg', '.ogg'],
+    ])(
+      'still takes a %s video, stored under its id plus %s',
+      async (type, extension) => {
+        const uploadVideo = jest
+          .spyOn(VideoService.prototype, 'uploadVideo')
+          .mockResolvedValue({ url: '' });
+        mockContextUpload.mockResolvedValue({ url: '' });
+
+        await send(type).expect(201);
+
+        const fullFilenames =
+          route === '/video/upload'
+            ? uploadVideo.mock.calls.map(([, blob, , , name]) => [
+                blob.filename,
+                name,
+              ])
+            : mockContextUpload.mock.calls.map(([{ video }]) => [
+                video.file.filename,
+                video.fullFileName,
+              ]);
+        expect(fullFilenames).toHaveLength(1);
+        const [[filename, fullFilename]] = fullFilenames;
+        expect(filename).toMatch(/^[0-9a-f-]{36}$/);
+        expect(fullFilename).toBe(`${filename}${extension}`);
+      },
+    );
+  });
+
   const uploadFile = (headers: Record<string, string>) =>
     request(app.getHttpServer())
       .post('/video/upload/file')

@@ -21,7 +21,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { TMP_PATH } from 'src/enums/tmpPathsEnums';
 import { v4 as uuidv4 } from 'uuid';
-import { fileExtensionMap } from 'src/services/utils/fileExtensionMap';
+import { videoFileExtension } from 'src/services/utils/fileExtensionMap';
 import {
   UPLOAD_FILE_BYTES,
   uploadOptions,
@@ -41,15 +41,17 @@ function requireVideoFile(
 
 /**
  * The extension the recording is stored and converted under, looked up as on the upload routes: a
- * type we have none for is refused (415) before anything is written, uploaded or deleted. It used
- * to be stored as `<id>undefined`, a name ffmpeg cannot convert to. These routes have no
+ * type that is no video container ffmpeg can write is refused (415) before anything is written,
+ * uploaded or deleted. It used to be stored as `<id>undefined`, or, for text/plain (a part without
+ * a Content-Type), application/octet-stream or application/pdf, as `<id>.xdr`, `<id>.xtp` or
+ * `<id>.pdf`: names ffmpeg cannot convert to. These routes have no
  * RemoveUploadInterceptor (the bucket upload reads the file in the background), so the temporary
  * file of a refused upload is removed here.
  */
 async function requireVideoExtension(
   blob: Express.Multer.File,
 ): Promise<string> {
-  const fileExtension = fileExtensionMap[blob.mimetype];
+  const fileExtension = videoFileExtension(blob.mimetype);
   if (!fileExtension) {
     if (blob.path) {
       await unlink(blob.path).catch(() => undefined);
