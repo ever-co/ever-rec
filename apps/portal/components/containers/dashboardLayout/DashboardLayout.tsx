@@ -1,6 +1,5 @@
 import { FC, ReactNode, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { X } from 'lucide-react';
 import Sidebar from './Sidebar/Sidebar';
 import { useShell } from 'components/shell/ShellContext';
 import { cn } from 'app/utilities/cn';
@@ -78,21 +77,12 @@ const DashboardLayout: FC<IProps> = ({
           )}
         >
           {drawerOpen && (
-            <>
-              <Sidebar
-                inDrawer
-                isProfilePage={isProfilePage}
-                isWorkspaceSettingsPage={isWorkspaceSettingsPage}
-              />
-              <button
-                type="button"
-                aria-label={t('shell.closeNavigation')}
-                onClick={() => setDrawerOpen(false)}
-                className="tw-absolute tw-right-3 tw-top-4 tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-md tw-bg-transparent tw-text-muted-foreground tw-outline-none hover:tw-bg-sidebar-accent hover:tw-text-foreground focus-visible:tw-ring-2 focus-visible:tw-ring-ring rtl:tw-left-3 rtl:tw-right-auto"
-              >
-                <X className="tw-size-4" aria-hidden="true" />
-              </button>
-            </>
+            <Sidebar
+              inDrawer
+              onCloseDrawer={() => setDrawerOpen(false)}
+              isProfilePage={isProfilePage}
+              isWorkspaceSettingsPage={isWorkspaceSettingsPage}
+            />
           )}
         </div>
       </div>

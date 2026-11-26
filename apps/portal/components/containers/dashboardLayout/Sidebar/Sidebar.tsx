@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import { RootStateOrAny, useDispatch, useSelector } from 'react-redux';
 import Link from 'next/link';
 import { useTranslation } from 'react-i18next';
-import { ChevronDown, PanelLeft } from 'lucide-react';
+import { ChevronDown, PanelLeft, X } from 'lucide-react';
 import SidebarMenuItem from '../elements/SidebarMenuItems/SidebarMenuItem';
 import AppSpinner from 'components/containers/appSpinner/AppSpinner';
 import UploadWorkspaceImageModal from 'components/pagesComponents/_imagesScreen/components/uploadWorkspaceImageModal/UploadWorkspaceImageModal';
@@ -25,6 +25,8 @@ interface IProps {
   isWorkspaceSettingsPage?: boolean;
   /** Drawn inside the phone drawer: always expanded, whatever the desktop choice is. */
   inDrawer?: boolean;
+  /** In the drawer, the header's button closes the drawer instead of collapsing the sidebar. */
+  onCloseDrawer?: () => void;
 }
 
 /**
@@ -35,6 +37,7 @@ const Sidebar: FC<IProps> = ({
   isProfilePage,
   isWorkspaceSettingsPage,
   inDrawer = false,
+  onCloseDrawer,
 }) => {
   const { t } = useTranslation();
   const router = useRouter();
@@ -116,14 +119,25 @@ const Sidebar: FC<IProps> = ({
     ? t('shell.expandSidebar')
     : t('shell.collapseSidebar');
 
-  const collapseButton = !inDrawer && (
+  const headerButtonClass =
+    'tw-flex tw-size-8 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-bg-transparent tw-text-muted-foreground tw-outline-none tw-transition-colors tw-duration-150 hover:tw-bg-sidebar-accent hover:tw-text-sidebar-accent-foreground focus-visible:tw-ring-2 focus-visible:tw-ring-ring';
+  const collapseButton = inDrawer ? (
+    <button
+      type="button"
+      aria-label={t('shell.closeNavigation')}
+      onClick={onCloseDrawer}
+      className={headerButtonClass}
+    >
+      <X className="tw-size-4" aria-hidden="true" />
+    </button>
+  ) : (
     <Hint label={collapseLabel} side={collapsed ? 'right' : 'bottom'}>
       <button
         type="button"
         aria-label={collapseLabel}
         aria-expanded={!collapsed}
         onClick={shell.toggleCollapsed}
-        className="tw-flex tw-size-8 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-bg-transparent tw-text-muted-foreground tw-outline-none tw-transition-colors tw-duration-150 hover:tw-bg-sidebar-accent hover:tw-text-sidebar-accent-foreground focus-visible:tw-ring-2 focus-visible:tw-ring-ring"
+        className={headerButtonClass}
       >
         <PanelLeft className="tw-size-4 rtl:tw-rotate-180" aria-hidden="true" />
       </button>
