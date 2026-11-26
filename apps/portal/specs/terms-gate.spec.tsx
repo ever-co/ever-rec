@@ -32,7 +32,11 @@ jest.mock('antd', () => ({
       </div>
     ) : null,
   Button: ({ onClick, children, ...rest }: any) => (
-    <button data-testid={rest['data-testid']} onClick={onClick}>
+    <button
+      data-testid={rest['data-testid']}
+      onClick={onClick}
+      disabled={!!rest.disabled}
+    >
       {children}
     </button>
   ),
@@ -232,6 +236,31 @@ describe('TermsGate', () => {
     expect(container.querySelector('a')?.getAttribute('href')).toBe(
       'https://rec.so/tos',
     );
+  });
+
+  it('keeps Sign out usable while an accept request is still pending', async () => {
+    getStatus.mockResolvedValue({
+      satisfied: false,
+      blocking: [pendingTos],
+      notices: [],
+      current: [],
+    });
+    accept.mockReturnValue(new Promise(() => undefined)); // never settles
+    await act(async () => root.render(<TermsGate />));
+    await act(async () => {
+      (
+        container.querySelector(
+          '[data-testid="terms-accept"]',
+        ) as HTMLButtonElement
+      ).click();
+    });
+
+    const signOutButton = container.querySelector(
+      '[data-testid="terms-signout"]',
+    ) as HTMLButtonElement;
+    expect(signOutButton.disabled).toBe(false);
+    await act(async () => signOutButton.click());
+    expect(mockPush).toHaveBeenCalledWith('/auth/login');
   });
 
   it('ignores an accept reply that arrives after the user changed', async () => {

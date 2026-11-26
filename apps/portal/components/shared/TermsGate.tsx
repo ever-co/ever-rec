@@ -116,12 +116,8 @@ const TermsGate: FC = () => {
       keyboard={false}
       title={t('page.termsReaccept.title')}
       footer={[
-        <Button
-          key="signout"
-          data-testid="terms-signout"
-          onClick={leave}
-          disabled={busy}
-        >
+        // Never disabled: it is the only way out, and an accept request that never settles must not trap anyone.
+        <Button key="signout" data-testid="terms-signout" onClick={leave}>
           {t('page.termsReaccept.signOut')}
         </Button>,
         <Button

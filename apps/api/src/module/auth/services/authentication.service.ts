@@ -146,25 +146,22 @@ export class AuthenticationService {
       // version, of which exact text (pinned by sha256 to the published legal
       // corpus), in which language, and by what mechanism.
       //
-      // Failures are logged and swallowed on purpose — the claims were already
-      // validated above, so anything failing here is infrastructure, and the
-      // Firebase user now exists. Throwing would abandon a created account. The
+      // A failure never fails the sign-up: the claims were already validated
+      // above, so anything failing here is infrastructure, and the Firebase
+      // user now exists. Throwing would abandon a created account. The failure
+      // is logged and sent to Sentry, and the sign-in gate asks again. The
       // Firestore write is keyed on a deterministic document id, so a retry is
       // safe rather than duplicative.
       if (registerData.terms?.length) {
-        try {
-          await this.termsAcceptanceService.record(uid, registerData.terms, {
-            method: 'signup-checkbox',
+        await this.termsAcceptanceService.recordAtSignUp(
+          uid,
+          registerData.terms,
+          {
             ip: registerData.ip ?? null,
             userAgent: registerData.userAgent ?? null,
-          });
-        } catch (error) {
-          this.logger.error(
-            `Failed to record terms acceptance for user ${uid}: ${
-              error instanceof Error ? error.message : String(error)
-            }`,
-          );
-        }
+          },
+          'password',
+        );
       }
 
       // Generate custom token for server-authenticated flows

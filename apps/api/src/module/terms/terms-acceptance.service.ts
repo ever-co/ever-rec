@@ -1,4 +1,5 @@
 import { BadRequestException, Inject, Injectable, Logger } from '@nestjs/common';
+import * as Sentry from '@sentry/nestjs';
 import * as admin from 'firebase-admin';
 import {
   TermsAcceptanceService as Recorder,
@@ -136,6 +137,42 @@ export class TermsAcceptanceService {
       method: context.method,
       ipHash: this.recorder.hashIp(context.ip),
       userAgent: context.userAgent ?? null,
+    });
+  }
+
+  /**
+   * Record a sign-up's acceptance without ever failing the sign-up: the claims were checked before the account
+   * was created, so a failure here is infrastructure, and the account stands. The failure is logged AND sent to
+   * Sentry: on 2026-11-26 production lost every sign-up record for hours and only a log line said so (#276).
+   * The sign-in gate (`GET /terms/status`) asks the person again, which repairs the record.
+   *
+   * @returns whether the record was stored.
+   */
+  async recordAtSignUp(
+    uid: string,
+    claims: ITermsAcceptanceClaim[],
+    context: { ip?: string | null; userAgent?: string | null },
+    flow: 'password' | 'ever-id',
+  ): Promise<boolean> {
+    try {
+      await this.record(uid, claims, { method: 'signup-checkbox', ...context });
+      return true;
+    } catch (error) {
+      this.reportUnrecorded(uid, flow, error);
+      return false;
+    }
+  }
+
+  /**
+   * The alert for a sign-up without its terms record. Sentry is a no-op when `SENTRY_DSN` is not set; the uid
+   * goes only into the log line, not to Sentry.
+   */
+  reportUnrecorded(uid: string, flow: 'password' | 'ever-id', error: unknown): void {
+    const message = error instanceof Error ? error.message : String(error);
+    this.logger.error(`Terms acceptance not recorded (${flow} sign-up) for user ${uid}: ${message}`);
+    Sentry.captureException(error instanceof Error ? error : new Error(message), {
+      level: 'error',
+      tags: { area: 'terms-acceptance', flow: `${flow}-signup` },
     });
   }
 
