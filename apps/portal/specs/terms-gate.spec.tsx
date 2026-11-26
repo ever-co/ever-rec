@@ -34,6 +34,7 @@ jest.mock('antd', () => ({
   Button: ({ onClick, children, ...rest }: any) => (
     <button
       data-testid={rest['data-testid']}
+      data-loading={String(!!rest.loading)}
       onClick={onClick}
       disabled={!!rest.disabled}
     >
@@ -261,6 +262,28 @@ describe('TermsGate', () => {
     expect(signOutButton.disabled).toBe(false);
     await act(async () => signOutButton.click());
     expect(mockPush).toHaveBeenCalledWith('/auth/login');
+  });
+
+  it('starts the next user without the pending accept of the previous one', async () => {
+    getStatus.mockResolvedValue({
+      satisfied: false,
+      blocking: [pendingTos],
+      notices: [],
+      current: [],
+    });
+    accept.mockReturnValueOnce(new Promise(() => undefined)); // never settles
+    await act(async () => root.render(<TermsGate />));
+    const acceptButton = () =>
+      container.querySelector(
+        '[data-testid="terms-accept"]',
+      ) as HTMLButtonElement;
+    await act(async () => acceptButton().click());
+    expect(acceptButton().dataset.loading).toBe('true');
+
+    mockUser.current = { id: 'uid-2' };
+    await act(async () => root.render(<TermsGate />));
+
+    expect(acceptButton().dataset.loading).toBe('false');
   });
 
   it('ignores an accept reply that arrives after the user changed', async () => {

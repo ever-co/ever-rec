@@ -56,8 +56,10 @@ const TermsGate: FC = () => {
   );
 
   useEffect(() => {
+    // A new session starts clean: an accept request of the previous one may still be pending.
     setStatus(null);
     setError(null);
+    setBusy(false);
     if (!userId) return;
     getTermsStatusAPI(locale)
       .then(applyFor(sessionKey))
@@ -88,7 +90,7 @@ const TermsGate: FC = () => {
         .then(applyFor(key))
         .catch(() => undefined);
     } finally {
-      setBusy(false);
+      if (currentKey.current === key) setBusy(false);
     }
   }, [blocking, locale, sessionKey, applyFor, t]);
 
