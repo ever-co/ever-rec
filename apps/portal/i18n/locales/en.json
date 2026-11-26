@@ -927,6 +927,15 @@
           "not_connected": "This Ever Rec installation is not connected to Ever Platform."
         }
       }
+    },
+    "termsReaccept": {
+      "title": "Please accept our terms",
+      "description": "To keep using Rec, please read and accept these documents.",
+      "updated": "v{{version}} (you accepted v{{accepted}})",
+      "new": "v{{version}}",
+      "accept": "I agree",
+      "signOut": "Sign out",
+      "failed": "Could not save your acceptance. Please try again."
     }
   },
   "modals": {

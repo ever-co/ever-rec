@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
+  ArrayMaxSize,
   ArrayNotEmpty,
   IsArray,
   IsEmail,
@@ -82,6 +83,21 @@ export class TermsAcceptanceClaimDto {
   @IsString()
   @MaxLength(35)
   locale: string;
+}
+
+/**
+ * What the re-acceptance dialog posts for a signed-in user: the documents it
+ * showed, echoed from `GET /terms/status`. Re-checked against the current
+ * corpus by `TermsAcceptanceService.reaccept`.
+ */
+export class TermsReacceptDto {
+  @ApiProperty({ type: () => [TermsAcceptanceClaimDto] })
+  @IsArray()
+  @ArrayNotEmpty({ message: 'Name at least one document to accept' })
+  @ArrayMaxSize(20)
+  @ValidateNested({ each: true })
+  @Type(() => TermsAcceptanceClaimDto)
+  documents: TermsAcceptanceClaimDto[];
 }
 
 export class RegisterDto {

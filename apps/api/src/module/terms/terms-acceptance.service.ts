@@ -2,9 +2,11 @@ import { BadRequestException, Inject, Injectable, Logger } from '@nestjs/common'
 import * as admin from 'firebase-admin';
 import {
   TermsAcceptanceService as Recorder,
+  DuplicateAcceptanceError,
   assertPublishedText,
   type AcceptanceMethod,
   type AcceptanceRecord,
+  type AcceptanceStatus,
   type RequiredDocument,
 } from 'terms-acceptance';
 import { FirebaseAcceptanceAdapter } from 'terms-acceptance/firebase';
@@ -135,6 +137,59 @@ export class TermsAcceptanceService {
       ipHash: this.recorder.hashIp(context.ip),
       userAgent: context.userAgent ?? null,
     });
+  }
+
+  /**
+   * Whether a signed-in user has accepted the documents currently required.
+   *
+   * `blocking` lists what they must accept before going on: a document never
+   * accepted (a sign-up whose record failed, or an account from before the
+   * checkbox was real) or a material new version. `notices` are minor changes.
+   */
+  async status(uid: string, locale?: string): Promise<AcceptanceStatus> {
+    return this.recorder.status(uid, this.getRequiredDocuments(locale));
+  }
+
+  /**
+   * Record what the re-acceptance dialog showed a signed-in user, then return the
+   * new status.
+   *
+   * Only the documents currently required, at their current version and digest,
+   * are accepted: an older text is refused even when it was once published, so a
+   * stale tab cannot record consent to terms that no longer apply. Posting a
+   * document that is already on file is not an error (a double click, two tabs).
+   *
+   * @throws BadRequestException when a claim is unpublished or not current.
+   */
+  async reaccept(
+    uid: string,
+    claims: ITermsAcceptanceClaim[],
+    context: { ip?: string | null; userAgent?: string | null },
+  ): Promise<AcceptanceStatus> {
+    this.assertClaimsArePublished(claims);
+    const locale = claims[0]?.locale;
+    const required = this.getRequiredDocuments(locale);
+    for (const claim of claims) {
+      const current = required.find((doc) => doc.documentId === claim.documentId);
+      if (!current || current.version !== claim.version || current.sha256 !== claim.sha256) {
+        throw new BadRequestException(
+          `Terms acceptance must be for the current text: ${claim.documentId}@${claim.version} is not what is required now.`,
+        );
+      }
+    }
+
+    const before = await this.status(uid, locale);
+    const outstanding = claims.filter((claim) =>
+      [...before.blocking, ...before.notices].some((doc) => doc.documentId === claim.documentId),
+    );
+    if (outstanding.length) {
+      try {
+        await this.record(uid, outstanding, { method: 'reaccept-modal', ...context });
+      } catch (error) {
+        if (!(error instanceof DuplicateAcceptanceError)) throw error;
+      }
+    }
+    return this.status(uid, locale);
   }
 
   /** Every acceptance on file for a user, newest first, integrity-checked. */
