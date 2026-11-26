@@ -77,13 +77,23 @@ export class MergeTokenPolicy {
  * Revoke a token by removing it from storage.
  * @param token - Reference token to revoke.
  */
-  public async revokeToken(token: string): Promise<void> {
+  public async revokeToken(
+    token: string,
+    options: { allowExpired?: boolean } = {},
+  ): Promise<void> {
     if (!this.isTokenLike(token)) {
       throw new BadRequestException("Invalid token provided");
     }
 
     try {
-      const { id } = await this.verify<{ id: string }>(token);
+      // `allowExpired`: the signature is still checked, only `exp` is not. A refresh keeps the
+      // storage entry and signs a new reference to it, so an expired reference can still name a
+      // live session that a logout must end.
+      const { id } = options.allowExpired
+        ? ((await this.jwtService.verifyAsync(token, {
+            ignoreExpiration: true,
+          })) as { id: string })
+        : await this.verify<{ id: string }>(token);
       const deleted = await this.tokenStorageService.delete(id);
 
       if (!deleted) {
