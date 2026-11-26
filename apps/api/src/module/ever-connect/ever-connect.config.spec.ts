@@ -142,6 +142,23 @@ describe('ever-connect config', () => {
       true,
     ]);
     expect(describeConfig(on)).toContain('person_deletion=on');
+    const empty = read({
+      EVER_CONNECT_PERSON_EXPORT_ENABLED: '',
+      EVER_CONNECT_PERSON_DELETION_ENABLED: '',
+    });
+    expect([empty.personExportEnabled, empty.personDeletionEnabled]).toEqual([
+      false,
+      false,
+    ]);
+  });
+
+  it('warns once when exports are on and the portal address is not https', () => {
+    read({ EVER_CONNECT_PERSON_EXPORT_ENABLED: 'true', WEBSITE_URL: 'http://rec.example.test' });
+    expect(warnings.filter((w) => w.includes('WEBSITE_URL'))).toHaveLength(1);
+    warnings = [];
+    resetWarnings();
+    read({ EVER_CONNECT_PERSON_EXPORT_ENABLED: 'true', WEBSITE_URL: 'https://rec.example.test/' });
+    expect(warnings.filter((w) => w.includes('WEBSITE_URL'))).toEqual([]);
   });
 
   it('connect codes: the SDK pattern, normalised', () => {

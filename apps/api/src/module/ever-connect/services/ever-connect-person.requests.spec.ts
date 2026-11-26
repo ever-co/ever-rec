@@ -286,15 +286,15 @@ describe('a person deletion request', () => {
 
     // The next run fails as well: nothing new is sent.
     t.deleter.delete.mockRejectedValueOnce(new Error('auth/internal-error'));
-    expect(await t.service.retryIncompleteDeletions()).toBe(0);
+    expect(await t.service.retryPersonRequests()).toBe(0);
     expect(t.acks).toHaveLength(1);
 
     // Then it completes: Ever Platform receives the final answer the pending one left room for.
-    expect(await t.service.retryIncompleteDeletions()).toBe(1);
+    expect(await t.service.retryPersonRequests()).toBe(1);
     expect(t.deleter.delete).toHaveBeenCalledTimes(3);
     expect(t.acks[1]).toEqual({ job_id: 'job-d5', result: 'deleted' });
     expect(t.stored('job-d5').incomplete).toBeUndefined();
-    expect(await t.service.retryIncompleteDeletions()).toBe(0);
+    expect(await t.service.retryPersonRequests()).toBe(0);
     expect(t.acks).toHaveLength(2);
   });
 
@@ -324,13 +324,13 @@ describe('a person deletion request', () => {
 
     // Still held at the next heartbeat: nothing new.
     hold.mockResolvedValueOnce('workspace_admin');
-    expect(await t.service.retryIncompleteDeletions()).toBe(0);
+    expect(await t.service.retryPersonRequests()).toBe(0);
     expect(t.acks).toHaveLength(1);
 
     // Handed over: both are deleted (the first again, which Rec's deletion allows) and deleted is sent.
     hold.mockReset();
     hold.mockResolvedValue(null);
-    expect(await t.service.retryIncompleteDeletions()).toBe(1);
+    expect(await t.service.retryPersonRequests()).toBe(1);
     expect(t.acks[1]).toEqual({ job_id: 'job-d7', result: 'deleted' });
   });
 
@@ -343,13 +343,13 @@ describe('a person deletion request', () => {
       if (body.result !== 'failed') return;
       t.hooks.onAck = undefined;
       t.ackErrors.push(new ProblemError(503, 'unavailable'));
-      expect(await t.service.retryIncompleteDeletions()).toBe(0);
+      expect(await t.service.retryPersonRequests()).toBe(0);
     };
     await t.service.onDeletionRequested(t.request('job-d9'));
     expect(t.stored('job-d9')).toMatchObject({ result: 'deleted' });
     expect(t.stored('job-d9').answeredAt).toBeUndefined();
     // The next heartbeat sends the final answer.
-    expect(await t.service.retryIncompleteDeletions()).toBe(1);
+    expect(await t.service.retryPersonRequests()).toBe(1);
     expect(t.acks).toEqual([
       { job_id: 'job-d9', ...PENDING_DELETION },
       { job_id: 'job-d9', result: 'deleted' },
@@ -396,7 +396,7 @@ describe('a person deletion request', () => {
     expect(await store.sweepPersonRequests(later)).toBe(1);
     expect(t.stored('job-old')).toBeNull();
     expect(t.stored('job-d8').incomplete).toBe(true);
-    expect(await t.service.retryIncompleteDeletions()).toBe(1);
+    expect(await t.service.retryPersonRequests()).toBe(1);
     expect(t.acks[1]).toEqual({ job_id: 'job-d8', result: 'deleted' });
   });
 
@@ -433,7 +433,7 @@ describe('a request read again', () => {
     await expect(
       t.service.onExportRequested(t.request('job-r4')),
     ).rejects.toBeInstanceOf(ProblemError);
-    expect(await t.service.retryIncompleteDeletions()).toBe(1);
+    expect(await t.service.retryPersonRequests()).toBe(1);
     expect(t.acks).toEqual([{ job_id: 'job-r4', ...EXPORT_NOT_AVAILABLE }]);
   });
 
@@ -443,6 +443,11 @@ describe('a request read again', () => {
     await t.service.onExportRequested(t.request('job-r2'));
     expect(t.stored('job-r2').outcome).toBe('not_needed:409:receipt_final');
     await t.service.onExportRequested(t.request('job-r2'));
+    // A 422 (an answer as it stands Ever Platform will never take) is final too: the feed goes on.
+    t.ackErrors.push(new ProblemError(422, 'validation_failed'));
+    await t.service.onDeletionRequested(t.request('job-r5'));
+    expect(t.stored('job-r5').outcome).toBe('not_needed:422:validation_failed');
+    expect(await t.service.retryPersonRequests()).toBe(0);
     expect(t.acks).toEqual([]);
   });
 

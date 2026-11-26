@@ -457,7 +457,7 @@ export class EverConnectPersonService {
    * Deletes the accounts by Rec's own account deletion: all or none are held. Every account is
    * checked before any is deleted, and each again right before its own deletion (an account that
    * became a workspace's admin meanwhile is kept). A deletion that did not complete is marked
-   * `incomplete` and run again by {@link retryIncompleteDeletions}: Rec's account deletion can
+   * `incomplete` and run again by {@link retryPersonRequests}: Rec's account deletion can
    * run again on an account it already partly deleted.
    */
   private async deleteAccounts(uids: string[]): Promise<Decided> {
@@ -493,11 +493,12 @@ export class EverConnectPersonService {
   }
 
   /**
-   * Runs again the account deletions that did not complete (while deletions are switched on), and
-   * sends Ever Platform the final `deleted` once they did; also sends again any decided answer that
-   * has not reached Ever Platform. Called with the heartbeat; answers how many requests it settled.
+   * The person requests left to finish, export and deletion alike, called with the heartbeat: runs
+   * again the account deletions that did not complete (while deletions are switched on) and sends
+   * Ever Platform the final `deleted` once they did, and sends again any decided answer that has not
+   * reached Ever Platform. Answers how many answers it got through.
    */
-  async retryIncompleteDeletions(): Promise<number> {
+  async retryPersonRequests(): Promise<number> {
     const all = ((
       await this.store.db().ref(EVER_CONNECT_PATHS.personRequests).get()
     ).val() ?? {}) as Record<string, PersonRequestRecord>;

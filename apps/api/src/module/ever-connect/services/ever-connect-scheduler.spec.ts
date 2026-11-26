@@ -61,7 +61,7 @@ function scheduler(
     feed as any,
     {
       syncExistingLinks: jest.fn(async () => undefined),
-      retryIncompleteDeletions: jest.fn(async () => 0),
+      retryPersonRequests: jest.fn(async () => 0),
     } as any,
     { retryPendingCompletes: jest.fn(async () => undefined) } as any,
   );

@@ -174,6 +174,16 @@ export function readPlatformIssuer(
   return null;
 }
 
+/** An https address without credentials (what an export page may be offered at). */
+function isHttpsAddress(value: string): boolean {
+  try {
+    const url = new URL(value);
+    return url.protocol === 'https:' && !!url.hostname && !url.username && !url.password;
+  } catch {
+    return false;
+  }
+}
+
 export function readEverConnectConfig(env: Env, warn: Warn): EverConnectConfig {
   const rawCode = (env['EVER_CONNECT_CODE'] ?? '').trim();
   const envCode = rawCode ? normaliseConnectCode(rawCode) : null;
@@ -192,6 +202,22 @@ export function readEverConnectConfig(env: Env, warn: Warn): EverConnectConfig {
     warnOnce(
       'feed-mode',
       'EVER_CONNECT_FEED_MODE is neither "longpoll" nor "interval"; using longpoll.',
+      warn,
+    );
+  }
+  const personExportEnabled = readBoolStrict(
+    'EVER_CONNECT_PERSON_EXPORT_ENABLED',
+    false,
+    env,
+    warn,
+  );
+  if (
+    personExportEnabled &&
+    !isHttpsAddress(trimTrailingSlashes(env['WEBSITE_URL']))
+  ) {
+    warnOnce(
+      'person-export-url',
+      'EVER_CONNECT_PERSON_EXPORT_ENABLED is on, but WEBSITE_URL is not an https address: export requests are answered as not available.',
       warn,
     );
   }
@@ -220,12 +246,7 @@ export function readEverConnectConfig(env: Env, warn: Warn): EverConnectConfig {
       env,
       warn,
     ),
-    personExportEnabled: readBoolStrict(
-      'EVER_CONNECT_PERSON_EXPORT_ENABLED',
-      false,
-      env,
-      warn,
-    ),
+    personExportEnabled,
     personDeletionEnabled: readBoolStrict(
       'EVER_CONNECT_PERSON_DELETION_ENABLED',
       false,
