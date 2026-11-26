@@ -168,11 +168,18 @@ export class TermsAcceptanceService {
   ): Promise<AcceptanceStatus> {
     this.assertClaimsArePublished(claims);
     const locale = claims[0]?.locale;
-    const required = this.getRequiredDocuments(locale);
-    // Each claim is recorded with the locale of the text that was actually shown: when the UI locale has no
-    // published translation, `required` holds the English fallback, and that is what the person read.
+    // Each claim is checked against the documents required in its own locale, and recorded with the locale of
+    // the text that was actually shown: when that locale has no published translation, the required set holds
+    // the English fallback, and that is what the person read.
+    const requiredByLocale = new Map<string, RequiredDocument[]>();
+    const requiredFor = (claimLocale: string): RequiredDocument[] => {
+      if (!requiredByLocale.has(claimLocale)) {
+        requiredByLocale.set(claimLocale, this.getRequiredDocuments(claimLocale));
+      }
+      return requiredByLocale.get(claimLocale) as RequiredDocument[];
+    };
     const validated = claims.map((claim) => {
-      const current = required.find((doc) => doc.documentId === claim.documentId);
+      const current = requiredFor(claim.locale).find((doc) => doc.documentId === claim.documentId);
       if (!current || current.version !== claim.version || current.sha256 !== claim.sha256) {
         throw new BadRequestException(
           `Terms acceptance must be for the current text: ${claim.documentId}@${claim.version} is not what is required now.`,
@@ -182,6 +189,8 @@ export class TermsAcceptanceService {
     });
 
     const before = await this.status(uid, locale);
+    // A minor-change notice may be accepted too (the dialog offers only blocking documents, a banner could offer
+    // notices): either way the new version is recorded and the document becomes current.
     const outstanding = validated.filter((claim) =>
       [...before.blocking, ...before.notices].some((doc) => doc.documentId === claim.documentId),
     );

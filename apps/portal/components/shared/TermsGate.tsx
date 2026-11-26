@@ -22,6 +22,12 @@ import { panelRoutes, preRoutes } from 'components/_routes';
  * If the status cannot be read (network, an expired session), nothing is shown:
  * the server stays the authority, and a failed check must not lock people out.
  */
+/** A body that is not a status (an error envelope, an old API) counts as "cannot read": nothing is shown. */
+const asStatus = (value: unknown): ITermsStatus | null =>
+  value && Array.isArray((value as ITermsStatus).blocking)
+    ? (value as ITermsStatus)
+    : null;
+
 const TermsGate: FC = () => {
   const { t, i18n } = useTranslation();
   const router = useRouter();
@@ -39,7 +45,7 @@ const TermsGate: FC = () => {
     setStatus(null);
     if (!userId) return;
     getTermsStatusAPI(locale)
-      .then((next) => active && setStatus(next))
+      .then((next) => active && setStatus(asStatus(next)))
       .catch(() => active && setStatus(null));
     return () => {
       active = false;
@@ -60,23 +66,27 @@ const TermsGate: FC = () => {
           locale,
         })),
       );
-      setStatus(next);
+      setStatus(asStatus(next));
     } catch {
       setError(t('page.termsReaccept.failed'));
       // The texts may have changed while the dialog was open (the server then refuses the old version):
       // reload what is required now, so the next "I agree" sends the current documents.
       getTermsStatusAPI(locale)
-        .then((next) => setStatus(next))
+        .then((next) => setStatus(asStatus(next)))
         .catch(() => undefined);
     } finally {
       setBusy(false);
     }
   }, [blocking, locale, t]);
 
+  // The only way out besides agreeing, so the redirect happens even if clearing the session throws.
   const leave = useCallback(() => {
-    signOut();
-    dispatch(AuthAC.setUser({ user: null }));
-    router.push(preRoutes.auth + panelRoutes.login);
+    try {
+      signOut(); // synchronous: removes the token cookies and the cached Drive user
+      dispatch(AuthAC.setUser({ user: null }));
+    } finally {
+      router.push(preRoutes.auth + panelRoutes.login);
+    }
   }, [dispatch, router]);
 
   if (!userId || blocking.length === 0) return null;

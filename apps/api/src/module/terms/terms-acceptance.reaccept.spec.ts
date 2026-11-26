@@ -16,6 +16,7 @@ jest.mock('terms-acceptance/firebase', () => {
 });
 
 import { TermsAcceptanceService } from './terms-acceptance.service';
+import { corpus } from './terms-acceptance.corpus';
 
 const newService = () =>
   new TermsAcceptanceService({ firestore: () => ({}) } as any);
@@ -119,25 +120,48 @@ describe('TermsAcceptanceService status and reaccept', () => {
     expect(await service.history('uid-1')).toHaveLength(0);
   });
 
-  it('refuses a document that is not required now', async () => {
+  it('refuses a published document that is not required (cookies), with the real corpus', async () => {
     const service = newService();
-    jest
-      .spyOn(service, 'assertClaimsArePublished')
-      .mockImplementation(() => undefined);
-    const [first] = claimsFrom(service);
+    const cookies = (corpus.documents as any[]).find(
+      (d) =>
+        d.product === 'ever-rec' &&
+        d.document === 'cookies' &&
+        d.locale === 'en',
+    );
+    expect(cookies).toBeDefined();
 
     await expect(
       service.reaccept(
         'uid-1',
-        [{ ...first, documentId: 'cookies:ever-rec' }],
+        [
+          {
+            documentId: 'cookies:ever-rec',
+            version: cookies.version,
+            sha256: cookies.sha256,
+            locale: 'en',
+          },
+        ],
         {},
       ),
     ).rejects.toBeInstanceOf(BadRequestException);
     expect(await service.history('uid-1')).toHaveLength(0);
   });
 
-  it('refuses an older version of a required document', async () => {
+  it('checks each claim against the documents of its own locale', async () => {
     const service = newService();
+    const mixed = claimsFrom(service).map((claim, i) => ({
+      ...claim,
+      locale: i === 0 ? 'en' : 'de',
+    }));
+
+    const status = await service.reaccept('uid-1', mixed, {});
+
+    expect(status.satisfied).toBe(true);
+  });
+
+  it('refuses a version that is not the required one, even when the corpus check is bypassed', async () => {
+    const service = newService();
+    // The corpus holds one version per document, so the corpus check is stubbed to reach the version check itself.
     jest
       .spyOn(service, 'assertClaimsArePublished')
       .mockImplementation(() => undefined);

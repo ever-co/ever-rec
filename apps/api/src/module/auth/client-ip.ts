@@ -9,6 +9,10 @@ import { isPrivateAddress } from '../../common/net/private-address';
  * client that proxy saw. From any other peer the header is the caller's own
  * claim, so the socket address is used instead.
  *
+ * `request.ip` is not used for the forwarded case on purpose: Express `trust proxy`
+ * is not configured in this API, so `request.ip` is the ingress address. The
+ * private-peer rule here is the same one the Ever ID rate-limit guard applies.
+ *
  * Only ever handed to `TermsAcceptanceService`, which hashes it with a
  * per-deployment salt; no authorization decision reads it.
  */

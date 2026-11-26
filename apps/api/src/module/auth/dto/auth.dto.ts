@@ -94,6 +94,7 @@ export class TermsReacceptDto {
   @ApiProperty({ type: () => [TermsAcceptanceClaimDto] })
   @IsArray()
   @ArrayNotEmpty({ message: 'Name at least one document to accept' })
+  // Abuse limit only: Ever Rec requires 2 documents (tos, privacy) and publishes 8 in all.
   @ArrayMaxSize(20)
   @ValidateNested({ each: true })
   @Type(() => TermsAcceptanceClaimDto)

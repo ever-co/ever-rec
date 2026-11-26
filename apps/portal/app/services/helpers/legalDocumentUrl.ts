@@ -1,5 +1,10 @@
-/** Where the published Rec legal texts are read (https://rec.so/tos, /privacy). */
-export const LEGAL_SITE_URL = 'https://rec.so';
+/**
+ * Where the published Rec legal texts are read (https://rec.so/tos, /privacy). Same default as the API's
+ * `TERMS_SITE_URL`; a build that overrides one sets `NEXT_PUBLIC_TERMS_SITE_URL` for the other.
+ */
+export const LEGAL_SITE_URL = (
+  process.env.NEXT_PUBLIC_TERMS_SITE_URL || 'https://rec.so'
+).replace(/\/$/, '');
 
 /**
  * The link to a legal document the person is asked to accept.
