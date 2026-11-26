@@ -6,6 +6,8 @@ import {
   Query,
   Req,
   UseGuards,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
 import type { Request } from 'express';
 import type { AcceptanceStatus } from 'terms-acceptance';
@@ -40,7 +42,10 @@ export class TermsAccountController {
     return this.termsAcceptanceService.status(user.id, locale);
   }
 
+  // No pipe is global in this API: without this one the DTO rules (non-empty, at most 20, each claim's shape)
+  // would not run.
   @Post('accept')
+  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
   accept(
     @User() user: IRequestUser,
     @Body() body: TermsReacceptDto,

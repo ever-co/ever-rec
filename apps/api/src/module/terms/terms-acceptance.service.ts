@@ -167,7 +167,6 @@ export class TermsAcceptanceService {
     context: { ip?: string | null; userAgent?: string | null },
   ): Promise<AcceptanceStatus> {
     this.assertClaimsArePublished(claims);
-    const locale = claims[0]?.locale;
     // Each claim is checked against the documents required in its own locale, and recorded with the locale of
     // the text that was actually shown: when that locale has no published translation, the required set holds
     // the English fallback, and that is what the person read.
@@ -191,8 +190,9 @@ export class TermsAcceptanceService {
     // What is still pending, asked per claim locale: a document can be pending under one locale's required set
     // and not appear in another's. A minor-change notice may be accepted too (the dialog offers only blocking
     // documents, a banner could offer notices): either way the new version is recorded and becomes current.
+    const claimLocales = [...new Set(claims.map((claim) => claim.locale))];
     const pending = new Set<string>();
-    for (const claimLocale of new Set(claims.map((claim) => claim.locale))) {
+    for (const claimLocale of claimLocales) {
       const before = await this.status(uid, claimLocale);
       for (const doc of [...before.blocking, ...before.notices]) pending.add(doc.documentId);
     }
@@ -204,7 +204,14 @@ export class TermsAcceptanceService {
         if (!(error instanceof DuplicateAcceptanceError)) throw error;
       }
     }
-    return this.status(uid, locale);
+    // The answer is for the locale of the claims (the portal sends one: the locale of its dialog). A mixed batch
+    // is never answered "satisfied" while one of its locales still has a document pending.
+    let answer: AcceptanceStatus | undefined;
+    for (const claimLocale of claimLocales.length ? claimLocales : [undefined]) {
+      const after = await this.status(uid, claimLocale);
+      if (!answer || (answer.satisfied && !after.satisfied)) answer = after;
+    }
+    return answer as AcceptanceStatus;
   }
 
   /** Every acceptance on file for a user, newest first, integrity-checked. */

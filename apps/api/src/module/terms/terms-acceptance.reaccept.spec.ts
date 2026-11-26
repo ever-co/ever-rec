@@ -176,6 +176,31 @@ describe('TermsAcceptanceService status and reaccept', () => {
     expect(status.satisfied).toBe(true);
   });
 
+  it('does not answer satisfied while another claim locale still has a document pending', async () => {
+    const service = newService();
+    const english = service.getRequiredDocuments('en');
+    // 'de' is made to require one more document than 'en', so the two locales of the batch disagree.
+    jest
+      .spyOn(service, 'getRequiredDocuments')
+      .mockImplementation((locale?: string) =>
+        locale === 'de'
+          ? [...english, { ...english[0], documentId: 'extra:ever-rec' }]
+          : english,
+      );
+    const [tos, privacy] = claimsFrom(service);
+
+    const status = await service.reaccept(
+      'uid-1',
+      [tos, { ...privacy, locale: 'de' }],
+      {},
+    );
+
+    expect(status.satisfied).toBe(false);
+    expect(status.blocking.map((d) => d.documentId)).toEqual([
+      'extra:ever-rec',
+    ]);
+  });
+
   it('refuses a version that is not the required one, even when the corpus check is bypassed', async () => {
     const service = newService();
     // The corpus holds one version per document, so the corpus check is stubbed to reach the version check itself.

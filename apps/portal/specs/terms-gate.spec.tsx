@@ -296,6 +296,12 @@ describe('TermsGate', () => {
     await act(async () => root.render(<TermsGate />));
     expect(container.innerHTML).toBe('');
 
+    // A body without the full status shape (an error envelope, an older API) counts as "cannot read" too.
+    getStatus.mockResolvedValue({ satisfied: false, blocking: [pendingTos] });
+    mockUser.current = { id: 'uid-3' };
+    await act(async () => root.render(<TermsGate />));
+    expect(container.innerHTML).toBe('');
+
     getStatus.mockClear();
     mockUser.current = null;
     await act(async () => root.render(<TermsGate />));

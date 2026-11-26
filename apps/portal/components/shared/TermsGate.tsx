@@ -27,7 +27,8 @@ const asStatus = (value: unknown): ITermsStatus | null =>
   typeof value === 'object' &&
   value !== null &&
   typeof (value as ITermsStatus).satisfied === 'boolean' &&
-  Array.isArray((value as ITermsStatus).blocking)
+  Array.isArray((value as ITermsStatus).blocking) &&
+  Array.isArray((value as ITermsStatus).notices)
     ? (value as ITermsStatus)
     : null;
 
