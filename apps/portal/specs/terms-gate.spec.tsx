@@ -16,7 +16,10 @@ jest.mock('react-i18next', () => ({
     i18n: { language: 'en-US' },
   }),
 }));
-jest.mock('next/router', () => ({ useRouter: () => ({ push: jest.fn() }) }));
+const mockPush = jest.fn();
+jest.mock('next/router', () => ({
+  useRouter: () => ({ push: mockPush }),
+}));
 jest.mock('antd', () => ({
   Modal: ({ open, footer, children, closable, maskClosable, keyboard }: any) =>
     open ? (
@@ -229,6 +232,58 @@ describe('TermsGate', () => {
     expect(container.querySelector('a')?.getAttribute('href')).toBe(
       'https://rec.so/tos',
     );
+  });
+
+  it('ignores an accept reply that arrives after the user changed', async () => {
+    getStatus.mockResolvedValue({
+      satisfied: false,
+      blocking: [pendingTos],
+      notices: [],
+      current: [],
+    });
+    let resolveAccept: (value: unknown) => void = () => undefined;
+    accept.mockReturnValue(new Promise((resolve) => (resolveAccept = resolve)));
+    await act(async () => root.render(<TermsGate />));
+    await act(async () => {
+      (
+        container.querySelector(
+          '[data-testid="terms-accept"]',
+        ) as HTMLButtonElement
+      ).click();
+    });
+
+    mockUser.current = { id: 'uid-2' };
+    await act(async () => root.render(<TermsGate />));
+    await act(async () => resolveAccept(satisfied));
+
+    // uid-2 has not accepted anything: the old user's "satisfied" must not close their dialog.
+    expect(container.querySelector('[data-testid="modal"]')).not.toBeNull();
+  });
+
+  it('clears the user and leaves even when clearing the session throws', async () => {
+    const { signOut } = jest.requireMock('app/services/auth');
+    (signOut as jest.Mock).mockImplementationOnce(() => {
+      throw new Error('cookie store');
+    });
+    const AuthAC = jest.requireMock('store/auth/actions/AuthAC').default;
+    getStatus.mockResolvedValue({
+      satisfied: false,
+      blocking: [pendingTos],
+      notices: [],
+      current: [],
+    });
+    await act(async () => root.render(<TermsGate />));
+
+    await act(async () => {
+      (
+        container.querySelector(
+          '[data-testid="terms-signout"]',
+        ) as HTMLButtonElement
+      ).click();
+    });
+
+    expect(AuthAC.setUser).toHaveBeenCalledWith({ user: null });
+    expect(mockPush).toHaveBeenCalledWith('/auth/login');
   });
 
   it('shows nothing when the user is up to date, signed out, or the status cannot be read', async () => {

@@ -147,6 +147,23 @@ describe('TermsAcceptanceService status and reaccept', () => {
     expect(await service.history('uid-1')).toHaveLength(0);
   });
 
+  it('records a document that is pending only under a later claim locale', async () => {
+    const service = newService();
+    const [tos, privacy] = claimsFrom(service);
+    // tos is already on file; privacy is pending and arrives under a different locale than the first claim.
+    await service.reaccept('uid-1', [tos], {});
+    const status = await service.reaccept(
+      'uid-1',
+      [tos, { ...privacy, locale: 'de' }],
+      {},
+    );
+
+    expect(status.satisfied).toBe(true);
+    expect(
+      (await service.history('uid-1')).map((r) => r.documentId).sort(),
+    ).toEqual([tos.documentId, privacy.documentId].sort());
+  });
+
   it('checks each claim against the documents of its own locale', async () => {
     const service = newService();
     const mixed = claimsFrom(service).map((claim, i) => ({

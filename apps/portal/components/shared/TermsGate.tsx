@@ -1,4 +1,4 @@
-import { FC, useCallback, useEffect, useState } from 'react';
+import { FC, useCallback, useEffect, useRef, useState } from 'react';
 import { Button, Modal } from 'antd';
 import { useRouter } from 'next/router';
 import { RootStateOrAny, useDispatch, useSelector } from 'react-redux';
@@ -24,7 +24,10 @@ import { panelRoutes, preRoutes } from 'components/_routes';
  */
 /** A body that is not a status (an error envelope, an old API) counts as "cannot read": nothing is shown. */
 const asStatus = (value: unknown): ITermsStatus | null =>
-  value && Array.isArray((value as ITermsStatus).blocking)
+  typeof value === 'object' &&
+  value !== null &&
+  typeof (value as ITermsStatus).satisfied === 'boolean' &&
+  Array.isArray((value as ITermsStatus).blocking)
     ? (value as ITermsStatus)
     : null;
 
@@ -39,22 +42,31 @@ const TermsGate: FC = () => {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const locale = (i18n?.language || 'en').split('-')[0];
+  // Who and which locale a response belongs to: a reply that arrives after a sign-out, a different sign-in or a
+  // language switch must not open or close the dialog for the new session.
+  const sessionKey = `${userId ?? ''}|${locale}`;
+  const currentKey = useRef(sessionKey);
+  currentKey.current = sessionKey;
+  const applyFor = useCallback(
+    (key: string) => (next: unknown) => {
+      if (currentKey.current === key) setStatus(asStatus(next));
+    },
+    [],
+  );
 
   useEffect(() => {
-    let active = true;
     setStatus(null);
+    setError(null);
     if (!userId) return;
     getTermsStatusAPI(locale)
-      .then((next) => active && setStatus(asStatus(next)))
-      .catch(() => active && setStatus(null));
-    return () => {
-      active = false;
-    };
-  }, [userId, locale]);
+      .then(applyFor(sessionKey))
+      .catch(() => applyFor(sessionKey)(null));
+  }, [userId, locale, sessionKey, applyFor]);
 
   const blocking = status?.blocking ?? [];
 
   const accept = useCallback(async () => {
+    const key = sessionKey;
     setBusy(true);
     setError(null);
     try {
@@ -66,25 +78,29 @@ const TermsGate: FC = () => {
           locale,
         })),
       );
-      setStatus(asStatus(next));
+      applyFor(key)(next);
     } catch {
-      setError(t('page.termsReaccept.failed'));
+      if (currentKey.current === key) setError(t('page.termsReaccept.failed'));
       // The texts may have changed while the dialog was open (the server then refuses the old version):
       // reload what is required now, so the next "I agree" sends the current documents.
       getTermsStatusAPI(locale)
-        .then((next) => setStatus(asStatus(next)))
+        .then(applyFor(key))
         .catch(() => undefined);
     } finally {
       setBusy(false);
     }
-  }, [blocking, locale, t]);
+  }, [blocking, locale, sessionKey, applyFor, t]);
 
-  // The only way out besides agreeing, so the redirect happens even if clearing the session throws.
+  // The only way out besides agreeing: the user is cleared and the redirect happens even if clearing the
+  // session throws, so the dialog cannot stay over the login page.
   const leave = useCallback(() => {
     try {
       signOut(); // synchronous: removes the token cookies and the cached Drive user
-      dispatch(AuthAC.setUser({ user: null }));
+    } catch {
+      // still leave: the user is cleared below, and a request without tokens is refused anyway
     } finally {
+      setStatus(null);
+      dispatch(AuthAC.setUser({ user: null }));
       router.push(preRoutes.auth + panelRoutes.login);
     }
   }, [dispatch, router]);
@@ -99,7 +115,12 @@ const TermsGate: FC = () => {
       keyboard={false}
       title={t('page.termsReaccept.title')}
       footer={[
-        <Button key="signout" onClick={leave} disabled={busy}>
+        <Button
+          key="signout"
+          data-testid="terms-signout"
+          onClick={leave}
+          disabled={busy}
+        >
           {t('page.termsReaccept.signOut')}
         </Button>,
         <Button

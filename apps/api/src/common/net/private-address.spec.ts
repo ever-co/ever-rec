@@ -12,6 +12,7 @@ describe('isPrivateAddress', () => {
     'fc00::1',
     'fd12:3456::1',
     'fe80::1',
+    'febf::1',
   ])('treats %s as private or loopback', (address) => {
     expect(isPrivateAddress(address)).toBe(true);
   });
@@ -23,6 +24,7 @@ describe('isPrivateAddress', () => {
     '172.32.0.1',
     '192.169.0.1',
     '2001:db8::1',
+    'fec0::1',
     '',
   ])('treats %s as public', (address) => {
     expect(isPrivateAddress(address)).toBe(false);

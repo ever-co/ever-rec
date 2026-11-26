@@ -45,8 +45,7 @@ export interface ITermsPendingDocument {
     | 'never-accepted'
     | 'material-change'
     | 'minor-change'
-    | 'text-mismatch'
-    | string;
+    | 'text-mismatch';
   blocking: boolean;
   acceptedVersion: string | null;
   acceptedAt: string | null;

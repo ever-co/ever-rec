@@ -12,6 +12,7 @@ import { isPrivateAddress } from '../../common/net/private-address';
  * `request.ip` is not used for the forwarded case on purpose: Express `trust proxy`
  * is not configured in this API, so `request.ip` is the ingress address. The
  * private-peer rule here is the same one the Ever ID rate-limit guard applies.
+ * If `trust proxy` is ever enabled, revisit this helper and the guard together.
  *
  * Only ever handed to `TermsAcceptanceService`, which hashes it with a
  * per-deployment salt; no authorization decision reads it.

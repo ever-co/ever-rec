@@ -4,5 +4,8 @@ export function isPrivateAddress(address: string): boolean {
   if (/^10\./.test(address) || /^192\.168\./.test(address)) return true;
   if (/^172\.(1[6-9]|2\d|3[01])\./.test(address)) return true;
   if (/^169\.254\./.test(address)) return true;
-  return /^f[cd][0-9a-f]{2}:/i.test(address) || /^fe80:/i.test(address);
+  // fc00::/7 (unique local) and fe80::/10 (link-local: first hextet fe80 to febf).
+  return (
+    /^f[cd][0-9a-f]{2}:/i.test(address) || /^fe[89ab][0-9a-f]:/i.test(address)
+  );
 }

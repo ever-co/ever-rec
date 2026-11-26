@@ -188,12 +188,15 @@ export class TermsAcceptanceService {
       return { ...claim, locale: current.locale };
     });
 
-    const before = await this.status(uid, locale);
-    // A minor-change notice may be accepted too (the dialog offers only blocking documents, a banner could offer
-    // notices): either way the new version is recorded and the document becomes current.
-    const outstanding = validated.filter((claim) =>
-      [...before.blocking, ...before.notices].some((doc) => doc.documentId === claim.documentId),
-    );
+    // What is still pending, asked per claim locale: a document can be pending under one locale's required set
+    // and not appear in another's. A minor-change notice may be accepted too (the dialog offers only blocking
+    // documents, a banner could offer notices): either way the new version is recorded and becomes current.
+    const pending = new Set<string>();
+    for (const claimLocale of new Set(claims.map((claim) => claim.locale))) {
+      const before = await this.status(uid, claimLocale);
+      for (const doc of [...before.blocking, ...before.notices]) pending.add(doc.documentId);
+    }
+    const outstanding = validated.filter((claim) => pending.has(claim.documentId));
     if (outstanding.length) {
       try {
         await this.record(uid, outstanding, { method: 'reaccept-modal', ...context });
