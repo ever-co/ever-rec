@@ -8,7 +8,10 @@
  * written, deleted or uploaded: it used to read `blob.mimetype` of nothing and answer 500.
  * So is a video of a type we have no file extension for (such as video/x-matroska) a 415, as on
  * the upload routes, and its temporary file is removed: it used to be stored as `<id>undefined`,
- * a name ffmpeg cannot convert to, so its master file never reached the bucket.
+ * a name ffmpeg cannot convert to, so its master file never reached the bucket. The same goes
+ * for a type that has a file extension but is no video container ffmpeg can write (text/plain,
+ * which is what a part without a Content-Type is reported as, application/octet-stream or
+ * application/pdf): it used to be stored as `<id>.xdr`, `<id>.xtp` or `<id>.pdf`.
  * The download link is the streaming provider's, never the `downloadUrl` the client sends: the
  * Jira and Trello export used to fetch that URL from the server.
  *
@@ -242,6 +245,28 @@ describe('stream save-data routes', () => {
     });
   };
 
+  /** The same form, written by hand: its `blob` part has no Content-Type header at all. */
+  const saveWithoutContentType = (
+    path: string,
+    fields: Record<string, string>,
+  ) => {
+    const boundary = 'ever-rec-spec-boundary';
+    const parts = Object.entries(fields).map(
+      ([key, value]) =>
+        `--${boundary}\r\nContent-Disposition: form-data; name="${key}"\r\n\r\n${value}\r\n`,
+    );
+    parts.push(
+      `--${boundary}\r\nContent-Disposition: form-data; name="blob"; filename="rec"\r\n\r\nvideo\r\n`,
+    );
+    return request(app.getHttpServer())
+      .post(`/stream/save-data${path}`)
+      .set({
+        Authorization: 'Bearer uid-me',
+        'Content-Type': `multipart/form-data; boundary=${boundary}`,
+      })
+      .send(`${parts.join('')}--${boundary}--\r\n`);
+  };
+
   /** The same form without its `blob` part, or the fields sent as JSON. */
   const saveWithoutFile = (
     path: string,
@@ -386,30 +411,52 @@ describe('stream save-data routes', () => {
     ['POST stream/save-data', ''],
     ['POST stream/save-data/:videoId', '/vid1'],
   ])('the type of the video file on %s', (_, path) => {
-    it.each(['video/x-matroska', 'application/x-not-a-video'])(
-      'refuses a type it has no file extension for (%s) with a 415, writing, deleting and uploading nothing',
+    const expectNothingStored = () => {
+      expect(mux.getAssetOwner).not.toHaveBeenCalled();
+      expect(mockDb.writes).toEqual([]);
+      expect(mux.deleteAsset).not.toHaveBeenCalled();
+      expect(apiVideo.deleteAsset).not.toHaveBeenCalled();
+      expect(mockUpload).not.toHaveBeenCalled();
+      expect(mockDb.data.users['uid-me'].videos.vid1.streamData).toEqual({
+        serviceType: 'mux',
+        assetId: 'old-asset',
+      });
+      // No interceptor removes the upload on these routes: the refusal does.
+      expect(readdirSync(TMP_PATH)).toEqual([]);
+    };
+
+    it.each([
+      'video/x-matroska',
+      'application/x-not-a-video',
+      // These have a file extension, but ffmpeg cannot write a video under it.
+      'text/plain',
+      'application/octet-stream',
+      'application/pdf',
+    ])(
+      'refuses a type that is no video container ffmpeg can write (%s) with a 415, writing, deleting and uploading nothing',
       async (type) => {
         const res = await save(path, fields('mine'), 'uid-me', type).expect(
           415,
         );
         expect(res.body.message).toBe(`Unsupported media type: ${type}`);
-        expect(mux.getAssetOwner).not.toHaveBeenCalled();
-        expect(mockDb.writes).toEqual([]);
-        expect(mux.deleteAsset).not.toHaveBeenCalled();
-        expect(apiVideo.deleteAsset).not.toHaveBeenCalled();
-        expect(mockUpload).not.toHaveBeenCalled();
-        expect(mockDb.data.users['uid-me'].videos.vid1.streamData).toEqual({
-          serviceType: 'mux',
-          assetId: 'old-asset',
-        });
-        // No interceptor removes the upload on these routes: the refusal does.
-        expect(readdirSync(TMP_PATH)).toEqual([]);
+        expectNothingStored();
       },
     );
+
+    it('refuses a video part without a Content-Type (read as text/plain) with a 415, writing, deleting and uploading nothing', async () => {
+      const res = await saveWithoutContentType(path, fields('mine')).expect(
+        415,
+      );
+      expect(res.body.message).toBe('Unsupported media type: text/plain');
+      expectNothingStored();
+    });
 
     it.each([
       ['video/mp4', '.mp4'],
       ['video/webm', '.webm'],
+      ['video/quicktime', '.mov'],
+      ['video/ogg', '.ogg'],
+      ['audio/ogg', '.ogg'],
     ])(
       'still saves a %s video, converted under its id plus %s',
       async (type, extension) => {

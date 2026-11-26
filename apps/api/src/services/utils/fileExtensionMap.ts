@@ -212,3 +212,32 @@ export const fileExtensionMap = {
   'video/ogg': '.ogg',
   'x-world/x-vrml': '.xof',
 };
+
+/**
+ * The types a video upload may be stored and converted as. ffmpeg picks the output format from the
+ * file extension, so this is only the container types it can write: the rest of fileExtensionMap
+ * (text/plain, which is what a part without a Content-Type is reported as,
+ * application/octet-stream, documents, images) would store `<id>.xdr`, `<id>.xtp` or `<id>.pdf`,
+ * which ffmpeg cannot convert to. No muxer takes the extension of video/mpeg (`.mpv2`) or of the
+ * other Windows Media entries (`.nsc`, `.wm`, ...), and the one for video/x-ivf (`.IVF`) takes
+ * no H.264.
+ */
+const videoContainerTypes: ReadonlySet<string> = new Set([
+  'video/mp4',
+  'video/webm',
+  'video/quicktime',
+  'video/ogg',
+  'audio/ogg',
+  'video/avi',
+  'video/x-flv',
+  'video/x-ms-wmv',
+]);
+
+/** The extension a video of this type is stored under, or undefined when ffmpeg cannot write it. */
+export function videoFileExtension(
+  mimetype: string | undefined,
+): string | undefined {
+  return videoContainerTypes.has(mimetype)
+    ? fileExtensionMap[mimetype as keyof typeof fileExtensionMap]
+    : undefined;
+}

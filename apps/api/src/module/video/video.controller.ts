@@ -30,7 +30,7 @@ import {
   UniqueViewsSharedService,
 } from 'src/services/shared/uniqueViews.shared.service';
 import { getClientIp } from 'src/services/utils/clientIp';
-import { fileExtensionMap } from 'src/services/utils/fileExtensionMap';
+import { videoFileExtension } from 'src/services/utils/fileExtensionMap';
 import { parseBooleanFlag } from 'src/services/utils/parseBooleanFlag';
 import { v4 as uuidv4 } from 'uuid';
 import { TMP_PATH } from '../../enums/tmpPathsEnums';
@@ -338,7 +338,8 @@ export class VideoController {
       throw new BadRequestException('Missing uploaded file or file metadata.');
     }
 
-    const fileExtension = fileExtensionMap[blob.mimetype];
+    // Only a container ffmpeg can write: it picks the output format from this extension.
+    const fileExtension = videoFileExtension(blob.mimetype);
 
     if (!fileExtension) {
       throw new UnsupportedMediaTypeException(
@@ -388,7 +389,8 @@ export class VideoController {
       throw new BadRequestException('Missing uploaded file or file metadata.');
     }
 
-    const fileExtension = fileExtensionMap[blob.mimetype];
+    // Only a container ffmpeg can write: it picks the output format from this extension.
+    const fileExtension = videoFileExtension(blob.mimetype);
 
     if (!fileExtension) {
       throw new UnsupportedMediaTypeException(
