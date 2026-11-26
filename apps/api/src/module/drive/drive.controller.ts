@@ -14,6 +14,10 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { FileInterceptor } from '@nestjs/platform-express';
+import {
+  UPLOAD_FILE_BYTES,
+  uploadOptions,
+} from '../../common/multipart/upload-limits';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { DriveService } from './drive.service';
 import { UserGuard } from '../auth/guards/user.guard';
@@ -34,7 +38,13 @@ export class DriveController {
 
   @UseGuards(AuthGuard)
   @Post('/upload/file')
-  @UseInterceptors(FileInterceptor('blob'))
+  // The web app and the extension send one of the user's images, at full size.
+  @UseInterceptors(
+    FileInterceptor(
+      'blob',
+      uploadOptions({ fileSize: UPLOAD_FILE_BYTES.image }),
+    ),
+  )
   async uploadFile(
     @Req() req,
     @Body() body,

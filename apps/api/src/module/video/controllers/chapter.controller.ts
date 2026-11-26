@@ -12,6 +12,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
+import { uploadOptions } from 'src/common/multipart/upload-limits';
 import { AuthGuard } from 'src/module/auth/guards/auth.guard';
 import {
   CanAccessWorkspaceQueryGuard,
@@ -24,9 +25,13 @@ import { MAX_CHAPTERS, parseChapterList } from '../utilities/chapterPayload';
 
 /**
  * Largest chapter thumbnail, in bytes. The editors send 1000x562 JPEG
- * thumbnails, which stay well under it.
+ * thumbnails at quality 0.75: even a frame of pure noise makes one of about
+ * 320 KB, and a real frame far less.
  */
-const MAX_CHAPTER_THUMBNAIL_BYTES = 2 * 1024 * 1024;
+const MAX_CHAPTER_THUMBNAIL_BYTES = 448 * 1024;
+
+/** Longest of the two chapter lists (`chapters`, `chaptersBlobs`), in bytes. */
+const MAX_CHAPTER_LIST_BYTES = 1024 * 1024;
 
 @Controller('video/chapter')
 export class VideoChapterController {
@@ -49,13 +54,21 @@ export class VideoChapterController {
 
   @UseGuards(AuthGuard, CanAccessWorkspaceQueryGuard)
   @WorkspaceVideoAccess(PermissionAccessEnum.WRITE)
-  // Multer keeps every uploaded file in memory, so the count and the size of
-  // the thumbnails are capped while they are read: a file that reaches the cap
-  // gets a 413 and more than MAX_CHAPTERS files a 400.
+  // Multer keeps the whole save in memory, so the thumbnails and the text
+  // fields are capped while they are read: a file that reaches the cap gets a
+  // 413, more than MAX_CHAPTERS files or any field but the two lists a 400. One
+  // save holds at most about 94 MB.
   @UseInterceptors(
-    FilesInterceptor('blobs', MAX_CHAPTERS, {
-      limits: { files: MAX_CHAPTERS, fileSize: MAX_CHAPTER_THUMBNAIL_BYTES },
-    }),
+    FilesInterceptor(
+      'blobs',
+      MAX_CHAPTERS,
+      uploadOptions({
+        files: MAX_CHAPTERS,
+        fileSize: MAX_CHAPTER_THUMBNAIL_BYTES,
+        fields: 2,
+        fieldSize: MAX_CHAPTER_LIST_BYTES,
+      }),
+    ),
   )
   @Post('save-changes/:videoId')
   async saveChapters(

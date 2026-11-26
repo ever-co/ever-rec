@@ -19,6 +19,10 @@ import { diskStorage } from 'multer';
 import { TMP_PATH } from 'src/enums/tmpPathsEnums';
 import { v4 as uuidv4 } from 'uuid';
 import { fileExtensionMap } from 'src/services/utils/fileExtensionMap';
+import {
+  UPLOAD_FILE_BYTES,
+  uploadOptions,
+} from 'src/common/multipart/upload-limits';
 
 @Controller('stream')
 export class StreamServiceController {
@@ -51,17 +55,23 @@ export class StreamServiceController {
   @UseGuards(AuthGuard)
   @Post('/save-data')
   @UseInterceptors(
-    FileInterceptor('blob', {
-      storage: diskStorage({
-        destination: (req, file, callback) => {
-          callback(null, TMP_PATH);
+    FileInterceptor(
+      'blob',
+      uploadOptions(
+        { fileSize: UPLOAD_FILE_BYTES.video },
+        {
+          storage: diskStorage({
+            destination: (req, file, callback) => {
+              callback(null, TMP_PATH);
+            },
+            filename: (req, file, cb) => {
+              const filename = uuidv4();
+              return cb(null, filename);
+            },
+          }),
         },
-        filename: (req, file, cb) => {
-          const filename = uuidv4();
-          return cb(null, filename);
-        },
-      }),
-    }),
+      ),
+    ),
   )
   async saveVideoData(
     @Req() request,
@@ -82,17 +92,23 @@ export class StreamServiceController {
   @UseGuards(AuthGuard)
   @Post('/save-data/:videoId')
   @UseInterceptors(
-    FileInterceptor('blob', {
-      storage: diskStorage({
-        destination: (req, file, callback) => {
-          callback(null, TMP_PATH);
+    FileInterceptor(
+      'blob',
+      uploadOptions(
+        { fileSize: UPLOAD_FILE_BYTES.video },
+        {
+          storage: diskStorage({
+            destination: (req, file, callback) => {
+              callback(null, TMP_PATH);
+            },
+            filename: (req, file, cb) => {
+              const filename = uuidv4();
+              return cb(null, filename);
+            },
+          }),
         },
-        filename: (req, file, cb) => {
-          const filename = uuidv4();
-          return cb(null, filename);
-        },
-      }),
-    }),
+      ),
+    ),
   )
   async updateVideoData(
     @Req() request,

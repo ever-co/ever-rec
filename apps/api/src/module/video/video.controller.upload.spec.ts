@@ -11,9 +11,9 @@ import { ConfigService } from '@nestjs/config';
 import { INestApplication } from '@nestjs/common';
 import { INTERCEPTORS_METADATA } from '@nestjs/common/constants';
 import { Test } from '@nestjs/testing';
-import { readdirSync, rmSync } from 'fs';
+import { readdirSync, readFileSync, rmSync } from 'fs';
 import { HttpService } from 'nestjs-http-promise';
-import { join } from 'path';
+import { dirname, join, resolve } from 'path';
 import request from 'supertest';
 import { TMP_PATH } from '../../enums/tmpPathsEnums';
 import { FoldersSharedService } from '../../services/shared/folders.shared.service';
@@ -29,7 +29,11 @@ import { VideoService } from './video.service';
 jest.mock('sharp', () => ({}), { virtual: true });
 jest.mock('firebase/compat/auth', () => ({}));
 jest.mock('firebase/compat/firestore', () => ({}));
-jest.mock('firebase-admin', () => ({}));
+// The bucket of `PUT video/single`: it records what is written, and where from.
+const mockBucket = { file: jest.fn(), upload: jest.fn() };
+jest.mock('firebase-admin', () => ({
+  storage: () => ({ bucket: () => mockBucket }),
+}));
 jest.mock('../auth/services/tokens', () => ({ TokenService: class {} }));
 jest.mock('src/services/utils/uploadVideoToBucket', () => ({
   uploadVideoToBucket: jest.fn(),
@@ -149,6 +153,10 @@ describe('POST video/upload', () => {
     );
     expect(new Interceptor().multer.limits).toEqual({
       fileSize: 1024 * 1024 * 1024,
+      files: 1,
+      fields: 20,
+      fieldSize: 64 * 1024,
+      parts: 22,
     });
   });
 
@@ -220,5 +228,117 @@ describe('POST video/upload', () => {
     await upload('video/webm').expect(500);
 
     expect(mockUpload).toHaveBeenCalledTimes(1);
+  });
+
+  // The video editors send the trimmed video here. It was kept in API memory with no cap, so one
+  // request could hold gigabytes; now it is written to disk like the other video uploads, capped
+  // at 1 GB, streamed to the bucket and removed.
+  describe('PUT video/single', () => {
+    const replace = () =>
+      request(app.getHttpServer())
+        .put('/video/single')
+        .set({ Authorization: 'Bearer uid-owner' })
+        .field('refName', 'clip.webm')
+        .attach('blob', Buffer.from('trimmed-video'), {
+          filename: 'blob',
+          contentType: 'video/webm',
+        });
+
+    beforeEach(() => {
+      mockBucket.file.mockReset().mockImplementation((name: string) => ({
+        name,
+        getSignedUrl: async () => [`https://storage.example/${name}`],
+      }));
+      mockBucket.upload.mockReset().mockResolvedValue(undefined);
+    });
+
+    it('caps the upload at 1 GB and writes it to disk, like POST video/upload', () => {
+      const [Interceptor, ...after] = Reflect.getMetadata(
+        INTERCEPTORS_METADATA,
+        VideoController.prototype.updateVideo,
+      );
+      const interceptor = new Interceptor();
+      expect(interceptor.multer.limits).toEqual({
+        fileSize: 1024 * 1024 * 1024,
+        files: 1,
+        fields: 20,
+        fieldSize: 64 * 1024,
+        parts: 22,
+      });
+      expect(interceptor.multer.storage.constructor.name).toBe('DiskStorage');
+      expect(after.map((item) => item.name)).toEqual([
+        'RemoveUploadInterceptor',
+      ]);
+    });
+
+    it('streams the video from the API disk to the bucket and removes it', async () => {
+      let written = '';
+      mockBucket.upload.mockImplementation(async (path: string) => {
+        written = readFileSync(path, 'utf8');
+      });
+
+      const response = await replace().expect(200);
+
+      expect(response.text).toBe(
+        'https://storage.example/users/uid-owner/videos/clip.webm',
+      );
+      expect(mockBucket.upload).toHaveBeenCalledTimes(1);
+      const [path, options] = mockBucket.upload.mock.calls[0];
+      expect(resolve(dirname(path))).toBe(resolve(TMP_PATH));
+      expect(written).toBe('trimmed-video');
+      expect(options.destination.name).toBe('users/uid-owner/videos/clip.webm');
+      expect(readdirSync(TMP_PATH)).toEqual([]);
+    });
+
+    it('removes the upload when the bucket write fails', async () => {
+      mockBucket.upload.mockRejectedValue(new Error('bucket down'));
+
+      await replace().expect(500);
+
+      expect(readdirSync(TMP_PATH)).toEqual([]);
+    });
+
+    it('answers 400 without a video', async () => {
+      await request(app.getHttpServer())
+        .put('/video/single')
+        .set({ Authorization: 'Bearer uid-owner' })
+        .field('refName', 'clip.webm')
+        .expect(400);
+
+      expect(mockBucket.upload).not.toHaveBeenCalled();
+    });
+  });
+
+  // The web app and the extension send JSON here, never a form: the route has no upload to keep.
+  describe('PUT video/single-data', () => {
+    it('reads no upload', () => {
+      expect(
+        Reflect.getMetadata(
+          INTERCEPTORS_METADATA,
+          VideoController.prototype.updateVideoData,
+        ),
+      ).toBeUndefined();
+    });
+
+    it('still takes the JSON the clients send', async () => {
+      const updateVideoData = jest
+        .spyOn(VideoService.prototype, 'updateVideoData')
+        .mockResolvedValue({ status: 'success' } as any);
+
+      await request(app.getHttpServer())
+        .put('/video/single-data')
+        .set({ Authorization: 'Bearer uid-owner' })
+        .send({ id: 'v1', title: 'New title', trash: false })
+        .expect(200);
+
+      expect(updateVideoData).toHaveBeenCalledWith(
+        'uid-owner',
+        'v1',
+        undefined,
+        false,
+        undefined,
+        'New title',
+      );
+    });
   });
 });
