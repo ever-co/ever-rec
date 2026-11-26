@@ -111,9 +111,11 @@ export class EverIdSessionIndexService {
 
   private async revokeQuietly(token: string): Promise<void> {
     try {
-      await this.mergeTokenPolicy.revokeToken(token);
+      // The recorded reference is the one issued at sign-in. Refreshes keep its storage entry and
+      // only sign new references to it, so once it has expired it must still end that entry.
+      await this.mergeTokenPolicy.revokeToken(token, { allowExpired: true });
     } catch (error) {
-      // Already revoked, already rotated by a refresh, or expired: nothing left to end.
+      // Already revoked (or never stored): nothing left to end.
       this.logger.debug(
         `Reference token not revoked: ${error instanceof Error ? error.message : 'error'}`,
       );
