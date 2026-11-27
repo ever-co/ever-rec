@@ -18,13 +18,20 @@ const read = (file: string) =>
 interface SentQuery {
   collection: string;
   where: string[];
+  /** The filter operators, in the order of `where`: the coverage check below holds for equality filters only. */
+  operators: string[];
   orderBy: Array<[string, string]>;
 }
 
 /** Enough of Firestore for the adapter's reads; records each query it runs. */
 const recordingFirestore = (sent: SentQuery[]) => {
   const query = (q: SentQuery): any => ({
-    where: (field: string) => query({ ...q, where: [...q.where, field] }),
+    where: (field: string, operator: string) =>
+      query({
+        ...q,
+        where: [...q.where, field],
+        operators: [...q.operators, operator],
+      }),
     orderBy: (field: string, direction = 'asc') =>
       query({ ...q, orderBy: [...q.orderBy, [field, direction]] }),
     get: async () => {
@@ -34,7 +41,7 @@ const recordingFirestore = (sent: SentQuery[]) => {
   });
   return {
     collection: (name: string) =>
-      query({ collection: name, where: [], orderBy: [] }),
+      query({ collection: name, where: [], operators: [], orderBy: [] }),
   };
 };
 
@@ -45,7 +52,11 @@ interface IndexField {
 const indexes: Array<{ collectionGroup: string; fields: IndexField[] }> =
   JSON.parse(read('firestore.indexes.json')).indexes;
 
-/** An index serves the query when it holds the equality fields (any order) followed by the ordered fields. */
+/**
+ * An index serves the query when it holds exactly the equality fields (any order) followed by the ordered fields, in
+ * the same direction. Deliberately strict: a false "covered" is what reached production; a stricter check only asks
+ * for an explicit index.
+ */
 const covers = (
   index: { collectionGroup: string; fields: IndexField[] },
   q: SentQuery,
@@ -81,6 +92,12 @@ describe('Firestore configuration for terms acceptances', () => {
     await service.history('uid-1');
 
     expect(sent.length).toBeGreaterThanOrEqual(2);
+    // A range filter would change which index serves the query; this check would then need to model it.
+    expect(
+      sent
+        .flatMap((s) => s.operators)
+        .every((op) => op === '==' || op === 'in'),
+    ).toBe(true);
     for (const q of sent.filter((s) => s.orderBy.length)) {
       expect({ query: q, covered: indexes.some((i) => covers(i, q)) }).toEqual({
         query: q,
