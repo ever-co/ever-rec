@@ -33,7 +33,7 @@ const SidebarFolderItem: React.FC<ISidebarFolderItemProps> = ({
       onClick={onClick}
     >
       <div
-        className="tw-mr-3 tw-flex tw-items-center"
+        className="tw-me-3 tw-flex tw-items-center"
         onClick={() => toggleExpand && toggleExpand()}
       >
         {showArrow &&
@@ -41,13 +41,13 @@ const SidebarFolderItem: React.FC<ISidebarFolderItemProps> = ({
             <AppSvg
               path="/common/arrow-down.svg"
               size="9px"
-              className="tw-mr-3 [&_path]:tw-fill-current"
+              className="tw-me-3 [&_path]:tw-fill-current"
             />
           ) : (
             <AppSvg
               path="/common/arrow-left.svg"
               size="9px"
-              className="tw-mr-3 [&_path]:tw-fill-current"
+              className="tw-me-3 [&_path]:tw-fill-current rtl:-tw-scale-x-100"
             />
           ))}
         <AppSvg path="/common/folder-v2.svg" bgColor={color} size="20px" />

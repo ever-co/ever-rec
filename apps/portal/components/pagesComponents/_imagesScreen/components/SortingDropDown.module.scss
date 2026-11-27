@@ -40,11 +40,11 @@
   min-width: 170px;
 
   span:first-of-type {
-    margin-right: 0.5rem;
+    margin-inline-end: 0.5rem;
     color: hsl(var(--muted-foreground));
   }
 
   svg {
-    margin-left: 0.5rem;
+    margin-inline-start: 0.5rem;
   }
 }

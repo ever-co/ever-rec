@@ -151,15 +151,15 @@ const LoginModal: React.FC<ILoginModalProps> = ({
     >
       <div className="tw-mb-6">
         {!onDelete ? (
-          <h2 className="tw-m-0 tw-pr-6 tw-text-base tw-font-semibold tw-text-foreground">
+          <h2 className="tw-m-0 tw-pe-6 tw-text-base tw-font-semibold tw-text-foreground">
             {t('page.setting.reEnterCredentials')}
           </h2>
         ) : !shouldHaveGoogleLogin ? (
-          <h2 className="tw-m-0 tw-pr-6 tw-text-base tw-font-semibold tw-text-foreground">
+          <h2 className="tw-m-0 tw-pe-6 tw-text-base tw-font-semibold tw-text-foreground">
             {t('page.setting.passwordBeforeRemove')}
           </h2>
         ) : (
-          <h2 className="tw-m-0 tw-pr-6 tw-text-base tw-font-semibold tw-text-foreground">
+          <h2 className="tw-m-0 tw-pe-6 tw-text-base tw-font-semibold tw-text-foreground">
             {t('page.setting.accountToBeRemoved')}
           </h2>
         )}

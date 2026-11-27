@@ -54,13 +54,13 @@ const Preferences: React.FC = () => {
       <div className="tw-flex tw-justify-center tw-px-4 tw-py-8">
         <div className="tw-w-full tw-max-w-xl">
           <div
-            className="-tw-ml-3 tw-mb-8 tw-flex tw-h-9 tw-w-max tw-cursor-pointer tw-items-center tw-gap-2 tw-rounded-md tw-px-3 tw-text-sm tw-font-medium tw-text-foreground tw-transition-colors tw-duration-150 hover:tw-bg-accent"
+            className="-tw-ms-3 tw-mb-8 tw-flex tw-h-9 tw-w-max tw-cursor-pointer tw-items-center tw-gap-2 tw-rounded-md tw-px-3 tw-text-sm tw-font-medium tw-text-foreground tw-transition-colors tw-duration-150 hover:tw-bg-accent"
             onClick={() => router.push(preRoutes.media + panelRoutes.images)}
           >
             <AppSvg
               path="/common/arrow_back-light.svg"
               size={16 + 'px'}
-              className="tw-text-muted-foreground"
+              className="tw-text-muted-foreground rtl:-tw-scale-x-100"
             />
             {t('navigation.back')}
           </div>

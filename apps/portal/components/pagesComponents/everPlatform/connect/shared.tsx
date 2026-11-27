@@ -53,13 +53,13 @@ export const SELECT =
 /** A machine value (an id, a field path, a payload). */
 export const CODE = 'tw-font-mono tw-text-xs tw-text-foreground';
 
-/** A block of JSON. */
+/** A block of JSON. Give the `<pre>` `dir="ltr"`: code reads left to right in every language. */
 export const PAYLOAD =
   'tw-m-0 tw-overflow-auto tw-rounded-lg tw-border tw-border-solid tw-border-border tw-bg-muted tw-p-4 tw-font-mono tw-text-xs tw-leading-5 tw-text-foreground';
 
 /** A plain data table: quiet head, hairline rows. */
 export const TABLE =
-  'tw-w-full tw-border-collapse tw-text-left tw-text-[13px] tw-leading-5 tw-text-foreground [&_td]:tw-border-b [&_td]:tw-border-solid [&_td]:tw-border-border [&_td]:tw-px-3 [&_td]:tw-py-2 [&_td]:tw-align-top [&_th]:tw-border-b [&_th]:tw-border-solid [&_th]:tw-border-border [&_th]:tw-px-3 [&_th]:tw-py-2 [&_th]:tw-text-xs [&_th]:tw-font-medium [&_th]:tw-text-muted-foreground [&_tr:last-child>td]:tw-border-b-0';
+  'tw-w-full tw-border-collapse tw-text-start tw-text-[13px] tw-leading-5 tw-text-foreground [&_td]:tw-border-b [&_td]:tw-border-solid [&_td]:tw-border-border [&_td]:tw-px-3 [&_td]:tw-py-2 [&_td]:tw-align-top [&_th]:tw-border-b [&_th]:tw-border-solid [&_th]:tw-border-border [&_th]:tw-px-3 [&_th]:tw-py-2 [&_th]:tw-text-xs [&_th]:tw-font-medium [&_th]:tw-text-muted-foreground [&_tr:last-child>td]:tw-border-b-0';
 
 /** The frame around a table: a card that scrolls sideways when the table is wider. */
 export const TABLE_FRAME =
@@ -81,9 +81,10 @@ export const DetailRow: React.FC<{
     </dt>
     <dd
       data-testid={testId}
-      className="tw-m-0 tw-min-w-0 tw-break-words tw-text-right tw-text-sm tw-tabular-nums tw-text-foreground [&_code]:tw-font-mono [&_code]:tw-text-xs"
+      className="tw-m-0 tw-min-w-0 tw-break-words tw-text-end tw-text-sm tw-tabular-nums tw-text-foreground [&_code]:tw-font-mono [&_code]:tw-text-xs"
     >
-      {children}
+      {/* A value (a date, an id) keeps its own order in a right-to-left page. */}
+      <span dir="auto">{children}</span>
     </dd>
   </div>
 );
@@ -98,7 +99,7 @@ export const StatTile: React.FC<{
       {label}
     </dt>
     <dd className="tw-m-0 tw-mt-1 tw-break-words tw-text-xl tw-font-semibold tw-tabular-nums tw-text-foreground [&_code]:tw-break-all [&_code]:tw-font-mono [&_code]:tw-text-base [&_code]:tw-font-medium">
-      {children}
+      <span dir="auto">{children}</span>
     </dd>
   </div>
 );

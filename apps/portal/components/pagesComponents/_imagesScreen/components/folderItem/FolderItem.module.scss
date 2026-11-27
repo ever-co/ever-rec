@@ -4,14 +4,14 @@
   font-size: 14px;
   font-weight: 500;
   line-height: 20px;
-  text-align: left;
+  text-align: start;
   background-color: hsl(var(--card));
   color: hsl(var(--foreground));
   transition:
     border-color 150ms var(--ease-out),
     background-color 150ms var(--ease-out);
   padding: 0.5rem 0.75rem;
-  padding-right: 0;
+  padding-inline-end: 0;
   border-radius: 10px;
   width: 250px;
   cursor: pointer;
@@ -42,11 +42,12 @@
 }
 
 .folderIconWrapper {
-  margin-right: 8px;
+  margin-inline-end: 8px;
   margin-bottom: 1px;
 }
 
 .folderName {
+  text-align: match-parent;
   font-size: 0.875rem;
   font-weight: 500;
   line-height: 1.25rem;
@@ -61,7 +62,7 @@
 }
 
 .favoriteWrapper .starSvg {
-  margin-right: 4px;
+  margin-inline-end: 4px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -92,7 +93,7 @@
   font-weight: 400;
   line-height: 20px;
   color: hsl(var(--muted-foreground));
-  text-align: left;
+  text-align: start;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

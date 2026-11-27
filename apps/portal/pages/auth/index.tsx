@@ -94,7 +94,7 @@ const Auth: React.FC<SignFlowComponent> = ({ children, componentType }) => {
 
   return (
     <div className="tw-relative tw-grid tw-min-h-screen tw-w-full tw-grid-cols-2 tw-gap-4 tw-bg-background tw-p-4 mx-lg:tw-grid-cols-1">
-      <div className="tw-absolute tw-left-5 tw-top-5 tw-z-10 tw-flex tw-items-center tw-gap-1">
+      <div className="tw-absolute tw-start-5 tw-top-5 tw-z-10 tw-flex tw-items-center tw-gap-1">
         <LanguageMenu variant="compact" />
         <ThemeToggle className="tw-size-8" />
       </div>

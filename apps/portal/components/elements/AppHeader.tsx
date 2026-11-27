@@ -46,7 +46,7 @@ const AppHeader: React.FC<IAppHeaderProps> = ({
         SIZE_CLASS[textSize],
       )}
     >
-      <span className={classNames({ 'tw-mr-2': spacing })}>{part1}</span>
+      <span className={classNames({ 'tw-me-2': spacing })}>{part1}</span>
       <span>{part2}</span>
     </h1>
   );

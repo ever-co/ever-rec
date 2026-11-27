@@ -48,7 +48,7 @@ const ShareWorkspaceModal: FC<IShareWorkspaceModalProps> = ({
         </div>
       }
     >
-      <h2 className="tw-mb-0 tw-pr-6 tw-text-base tw-font-semibold tw-text-foreground">
+      <h2 className="tw-mb-0 tw-pe-6 tw-text-base tw-font-semibold tw-text-foreground">
         {t('modals.shareLinkTeam')}
       </h2>
 

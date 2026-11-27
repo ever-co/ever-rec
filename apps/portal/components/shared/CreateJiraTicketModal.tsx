@@ -177,7 +177,7 @@ const CreateJiraTicketModal: React.FC<ICreateJiraTicketModalProps> = ({
         </div>
       }
     >
-      <h2 className="tw-mb-4 tw-pr-6 tw-text-base tw-font-semibold">
+      <h2 className="tw-mb-4 tw-pe-6 tw-text-base tw-font-semibold">
         {t('modals.createJira')}
       </h2>
 

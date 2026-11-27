@@ -109,7 +109,7 @@
   .hoveredHidden {
     min-width: 0 !important;
     width: 0 !important;
-    border-left-width: 0 !important;
+    border-inline-start-width: 0 !important;
     opacity: 0;
     z-index: 1;
     visibility: hidden;
@@ -129,7 +129,7 @@
       width: 85%;
       opacity: 1;
       transition: opacity 150ms var(--ease-out);
-      margin-left: 8px;
+      margin-inline-start: 8px;
       color: hsl(var(--foreground));
     }
 
@@ -160,7 +160,7 @@
     transition: opacity 150ms var(--ease-out);
 
     & + .cloudProviderButton {
-      border-left: 1px solid hsl(var(--border));
+      border-inline-start: 1px solid hsl(var(--border));
     }
 
     & .openImageText {
@@ -208,8 +208,8 @@
   background-color: transparent;
   border-radius: calc(var(--radius) - 2px);
   color: hsl(var(--foreground));
-  padding-left: 12px;
-  padding-right: 12px;
+  padding-inline-start: 12px;
+  padding-inline-end: 12px;
   cursor: pointer;
   margin-top: 12px;
   height: 36px;

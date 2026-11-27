@@ -113,7 +113,7 @@ const MemberRow: FC<IMemberRow> = ({
   return (
     <div
       key={member.id}
-      className={classNames(styles.MemberRow, members.length > 8 && 'tw-mr-2')}
+      className={classNames(styles.MemberRow, members.length > 8 && 'tw-me-2')}
     >
       <div>
         <img src={photoURL} alt="" />

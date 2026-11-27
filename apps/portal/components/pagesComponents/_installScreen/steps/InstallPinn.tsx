@@ -20,7 +20,7 @@ const InstallPinn: React.FC<IStepProps> = ({ nextStep }) => {
             {t('page.install.remainPinned')}
           </p>
 
-          <ol className="tw-mb-6 tw-ml-5 tw-mt-2 tw-list-decimal tw-text-sm tw-text-foreground">
+          <ol className="tw-mb-6 tw-ms-5 tw-mt-2 tw-list-decimal tw-text-sm tw-text-foreground">
             <li>{t('page.install.clickPuzzle')}</li>
             <li>{t('page.install.clickRec')}</li>
             <li>{t('page.install.clickPin')}</li>

@@ -54,6 +54,7 @@ import DeleteItemModal from 'components/shared/DeleteItemModal';
 import { useWorkspaceImageDelete } from 'misc/workspaceFunctions';
 import useGenerateShareLink from 'hooks/useGenerateShareLink';
 import { Trans, useTranslation } from 'react-i18next';
+import { mirrorPlacement, useDirection } from 'i18n/direction';
 
 interface Props {
   image: IEditorImage | IWorkspaceImage;
@@ -77,6 +78,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
   const { workspaceImageDelete } = useWorkspaceImageDelete();
   const user = useAuthenticateUser();
   const { t } = useTranslation();
+  const direction = useDirection();
   const dispatch = useDispatch();
   const router = useRouter();
   const [showFolderModal, setShowFolderModal] = useState(false);
@@ -487,7 +489,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
               <div>{t('page.image.manage')}</div>
             </Tab>
             {/* <Tab className="tw-flex tw-justify-center tw-items-center tw-w-1/2 tw-h-50px tw-cursor-pointer tw-outline-none">
-              <div className="tw-mr-2">
+              <div className="tw-me-2">
                 <AppSvg path="/images/comments.svg" size="25px" />
               </div>
               <div>Comments</div>
@@ -511,7 +513,11 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
               >
                 <div className={styles.moveToFolderInner}>
                   <div>{t('page.image.moveToFolder')}</div>
-                  <AppSvg size="16px" path="/images/right-arrow.svg" />
+                  <AppSvg
+                    size="16px"
+                    path="/images/right-arrow.svg"
+                    className="rtl:-tw-scale-x-100"
+                  />
                 </div>
               </button>
             </ImageActionsCard>
@@ -536,7 +542,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
                 <Dropdown
                   trigger={['click']}
                   overlay={moreMenu}
-                  placement="bottomLeft"
+                  placement={mirrorPlacement('bottomLeft', direction)}
                 >
                   <ImageActionItem
                     title={t('page.image.more')}

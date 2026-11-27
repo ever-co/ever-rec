@@ -33,7 +33,7 @@ const UserShortInfo: React.FC<IUserShortInfoProps> = ({
         href={preRoutes.settings + panelRoutes.profile}
         className={classNames(
           styles.userPhotoContainer,
-          `tw-rounded-full tw-overflow-hidden tw-cursor-pointer tw-flex tw-justify-center tw-mr-4 tw-h-full px tw-h-full`,
+          `tw-rounded-full tw-overflow-hidden tw-cursor-pointer tw-flex tw-justify-center tw-me-4 tw-h-full px tw-h-full`,
         )}
         style={{
           width: `${avaSize}px`,

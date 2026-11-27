@@ -183,7 +183,7 @@ const Trashed: React.FC = () => {
                 <AppSvg
                   path="/trash/warning.svg"
                   size="18px"
-                  className="tw-mr-2"
+                  className="tw-me-2"
                 />
               </div>
               <p className="tw-m-0">

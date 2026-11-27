@@ -1,6 +1,7 @@
 import { Dropdown } from 'antd';
 import classNames from 'classnames';
 import { Check, MoreHorizontal } from 'lucide-react';
+import { mirrorPlacement, useDirection } from 'i18n/direction';
 import { useTranslation } from 'react-i18next';
 import IEditorVideo from 'app/interfaces/IEditorVideo';
 import { IWorkspace } from 'app/interfaces/IWorkspace';
@@ -54,6 +55,7 @@ const Overlay: React.FC<OverlayProps> = ({
   onDropdownActionHandler,
   onDropdownVisibleChange,
 }) => {
+  const direction = useDirection();
   const containerClasses = classNames(
     'screenshot-item-overlay',
     styles.overlayContainer,
@@ -91,7 +93,7 @@ const Overlay: React.FC<OverlayProps> = ({
             workspace={workspace}
           />
         }
-        placement="bottomRight"
+        placement={mirrorPlacement('bottomRight', direction)}
         onOpenChange={onDropdownVisibleChange}
       >
         <button

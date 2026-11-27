@@ -3,6 +3,7 @@ import styles from './FolderItem.module.scss';
 import { Dropdown } from 'antd';
 import AppSvg from 'components/elements/AppSvg';
 import classNames from 'classnames';
+import { mirrorPlacement, useDirection } from 'i18n/direction';
 
 interface FolderHeaderProps {
   folder: any;
@@ -67,6 +68,9 @@ interface FolderNameProps {
 const FolderName: FC<FolderNameProps> = ({ name }) => {
   return (
     <div
+      // A name reads in its own direction (an English one is cut at its end); the style keeps
+      // it lined up with the page.
+      dir="auto"
       className={classNames(styles.folderName)}
       title={name.length > 25 ? name : undefined}
     >
@@ -106,12 +110,13 @@ const MenuButton: FC<MenuButtonProps> = ({
   isDropdownVisible,
   onVisibleChange,
 }) => {
+  const direction = useDirection();
   return (
     <Dropdown
       trigger={['click']}
       open={isDropdownVisible}
       overlay={overlay}
-      placement={placement}
+      placement={mirrorPlacement(placement, direction)}
       onOpenChange={onVisibleChange}
     >
       <div

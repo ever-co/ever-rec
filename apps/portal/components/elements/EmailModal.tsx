@@ -203,7 +203,7 @@ const EmailModal: React.FC<IEmailModalProps> = ({
         </div>
       }
     >
-      <h2 className="tw-text-base tw-font-semibold tw-mb-4 tw-pr-6">
+      <h2 className="tw-text-base tw-font-semibold tw-mb-4 tw-pe-6">
         {t('extras.sendItemTo', { itemType: itemType })}
       </h2>
 
@@ -229,7 +229,7 @@ const EmailModal: React.FC<IEmailModalProps> = ({
               {email}
 
               <div
-                className="tw-cursor-pointer tw-ml-1 tw-text-muted-foreground hover:tw-text-foreground"
+                className="tw-cursor-pointer tw-ms-1 tw-text-muted-foreground hover:tw-text-foreground"
                 onClick={() => removeEmail(index)}
               >
                 <AppSvg

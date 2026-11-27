@@ -255,7 +255,7 @@ const VideoChapters: FC<IVideoChaptersProps> = ({
           isHorizontalUI && s.VideoChaptersWrapperHorizontal,
           s.VideoChaptersWrapper,
           'scroll-div',
-          chapters.length > 2 && 'tw-pr-4',
+          chapters.length > 2 && 'tw-pe-4',
         )}
         onScroll={() => sendCloseTooltipEvent()}
       >

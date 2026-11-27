@@ -102,7 +102,7 @@ const SlackChannelModal: React.FC<ISlackChannelModalProps> = ({
         </div>
       }
     >
-      <h2 className="tw-mb-4 tw-pr-6 tw-text-base tw-font-semibold">
+      <h2 className="tw-mb-4 tw-pe-6 tw-text-base tw-font-semibold">
         {t('modals.sendToSlack')}
       </h2>
       <AppSpinner show={channelLoading} local={true} />

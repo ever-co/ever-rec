@@ -82,7 +82,7 @@ const ShareItemModal: FC<IProps> = ({
     <Modal open={visible} footer={null} closable onCancel={onCancel}>
       {sharedLink ? (
         <div className="tw-pb-8">
-          <div className="tw-flex tw-items-center tw-justify-between tw-gap-4 tw-mb-3 tw-pr-6">
+          <div className="tw-flex tw-items-center tw-justify-between tw-gap-4 tw-mb-3 tw-pe-6">
             <h3 className="tw-font-semibold tw-text-base tw-mb-0">
               {t('page.image.shareableLink')}
             </h3>
@@ -135,7 +135,7 @@ const ShareItemModal: FC<IProps> = ({
         </div>
       ) : (
         <div className="tw-pb-8">
-          <h3 className="tw-font-semibold tw-text-base tw-mb-4 tw-pr-6">
+          <h3 className="tw-font-semibold tw-text-base tw-mb-4 tw-pe-6">
             {t('page.image.shareYourVideo')}
           </h3>
 

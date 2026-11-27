@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Button, Modal, Switch } from 'antd';
 import { useTranslation } from 'react-i18next';
+import { useDirection } from 'i18n/direction';
 import {
   EVER_STATS_DOCS_URL,
   getHealth,
@@ -45,6 +46,8 @@ const pretty = (text: string) => {
  */
 const EverPlatformStatistics: React.FC = () => {
   const { t } = useTranslation();
+  // antd's Modal.confirm renders outside ConfigProvider: it takes the direction itself.
+  const direction = useDirection();
   const [load, setLoad] = useState<Load>('loading');
   const [status, setStatus] = useState<IEverStatsStatus | null>(null);
   const [whatIsSent, setWhatIsSent] = useState<IEverStatsPreview | null>(null);
@@ -228,6 +231,7 @@ const EverPlatformStatistics: React.FC = () => {
           disabled={busy}
           onClick={() =>
             Modal.confirm({
+              direction,
               title: t('page.everPlatform.statistics.resetTitle'),
               content: t('page.everPlatform.statistics.resetConfirm'),
               okText: t('page.everPlatform.statistics.reset'),
@@ -254,7 +258,7 @@ const EverPlatformStatistics: React.FC = () => {
         <h4 className={BLOCK_TITLE}>
           {t('page.everPlatform.statistics.whatIsSent')}
         </h4>
-        <pre data-testid="ever-platform-preview" className={PAYLOAD}>
+        <pre data-testid="ever-platform-preview" dir="ltr" className={PAYLOAD}>
           {whatIsSent ? JSON.stringify(whatIsSent.payload, null, 2) : '—'}
         </pre>
       </section>
@@ -275,7 +279,9 @@ const EverPlatformStatistics: React.FC = () => {
                 ? ` · ${t('page.everPlatform.statistics.resetHint')}`
                 : ''}
             </p>
-            <pre className={PAYLOAD}>{pretty(last.payload)}</pre>
+            <pre dir="ltr" className={PAYLOAD}>
+              {pretty(last.payload)}
+            </pre>
           </div>
         ) : (
           <p className={MUTED_TEXT}>

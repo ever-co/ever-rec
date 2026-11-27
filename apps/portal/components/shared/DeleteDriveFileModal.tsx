@@ -36,7 +36,7 @@ const DeleteDriveFileModal: React.FC<Props> = ({ onOk, onCancel, visible }) => {
         </div>
       }
     >
-      <h2 className="tw-mb-0 tw-pr-6 tw-text-base tw-font-semibold">
+      <h2 className="tw-mb-0 tw-pe-6 tw-text-base tw-font-semibold">
         {t('modals.deleteGoogleFile')}
       </h2>
     </Modal>

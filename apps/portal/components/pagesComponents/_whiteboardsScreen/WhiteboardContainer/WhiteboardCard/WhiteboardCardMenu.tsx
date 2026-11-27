@@ -1,4 +1,5 @@
 import { FC } from 'react';
+import { mirrorPlacement, useDirection } from 'i18n/direction';
 import classNames from 'classnames';
 import { Menu, Dropdown, Button } from 'antd';
 import AppSvg from 'components/elements/AppSvg';
@@ -30,6 +31,7 @@ const WhiteboardCardMenu: FC<IProps> = ({
   whiteboard,
   handleMenuItemClick,
 }) => {
+  const direction = useDirection();
   let menuItems = isTrash
     ? whiteboardCardMenuItemsTrash
     : whiteboardCardMenuItems;
@@ -98,7 +100,11 @@ const WhiteboardCardMenu: FC<IProps> = ({
   );
 
   return (
-    <Dropdown overlay={menu} placement="bottomRight" trigger={['click']}>
+    <Dropdown
+      overlay={menu}
+      placement={mirrorPlacement('bottomRight', direction)}
+      trigger={['click']}
+    >
       <Button
         // The button itself is only the hit area, sized here: a rule for the page's own dropdown
         // trigger (antd.scss, `.whiteboards .ant-dropdown-trigger`) would otherwise stretch and

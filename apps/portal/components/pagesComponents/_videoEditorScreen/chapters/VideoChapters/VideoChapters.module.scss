@@ -19,8 +19,8 @@
   overflow-x: hidden;
   overflow-y: auto;
   margin-top: 0.5rem;
-  margin-right: 0.5rem;
-  padding-left: 0.5rem;
+  margin-inline-end: 0.5rem;
+  padding-inline-start: 0.5rem;
 }
 
 .VideoChaptersWrapperHorizontal {
@@ -30,9 +30,9 @@
   height: auto;
   overflow-x: auto;
   margin-top: 0.75rem;
-  margin-right: 0;
+  margin-inline-end: 0;
   padding-bottom: 0.75rem;
-  padding-left: 0;
+  padding-inline-start: 0;
 }
 
 .ChapterHeading {
@@ -47,7 +47,7 @@
     font-size: 0.8125rem;
     font-weight: 400;
     line-height: 1.25rem;
-    text-align: left;
+    text-align: start;
   }
 }
 
@@ -56,7 +56,7 @@
 
   h3 {
     width: unset;
-    text-align: left;
+    text-align: start;
     margin: 0;
   }
 }
@@ -88,7 +88,7 @@
 }
 
 .CopyChaptersWrapperHorizontal .CopyChaptersButton {
-  padding-left: 0;
+  padding-inline-start: 0;
 }
 
 .AddChapterButtonWrapper {

@@ -50,7 +50,7 @@ const StarredFolders: FC = () => {
   const none = !favoritesImages.length && !favoritesVideos.length;
 
   return (
-    <div className="tw-ml-[19px] tw-max-h-48 tw-overflow-y-auto tw-border-0 tw-border-l tw-border-solid tw-border-sidebar-border tw-pl-2">
+    <div className="tw-ms-[19px] tw-max-h-48 tw-overflow-y-auto tw-border-0 tw-border-s tw-border-solid tw-border-sidebar-border tw-ps-2">
       {favoritesImages.length > 0 && (
         <Group title={t('common.images')} folders={favoritesImages as any} />
       )}

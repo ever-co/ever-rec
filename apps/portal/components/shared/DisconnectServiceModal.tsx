@@ -39,7 +39,7 @@ const DisconnectServiceModal: React.FC<IDisconnectServiceModalProps> = ({
         </div>
       }
     >
-      <h2 className="tw-mb-2 tw-pr-6 tw-text-base tw-font-semibold">{title}</h2>
+      <h2 className="tw-mb-2 tw-pe-6 tw-text-base tw-font-semibold">{title}</h2>
       {subTitle}
     </Modal>
   );

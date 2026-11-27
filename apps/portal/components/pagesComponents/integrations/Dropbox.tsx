@@ -43,7 +43,7 @@ const Dropbox: React.FC = () => {
       <h1 className="tw-m-0 tw-text-sm tw-font-medium tw-text-foreground">
         <div className="tw-flex tw-h-7 tw-items-center">
           <AppSvg
-            className="tw-mr-2"
+            className="tw-me-2"
             path="/settings/dropbox.svg"
             size="26px"
           />

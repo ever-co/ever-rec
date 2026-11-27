@@ -205,7 +205,7 @@ const UpdateWorkspaceTeamModal: React.FC<IProps> = ({
           e.currentTarget.value = '';
         }}
       />
-      <h2 className="tw-mb-6 tw-pr-6 tw-text-base tw-font-semibold tw-text-foreground">
+      <h2 className="tw-mb-6 tw-pe-6 tw-text-base tw-font-semibold tw-text-foreground">
         {t('modals.updateTeamSettings')}
       </h2>
       <div className={styles.row}>

@@ -7,6 +7,7 @@ import CommentInput from '../CommentInput/CommentInput';
 import { RootStateOrAny, useSelector } from 'react-redux';
 import { IUser } from 'app/interfaces/IUserData';
 import { useTranslation } from 'react-i18next';
+import { mirrorPlacement, useDirection } from 'i18n/direction';
 
 export type IComment = {
   id: string;
@@ -39,6 +40,7 @@ const CommentElement: FC<IProps> = ({
   deleteCommentHandler,
 }) => {
   const { t } = useTranslation();
+  const direction = useDirection();
   const user: IUser = useSelector((state: RootStateOrAny) => state.auth.user);
 
   const authorName = comment.user?.name;
@@ -98,7 +100,7 @@ const CommentElement: FC<IProps> = ({
 
           <div>
             <span className={styles.dotSeparator}>●</span>
-            <span>{dateElapsed}</span>
+            <span dir="auto">{dateElapsed}</span>
             {isEdited && <span>{t('page.video.editBrackets')}</span>}
           </div>
         </div>
@@ -112,12 +114,15 @@ const CommentElement: FC<IProps> = ({
             />
           ) : (
             <div className={styles.commentContent}>
-              <p>{comment.content}</p>
+              {/* A comment reads in its own language's direction, lined up with the page. */}
+              <p dir="auto" className="[text-align:match-parent]">
+                {comment.content}
+              </p>
 
               {comment.isOwn && user?.id && (
                 <Dropdown
                   trigger={['click']}
-                  placement="bottomRight"
+                  placement={mirrorPlacement('bottomRight', direction)}
                   overlay={() => commentMenu(comment)}
                 >
                   <div className={styles.moreButton}>

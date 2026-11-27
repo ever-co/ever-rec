@@ -3,7 +3,8 @@
 // The dialog's title: the name of the team. It starts where the tab labels and the rows start.
 .Heading {
   margin-bottom: 1rem;
-  padding: 0 1.5rem 0 0.75rem;
+  padding-block: 0;
+  padding-inline: 0.75rem 1.5rem;
   color: hsl(var(--foreground));
   font-size: 1rem;
   font-weight: 600;
@@ -18,5 +19,5 @@
 }
 
 .margin-right {
-  margin-right: 0.5rem;
+  margin-inline-end: 0.5rem;
 }

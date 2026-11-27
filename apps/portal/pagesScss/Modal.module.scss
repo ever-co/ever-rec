@@ -4,7 +4,7 @@
   line-height: 1.5rem;
   margin-bottom: 1rem;
   // Clear of the dialog's close button.
-  padding-right: 1.5rem;
+  padding-inline-end: 1.5rem;
 }
 
 .inputField {
@@ -24,7 +24,7 @@
     }
 
     svg {
-      margin-left: -0.5rem;
+      margin-inline-start: -0.5rem;
     }
   }
 }

@@ -188,14 +188,14 @@ const PanelRegister: React.FC = () => {
             placeholder={t('page.auth.common.password')}
             autoComplete="new-password"
             className="tw-w-full"
-            inputClass="tw-pr-10"
+            inputClass="tw-pe-10"
             type={passwordShown ? 'text' : 'password'}
             rules={passwordRules}
             errors={password.errors}
             onChange={passwordChangeHandler}
           />
           <PasswordEye
-            className="tw-relative tw-right-2"
+            className="tw-relative tw-end-2"
             passwordShown={passwordShown}
             togglePassword={togglePassword}
           />
@@ -207,12 +207,12 @@ const PanelRegister: React.FC = () => {
             type={passwordShown ? 'text' : 'password'}
             placeholder={t('page.auth.common.confirmPassword')}
             className="tw-w-full"
-            inputClass="tw-pr-10"
+            inputClass="tw-pe-10"
             errors={passwordConfirm.errors}
             onChange={passwordConfirmChangeHandler}
           />
           <PasswordEye
-            className="tw-relative tw-right-2"
+            className="tw-relative tw-end-2"
             passwordShown={passwordShown}
             togglePassword={togglePassword}
           />

@@ -21,7 +21,7 @@ const PasswordEye: React.FC<IPasswordEyeProps> = ({
     <button
       onClick={togglePassword}
       className={classNames(
-        '-tw-ml-6 tw-flex tw-size-6 tw-shrink-0 tw-items-center tw-justify-center tw-rounded tw-text-muted-foreground tw-transition-colors tw-duration-150 hover:tw-text-foreground',
+        '-tw-ms-6 tw-flex tw-size-6 tw-shrink-0 tw-items-center tw-justify-center tw-rounded tw-text-muted-foreground tw-transition-colors tw-duration-150 hover:tw-text-foreground',
         className,
       )}
     >

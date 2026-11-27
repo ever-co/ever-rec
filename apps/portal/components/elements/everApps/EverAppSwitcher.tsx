@@ -72,9 +72,12 @@ const EverAppSwitcher: FC<EverAppSwitcherProps> = ({ model }) => {
     if (!root || !panel) {
       return;
     }
-    const left = root.getBoundingClientRect().left;
-    const overflow = left + panel.offsetWidth - (window.innerWidth - VIEWPORT_MARGIN);
-    const next = overflow > 0 ? Math.max(-overflow, VIEWPORT_MARGIN - left) : 0;
+    // The panel starts at the button's inline-start edge: its left edge, or its right edge right to left.
+    const rect = root.getBoundingClientRect();
+    const start =
+      getComputedStyle(root).direction === 'rtl' ? window.innerWidth - rect.right : rect.left;
+    const overflow = start + panel.offsetWidth - (window.innerWidth - VIEWPORT_MARGIN);
+    const next = overflow > 0 ? Math.max(-overflow, VIEWPORT_MARGIN - start) : 0;
     setShift(next);
   }, []);
 
@@ -169,7 +172,7 @@ const EverAppSwitcher: FC<EverAppSwitcherProps> = ({ model }) => {
           id={panelId}
           aria-label={title}
           className={styles.panel}
-          style={shift ? { left: shift } : undefined}
+          style={shift ? { insetInlineStart: shift } : undefined}
         >
           <p aria-hidden="true" className={styles.title}>
             {title}

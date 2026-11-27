@@ -37,7 +37,7 @@ const FolderHistory: FC<IFoldersProps> = ({
           <AppSvg
             path="/common/Chevron_right.svg"
             size="20px"
-            className="tw-mx-1 tw-text-muted-foreground"
+            className="tw-mx-1 tw-text-muted-foreground rtl:-tw-scale-x-100"
           />
         )}
       </div>
@@ -57,7 +57,7 @@ const FolderHistory: FC<IFoldersProps> = ({
       <AppSvg
         path="/common/Chevron_right.svg"
         size="20px"
-        className="tw-mx-1 tw-text-muted-foreground"
+        className="tw-mx-1 tw-text-muted-foreground rtl:-tw-scale-x-100"
       />
       {folderElements}
     </div>

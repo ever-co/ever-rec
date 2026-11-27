@@ -5,7 +5,7 @@
   flex-direction: column;
 
   & * {
-    text-align: left;
+    text-align: start;
   }
 
   .mainHeader {
@@ -14,7 +14,7 @@
     font-size: 1rem;
     font-weight: 600;
     line-height: 1.5rem;
-    text-align: left;
+    text-align: start;
     padding-bottom: 0.75rem;
     margin-bottom: 1.5rem;
     border-bottom: 2px solid hsl(var(--foreground));

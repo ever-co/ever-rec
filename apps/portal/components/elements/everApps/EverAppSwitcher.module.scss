@@ -55,7 +55,7 @@ $ease-out: var(--ease-out);
 .panel {
   position: absolute;
   top: calc(100% + 8px);
-  left: 0;
+  inset-inline-start: 0;
   z-index: 1050;
   width: 18rem;
   max-width: calc(100vw - 16px);

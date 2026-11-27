@@ -41,7 +41,7 @@ const ShareModal: FC<IShareModalProps> = ({
         </div>
       }
     >
-      <h2 className="tw-mb-4 tw-pr-6 tw-text-base tw-font-semibold">
+      <h2 className="tw-mb-4 tw-pe-6 tw-text-base tw-font-semibold">
         {t('modals.shareLink')}
       </h2>
       <label className="tw-text-sm tw-text-muted-foreground">

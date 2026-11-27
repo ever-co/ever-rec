@@ -69,7 +69,7 @@ const DashboardLayout: FC<IProps> = ({
                 opener.focus();
               }
             }}
-            className="tw-fixed tw-inset-y-0 tw-left-0 tw-z-[901] tw-flex tw-w-[18rem] tw-max-w-[85vw] tw-border-0 tw-border-r tw-border-solid tw-border-sidebar-border tw-bg-sidebar tw-outline-none tw-duration-200 data-[state=open]:tw-animate-in data-[state=closed]:tw-animate-out data-[state=closed]:tw-slide-out-to-left data-[state=open]:tw-slide-in-from-left rtl:tw-left-auto rtl:tw-right-0 rtl:data-[state=closed]:tw-slide-out-to-right rtl:data-[state=open]:tw-slide-in-from-right md:tw-hidden"
+            className="tw-fixed tw-inset-y-0 tw-start-0 tw-z-[901] tw-flex tw-w-[18rem] tw-max-w-[85vw] tw-border-0 tw-border-e tw-border-solid tw-border-sidebar-border tw-bg-sidebar tw-outline-none tw-duration-200 data-[state=open]:tw-animate-in data-[state=closed]:tw-animate-out data-[state=closed]:tw-slide-out-to-left data-[state=open]:tw-slide-in-from-left rtl:data-[state=closed]:tw-slide-out-to-right rtl:data-[state=open]:tw-slide-in-from-right md:tw-hidden"
           >
             <Dialog.Title className="tw-sr-only">
               {t('shell.openNavigation')}
@@ -94,7 +94,7 @@ const DashboardLayout: FC<IProps> = ({
       {assistant}
 
       {/* The page panel */}
-      <div className="tw-relative tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-overflow-hidden tw-bg-background md:tw-my-2 md:tw-mr-2 md:tw-rounded-xl md:tw-shadow-panel">
+      <div className="tw-relative tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-overflow-hidden tw-bg-background md:tw-my-2 md:tw-me-2 md:tw-rounded-xl md:tw-shadow-panel">
         {children}
       </div>
     </div>

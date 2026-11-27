@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Button, Input, Modal, Select } from 'antd';
 import { useTranslation } from 'react-i18next';
+import { useDirection } from 'i18n/direction';
 import {
   connectInstallation,
   disconnectInstallation,
@@ -37,6 +38,8 @@ const EverConnectConnection: React.FC<{ workspaces: AdminWorkspace[] }> = ({
   workspaces,
 }) => {
   const { t } = useTranslation();
+  // antd's Modal.confirm renders outside ConfigProvider: it takes the direction itself.
+  const direction = useDirection();
   const errorMessage = useErrorMessage();
   const [status, setStatus] = useState<IEverConnectStatus | null>(null);
   const [code, setCode] = useState('');
@@ -165,7 +168,7 @@ const EverConnectConnection: React.FC<{ workspaces: AdminWorkspace[] }> = ({
             <p className="tw-m-0 tw-font-medium tw-text-foreground">
               {t('page.everPlatform.connect.connection.whatIsSent')}
             </p>
-            <ul className="tw-m-0 tw-my-2 tw-list-disc tw-pl-5">
+            <ul className="tw-m-0 tw-my-2 tw-list-disc tw-ps-5">
               <li>
                 {t('page.everPlatform.connect.connection.sentProduct', {
                   version: status.version,
@@ -289,6 +292,7 @@ const EverConnectConnection: React.FC<{ workspaces: AdminWorkspace[] }> = ({
               disabled={busy}
               onClick={() =>
                 Modal.confirm({
+                  direction,
                   title: t('page.everPlatform.connect.connection.rotateTitle'),
                   content: t(
                     'page.everPlatform.connect.connection.rotateConfirm',
@@ -311,6 +315,7 @@ const EverConnectConnection: React.FC<{ workspaces: AdminWorkspace[] }> = ({
               disabled={busy}
               onClick={() =>
                 Modal.confirm({
+                  direction,
                   title: t(
                     'page.everPlatform.connect.connection.disconnectTitle',
                   ),
