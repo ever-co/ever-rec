@@ -126,6 +126,7 @@ const ChangePasswordModal: React.FC<IProps> = ({ visible, onClose, onOk }) => {
             onChange={onPasswordChange}
           />
           <PasswordEye
+            className="tw-self-center"
             passwordShown={passwordShown}
             togglePassword={togglePasswordShown}
           />
@@ -148,6 +149,7 @@ const ChangePasswordModal: React.FC<IProps> = ({ visible, onClose, onOk }) => {
             onChange={onNewPasswordChange}
           />
           <PasswordEye
+            className="tw-self-center"
             passwordShown={passwordShown}
             togglePassword={togglePasswordShown}
           />

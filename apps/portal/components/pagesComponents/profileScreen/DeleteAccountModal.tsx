@@ -172,6 +172,7 @@ const EnterCurrentPassword: FC<IEnterCurrentPasswordProps> = ({
           onChange={onPasswordChange}
         />
         <PasswordEye
+          className="tw-self-center"
           passwordShown={passwordShown}
           togglePassword={togglePassword}
         />

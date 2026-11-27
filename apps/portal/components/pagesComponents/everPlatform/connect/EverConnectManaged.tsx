@@ -115,7 +115,7 @@ const EverConnectManaged: React.FC = () => {
         }))}
       />
       <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-text-sm tw-text-foreground">
-        <span className="tw-text-[13px] tw-font-medium">
+        <span className="tw-w-full tw-text-[13px] tw-font-medium">
           {t('page.everPlatform.connect.managed.window')}
         </span>
         <Checkbox.Group
@@ -130,12 +130,12 @@ const EverConnectManaged: React.FC = () => {
           }))}
         />
         <Input
-          className="tw-w-24 tw-tabular-nums"
+          className="tw-w-20 tw-tabular-nums"
           value={slot.from}
           onChange={(event) => setSlot({ ...slot, from: event.target.value })}
         />
         <Input
-          className="tw-w-24 tw-tabular-nums"
+          className="tw-w-20 tw-tabular-nums"
           value={slot.to}
           onChange={(event) => setSlot({ ...slot, to: event.target.value })}
         />
