@@ -86,7 +86,8 @@
 @media screen and (max-width: 767px) {
   .pageContainer {
     --editor-top-bar: 56px;
-    --editor-tool-bar: calc(57px + env(safe-area-inset-bottom, 0px));
+    // The tool bar: 40px buttons, 2px margins, 8px padding, 1px border.
+    --editor-tool-bar: calc(61px + env(safe-area-inset-bottom, 0px));
     display: block;
     height: 100vh;
     height: 100dvh;
