@@ -408,7 +408,13 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
   const moreMenu = (
     <Menu>
       <Menu.Item
-        icon={<AppSvg size="16px" path="/images/file_download_black.svg" />}
+        icon={
+          <AppSvg
+            size="16px"
+            path="/images/file_download_black.svg"
+            className={styles.inkIcon}
+          />
+        }
         onClick={pdfSave}
         key="menu_item_pdf"
       >

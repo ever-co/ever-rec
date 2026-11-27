@@ -40,6 +40,12 @@
   }
 }
 
+// A menu icon whose drawing in /public sets its ink in an inline style (so only an important rule
+// can re-point it): it takes the text colour of its menu row.
+.inkIcon :global(.injected-svg) path {
+  fill: currentColor !important;
+}
+
 // The stage the picture sits on.
 .imageWrapper {
   border: 1px solid hsl(var(--border));
