@@ -17,6 +17,7 @@ function scheduler(
     envCode: jest.fn(async () => null),
     patchConnection: jest.fn(async () => undefined),
     sweepPersonExports: jest.fn(async () => 0),
+    sweepPersonRequests: jest.fn(async () => 0),
   };
   const lease = {
     acquire: jest.fn(async () => true),
@@ -58,7 +59,10 @@ function scheduler(
     integrations as any,
     links as any,
     feed as any,
-    { syncExistingLinks: jest.fn(async () => undefined) } as any,
+    {
+      syncExistingLinks: jest.fn(async () => undefined),
+      retryPersonRequests: jest.fn(async () => 0),
+    } as any,
     { retryPendingCompletes: jest.fn(async () => undefined) } as any,
   );
   return { service, calls, feed, connect };

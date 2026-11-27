@@ -3,6 +3,37 @@ import { IWorkspaceFolder } from '../Interfaces/Folders';
 // Folders nest three levels deep: 0 (top), 1 and 2. Same limit as folder creation.
 export const MAX_FOLDER_NEST_LEVEL = 2;
 
+/**
+ * The `nestLevel` a new folder gets under `parentId` (`false` is the top level, level 0), counted
+ * from the stored `parentId` links like a folder move does, not from a level a client sends.
+ * `undefined` when the parent is not in `folders`.
+ */
+export function nestLevelUnder(
+  folders: IWorkspaceFolder[],
+  parentId: string | false,
+): number | undefined {
+  if (!parentId) {
+    return 0;
+  }
+  const byId = new Map<string, IWorkspaceFolder>();
+  for (const folder of folders) {
+    if (folder?.id) {
+      byId.set(folder.id, folder);
+    }
+  }
+  if (!byId.has(parentId)) {
+    return undefined;
+  }
+  // The parent and every folder above it; a chain that loops or breaks stops where it does.
+  const chain = new Set<string>();
+  let currentId: string | false = parentId;
+  while (currentId && byId.has(currentId) && !chain.has(currentId)) {
+    chain.add(currentId);
+    currentId = byId.get(currentId)?.parentId || false;
+  }
+  return chain.size;
+}
+
 // `message` is set when `ok` is false; `folders` and `changed` when it is true.
 export interface FolderMovePlan {
   ok: boolean;

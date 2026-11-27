@@ -262,8 +262,49 @@ describe('a person\'s deletion and export requests', () => {
   const hashOf = (issuer: string, subject: string) =>
     createHash('sha256').update(`${issuer}#${subject}`).digest('hex');
 
-  it('deletion unlinks the Ever ID and answers anonymised; export is readable by that account only', async () => {
+  it('switched off (the default): an export is not offered and a deletion only unlinks; both receipts stay open', async () => {
     const t = await createConnectTestApp({ env: CONNECT_ON });
+    try {
+      await connectInstallation(t);
+      t.firebase.db.write(['users', 'uid-person'], { displayName: 'Person' });
+      t.firebase.db.write(['ever_identities', 'k1'], {
+        issuer: 'https://auth.ever.co',
+        subject: 'subject-1',
+        uid: 'uid-person',
+      });
+      t.platform.publish('ever.registry.person.export_requested', {
+        person_id: 'p1',
+        job_id: 'job-export-off',
+        respond_by: '2026-12-01T00:00:00Z',
+        subject_hashes: [hashOf('https://auth.ever.co', 'subject-1')],
+      });
+      t.platform.publish('ever.registry.person.deletion_requested', {
+        person_id: 'p1',
+        job_id: 'job-delete-off',
+        respond_by: '2026-12-01T00:00:00Z',
+        subject_hashes: [hashOf('https://auth.ever.co', 'subject-1')],
+      });
+      await readFeed(t);
+      expect(t.platform.instance.acks).toEqual([
+        { job_id: 'job-export-off', result: 'failed', detail: { reason_code: 'export_not_available' } },
+        { job_id: 'job-delete-off', result: 'failed', detail: { reason_code: 'account_deletion_pending' } },
+      ]);
+      expect(t.firebase.db.dump(EVER_CONNECT_PATHS.personExports)).toBeNull();
+      expect(t.firebase.db.dump('ever_identities/k1')).toBeNull();
+      expect(t.firebase.db.dump('users/uid-person')).not.toBeNull();
+    } finally {
+      await t.close();
+    }
+  });
+
+  it('export switched on: exported, with the portal page; readable by that account only; deletion unlinks', async () => {
+    const t = await createConnectTestApp({
+      env: {
+        ...CONNECT_ON,
+        EVER_CONNECT_PERSON_EXPORT_ENABLED: 'true',
+        WEBSITE_URL: 'https://rec.example.test',
+      },
+    });
     try {
       await connectInstallation(t);
       t.firebase.db.write(['users', 'uid-person'], {
@@ -296,7 +337,11 @@ describe('a person\'s deletion and export requests', () => {
       });
       await readFeed(t);
       expect(t.platform.instance.acks).toEqual([
-        { job_id: 'job-export-1', result: 'exported' },
+        {
+          job_id: 'job-export-1',
+          result: 'exported',
+          export_url: 'https://rec.example.test/settings/data-export?job=job-export-1',
+        },
         { job_id: 'job-export-2', result: 'no_account' },
       ]);
       const person = await t.signIn('uid-person');
@@ -320,8 +365,8 @@ describe('a person\'s deletion and export requests', () => {
       await readFeed(t);
       expect(t.platform.instance.acks[2]).toEqual({
         job_id: 'job-delete-1',
-        result: 'anonymised',
-        detail: { reason_code: 'identity_unlinked' },
+        result: 'failed',
+        detail: { reason_code: 'account_deletion_pending' },
       });
       expect(t.firebase.db.dump('ever_identities/k1')).toBeNull();
       expect(t.firebase.db.dump('users/uid-person')).not.toBeNull();

@@ -35,6 +35,7 @@ export const EVER_CONNECT_PATHS = Object.freeze({
   feedSeen: 'ever_connect/feed_seen',
   keySet: 'ever_connect/key_set',
   personExports: 'ever_connect/person_exports',
+  personRequests: 'ever_connect/person_requests',
   personLinksSynced: 'ever_connect/person_links_synced',
   personLinksDirtyAt: 'ever_connect/person_links_dirty_at',
   personLinkRemovals: 'ever_connect/person_link_removals',
@@ -180,6 +181,38 @@ export interface PersonExportRecord {
   createdAt: number;
   expiresAt: number;
   bundleEnc: string;
+}
+
+/** How long the receipt of an answered person request is kept (a request read again gets the same answer). */
+export const PERSON_REQUEST_KEPT_MS = 90 * 24 * 3600 * 1000;
+
+/** An answer this installation gives to a person's request (the contract's set, as Rec uses it). */
+export type PersonRequestResult = 'deleted' | 'no_account' | 'exported' | 'failed';
+
+/**
+ * `ever_connect/person_requests/{jobId}`: a person's deletion or export request, decided once and
+ * answered with the same receipt until Ever Platform recorded it. Ids only: no e-mail, no name.
+ */
+export interface PersonRequestRecord {
+  kind: 'deletion' | 'export';
+  /**
+   * The Ever ID links the request matched when it was first read, `{ever_identities key: uid}`.
+   * Kept, because a deletion removes the links it matched by: a request read again must not match
+   * nothing and be answered `no_account`.
+   */
+  identities?: Record<string, string>;
+  receivedAt: number;
+  result?: PersonRequestResult;
+  /** For `failed`: `export_not_available` or `account_deletion_pending`. */
+  reasonCode?: string;
+  /** For `exported`: the portal page where the account downloads its export. */
+  exportUrl?: string;
+  /** A deletion that was started and did not complete: run again with the heartbeat, then answered `deleted`. */
+  incomplete?: boolean;
+  decidedAt?: number;
+  answeredAt?: number;
+  /** `answered`, or `not_needed:<status>:<code>` when Ever Platform will not take the answer. */
+  outcome?: string;
 }
 
 /**

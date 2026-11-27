@@ -40,6 +40,9 @@ export class WorkspaceFoldersController {
     // left blank intentionally
   }
 
+  // A subfolder needs WRITE on its parent (`parentId`) and every folder above it; a top-level
+  // folder (no `parentId`, or `false`) is open to every member.
+  @CanAccessDestinationFolder(PermissionAccessEnum.WRITE)
   @Post()
   async createWorkspaceFolder(
     @Param('workspaceId', ValidateId) workspaceId: string,

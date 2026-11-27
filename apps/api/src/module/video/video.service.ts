@@ -586,6 +586,16 @@ export class VideoService {
     newId: string,
     parentId?: string,
   ): Promise<IDataResponse<DbFolderData>> {
+    // Both ids go into a database path: a sub-path such as `<id>/children` would write inside
+    // another folder.
+    if (
+      typeof newId !== 'string' ||
+      !is_id(newId) ||
+      (parentId && (typeof parentId !== 'string' || !is_id(parentId)))
+    ) {
+      throw new BadRequestException('Invalid folder id');
+    }
+
     const db = admin.database();
 
     const created = new Date().toISOString();
@@ -597,8 +607,14 @@ export class VideoService {
       const parentFolderRef = db.ref(`users/${uid}/videoFolders/${parentId}`);
       const parentFolderSnap = await parentFolderRef.get();
       const parentFolderVal = parentFolderSnap.val();
+
+      // A parent deleted in the meantime (in another tab): nothing is written.
+      if (!parentFolderVal) {
+        return sendError('Parent folder not found.');
+      }
+
       const folderChildren = parentFolderVal.children || [];
-      nestLevel = parentFolderVal.nestLevel + 1;
+      nestLevel = (parentFolderVal.nestLevel || 0) + 1;
 
       if (nestLevel > 2) {
         return {

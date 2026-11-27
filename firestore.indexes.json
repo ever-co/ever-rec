@@ -1,0 +1,23 @@
+{
+	"indexes": [
+		{
+			"collectionGroup": "termsAcceptances",
+			"queryScope": "COLLECTION",
+			"fields": [
+				{ "fieldPath": "documentId", "order": "ASCENDING" },
+				{ "fieldPath": "subjectId", "order": "ASCENDING" },
+				{ "fieldPath": "tenantId", "order": "ASCENDING" },
+				{ "fieldPath": "acceptedAt", "order": "DESCENDING" }
+			]
+		},
+		{
+			"collectionGroup": "termsAcceptances",
+			"queryScope": "COLLECTION",
+			"fields": [
+				{ "fieldPath": "subjectId", "order": "ASCENDING" },
+				{ "fieldPath": "acceptedAt", "order": "DESCENDING" }
+			]
+		}
+	],
+	"fieldOverrides": []
+}

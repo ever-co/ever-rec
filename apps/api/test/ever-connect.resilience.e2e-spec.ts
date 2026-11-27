@@ -19,7 +19,13 @@ describe('resilience', () => {
   let operator: string;
 
   beforeEach(async () => {
-    t = await createConnectTestApp({ env: CONNECT_ON });
+    t = await createConnectTestApp({
+      env: {
+        ...CONNECT_ON,
+        EVER_CONNECT_PERSON_EXPORT_ENABLED: 'true',
+        WEBSITE_URL: 'https://rec.example.test',
+      },
+    });
     operator = await connectInstallation(t);
   });
   afterEach(() => t.close());
