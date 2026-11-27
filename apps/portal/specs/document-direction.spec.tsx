@@ -1,10 +1,13 @@
 import React, { useContext } from 'react';
-import { createRoot, Root } from 'react-dom/client';
+import { createRoot, hydrateRoot, Root } from 'react-dom/client';
+import { renderToString } from 'react-dom/server';
 import i18next, { i18n as I18n } from 'i18next';
 import { I18nextProvider, initReactI18next } from 'react-i18next';
+import LanguageDetector from 'i18next-browser-languagedetector';
 import { ConfigProvider } from 'antd';
 import DirectionProvider from 'components/shell/DirectionProvider';
 import {
+  activeLanguage,
   directionOf,
   documentLanguageScript,
   inlineEndSide,
@@ -12,7 +15,7 @@ import {
   RTL_LANGUAGES,
   useDirection,
 } from 'i18n/direction';
-import { languages } from 'i18n/constants';
+import { languageDetection, languages } from 'i18n/constants';
 
 // Arabic and Hebrew lay the portal out right to left: `<html lang/dir>` follow the language
 // i18next shows, from the first render and on every change, and antd gets the same direction.
@@ -32,9 +35,7 @@ const Probe = () => {
   const direction = useDirection();
   const antd = useContext(ConfigProvider.ConfigContext);
   return (
-    <span data-testid="probe">
-      {direction}/{antd.direction ?? 'none'}
-    </span>
+    <span data-testid="probe">{`${direction}/${antd.direction ?? 'none'}`}</span>
   );
 };
 
@@ -152,25 +153,154 @@ describe('DirectionProvider', () => {
 });
 
 describe('documentLanguageScript (before the first paint)', () => {
-  beforeEach(() => {
+  // Every case runs the script, then the real detector and i18next on the same browser state: the
+  // two must agree, or the page would flip sides when the app starts.
+  interface Browser {
+    url?: string;
+    stored?: string;
+    cookie?: string;
+    navigatorLanguages?: string[];
+    blockedStorage?: boolean;
+  }
+
+  const setUp = ({
+    url = '/',
+    stored,
+    cookie,
+    navigatorLanguages = ['en-US'],
+    blockedStorage = false,
+  }: Browser) => {
     html.removeAttribute('lang');
     html.removeAttribute('dir');
     window.localStorage.clear();
-    window.history.replaceState(null, '', '/');
-  });
-
-  it.each([
-    ['the language i18next stored', '/', 'he', 'he rtl'],
-    ['the stored language, left to right', '/', 'de', 'de ltr'],
-    // As the detector does, the `lng` query parameter wins over the stored language.
-    ['the lng query parameter first', '/media/images?lng=ar', 'en', 'ar rtl'],
-    ['English for a language the portal does not ship', '/', 'ja', 'en ltr'],
-  ])('reads %s', (_, url, stored, expected) => {
+    window.sessionStorage.clear();
+    document.cookie = 'i18next=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
     window.history.replaceState(null, '', url);
-    window.localStorage.setItem('i18nextLng', stored);
+    if (stored) window.localStorage.setItem('i18nextLng', stored);
+    if (cookie) document.cookie = `i18next=${cookie}; path=/`;
+    Object.defineProperty(window.navigator, 'languages', {
+      value: navigatorLanguages,
+      configurable: true,
+    });
+    if (blockedStorage) {
+      const blocked = () => {
+        throw new DOMException('blocked', 'SecurityError');
+      };
+      jest.spyOn(Storage.prototype, 'getItem').mockImplementation(blocked);
+      jest.spyOn(Storage.prototype, 'setItem').mockImplementation(blocked);
+    }
+  };
+
+  const fromScript = () => {
     new Function(documentLanguageScript)();
-    expect(`${html.getAttribute('lang')} ${html.getAttribute('dir')}`).toBe(
-      expected,
+    return `${html.getAttribute('lang')} ${html.getAttribute('dir')}`;
+  };
+
+  const fromI18next = async () => {
+    // A fresh detector: it remembers whether storage works for the life of the module.
+    let Detector: typeof LanguageDetector = LanguageDetector;
+    jest.isolateModules(() => {
+      const fresh = require('i18next-browser-languagedetector');
+      Detector = fresh.default ?? fresh;
+    });
+    const instance = i18next.createInstance();
+    await instance.use(Detector).init({
+      fallbackLng: 'en',
+      detection: { ...languageDetection, caches: [] },
+      resources: Object.fromEntries(
+        languages.map(({ code }) => [code, { translation: { hello: code } }]),
+      ),
+    });
+    const shown = activeLanguage(instance);
+    return `${shown} ${directionOf(shown)}`;
+  };
+
+  afterEach(() => jest.restoreAllMocks());
+
+  it.each<[string, Browser, string]>([
+    ['the stored language', { stored: 'he' }, 'he rtl'],
+    ['a stored left-to-right language', { stored: 'de' }, 'de ltr'],
+    [
+      'the lng query parameter first',
+      { url: '/media/images?lng=ar', stored: 'en' },
+      'ar rtl',
+    ],
+    ['the last lng parameter', { url: '/?lng=en&lng=he' }, 'he rtl'],
+    [
+      'lng in the hash when there is no query',
+      { url: '/#/x?lng=ar' },
+      'ar rtl',
+    ],
+    [
+      'the cookie before localStorage',
+      { cookie: 'he', stored: 'en' },
+      'he rtl',
+    ],
+    ['a region, falling back to its language', { stored: 'ar-EG' }, 'ar rtl'],
+    ['a region in odd case, canonicalised', { stored: 'AR-eg' }, 'ar rtl'],
+    [
+      'a code in capitals, which i18next does not ship',
+      { stored: 'AR' },
+      'en ltr',
+    ],
+    ['a language the portal does not ship', { stored: 'ja' }, 'en ltr'],
+    [
+      'the browser when nothing is stored',
+      { navigatorLanguages: ['he-IL', 'en'] },
+      'he rtl',
+    ],
+    [
+      'past a value the detector rejects as XSS',
+      { url: '/?lng=javascript:alert(1)', stored: 'ar' },
+      'ar rtl',
+    ],
+    [
+      'the browser when storage is blocked',
+      { blockedStorage: true, navigatorLanguages: ['ar'] },
+      'ar rtl',
+    ],
+  ])('reads %s, as i18next does', async (_, browser, expected) => {
+    setUp(browser);
+    expect(fromScript()).toBe(expected);
+    setUp(browser);
+    expect(await fromI18next()).toBe(expected);
+  });
+});
+
+describe('hydration', () => {
+  it('renders left to right on the server and in the first client render', async () => {
+    const instance = i18next.createInstance();
+    await instance.use(initReactI18next).init({
+      lng: 'ar',
+      fallbackLng: 'en',
+      resources: { ar: { translation: { hello: 'ar' } } },
+    });
+    const tree = (
+      <I18nextProvider i18n={instance}>
+        <DirectionProvider>
+          <Probe />
+        </DirectionProvider>
+      </I18nextProvider>
     );
+
+    // The server has no reader's language: whatever i18next says, it renders `ltr`...
+    const serverHtml = renderToString(tree);
+    expect(serverHtml).toContain('ltr/ltr');
+
+    // ...and so does the browser's first render: hydration matches, then the layout effect flips.
+    html.removeAttribute('dir');
+    const container = document.createElement('div');
+    container.innerHTML = serverHtml;
+    document.body.appendChild(container);
+    const onRecoverableError = jest.fn();
+    let root: Root | undefined;
+    await act(async () => {
+      root = hydrateRoot(container, tree, { onRecoverableError });
+    });
+    expect(onRecoverableError).not.toHaveBeenCalled();
+    expect(page()).toBe('ar rtl rtl/rtl');
+
+    await act(async () => root?.unmount());
+    container.remove();
   });
 });

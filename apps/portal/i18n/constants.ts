@@ -8,6 +8,26 @@ export interface Language {
   dir?: 'rtl';
 }
 
+/**
+ * i18next-browser-languagedetector's options, written out (they are its defaults): the script in
+ * `_document` that sets `<html dir>` before the first paint reads the same sources in the same order.
+ */
+export const languageDetection = {
+  order: [
+    'querystring',
+    'cookie',
+    'localStorage',
+    'sessionStorage',
+    'navigator',
+    'htmlTag',
+  ],
+  lookupQuerystring: 'lng',
+  lookupCookie: 'i18next',
+  lookupLocalStorage: 'i18nextLng',
+  lookupSessionStorage: 'i18nextLng',
+  caches: ['localStorage'],
+};
+
 export const languages: Language[] = [
   { text: 'English', code: 'en', nativeName: 'English' },
   { text: 'Bulgarian', code: 'bg', nativeName: 'Български' },

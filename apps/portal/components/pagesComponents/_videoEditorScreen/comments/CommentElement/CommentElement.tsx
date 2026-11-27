@@ -114,8 +114,10 @@ const CommentElement: FC<IProps> = ({
             />
           ) : (
             <div className={styles.commentContent}>
-              {/* A comment reads in its own language's direction, whatever the page's. */}
-              <p dir="auto">{comment.content}</p>
+              {/* A comment reads in its own language's direction, lined up with the page. */}
+              <p dir="auto" className="[text-align:match-parent]">
+                {comment.content}
+              </p>
 
               {comment.isOwn && user?.id && (
                 <Dropdown
