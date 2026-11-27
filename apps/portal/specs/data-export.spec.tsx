@@ -101,7 +101,18 @@ describe('Settings → Your data export', () => {
   });
 
   it('every message the page shows exists in English', () => {
-    for (const key of ['title', 'intro', 'unavailable', 'download']) {
+    for (const key of [
+      'title',
+      'lead',
+      'contents.profile',
+      'contents.identities',
+      'contents.workspaces',
+      'contents.media',
+      'access',
+      'unavailableTitle',
+      'unavailable',
+      'download',
+    ]) {
       expect(typeof message(`page.dataExport.${key}`)).toBe('string');
     }
     expect(typeof message('page.everPlatform.loading')).toBe('string');
