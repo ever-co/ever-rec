@@ -12,6 +12,7 @@ import { everIdErrorCode, everIdErrorMessageKey, EverIdErrorMessageKey } from 'a
 import { ITermsAcceptanceDocument } from 'app/interfaces/ITermsAcceptance';
 import { readEverIdBinding } from 'app/services/everIdBinding';
 import { panelRoutes, preRoutes } from 'components/_routes';
+import { legalUrlFor } from 'app/services/helpers/legalDocumentUrl';
 
 type Mode = 'working' | 'confirm' | 'error';
 
@@ -146,13 +147,13 @@ const EverIdPage: React.FC = () => {
               />
               <p>
                 {t('page.register.terms.agree')}
-                <a className="tw-underline tw-text-primary-purple" href="https://rec.com/tos" target="_blank" rel="noreferrer">
+                <a className="tw-underline tw-text-primary-purple" href={legalUrlFor(termsDocuments, 'tos')} target="_blank" rel="noreferrer">
                   {t('page.register.terms.terms')}
                 </a>
                 {t('page.register.terms.and')}
                 <a
                   className="tw-underline tw-text-primary-purple"
-                  href="https://rec.com/privacy"
+                  href={legalUrlFor(termsDocuments, 'privacy')}
                   target="_blank"
                   rel="noreferrer"
                 >

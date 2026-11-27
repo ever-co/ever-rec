@@ -1,10 +1,13 @@
 import { BadRequestException, Inject, Injectable, Logger } from '@nestjs/common';
+import * as Sentry from '@sentry/nestjs';
 import * as admin from 'firebase-admin';
 import {
   TermsAcceptanceService as Recorder,
+  DuplicateAcceptanceError,
   assertPublishedText,
   type AcceptanceMethod,
   type AcceptanceRecord,
+  type AcceptanceStatus,
   type RequiredDocument,
 } from 'terms-acceptance';
 import { FirebaseAcceptanceAdapter } from 'terms-acceptance/firebase';
@@ -135,6 +138,117 @@ export class TermsAcceptanceService {
       ipHash: this.recorder.hashIp(context.ip),
       userAgent: context.userAgent ?? null,
     });
+  }
+
+  /**
+   * Record a sign-up's acceptance without ever failing the sign-up: the claims were checked before the account
+   * was created, so a failure here is infrastructure, and the account stands. The failure is logged AND sent to
+   * Sentry: on 2026-11-26 production lost every sign-up record for hours and only a log line said so (#276).
+   * The sign-in gate (`GET /terms/status`) asks the person again, which repairs the record.
+   *
+   * @returns whether the record was stored.
+   */
+  async recordAtSignUp(
+    uid: string,
+    claims: ITermsAcceptanceClaim[],
+    context: { ip?: string | null; userAgent?: string | null },
+    flow: 'email' | 'ever-id',
+  ): Promise<boolean> {
+    try {
+      await this.record(uid, claims, { method: 'signup-checkbox', ...context });
+      return true;
+    } catch (error) {
+      this.reportUnrecorded(uid, flow, error);
+      return false;
+    }
+  }
+
+  /**
+   * The alert for a sign-up without its terms record. Sentry is a no-op when `SENTRY_DSN` is not set; the uid
+   * goes only into the log line, not to Sentry.
+   */
+  reportUnrecorded(uid: string, flow: 'email' | 'ever-id', error: unknown): void {
+    const message = error instanceof Error ? error.message : String(error);
+    this.logger.error(`Terms acceptance not recorded (${flow} sign-up) for user ${uid}: ${message}`);
+    Sentry.captureException(error instanceof Error ? error : new Error(message), {
+      level: 'error',
+      tags: { area: 'terms-acceptance', flow: `${flow}-signup` },
+    });
+  }
+
+  /**
+   * Whether a signed-in user has accepted the documents currently required.
+   *
+   * `blocking` lists what they must accept before going on: a document never
+   * accepted (a sign-up whose record failed, or an account from before the
+   * checkbox was real) or a material new version. `notices` are minor changes.
+   */
+  async status(uid: string, locale?: string): Promise<AcceptanceStatus> {
+    return this.recorder.status(uid, this.getRequiredDocuments(locale));
+  }
+
+  /**
+   * Record what the re-acceptance dialog showed a signed-in user, then return the
+   * new status.
+   *
+   * Only the documents currently required, at their current version and digest,
+   * are accepted: an older text is refused even when it was once published, so a
+   * stale tab cannot record consent to terms that no longer apply. Posting a
+   * document that is already on file is not an error (a double click, two tabs).
+   *
+   * @throws BadRequestException when a claim is unpublished or not current.
+   */
+  async reaccept(
+    uid: string,
+    claims: ITermsAcceptanceClaim[],
+    context: { ip?: string | null; userAgent?: string | null },
+  ): Promise<AcceptanceStatus> {
+    this.assertClaimsArePublished(claims);
+    // Each claim is checked against the documents required in its own locale, and recorded with the locale of
+    // the text that was actually shown: when that locale has no published translation, the required set holds
+    // the English fallback, and that is what the person read.
+    const requiredByLocale = new Map<string, RequiredDocument[]>();
+    const requiredFor = (claimLocale: string): RequiredDocument[] => {
+      if (!requiredByLocale.has(claimLocale)) {
+        requiredByLocale.set(claimLocale, this.getRequiredDocuments(claimLocale));
+      }
+      return requiredByLocale.get(claimLocale) as RequiredDocument[];
+    };
+    const validated = claims.map((claim) => {
+      const current = requiredFor(claim.locale).find((doc) => doc.documentId === claim.documentId);
+      if (!current || current.version !== claim.version || current.sha256 !== claim.sha256) {
+        throw new BadRequestException(
+          `Terms acceptance must be for the current text: ${claim.documentId}@${claim.version} is not what is required now.`,
+        );
+      }
+      return { ...claim, locale: current.locale };
+    });
+
+    // What is still pending, asked per claim locale: a document can be pending under one locale's required set
+    // and not appear in another's. A minor-change notice may be accepted too (the dialog offers only blocking
+    // documents, a banner could offer notices): either way the new version is recorded and becomes current.
+    const claimLocales = [...new Set(claims.map((claim) => claim.locale))];
+    const pending = new Set<string>();
+    for (const claimLocale of claimLocales) {
+      const before = await this.status(uid, claimLocale);
+      for (const doc of [...before.blocking, ...before.notices]) pending.add(doc.documentId);
+    }
+    const outstanding = validated.filter((claim) => pending.has(claim.documentId));
+    if (outstanding.length) {
+      try {
+        await this.record(uid, outstanding, { method: 'reaccept-modal', ...context });
+      } catch (error) {
+        if (!(error instanceof DuplicateAcceptanceError)) throw error;
+      }
+    }
+    // The answer is for the locale of the claims (the portal sends one: the locale of its dialog). A mixed batch
+    // is never answered "satisfied" while one of its locales still has a document pending.
+    let answer: AcceptanceStatus | undefined;
+    for (const claimLocale of claimLocales.length ? claimLocales : [undefined]) {
+      const after = await this.status(uid, claimLocale);
+      if (!answer || (answer.satisfied && !after.satisfied)) answer = after;
+    }
+    return answer as AcceptanceStatus;
   }
 
   /** Every acceptance on file for a user, newest first, integrity-checked. */

@@ -16,6 +16,7 @@ import {
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { EVER_COUNTER_EVENTS } from '../src/common/events/ever-counters.events';
 import { EverIdLinkService } from '../src/module/ever-id/services/ever-id-link.service';
+import { TermsAcceptanceService } from '../src/module/terms/terms-acceptance.service';
 import { MockOidcIssuer } from './mock-oidc/mock-oidc-issuer';
 import { createTestApp, TestApp } from './support/test-app';
 
@@ -490,6 +491,38 @@ describe('Ever ID sign-in (e2e)', () => {
       expect(t.firebase.db.dump('ever_identities')).toBeNull();
     });
 
+    it('keeps the account and raises the alert when the terms record fails (#276)', async () => {
+      const failure = new Error('7 PERMISSION_DENIED: Cloud Firestore API has not been used');
+      jest
+        .spyOn(TermsAcceptanceService.prototype, 'record')
+        .mockRejectedValueOnce(failure);
+      const alert = jest.spyOn(TermsAcceptanceService.prototype, 'reportUnrecorded');
+      // The claims the portal's confirmation screen posts.
+      const terms = t.app
+        .get(TermsAcceptanceService)
+        .getRequiredDocuments('en')
+        .map(({ documentId, version, sha256, locale }) => ({ documentId, version, sha256, locale }));
+
+      issuer.nextClaims = { sub: 'unrecorded-person' };
+      const landing = await authorize();
+      const confirm = await request(server())
+        .post('/api/v1/auth/ever-id/sign-up/confirm')
+        .send({
+          pending: landing.searchParams.get('confirm'),
+          termsAccepted: true,
+          terms,
+          binding: PORTAL_BINDING,
+        });
+      expect(confirm.status).toBe(200);
+      const session = await exchange(confirm.body.code);
+      expect(session.status).toBe(201);
+      const person = session.body.data;
+
+      expect(t.firebase.db.dump(`users/${person.id}`)).not.toBeNull();
+      expect(alert).toHaveBeenCalledWith(person.id, 'ever-id', failure);
+      expect(t.firebase.acceptances).toEqual([]);
+    });
+
     it('counts a new account once it is linked, never one whose sign-up was undone', async () => {
       let usersCreated = 0;
       t.app.get(EventEmitter2).on(EVER_COUNTER_EVENTS.userCreated, () => {
@@ -842,14 +875,17 @@ describe('Ever ID sign-in (e2e)', () => {
     });
 
     it('ends a refreshed session after its sign-in reference has expired', async () => {
-      // References live 4 s here, so the one recorded at sign-in expires while the session lives on.
+      // References live 6 s. `exp` counts whole seconds, so a reference issued at t has between 5 and 6 s.
+      // Refreshing at t+3 s leaves the sign-in reference >= 2 s of slack; waiting until t+6.3 s expires it
+      // while the refreshed one (issued at about t+3 s) still has >= 1.7 s left.
       await t.close();
-      t = await createTestApp({ env: onEnv(issuer, { REC_JWT_EXPIRES_IN: '4s' }) });
+      t = await createTestApp({ env: onEnv(issuer, { REC_JWT_EXPIRES_IN: '6s' }) });
       const session = await signUp('expired-reference-person');
-      await new Promise((resolve) => setTimeout(resolve, 2500));
+      const issuedAt = Date.now();
+      await new Promise((resolve) => setTimeout(resolve, 3000));
       const first = await refresh(session.refreshToken);
       expect(first.status).toBe(200);
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, Math.max(0, issuedAt + 6300 - Date.now())));
       // The sign-in reference has expired...
       expect((await refresh(session.refreshToken)).status).toBeGreaterThanOrEqual(400);
       // ...while the session itself is alive: its current reference still refreshes, and the reference
@@ -866,7 +902,7 @@ describe('Ever ID sign-in (e2e)', () => {
       expect((await t.firebase.db.ref(`tokens/${id}`).get()).exists()).toBe(false);
       // ...so its newest reference no longer refreshes.
       expect((await refresh(second.body.refreshToken)).status).toBeGreaterThanOrEqual(400);
-    }, 20000);
+    }, 30000);
 
     it('ends a session without a session id on a subject-only logout', async () => {
       issuer.nextClaims = { sub: 'no-sid-person', sid: undefined };

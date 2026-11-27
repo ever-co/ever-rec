@@ -37,3 +37,28 @@ export interface ITermsAcceptanceClaim {
   sha256: string;
   locale: string;
 }
+
+/** One document the signed-in user still has to accept (`GET /api/v1/terms/status`). */
+export interface ITermsPendingDocument {
+  documentId: string;
+  reason:
+    | 'never-accepted'
+    | 'material-change'
+    | 'minor-change'
+    | 'text-mismatch';
+  blocking: boolean;
+  acceptedVersion: string | null;
+  acceptedAt: string | null;
+  requiredVersion: string;
+  requiredSha256: string;
+  title?: string;
+  url?: string;
+}
+
+/** Whether the signed-in user has accepted what is required now. */
+export interface ITermsStatus {
+  satisfied: boolean;
+  blocking: ITermsPendingDocument[];
+  notices: ITermsPendingDocument[];
+  current: string[];
+}

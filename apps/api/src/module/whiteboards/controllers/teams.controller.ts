@@ -12,6 +12,10 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import {
+  UPLOAD_FILE_BYTES,
+  uploadOptions,
+} from '../../../common/multipart/upload-limits';
 import { AuthGuard } from '../../auth/guards/auth.guard';
 import { WhiteboardTeamService } from '../services/teams.service';
 
@@ -47,10 +51,13 @@ export class WhiteboardTeamController {
 
   @UseGuards(AuthGuard)
   @UseInterceptors(
-    FileFieldsInterceptor([
-      { name: 'avatar', maxCount: 1 },
-      { name: 'thumbnail', maxCount: 1 },
-    ]),
+    FileFieldsInterceptor(
+      [
+        { name: 'avatar', maxCount: 1 },
+        { name: 'thumbnail', maxCount: 1 },
+      ],
+      uploadOptions({ files: 2, fileSize: UPLOAD_FILE_BYTES.picture }),
+    ),
   )
   @Put(':teamId')
   async updateTeam(

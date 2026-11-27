@@ -50,6 +50,7 @@ import { UpdateUserProfileChain } from './services/update-user-profile/update-us
 import { WorkflowFirebaseProfileFactory } from './services/update-user-profile/workflow-profile.factory';
 import { UserProfileService } from './services/user-profile.service';
 import { UserService } from './services/user.service';
+import { TermsAccountController } from './terms-account.controller';
 
 @Module({
   imports: [
@@ -78,7 +79,7 @@ import { UserService } from './services/user.service';
     // is where the signup checkbox finally becomes a stored record.
     TermsModule,
   ],
-  controllers: [AuthController],
+  controllers: [AuthController, TermsAccountController],
   providers: [
     // Main orchestrator service
     AuthOrchestratorService,

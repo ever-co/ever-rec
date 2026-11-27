@@ -18,6 +18,8 @@ import { IMainMenuItem, useMenuItems } from 'misc/menuItems';
 import useClickOrKeyOutside from 'hooks/useClickOrKeyOutside';
 import { useCreateWorkspace } from 'hooks/useCreateWorkspaceHandler';
 import { useTranslation } from 'react-i18next';
+import EverAppSwitcher from 'components/elements/everApps/EverAppSwitcher';
+import { EVER_APP_SWITCHER } from 'misc/everApps';
 
 interface IProps {
   isProfilePage?: boolean;
@@ -112,7 +114,13 @@ const Sidebar: FC<IProps> = ({ isProfilePage, isWorkspaceSettingsPage }) => {
 
       <div className={styles.sidebarContainer}>
         <div className={`${styles.sidebarWrapper} tw-px-4`}>
-          <div className={styles.logoWrapper}>
+          <div
+            className={classNames(
+              styles.logoWrapper,
+              EVER_APP_SWITCHER && styles.withEverApps,
+            )}
+          >
+            <EverAppSwitcher model={EVER_APP_SWITCHER} />
             <Logo
               className="tw-w-full"
               onClick={() => router.push(preRoutes.media + panelRoutes.images)}

@@ -78,6 +78,22 @@
     "profile": "个人资料",
     "administration": "管理"
   },
+  "everApps": {
+    "title": "应用",
+    "switchLabel": "切换到其他 Ever 平台或应用",
+    "add": "添加",
+    "addLabel": "添加您自己的应用到 Ever Platform",
+    "lines": {
+      "platform": "一个账户，畅用所有 Ever 应用",
+      "works": "为您运营业务的 AI 智能体",
+      "teams": "工作与项目管理",
+      "gauzy": "集 ERP、CRM 与人力资源于一体",
+      "rec": "屏幕截图与录制",
+      "traduora": "面向团队的翻译管理",
+      "demand": "电商与按需服务市场",
+      "tech": "可聘用的工程师与托管智能体"
+    }
+  },
   "notFound": {
     "workspace": {
       "heading": "未找到工作区",

@@ -16,6 +16,7 @@ import {
 import redirect from 'misc/redirect';
 import PasswordEye from 'components/pagesComponents/_signScreen/PasswordEye';
 import { useTranslation } from 'react-i18next';
+import { legalUrlFor } from 'app/services/helpers/legalDocumentUrl';
 
 const defaultInput: IAppControl = {
   value: '',
@@ -235,7 +236,7 @@ const PanelRegister: React.FC = () => {
             {t('page.register.terms.agree')}
             <a
               className="tw-underline tw-text-primary-purple"
-              href="https://rec.com/tos"
+              href={legalUrlFor(termsDocuments, 'tos')}
               target="_blank"
               rel="noreferrer"
             >
@@ -244,7 +245,7 @@ const PanelRegister: React.FC = () => {
             {t('page.register.terms.and')}
             <a
               className="tw-underline tw-text-primary-purple"
-              href="https://rec.com/privacy"
+              href={legalUrlFor(termsDocuments, 'privacy')}
               target="_blank"
               rel="noreferrer"
             >

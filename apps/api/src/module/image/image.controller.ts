@@ -15,6 +15,10 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import {
+  UPLOAD_FILE_BYTES,
+  uploadOptions,
+} from 'src/common/multipart/upload-limits';
 import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
 import {
@@ -280,7 +284,10 @@ export class ImageController {
   @UseGuards(AuthGuard)
   @Post('upload/file')
   @UseInterceptors(
-    FileInterceptor('file', { limits: { fileSize: 10 * 1024 * 1024 } }),
+    FileInterceptor(
+      'file',
+      uploadOptions({ fileSize: UPLOAD_FILE_BYTES.picture }),
+    ),
   )
   async uploadFile(
     @User() user: IRequestUser,
@@ -338,7 +345,13 @@ export class ImageController {
 
   @UseGuards(AuthGuard)
   @Put('single')
-  @UseInterceptors(FileInterceptor('blob'))
+  // The editors send the edited image, at full size.
+  @UseInterceptors(
+    FileInterceptor(
+      'blob',
+      uploadOptions({ fileSize: UPLOAD_FILE_BYTES.image }),
+    ),
+  )
   async updateImage(@Req() req, @Body() body, @UploadedFile() blob: any) {
     return await this.imageService.updateImage(
       req.user?.id,

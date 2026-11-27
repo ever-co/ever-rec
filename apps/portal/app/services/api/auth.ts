@@ -3,6 +3,7 @@ import { IUser } from 'app/interfaces/IUserData';
 import {
   ITermsAcceptanceClaim,
   ITermsAcceptanceDocument,
+  ITermsStatus,
 } from 'app/interfaces/ITermsAcceptance';
 import api from './api';
 
@@ -33,6 +34,22 @@ const getRequiredTermsAPI = (
   return api
     .get('/api/v1/terms/required', { params: locale ? { locale } : undefined })
     .then((response: any) => response as unknown as ITermsAcceptanceDocument[]);
+};
+
+/** What the signed-in user still has to accept (none when `satisfied`). */
+const getTermsStatusAPI = (locale?: string): Promise<ITermsStatus> => {
+  return api
+    .get('/api/v1/terms/status', { params: locale ? { locale } : undefined })
+    .then((response: any) => response as unknown as ITermsStatus);
+};
+
+/** Record the documents the re-acceptance dialog showed; answers the new status. */
+const acceptTermsAPI = (
+  documents: ITermsAcceptanceClaim[],
+): Promise<ITermsStatus> => {
+  return api
+    .post('/api/v1/terms/accept', { documents })
+    .then((response: any) => response as unknown as ITermsStatus);
 };
 
 const registerUserEmailPassAPI = (
@@ -147,6 +164,8 @@ const getUserServerSideProps = async (
 export {
   signInWithEmailAndPasswordAPI,
   getRequiredTermsAPI,
+  getTermsStatusAPI,
+  acceptTermsAPI,
   registerUserEmailPassAPI,
   updateUserDataAPI,
   uploadAvatarAPI,

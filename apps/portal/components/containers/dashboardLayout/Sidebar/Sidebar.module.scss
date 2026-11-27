@@ -30,6 +30,15 @@
   // padding: 1.5rem;
 }
 
+// The Ever app switcher's mark in front of the logo (only when the build links other Ever apps).
+.withEverApps {
+  align-items: center;
+  gap: 8px;
+  // The 32 px mark button is taller than the 24 px logo: keep the nav below where it was.
+  margin-top: calc(1.5rem - 4px);
+  margin-bottom: calc(1.5rem - 4px);
+}
+
 .lineSeparator {
   border-top: 1px solid $grey-light05;
   margin: 1.25rem 0;
