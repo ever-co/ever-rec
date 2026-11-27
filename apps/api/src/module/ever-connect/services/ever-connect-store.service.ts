@@ -321,7 +321,11 @@ export class EverConnectStoreService {
     const old: string[] = [];
     for (const [uid, runs] of Object.entries(all)) {
       for (const [run, mark] of Object.entries(runs ?? {})) {
-        if (!(mark?.startedAt >= now - ACCOUNT_DELETION_MARK_KEPT_MS)) {
+        // A mark without its start (never written by this module) goes too.
+        if (
+          typeof mark?.startedAt !== 'number' ||
+          mark.startedAt < now - ACCOUNT_DELETION_MARK_KEPT_MS
+        ) {
           old.push(`${uid}/${run}`);
         }
       }

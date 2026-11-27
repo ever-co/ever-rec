@@ -252,6 +252,22 @@ describe('a deletion for Ever Platform while the account creates a workspace', (
     expect(await t.person.deletionStarted(UID)).toBe(false);
   });
 
+  it('a last check that fails leaves no mark, and the account can still create workspaces', async () => {
+    const t = setup();
+    const holdFor = jest.spyOn(t.person, 'holdFor');
+    holdFor
+      .mockImplementationOnce(async () => null)
+      .mockImplementationOnce(async () => {
+        throw new Error('database unavailable');
+      });
+
+    await expect(t.requestDeletion()).rejects.toThrow('database unavailable');
+
+    expect(t.deleter.delete).not.toHaveBeenCalled();
+    expect(t.marks()).toBeNull();
+    expect((await t.createWorkspace()).status).toBe(ResStatusEnum.success);
+  });
+
   it('marks a finished deletion until the sweep removes it, a day later', async () => {
     const t = setup();
     await t.requestDeletion();

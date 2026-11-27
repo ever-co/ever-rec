@@ -167,7 +167,8 @@ export class WorkspacesService {
         try {
           deleting = !!(await this.accountDeletions?.deletionStarted(uid));
         } catch (error) {
-          await undo();
+          // The read's error is the one reported, whether or not the undo went through.
+          await undo().catch(() => undefined);
           throw error;
         }
         if (deleting) {

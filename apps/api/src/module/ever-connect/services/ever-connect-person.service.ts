@@ -482,7 +482,14 @@ export class EverConnectPersonService implements EverConnectAccountDeletions {
     let started = false;
     for (const uid of uids) {
       const mark = await this.markDeletion(uid);
-      const hold = await this.holdFor(uid);
+      let hold: PersonDeletionHold | null;
+      try {
+        hold = await this.holdFor(uid);
+      } catch (error) {
+        // Nothing was deleted: the mark would only keep the account from creating workspaces
+        await mark.remove().catch(() => undefined);
+        throw error;
+      }
       if (hold) {
         await mark.remove();
         this.logger.warn(`A person's accounts were kept (${hold}).`);
@@ -518,7 +525,9 @@ export class EverConnectPersonService implements EverConnectAccountDeletions {
   /**
    * {@link EverConnectAccountDeletions}: whether a deletion of the account has started here and was
    * not called off to keep the account (see {@link deleteAccounts}). Read from the database, so a
-   * deletion run by another process of this installation counts too.
+   * deletion run by another process of this installation counts too. A finished deletion counts
+   * until the sweep removes its mark, a day later: a request made by the deleted account before
+   * it went can then no longer make it a workspace's admin.
    */
   async deletionStarted(uid: string): Promise<boolean> {
     if (!isDbKey(uid)) return false;
