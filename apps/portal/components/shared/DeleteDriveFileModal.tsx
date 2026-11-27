@@ -17,8 +17,14 @@ const DeleteDriveFileModal: React.FC<Props> = ({ onOk, onCancel, visible }) => {
       onCancel={onCancel}
       closable={true}
       footer={
-        // Row reversed: the destructive action sits on the right, the markup order stays.
-        <div className="tw-flex tw-flex-row-reverse tw-justify-start tw-gap-2 tw-mt-6">
+        <div className="tw-flex tw-justify-end tw-gap-2 tw-mt-6">
+          <AppButton
+            onClick={onCancel}
+            outlined
+            className="tw-flex tw-h-9 tw-items-center tw-justify-center tw-px-4 tw-py-0"
+          >
+            {t('common.cancel')}
+          </AppButton>
           <AppButton
             onClick={onOk}
             bgColor="tw-bg-danger"
@@ -26,13 +32,6 @@ const DeleteDriveFileModal: React.FC<Props> = ({ onOk, onCancel, visible }) => {
             // disabled={!valid}
           >
             {t('common.delete')}
-          </AppButton>
-          <AppButton
-            onClick={onCancel}
-            outlined
-            className="tw-flex tw-h-9 tw-items-center tw-justify-center tw-px-4 tw-py-0"
-          >
-            {t('common.cancel')}
           </AppButton>
         </div>
       }

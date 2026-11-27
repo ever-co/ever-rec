@@ -1,8 +1,9 @@
-import { FC, ReactNode } from 'react';
+import { FC, ReactNode, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Dialog from '@radix-ui/react-dialog';
 import Sidebar from './Sidebar/Sidebar';
 import { useShell } from 'components/shell/ShellContext';
+import { useCreateWorkspace } from 'hooks/useCreateWorkspaceHandler';
 
 interface IProps {
   children?: ReactNode;
@@ -27,6 +28,12 @@ const DashboardLayout: FC<IProps> = ({
 }) => {
   const { t } = useTranslation();
   const { drawerOpen, setDrawerOpen, drawerTriggerRef } = useShell();
+  // One dialog for both sidebars. It is drawn beside the drawer: inside it, the drawer's focus
+  // trap would take the focus back from the dialog's field.
+  const { Modal: CreateWorkspaceModal, setShowCreateWorkspaceModal } =
+    useCreateWorkspace(true);
+  // Set when the drawer closes to make room for a dialog: the focus then belongs to the dialog.
+  const keepFocusWhereItIs = useRef(false);
 
   return (
     <div className="tw-flex tw-h-[100dvh] tw-w-full tw-overflow-hidden tw-bg-sidebar tw-text-foreground">
@@ -35,6 +42,7 @@ const DashboardLayout: FC<IProps> = ({
         <Sidebar
           isProfilePage={isProfilePage}
           isWorkspaceSettingsPage={isWorkspaceSettingsPage}
+          onAddWorkspace={() => setShowCreateWorkspaceModal(true)}
         />
       </div>
 
@@ -48,6 +56,11 @@ const DashboardLayout: FC<IProps> = ({
           <Dialog.Content
             aria-describedby={undefined}
             onCloseAutoFocus={(event) => {
+              if (keepFocusWhereItIs.current) {
+                keepFocusWhereItIs.current = false;
+                event.preventDefault();
+                return;
+              }
               // The button that opens the drawer lives in the page's top bar, not in this
               // dialog, so hand focus back to it ourselves. Without one, Radix decides.
               const opener = drawerTriggerRef.current;
@@ -64,6 +77,11 @@ const DashboardLayout: FC<IProps> = ({
             <Sidebar
               inDrawer
               onCloseDrawer={() => setDrawerOpen(false)}
+              onAddWorkspace={() => {
+                keepFocusWhereItIs.current = true;
+                setDrawerOpen(false);
+                setShowCreateWorkspaceModal(true);
+              }}
               isProfilePage={isProfilePage}
               isWorkspaceSettingsPage={isWorkspaceSettingsPage}
             />
@@ -71,10 +89,12 @@ const DashboardLayout: FC<IProps> = ({
         </Dialog.Portal>
       </Dialog.Root>
 
+      {CreateWorkspaceModal}
+
       {assistant}
 
       {/* The page panel */}
-      <div className="tw-relative tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-overflow-hidden tw-bg-background md:tw-my-2 md:tw-mr-2 md:tw-rounded-xl md:tw-shadow-[0_0_0_1px_hsl(var(--border)),var(--shadow-sm)]">
+      <div className="tw-relative tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-overflow-hidden tw-bg-background md:tw-my-2 md:tw-mr-2 md:tw-rounded-xl md:tw-shadow-panel">
         {children}
       </div>
     </div>

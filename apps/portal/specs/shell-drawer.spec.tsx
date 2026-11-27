@@ -42,11 +42,22 @@ jest.mock('components/containers/dashboardLayout/Sidebar/Sidebar', () => {
   const react = require('react');
   return {
     __esModule: true,
-    default: ({ inDrawer }: { inDrawer?: boolean }) =>
+    default: ({
+      inDrawer,
+      onAddWorkspace,
+    }: {
+      inDrawer?: boolean;
+      onAddWorkspace: () => void;
+    }) =>
       react.createElement(
         'nav',
         { 'data-place': inDrawer ? 'drawer' : 'desktop' },
         react.createElement('a', { href: '/media/images' }, 'My Images'),
+        react.createElement(
+          'button',
+          { type: 'button', 'data-add-workspace': '', onClick: onAddWorkspace },
+          'Add workspace',
+        ),
       ),
   };
 });
@@ -148,5 +159,23 @@ describe('the phone drawer', () => {
 
     expect(dialog()).toBeNull();
     expect(document.activeElement).toBe(trigger());
+  });
+
+  it('makes room for the "add workspace" dialog and leaves the focus to it', async () => {
+    await open();
+    const add = (dialog() as HTMLElement).querySelector(
+      '[data-add-workspace]',
+    ) as HTMLElement;
+
+    await act(async () => {
+      add.click();
+    });
+    await settle();
+
+    // The drawer is gone: its focus trap cannot take the focus back from the new dialog.
+    expect(document.body.querySelector('nav[data-place="drawer"]')).toBeNull();
+    // The dialog that names the new workspace is open, beside the layout.
+    expect(document.body.querySelector('.ant-modal')).not.toBeNull();
+    expect(document.activeElement).not.toBe(trigger());
   });
 });

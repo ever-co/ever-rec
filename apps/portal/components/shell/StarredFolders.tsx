@@ -46,8 +46,8 @@ const Group: FC<{ title: string; folders: IStarredFolder[] }> = ({
  */
 const StarredFolders: FC = () => {
   const { t } = useTranslation();
-  const { favoritesImages, favoritesVideos } = useFavoritesFolders();
-  const empty = !favoritesImages.length && !favoritesVideos.length;
+  const { favoritesImages, favoritesVideos, loader } = useFavoritesFolders();
+  const none = !favoritesImages.length && !favoritesVideos.length;
 
   return (
     <div className="tw-ml-[19px] tw-max-h-48 tw-overflow-y-auto tw-border-0 tw-border-l tw-border-solid tw-border-sidebar-border tw-pl-2">
@@ -57,9 +57,12 @@ const StarredFolders: FC = () => {
       {favoritesVideos.length > 0 && (
         <Group title={t('common.videos')} folders={favoritesVideos as any} />
       )}
-      {empty && (
-        <div className="tw-px-2.5 tw-py-2 tw-text-xs tw-text-muted-foreground">
-          {t('shell.noStarredFolders')}
+      {none && (
+        <div
+          className="tw-px-2.5 tw-py-2 tw-text-xs tw-text-muted-foreground"
+          role="status"
+        >
+          {loader ? t('shell.loading') : t('shell.noStarredFolders')}
         </div>
       )}
     </div>

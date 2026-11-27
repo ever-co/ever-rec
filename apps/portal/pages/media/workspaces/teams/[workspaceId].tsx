@@ -7,6 +7,7 @@ import { IWorkspace, IWorkspaceUser } from 'app/interfaces/IWorkspace';
 import DashboardCard from 'components/containers/dashboardLayout/elements/DashboardCard';
 import Image from 'next/legacy/image';
 import { ArrowLeft, LogOut, Settings, UserPlus } from 'lucide-react';
+import DrawerButton from 'components/shell/DrawerButton';
 import MediaIndex from 'pages/media';
 import { useRouter } from 'next/router';
 import AppSpinner from 'components/containers/appSpinner/AppSpinner';
@@ -241,6 +242,7 @@ const WorkspaceTeams: FC = () => {
         <DashboardCard className={styles.dashboardCard}>
           <div className={classNames(styles.mainHeader, styles.teamHeader)}>
             <div className={styles.teamHeading}>
+              <DrawerButton className="-tw-ml-1" />
               <Link
                 href={`${preRoutes.media}${panelRoutes.manageWorkspaces}`}
                 passHref

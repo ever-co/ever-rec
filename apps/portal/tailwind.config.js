@@ -182,6 +182,8 @@ const config = {
         // an arbitrary `var()` there as a shadow colour and emits no box-shadow.
         float: 'var(--shadow-float)',
         card: 'var(--shadow-sm)',
+        // The page panel beside the sidebar: a hairline ring and the small shadow.
+        panel: '0 0 0 1px hsl(var(--border)), var(--shadow-sm)',
         'app-blocks': 'var(--shadow-float)',
         'round-sm': 'var(--shadow-float)',
       },

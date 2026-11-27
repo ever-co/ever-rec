@@ -10,7 +10,6 @@ import PanelAC from '../../../../app/store/panel/actions/PanelAC';
 import { getExplorerData } from 'app/services/screenshots';
 import { getExplorerDataVideo } from 'app/services/videos';
 import { IMainMenuItem, useMenuItems } from 'misc/menuItems';
-import { useCreateWorkspace } from 'hooks/useCreateWorkspaceHandler';
 import { cn } from 'app/utilities/cn';
 import SidebarBrand from 'components/shell/SidebarBrand';
 import WorkspaceSwitcher from 'components/shell/WorkspaceSwitcher';
@@ -26,6 +25,8 @@ interface IProps {
   inDrawer?: boolean;
   /** In the drawer, the header's button closes the drawer instead of collapsing the sidebar. */
   onCloseDrawer?: () => void;
+  /** Opens the "add workspace" dialog, which the layout owns. */
+  onAddWorkspace: () => void;
 }
 
 /**
@@ -37,6 +38,7 @@ const Sidebar: FC<IProps> = ({
   isWorkspaceSettingsPage,
   inDrawer = false,
   onCloseDrawer,
+  onAddWorkspace,
 }) => {
   const { t } = useTranslation();
   const router = useRouter();
@@ -54,8 +56,6 @@ const Sidebar: FC<IProps> = ({
   const [showStarredFolders, setShowStarredFolders] = useState(false);
   const [showWorkspaceImageModal] = useState(false); //? not fully implemented
   const [loaderState, setLoaderState] = useState(false);
-  const { Modal: CreateWSModal, setShowCreateWorkspaceModal } =
-    useCreateWorkspace(true);
 
   const sidebarItemClicked = async (item: any) => {
     // Reset active workspace on each route except workspace routes and starred folders UI
@@ -148,13 +148,19 @@ const Sidebar: FC<IProps> = ({
         <SidebarBrand className={collapsed ? 'tw-size-10' : undefined} />
         <WorkspaceSwitcher
           collapsed={collapsed}
-          onAddWorkspace={() => setShowCreateWorkspaceModal(true)}
+          onAddWorkspace={onAddWorkspace}
         />
         {collapseButton}
       </div>
 
       <nav
-        aria-label={isSettings ? t('sidebar.administration') : undefined}
+        aria-label={
+          isWorkspaceSettingsPage
+            ? t('sidebar.administration')
+            : isProfilePage
+              ? t('shell.account')
+              : undefined
+        }
         className={cn(
           'tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-gap-0.5 tw-overflow-y-auto tw-py-2',
           collapsed ? 'tw-items-center tw-px-3' : 'tw-px-3',
@@ -235,8 +241,6 @@ const Sidebar: FC<IProps> = ({
       >
         <UserBlock collapsed={collapsed} />
       </div>
-
-      {CreateWSModal}
 
       <UploadWorkspaceImageModal
         onOk={() => void 0}

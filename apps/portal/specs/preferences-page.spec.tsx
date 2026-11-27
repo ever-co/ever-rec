@@ -151,6 +151,47 @@ describe('Preferences: theme', () => {
 
     expect(setTheme).toHaveBeenCalledWith(theme);
   });
+
+  it('is one tab stop: the chosen tile', async () => {
+    mockTheme = 'dark';
+    await render();
+
+    expect(tiles().map((element) => element.tabIndex)).toEqual([-1, 0, -1]);
+  });
+
+  it.each([
+    ['ArrowRight', 'light', 'dark'],
+    ['ArrowDown', 'dark', 'system'],
+    ['ArrowRight', 'system', 'light'],
+    ['ArrowLeft', 'light', 'system'],
+    ['ArrowUp', 'dark', 'light'],
+  ])(
+    '%s from %s chooses %s and moves the focus there',
+    async (key, from, to) => {
+      mockTheme = from;
+      await render();
+      const group = container.querySelector(
+        '[role="radiogroup"]',
+      ) as HTMLElement;
+
+      await act(async () => {
+        group.dispatchEvent(
+          new KeyboardEvent('keydown', {
+            key,
+            bubbles: true,
+            cancelable: true,
+          }),
+        );
+      });
+
+      expect(setTheme).toHaveBeenCalledWith(to);
+      expect(
+        (document.activeElement as HTMLElement).getAttribute(
+          'data-theme-choice',
+        ),
+      ).toBe(to);
+    },
+  );
 });
 
 describe('Preferences: language', () => {

@@ -61,6 +61,20 @@ export const ShellProvider: FC<{ children: ReactNode }> = ({ children }) => {
     });
   }, []);
 
+  // So does a window that grows to desktop width: the drawer is hidden there, and left open it
+  // would keep the page inert behind an invisible dialog.
+  useEffect(() => {
+    if (typeof window.matchMedia !== 'function') return;
+
+    const desktop = window.matchMedia('(min-width: 768px)');
+    const close = (event: MediaQueryListEvent) => {
+      if (event.matches) setDrawerOpen(false);
+    };
+    desktop.addEventListener('change', close);
+
+    return () => desktop.removeEventListener('change', close);
+  }, []);
+
   // A page change closes the drawer.
   useEffect(() => {
     const close = () => setDrawerOpen(false);

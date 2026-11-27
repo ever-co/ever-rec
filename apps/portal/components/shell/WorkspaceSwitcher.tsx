@@ -42,7 +42,7 @@ const WorkspaceTile: FC<{
     {avatar ? (
       <img src={avatar} alt="" className="tw-size-full tw-object-cover" />
     ) : (
-      initialsOf(name).charAt(0)
+      (Array.from(initialsOf(name))[0] ?? '')
     )}
   </span>
 );

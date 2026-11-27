@@ -150,9 +150,36 @@ const Preferences: FC = () => {
               role="radiogroup"
               aria-label={t('page.appearance.theme')}
               className="tw-grid tw-grid-cols-3 tw-gap-3"
+              onKeyDown={(event) => {
+                const step =
+                  event.key === 'ArrowRight' || event.key === 'ArrowDown'
+                    ? 1
+                    : event.key === 'ArrowLeft' || event.key === 'ArrowUp'
+                      ? -1
+                      : 0;
+                if (!step) return;
+
+                event.preventDefault();
+                const current = Math.max(
+                  0,
+                  themeTiles.findIndex((tile) => tile.value === choice),
+                );
+                const next =
+                  themeTiles[
+                    (current + step + themeTiles.length) % themeTiles.length
+                  ];
+                setTheme(next.value);
+                event.currentTarget
+                  .querySelector<HTMLElement>(
+                    `[data-theme-choice="${next.value}"]`,
+                  )
+                  ?.focus();
+              }}
             >
-              {themeTiles.map((tile) => {
+              {themeTiles.map((tile, index) => {
                 const selected = choice === tile.value;
+                // One tab stop for the group: the chosen tile, or the first one before a choice is known.
+                const tabStop = choice ? selected : index === 0;
 
                 return (
                   <button
@@ -160,6 +187,8 @@ const Preferences: FC = () => {
                     type="button"
                     role="radio"
                     aria-checked={selected}
+                    tabIndex={tabStop ? 0 : -1}
+                    data-theme-choice={tile.value}
                     onClick={() => setTheme(tile.value)}
                     className={cn(
                       'tw-group tw-flex tw-flex-col tw-gap-2 tw-rounded-lg tw-bg-transparent tw-p-0 tw-text-left tw-outline-none',

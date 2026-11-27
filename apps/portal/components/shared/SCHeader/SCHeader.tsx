@@ -1,20 +1,13 @@
 import { FC, ChangeEvent, useRef } from 'react';
 import { useRouter } from 'next/router';
 import { useTranslation } from 'react-i18next';
-import {
-  Bell,
-  CircleHelp,
-  Menu as MenuIcon,
-  Search,
-  Settings,
-  UserPlus,
-} from 'lucide-react';
+import { Bell, CircleHelp, Search, Settings, UserPlus } from 'lucide-react';
 import { panelRoutes, preRoutes } from 'components/_routes';
 import { infoMessage } from 'app/services/helpers/toastMessages';
 import { Button } from 'components/ui/button';
 import { Hint } from 'components/ui/tooltip';
 import ThemeToggle from 'components/shell/ThemeToggle';
-import { useShell } from 'components/shell/ShellContext';
+import DrawerButton from 'components/shell/DrawerButton';
 
 interface ISCHeaderProps {
   filterValue?: string | null;
@@ -46,7 +39,6 @@ const SCHeader: FC<ISCHeaderProps> = ({
   const clickedNotifications = useRef(false); // to be removed when implemented
   const clickedHelpCenter = useRef(false); // to be removed when implemented
   const router = useRouter();
-  const { setDrawerOpen, drawerTriggerRef } = useShell();
 
   const goToWorkspace = () => {
     const { workspaceId } = router.query;
@@ -64,17 +56,7 @@ const SCHeader: FC<ISCHeaderProps> = ({
   return (
     <header className="tw-flex tw-h-14 tw-shrink-0 tw-items-center tw-justify-between tw-gap-3 tw-border-0 tw-border-b tw-border-solid tw-border-border tw-px-4 md:tw-px-6">
       <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-2">
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          className="-tw-ml-1 md:tw-hidden"
-          aria-label={t('shell.openNavigation')}
-          aria-haspopup="dialog"
-          ref={drawerTriggerRef}
-          onClick={() => setDrawerOpen(true)}
-        >
-          <MenuIcon />
-        </Button>
+        <DrawerButton className="-tw-ml-1" />
 
         {canSearch ? (
           <label className="tw-flex tw-h-8 tw-w-full tw-max-w-sm tw-items-center tw-gap-2 tw-rounded-md tw-border tw-border-solid tw-border-border tw-bg-card tw-px-2.5 tw-text-sm tw-text-muted-foreground tw-transition-colors tw-duration-150 focus-within:tw-border-ring focus-within:tw-ring-2 focus-within:tw-ring-ring/20">

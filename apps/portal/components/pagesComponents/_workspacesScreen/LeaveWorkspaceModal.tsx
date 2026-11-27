@@ -32,24 +32,20 @@ const LeaveWorkspaceModal: React.FC<IProps> = ({
       // The markup is [confirm] [cancel]; the row is reversed so the action sits on the right
       // and the cancel to its left, as in the other dialogs.
       footer={
-        <div
-          className={classNames(
-            'tw-mt-6 tw-flex tw-flex-row-reverse tw-justify-start tw-gap-2',
-          )}
-        >
-          <AppButton
-            onClick={onOk}
-            twPadding="tw-px-4 tw-py-[7px]"
-            bgColor="tw-bg-danger"
-          >
-            {t('common.confirm')}
-          </AppButton>
+        <div className={classNames('tw-mt-6 tw-flex tw-justify-end tw-gap-2')}>
           <AppButton
             onClick={onCancel}
             outlined
             twPadding="tw-px-4 tw-py-[7px]"
           >
             {t('common.cancel')}
+          </AppButton>
+          <AppButton
+            onClick={onOk}
+            twPadding="tw-px-4 tw-py-[7px]"
+            bgColor="tw-bg-danger"
+          >
+            {t('common.confirm')}
           </AppButton>
         </div>
       }
