@@ -23,7 +23,11 @@ interface SentQuery {
   orderBy: Array<[string, string]>;
 }
 
-/** Enough of Firestore for the adapter's reads; records each query it runs. */
+/**
+ * Enough of Firestore for the adapter's reads; records each query it runs. Every read answers "no rows": the
+ * adapter builds its query before it sees any result (rows are filtered and sorted in memory afterwards), and the
+ * duplicate path of `record()` reads through `latest()`, the same query shape as `status()` with one document id.
+ */
 const recordingFirestore = (sent: SentQuery[]) => {
   const query = (q: SentQuery): any => ({
     where: (field: string, operator: string) =>
@@ -84,6 +88,8 @@ const covers = (
 describe('Firestore configuration for terms acceptances', () => {
   it('has an index for every ordered query the recorder sends', async () => {
     const sent: SentQuery[] = [];
+    // The service takes a firebase-admin App and uses only its `firestore()`: the cast stands in for the rest of
+    // the App, which this check does not touch.
     const service = new TermsAcceptanceService({
       firestore: () => recordingFirestore(sent),
     } as any);

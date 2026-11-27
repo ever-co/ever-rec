@@ -422,8 +422,9 @@ An installation can also connect to Ever Platform (off by default; `EVER_CONNECT
 
 2. **Cloud Firestore (terms-of-service acceptances)**
     - Create the `(default)` Firestore database in Native mode, in the same region as the Realtime Database.
-    - Deploy its rules and indexes from this repository: `firebase deploy --only firestore` (`firestore.rules` and
-      `firestore.indexes.json`, both listed in `firebase.json`).
+    - Deploy its rules and indexes from this repository, naming the project (the repository has no `.firebaserc`,
+      so the CLI has no default): `firebase deploy --only firestore --project <your-firebase-project-id>`
+      (`firestore.rules` and `firestore.indexes.json`, both listed in `firebase.json`).
     - The indexes are required: without them every terms status check (`GET /api/v1/terms/status`, asked by the
       portal after each sign-in) fails with `FAILED_PRECONDITION: The query requires an index`.
 
