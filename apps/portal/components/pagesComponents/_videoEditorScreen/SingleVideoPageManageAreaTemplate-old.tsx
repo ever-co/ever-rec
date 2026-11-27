@@ -530,7 +530,7 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
               </div>
             </ImageActionsCard>
             <ImageActionsCard>
-              <div className="tw-grid tw-gap-2 tw-grid-cols-3 across-btns:tw-gap-1">
+              <div className="tw-grid tw-gap-2 tw-grid-cols-[repeat(auto-fit,minmax(100px,1fr))] across-btns:tw-gap-1">
                 <ImageActionItem
                   title={t('common.download')}
                   onClick={localSave}

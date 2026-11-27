@@ -17,7 +17,7 @@ const WatermarkToolSlider: React.FC<IWatermarkToolSliderProps> = ({
   onChange,
 }) => {
   return (
-    <div style={{marginTop: '1rem'}}>
+    <div style={{ marginTop: '1rem' }}>
       <div
         style={{
           display: 'flex',

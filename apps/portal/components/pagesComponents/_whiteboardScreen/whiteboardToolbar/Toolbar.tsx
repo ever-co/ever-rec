@@ -48,7 +48,7 @@ const ToolBar = (props: IToolBar) => {
         left: '5px',
       }}
     >
-      <div className="tw-bg-card tw-ring-1 tw-ring-border tw-shadow-[var(--shadow-float)] tw-rounded-lg tw-p-1 tw-flex tw-flex-col tw-items-center">
+      <div className="tw-bg-card tw-ring-1 tw-ring-border tw-shadow-[shadow:var(--shadow-float)] tw-rounded-lg tw-p-1 tw-flex tw-flex-col tw-items-center">
         {/*<ToolButton
           active={props.active_tool === tools.comments ? true : false}
           onSelect={() => {
@@ -152,7 +152,7 @@ const ToolBar = (props: IToolBar) => {
           icon={tools.redo.icon}
         />
       </div>
-      <div className="tw-bg-card tw-ring-1 tw-ring-border tw-shadow-[var(--shadow-float)] tw-rounded-lg tw-p-1 tw-flex tw-flex-col tw-items-center tw-mt-3">
+      <div className="tw-bg-card tw-ring-1 tw-ring-border tw-shadow-[shadow:var(--shadow-float)] tw-rounded-lg tw-p-1 tw-flex tw-flex-col tw-items-center tw-mt-3">
         <ToolButton
           active={props.active_tool === tools.note ? true : false}
           onSelect={() => props.setActiveTool(tools.note)}

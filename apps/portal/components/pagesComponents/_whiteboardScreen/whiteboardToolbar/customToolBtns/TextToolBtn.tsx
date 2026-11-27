@@ -15,9 +15,11 @@ import underlineIcon from 'public/assets/svg/tools-panel/underline.svg';
 import alignCenterIcon from 'public/assets/svg/tools-panel/align-center.svg';
 import alignLeftIcon from 'public/assets/svg/tools-panel/align-left.svg';
 import alignRightIcon from 'public/assets/svg/tools-panel/align-right.svg';
-// One black-ink drawing per button, like the rest of the row: ToolSubPanelBtn paints its states.
+import WhiteTTIcon from 'public/assets/svg/tools-panel/whiteTT.svg';
 import BlackTTIcon from 'public/assets/svg/tools-panel/blackTT.svg';
 import BlacktIcon from 'public/assets/svg/tools-panel/normalTt_black.svg';
+import WhitetIcon from 'public/assets/svg/tools-panel/normalTt_white.svg';
+import WhiteT2Icon from 'public/assets/svg/tools-panel/whiteT_2.svg';
 import BlackT2Icon from 'public/assets/svg/tools-panel/blackT_2.svg';
 import StrokeIcon from 'public/assets/svg/tools-panel/T(Stroke).svg';
 import cross from 'public/assets/svg/tools-panel/cross.svg';

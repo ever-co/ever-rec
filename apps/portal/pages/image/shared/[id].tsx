@@ -172,7 +172,7 @@ const SharedImage: React.FC<ISharedItem> = ({ user }) => {
                 gutter={30}
                 style={{ minHeight: '85vh', marginLeft: 0, marginRight: 0 }}
               >
-                <Col xs={16} lg={16} xl={17} md={16}>
+                <Col xs={24} lg={16} xl={17} md={16}>
                   <div className="tw-flex tw-flex-col tw-w-full">
                     <div
                       className={classNames(
@@ -262,7 +262,13 @@ tw-items-center tw-justify-center tw-h-500px"
                 </Col>
 
                 {!isWorkspace && (
-                  <Col xs={8} lg={8} xl={7} md={8} className="mx-lg:tw-my-30px">
+                  <Col
+                    xs={24}
+                    lg={8}
+                    xl={7}
+                    md={8}
+                    className="mx-lg:tw-my-30px"
+                  >
                     <div className="tw-rounded-xl tw-border tw-border-solid tw-border-border tw-bg-card tw-p-3">
                       <div className="tw-flex tw-flex-col tw-justify-between">
                         {commentsTemplate}

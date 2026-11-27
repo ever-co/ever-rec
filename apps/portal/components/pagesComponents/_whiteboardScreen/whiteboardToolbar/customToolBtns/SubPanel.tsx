@@ -8,7 +8,7 @@ interface IToolSubPanelProp {
 // nothing to show, so the panel's frame is hidden for it.
 const SubPanel: React.FC<IToolSubPanelProp> = ({ children }) => {
   return (
-    <div className="tw-rounded-lg tw-border tw-border-border tw-bg-popover tw-text-popover-foreground tw-shadow-[var(--shadow-float)] [&:has(>:only-child:empty)]:tw-hidden">
+    <div className="tw-rounded-lg tw-border tw-border-border tw-bg-popover tw-text-popover-foreground tw-shadow-[shadow:var(--shadow-float)] [&:has(>:only-child:empty)]:tw-hidden">
       {children}
     </div>
   );

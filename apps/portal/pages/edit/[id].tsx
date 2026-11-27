@@ -409,19 +409,19 @@ const EditorScreen: React.FC = () => {
         img,
         renderDimentions: resizer
           ? {
-            width: resizer.width,
-            height: resizer.height,
-          }
+              width: resizer.width,
+              height: resizer.height,
+            }
           : {
-            width:
-              resizeDimentions.width !== 0
-                ? resizeDimentions.width
-                : initialDimentions.width,
-            height:
-              resizeDimentions.height !== 0
-                ? resizeDimentions.height
-                : initialDimentions.height,
-          },
+              width:
+                resizeDimentions.width !== 0
+                  ? resizeDimentions.width
+                  : initialDimentions.width,
+              height:
+                resizeDimentions.height !== 0
+                  ? resizeDimentions.height
+                  : initialDimentions.height,
+            },
       });
       setHistory(historyArr);
       setHistoryStep(historyArr.length - 1);
@@ -960,10 +960,10 @@ const EditorScreen: React.FC = () => {
       !workspaceId
         ? EditorService.saveOriginalImageData(editorImage)
         : saveOriginalWSImageData(
-          activeWorkspace?.id,
-          editorImage.dbData?.refName || '',
-          editorImage,
-        );
+            activeWorkspace?.id,
+            editorImage.dbData?.refName || '',
+            editorImage,
+          );
     }
 
     !editorImage && (workspaceId ? getImageWorkspace() : getImage());
@@ -1499,7 +1499,7 @@ const EditorScreen: React.FC = () => {
         currentShape={currentShape}
         scale={stageScale}
         comments={comments}
-      // addComment={addComment}
+        // addComment={addComment}
       />
       <AppSpinner show={!imageLoaded} tip="Loading image..." />
     </div>

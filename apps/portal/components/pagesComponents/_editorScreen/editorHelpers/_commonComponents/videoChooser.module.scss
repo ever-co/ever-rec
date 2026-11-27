@@ -59,27 +59,27 @@
 }
 
 .videosContainer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    padding-right: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding-right: 1.25rem;
 }
 
 .videosInnerContainer {
-    margin-bottom: 1.5rem;
-    font-size: 1.125rem;
-    line-height: 1.75rem;
-    font-weight: 600;
-    color: hsl(var(--foreground));
+  margin-bottom: 1.5rem;
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+  font-weight: 600;
+  color: hsl(var(--foreground));
 }
 
 .appButton {
-    padding-bottom: 0.5rem;
-    padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  padding-top: 0.5rem;
 }
 
 .appBtnPadding {
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
 }

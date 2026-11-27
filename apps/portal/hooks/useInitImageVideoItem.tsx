@@ -85,14 +85,15 @@ const useInitImageVideoItem = ({
           onFocus={setTitleFocus}
           onBlur={blurTitleHandler}
           // On the single item page the title is the page's heading (20px / 600): it shows its
-          // field border only while it is edited. (Inline styles: Tailwind does not scan hooks/.)
+          // field border only while it is edited, and grows with a long title (up to three
+          // lines) instead of cutting it. (Inline styles: Tailwind does not scan hooks/.)
           style={{
             fontSize: forSinglePage ? '1.25rem' : '1rem',
-            height: forSinglePage ? 40 : undefined,
             lineHeight: !forSinglePage ? 1.17 : '1.75rem',
             borderColor:
               forSinglePage && !editTitle ? 'transparent' : undefined,
           }}
+          autoSize={forSinglePage ? { minRows: 1, maxRows: 3 } : undefined}
           maxLength={200}
         />
       ) : (
@@ -104,7 +105,7 @@ const useInitImageVideoItem = ({
               : 'tw-text-xl',
           )}
           style={{
-            height: forSinglePage ? 40 : undefined,
+            minHeight: forSinglePage ? 40 : undefined,
             lineHeight: !forSinglePage ? 1.17 : '1.75rem',
             fontSize: forSinglePage ? '1.25rem' : undefined,
             fontWeight: forSinglePage ? 600 : undefined,

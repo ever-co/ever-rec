@@ -1,47 +1,46 @@
 .parentContainer {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
 .select {
-    width: 100%;
-    border-radius: 0.25rem;
+  width: 100%;
+  border-radius: 0.25rem;
 }
 .flexContainer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-top: 0.5rem;
-    width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.5rem;
+  width: 100%;
 }
 
 .cursor {
-    cursor: pointer;
+  cursor: pointer;
 }
 
 // The font-size stepper: a bordered control (its plus and minus are black image files).
 .container {
-    border-radius: 0.5rem;
-    background-color: transparent;
-    display: flex;
-    justify-content: center;
-    margin: 4px 0 4px 8px;
-    border: 1px solid hsl(var(--input));
+  border-radius: 0.5rem;
+  background-color: transparent;
+  display: flex;
+  justify-content: center;
+  margin: 4px 0 4px 8px;
+  border: 1px solid hsl(var(--input));
 }
 
 :global(.dark) .container img {
-    filter: brightness(0) invert(1);
+  filter: brightness(0) invert(1);
 }
 
 .colorSelectorWrapper {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 0.5rem;
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.5rem;
 }
 
-
 .colorSelector {
-    cursor: pointer;
-    margin-right: 0.5rem;
+  cursor: pointer;
+  margin-right: 0.5rem;
 }

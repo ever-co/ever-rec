@@ -1,76 +1,76 @@
 .parentContainer {
-    display: flex;
-    flex-direction: column;
-    width: 330px;
+  display: flex;
+  flex-direction: column;
+  width: 330px;
 }
 
 .innerContainer {
-    display: flex;
-    width: 100%;
-    align-items: flex-start;
-    justify-content: flex-start;
-    flex-direction: column;
+  display: flex;
+  width: 100%;
+  align-items: flex-start;
+  justify-content: flex-start;
+  flex-direction: column;
 }
 
 .title {
-    font-size: 1rem;
-    line-height: 1.5rem;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
+  font-size: 1rem;
+  line-height: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
 }
 
 // The address field (react-multi-email ships a white field with its own focus colour).
 .emailContainer.emailContainer {
-    border: 1px solid hsl(var(--input));
-    border-radius: 8px;
-    width: 100%;
-    background: transparent;
-    color: hsl(var(--foreground));
+  border: 1px solid hsl(var(--input));
+  border-radius: 8px;
+  width: 100%;
+  background: transparent;
+  color: hsl(var(--foreground));
 
-    &:global(.focused) {
-        border-color: hsl(var(--ring));
-        background: transparent;
-        box-shadow: 0 0 0 3px hsl(var(--ring) / 0.2);
-    }
+  &:global(.focused) {
+    border-color: hsl(var(--ring));
+    background: transparent;
+    box-shadow: 0 0 0 3px hsl(var(--ring) / 0.2);
+  }
 }
 
 .emailInput.emailInput {
-    background-color: hsl(var(--muted));
-    color: hsl(var(--foreground));
-    padding: 0;
+  background-color: hsl(var(--muted));
+  color: hsl(var(--foreground));
+  padding: 0;
 }
 
 .wrapper {
-    padding-top: 12px;
-    display: flex;
-    width: 100%;
-    align-items: flex-start;
-    justify-content: space-between;
+  padding-top: 12px;
+  display: flex;
+  width: 100%;
+  align-items: flex-start;
+  justify-content: space-between;
 }
 
 .column {
-    flex-direction: column;
+  flex-direction: column;
 }
 
 .row {
-    flex-direction: row;
+  flex-direction: row;
 }
 
 .textarea {
-    border-radius: 5px;
-    width: 100%;
-    margin: '10px 0px';
+  border-radius: 5px;
+  width: 100%;
+  margin: '10px 0px';
 }
 
 .fullWidth {
-    width: 100%;
+  width: 100%;
 }
 
 .flexContainer {
-    align-items: center;
-    justify-content: flex-end;
+  align-items: center;
+  justify-content: flex-end;
 }
 
 .button {
-    padding: 0.5rem 2rem;
+  padding: 0.5rem 2rem;
 }

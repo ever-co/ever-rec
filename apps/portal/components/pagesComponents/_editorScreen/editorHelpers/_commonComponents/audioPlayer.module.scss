@@ -1,60 +1,60 @@
 // A voice note inside a comment: a quiet chip with a round play button.
 .audioContainer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background-color: hsl(var(--background));
-    border: 1px solid hsl(var(--border));
-    width: 200px;
-    padding: 0.25rem;
-    padding-left: 0.5rem;
-    border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: hsl(var(--background));
+  border: 1px solid hsl(var(--border));
+  width: 200px;
+  padding: 0.25rem;
+  padding-left: 0.5rem;
+  border-radius: 9999px;
 }
 
 .iconWrapper {
-    display: flex;
-    align-items: center;
-    margin-right: 0.5rem;
-    margin-top: 2px;
+  display: flex;
+  align-items: center;
+  margin-right: 0.5rem;
+  margin-top: 2px;
 }
 
 // The microphone is an injected SVG with a fixed dark violet ink.
 .icon {
-    margin-right: 0.25rem;
-    margin-top: 1px;
-    color: hsl(var(--muted-foreground));
+  margin-right: 0.25rem;
+  margin-top: 1px;
+  color: hsl(var(--muted-foreground));
 
-    svg path {
-        fill: currentColor !important;
-    }
+  svg path {
+    fill: currentColor !important;
+  }
 }
 
 .label {
-    color: hsl(var(--foreground));
-    font-size: 0.8125rem;
-    font-weight: 500;
+  color: hsl(var(--foreground));
+  font-size: 0.8125rem;
+  font-weight: 500;
 }
 
 .duration {
-    color: hsl(var(--muted-foreground));
-    font-size: 0.8125rem;
-    font-weight: 500;
-    font-variant-numeric: tabular-nums;
-    margin-top: 0.25rem;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.8125rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  margin-top: 0.25rem;
 }
 
 .playButton {
-    border-radius: 9999px;
-    background-color: hsl(var(--card));
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-color: hsl(var(--input));
-    padding: 0;
-    width: 30px !important;
-    height: 30px !important;
+  border-radius: 9999px;
+  background-color: hsl(var(--card));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-color: hsl(var(--input));
+  padding: 0;
+  width: 30px !important;
+  height: 30px !important;
 }
 
 .spacing {
-    margin-left: 2px;
+  margin-left: 2px;
 }

@@ -23,15 +23,15 @@
 
 // The chosen marker style (the marker pictures keep their own colours).
 .bgColor {
-    background-color: hsl(var(--brand-muted));
-    box-shadow: inset 0 0 0 1px hsl(var(--brand) / 0.5);
-    &:hover {
-        background: hsl(var(--brand-muted));
-    }
+  background-color: hsl(var(--brand-muted));
+  box-shadow: inset 0 0 0 1px hsl(var(--brand) / 0.5);
+  &:hover {
+    background: hsl(var(--brand-muted));
+  }
 }
 
 .selector {
-    cursor: pointer;
-    width: 40px;
-    height: 25px;
+  cursor: pointer;
+  width: 40px;
+  height: 25px;
 }

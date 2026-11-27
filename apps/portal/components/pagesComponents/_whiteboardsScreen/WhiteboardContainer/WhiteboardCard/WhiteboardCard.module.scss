@@ -4,10 +4,12 @@
   white-space: nowrap;
 }
 
-// What sits on the preview is over media: a dark ground with light ink, in both themes.
-@mixin over-media {
-  background-color: hsl(var(--overlay) / 0.6);
-  color: hsl(var(--on-overlay));
+// What sits on the preview gets its own small ground, so it reads on any picture and follows
+// the theme like the rest of the card.
+@mixin on-preview {
+  border: 1px solid hsl(var(--border));
+  background-color: hsl(var(--card));
+  color: hsl(var(--muted-foreground));
 }
 
 .whiteboardCard {
@@ -49,8 +51,9 @@
         justify-content: center;
         min-width: 2rem;
         min-height: 2rem;
+        padding: 1px;
         border-radius: 0.5rem;
-        @include over-media;
+        @include on-preview;
       }
     }
 
@@ -64,7 +67,7 @@
         padding: 0.125rem 0.5rem;
         border-radius: 0.375rem;
         font-weight: 500;
-        @include over-media;
+        @include on-preview;
       }
     }
   }

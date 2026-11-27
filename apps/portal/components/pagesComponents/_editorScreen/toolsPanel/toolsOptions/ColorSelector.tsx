@@ -76,11 +76,7 @@ const ColorSelector: React.FC<IColorSelectorProps> = ({
       {icon ? (
         <div style={{ cursor: 'pointer' }} onClick={togglePicker}>
           <div className={styles.flexContainer}>
-            <Image
-              src={icon}
-              alt=""
-              className="tw-grayscale dark:tw-invert"
-            />
+            <Image src={icon} alt="" className="tw-grayscale dark:tw-invert" />
           </div>
 
           {colorIndicator ? (
