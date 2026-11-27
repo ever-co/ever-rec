@@ -1,18 +1,30 @@
 // The chapter list of a single video (a column beside the player, or a strip under it) and the
 // buttons under the list. On the shared Ever tokens.
 
+// In a column the list takes the height its place has left (the column is as high as the player)
+// and scrolls inside it; it never makes the column higher.
+.VideoChapters {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  min-height: 0;
+}
+
 .VideoChaptersWrapper {
   display: flex;
+  flex: 1 1 0;
   flex-direction: column;
   gap: 0.25rem;
+  min-height: 0;
   overflow-x: hidden;
+  overflow-y: auto;
   margin-top: 0.5rem;
   margin-right: 0.5rem;
   padding-left: 0.5rem;
-  height: 430px;
 }
 
 .VideoChaptersWrapperHorizontal {
+  flex: none;
   flex-direction: row;
   gap: 0.75rem;
   height: auto;

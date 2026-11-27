@@ -281,8 +281,9 @@ const CreateJiraTicketModal: React.FC<ICreateJiraTicketModalProps> = ({
         value={description}
         canResize={false}
         placeholder={t('modals.cardDescription')}
-        className="tw-mt-6 tw-w-full"
+        className="tw-mt-3 tw-w-full"
         inputClass="scroll-div"
+        dense
         onChange={(e) => setSelectedDescription(e.value)}
       />
 

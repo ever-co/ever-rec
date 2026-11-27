@@ -108,6 +108,8 @@ const SlackChannelModal: React.FC<ISlackChannelModalProps> = ({
       <AppSpinner show={channelLoading} local={true} />
       <AppSelect
         label={t('modals.selectChannel')}
+        labelClass="tw-text-sm tw-text-muted-foreground"
+        dense
         placeholder={t('modals.selectAOption')}
         value={selectedChannel}
         errors={errors || undefined}

@@ -20,8 +20,10 @@
   }
 }
 
-// The chapters column: a card with a hairline.
+// The chapters column: a card with a hairline, as high as the player beside it (its list scrolls).
 .chapters {
+  display: flex;
+  flex-direction: column;
   border: 1px solid hsl(var(--border));
   border-radius: calc(var(--radius) + 2px);
   background: hsl(var(--card));
