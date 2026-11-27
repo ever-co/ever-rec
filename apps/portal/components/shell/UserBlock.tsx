@@ -137,7 +137,7 @@ const UserBlock: FC<{ collapsed?: boolean }> = ({ collapsed = false }) => {
         <DropdownMenuSeparator />
 
         <DropdownMenuItem onSelect={signOut}>
-          <LogOut />
+          <LogOut className="rtl:-tw-scale-x-100" />
           {t('header.user.signout')}
         </DropdownMenuItem>
       </DropdownMenuContent>

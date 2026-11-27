@@ -19,6 +19,7 @@ import {
 import styles from './ScreenshotItem.module.scss';
 import { MoreHorizontal } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { mirrorPlacement, useDirection } from 'i18n/direction';
 
 // Controls over the thumbnail's scrim: light ink and a light hover veil in both themes (the
 // theme's own hover surface would be a pale block over the picture in the light theme).
@@ -70,6 +71,7 @@ const ScreenshotItem: React.FC<IScreenshotItemProps> = ({
   onDropdownVisibleChange,
 }) => {
   const { t } = useTranslation();
+  const direction = useDirection();
   const canEditTitle = useMemo(
     () => (workspace && canEdit) || !workspace,
     [workspace, canEdit],
@@ -216,7 +218,7 @@ const ScreenshotItem: React.FC<IScreenshotItemProps> = ({
                     workspace={workspace}
                   />
                 }
-                placement="bottomRight"
+                placement={mirrorPlacement('bottomRight', direction)}
                 onOpenChange={dropdownVisibleChangeHandler}
               >
                 <button

@@ -3,6 +3,7 @@ import styles from './FolderItem.module.scss';
 import { Dropdown } from 'antd';
 import AppSvg from 'components/elements/AppSvg';
 import classNames from 'classnames';
+import { mirrorPlacement, useDirection } from 'i18n/direction';
 
 interface FolderHeaderProps {
   folder: any;
@@ -109,12 +110,13 @@ const MenuButton: FC<MenuButtonProps> = ({
   isDropdownVisible,
   onVisibleChange,
 }) => {
+  const direction = useDirection();
   return (
     <Dropdown
       trigger={['click']}
       open={isDropdownVisible}
       overlay={overlay}
-      placement={placement}
+      placement={mirrorPlacement(placement, direction)}
       onOpenChange={onVisibleChange}
     >
       <div

@@ -430,7 +430,11 @@ const ManageWorkspaces: React.FC = () => {
                         }
                       >
                         {workspace.admin !== user?.id ? (
-                          <LogOut strokeWidth={1.75} aria-hidden="true" />
+                          <LogOut
+                            strokeWidth={1.75}
+                            className="rtl:-tw-scale-x-100"
+                            aria-hidden="true"
+                          />
                         ) : (
                           <Trash2 strokeWidth={1.75} aria-hidden="true" />
                         )}

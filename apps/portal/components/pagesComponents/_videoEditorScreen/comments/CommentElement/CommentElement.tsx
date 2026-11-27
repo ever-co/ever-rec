@@ -7,6 +7,7 @@ import CommentInput from '../CommentInput/CommentInput';
 import { RootStateOrAny, useSelector } from 'react-redux';
 import { IUser } from 'app/interfaces/IUserData';
 import { useTranslation } from 'react-i18next';
+import { mirrorPlacement, useDirection } from 'i18n/direction';
 
 export type IComment = {
   id: string;
@@ -39,6 +40,7 @@ const CommentElement: FC<IProps> = ({
   deleteCommentHandler,
 }) => {
   const { t } = useTranslation();
+  const direction = useDirection();
   const user: IUser = useSelector((state: RootStateOrAny) => state.auth.user);
 
   const authorName = comment.user?.name;
@@ -118,7 +120,7 @@ const CommentElement: FC<IProps> = ({
               {comment.isOwn && user?.id && (
                 <Dropdown
                   trigger={['click']}
-                  placement="bottomRight"
+                  placement={mirrorPlacement('bottomRight', direction)}
                   overlay={() => commentMenu(comment)}
                 >
                   <div className={styles.moreButton}>

@@ -53,7 +53,7 @@ export const SELECT =
 /** A machine value (an id, a field path, a payload). */
 export const CODE = 'tw-font-mono tw-text-xs tw-text-foreground';
 
-/** A block of JSON. */
+/** A block of JSON. Give the `<pre>` `dir="ltr"`: code reads left to right in every language. */
 export const PAYLOAD =
   'tw-m-0 tw-overflow-auto tw-rounded-lg tw-border tw-border-solid tw-border-border tw-bg-muted tw-p-4 tw-font-mono tw-text-xs tw-leading-5 tw-text-foreground';
 
@@ -83,7 +83,8 @@ export const DetailRow: React.FC<{
       data-testid={testId}
       className="tw-m-0 tw-min-w-0 tw-break-words tw-text-end tw-text-sm tw-tabular-nums tw-text-foreground [&_code]:tw-font-mono [&_code]:tw-text-xs"
     >
-      {children}
+      {/* A value (a date, an id) keeps its own order in a right-to-left page. */}
+      <span dir="auto">{children}</span>
     </dd>
   </div>
 );
@@ -98,7 +99,7 @@ export const StatTile: React.FC<{
       {label}
     </dt>
     <dd className="tw-m-0 tw-mt-1 tw-break-words tw-text-xl tw-font-semibold tw-tabular-nums tw-text-foreground [&_code]:tw-break-all [&_code]:tw-font-mono [&_code]:tw-text-base [&_code]:tw-font-medium">
-      {children}
+      <span dir="auto">{children}</span>
     </dd>
   </div>
 );

@@ -258,7 +258,7 @@ const EverPlatformStatistics: React.FC = () => {
         <h4 className={BLOCK_TITLE}>
           {t('page.everPlatform.statistics.whatIsSent')}
         </h4>
-        <pre data-testid="ever-platform-preview" className={PAYLOAD}>
+        <pre data-testid="ever-platform-preview" dir="ltr" className={PAYLOAD}>
           {whatIsSent ? JSON.stringify(whatIsSent.payload, null, 2) : '—'}
         </pre>
       </section>
@@ -279,7 +279,9 @@ const EverPlatformStatistics: React.FC = () => {
                 ? ` · ${t('page.everPlatform.statistics.resetHint')}`
                 : ''}
             </p>
-            <pre className={PAYLOAD}>{pretty(last.payload)}</pre>
+            <pre dir="ltr" className={PAYLOAD}>
+              {pretty(last.payload)}
+            </pre>
           </div>
         ) : (
           <p className={MUTED_TEXT}>

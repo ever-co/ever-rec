@@ -8,6 +8,7 @@ import {
   directionOf,
   documentLanguageScript,
   inlineEndSide,
+  mirrorPlacement,
   RTL_LANGUAGES,
   useDirection,
 } from 'i18n/direction';
@@ -60,6 +61,13 @@ describe('directionOf', () => {
   it('puts the collapsed sidebar’s menus on the line-end side', () => {
     expect(inlineEndSide('ltr')).toBe('right');
     expect(inlineEndSide('rtl')).toBe('left');
+  });
+
+  it('mirrors antd dropdown corners right to left only', () => {
+    expect(mirrorPlacement('bottomRight', 'ltr')).toBe('bottomRight');
+    expect(mirrorPlacement('bottomRight', 'rtl')).toBe('bottomLeft');
+    expect(mirrorPlacement('topLeft', 'rtl')).toBe('topRight');
+    expect(mirrorPlacement('bottom', 'rtl')).toBe('bottom');
   });
 });
 

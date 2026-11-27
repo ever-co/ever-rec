@@ -347,7 +347,11 @@ const WorkspaceTeams: FC = () => {
                             onClick={() => leaveTeamHandler(team.id, team.name)}
                             title={t('workspace.leaveTeam')}
                           >
-                            <LogOut strokeWidth={1.75} aria-hidden="true" />
+                            <LogOut
+                              strokeWidth={1.75}
+                              className="rtl:-tw-scale-x-100"
+                              aria-hidden="true"
+                            />
                           </div>
                         )}
                       </div>

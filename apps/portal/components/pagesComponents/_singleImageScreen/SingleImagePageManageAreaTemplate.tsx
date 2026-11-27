@@ -54,6 +54,7 @@ import DeleteItemModal from 'components/shared/DeleteItemModal';
 import { useWorkspaceImageDelete } from 'misc/workspaceFunctions';
 import useGenerateShareLink from 'hooks/useGenerateShareLink';
 import { Trans, useTranslation } from 'react-i18next';
+import { mirrorPlacement, useDirection } from 'i18n/direction';
 
 interface Props {
   image: IEditorImage | IWorkspaceImage;
@@ -77,6 +78,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
   const { workspaceImageDelete } = useWorkspaceImageDelete();
   const user = useAuthenticateUser();
   const { t } = useTranslation();
+  const direction = useDirection();
   const dispatch = useDispatch();
   const router = useRouter();
   const [showFolderModal, setShowFolderModal] = useState(false);
@@ -540,7 +542,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
                 <Dropdown
                   trigger={['click']}
                   overlay={moreMenu}
-                  placement="bottomLeft"
+                  placement={mirrorPlacement('bottomLeft', direction)}
                 >
                   <ImageActionItem
                     title={t('page.image.more')}

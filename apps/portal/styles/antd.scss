@@ -362,6 +362,12 @@ a {
       color $t-fast;
   }
 
+  // antd 4 puts the gap after a menu icon on its right only, even right to left.
+  .ant-dropdown-menu-item-icon {
+    margin-right: 0;
+    margin-inline-end: 8px;
+  }
+
   .ant-dropdown-menu-item:hover,
   .ant-dropdown-menu-submenu-title:hover,
   .ant-dropdown-menu-item.ant-dropdown-menu-item-active,

@@ -97,3 +97,17 @@ export const useDirection = (): Direction => useContext(DirectionContext);
  */
 export const inlineEndSide = (direction: Direction): 'left' | 'right' =>
   direction === 'rtl' ? 'left' : 'right';
+
+/**
+ * antd names a dropdown's corner physically (`bottomRight`) and keeps it right to left. Mirrored,
+ * the menu opens over its own card again instead of the neighbour's.
+ */
+export function mirrorPlacement<P extends string>(
+  placement: P,
+  direction: Direction,
+): P {
+  if (direction !== 'rtl') return placement;
+  return placement.replace(/(Left|Right)$/, (side) =>
+    side === 'Left' ? 'Right' : 'Left',
+  ) as P;
+}
