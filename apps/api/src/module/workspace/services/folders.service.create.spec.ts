@@ -17,8 +17,14 @@ jest.mock('firebase-admin', () => ({
   database: () => mockFirebase.database(),
   storage: () => mockFirebase.storage(),
 }));
+// utilities.service imports sharp, whose native build CI skips (`--ignore-scripts`).
+jest.mock('sharp', () => ({ __esModule: true, default: jest.fn() }));
 
-const folderRecord = (id: string, parentId: string | false, nestLevel: number) => ({
+const folderRecord = (
+  id: string,
+  parentId: string | false,
+  nestLevel: number,
+) => ({
   id,
   name: id,
   creator: 'uid-admin',
@@ -59,7 +65,10 @@ describe('nestLevelUnder', () => {
   });
 
   it('stops on a parent chain that loops', () => {
-    const loop = [folderRecord('a', 'b', 0), folderRecord('b', 'a', 0)] as any[];
+    const loop = [
+      folderRecord('a', 'b', 0),
+      folderRecord('b', 'a', 0),
+    ] as any[];
     expect(nestLevelUnder(loop, 'a')).toBe(2);
   });
 });
