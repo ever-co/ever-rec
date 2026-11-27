@@ -2,7 +2,7 @@
  * Builds the auth part of the API (the real `AuthModule`, and `EverIdModule` when present) on top of
  * the in-memory Firebase doubles, with the same global prefix and body parsing as `main.ts`.
  */
-import { INestApplication } from '@nestjs/common';
+import { DynamicModule, INestApplication, Type } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { Test } from '@nestjs/testing';
@@ -56,6 +56,8 @@ export interface TestAppOptions {
   everId?: boolean;
   /** Gauzy mirror base URL (sets `GAUZY_API_URL` for the Gauzy module's config). */
   gauzyApiUrl?: string;
+  /** More modules to import, for instance a stand-in for an optional module of `AppModule`. */
+  imports?: Array<Type<unknown> | DynamicModule>;
 }
 
 /** Loads `EverIdModule` when it exists. */
@@ -102,6 +104,7 @@ export async function createTestApp(
       FirebaseModule,
       AuthModule,
       ...(everIdModule ? [everIdModule] : []),
+      ...(options.imports ?? []),
     ],
   })
     .overrideProvider(FIREBASE_ADMIN)
