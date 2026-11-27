@@ -176,7 +176,8 @@ const Auth: React.FC<SignFlowComponent> = ({ children, componentType }) => {
             <div className="tw-flex tw-justify-center tw-p-8">
               <Image
                 src="/sign/signin1.svg"
-                alt="Google"
+                alt=""
+                className="dark:tw-invert dark:tw-hue-rotate-180"
                 layout="intrinsic"
                 height="650"
                 width="500"

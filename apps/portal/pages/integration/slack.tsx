@@ -74,7 +74,12 @@ const PanelSlackIntegration: React.FC = () => {
       </div>
       <div className="tw-flex tw-items-center tw-justify-center tw-rounded-[0.75rem] tw-bg-muted mx-lg:tw-hidden">
         <div className="tw-relative tw-h-full tw-w-8/12">
-          <Image src="/sign/signin1.svg" alt="Google" layout="fill" />
+          <Image
+            src="/sign/signin1.svg"
+            alt=""
+            layout="fill"
+            className="dark:tw-invert dark:tw-hue-rotate-180"
+          />
         </div>
       </div>
     </div>

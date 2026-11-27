@@ -119,7 +119,7 @@ const RenameModal: React.FC<Props> = ({ onOk, onCancel, visible }) => {
           path={renameIcon.src}
           className="tw-text-muted-foreground"
         />
-        <h2 className="tw-m-0 tw-text-lg tw-font-semibold tw-text-foreground">
+        <h2 className="tw-m-0 tw-text-base tw-font-semibold tw-text-foreground">
           Rename
         </h2>
       </div>

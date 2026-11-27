@@ -40,7 +40,7 @@ const TrashModal: React.FC<ITrashModalProps> = ({
         </div>
       }
     >
-      <h2 className="tw-pr-6 tw-text-lg tw-font-semibold tw-text-foreground">
+      <h2 className="tw-pr-6 tw-text-base tw-font-semibold tw-text-foreground">
         {title}
       </h2>
     </Modal>

@@ -21,7 +21,13 @@ const NoAccess = () => {
           className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-py-12"
         >
           <div className="tw-flex tw-justify-center">
-            <Image src="/images/404.svg" alt="404" width={240} height={240} />
+            <Image
+              src="/images/404.svg"
+              alt=""
+              width={240}
+              height={240}
+              className="dark:tw-invert dark:tw-hue-rotate-180"
+            />
           </div>
           <div className="tw-flex tw-justify-center">
             <div>

@@ -81,7 +81,7 @@ const ShareItemModal: React.FC<IShareItemModalProps> = ({
         </div>
       }
     >
-      <h2 className="tw-mb-4 tw-pr-6 tw-text-lg tw-font-semibold tw-text-foreground">
+      <h2 className="tw-mb-4 tw-pr-6 tw-text-base tw-font-semibold tw-text-foreground">
         {t('modals.shareLink')}
       </h2>
       <label className="tw-text-sm tw-text-muted-foreground">
