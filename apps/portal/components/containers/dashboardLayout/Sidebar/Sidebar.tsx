@@ -1,4 +1,4 @@
-import { FC, useCallback, useState } from 'react';
+import { FC, useState } from 'react';
 import { useRouter } from 'next/router';
 import { RootStateOrAny, useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
@@ -87,22 +87,16 @@ const Sidebar: FC<IProps> = ({
 
     return router.asPath.includes(item.route);
   };
-  const handleItemClick = useCallback(
-    (item: any) => {
-      sidebarItemClicked(item);
-    },
-    [router], // Dependency array
-  );
 
   const menuItems: IMainMenuItem[] = isWorkspaceSettingsPage
     ? getWorkspaceSettingsMenuItems(router.query.workspaceId as string)
     : isProfilePage
       ? [...settingsMenuItems]
       : [...mainMenuItems];
-  const createClickHandler = useCallback(
-    (item: any) => () => handleItemClick(item),
-    [handleItemClick],
-  );
+  // Not memoised: the handler has to see the folder that is open now, not the one at first render.
+  const createClickHandler = (item: IMainMenuItem) => () => {
+    void sidebarItemClicked(item);
+  };
 
   const isSettings = isProfilePage || isWorkspaceSettingsPage;
   const backItem = isSettings
