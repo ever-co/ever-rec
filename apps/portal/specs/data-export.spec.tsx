@@ -88,8 +88,8 @@ describe('Settings → Your data export', () => {
     const unavailable = byTestId('data-export-unavailable');
     expect(unavailable).not.toBeNull();
     // Its own title, then the reasons
-    expect(unavailable.textContent).toBe('page.dataExport.unavailableTitlepage.dataExport.unavailable');
-    expect(container.querySelector('[role="status"]').contains(unavailable)).toBe(true);
+    expect(unavailable?.textContent).toBe('page.dataExport.unavailableTitlepage.dataExport.unavailable');
+    expect(container.querySelector('[role="status"]')?.contains(unavailable)).toBe(true);
     expect(byTestId('data-export-download')).toBeNull();
   });
 
