@@ -180,16 +180,16 @@
     "deleteWorkspace": "Verwijder werkruimte"
   },
   "header": {
-    "searchFiles": "Zoek bestanden...",
+    "searchFiles": "Zoek bestanden",
     "help": "Helpcentrum",
-    "helpSoon": "Helpcentrum binnenkort beschikbaar!",
+    "helpSoon": "Helpcentrum binnenkort beschikbaar",
     "notifications": "Meldingen",
-    "notificationsSoon": "Meldingen binnenkort beschikbaar!",
+    "notificationsSoon": "Meldingen binnenkort beschikbaar",
     "companySettings": "Bedrijfsinstellingen",
     "user": {
       "addNewCompany": "Voeg nieuw bedrijf toe",
       "installChrome": "Installeer Chrome-extensie",
-      "availableSoon": "Binnenkort beschikbaar in de Chrome Web Store!",
+      "availableSoon": "Binnenkort beschikbaar in de Chrome Web Store",
       "signout": "Uitloggen"
     }
   },
@@ -640,6 +640,17 @@
       "saveEachFile": "Vraag waar elk bestand moet worden opgeslagen voordat u het downloadt.",
       "saveEachFileDescription": "Opmerking: om deze functie te gebruiken, moet u de extensie toestemming geven om downloads te beheren wanneer het toestemmingsvenster verschijnt. Alleen als deze optie is ingeschakeld, kunt u een standaard submap opgeven om schermafbeeldingen op uw lokale schijf op te slaan. Standaard wordt de map 'Downloads' gebruikt als u geen submap opgeeft.",
       "addDateAndUrl": "Voeg datum en URL toe bovenaan een schermafbeelding."
+    },
+    "appearance": {
+      "description": "Uiterlijk en taal van Ever Rec in deze browser",
+      "theme": "Thema",
+      "themeHint": "Geldt alleen voor deze browser",
+      "light": "Licht",
+      "dark": "Donker",
+      "system": "Systeem",
+      "languageHint": "De taal van de app in deze browser",
+      "saving": "Screenshots opslaan",
+      "savingHint": "Bestandsindeling, downloadmap en Google Drive-links voor de browserextensie"
     }
   },
   "modals": {
@@ -818,5 +829,28 @@
     "videoDeletedAndRedirect": "Video succesvol verwijderd. U wordt doorgestuurd naar uw werkruimte...",
     "videoMovedToTrashAndRedirecting": "Video succesvol naar de prullenbak verplaatst. U wordt doorgestuurd naar 'Mijn video's'...",
     "joinedWorkspaceSuccess": "U bent succesvol lid geworden van de werkruimte. U wordt doorgestuurd naar de nieuwe werkruimte..."
+  },
+  "shell": {
+    "select": "Selecteren",
+    "loading": "Laden",
+    "myLibrary": "Mijn bibliotheek",
+    "workspaces": "Werkruimtes",
+    "noOtherWorkspace": "Geen andere werkruimte",
+    "switchWorkspace": "Van werkruimte wisselen",
+    "account": "Account",
+    "accountMenu": "Accountmenu",
+    "backToApp": "Terug naar de app",
+    "collapseSidebar": "Zijbalk inklappen",
+    "expandSidebar": "Zijbalk uitklappen",
+    "openNavigation": "Navigatie openen",
+    "closeNavigation": "Navigatie sluiten",
+    "switchToDark": "Naar donker thema wisselen",
+    "switchToLight": "Naar licht thema wisselen",
+    "showStarredFolders": "Mappen met ster tonen",
+    "hideStarredFolders": "Mappen met ster verbergen",
+    "noStarredFolders": "Geen mappen met ster",
+    "members": "{{count}} leden",
+    "members_one": "{{count}} lid",
+    "members_other": "{{count}} leden"
   }
 }

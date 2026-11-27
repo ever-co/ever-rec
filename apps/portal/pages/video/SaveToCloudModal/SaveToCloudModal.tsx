@@ -85,15 +85,7 @@ const SaveToCloudModal = ({ user, visible, item, onCancel }) => {
   };
 
   return (
-    <Modal
-      open={visible}
-      closable
-      closeIcon={
-        <AppSvg path="/common/close-icon.svg" className="modalCloseButton" />
-      }
-      footer={null}
-      onCancel={onCancel}
-    >
+    <Modal open={visible} closable footer={null} onCancel={onCancel}>
       <div className="tw-font-semibold tw-text-sm tw-mb-2 tw-text-center">
         {t('page.image.saveToCloud')}
       </div>
@@ -119,7 +111,7 @@ const SaveToCloudModal = ({ user, visible, item, onCancel }) => {
                 )}
               >
                 <div className={styles.localAppSpinnerWrapper}>
-                  <AppSpinnerLocal circleInnerColor="#5b4dbe" />
+                  <AppSpinnerLocal />
                 </div>
               </div>
               <div className={styles.providerText}>
@@ -188,7 +180,7 @@ const SaveToCloudModal = ({ user, visible, item, onCancel }) => {
                 )}
               >
                 <div className={styles.localAppSpinnerWrapper}>
-                  <AppSpinnerLocal circleInnerColor="#5b4dbe" />
+                  <AppSpinnerLocal />
                 </div>
                 <div className={styles.providerText}>
                   <div className={styles.openImageText}>

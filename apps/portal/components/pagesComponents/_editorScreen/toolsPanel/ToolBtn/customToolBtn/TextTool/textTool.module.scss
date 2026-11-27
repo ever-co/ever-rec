@@ -1,43 +1,49 @@
 .parentContainer {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
+// The font select: the global select skin has no outline of its own, so the field's hairline is
+// drawn here (it was a white box before).
 .select {
-    width: 100%;
-    border-radius: 0.25rem;
-    background-color: white;
+  width: 100%;
+  border: 1px solid hsl(var(--input));
+  border-radius: 0.5rem;
 }
 .flexContainer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-top: 0.5rem;
-    width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.5rem;
+  width: 100%;
 }
 
 .cursor {
-    cursor: pointer;
+  cursor: pointer;
 }
 
+// The font-size stepper: a bordered control (its plus and minus are black image files).
 .container {
-    border-radius: 1rem;
-    background-color: white;
-    display: flex;
-    justify-content: center;
-    margin: 5px 0 5px 10px;
-    border: 2px solid #D8D8D8;
+  border-radius: 0.5rem;
+  background-color: transparent;
+  display: flex;
+  justify-content: center;
+  margin: 4px 0 4px 8px;
+  border: 1px solid hsl(var(--input));
+}
+
+:global(.dark) .container img {
+  filter: brightness(0) invert(1);
 }
 
 .colorSelectorWrapper {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 0.5rem;
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.5rem;
 }
 
-
 .colorSelector {
-    cursor: pointer;
-    margin-right: 0.5rem;
+  cursor: pointer;
+  margin-right: 0.5rem;
 }

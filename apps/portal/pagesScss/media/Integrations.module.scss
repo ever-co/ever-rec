@@ -1,26 +1,25 @@
-@import 'pagesScss/partials/_colors.scss';
-
 .mainWrapper {
+  display: flex;
+  flex-direction: column;
   height: 100%;
+  min-height: 0;
 
   .mainHeader {
     width: 100%;
-    font-family: 'Roboto', sans-serif;
-    font-style: normal;
-
     font-size: 1rem;
     font-weight: 600;
     padding: 1rem 2rem;
-    border-bottom: 1px solid $grey-light05;
+    border-bottom: 1px solid hsl(var(--border));
   }
 
   .innerWrapper {
     display: grid;
-    grid-template-columns: repeat(auto-fit, 300px);
-    gap: 2rem;
-    justify-content: center;
-    max-height: 82vh;
-    padding: 2rem;
+    flex: 1;
+    grid-template-columns: repeat(auto-fill, minmax(17.5rem, 1fr));
+    align-content: start;
+    gap: 1rem;
+    min-height: 0;
+    padding: 1.5rem;
     overflow-y: auto;
   }
 }

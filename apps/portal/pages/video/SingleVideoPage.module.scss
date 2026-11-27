@@ -1,31 +1,59 @@
+// The single video page (own, shared and workspace): the player, the chapters column beside it,
+// the title and actions under it, then the comments. On the shared Ever tokens.
+
 .itemPageWrapper {
-  padding: 3rem 3rem;
+  padding: 2rem 3rem 3rem;
   max-width: 1436px;
   margin: auto;
 }
 
 .itemDisplaySection {
   display: flex;
+  gap: 1rem;
   margin-bottom: 1rem;
+
+  // The player. Its own ground and control bar stay dark-on-media; only the corners are ours.
+  > div:first-child {
+    overflow: hidden;
+    border-radius: calc(var(--radius) + 2px);
+    background: hsl(var(--muted));
+  }
 }
 
+// The chapters column: a card with a hairline, as high as the player beside it (its list scrolls).
 .chapters {
-  border: 1px solid #80808066;
-  padding-bottom: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid hsl(var(--border));
+  border-radius: calc(var(--radius) + 2px);
+  background: hsl(var(--card));
+  color: hsl(var(--card-foreground));
+  padding-bottom: 1rem;
 }
 
 .chaptersHeading {
   display: flex;
   gap: 0.25rem;
-  background-color: #c3c3c3;
-  padding: 0.25rem 1rem;
-  font-weight: bold;
-  font-size: 0.9rem;
+  border-bottom: 1px solid hsl(var(--border));
+  padding: 0.75rem 1rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+
+  // The label comes lower-cased from the translations ("chapters").
+  span {
+    display: block;
+
+    &::first-letter {
+      text-transform: uppercase;
+    }
+  }
 }
 
 .itemActionSection {
   display: flex;
   justify-content: space-between;
+  gap: 1rem;
   margin-bottom: 2rem;
 }
 

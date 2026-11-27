@@ -102,32 +102,40 @@ const FeatCard: React.FC<IFeatureCard> = ({
   priority,
 }) => {
   return (
-    <div id={id} className="tw-flex tw-mt-30px">
-      <div className="tw-w-6/12 tw-flex tw-border-b tw-border-1px tw-border-solid tw-border-[#2A292F] ">
+    <div
+      id={id}
+      className="tw-flex tw-items-center tw-gap-6 tw-rounded-lg tw-border tw-border-solid tw-border-border tw-bg-card tw-p-5"
+    >
+      <div className="tw-flex tw-min-w-0 tw-flex-1">
         <div className="tw-flex tw-flex-col">
-          <div className="tw-flex">
-            <AppSvg className="tw-mt-1" path={imgPath} size="30" />
-            <div className="tw-flex tw-flex-col tw-ml-4">
-              <h4 className="tw-font-bold tw-text-xl">{title}</h4>
-              <p className="tw-text-app-grey-darker">{date}</p>
+          <div className="tw-flex tw-items-start tw-text-foreground">
+            <AppSvg className="tw-shrink-0" path={imgPath} size="30" />
+            <div className="tw-ml-3 tw-flex tw-flex-col">
+              <h4 className="tw-m-0 tw-text-base tw-font-semibold tw-text-foreground">
+                {title}
+              </h4>
+              <p className="tw-m-0 tw-text-xs tw-text-muted-foreground">
+                {date}
+              </p>
             </div>
           </div>
-          <p className="tw-my-4">{description}</p>
-          {/* The link is the only interactive element: it is styled like a button instead of
-              nesting a focusable AppButton (two tab stops, a button inside a link). The classes
-              match what that AppButton rendered: its text was semibold, and only colours animate
-              so the focus ring shows at once. */}
+          <p className="tw-m-0 tw-my-3 tw-text-sm tw-text-muted-foreground">
+            {description}
+          </p>
+          {/* The link is the only interactive element: it is styled like a button (the outline
+              button of the shared set) instead of nesting a focusable AppButton (two tab stops, a
+              button inside a link). Only colours animate, so the focus ring shows at once. */}
           <a
             href={extensionLink}
             target="_blank"
             rel="noopener noreferrer"
-            className="tw-block tw-w-max tw-mb-6 tw-py-2 tw-px-5 tw-rounded-md tw-border !tw-border-primary-purple tw-bg-white tw-cursor-pointer tw-select-none tw-text-base tw-text-black hover:!tw-text-primary-purple tw-font-semibold tw-transition-colors tw-duration-300 focus-visible:!tw-outline focus-visible:!tw-outline-2 focus-visible:!tw-outline-offset-2 focus-visible:!tw-outline-primary-purple"
+            className="tw-flex tw-h-8 tw-w-max tw-cursor-pointer tw-select-none tw-items-center tw-rounded-md tw-border tw-border-solid tw-border-input tw-bg-transparent tw-px-3 tw-text-xs tw-font-medium tw-text-foreground tw-transition-colors tw-duration-150 hover:tw-bg-accent hover:tw-text-accent-foreground focus:tw-text-foreground focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-ring"
           >
             {buttonText}
           </a>
         </div>
       </div>
-      <div className="tw-relative tw-w-60 tw-h-56 tw-ml-12">
+      <div className="tw-relative tw-h-32 tw-w-36 tw-shrink-0 mx-xl:tw-hidden">
         <Image
           src={rightImgPath}
           priority={priority}

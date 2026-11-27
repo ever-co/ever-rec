@@ -70,7 +70,7 @@ const AppInput: React.FC<AppInputProps> = ({
       return (
         <div
           className={classNames(
-            'tw-p-1 tw-text-danger tw-w-full tw-text-xs tw-leading-2 tw-absolute tw-z-10',
+            'tw-p-1 tw-text-destructive-text tw-w-full tw-text-xs tw-leading-2 tw-absolute tw-z-10',
             errorClass,
           )}
         >
@@ -103,7 +103,7 @@ const AppInput: React.FC<AppInputProps> = ({
           maxLength={maxLength}
           autoComplete={autoComplete}
           className={classNames(
-            'tw-py-2 tw-px-1 tw-w-full tw-text-base tw-border-b tw-border-black tw-bg-transparent tw-placeholder-black',
+            'tw-h-10 tw-w-full tw-rounded-md tw-border tw-border-solid tw-border-input tw-bg-transparent tw-px-3 tw-text-sm tw-text-foreground tw-outline-none tw-transition-[border-color,box-shadow] tw-duration-150 placeholder:tw-text-muted-foreground focus:tw-border-ring focus:tw-ring-2 focus:tw-ring-ring/20',
             inputClass,
           )}
           onChange={(e) => inputChangeHandler(e.target.value)}

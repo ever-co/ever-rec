@@ -180,16 +180,16 @@
     "deleteWorkspace": "Usuń obszar roboczy"
   },
   "header": {
-    "searchFiles": "Szukaj plików...",
+    "searchFiles": "Szukaj plików",
     "help": "Centrum pomocy",
-    "helpSoon": "Centrum pomocy już wkrótce!",
+    "helpSoon": "Centrum pomocy już wkrótce",
     "notifications": "Powiadomienia",
-    "notificationsSoon": "Powiadomienia już wkrótce!",
+    "notificationsSoon": "Powiadomienia już wkrótce",
     "companySettings": "Ustawienia firmy",
     "user": {
       "addNewCompany": "Dodaj nową firmę",
       "installChrome": "Zainstaluj rozszerzenie Chrome",
-      "availableSoon": "Dostępne wkrótce w Chrome Web Store!",
+      "availableSoon": "Dostępne wkrótce w Chrome Web Store",
       "signout": "Wyloguj się"
     }
   },
@@ -640,6 +640,17 @@
       "saveEachFile": "Pytaj, gdzie zapisać każdy plik przed pobraniem.",
       "saveEachFileDescription": "Uwaga: Aby korzystać z tej funkcji, musisz zezwolić rozszerzeniu na zarządzanie pobieraniem, gdy pojawi się okno z prośbą o pozwolenie. Tylko gdy ta opcja jest włączona, możesz określić domyślny podfolder do zapisywania zrzutów ekranu na dysku lokalnym. Domyślnie używany jest folder Pobrane, jeśli nie określisz podfolderu.",
       "addDateAndUrl": "Dodaj datę i URL na górze zrzutu ekranu."
+    },
+    "appearance": {
+      "description": "Wygląd i język Ever Rec w tej przeglądarce",
+      "theme": "Motyw",
+      "themeHint": "Dotyczy tylko tej przeglądarki",
+      "light": "Jasny",
+      "dark": "Ciemny",
+      "system": "Systemowy",
+      "languageHint": "Język aplikacji w tej przeglądarce",
+      "saving": "Zapisywanie zrzutów ekranu",
+      "savingHint": "Format pliku, folder pobierania i linki Google Drive dla rozszerzenia przeglądarki"
     }
   },
   "modals": {
@@ -818,5 +829,30 @@
     "videoDeletedAndRedirect": "Film usunięty pomyślnie. Przekierowywanie do Twojego obszaru roboczego...",
     "videoMovedToTrashAndRedirecting": "Film przeniesiony do kosza pomyślnie. Przekierowywanie do 'Moje filmy'...",
     "joinedWorkspaceSuccess": "Pomyślnie dołączono do obszaru roboczego. Przekierowywanie do nowego obszaru roboczego..."
+  },
+  "shell": {
+    "select": "Zaznacz",
+    "loading": "Ładowanie",
+    "myLibrary": "Moja biblioteka",
+    "workspaces": "Przestrzenie robocze",
+    "noOtherWorkspace": "Brak innej przestrzeni roboczej",
+    "switchWorkspace": "Przełącz przestrzeń roboczą",
+    "account": "Konto",
+    "accountMenu": "Menu konta",
+    "backToApp": "Wróć do aplikacji",
+    "collapseSidebar": "Zwiń pasek boczny",
+    "expandSidebar": "Rozwiń pasek boczny",
+    "openNavigation": "Otwórz nawigację",
+    "closeNavigation": "Zamknij nawigację",
+    "switchToDark": "Przełącz na ciemny motyw",
+    "switchToLight": "Przełącz na jasny motyw",
+    "showStarredFolders": "Pokaż foldery oznaczone gwiazdką",
+    "hideStarredFolders": "Ukryj foldery oznaczone gwiazdką",
+    "noStarredFolders": "Brak folderów oznaczonych gwiazdką",
+    "members": "{{count}} członków",
+    "members_one": "{{count}} członek",
+    "members_few": "{{count}} członków",
+    "members_many": "{{count}} członków",
+    "members_other": "{{count}} członka"
   }
 }

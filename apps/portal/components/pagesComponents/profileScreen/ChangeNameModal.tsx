@@ -76,7 +76,9 @@ const ChangeNameModal: React.FC<IProps> = ({
     >
       <h2 className={styles.modalHeader}>{t('common.name')}</h2>
 
-      <label>{t('page.profile.nameModal.currentName')}</label>
+      <label className="tw-block tw-text-[13px] tw-font-medium tw-text-foreground">
+        {t('page.profile.nameModal.currentName')}
+      </label>
       <AppInput
         placeholder={t('page.profile.newName')}
         value={newName.value}

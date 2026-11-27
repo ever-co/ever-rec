@@ -24,7 +24,7 @@ const FolderHeader: FC<FolderHeaderProps> = ({
       <div className={styles.folderContent}>
         <FolderIcon
           path="/common/folder-icon-v3.svg"
-          bgColor={folder.color ? folder.color : '#ffffff'}
+          bgColor={folder.color ? folder.color : 'transparent'}
           size="19px"
         />
         <FolderName name={folder.name} />
@@ -54,7 +54,8 @@ interface FolderIconProps {
 export const FolderIcon: FC<FolderIconProps> = ({ path, bgColor, size }) => {
   return (
     <div className={styles.folderIconWrapper}>
-      <AppSvg path={path} bgColor={bgColor} size={size} />
+      {/* `themed`: the folder's outline takes the text colour; its body keeps the folder's colour. */}
+      <AppSvg path={path} bgColor={bgColor} size={size} themed />
     </div>
   );
 };
@@ -85,7 +86,7 @@ const FavoriteStar: FC<IFavoriteStarProps> = ({ isFavorite }) => {
     isFavorite && (
       <AppSvg
         path="/common/star_filled.svg"
-        size="23px"
+        size="16px"
         className={styles.starSvg}
       />
     )

@@ -207,8 +207,10 @@ const WorkspaceItemsContainer: FC<Props> = ({
             loader={null}
             scrollableTarget="scrollableDivItems"
             className="scrollbar"
+            // The library's own scroll box scrolls; this wrapper must not clip a card's selection ring.
+            style={{ overflow: 'visible' }}
           >
-            <Row className="tw-w-full" gutter={[30, 25]}>
+            <Row className="tw-w-full" gutter={[16, 16]}>
               {itemsToMap
                 ? itemsToMap.map((item: WorkspaceItemType, index: number) => {
                     if (index + 1 > itemsToLoad)
@@ -231,7 +233,7 @@ const WorkspaceItemsContainer: FC<Props> = ({
                         <Link
                           href={generateItemHref(item)}
                           passHref
-                          className="tw-h-full tw-w-full"
+                          className="tw-block tw-h-full tw-w-full tw-rounded-lg"
                         >
                           {isIEditorVideo(item) ? (
                             <VideoItem

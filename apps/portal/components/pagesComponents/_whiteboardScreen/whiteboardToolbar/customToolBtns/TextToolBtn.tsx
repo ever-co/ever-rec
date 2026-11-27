@@ -53,7 +53,7 @@ const TextTool: React.FC<ITextToolProps> = ({
   setActiveTool,
   onResetShape,
   title,
-  iconMore
+  iconMore,
 }) => {
   const optionsChangeHandler = (field: string, value: any) => {
     onChange({ ...options, [field]: value });
@@ -77,8 +77,8 @@ const TextTool: React.FC<ITextToolProps> = ({
           value={options.fontFamily}
           style={{ fontFamily: options.fontFamily }}
           onChange={(val) => optionsChangeHandler('fontFamily', val)}
-          className="tw-w-full tw-rounded tw-bg-primary-violet app-selectable"
-    >
+          className="tw-w-full tw-rounded-md tw-border tw-border-input app-selectable"
+        >
           {fonts.map((font, index) => (
             <Select.Option
               key={`font_${index}`}
@@ -99,10 +99,10 @@ const TextTool: React.FC<ITextToolProps> = ({
               options.fontStyle === ''
                 ? optionsChangeHandler('fontStyle', 'bold')
                 : options.fontStyle === 'italic'
-                ? optionsChangeHandler('fontStyle', 'italic bold')
-                : options.fontStyle === 'italic bold'
-                ? optionsChangeHandler('fontStyle', 'italic')
-                : optionsChangeHandler('fontStyle', '');
+                  ? optionsChangeHandler('fontStyle', 'italic bold')
+                  : options.fontStyle === 'italic bold'
+                    ? optionsChangeHandler('fontStyle', 'italic')
+                    : optionsChangeHandler('fontStyle', '');
             }}
           />
 
@@ -113,10 +113,10 @@ const TextTool: React.FC<ITextToolProps> = ({
               options.fontStyle === ''
                 ? optionsChangeHandler('fontStyle', 'italic')
                 : options.fontStyle === 'bold'
-                ? optionsChangeHandler('fontStyle', 'italic bold')
-                : options.fontStyle === 'italic bold'
-                ? optionsChangeHandler('fontStyle', 'bold')
-                : optionsChangeHandler('fontStyle', '');
+                  ? optionsChangeHandler('fontStyle', 'italic bold')
+                  : options.fontStyle === 'italic bold'
+                    ? optionsChangeHandler('fontStyle', 'bold')
+                    : optionsChangeHandler('fontStyle', '');
             }}
           />
 
@@ -150,7 +150,7 @@ const TextTool: React.FC<ITextToolProps> = ({
             icon={StrokeIcon}
             className="tw-cursor-pointer"
           />
-          <div className=" tw-rounded-2xl  tw-bg-white tw-flex tw-justify-center tw-my-5px tw-ml-10px tw-border-2 tw-border-dark-grey">
+          <div className="tw-rounded-md tw-flex tw-justify-center tw-my-1 tw-ml-2 tw-border tw-border-input">
             {' '}
             <AppNumberSelector
               value={options.fontSize}

@@ -106,17 +106,22 @@ const RenameModal: React.FC<Props> = ({ onOk, onCancel, visible }) => {
           <AppButton
             disabled={!valid ? true : false}
             onClick={onOkHandler}
-            className="tw-px-12 tw-text-white tw-py-1 "
-            bgColor="tw-bg-whiteboard-purple"
+            className="tw-px-12"
           >
             Save
           </AppButton>
         </div>
       }
     >
-      <div className="tw-flex tw-gap-10px">
-        <AppSvg size="26px" path={renameIcon.src} />
-        <h2 className="tw-mb-6 tw-text-xl tw-font-bold">Rename</h2>
+      <div className="tw-mb-6 tw-flex tw-items-center tw-gap-2">
+        <AppSvg
+          size="24px"
+          path={renameIcon.src}
+          className="tw-text-muted-foreground"
+        />
+        <h2 className="tw-m-0 tw-text-base tw-font-semibold tw-text-foreground">
+          Rename
+        </h2>
       </div>
 
       <AppInput
@@ -125,7 +130,6 @@ const RenameModal: React.FC<Props> = ({ onOk, onCancel, visible }) => {
         errors={name.errors}
         onChange={folderNameChangeHandler}
         rules={nameRules}
-        inputClass="tw-bg-transparent tw-placeholder-grey-dark2"
       />
 
       {/* <input

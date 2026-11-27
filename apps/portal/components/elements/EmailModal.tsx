@@ -183,12 +183,11 @@ const EmailModal: React.FC<IEmailModalProps> = ({
       open={visible}
       onCancel={onCancel}
       footer={
-        <div className="tw-flex tw-justify-end tw-mt-14">
+        <div className="tw-flex tw-justify-end tw-gap-2 tw-mt-6">
           <AppButton
             onClick={onCancel}
-            bgColor="tw-bg-app-grey-darker"
             outlined
-            className="tw-px-8 tw-mx-4 tw-pb-1 tw-pt-1"
+            className="tw-flex tw-h-9 tw-items-center tw-justify-center tw-px-4 tw-py-0"
           >
             {t('common.cancel')}
           </AppButton>
@@ -197,21 +196,22 @@ const EmailModal: React.FC<IEmailModalProps> = ({
               !emailcollection?.emails || emailcollection?.emails?.length === 0
             }
             onClick={fromEditor ? saveAndSend : onOkHandler}
-            className="tw-px-8 tw-pb-1 tw-pt-1"
+            className="tw-flex tw-h-9 tw-items-center tw-justify-center tw-px-4 tw-py-0"
           >
             {t('common.sendEmail')}
           </AppButton>
         </div>
       }
     >
-      <h2 className="tw-text-2xl tw-font-semibold tw-mb-2">
+      <h2 className="tw-text-base tw-font-semibold tw-mb-4 tw-pr-6">
         {t('extras.sendItemTo', { itemType: itemType })}
       </h2>
 
+      {/* The library ships its own white field; the classes put it on the Ever input. */}
       <ReactMultiEmail
         emails={emailcollection?.emails}
         placeholder={t('workspace.addEmail')}
-        className="tw-border tw-border-solid tw-border-purple-active tw-rounded-5 tw-w-full "
+        className="tw-w-full tw-min-h-10 !tw-rounded-md !tw-border !tw-border-solid !tw-border-input !tw-bg-transparent !tw-px-2 !tw-py-1 !tw-text-sm !tw-text-foreground tw-transition-[border-color,box-shadow] tw-duration-150 [&.focused]:!tw-border-ring [&.focused]:tw-ring-2 [&.focused]:tw-ring-ring/20 [&>input]:!tw-bg-transparent [&>input]:tw-text-foreground [&>span[data-placeholder]]:!tw-text-muted-foreground"
         onChange={(_emails: string[]) => {
           setEmailcollection({ emails: _emails });
         }}
@@ -223,16 +223,20 @@ const EmailModal: React.FC<IEmailModalProps> = ({
           return (
             <div
               data-tag
-              className="tw-bg-white tw-px-0px tw-py-0px"
+              className="!tw-rounded-md !tw-bg-muted !tw-px-2 !tw-py-1 !tw-text-xs !tw-font-medium !tw-text-foreground"
               key={index}
             >
               {email}
 
               <div
-                className="tw-cursor-pointer tw-ml-1"
+                className="tw-cursor-pointer tw-ml-1 tw-text-muted-foreground hover:tw-text-foreground"
                 onClick={() => removeEmail(index)}
               >
-                <AppSvg path="/common/close.svg" size="14px" />
+                <AppSvg
+                  path="/common/close.svg"
+                  size="14px"
+                  className="[&_path]:tw-fill-current"
+                />
               </div>
             </div>
           );
@@ -240,7 +244,7 @@ const EmailModal: React.FC<IEmailModalProps> = ({
       />
 
       <div
-        className={`tw-pt-13px tw-flex tw-w-full tw-items-start tw-justify-between  tw-flex-${
+        className={`tw-pt-3 tw-flex tw-w-full tw-items-start tw-justify-between  tw-flex-${
           messagestatus ? 'col' : 'row'
         } `}
       >
@@ -248,15 +252,13 @@ const EmailModal: React.FC<IEmailModalProps> = ({
           checked={messagestatus}
           onChange={() => setMesagestatus(!messagestatus)}
         >
-          <span className="tw-text-black">{t('common.addMessage')}</span>
+          <span className="tw-text-foreground">{t('common.addMessage')}</span>
         </Checkbox>
         {messagestatus ? (
           <TextArea
-            className=" tw-rounded-5 tw-w-full tw-my-10px "
+            className="tw-w-full"
             style={{
-              margin: '10px 0px',
-              border: '1px solid #998FFF',
-              borderRadius: '5px',
+              margin: '8px 0px',
             }}
             onChange={(e) => {
               setMessage(e.target.value);

@@ -1,17 +1,32 @@
+// A workspace to choose: a list item with a hairline; the chosen one carries the accent ring.
 .workspaceItem {
-  background: #b8b1f8;
-  padding: 10px;
-  padding-left: 20px;
-  color: black;
-  border-radius: 5px;
+  padding: 0.625rem 0.75rem;
+  margin-bottom: 0.5rem;
+  border: 1px solid hsl(var(--border));
+  border-radius: calc(var(--radius) - 2px);
+  color: hsl(var(--foreground));
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.25rem;
   cursor: pointer;
-  border: 1px solid #5b4dbe;
-  transition: all 0.5s ease;
-  margin-bottom: 10px;
+  transition:
+    background-color 150ms var(--ease-out),
+    border-color 150ms var(--ease-out);
 
-  &.active, &:hover{
-    transition: all 0.5s ease;
-    color: white;
-    background: #5b4dbe;
+  // The list starts the dialog: the first row stands clear of the close button.
+  &:first-child {
+    margin-top: 0.5rem;
+  }
+
+  &:hover {
+    border-color: hsl(var(--foreground) / 0.25);
+    background: hsl(var(--accent));
+  }
+
+  &.active,
+  &.active:hover {
+    border-color: hsl(var(--brand));
+    background: hsl(var(--accent));
+    box-shadow: 0 0 0 1px hsl(var(--brand));
   }
 }

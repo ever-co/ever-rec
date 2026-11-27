@@ -98,11 +98,11 @@ const UniqueViews: React.FC<IUniqueViewsProps> = ({
             <Spin spinning={loading} style={{ width: 18, height: 18 }} />
           </div>
         ) : (
-          <div className={classNames(`${styles.bgColor}`, 'tw-p-5')}>
-            <div className="tw-text-sm tw-font-bold tw-text-left tw-mb-2">
+          <div className={classNames(`${styles.bgColor}`, 'tw-p-4')}>
+            <div className="tw-text-sm tw-font-semibold tw-text-left tw-mb-2">
               {t('page.image.viewInsights')}
             </div>
-            <div className="tw-text-sm tw-text-center tw-mb-2 tw-bg-white tw-p-2 tw-rounded-lg">
+            <div className="tw-text-xs tw-text-center tw-text-muted-foreground tw-mb-2 tw-bg-muted tw-px-3 tw-py-2 tw-rounded-md tw-whitespace-nowrap">
               {`${views} ${t('page.image.unique')} ${viewString} | ${uniqueLength} ${t('page.image.user')} ${uniqueString}`}
             </div>
             {uniqueViews.length != 0 && (
@@ -116,7 +116,7 @@ const UniqueViews: React.FC<IUniqueViewsProps> = ({
                   <div
                     key={view.id}
                     className={classNames(
-                      'tw-flex tw-items-center tw-bg-white tw-p-2 tw-rounded-2xl tw-mb-1 tw-over',
+                      'tw-flex tw-items-center tw-py-1 tw-text-sm tw-text-foreground',
                       uniqueLength > 3 && 'tw-pr-2',
                     )}
                   >

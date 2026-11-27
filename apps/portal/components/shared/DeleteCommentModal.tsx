@@ -1,7 +1,6 @@
 import React from 'react';
 import { Modal } from 'antd';
 import AppButton from 'components/controls/AppButton';
-import AppSvg from '../elements/AppSvg';
 import classNames from 'classnames';
 import { useTranslation } from 'react-i18next';
 
@@ -28,31 +27,27 @@ const DeleteCommentModal: React.FC<IDeleteScreenshotModalProps> = ({
       open={visible}
       onCancel={onCancel}
       closable={true}
-      closeIcon={
-        <AppSvg path="/common/close-icon.svg" className="modalCloseButton" />
-      }
       footer={
-        <div className={classNames('tw-flex tw-justify-end tw-mt-14')}>
+        <div className={classNames('tw-flex tw-justify-end tw-gap-2 tw-mt-6')}>
+          <AppButton
+            onClick={onCancel}
+            outlined
+            className="tw-flex tw-h-9 tw-items-center tw-justify-center tw-px-4 tw-py-0"
+          >
+            {t('common.cancel')}
+          </AppButton>
           <AppButton
             onClick={onOkHandler}
-            className="tw-px-8 tw-text-white tw-pb-1 tw-pt-1 tw-border tw-border-danger tw-border-solid"
+            className="tw-flex tw-h-9 tw-items-center tw-justify-center tw-px-4 tw-py-0"
             bgColor="tw-bg-danger"
             // disabled={!valid}
           >
             {t('common.delete')}
           </AppButton>
-          <AppButton
-            onClick={onCancel}
-            bgColor="tw-bg-white"
-            outlined
-            className="tw-px-8 tw-mx-4 tw-pb-1 tw-pt-1"
-          >
-            {t('common.cancel')}
-          </AppButton>
         </div>
       }
     >
-      <h2 className="tw-mb-6 tw-text-xl tw-font-bold">
+      <h2 className="tw-mb-0 tw-pr-6 tw-text-base tw-font-semibold">
         {t('modals.deleteComment')}
       </h2>
     </Modal>

@@ -8,16 +8,42 @@
     text-align: left;
   }
 
+  // This dialog has one tab only, so the tab stands as the dialog's title: no tab strip under
+  // it, no line that marks it as the chosen one, and room on the right for the close button.
+  .tabList {
+    margin: 0 0 1rem;
+    padding: 0 1.5rem 0 0;
+    border-bottom: 0;
+  }
+
+  .tab {
+    bottom: 0;
+    padding: 0;
+    border: 0;
+    font-size: 1rem;
+    font-weight: 600 !important;
+    line-height: 1.5rem;
+    cursor: default;
+
+    &:before {
+      display: none;
+    }
+
+    &:focus-visible {
+      border-radius: 2px;
+      outline-offset: 2px;
+    }
+  }
+
   .mainHeader {
     width: fit-content;
-    font-family: Roboto;
-    font-size: 20px;
-    font-weight: 700;
-    line-height: 23px;
-    letter-spacing: 0.25px;
+    color: hsl(var(--foreground));
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.5rem;
     text-align: left;
-    padding-bottom: 15px;
-    margin-bottom: 40px;
-    border-bottom: 2px solid #5b4dbe;
+    padding-bottom: 0.75rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid hsl(var(--foreground));
   }
 }

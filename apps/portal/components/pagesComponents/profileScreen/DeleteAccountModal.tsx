@@ -157,7 +157,9 @@ const EnterCurrentPassword: FC<IEnterCurrentPasswordProps> = ({
   const { t } = useTranslation();
   return (
     <div className={styles.inputField}>
-      <label>{t('page.profile.deleteAccountModal.currentPassword')}</label>
+      <label className="tw-block tw-text-[13px] tw-font-medium tw-text-foreground">
+        {t('page.profile.deleteAccountModal.currentPassword')}
+      </label>
       <div className={styles.inputFieldCombined}>
         <AppInput
           placeholder={t('page.profile.deleteAccountModal.enterPassword')}
@@ -170,6 +172,7 @@ const EnterCurrentPassword: FC<IEnterCurrentPasswordProps> = ({
           onChange={onPasswordChange}
         />
         <PasswordEye
+          className="tw-self-center"
           passwordShown={passwordShown}
           togglePassword={togglePassword}
         />

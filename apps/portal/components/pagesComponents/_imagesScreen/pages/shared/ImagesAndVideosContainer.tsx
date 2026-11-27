@@ -547,8 +547,10 @@ const ImagesAndVideosContainer: React.FC<IImagesAndVideosProps> = ({
           loader={null}
           scrollableTarget="scrollableDivItems"
           className="scrollbar"
+          // The scroll box is `scrollableDivItems`; this inner box must not cut a card's ring.
+          style={{ overflow: 'visible' }}
         >
-          <Row className="tw-w-full" gutter={[30, 25]}>
+          <Row className="tw-w-full" gutter={[16, 16]}>
             {joinedItems.map((item, index) => {
               if (index + 1 > itemsToLoad) return;
 

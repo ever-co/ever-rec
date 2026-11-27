@@ -5,6 +5,7 @@ import useEverIdConfig from 'hooks/useEverIdConfig';
 import { everIdStartUrl } from 'app/services/api/everId';
 import { everIdErrorMessageKey, everIdReturnPath } from 'app/services/everId';
 import { createEverIdBinding } from 'app/services/everIdBinding';
+import EverStar from 'components/shell/EverStar';
 
 /**
  * "Continue with Ever ID", shown below the Google button only when the server offers Ever ID
@@ -39,19 +40,20 @@ const EverIdButton: React.FC = () => {
         <div
           role="alert"
           data-testid="ever-id-error"
-          className="tw-w-full tw-mt-4 tw-p-3 tw-rounded-md tw-border tw-border-red-300 tw-bg-red-50 tw-text-sm tw-text-red-700"
+          className="tw-mt-3 tw-w-full tw-rounded-md tw-border tw-border-solid tw-border-destructive/40 tw-bg-destructive-muted tw-px-3 tw-py-2 tw-text-sm tw-text-destructive-text"
         >
           {t(everIdErrorMessageKey(errorCode))}
         </div>
       )}
       {enabled && (
-        <div className="tw-w-full tw-flex tw-justify-center tw-mt-4">
+        <div className="tw-mt-3 tw-flex tw-w-full tw-justify-center">
           <button
             type="button"
             data-testid="ever-id-button"
             onClick={start}
-            className="tw-flex tw-items-center tw-justify-center tw-gap-2 tw-py-2 tw-px-4 tw-min-w-[200px] tw-border tw-border-app-grey tw-rounded tw-bg-white tw-text-sm tw-font-medium tw-text-dark-blue2 hover:tw-bg-gray-50"
+            className="tw-flex tw-h-10 tw-w-full tw-items-center tw-justify-center tw-gap-2 tw-rounded-md tw-border tw-border-solid tw-border-input tw-bg-transparent tw-px-4 tw-text-sm tw-font-medium tw-text-foreground tw-transition-colors tw-duration-150 hover:tw-bg-accent hover:tw-text-accent-foreground"
           >
+            <EverStar className="tw-size-4 tw-shrink-0" />
             {t('page.auth.everId.continue')}
           </button>
         </div>

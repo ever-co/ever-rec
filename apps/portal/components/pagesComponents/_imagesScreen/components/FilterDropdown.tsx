@@ -28,14 +28,13 @@ export const FilterDropdown: FC<IProps> = ({
   const menuElements = teams.map((team) => {
     return (
       <Menu.Item
-        className={classNames(styles.itemsStyle)}
         key={team.id}
         icon={
           <div
-            className="tw-mr-5px"
+            className={styles.check}
             style={filterTeamId === team.id ? { opacity: 1 } : { opacity: 0 }}
           >
-            <AppSvg path="/common/check-purple.svg" size="19px" />
+            <AppSvg path="/common/check-purple.svg" size="16px" />
           </div>
         }
       >
@@ -45,25 +44,18 @@ export const FilterDropdown: FC<IProps> = ({
   });
 
   const menu = (
-    <Menu
-      className={classNames(styles.gradientBackground)}
-      onClick={handleMenuClick}
-    >
-      <Menu.Item
-        key="fake-item"
-        className={classNames(styles.itemsStyle, styles.fakeItem)}
-      >
+    <Menu className={classNames(styles.menu)} onClick={handleMenuClick}>
+      <Menu.Item key="fake-item" className={classNames(styles.fakeItem)}>
         <span>{t('common.filterByTeam')}</span>
       </Menu.Item>
       <Menu.Item
-        className={classNames(styles.itemsStyle)}
         key="remove-filter"
         icon={
           <div
-            className="tw-mr-5px"
+            className={styles.check}
             style={filterTeamId !== null ? { opacity: 0 } : { opacity: 1 }}
           >
-            <AppSvg path="/common/check-purple.svg" size="19px" />
+            <AppSvg path="/common/check-purple.svg" size="16px" />
           </div>
         }
       >
@@ -80,12 +72,13 @@ export const FilterDropdown: FC<IProps> = ({
         style={{
           marginLeft: '.5rem',
           marginTop: '1px',
-          borderRadius: '5px',
           padding: '3px !important',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          border: filterTeamId ? '2px solid #5c4ebb' : undefined,
+          // A team filter is on: the accent ring of a selected control.
+          borderColor: filterTeamId ? 'hsl(var(--brand))' : undefined,
+          boxShadow: filterTeamId ? '0 0 0 1px hsl(var(--brand))' : undefined,
         }}
         icon={<AppSvg path="/common/team-icon.svg" size="20px" />}
         size="large"

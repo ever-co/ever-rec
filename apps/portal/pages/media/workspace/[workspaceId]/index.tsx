@@ -474,7 +474,7 @@ const Workspace: FC = () => {
 
         <DashboardCard
           className={classNames(
-            'tw-px-0 tw-pt-0 tw-pb-4 mx-md:tw-h-full tw-flex-1',
+            'mx-md:tw-h-full tw-flex-1',
             styles.contentDashboardCard,
           )}
         >
@@ -568,9 +568,9 @@ const WorkspaceTeamMembersWrapper: FC<any> = ({
   setShowTeamsModal,
 }) => {
   return (
-    <div className="mx-lg:tw-w-full">
+    <div className="tw-shrink-0">
       <div className="tw-flex tw-flex-wrap tw-justify-end">
-        <div className="tw-flex tw-justify-end default:tw-w-full default:tw-mb-10px lg:tw-mb-0 tw-items-center">
+        <div className="tw-flex tw-items-center tw-justify-end">
           {/* <span>Members: </span> */}
           <WorkspaceTeamMembers
             isWorkspace

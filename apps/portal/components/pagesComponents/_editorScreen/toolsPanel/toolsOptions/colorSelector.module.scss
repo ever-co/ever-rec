@@ -4,24 +4,36 @@
   bottom: 0;
 }
 
+// The colour picker (react-color) paints itself with fixed light-theme inline styles: its panel,
+// field labels, field outlines and the hairline above the presets follow the theme here. The
+// colour area, the sliders and the preset swatches are the person's colours and stay as they are.
 .sketchpicker {
-  padding: 18px !important;
+  padding: 16px !important;
   border-radius: 10px !important;
-  background-color: #e9e7f0 !important;
-  background-image: radial-gradient(
-      at 47% 83%,
-      rgb(211, 205, 248) 0,
-      transparent 59%
-    ),
-    radial-gradient(at 82% 65%, hsl(253.33, 23%, 92%) 0, transparent 55%) !important;
-  -webkit-box-shadow: inset 0px 22px 10px -15px #ffffff !important;
-  box-shadow: inset 0px 22px 10px -15px #ffffff !important;
+  background: hsl(var(--popover)) !important;
+  border: 1px solid hsl(var(--border));
+  box-shadow: var(--shadow-float) !important;
+  color: hsl(var(--popover-foreground));
   .flexbox-fix {
     input {
       width: 100% !important;
       text-align: center;
       border-radius: 5px !important;
     }
+  }
+
+  :global(.flexbox-fix) {
+    border-top-color: hsl(var(--border)) !important;
+  }
+
+  label {
+    color: hsl(var(--muted-foreground)) !important;
+  }
+
+  input {
+    background-color: transparent;
+    color: hsl(var(--foreground));
+    box-shadow: inset 0 0 0 1px hsl(var(--input)) !important;
   }
 }
 

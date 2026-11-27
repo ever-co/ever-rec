@@ -1,39 +1,59 @@
-@import 'pagesScss/partials/_colors.scss';
+// The chapter list of a single video (a column beside the player, or a strip under it) and the
+// buttons under the list. On the shared Ever tokens.
+
+// In a column the list takes the height its place has left (the column is as high as the player)
+// and scrolls inside it; it never makes the column higher.
+.VideoChapters {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  min-height: 0;
+}
 
 .VideoChaptersWrapper {
   display: flex;
+  flex: 1 1 0;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.25rem;
+  min-height: 0;
   overflow-x: hidden;
+  overflow-y: auto;
   margin-top: 0.5rem;
   margin-right: 0.5rem;
-  padding-left: 1rem;
-  height: 430px;
+  padding-left: 0.5rem;
 }
 
 .VideoChaptersWrapperHorizontal {
+  flex: none;
   flex-direction: row;
+  gap: 0.75rem;
   height: auto;
   overflow-x: auto;
-  margin-top: 1rem;
+  margin-top: 0.75rem;
   margin-right: 0;
-  padding-bottom: 1rem;
+  padding-bottom: 0.75rem;
   padding-left: 0;
 }
 
 .ChapterHeading {
   display: flex;
   flex-direction: column;
-  padding-top: 0.25rem;
+  padding: 0.25rem 0.5rem 0.5rem;
 
   h3 {
     width: 350px;
-    text-align: center;
-    margin: auto;
+    margin: 0;
+    color: hsl(var(--muted-foreground));
+    font-size: 0.8125rem;
+    font-weight: 400;
+    line-height: 1.25rem;
+    text-align: left;
   }
 }
 
 .ChapterHeadingHorizontal {
+  padding: 0.25rem 0 0;
+
   h3 {
     width: unset;
     text-align: left;
@@ -50,21 +70,25 @@
 
 .CopyChaptersWrapperHorizontal {
   justify-content: start;
-  margin: 0.75rem 0 0 0;
+  margin: 0.5rem 0 0 0;
 }
 
 .CopyChaptersButton {
   background: none;
   border: none;
   padding: 0.25rem 0.5rem;
-  color: $primary-violet;
-  font-size: 0.875rem;
-  text-decoration: underline;
+  color: hsl(var(--brand-text));
+  font-size: 0.8125rem;
   cursor: pointer;
 
   &:hover {
-    color: $primary-violet80;
+    text-decoration: underline;
+    text-underline-offset: 3px;
   }
+}
+
+.CopyChaptersWrapperHorizontal .CopyChaptersButton {
+  padding-left: 0;
 }
 
 .AddChapterButtonWrapper {
@@ -74,7 +98,7 @@
   gap: 0.5rem;
   bottom: 0;
   width: 91.8%;
-  margin: 1rem auto 0;
+  margin: 0.75rem auto 0;
 
   button:first-of-type {
     flex: 200%;
@@ -84,38 +108,60 @@
 .AddChapterButtonWrapperHorizontal {
   justify-content: start;
   max-width: 500px;
-  margin: 1rem 0 0 0;
+  margin: 0.75rem 0 0 0;
 }
 
+// "Add chapter": an outline button. "Save changes" is the filled one (see .ChapterButtonPrimary).
 .ChapterButton {
   width: 100%;
   max-width: 250px;
-  height: 40px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: $primary-violet;
-  border-radius: 1.4rem;
-  color: white;
+  padding: 0 0.75rem;
+  border: 1px solid hsl(var(--input));
+  border-radius: calc(var(--radius) - 2px);
+  background-color: transparent;
+  color: hsl(var(--foreground));
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  white-space: nowrap;
+  transition:
+    background-color 150ms var(--ease-out),
+    opacity 150ms var(--ease-out);
 
   &:hover {
-    background-color: $primary-violet80;
+    background-color: hsl(var(--accent));
   }
 }
 
+.ChapterButtonPrimary,
 .spinner {
-  background-color: $primary-violet !important;
-}
-
-.ChapterButtonDisabled {
-  background-color: $grey-light01;
+  border-color: transparent;
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
 
   &:hover {
-    background-color: $grey-dark-20;
+    background-color: hsl(var(--primary) / 0.9);
   }
+}
+
+.spinner,
+.spinner:hover {
+  background-color: hsl(var(--primary));
+  cursor: default;
+}
+
+.ChapterButtonDisabled,
+.ChapterButtonDisabled:hover {
+  background-color: transparent;
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .localAppSpinnerWrapper {
-  width: 25px;
-  height: 25px;
+  width: 16px;
+  height: 16px;
 }

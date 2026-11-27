@@ -1,10 +1,11 @@
 import { Dropdown } from 'antd';
 import classNames from 'classnames';
+import { Check, MoreHorizontal } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import IEditorVideo from 'app/interfaces/IEditorVideo';
 import { IWorkspace } from 'app/interfaces/IWorkspace';
 import { IDropdownAvailableActions } from 'components/pagesComponents/_imagesScreen/components/contextMenu/ItemDropdownActions';
 import AppButton from 'components/controls/AppButton';
-import AppSvg from 'components/elements/AppSvg';
 import ItemDropdownActions from 'components/pagesComponents/_imagesScreen/components/contextMenu/ItemDropdownActions';
 import styles from './VideoItemOverlay.module.scss';
 
@@ -93,17 +94,16 @@ const Overlay: React.FC<OverlayProps> = ({
         placement="bottomRight"
         onOpenChange={onDropdownVisibleChange}
       >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/item/options.svg"
-          alt="options"
-          className="tw-py-2 tw-px-5"
+        <button
+          type="button"
+          aria-label="options"
+          aria-haspopup="menu"
+          className={styles.optionsButton}
           draggable={false}
-          style={{
-            height: '50px',
-          }}
           onClick={(event) => event.stopPropagation()}
-        />
+        >
+          <MoreHorizontal aria-hidden="true" />
+        </button>
       </Dropdown>
     </div>
   );
@@ -120,21 +120,35 @@ const SelectButton = ({
   selectedItems?: { items: IEditorVideo[] };
   selectItem: (e: React.MouseEvent) => void;
 }) => {
-  const iconPath = isSelected ? '/item/checked.svg' : '/item/unchecked.svg';
-
   return (
     <div className={styles.selectButton}>
-      <OverlayButton onClick={selectItem} iconPath={iconPath} size="25px" />
+      <OverlayButton onClick={selectItem} checked={isSelected} />
     </div>
   );
 };
 
+// The button sits over media: its hover ground is a light veil, not the theme's hover surface.
 const OverlayButton: React.FC<{
-  size?: string;
-  iconPath: string;
+  checked: boolean;
   onClick: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
-}> = ({ onClick, iconPath, size = '26px' }) => (
-  <AppButton bgColor="tw-bg-transparent" onClick={onClick}>
-    <AppSvg className="tw-text-white" path={iconPath} size={size} />
-  </AppButton>
-);
+}> = ({ onClick, checked }) => {
+  const { t } = useTranslation();
+
+  return (
+    <AppButton
+      bgColor="tw-bg-transparent hover:tw-bg-[hsl(var(--on-overlay)/0.16)]"
+      twPadding="tw-p-1.5"
+      onClick={onClick}
+      ariaLabel={t('shell.select')}
+    >
+      <span
+        className={classNames(
+          styles.checkbox,
+          checked && styles.checkboxChecked,
+        )}
+      >
+        {checked && <Check strokeWidth={3} aria-hidden="true" />}
+      </span>
+    </AppButton>
+  );
+};

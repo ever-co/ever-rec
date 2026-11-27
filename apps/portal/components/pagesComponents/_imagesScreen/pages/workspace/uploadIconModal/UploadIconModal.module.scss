@@ -1,28 +1,30 @@
 .heading {
-  font-family: Roboto !important;
-  font-size: 20px !important;
-  font-weight: bold;
-  line-height: 26px;
-  letter-spacing: 0.01em;
+  color: hsl(var(--foreground));
+  font-size: 0.875rem;
+  font-weight: 400;
+  line-height: 1.25rem;
   text-align: center;
 }
 
-.buttonWrapper, .descWrapper {
-    width: 90%;
+.buttonWrapper,
+.descWrapper {
+  width: 90%;
+}
+
+.buttonWrapper {
+  display: flex;
+  justify-content: center;
 }
 
 .descWrapper {
-  margin-top: 20px;
+  margin-top: 1rem;
 
   .desc {
-    margin-top: 5px;
-    text-align: center;
-    //styleName: Subtitle 1;
-    font-family: Roboto !important;
-    font-size: 16px;
-    font-weight: bolder;
-    line-height: 24px;
-    letter-spacing: 0.01em;
+    margin: 0.25rem 0 0;
+    color: hsl(var(--muted-foreground));
+    font-size: 0.75rem;
+    font-weight: 400;
+    line-height: 1rem;
     text-align: center;
   }
 }

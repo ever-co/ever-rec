@@ -14,7 +14,7 @@ interface IProps {
 const ProfileDetail: FC<IProps> = ({
   title,
   value,
-  valueColor = 'black',
+  valueColor = 'hsl(var(--foreground))',
   disabled = false,
   clicked,
 }) => {
@@ -32,7 +32,7 @@ const ProfileDetail: FC<IProps> = ({
         {value && <span style={{ color: valueColor }}>{value}</span>}
 
         <div className={styles.profileDetailRightArrow}>
-          <AppSvg path="/settings/profile/right-arrow.svg" size="25px" />
+          <AppSvg path="/settings/profile/right-arrow.svg" size="20px" />
         </div>
       </div>
     </div>

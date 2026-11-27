@@ -180,16 +180,16 @@
     "deleteWorkspace": "Arbeitsbereich löschen"
   },
   "header": {
-    "searchFiles": "Dateien durchsuchen...",
+    "searchFiles": "Dateien durchsuchen",
     "help": "Hilfecenter",
-    "helpSoon": "Hilfecenter in Kürze verfügbar!",
+    "helpSoon": "Hilfecenter in Kürze verfügbar",
     "notifications": "Benachrichtigungen",
-    "notificationsSoon": "Benachrichtigungen in Kürze verfügbar!",
+    "notificationsSoon": "Benachrichtigungen in Kürze verfügbar",
     "companySettings": "Unternehmenseinstellungen",
     "user": {
       "addNewCompany": "Neues Unternehmen hinzufügen",
       "installChrome": "Chrome-Erweiterung installieren",
-      "availableSoon": "Bald im Chrome Web Store verfügbar!",
+      "availableSoon": "Bald im Chrome Web Store verfügbar",
       "signout": "Abmelden"
     }
   },
@@ -640,6 +640,17 @@
       "saveEachFile": "Vor dem Herunterladen fragen, wo jede Datei gespeichert werden soll.",
       "saveEachFileDescription": "Hinweis: Um diese Funktion zu nutzen, müssen Sie der Erweiterung erlauben, Downloads zu verwalten, wenn das Berechtigungsfenster erscheint. Nur wenn diese Option aktiviert ist, können Sie einen Standard-Unterordner zum Speichern von Bildschirmfotos auf Ihrer lokalen Festplatte angeben. Standardmäßig wird der Ordner 'Downloads' verwendet, wenn Sie keinen Unterordner angeben.",
       "addDateAndUrl": "Datum und URL am oberen Rand eines Bildschirmfotos hinzufügen."
+    },
+    "appearance": {
+      "description": "Aussehen und Sprache von Ever Rec in diesem Browser",
+      "theme": "Design",
+      "themeHint": "Gilt nur für diesen Browser",
+      "light": "Hell",
+      "dark": "Dunkel",
+      "system": "System",
+      "languageHint": "Die Sprache der App in diesem Browser",
+      "saving": "Screenshots speichern",
+      "savingHint": "Dateiformat, Download-Ordner und Google-Drive-Links für die Browsererweiterung"
     }
   },
   "modals": {
@@ -818,5 +829,28 @@
     "videoDeletedAndRedirect": "Video erfolgreich gelöscht. Weiterleitung zu Ihrem Arbeitsbereich...",
     "videoMovedToTrashAndRedirecting": "Video erfolgreich in den Papierkorb verschoben. Weiterleitung zu 'Meine Videos'...",
     "joinedWorkspaceSuccess": "Erfolgreich dem Arbeitsbereich beigetreten. Weiterleitung zum neuen Arbeitsbereich..."
+  },
+  "shell": {
+    "select": "Auswählen",
+    "loading": "Wird geladen",
+    "myLibrary": "Meine Bibliothek",
+    "workspaces": "Arbeitsbereiche",
+    "noOtherWorkspace": "Kein weiterer Arbeitsbereich",
+    "switchWorkspace": "Arbeitsbereich wechseln",
+    "account": "Konto",
+    "accountMenu": "Kontomenü",
+    "backToApp": "Zurück zur App",
+    "collapseSidebar": "Seitenleiste einklappen",
+    "expandSidebar": "Seitenleiste ausklappen",
+    "openNavigation": "Navigation öffnen",
+    "closeNavigation": "Navigation schließen",
+    "switchToDark": "Zum dunklen Design wechseln",
+    "switchToLight": "Zum hellen Design wechseln",
+    "showStarredFolders": "Markierte Ordner anzeigen",
+    "hideStarredFolders": "Markierte Ordner ausblenden",
+    "noStarredFolders": "Keine markierten Ordner",
+    "members": "{{count}} Mitglieder",
+    "members_one": "{{count}} Mitglied",
+    "members_other": "{{count}} Mitglieder"
   }
 }

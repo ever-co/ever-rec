@@ -57,8 +57,8 @@ const PanelResetPassword: React.FC = () => {
           onClick={resetEmail}
           full
           disabled={!valid}
-          className="tw-mt-8"
-          twPadding="tw-p-4"
+          className="tw-mt-6 tw-flex tw-h-10 tw-items-center tw-justify-center"
+          twPadding="tw-px-4"
         >
           {t('page.auth.common.sendEmail')}
         </AppButton>

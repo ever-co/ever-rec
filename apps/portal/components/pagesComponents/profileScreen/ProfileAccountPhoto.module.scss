@@ -1,6 +1,8 @@
 .profileUserPhoto {
   display: flex;
-  border-radius: 100%;
+  flex-shrink: 0;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px hsl(var(--border));
   overflow: hidden;
   cursor: pointer;
 

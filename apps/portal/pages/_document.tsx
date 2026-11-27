@@ -38,7 +38,8 @@ export default class CustomDocument extends Document<{
 
   render() {
     return (
-      <Html>
+      // next-themes sets the theme class on <html> before React hydrates.
+      <Html suppressHydrationWarning>
         <Head>{this.props.styles}</Head>
         <body className="rec-next scroll-div">
           <Main />

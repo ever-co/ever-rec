@@ -1,84 +1,72 @@
 .parentContainer {
-    display: flex;
-    flex-direction: column;
-    width: 280px;
+  display: flex;
+  flex-direction: column;
+  width: 280px;
 }
 
 .title {
-    font-size: 1.25rem;
-    line-height: 1.75rem;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
+  font-size: 1rem;
+  line-height: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
 }
 
 .flexContainer {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
 }
 
 .container {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
+// The pixel fields are narrow: less side padding than the shared field, so four digits fit.
 .inputContainer {
-    background: transparent;
-    border: 1px solid #a1a1a1;
-    border-radius: 3px;
-    width: 65px;
+  background: transparent;
+  width: 65px;
+  padding-left: 0.5rem;
+  padding-right: 0.25rem;
 }
 
 .innerInputContainer {
-    margin-right: 0.5rem;
-    margin-left: 0.75rem;
+  margin-right: 0.5rem;
+  margin-left: 0.75rem;
 }
 
 .secondInputContainer {
-    font-size: 1rem;
-    line-height: 1.5rem;
-    background: transparent;
-    border: 1px solid #a1a1a1;
-    border-radius: 3px;
-    width: 65px;
+  background: transparent;
+  width: 65px;
+  padding-left: 0.5rem;
+  padding-right: 0.25rem;
 }
 
 .secondInnerInputContainer {
-    margin-left: 0.25rem;
-    margin-right: 0.25rem;
+  margin-left: 0.25rem;
+  margin-right: 0.25rem;
 }
 
 .widthError {
-    font-size: 0.875rem;
-    line-height: 1.25rem;
-    color: #f45046;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: hsl(var(--destructive-text));
 }
 
 .heightError {
-    font-size: 0.875rem;
-    line-height: 1.25rem;
-    color: #f45046;
-    margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: hsl(var(--destructive-text));
+  margin-bottom: 0.5rem;
 }
 
 .buttonContainer {
-    margin-top: 0.75rem;
-    display: flex;
-    justify-content: flex-end;
+  margin-top: 0.75rem;
+  display: flex;
+  justify-content: flex-end;
 }
 
 .firstBtn {
-    margin-right: 0.5rem;
-    padding-top: 0.25rem;
-    padding-bottom: 0.25rem;
-}
-
-.whiteBg {
-    background-color: white;
-}
-
-.secondBtn {
-    padding-top: 0.25rem;
-    padding-bottom: 0.25rem;
+  margin-right: 0.5rem;
 }

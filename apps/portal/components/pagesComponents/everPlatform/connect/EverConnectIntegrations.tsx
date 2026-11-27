@@ -19,15 +19,28 @@ import {
 
 /** The states are read from Ever Platform at most this often when the tab is shown again. */
 const FOCUS_REFRESH_MS = 30_000;
-import { useErrorMessage } from './shared';
+import {
+  BLOCK_TITLE,
+  CODE,
+  MUTED_TEXT,
+  NOTICE,
+  TABLE,
+  useErrorMessage,
+} from './shared';
 
 /** Where the consent screens live: the links the platform signs must point there. */
-const CONSENT_ORIGINS = new Set(['https://app.ever.co', 'https://app-stage.ever.co', 'https://app-dev.ever.co']);
+const CONSENT_ORIGINS = new Set([
+  'https://app.ever.co',
+  'https://app-stage.ever.co',
+  'https://app-dev.ever.co',
+]);
 
 const consentLinkAllowed = (url: string) => {
   try {
     const parsed = new URL(url);
-    return CONSENT_ORIGINS.has(parsed.origin) || parsed.hostname === 'localhost';
+    return (
+      CONSENT_ORIGINS.has(parsed.origin) || parsed.hostname === 'localhost'
+    );
   } catch {
     return false;
   }
@@ -38,7 +51,10 @@ const consentLinkAllowed = (url: string) => {
  * state, *Enable…* (the consent screen of app.ever.co in a new tab; nothing is enabled here) and,
  * for the operator, *Disable*, accept or decline, and the instance policy.
  */
-const EverConnectIntegrations: React.FC<{ operator: boolean; workspaceId?: string }> = ({ operator, workspaceId }) => {
+const EverConnectIntegrations: React.FC<{
+  operator: boolean;
+  workspaceId?: string;
+}> = ({ operator, workspaceId }) => {
   const { t } = useTranslation();
   const router = useRouter();
   const errorMessage = useErrorMessage();
@@ -132,70 +148,138 @@ const EverConnectIntegrations: React.FC<{ operator: boolean; workspaceId?: strin
   const prepareConsent = async (key: string) => {
     setNotice(null);
     try {
-      const answer = operator ? await getConsentUrl(key) : await getWorkspaceConsentUrl(workspaceId as string, key);
+      const answer = operator
+        ? await getConsentUrl(key)
+        : await getWorkspaceConsentUrl(workspaceId as string, key);
       if (answer.state === 'ready' && consentLinkAllowed(answer.url)) {
         setLinks((current) => ({ ...current, [key]: answer.url }));
       } else {
-        setNotice(t(`page.everPlatform.connect.integrations.consentState.${answer.state}`, t('page.everPlatform.errors.generic')));
+        setNotice(
+          t(
+            `page.everPlatform.connect.integrations.consentState.${answer.state}`,
+            t('page.everPlatform.errors.generic'),
+          ),
+        );
       }
     } catch (error) {
       setNotice(errorMessage(error));
     }
   };
 
-  if (!rows) return <p data-testid="ever-connect-integrations-loading">{t('page.everPlatform.loading')}</p>;
+  if (!rows)
+    return (
+      <p data-testid="ever-connect-integrations-loading" className={MUTED_TEXT}>
+        {t('page.everPlatform.loading')}
+      </p>
+    );
 
   return (
-    <div data-testid="ever-connect-integrations" className="tw-flex tw-flex-col tw-gap-4">
-      <p>{t('page.everPlatform.connect.integrations.description')}</p>
+    <div
+      data-testid="ever-connect-integrations"
+      className="tw-flex tw-flex-col tw-items-start tw-gap-4"
+    >
+      <p className={MUTED_TEXT}>
+        {t('page.everPlatform.connect.integrations.description')}
+      </p>
       {rows.map((row) => {
         const rowPolicy = policy.find((item) => item.key === row.key);
         return (
-          <section key={row.key} data-testid={`ever-connect-integration-${row.key}`} className="tw-rounded tw-border tw-p-4">
+          <section
+            key={row.key}
+            data-testid={`ever-connect-integration-${row.key}`}
+            className="tw-w-full tw-rounded-[0.75rem] tw-border tw-border-solid tw-border-border tw-bg-card tw-p-4"
+          >
             <div className="tw-flex tw-items-center tw-gap-3">
-              <h4 className="tw-font-semibold">{row.name}</h4>
-              <Tag data-testid={`ever-connect-state-${row.key}`}>
-                {t(`page.everPlatform.connect.integrations.states.${row.state}`, row.state)}
+              <h4 className={BLOCK_TITLE}>{row.name}</h4>
+              <Tag
+                data-testid={`ever-connect-state-${row.key}`}
+                className="tw-m-0"
+              >
+                {t(
+                  `page.everPlatform.connect.integrations.states.${row.state}`,
+                  row.state,
+                )}
               </Tag>
             </div>
-            <p>{row.description}</p>
-            {row.pendingRemoteRevoke && <p>{t('page.everPlatform.connect.integrations.pendingRevoke')}</p>}
-            <div className="tw-mt-2 tw-flex tw-flex-wrap tw-items-center tw-gap-3">
-              <Button data-testid={`ever-connect-scope-${row.key}`} onClick={() => setOpen(open === row.key ? null : row.key)}>
+            <p className={`${MUTED_TEXT} tw-mt-1`}>{row.description}</p>
+            {row.pendingRemoteRevoke && (
+              <p className="tw-m-0 tw-mt-1 tw-text-[13px] tw-leading-5 tw-text-warning">
+                {t('page.everPlatform.connect.integrations.pendingRevoke')}
+              </p>
+            )}
+            <div className="tw-mt-4 tw-flex tw-flex-wrap tw-items-center tw-gap-2">
+              <Button
+                data-testid={`ever-connect-scope-${row.key}`}
+                onClick={() => setOpen(open === row.key ? null : row.key)}
+              >
                 {t('page.everPlatform.connect.integrations.showScope')}
               </Button>
-              {!row.enabled && row.connected && ['available', 'disabled', 'revoked', 'revoked_remote', 'declined'].includes(row.state) && (
-                <Button data-testid={`ever-connect-enable-${row.key}`} disabled={busy} onClick={() => prepareConsent(row.key)}>
-                  {t('page.everPlatform.connect.integrations.enable')}
-                </Button>
-              )}
+              {!row.enabled &&
+                row.connected &&
+                [
+                  'available',
+                  'disabled',
+                  'revoked',
+                  'revoked_remote',
+                  'declined',
+                ].includes(row.state) && (
+                  <Button
+                    data-testid={`ever-connect-enable-${row.key}`}
+                    disabled={busy}
+                    onClick={() => prepareConsent(row.key)}
+                  >
+                    {t('page.everPlatform.connect.integrations.enable')}
+                  </Button>
+                )}
               {links[row.key] && (
-                <a data-testid={`ever-connect-consent-${row.key}`} href={links[row.key]} target="_blank" rel="noopener noreferrer">
+                <a
+                  data-testid={`ever-connect-consent-${row.key}`}
+                  href={links[row.key]}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="tw-text-[13px] tw-font-medium tw-underline-offset-4 hover:tw-underline"
+                >
                   {t('page.everPlatform.connect.integrations.openConsent')}
                 </a>
               )}
               {operator && row.enabled && (
-                <Button data-testid={`ever-connect-disable-${row.key}`} danger disabled={busy} onClick={() => run(() => disableIntegration(row.key))}>
+                <Button
+                  data-testid={`ever-connect-disable-${row.key}`}
+                  danger
+                  disabled={busy}
+                  onClick={() => run(() => disableIntegration(row.key))}
+                >
                   {t('page.everPlatform.connect.integrations.disable')}
                 </Button>
               )}
               {operator && row.state === 'pending_operator' && (
                 <>
-                  <Button data-testid={`ever-connect-accept-${row.key}`} type="primary" disabled={busy} onClick={() => run(() => acceptIntegration(row.key, true))}>
+                  <Button
+                    data-testid={`ever-connect-accept-${row.key}`}
+                    type="primary"
+                    disabled={busy}
+                    onClick={() => run(() => acceptIntegration(row.key, true))}
+                  >
                     {t('page.everPlatform.connect.integrations.accept')}
                   </Button>
-                  <Button data-testid={`ever-connect-decline-${row.key}`} disabled={busy} onClick={() => run(() => acceptIntegration(row.key, false))}>
+                  <Button
+                    data-testid={`ever-connect-decline-${row.key}`}
+                    disabled={busy}
+                    onClick={() => run(() => acceptIntegration(row.key, false))}
+                  >
                     {t('page.everPlatform.connect.integrations.decline')}
                   </Button>
                 </>
               )}
               {operator && rowPolicy && (
-                <span className="tw-flex tw-items-center tw-gap-2">
+                <span className="tw-flex tw-items-center tw-gap-2 tw-text-[13px] tw-text-muted-foreground">
                   <Switch
                     data-testid={`ever-connect-policy-${row.key}`}
                     checked={rowPolicy.allowed}
                     disabled={busy || rowPolicy.deniedByEnv}
-                    onChange={(checked) => run(() => setPolicy(row.key, checked))}
+                    onChange={(checked) =>
+                      run(() => setPolicy(row.key, checked))
+                    }
                   />
                   {rowPolicy.deniedByEnv
                     ? t('page.everPlatform.connect.integrations.deniedByEnv')
@@ -204,38 +288,76 @@ const EverConnectIntegrations: React.FC<{ operator: boolean; workspaceId?: strin
               )}
             </div>
             {open === row.key && (
-              <table data-testid={`ever-connect-scope-table-${row.key}`} className="tw-mt-3 tw-w-full tw-text-sm">
-                <thead>
-                  <tr>
-                    <th>{t('page.everPlatform.connect.integrations.scope.field')}</th>
-                    <th>{t('page.everPlatform.connect.integrations.scope.direction')}</th>
-                    <th>{t('page.everPlatform.connect.integrations.scope.frequency')}</th>
-                    <th>{t('page.everPlatform.connect.integrations.scope.purpose')}</th>
-                    <th>{t('page.everPlatform.connect.integrations.scope.retention')}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {row.scope.map((scope) => (
-                    <tr key={scope.field_path}>
-                      <td>
-                        <code>{scope.field_path}</code>
-                      </td>
-                      <td>{t(`page.everPlatform.connect.integrations.directions.${scope.direction}`, scope.direction)}</td>
-                      <td>{scope.frequency}</td>
-                      <td>{scope.purpose}</td>
-                      <td>{scope.retention}</td>
+              <div className="tw-mt-4 tw-overflow-x-auto tw-rounded-lg tw-border tw-border-solid tw-border-border tw-bg-background">
+                <table
+                  data-testid={`ever-connect-scope-table-${row.key}`}
+                  className={TABLE}
+                >
+                  <thead>
+                    <tr>
+                      <th>
+                        {t(
+                          'page.everPlatform.connect.integrations.scope.field',
+                        )}
+                      </th>
+                      <th>
+                        {t(
+                          'page.everPlatform.connect.integrations.scope.direction',
+                        )}
+                      </th>
+                      <th>
+                        {t(
+                          'page.everPlatform.connect.integrations.scope.frequency',
+                        )}
+                      </th>
+                      <th>
+                        {t(
+                          'page.everPlatform.connect.integrations.scope.purpose',
+                        )}
+                      </th>
+                      <th>
+                        {t(
+                          'page.everPlatform.connect.integrations.scope.retention',
+                        )}
+                      </th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {row.scope.map((scope) => (
+                      <tr key={scope.field_path}>
+                        <td>
+                          <code className={CODE}>{scope.field_path}</code>
+                        </td>
+                        <td>
+                          {t(
+                            `page.everPlatform.connect.integrations.directions.${scope.direction}`,
+                            scope.direction,
+                          )}
+                        </td>
+                        <td>{scope.frequency}</td>
+                        <td>{scope.purpose}</td>
+                        <td>{scope.retention}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             )}
           </section>
         );
       })}
-      <Button data-testid="ever-connect-integrations-refresh" disabled={busy} onClick={() => void refreshFromPlatform()}>
+      <Button
+        data-testid="ever-connect-integrations-refresh"
+        disabled={busy}
+        onClick={() => void refreshFromPlatform()}
+      >
         {t('page.everPlatform.connect.refresh')}
       </Button>
-      {notice && <p data-testid="ever-connect-notice">{notice}</p>}
+      {notice && (
+        <p data-testid="ever-connect-notice" className={NOTICE}>
+          {notice}
+        </p>
+      )}
     </div>
   );
 };

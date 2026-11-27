@@ -28,30 +28,26 @@ const DeleteMultiItemsModal: React.FC<IDelteMultiItemsModalProps> = ({
       open={visible}
       onCancel={onClose}
       footer={
-        <div className="tw-flex tw-justify-end tw-mt-6">
-          <AppButton
-            onClick={onClose}
-            bgColor="tw-bg-app-grey-darker"
-            outlined
-            className="tw-px-8 tw-mx-4 tw-pb-1 tw-pt-1"
-          >
+        <div className="tw-flex tw-justify-end tw-gap-2 tw-mt-6">
+          <AppButton onClick={onClose} bgColor="tw-bg-app-grey-darker" outlined>
             {t('common.cancel')}
           </AppButton>
           <AppButton
             onClick={onOkHandler}
-            className="tw-px-8 tw-pb-1 tw-pt-1"
             bgColor={type === 'item' ? 'tw-bg-danger' : undefined}
-            twTextColor={type === 'item' ? 'tw-text-white' : undefined}
+            twTextColor={
+              type === 'item' ? 'tw-text-destructive-foreground' : undefined
+            }
           >
             {t('common.delete')}
           </AppButton>
         </div>
       }
     >
-      <h2 className="tw-mb-6 tw-text-2xl tw-font-semibold">
+      <h2 className="tw-mb-2 tw-text-base tw-font-semibold">
         <Trans values={{ type: type }} count={2} i18nKey="modals.deleteType" />
       </h2>
-      <p>{paragraph}</p>
+      <p className="tw-mb-0 tw-text-sm tw-text-muted-foreground">{paragraph}</p>
     </Modal>
   );
 };

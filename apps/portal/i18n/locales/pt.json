@@ -180,16 +180,16 @@
     "deleteWorkspace": "Excluir espaço de trabalho"
   },
   "header": {
-    "searchFiles": "Procurar arquivos...",
+    "searchFiles": "Procurar arquivos",
     "help": "Central de Ajuda",
-    "helpSoon": "Central de Ajuda em breve!",
+    "helpSoon": "Central de Ajuda em breve",
     "notifications": "Notificações",
-    "notificationsSoon": "Notificações em breve!",
+    "notificationsSoon": "Notificações em breve",
     "companySettings": "Configurações da empresa",
     "user": {
       "addNewCompany": "Adicionar nova empresa",
       "installChrome": "Instalar extensão para Chrome",
-      "availableSoon": "Disponível em breve na Chrome Web Store!",
+      "availableSoon": "Disponível em breve na Chrome Web Store",
       "signout": "Sair"
     }
   },
@@ -640,6 +640,17 @@
       "saveEachFile": "Perguntar onde salvar cada arquivo antes de baixar.",
       "saveEachFileDescription": "Nota: Para usar esta funcionalidade, você precisa permitir que a extensão gerencie os downloads quando a janela de solicitação de permissão aparecer. Além disso, somente quando esta opção estiver ativada, você poderá especificar uma subpasta padrão para salvar as capturas de tela em seu disco local. O padrão é a pasta 'Downloads' se você не especificar uma subpasta.",
       "addDateAndUrl": "Adicionar data e URL na parte superior de uma captura de tela."
+    },
+    "appearance": {
+      "description": "Aparência e idioma do Ever Rec neste navegador",
+      "theme": "Tema",
+      "themeHint": "Aplica-se apenas a este navegador",
+      "light": "Claro",
+      "dark": "Escuro",
+      "system": "Sistema",
+      "languageHint": "O idioma do aplicativo neste navegador",
+      "saving": "Salvamento de capturas",
+      "savingHint": "Formato de arquivo, pasta de downloads e links do Google Drive para a extensão do navegador"
     }
   },
   "modals": {
@@ -818,5 +829,29 @@
     "videoDeletedAndRedirect": "Vídeo excluído com sucesso. Redirecionando para seu espaço de trabalho...",
     "videoMovedToTrashAndRedirecting": "Vídeo movido para a lixeira com sucesso. Redirecionando para 'Meus vídeos'...",
     "joinedWorkspaceSuccess": "Você se juntou ao espaço de trabalho com sucesso. Redirecionando para o novo espaço de trabalho..."
+  },
+  "shell": {
+    "select": "Selecionar",
+    "loading": "A carregar",
+    "myLibrary": "Minha biblioteca",
+    "workspaces": "Espaços de trabalho",
+    "noOtherWorkspace": "Nenhum outro espaço de trabalho",
+    "switchWorkspace": "Trocar de espaço de trabalho",
+    "account": "Conta",
+    "accountMenu": "Menu da conta",
+    "backToApp": "Voltar ao aplicativo",
+    "collapseSidebar": "Recolher barra lateral",
+    "expandSidebar": "Expandir barra lateral",
+    "openNavigation": "Abrir navegação",
+    "closeNavigation": "Fechar navegação",
+    "switchToDark": "Mudar para o tema escuro",
+    "switchToLight": "Mudar para o tema claro",
+    "showStarredFolders": "Mostrar pastas com estrela",
+    "hideStarredFolders": "Ocultar pastas com estrela",
+    "noStarredFolders": "Nenhuma pasta com estrela",
+    "members": "{{count}} membros",
+    "members_one": "{{count}} membro",
+    "members_many": "{{count}} membros",
+    "members_other": "{{count}} membros"
   }
 }

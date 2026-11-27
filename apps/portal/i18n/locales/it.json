@@ -180,16 +180,16 @@
     "deleteWorkspace": "Elimina area di lavoro"
   },
   "header": {
-    "searchFiles": "Cerca file...",
+    "searchFiles": "Cerca file",
     "help": "Centro assistenza",
-    "helpSoon": "Centro assistenza disponibile a breve!",
+    "helpSoon": "Centro assistenza disponibile a breve",
     "notifications": "Notifiche",
-    "notificationsSoon": "Notifiche disponibili a breve!",
+    "notificationsSoon": "Notifiche disponibili a breve",
     "companySettings": "Impostazioni azienda",
     "user": {
       "addNewCompany": "Aggiungi nuova azienda",
       "installChrome": "Installa estensione per Chrome",
-      "availableSoon": "Disponibile a breve nel Chrome Web Store!",
+      "availableSoon": "Disponibile a breve nel Chrome Web Store",
       "signout": "Esci"
     }
   },
@@ -640,6 +640,17 @@
       "saveEachFile": "Chiedi dove salvare ogni file prima di scaricarlo.",
       "saveEachFileDescription": "Nota: per utilizzare questa funzione, devi consentire all'estensione di gestire i download quando appare la finestra di richiesta di autorizzazione. Inoltre, solo quando questa opzione è attivata, puoi specificare una sottocartella predefinita per salvare gli screenshot sul tuo disco locale. Se non specifichi una sottocartella, verrà utilizzata la cartella Download.",
       "addDateAndUrl": "Aggiungi data e URL in cima a uno screenshot."
+    },
+    "appearance": {
+      "description": "Aspetto e lingua di Ever Rec in questo browser",
+      "theme": "Tema",
+      "themeHint": "Si applica solo a questo browser",
+      "light": "Chiaro",
+      "dark": "Scuro",
+      "system": "Sistema",
+      "languageHint": "La lingua dell'app in questo browser",
+      "saving": "Salvataggio degli screenshot",
+      "savingHint": "Formato file, cartella di download e link di Google Drive per l'estensione del browser"
     }
   },
   "modals": {
@@ -818,5 +829,29 @@
     "videoDeletedAndRedirect": "Video eliminato con successo. Reindirizzamento alla tua area di lavoro...",
     "videoMovedToTrashAndRedirecting": "Video spostato nel cestino con successo. Reindirizzamento a 'I miei video'...",
     "joinedWorkspaceSuccess": "Ti sei unito all'area di lavoro con successo. Reindirizzamento alla nuova area di lavoro..."
+  },
+  "shell": {
+    "select": "Seleziona",
+    "loading": "Caricamento",
+    "myLibrary": "La mia libreria",
+    "workspaces": "Aree di lavoro",
+    "noOtherWorkspace": "Nessun'altra area di lavoro",
+    "switchWorkspace": "Cambia area di lavoro",
+    "account": "Account",
+    "accountMenu": "Menu account",
+    "backToApp": "Torna all'app",
+    "collapseSidebar": "Comprimi barra laterale",
+    "expandSidebar": "Espandi barra laterale",
+    "openNavigation": "Apri navigazione",
+    "closeNavigation": "Chiudi navigazione",
+    "switchToDark": "Passa al tema scuro",
+    "switchToLight": "Passa al tema chiaro",
+    "showStarredFolders": "Mostra cartelle speciali",
+    "hideStarredFolders": "Nascondi cartelle speciali",
+    "noStarredFolders": "Nessuna cartella speciale",
+    "members": "{{count}} membri",
+    "members_one": "{{count}} membro",
+    "members_many": "{{count}} membri",
+    "members_other": "{{count}} membri"
   }
 }

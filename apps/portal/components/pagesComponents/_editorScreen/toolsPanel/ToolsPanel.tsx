@@ -57,7 +57,6 @@ import pin_lock_black from 'public/assets/svg/tools-panel/pin_lock_black.svg';
 import collapse_close from 'public/assets/svg/tools-panel/collapse_close.svg';
 import expand_open from 'public/assets/svg/tools-panel/expand_open.svg';
 // import browser from '@/app/utilities/browser';
-import ds from 'public/assets/svg/tools-panel/ds.svg';
 import { IUser } from 'app/interfaces/IUserData';
 import PanelSplitter from './PanelSplitter';
 import IEditorImage from 'app/interfaces/IEditorImage';
@@ -375,6 +374,7 @@ const ToolsPanel: React.FC<IToolsPanelProps> = ({
               <IconBtn
                 size="10px"
                 icon={pin_lock}
+                className="tw-opacity-40 tw-brightness-0 dark:tw-invert"
                 onSelect={() => {
                   setLocked(true);
                 }}
@@ -385,6 +385,7 @@ const ToolsPanel: React.FC<IToolsPanelProps> = ({
               <IconBtn
                 size="10px"
                 icon={pin_lock_black}
+                className="dark:tw-invert"
                 onSelect={() => {
                   setLocked(false);
                 }}
@@ -395,6 +396,7 @@ const ToolsPanel: React.FC<IToolsPanelProps> = ({
             <IconBtn
               size="10px"
               icon={close}
+              className="tw-opacity-60 tw-brightness-0 dark:tw-invert"
               onSelect={() => {
                 onCancelHandler();
               }}
@@ -459,6 +461,7 @@ const ToolsPanel: React.FC<IToolsPanelProps> = ({
                 <IconBtn
                   size="10px"
                   icon={collapse_close}
+                  className="tw-opacity-60 tw-brightness-0 dark:tw-invert"
                   onSelect={() => {
                     setShow(true);
                   }}
@@ -471,13 +474,13 @@ const ToolsPanel: React.FC<IToolsPanelProps> = ({
                 <IconBtn
                   size="10px"
                   icon={expand_open}
+                  className="tw-opacity-60 tw-brightness-0 dark:tw-invert"
                   onSelect={() => {
                     setShow(false);
                   }}
                 />
               </div>
             )}
-            <Image src={ds} style={{ userSelect: 'none' }} alt="" />
           </ToolsColumn>
         </div>
 
@@ -630,7 +633,6 @@ const ToolsPanel: React.FC<IToolsPanelProps> = ({
                 {' '}
                 <Picker
                   // set={'twitter'}
-                  color={'#eb3507'}
                   data={data}
                   autofocus={true}
                   icons={'solid'}
@@ -639,7 +641,7 @@ const ToolsPanel: React.FC<IToolsPanelProps> = ({
                   emojiSize={40}
                   emojiButtonRadius={'1rem'}
                   emojiButtonSize={65}
-                  emojiButtonColors={['rgb(54, 46, 114)']}
+                  emojiButtonColors={['hsl(var(--foreground) / 0.1)']}
                   onEmojiSelect={(emoji: Emoji) => selectEmoji(emoji)}
                   previewEmoji={emojiOptions.id}
                 />{' '}
@@ -1327,13 +1329,17 @@ const ToolsPanel: React.FC<IToolsPanelProps> = ({
               className={styles.buttonWrapper}
               onClick={onSaveAsJPG}
               full
-              bgColor={styles.backgroundColor}
+              outlined
+              twPadding="tw-px-1 tw-py-0"
             >
-              <div style={{ color: 'black' }} className={styles.font}>
-                Download
-              </div>
+              <div className={styles.font}>Download</div>
             </AppButton>
-            <AppButton className={styles.saveBtn} onClick={saveScreenshot} full>
+            <AppButton
+              className={styles.saveBtn}
+              onClick={saveScreenshot}
+              full
+              twPadding="tw-px-1 tw-py-0"
+            >
               <div className={styles.font}>Save </div>
             </AppButton>
             <AppButton
@@ -1342,9 +1348,10 @@ const ToolsPanel: React.FC<IToolsPanelProps> = ({
                 onCancelHandler();
               }}
               full
-              bgColor={styles.backgroundColor}
+              bgColor="tw-bg-transparent"
+              twPadding="tw-px-1 tw-py-0"
             >
-              <div style={{ color: '#f45046' }} className={styles.font}>
+              <div className={styles.font}>
                 {fromExisted ? 'Back' : 'Cancel'}
               </div>
             </AppButton>

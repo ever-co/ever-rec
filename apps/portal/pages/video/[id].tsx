@@ -446,7 +446,7 @@ const SingleVideoPage: FC<IProps> = ({
     return (
       <>
         <TopMenuBar user={user} fromPage="video" />
-        <VideoNotFoundPage />;
+        <VideoNotFoundPage />
       </>
     );
   }
@@ -612,16 +612,25 @@ const VideoNotFoundPage = () => {
   return (
     <AppContainer>
       <Row style={{ minHeight: '85vh', marginLeft: 0, marginRight: 0 }}>
-        <Col span={24}>
-          <div className="tw-flex tw-justify-center tw-mt-8">
-            <Image src="/images/404.svg" alt="404" width={300} height={300} />
+        <Col
+          span={24}
+          className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-py-12"
+        >
+          <div className="tw-flex tw-justify-center">
+            <Image
+              src="/images/404.svg"
+              alt=""
+              width={240}
+              height={240}
+              className="dark:tw-invert dark:tw-hue-rotate-180"
+            />
           </div>
           <div className="tw-flex tw-justify-center">
             <div>
-              <div className="tw-font-bold tw-text-3xl tw-text-center tw-mt-4">
+              <div className="tw-mt-6 tw-text-center tw-text-2xl tw-font-semibold tw-text-foreground">
                 {t('page.video.oops')}
               </div>
-              <div className="tw-text-lg tw-text-center tw-mt-2">
+              <div className="tw-mt-2 tw-text-center tw-text-sm tw-text-muted-foreground">
                 {t('page.video.noAccess')}
               </div>
 
@@ -630,7 +639,8 @@ const VideoNotFoundPage = () => {
                   onClick={() => {
                     router.push(preRoutes.media + panelRoutes.images);
                   }}
-                  className="tw-m-auto tw-mt-5 tw-px-10 tw-py-4"
+                  twPadding="tw-px-6"
+                  className="tw-m-auto tw-mt-6 tw-flex tw-h-10 tw-items-center tw-justify-center"
                 >
                   {t('page.video.backToPortal')}
                 </AppButton>

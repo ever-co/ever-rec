@@ -18,7 +18,7 @@
 .uploadedImageWrapper {
   width: 80px;
   height: 80px;
-  border: 1px dashed #a2a1a1;
+  border: 1px dashed hsl(var(--input));
   border-radius: 10px;
   display: flex;
   justify-content: center;
@@ -26,7 +26,7 @@
 }
 
 .wrapper {
-  padding: 30px 20px;
+  padding: 32px 20px;
   width: 100%;
   height: 100%;
 }
@@ -34,8 +34,18 @@
 .uploadedImageWrapper,
 .imageSVG,
 .dragNDrop,
-.inputWrapper, .marginDiv {
-  margin-bottom: 30px;
+.inputWrapper,
+.marginDiv {
+  margin-bottom: 24px;
+}
+
+// The drop picture is drawn in one fixed dark ink: it takes the quiet text colour instead.
+.imageSVG {
+  color: hsl(var(--muted-foreground));
+
+  svg path {
+    fill: currentColor;
+  }
 }
 
 .marginDiv {
@@ -44,31 +54,30 @@
   justify-content: center;
 
   .headingUploaded {
-    //styleName: Subtitle 1;
-    font-family: Roboto;
-    font-size: 16px;
-    font-weight: bolder;
-    line-height: 24px;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 20px;
     text-align: center;
   }
 }
 
 .actionSpan {
   text-decoration: underline;
-  font-weight: bolder;
-  color: #5B4DBE;
+  text-underline-offset: 3px;
+  font-weight: 500;
+  color: hsl(var(--brand-text));
   justify-content: center;
-  font-family: Roboto;
-  font-size: 16px;
-  line-height: 24px;
-  letter-spacing: 0.01em;
+  font-size: 14px;
+  line-height: 20px;
   text-align: center;
   cursor: pointer;
 }
 
 .dropFilesHere {
-  font-size: 48px;
-  margin-bottom: 50px;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 32px;
+  margin-bottom: 48px;
 }
 
 .afterUploadWrapper {
@@ -92,28 +101,20 @@
     flex-direction: column;
     align-items: center;
     width: 100%;
-
-    .appButton {
-      padding: 15px;
-    }
   }
 
   & .dragNDrop {
-    font-family: Roboto;
-    font-size: 20px;
-    font-weight: bolder;
-    line-height: 26px;
-    letter-spacing: 0.01em;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 24px;
     text-align: center;
   }
 
   .footerDiv {
-    //styleName: Subtitle 1;
-    font-family: Roboto;
-    font-size: 16px;
-    font-weight: bolder;
-    line-height: 24px;
-    letter-spacing: 0.01em;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 20px;
     text-align: center;
+    color: hsl(var(--muted-foreground));
   }
 }

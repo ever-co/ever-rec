@@ -111,7 +111,9 @@ const ChangePasswordModal: React.FC<IProps> = ({ visible, onClose, onOk }) => {
       <h2 className={styles.modalHeader}>{t('page.auth.common.password')}</h2>
 
       <div className={styles.inputField}>
-        <label>{t('page.profile.deleteAccountModal.currentPassword')}</label>
+        <label className="tw-block tw-text-[13px] tw-font-medium tw-text-foreground">
+          {t('page.profile.deleteAccountModal.currentPassword')}
+        </label>
         <div className={styles.inputFieldCombined}>
           <AppInput
             placeholder={t('page.profile.deleteAccountModal.enterPassword')}
@@ -124,6 +126,7 @@ const ChangePasswordModal: React.FC<IProps> = ({ visible, onClose, onOk }) => {
             onChange={onPasswordChange}
           />
           <PasswordEye
+            className="tw-self-center"
             passwordShown={passwordShown}
             togglePassword={togglePasswordShown}
           />
@@ -131,7 +134,9 @@ const ChangePasswordModal: React.FC<IProps> = ({ visible, onClose, onOk }) => {
       </div>
 
       <div className={styles.inputField}>
-        <label>{t('page.auth.newPassword.newPasswordColon')}</label>
+        <label className="tw-block tw-text-[13px] tw-font-medium tw-text-foreground">
+          {t('page.auth.newPassword.newPasswordColon')}
+        </label>
         <div className={styles.inputFieldCombined}>
           <AppInput
             placeholder={t('page.profile.newPassword')}
@@ -144,11 +149,14 @@ const ChangePasswordModal: React.FC<IProps> = ({ visible, onClose, onOk }) => {
             onChange={onNewPasswordChange}
           />
           <PasswordEye
+            className="tw-self-center"
             passwordShown={passwordShown}
             togglePassword={togglePasswordShown}
           />
         </div>
-        <span>{t('page.profile.passwordValidation')}</span>
+        <span className="tw-text-[13px] tw-text-muted-foreground">
+          {t('page.profile.passwordValidation')}
+        </span>
       </div>
     </Modal>
   );

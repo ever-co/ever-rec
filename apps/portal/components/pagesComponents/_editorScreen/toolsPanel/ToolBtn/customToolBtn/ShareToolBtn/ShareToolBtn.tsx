@@ -92,6 +92,11 @@ const ShareTool: React.FC<IShareProps> = ({
                 <PopupButton
                   key={index}
                   iconSrc={data.icon.src}
+                  iconClassName={
+                    data.type === 'email'
+                      ? 'tw-brightness-0 dark:tw-invert'
+                      : undefined
+                  }
                   onSelect={() => {
                     data.type === 'email'
                       ? openEmailModal(image)

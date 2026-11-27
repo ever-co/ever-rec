@@ -3,7 +3,7 @@ import 'react-tabs/style/react-tabs.css';
 import styles from './InviteMembersModal.module.scss';
 import classNames from 'classnames';
 import { Modal } from 'antd';
-import AppSvg from 'components/elements/AppSvg';
+import { X } from 'lucide-react';
 import { TabList, Tab, TabPanel, Tabs } from 'react-tabs';
 import { IWorkspace } from 'app/interfaces/IWorkspace';
 import useShareWorkspaceInviteModal from 'hooks/useShareWorkspaceInviteModal';
@@ -38,7 +38,9 @@ const InviteMembersModal: FC<IProps> = ({
       destroyOnClose
       closable
       closeIcon={
-        <AppSvg path="/common/close-icon.svg" className="modalCloseButton" />
+        <span className="tw-flex tw-size-full tw-items-center tw-justify-center">
+          <X className="tw-size-4" aria-hidden="true" />
+        </span>
       }
       onCancel={onCancel}
       footer={<></>}

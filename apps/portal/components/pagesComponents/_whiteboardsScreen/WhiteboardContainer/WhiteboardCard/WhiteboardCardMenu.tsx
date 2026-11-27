@@ -19,6 +19,11 @@ interface IProps {
   handleMenuItemClick: (item: IMenuItem, whiteboard: IWhiteboard) => void;
 }
 
+// A hairline under the last row of a group. Drawn as a pseudo-element in the gap below the row,
+// so it stays straight under the row's rounded hover ground.
+const GROUP_END =
+  '[&.ant-dropdown-menu-item]:tw-mb-2 after:tw-absolute after:-tw-inset-x-1 after:-tw-bottom-1 after:tw-h-px after:tw-bg-border';
+
 const WhiteboardCardMenu: FC<IProps> = ({
   isTrash,
   favorite,
@@ -41,30 +46,49 @@ const WhiteboardCardMenu: FC<IProps> = ({
 
   const menu = (
     <Menu className="tw-w-210px">
-      {menuItems.map((item) => {
+      {menuItems.map((item, index) => {
+        // The one row that cannot be undone reads as a delete row.
+        const rowColor =
+          item.title === EWhiteboardCardMenuItems.REMOVE_FOREVER
+            ? 'tw-text-destructive-text'
+            : '';
+        const iconColor = rowColor ? '' : 'tw-text-muted-foreground';
+        const endsGroup =
+          (item.id === 2 || item.id === 6) && index < menuItems.length - 1;
+
         return (
           <Menu.Item
             key={item.id}
             onClick={() => handleMenuItemClick(item, whiteboard)}
-            className={classNames(
-              item.id === 2 || item.id === 6
-                ? 'tw-border-b tw-border-iron-grey'
-                : '',
-              'tw-text-grey-dark2 hover:tw-text-whiteboard-purple',
-            )}
+            className={classNames(endsGroup ? GROUP_END : '')}
           >
             {item.title === 'Open in new tab' ? (
               <a
                 target="_blank"
                 href={`/whiteboard/${whiteboard.id}`}
-                className="tw-flex tw-items-center tw-gap-2"
+                className="tw-flex tw-items-center tw-gap-2 tw-text-inherit hover:tw-text-inherit"
                 rel="noreferrer"
               >
-                <AppSvg size="24px" path={item.icon.src} /> {item.title}
+                <AppSvg
+                  size="16px"
+                  path={item.icon.src}
+                  className={iconColor}
+                />{' '}
+                {item.title}
               </a>
             ) : (
-              <div className="tw-flex tw-items-center tw-gap-2">
-                <AppSvg size="24px" path={item.icon.src} /> {item.title}
+              <div
+                className={classNames(
+                  'tw-flex tw-items-center tw-gap-2',
+                  rowColor,
+                )}
+              >
+                <AppSvg
+                  size="16px"
+                  path={item.icon.src}
+                  className={iconColor}
+                />{' '}
+                {item.title}
               </div>
             )}
           </Menu.Item>
@@ -74,18 +98,23 @@ const WhiteboardCardMenu: FC<IProps> = ({
   );
 
   return (
-    <Dropdown
-      overlay={menu}
-      placement="bottomRight"
-      arrow={{ pointAtCenter: true }}
-      trigger={['click']}
-    >
+    <Dropdown overlay={menu} placement="bottomRight" trigger={['click']}>
       <Button
-        className="!tw-border-0 !tw-m-0 !tw-p-0 "
+        // The button itself is only the hit area, sized here: a rule for the page's own dropdown
+        // trigger (antd.scss, `.whiteboards .ant-dropdown-trigger`) would otherwise stretch and
+        // pad it. It sits over the preview, so the icon paints the over-media ink and hover.
+        style={{
+          width: 32,
+          height: 32,
+          margin: 0,
+          padding: 0,
+          border: 0,
+          background: 'transparent',
+        }}
         icon={
           <AppSvg
-            className="tw-transition-all tw-text-wb-grey hover:tw-text-grey-dark2"
-            size="27px"
+            className="tw-flex tw-size-full tw-items-center tw-justify-center tw-rounded-md tw-text-[hsl(var(--on-overlay))] tw-transition-colors tw-duration-150 [.ant-btn:hover_&]:tw-bg-[hsl(var(--on-overlay)/0.16)] [.ant-dropdown-open_&]:tw-bg-[hsl(var(--on-overlay)/0.16)]"
+            size="20px"
             path={optionsIcon.src}
           />
         }

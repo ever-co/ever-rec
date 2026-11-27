@@ -239,7 +239,7 @@ const VideoChapters: FC<IVideoChaptersProps> = ({
     <div className={classNames(s.VideoChapters)}>
       {isHorizontalUI && (
         <>
-          <h3 style={{ fontWeight: 'bold' }}>Chapters</h3>
+          <h3 style={{ fontSize: '1rem', fontWeight: 600 }}>Chapters</h3>
 
           <ChapterHeading
             isHorizontalUI={isHorizontalUI}
@@ -305,7 +305,7 @@ const VideoChapters: FC<IVideoChaptersProps> = ({
             )}
           >
             {t('page.video.addChapter')}
-            {videoTime && `${t('common.at')} ${videoTime.timestamp}`}
+            {videoTime && ` ${t('common.at')} ${videoTime.timestamp}`}
           </button>
 
           {hasChanges &&
@@ -316,7 +316,10 @@ const VideoChapters: FC<IVideoChaptersProps> = ({
                 </div>
               </button>
             ) : (
-              <button onClick={() => saveChanges()} className={s.ChapterButton}>
+              <button
+                onClick={() => saveChanges()}
+                className={classNames(s.ChapterButton, s.ChapterButtonPrimary)}
+              >
                 {t('common.saveChanges')}
               </button>
             ))}

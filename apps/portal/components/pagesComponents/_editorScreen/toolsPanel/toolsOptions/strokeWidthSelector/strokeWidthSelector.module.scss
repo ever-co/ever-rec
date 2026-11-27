@@ -3,25 +3,30 @@
   border-radius: 0.25rem;
 }
 
+// The caret of the select is an injected SVG with black ink: it takes the quiet text colour.
 .black {
-  color: black;
+  color: hsl(var(--muted-foreground));
+
+  svg path {
+    fill: currentColor;
+  }
 }
 
 .flexContainer {
   display: flex;
-  color: black;
   flex-direction: column;
   align-items: center;
-  color: rgb(0, 0, 0) !important;
+  color: hsl(var(--foreground)) !important;
 }
 
 .wrapper {
-  font-size: 0.75rem; 
+  font-size: 0.75rem;
   line-height: 1rem;
 }
 
+// The sample line of each width.
 .select {
-  background-color: rgb(0, 0, 0) !important;
+  background-color: hsl(var(--foreground)) !important;
   width: 100%;
   border-radius: 9999px;
 }

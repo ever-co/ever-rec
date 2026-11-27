@@ -168,7 +168,6 @@ const PanelRegister: React.FC = () => {
           value={username}
           placeholder={t('page.register.fields.fullName')}
           autoComplete="new-password"
-          inputClass="tw-placeholder-mid-grey"
           onChange={usernameChangeHandler}
         />
 
@@ -177,50 +176,49 @@ const PanelRegister: React.FC = () => {
           placeholder={t('page.auth.common.email')}
           autoComplete="new-password"
           className="tw-mt-2"
-          inputClass="tw-placeholder-mid-grey"
           rules={emailRules}
           errors={email.errors}
           onChange={emailChangeHandler}
         />
 
-        <div className="tw-flex tw-justify-between tw-items-center tw-border-b tw-border-black">
+        {/* The eye sits inside the field's right end. */}
+        <div className="tw-mt-2 tw-flex tw-items-center">
           <AppInput
             value={password.value}
             placeholder={t('page.auth.common.password')}
             autoComplete="new-password"
             className="tw-w-full"
-            inputClass="tw-placeholder-mid-grey tw-border-b-0 tw-mt-4"
-            errorClass="tw-mt-2"
+            inputClass="tw-pr-10"
             type={passwordShown ? 'text' : 'password'}
             rules={passwordRules}
             errors={password.errors}
             onChange={passwordChangeHandler}
           />
           <PasswordEye
-            className="tw-mt-5"
+            className="tw-relative tw-right-2"
             passwordShown={passwordShown}
             togglePassword={togglePassword}
           />
         </div>
 
-        <div className="tw-flex tw-justify-between tw-items-center tw-border-b tw-border-black">
+        <div className="tw-mt-2 tw-flex tw-items-center">
           <AppInput
             value={passwordConfirm.value}
             type={passwordShown ? 'text' : 'password'}
             placeholder={t('page.auth.common.confirmPassword')}
-            className="tw-w-full tw-mt-4"
-            inputClass="tw-placeholder-mid-grey tw-border-b-0 tw-mt-4"
+            className="tw-w-full"
+            inputClass="tw-pr-10"
             errors={passwordConfirm.errors}
             onChange={passwordConfirmChangeHandler}
           />
           <PasswordEye
-            className="tw-mt-8"
+            className="tw-relative tw-right-2"
             passwordShown={passwordShown}
             togglePassword={togglePassword}
           />
         </div>
 
-        <div className="tw-flex tw-mt-10 tw-gap-4">
+        <div className="tw-mt-4 tw-flex tw-items-start tw-gap-2 tw-text-sm tw-text-foreground">
           {/*
             Disabled until the published documents are in hand. Ticking a box
             whose acceptance cannot be recorded is the appearance of consent
@@ -232,10 +230,10 @@ const PanelRegister: React.FC = () => {
             disabled={!termsLoaded || termsDocuments.length === 0}
             onChange={() => setTOS((prevTos) => !prevTos)}
           />
-          <p>
+          <p className="tw-m-0">
             {t('page.register.terms.agree')}
             <a
-              className="tw-underline tw-text-primary-purple"
+              className="tw-text-brand-text tw-underline tw-underline-offset-4 hover:tw-text-brand-text"
               href={legalUrlFor(termsDocuments, 'tos')}
               target="_blank"
               rel="noreferrer"
@@ -244,7 +242,7 @@ const PanelRegister: React.FC = () => {
             </a>
             {t('page.register.terms.and')}
             <a
-              className="tw-underline tw-text-primary-purple"
+              className="tw-text-brand-text tw-underline tw-underline-offset-4 hover:tw-text-brand-text"
               href={legalUrlFor(termsDocuments, 'privacy')}
               target="_blank"
               rel="noreferrer"
@@ -258,15 +256,15 @@ const PanelRegister: React.FC = () => {
           <AppButton
             full
             disabled={!valid}
-            className="tw-mt-8"
-            twPadding="tw-p-4"
+            className="tw-mt-6 tw-flex tw-h-10 tw-items-center tw-justify-center"
+            twPadding="tw-px-4"
             onClick={submitHandler}
           >
             {t('page.register.title')}
           </AppButton>
         </div>
 
-        <p className="tw-my-8 tw-font-medium tw-text-center">
+        <p className="tw-m-0 tw-my-6 tw-text-center tw-text-sm tw-text-muted-foreground">
           {t('page.register.continueOptions.title')}
         </p>
 

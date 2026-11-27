@@ -1,7 +1,7 @@
 /* eslint-disable react/jsx-no-target-blank */
 /* eslint-disable jsx-a11y/alt-text */
 /* eslint-disable @next/next/no-img-element */
-import { useEffect, useState } from 'react';
+import { CSSProperties, useEffect, useState } from 'react';
 import classNames from 'classnames';
 import styles from './WhiteboardCard.module.scss';
 import { UserOutlined } from '@ant-design/icons';
@@ -215,19 +215,31 @@ const WhiteboardCard: React.FC<IWhiteboardCardProps> = ({
   return (
     <div className={styles.whiteboardCard}>
       <div
-        style={{
-          backgroundImage: whiteboard.thumbnail
-            ? `url(${whiteboard.thumbnail})`
-            : `url(${defaultBackground.src})`,
-          backgroundSize: whiteboard.thumbnail ? 'cover' : '45%',
-          backgroundRepeat: 'no-repeat',
-          backgroundPosition: 'center',
-        }}
-        className={styles.whiteboardCardThumbnail}
+        style={
+          whiteboard.thumbnail
+            ? {
+                backgroundImage: `url(${whiteboard.thumbnail})`,
+                backgroundSize: 'cover',
+                backgroundRepeat: 'no-repeat',
+                backgroundPosition: 'center',
+              }
+            : // The placeholder drawing is painted by the stylesheet (as a mask) in a text role.
+              ({
+                '--placeholder': `url(${defaultBackground.src})`,
+              } as CSSProperties)
+        }
+        className={classNames(
+          styles.whiteboardCardThumbnail,
+          !whiteboard.thumbnail && styles.whiteboardCardThumbnailEmpty,
+        )}
       >
         <div className={styles.whiteboardCardThumbnailOverlayTop}>
           <div>
-            <AppSvg size="27px" path={checkIcon.src} />
+            <AppSvg
+              size="20px"
+              path={checkIcon.src}
+              className="[&_path]:tw-fill-current"
+            />
           </div>
 
           <div>
@@ -260,8 +272,8 @@ const WhiteboardCard: React.FC<IWhiteboardCardProps> = ({
         <div>
           <Tooltip title="Ant User" placement="top">
             <Avatar
-              size={26}
-              style={{ backgroundColor: '#87d068', marginRight: '0.5rem' }}
+              size={24}
+              style={{ marginRight: '0.5rem' }}
               icon={<UserOutlined />}
             />
           </Tooltip>

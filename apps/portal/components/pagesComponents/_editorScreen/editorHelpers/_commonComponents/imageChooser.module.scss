@@ -12,17 +12,23 @@
   overflow: hidden !important;
 }
 
+// A thumbnail to pick: a hairline tile, the picture on the quiet placeholder ground.
 .imageWrapper {
-  border: 2px solid #5b4dbe;
+  border: 1px solid hsl(var(--border));
   height: 220px;
   border-radius: 0.5rem;
-  background: black;
+  background: hsl(var(--muted));
   display: flex;
   align-items: center;
   justify-content: center;
   flex-direction: column;
   overflow: hidden !important;
   cursor: pointer;
+  transition: border-color 150ms var(--ease-out);
+
+  &:hover {
+    border-color: hsl(var(--foreground) / 0.25);
+  }
 }
 
 .image {
@@ -32,8 +38,10 @@
 
 .title {
   text-align: left;
-  font-size: 1.125rem;
-  line-height: 1.75rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 500;
+  color: hsl(var(--foreground));
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -50,17 +58,17 @@
 
 .imagesContainer {
   margin-bottom: 1.5rem;
-  font-size: 1.25rem;
+  font-size: 1.125rem;
   line-height: 1.75rem;
-  font-weight: 700;
+  font-weight: 600;
+  color: hsl(var(--foreground));
 }
 
 .button {
-  color: white;
   padding-bottom: 0.5rem;
   padding-top: 0.5rem;
 }
 .btnPadding {
-  padding-left: 3.5rem;
-  padding-right: 3.5rem;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
 }

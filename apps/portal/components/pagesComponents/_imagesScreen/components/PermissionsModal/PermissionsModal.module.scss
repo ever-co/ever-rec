@@ -2,7 +2,6 @@
 
 .modalWrapper {
   width: 700px !important;
-  border-image-source: linear-gradient(180deg, #ffffff 0%, #cccad5 100%);
 
   ::-webkit-scrollbar {
     width: 40px;
@@ -14,10 +13,10 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    border: 17px solid rgba(0, 0, 0, 0);
+    border: 17px solid transparent;
     background-clip: padding-box;
     border-radius: 9999px;
-    background-color: #5b4dbe;
+    background-color: hsl(var(--foreground) / 0.2);
   }
 }
 
@@ -33,8 +32,8 @@
 }
 
 .mainSection {
-  margin-top: 10px;
-  margin-bottom: 30px;
+  margin-top: 8px;
+  margin-bottom: 32px;
   width: 100%;
   display: flex;
   justify-content: center;
@@ -59,25 +58,24 @@
 }
 
 .recordRow {
-  margin-bottom: 15px;
+  align-items: center;
+  margin-bottom: 12px;
 
   .userInfo {
     display: flex;
     align-items: center;
-    font-family: Roboto;
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 400;
-    line-height: 24px;
-    letter-spacing: 0.01em;
+    line-height: 20px;
     text-align: left;
-    color: #636366;
+    color: hsl(var(--foreground));
   }
 
   .photoURL {
-    border-radius: 99px;
-    width: 30px;
-    height: 30px;
-    margin-right: 10px;
+    border-radius: 9999px;
+    width: 32px;
+    height: 32px;
+    margin-right: 12px;
   }
 }
 
@@ -88,29 +86,35 @@
     width: 35%;
     display: flex;
     justify-content: center;
-    font-family: Roboto;
-    font-size: 16px;
-    font-weight: 400;
-    line-height: 24px;
-    letter-spacing: 0.01em;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 20px;
     text-align: center;
-    color: #636366;
+    color: hsl(var(--muted-foreground));
   }
 
+  // A native checkbox: it follows the theme through `color-scheme`, and is ticked in the ink of
+  // the primary action instead of the browser's blue.
   .checkbox {
-    width: 80%;
+    width: 16px;
+    height: 16px;
     cursor: pointer;
+    accent-color: hsl(var(--primary));
   }
 }
 
 .headingRecordRow {
-  margin-bottom: 15px;
+  margin-bottom: 12px;
   display: flex;
   justify-content: flex-end;
 }
 
 .recordHeader {
   width: 85%;
+  margin-bottom: 0;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
 }
 
 .noMembersSection {
@@ -128,5 +132,5 @@
   width: 100%;
   display: flex;
   justify-content: center;
-  margin-top: 30px;
+  margin-top: 32px;
 }

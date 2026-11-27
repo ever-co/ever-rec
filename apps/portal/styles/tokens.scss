@@ -1,0 +1,130 @@
+// The shared Ever tokens.
+//
+// One neutral ramp for every surface, text role and hairline: the zinc values of Ever Teams, which
+// the shared Ever shell names as the baseline for every app (light page 240 11% 98%, sidebar
+// 240 3% 94%, border 240 3% 89%; dark page 240 5% 7%, sidebar 240 6% 4%, border 240 4% 16%).
+// The primary action is black on white and white on black, as in Ever Works. Colour is spent in
+// two places only: the Ever mark, and one accent (the Rec violet) for selection, focus and links.
+//
+// Values are HSL triplets so Tailwind can add alpha: `hsl(var(--border) / 0.6)`.
+// Light is `:root`; dark is `.dark` on <html> (set by next-themes, see components/theme).
+
+:root {
+  color-scheme: light;
+
+  // The system stack, like Ever Works and Ever Teams: no web font.
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue',
+    Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
+  --font-mono:
+    'SFMono-Regular', 'SF Mono', Menlo, Monaco, Consolas, 'Liberation Mono',
+    monospace;
+
+  // Surfaces: sidebar (the "window") < page < card.
+  --sidebar: 240 3% 94%;
+  --background: 240 11% 98%;
+  --card: 0 0% 100%;
+  --popover: 0 0% 100%;
+  --muted: 240 5% 95%;
+  --accent: 240 5% 95%;
+  --secondary: 240 5% 95%;
+
+  // Text roles: primary and muted. (Secondary is the primary at 80%.)
+  --foreground: 240 6% 10%;
+  --card-foreground: 240 6% 10%;
+  --popover-foreground: 240 6% 10%;
+  --sidebar-foreground: 240 6% 10%;
+  --muted-foreground: 240 4% 42%;
+  --accent-foreground: 240 6% 10%;
+  --secondary-foreground: 240 6% 10%;
+
+  // The primary action: ink on paper.
+  --primary: 240 6% 10%;
+  --primary-foreground: 0 0% 100%;
+
+  // Hairlines.
+  --border: 240 3% 89%;
+  --input: 240 3% 89%;
+  --sidebar-border: 240 3% 89%;
+  --sidebar-accent: 240 3% 88%;
+  --sidebar-accent-foreground: 240 6% 10%;
+
+  // The one accent: Rec violet. `--brand` is a fill (white text on it), `--brand-text` is ink.
+  --brand: 247 46% 52%;
+  --brand-foreground: 0 0% 100%;
+  --brand-text: 247 46% 48%;
+  --brand-muted: 245 40% 95%;
+  --ring: 247 46% 52%;
+
+  // Semantic. `--destructive` is a fill; `--destructive-text` is ink on a surface.
+  --destructive: 0 74% 42%;
+  --destructive-foreground: 0 0% 100%;
+  --destructive-text: 0 74% 42%;
+  --destructive-muted: 0 86% 96%;
+  --success: 163 100% 24%;
+  --success-muted: 152 60% 94%;
+  --warning: 26 100% 36%;
+  --warning-muted: 48 96% 91%;
+
+  // What sits over media (thumbnails, the player) and behind dialogs: dark in both themes.
+  --overlay: 240 10% 4%;
+  --overlay-opacity: 0.5;
+  --on-overlay: 0 0% 100%;
+
+  --radius: 0.625rem;
+  --shadow-sm: 0 1px 3px rgb(0 0 0 / 0.04);
+  --shadow-float:
+    0 4px 8px -2px rgb(0 0 0 / 0.06), 0 12px 32px -4px rgb(0 0 0 / 0.1);
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.dark {
+  color-scheme: dark;
+
+  --sidebar: 240 6% 4%;
+  --background: 240 5% 7%;
+  --card: 240 5% 10%;
+  --popover: 240 5% 11%;
+  --muted: 240 4% 13%;
+  --accent: 240 4% 14%;
+  --secondary: 240 4% 13%;
+
+  --foreground: 240 5% 90%;
+  --card-foreground: 240 5% 90%;
+  --popover-foreground: 240 5% 90%;
+  --sidebar-foreground: 240 5% 90%;
+  --muted-foreground: 240 5% 62%;
+  --accent-foreground: 0 0% 100%;
+  --secondary-foreground: 240 5% 90%;
+
+  // Paper on ink.
+  --primary: 0 0% 93%;
+  --primary-foreground: 0 0% 0%;
+
+  --border: 240 4% 16%;
+  --input: 240 4% 18%;
+  --sidebar-border: 240 4% 16%;
+  --sidebar-accent: 240 4% 14%;
+  --sidebar-accent-foreground: 0 0% 100%;
+
+  --brand: 247 56% 62%;
+  --brand-foreground: 0 0% 100%;
+  --brand-text: 247 90% 82%;
+  --brand-muted: 247 28% 19%;
+  --ring: 247 80% 74%;
+
+  --destructive: 0 72% 51%;
+  --destructive-foreground: 0 0% 100%;
+  --destructive-text: 0 91% 71%;
+  --destructive-muted: 0 45% 16%;
+  --success: 158 76% 64%;
+  --success-muted: 158 35% 13%;
+  --warning: 47 100% 61%;
+  --warning-muted: 40 45% 14%;
+
+  --overlay-opacity: 0.7;
+
+  // Depth in dark comes from surface steps and hairlines; floating layers keep a soft shadow.
+  --shadow-sm: 0 0 0 rgb(0 0 0 / 0);
+  --shadow-float: 0 12px 32px -4px rgb(0 0 0 / 0.5);
+}

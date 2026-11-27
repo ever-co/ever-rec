@@ -180,16 +180,16 @@
     "deleteWorkspace": "Delete Workspace"
   },
   "header": {
-    "searchFiles": "Search files...",
+    "searchFiles": "Search files",
     "help": "Help Center",
-    "helpSoon": "Help Center coming soon!",
+    "helpSoon": "Help Center coming soon",
     "notifications": "Notifications",
-    "notificationsSoon": "Notifications coming soon!",
+    "notificationsSoon": "Notifications coming soon",
     "companySettings": "Company Settings",
     "user": {
       "addNewCompany": "Add New Company",
       "installChrome": "Install Chrome Extension",
-      "availableSoon": "Available in the Chrome Web Store soon!",
+      "availableSoon": "Available in the Chrome Web Store soon",
       "signout": "Sign Out"
     }
   },
@@ -950,6 +950,17 @@
         }
       }
     },
+    "appearance": {
+      "description": "How Ever Rec looks and reads on this browser",
+      "theme": "Theme",
+      "themeHint": "Applies to this browser only",
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System",
+      "languageHint": "The language of the app on this browser",
+      "saving": "Saving screenshots",
+      "savingHint": "File format, download folder and Google Drive links for the browser extension"
+    },
     "termsReaccept": {
       "title": "Please accept our terms",
       "description": "To keep using Rec, please read and accept these documents.",
@@ -1136,5 +1147,28 @@
     "videoDeletedAndRedirect": "Video deleted successfully. Redirecting to your workspace...",
     "videoMovedToTrashAndRedirecting": "Video moved to Trash successfully. Redirecting to My Videos...",
     "joinedWorkspaceSuccess": "Successfully joined the workspace. Redirecting to the new workspace..."
+  },
+  "shell": {
+    "select": "Select",
+    "loading": "Loading",
+    "myLibrary": "My library",
+    "workspaces": "Workspaces",
+    "noOtherWorkspace": "No other workspace",
+    "switchWorkspace": "Switch workspace",
+    "account": "Account",
+    "accountMenu": "Account menu",
+    "backToApp": "Back to app",
+    "collapseSidebar": "Collapse sidebar",
+    "expandSidebar": "Expand sidebar",
+    "openNavigation": "Open navigation",
+    "closeNavigation": "Close navigation",
+    "switchToDark": "Switch to dark theme",
+    "switchToLight": "Switch to light theme",
+    "showStarredFolders": "Show starred folders",
+    "hideStarredFolders": "Hide starred folders",
+    "noStarredFolders": "No starred folders",
+    "members": "{{count}} members",
+    "members_one": "{{count}} member",
+    "members_other": "{{count}} members"
   }
 }

@@ -1,75 +1,135 @@
+// A team's row: the same measures as a member's row in the tab beside it
+// (WorkspaceMembersModalMembersWrapper).
 .teamWrapper {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin: 10px 0;
-  padding: 0.5rem 1rem;
-  border-radius: 0.25rem;
-  transition: background-color 0.2s;
-
-  &:last-of-type {
-    border: none;
-    margin-bottom: 0;
-  }
+  gap: 0.75rem;
+  min-height: 3.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: calc(var(--radius) - 2px);
+  transition: background-color 150ms var(--ease-out);
 
   &:hover {
-    background-color: white;
+    background-color: hsl(var(--accent));
   }
 }
 
 .separator {
-  margin: 10px 0;
-  color: rgb(179, 179, 179);
+  margin: 0;
+  border: 0;
+  border-top: 1px solid hsl(var(--border));
 
   &:last-of-type {
     display: none;
   }
 }
 
+// The picture on the left, the name and the member count in two lines beside it.
 .mainRow {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 2rem minmax(0, 1fr);
+  column-gap: 0.75rem;
+  align-items: center;
+  min-width: 0;
 }
 
-.avatarWrapper,
-.actionsWrapper {
+.avatarWrapper {
+  display: contents;
+}
+
+.avatar {
+  grid-column: 1;
+  grid-row: 1 / span 2;
   display: flex;
-  div:first-of-type {
-    margin-right: 0.5rem;
+  justify-content: center;
+  align-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background-color: hsl(var(--muted));
+  overflow: hidden;
+
+  img {
+    object-fit: cover;
   }
 }
-.avatar {
-  margin-right: 10px;
+
+// The stock team picture is dark ink inside an <img>, so it cannot take the text colour: it is
+// dimmed to the quiet text, and turned to light ink on the dark theme.
+.stockAvatar img {
+  opacity: 0.6;
 }
 
-.teamName,
-.leaveAction {
-  font-family: Roboto;
-  font-size: 16px;
-  font-weight: 400;
-  line-height: 24px;
-  letter-spacing: 0.01em;
+:global(.dark) .stockAvatar img {
+  filter: invert(1);
+}
+
+.teamName {
+  grid-column: 2;
+  grid-row: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: hsl(var(--foreground));
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.25rem;
   text-align: left;
-  color: #636366;
 }
 
+.members {
+  grid-column: 2;
+  grid-row: 2;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.25rem;
+}
+
+.actionsWrapper {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+// "Manage" / "Go to" and "Leave": one small size for every row. The row lights up on hover, so
+// the buttons take a tint of the text colour instead of the hover surface.
 .leaveAction,
-.goAction {
-  padding: 0.2rem 0.5rem;
-  cursor: pointer;
-}
-
 .goAction {
   display: flex;
   justify-content: center;
   align-items: center;
-  border-radius: 0.2rem;
-  background-color: green;
-  color: white;
-  margin-right: 20px;
+  height: 2rem;
+  padding: 0 0.75rem;
+  border: 1px solid transparent;
+  border-radius: calc(var(--radius) - 2px);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.25rem;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color 150ms var(--ease-out),
+    color 150ms var(--ease-out);
+
+  &:hover {
+    background-color: hsl(var(--foreground) / 0.08);
+  }
 }
 
-.members {
-  color: black;
+// An outline button.
+.goAction {
+  border-color: hsl(var(--input));
+  color: hsl(var(--foreground));
+}
+
+// A ghost button.
+.leaveAction {
+  color: hsl(var(--muted-foreground));
+
+  &:hover {
+    color: hsl(var(--foreground));
+  }
 }

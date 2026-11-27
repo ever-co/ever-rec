@@ -76,7 +76,10 @@ const AudioPlayer: React.FC<IPlayerProps> = ({ audioSrc, audioDuration }) => {
           {' '}
           <img
             src={playingState ? pauseIcon.src : playIcon.src}
-            className={!playingState ? styles.spacing : ''}
+            className={classNames(
+              'tw-brightness-0 dark:tw-invert',
+              !playingState ? styles.spacing : '',
+            )}
             alt="play/pause"
           ></img>
         </Button>

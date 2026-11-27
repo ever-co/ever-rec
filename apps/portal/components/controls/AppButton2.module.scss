@@ -1,13 +1,27 @@
-@import 'pagesScss/partials/_colors.scss';
-
+// A large choice tile (label on the left, icon on the right), e.g. "New folder".
 .appButton2 {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1rem;
-  border: 2px solid $grey-light04;
-  border-radius: 0.5rem;
-  font-weight: bold;
   gap: 1rem;
-  transition: all 0.1s ease-in-out;
+  padding: 0.875rem 1rem;
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  background: hsl(var(--card));
+  color: hsl(var(--foreground));
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition:
+    background-color 150ms var(--ease-out),
+    border-color 150ms var(--ease-out);
+
+  &:hover {
+    border-color: hsl(var(--foreground) / 0.25);
+    background: hsl(var(--accent));
+  }
+
+  &:focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
 }

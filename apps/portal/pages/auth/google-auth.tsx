@@ -46,16 +46,19 @@ const GoogleAuth = () => {
   }, [router.isReady, router.query]);
 
   return (
-    <div className="tw-flex tw-items-center tw-justify-center tw-bg-dark-grey tw-w-full tw-h-100vh">
-      <div className="tw-border-solid tw-border-black tw-border tw-bg-white tw-w-500px tw-h-350px tw-p-10px tw-flex tw-flex-col tw-justify-around tw-items-center">
-        <h2 className="tw-text-2xl  tw-text-center">
+    <div className="tw-flex tw-min-h-screen tw-w-full tw-items-center tw-justify-center tw-bg-background tw-p-4">
+      <div className="tw-flex tw-w-full tw-max-w-[500px] tw-flex-col tw-items-center tw-gap-6 tw-rounded-xl tw-border tw-border-solid tw-border-border tw-bg-card tw-p-8">
+        <h2 className="tw-m-0 tw-text-center tw-text-xl tw-font-semibold tw-text-foreground">
           {t('page.auth.common.googleRequire')}
         </h2>
-        <div className="tw-flex tw-justify-center tw-w-full">
+        <div className="tw-flex tw-w-full tw-justify-center">
           {loginType === 'google' ? (
             <GoogleBtn onSuccess={googleLogin} />
           ) : (
-            <div onClick={driveLogin} className="tw-cursor-pointer">
+            <div
+              onClick={driveLogin}
+              className="tw-max-w-full tw-cursor-pointer tw-overflow-hidden tw-rounded-md"
+            >
               <AppSvg
                 path="/sign/sign-in-google.svg"
                 width="400px"

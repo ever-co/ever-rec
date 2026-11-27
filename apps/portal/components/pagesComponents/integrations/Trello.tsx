@@ -63,8 +63,8 @@ const Trello: React.FC = () => {
 
   return (
     <div className={styles.mainWrapperItem}>
-      <h1 className="tw-font-semibold">
-        <div className="tw-flex">
+      <h1 className="tw-m-0 tw-text-sm tw-font-medium tw-text-foreground">
+        <div className="tw-flex tw-h-7 tw-items-center">
           <AppSvg size="22px" className="tw-mr-2" path="/settings/trello.svg" />
           {t('page.integrations.trello.title')}
         </div>
@@ -75,23 +75,23 @@ const Trello: React.FC = () => {
       user.trello.isIntegrated &&
       user.trello.isIntegrated === true ? (
         <>
-          <h2 className="tw-max-w-full tw-text-center">
-            <div className="tw-flex tw-flex-col tw-gap-2 tw-justify-center">
-              <div className="tw-mr-2">
-                {t('page.integrations.connectedTo')}
-              </div>
-              <div className="tw-flex">
-                <span className="tw-text-primary-purple tw-font-bold">
+          <h2 className="tw-m-0 tw-max-w-full tw-text-[13px] tw-font-normal tw-leading-5 tw-text-muted-foreground">
+            <div className="tw-flex tw-flex-col">
+              <div>{t('page.integrations.connectedTo')}</div>
+              <div className="tw-flex tw-min-w-0">
+                <span className="tw-truncate tw-font-medium tw-text-foreground">
                   {user.trello.email}
                 </span>
               </div>
             </div>
           </h2>
 
-          <div className="tw-w-90p">
+          <div className={styles.action}>
             <AppButton
               full={true}
-              className={styles.disconnectBtn}
+              bgColor="tw-bg-transparent hover:tw-bg-destructive-muted"
+              twTextColor="tw-text-destructive-text"
+              twPadding="tw-px-4 tw-py-[7px]"
               onClick={() => setIsDisconnect(true)}
             >
               {t('page.integrations.trello.disconnectTrello')}
@@ -103,8 +103,13 @@ const Trello: React.FC = () => {
           <p className={styles.description}>
             {t('page.integrations.trello.connectedDescription')}
           </p>
-          <div className="tw-w-90p">
-            <AppButton onClick={connectToAccount} full={true}>
+          <div className={styles.action}>
+            <AppButton
+              outlined
+              twPadding="tw-px-4 tw-py-[7px]"
+              onClick={connectToAccount}
+              full={true}
+            >
               {t('page.integrations.trello.connectWithTrello')}
             </AppButton>
           </div>

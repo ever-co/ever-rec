@@ -129,7 +129,9 @@ const MemberRow: FC<IMemberRow> = ({
           onClick={() =>
             !isLoading && onAdd && onAdd(teamId as string, member.id)
           }
-          bgColor="tw-bg-primary-purple"
+          outlined
+          twPadding="tw-p-0"
+          twTextSize="tw-text-[13px]"
           className={styles.MemberButton}
         >
           {isLoading ? (
@@ -147,16 +149,14 @@ const MemberRow: FC<IMemberRow> = ({
           onClick={() =>
             !isLoading && onRemove && onRemove(teamId as string, member.id)
           }
-          bgColor="tw-bg-app-grey-darker"
-          twTextColor="tw-text-white"
+          bgColor="tw-bg-transparent"
+          twPadding="tw-p-0"
+          twTextSize="tw-text-[13px]"
           className={styles.MemberButton}
         >
           {isLoading ? (
             <div className={styles.spinnerWrapper}>
-              <AppSpinnerLocal
-                circleInnerColor="#6e6e6e"
-                circleColor="#ffffff"
-              />
+              <AppSpinnerLocal />
             </div>
           ) : (
             t('common.remove')

@@ -13,8 +13,7 @@ import PanelAC from 'app/store/panel/actions/PanelAC';
 import OutsideClickHandler from 'react-outside-click-handler';
 import ToolSubPanel from './components/ToolSubPanel';
 import { tools } from 'components/pagesComponents/_editorScreen/toolsPanel/tools';
-import AppSvg from 'components/elements/AppSvg';
-import closeIcon from 'public/common/close-icon.svg';
+import { X } from 'lucide-react';
 import { Tooltip } from 'antd';
 
 type ToolPlacement = 'left' | 'right';
@@ -207,7 +206,7 @@ const ToolBtn = forwardRef<{ closePanel: () => void }, IToolBtn>(
                 {children}
               </ToolSubPanel>
               <div className={styles.close} onClick={() => closePanel()}>
-                <AppSvg width="25px" height="25px" path={closeIcon.src} />
+                <X className="tw-size-3.5" strokeWidth={1.75} />
               </div>
             </div>
           </OutsideClickHandler>

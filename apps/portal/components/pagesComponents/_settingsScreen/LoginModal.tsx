@@ -9,7 +9,7 @@ import { login } from '../../../app/services/auth';
 import { IUser, IUserData } from '../../../app/interfaces/IUserData';
 import { errorHandler } from '../../../app/services/helpers/errors';
 import { IDataResponse } from 'app/interfaces/IApiResponse';
-import AppSvg from 'components/elements/AppSvg';
+import { X } from 'lucide-react';
 import jwt_decode from 'jwt-decode';
 import { useTranslation } from 'react-i18next';
 
@@ -116,15 +116,17 @@ const LoginModal: React.FC<ILoginModalProps> = ({
       open={visible}
       onCancel={onClose}
       closeIcon={
-        <AppSvg path="/images/close-icon.svg" className="modalCloseButton" />
+        <span className="tw-flex tw-size-full tw-items-center tw-justify-center">
+          <X className="tw-size-4" aria-hidden="true" />
+        </span>
       }
       footer={
-        <div className="tw-flex tw-justify-end tw-mt-14">
+        <div className="tw-mt-6 tw-flex tw-justify-end">
           {!shouldHaveGoogleLogin &&
             (onDelete ? (
               <AppButton
                 onClick={onOk}
-                className="tw-pt-2 tw-text-white tw-bg-danger tw-border tw-border-danger tw-border-solid"
+                twPadding="tw-px-4 tw-py-[7px]"
                 disabled={!valid}
                 bgColor="tw-bg-danger"
               >
@@ -133,7 +135,7 @@ const LoginModal: React.FC<ILoginModalProps> = ({
             ) : (
               <AppButton
                 onClick={onLoginHandler}
-                className="tw-px-10"
+                twPadding="tw-px-4 tw-py-[7px]"
                 disabled={!valid}
               >
                 {t('common.confirm')}
@@ -147,17 +149,17 @@ const LoginModal: React.FC<ILoginModalProps> = ({
         </div>
       }
     >
-      <div className="tw-mb-30px">
+      <div className="tw-mb-6">
         {!onDelete ? (
-          <h2 className="tw-mb-8 tw-text-2xl tw-font-bold">
+          <h2 className="tw-m-0 tw-pr-6 tw-text-base tw-font-semibold tw-text-foreground">
             {t('page.setting.reEnterCredentials')}
           </h2>
         ) : !shouldHaveGoogleLogin ? (
-          <h2 className="tw-mb-8 tw-text-2xl tw-font-bold">
+          <h2 className="tw-m-0 tw-pr-6 tw-text-base tw-font-semibold tw-text-foreground">
             {t('page.setting.passwordBeforeRemove')}
           </h2>
         ) : (
-          <h2 className="tw-mb-8 tw-text-2xl tw-font-bold">
+          <h2 className="tw-m-0 tw-pr-6 tw-text-base tw-font-semibold tw-text-foreground">
             {t('page.setting.accountToBeRemoved')}
           </h2>
         )}
@@ -171,7 +173,6 @@ const LoginModal: React.FC<ILoginModalProps> = ({
             errors={password.errors}
             onChange={passwordChangeHandler}
             rules={passwordRules}
-            inputClass="tw-bg-transparent tw-border-mid-grey tw-placeholder-black"
           />
         </div>
       )}

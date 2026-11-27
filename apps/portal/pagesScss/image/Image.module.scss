@@ -1,11 +1,10 @@
+// The single image page (own, shared and workspace): page ground, media stage and the manage
+// column. Every colour is a shared Ever token (styles/tokens.scss), so the page follows the theme.
+
 .appContainer {
-  min-height: calc(100vh - 5rem);
-  background: radial-gradient(
-    ellipse at 25% 92%,
-    rgba(101, 99, 255, 0.35) 0%,
-    rgba(236, 234, 244, 0.4) 42%,
-    rgba(236, 234, 244, 0.7) 100%
-  );
+  // The top bar above is 56px high.
+  min-height: calc(100vh - 3.5rem);
+  background: hsl(var(--background));
 }
 
 .comingSoon {
@@ -16,41 +15,90 @@
   }
 }
 
+// An action of the manage column (Download, Annotate, More): an outline button with a quiet icon.
 .containerImageAction {
-  background: #f5f4f7 !important;
-  transition: background-color 0.3s ease;
+  transition:
+    background-color 150ms var(--ease-out),
+    border-color 150ms var(--ease-out);
 
   & .innerCircle {
-    background: #d8d8d8 !important;
-    transition: background-color 0.3s ease;
-    border: 1px solid white;
+    color: hsl(var(--muted-foreground));
+    transition: color 150ms var(--ease-out);
+
+    // Icons injected from /public carry their own ink: they take the text colour here.
+    :global(.injected-svg) path {
+      fill: currentColor;
+    }
   }
 
   &:hover {
-    background: #d8d8d8 !important;
+    background: hsl(var(--accent));
 
     & .innerCircle {
-      background: #f5f4f7 !important;
+      color: hsl(var(--foreground));
     }
   }
 }
 
+// A menu icon whose drawing in /public sets its ink in an inline style (so only an important rule
+// can re-point it): it takes the text colour of its menu row.
+.inkIcon :global(.injected-svg) path {
+  fill: currentColor !important;
+}
+
+// The stage the picture sits on.
 .imageWrapper {
-  background: radial-gradient(
-    ellipse at 50% 100%,
-    rgba(163, 132, 252, 0.5) 0%,
-    rgba(236, 234, 244, 0.4) 44%,
-    rgba(236, 234, 244, 0.4) 100%
-  );
+  border: 1px solid hsl(var(--border));
+  background: hsl(var(--muted));
+}
+
+// The manage column: one card with a hairline, its sections divided by hairlines.
+.managePanel {
+  border: 1px solid hsl(var(--border));
+  border-radius: calc(var(--radius) + 2px);
+  background: hsl(var(--card));
+  color: hsl(var(--card-foreground));
+}
+
+.manageTabList {
+  display: flex;
+  margin: 0;
+  padding: 0;
+  border-bottom: 1px solid hsl(var(--border));
+}
+
+.manageTab {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: 3rem;
+  padding: 0 1rem;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.875rem;
+  font-weight: 500;
+  list-style: none;
+
+  :global(.injected-svg) path {
+    fill: currentColor;
+  }
+}
+
+// react-tabs paints its selected tab white with black text: both come from the tokens here.
+.manageTabSelected.manageTabSelected {
+  border-radius: 0;
+  background: transparent;
+  color: hsl(var(--foreground));
+  font-weight: 600;
 }
 
 .cloudProvidersWrapper {
-  border-radius: 5px;
+  border: 1px solid hsl(var(--input));
+  border-radius: calc(var(--radius) - 2px);
   overflow: hidden;
   display: flex;
   position: relative;
   width: 100%;
-  height: 51px;
+  height: 36px;
 
   .providerText,
   .deleteDriveItemBtn {
@@ -61,10 +109,11 @@
   .hoveredHidden {
     min-width: 0 !important;
     width: 0 !important;
+    border-left-width: 0 !important;
     opacity: 0;
     z-index: 1;
     visibility: hidden;
-    transition: all 0.2s ease-in-out;
+    transition: opacity 150ms var(--ease-out);
   }
 
   .hoveredActive {
@@ -74,34 +123,45 @@
     z-index: 10;
     visibility: visible;
     opacity: 1;
-    transition: all 0.2s ease-in-out;
+    transition: opacity 150ms var(--ease-out);
 
     & .providerText {
       width: 85%;
       opacity: 1;
-      transition: opacity 0.2s ease-in;
-      margin-left: 10px;
-      color: white;
+      transition: opacity 150ms var(--ease-out);
+      margin-left: 8px;
+      color: hsl(var(--foreground));
     }
 
     & .deleteDriveItemBtn {
       width: 15%;
+      min-width: 36px;
       opacity: 1;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-left: 2px;
-      background: #d32f2f;
-      transition: opacity 0.2s ease-in;
-      border-top-left-radius: 0px;
-      border-bottom-left-radius: 0px;
+      padding: 0;
+      background: hsl(var(--destructive));
+      color: hsl(var(--destructive-foreground));
+      transition:
+        opacity 150ms var(--ease-out),
+        background-color 150ms var(--ease-out);
+      border-radius: 0;
+
+      &:hover {
+        background: hsl(var(--destructive) / 0.9);
+      }
     }
   }
 
   .cloudProviderButton {
     width: 50%;
     min-width: 50%;
-    transition: all 0.2s ease-in-out;
+    transition: opacity 150ms var(--ease-out);
+
+    & + .cloudProviderButton {
+      border-left: 1px solid hsl(var(--border));
+    }
 
     & .openImageText {
       white-space: nowrap;
@@ -116,7 +176,6 @@
   justify-content: center !important;
   position: relative;
   align-items: center;
-  background: #5b4dbe;
 }
 
 .svgWrapper {
@@ -124,9 +183,15 @@
   align-items: center;
   justify-content: center;
 
+  // The provider marks in /public are drawn in white (for the old violet button): they take the
+  // text colour, so they show on the card in the light and the dark theme.
+  :global(.injected-svg) path {
+    fill: currentColor;
+  }
+
   &.loadingSpinner {
-    width: 25px;
-    height: 25px;
+    width: 16px;
+    height: 16px;
   }
 }
 
@@ -135,22 +200,29 @@
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  border: none;
+  border: 1px solid hsl(var(--input));
   font: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
   text-align: inherit;
-  background-color: #f5f4f7;
-  border-radius: 5px;
-  color: #9b9b9b;
-  padding-left: 25px;
-  padding-right: 25px;
+  background-color: transparent;
+  border-radius: calc(var(--radius) - 2px);
+  color: hsl(var(--foreground));
+  padding-left: 12px;
+  padding-right: 12px;
   cursor: pointer;
-  margin-top: 10px;
-  font-family: 'Roboto', sans-serif;
-  font-style: normal;
-  height: 60px;
+  margin-top: 12px;
+  height: 36px;
+  transition:
+    background-color 150ms var(--ease-out),
+    border-color 150ms var(--ease-out);
+
+  &:hover {
+    background-color: hsl(var(--accent));
+  }
 
   &:focus-visible {
-    outline: 2px solid #5b4dbe;
+    outline: 2px solid hsl(var(--ring));
     outline-offset: 2px;
   }
 
@@ -158,6 +230,15 @@
     width: 100%;
     display: flex;
     justify-content: space-between;
+    align-items: center;
+
+    :global(.injected-svg) {
+      color: hsl(var(--muted-foreground));
+
+      path {
+        fill: currentColor;
+      }
+    }
   }
 }
 
@@ -170,15 +251,15 @@
 
 .generateLink {
   text-align: center;
-  height: 51px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .localAppSpinnerWrapper {
-  width: 25px;
-  height: 25px;
+  width: 16px;
+  height: 16px;
   .localAppSpinner {
     width: 80%;
     height: 80%;

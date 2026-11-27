@@ -29,12 +29,12 @@ const EmptyScreenshotsOrVideos: FC<IProps> = ({ emptyType }) => {
     imagePath = '/images/emptyItems/noimage.svg';
   }
   return (
-    <div className="tw-flex tw-flex-col tw-items-center">
+    <div className="tw-flex tw-flex-col tw-items-center tw-px-6 tw-py-10">
       <AppSvg path={imagePath} className="tw-w-max" />
-      <h2 className="tw-text-2xl tw-mt-7 tw-mb-2 tw-font-semibold">
+      <h2 className="tw-text-lg tw-mt-6 tw-mb-1 tw-font-semibold tw-text-foreground">
         {heading}
       </h2>
-      <p className="tw-text-center">
+      <p className="tw-text-center tw-text-sm tw-text-muted-foreground">
         {type == 'a video or screenshot' ? (
           t('shared.sharedWithOthers')
         ) : (
@@ -43,7 +43,7 @@ const EmptyScreenshotsOrVideos: FC<IProps> = ({ emptyType }) => {
               values={{ taking: taking, type: typeTranslated }}
               i18nKey="shared.videoOrScreenShot"
               components={{
-                1: <b />,
+                1: <b className="tw-font-medium tw-text-foreground" />,
               }}
             />
             {/* Start {taking}. Click the <b>{type}</b> button */}
