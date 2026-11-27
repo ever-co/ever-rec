@@ -53,7 +53,7 @@ import WorkspaceItemsFolderModal from '../_imagesScreen/components/itemsFolderMo
 import DeleteItemModal from 'components/shared/DeleteItemModal';
 import { useWorkspaceImageDelete } from 'misc/workspaceFunctions';
 import useGenerateShareLink from 'hooks/useGenerateShareLink';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 interface Props {
   image: IEditorImage | IWorkspaceImage;
@@ -495,11 +495,14 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
           </TabList>
           <TabPanel selectedClassName={styles.selectedTabPanel}>
             <ImageActionsCard>
-              <div className="tw-text-muted-foreground">
-                {t('page.image.currentlySavedIn')}
-                <strong className="tw-ml-1.5 tw-font-medium tw-text-foreground">
-                  {currentlySavedIn}
-                </strong>
+              <div className="tw-text-muted-foreground [&_strong]:tw-font-medium [&_strong]:tw-text-foreground">
+                <Trans
+                  values={{ currentlySavedIn: currentlySavedIn }}
+                  i18nKey="page.image.currentlySavedInOnly"
+                  components={{
+                    strong: <strong></strong>,
+                  }}
+                />
               </div>
               <button
                 type="button"

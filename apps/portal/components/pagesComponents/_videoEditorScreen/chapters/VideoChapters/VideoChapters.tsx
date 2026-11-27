@@ -305,7 +305,7 @@ const VideoChapters: FC<IVideoChaptersProps> = ({
             )}
           >
             {t('page.video.addChapter')}
-            {videoTime && `${t('common.at')} ${videoTime.timestamp}`}
+            {videoTime && ` ${t('common.at')} ${videoTime.timestamp}`}
           </button>
 
           {hasChanges &&
