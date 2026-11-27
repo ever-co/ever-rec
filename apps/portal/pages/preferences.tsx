@@ -141,11 +141,17 @@ const Preferences: React.FC = () => {
         </div>
       </div>
       <div className="tw-relative tw-flex tw-items-center tw-justify-center tw-rounded-[0.75rem] tw-bg-muted mx-lg:tw-hidden">
-        <img
-          src={`/preferences/preferences.png`}
-          alt=""
-          className="tw-w-8/12 dark:tw-invert dark:tw-hue-rotate-180"
-        />
+        {/*
+          A full-colour drawing with black line: flipping it for the dark theme muddies its
+          colours, so there it sits on a light plate instead.
+        */}
+        <div className="tw-w-8/12 dark:tw-rounded-2xl dark:tw-bg-primary dark:tw-p-6">
+          <img
+            src={`/preferences/preferences.png`}
+            alt=""
+            className="tw-block tw-w-full"
+          />
+        </div>
       </div>
     </div>
   );

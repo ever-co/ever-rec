@@ -90,7 +90,7 @@ beforeEach(async () => {
       <TooltipProvider>
         <ShellProvider>
           <DashboardLayout>
-            <SCHeader text="My Images" />
+            <SCHeader filterValue={null} />
           </DashboardLayout>
         </ShellProvider>
       </TooltipProvider>,

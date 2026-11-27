@@ -29,6 +29,8 @@
 
 .mainHeader {
   display: flex;
+  // On a phone the workspace's name and the page's name take a line each.
+  flex-wrap: wrap;
   align-items: center;
   margin: 0;
   color: hsl(var(--foreground));

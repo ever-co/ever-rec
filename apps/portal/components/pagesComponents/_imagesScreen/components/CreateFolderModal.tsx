@@ -169,7 +169,8 @@ const CreateFolderModal: React.FC<ICreateFolderModalProps> = ({
         </span>
       </div>
       <div className="tw-flex tw-items-center tw-space-x-4"></div>
-      <div className="tw-my-4 tw-flex tw-w-full tw-justify-center tw-h-25px tw-items-center">
+      {/* One line in a desktop dialog; on a phone the swatches wrap instead of leaving the dialog. */}
+      <div className="tw-my-4 tw-flex tw-min-h-[25px] tw-w-full tw-flex-wrap tw-items-center tw-justify-center tw-gap-y-2">
         <p className="tw-mt-1 tw-mr-1 tw-text-sm tw-text-muted-foreground">
           {t('modals.custom')}
         </p>{' '}
