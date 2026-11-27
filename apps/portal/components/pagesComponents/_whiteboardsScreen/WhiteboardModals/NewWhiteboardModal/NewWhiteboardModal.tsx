@@ -115,7 +115,7 @@ const NewWhiteboardModal: React.FC<Props> = ({ visible, onClose, onOk }) => {
         </div>
       }
     >
-      <h2 className={styles.mainHeading}>New Whiteboard</h2>
+      <h2 className={styles.mainHeading}>New whiteboard</h2>
       {/* <h4 className={styles.subHeading}>
         Collaboration made easy with a workspace to share images and videos
         instantly.
