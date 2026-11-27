@@ -181,3 +181,27 @@
   transition: opacity 150ms var(--ease-out);
   background-color: hsl(var(--popover));
 }
+
+// Phone width: a sheet across the width above the editor's tool bar, wherever the marker is.
+// markerDrawer.setPosition writes left and top inline for the desktop, hence the !important.
+@media screen and (max-width: 767px) {
+  .commentContainer {
+    position: fixed;
+    left: 0.5rem !important;
+    right: 0.5rem;
+    top: auto !important;
+    bottom: calc(var(--editor-tool-bar, 60px) + 0.5rem);
+    width: auto;
+    max-height: calc(
+      100dvh - var(--editor-top-bar, 56px) - var(--editor-tool-bar, 60px) -
+        1.5rem
+    );
+    overflow-y: auto;
+  }
+
+  // Hidden (opacity 0, EditorService.toggleMarkerPopup) it must not catch the taps meant for the
+  // stage under it.
+  .commentContainer:not([style*='opacity: 1']) {
+    pointer-events: none;
+  }
+}

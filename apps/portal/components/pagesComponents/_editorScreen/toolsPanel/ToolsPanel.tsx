@@ -63,6 +63,7 @@ import IEditorImage from 'app/interfaces/IEditorImage';
 import Image from 'next/legacy/image';
 import { imgSrcLoader } from '../editorHelpers/imgSrcLoader';
 import useEditorVideo from 'hooks/useEditorVideo';
+import useIsPhone from 'hooks/useIsPhone';
 import { Emoji } from 'emoji-mart/dist/index';
 import { ICommentsOptions } from 'app/interfaces/tools_interfaces/ICommentsGroupOptions';
 import ShareTool from './ToolBtn/customToolBtn/ShareToolBtn/ShareToolBtn';
@@ -222,6 +223,7 @@ const ToolsPanel: React.FC<IToolsPanelProps> = ({
   );
   const [locked, setLocked] = useState<boolean>(true);
   const [show, setShow] = useState<boolean>(false);
+  const isPhone = useIsPhone();
 
   const {
     stopVideo,
@@ -365,6 +367,936 @@ const ToolsPanel: React.FC<IToolsPanelProps> = ({
     onToolChange(tools.emoji);
   };
 
+  // The panel's parts. On a desktop they stack in the floating panel as before. On a phone the
+  // logo and the actions go to a bar at the top, the tools to a bar along the bottom that scrolls
+  // sideways, and the zoom control floats over the corner of the stage.
+  const logo = (
+    <div onClick={() => switch3D()} className={styles.container}>
+      <Logo width={89} height={24} type="default" />
+      <div className={styles.absoluteContainer}></div>
+    </div>
+  );
+
+  const primaryTools = (
+    <>
+      <ToolBtn
+        toolTitle={tools.video.title}
+        large={true}
+        panel3D={panel3D}
+        isOpenEditTool={false}
+        onSelect={() => {
+          onResetShape();
+          onVideoRecordHandler();
+        }}
+        icon={recordingIcon}
+        active={isActive(tools.video)}
+        disabled={recordingStatus == 'resume' || recordingStatus == 'pause'}
+      />
+
+      <MarkerTool
+        options={markerOptions}
+        isOpenEditTool={currentTool?.name == 'marker' ? true : false}
+        active={isActive(tools.marker)}
+        onToolChange={onToolChange}
+        onResetShape={onResetShape}
+        title="marker"
+        onChange={onMarkerOptionsChange}
+      />
+
+      <TextTool
+        isOpenEditTool={currentTool?.name == 'text' ? true : false}
+        options={textOptions}
+        active={isActive(tools.text)}
+        onChange={onTextOptionsChange}
+        onToolChange={onToolChange}
+        onResetShape={onResetShape}
+        title="text"
+      />
+      <ArrowTool
+        isOpenEditTool={currentTool?.name == 'arrow' ? true : false}
+        title="arrow"
+        options={arrowGroupOptions}
+        activeTool={activeTool}
+        onChange={onArrowGroupOptionsChange}
+        onToolChange={onToolChange}
+        onResetShape={onResetShape}
+      />
+    </>
+  );
+
+  const secondaryTools = (
+    <>
+      <ToolsRow>
+        <ResizeTool
+          isOpenEditTool={currentTool?.name == 'resize' ? true : false}
+          onSelect={onToolChange}
+          active={isActive(tools.resize)}
+          initialWidth={stage.width()}
+          initialHeight={stage.height()}
+          onResize={resizeHandler}
+        />
+
+        <ToolBtn
+          panel3D={panel3D}
+          isOpenEditTool={false}
+          onSelect={() => {
+            onResetShape();
+            onToolChange(tools.crop);
+          }}
+          icon={tools.crop.icon}
+          active={isActive(tools.crop)}
+          toolTitle={tools.crop.title}
+          placement="right"
+        />
+      </ToolsRow>
+      {/* <PanelSplitter /> */}
+      <ToolsRow>
+        <ToolBtn
+          panel3D={panel3D}
+          isOpenEditTool={false}
+          onSelect={() => {
+            onResetShape();
+            onToolChange(tools.pointer);
+          }}
+          icon={tools.pointer.icon}
+          active={isActive(tools.pointer)}
+          toolTitle={tools.pointer.title}
+        />
+
+        <EraserTool
+          isOpenEditTool={currentTool?.name == 'eraser' ? true : false}
+          onToolChange={onToolChange}
+          active={isActive(tools.eraser)}
+          options={pencilGroupOptions}
+          onChange={onPencilGroupOptionsChange}
+          onResetShape={() => {
+            onResetShape();
+            onPencilGroupOptionsChange({
+              strokeWidth: pencilGroupOptions.strokeWidth,
+              strokeColor: 'rgb(0,0,0)',
+            });
+          }}
+        />
+      </ToolsRow>
+      <ToolsRow>
+        <ToolBtn
+          panel3D={panel3D}
+          isOpenEditTool={currentTool?.name == 'free' ? true : false}
+          title="free"
+          toolTitle={tools.roller.title}
+          onSelect={() => {
+            onToolChange(isActive(tools.roller) ? tools.roller : tools.pencil);
+            onResetShape();
+            if (!isActive(tools.pencil) && !isActive(tools.roller)) {
+              onPencilGroupOptionsChange({
+                strokeWidth: 2,
+                strokeColor: 'rgb(0,0,0)',
+              });
+            }
+          }}
+          icon={isActive(tools.roller) ? tools.roller.icon : tools.pencil.icon}
+          active={isActive(tools.pencil) || isActive(tools.roller)}
+        >
+          <div>
+            <div className={styles.flexContainer}>
+              <ToolSubPanelBtn
+                onSelect={() => {
+                  onToolChange(tools.pencil);
+                  onResetShape();
+                  onPencilGroupOptionsChange({
+                    strokeWidth: 2,
+                    strokeColor: 'rgb(0,0,0)',
+                  });
+                }}
+                icon={tools.pencil.icon}
+                active={isActive(tools.pencil)}
+                toolTitle={tools.pencil.title}
+              />
+
+              <ToolSubPanelBtn
+                icon={tools.roller.icon}
+                active={isActive(tools.roller)}
+                onSelect={() => {
+                  onToolChange(tools.roller);
+                  onResetShape();
+                  onPencilGroupOptionsChange({
+                    strokeWidth: 6,
+                    strokeColor: 'rgba(0,0,0,0.5)',
+                  });
+                }}
+                toolTitle={tools.roller.title}
+              />
+            </div>
+
+            <div className={styles.selectorWrapper}>
+              <ColorSelector
+                color={pencilGroupOptions.strokeColor}
+                onChange={(val) =>
+                  pencilGroupOptionsChangeHandler('strokeColor', val)
+                }
+                className={styles.selectorWidth}
+              />
+
+              <StrokeWidthSelector
+                tool={
+                  pencilGroupOptions.strokeWidth >= 32 ||
+                  String(activeTool?.tool) === 'roller'
+                    ? 'roller'
+                    : 'pencil'
+                }
+                width={pencilGroupOptions.strokeWidth}
+                onChange={(val) =>
+                  pencilGroupOptionsChangeHandler('strokeWidth', val)
+                }
+              />
+            </div>
+          </div>
+        </ToolBtn>
+
+        <ToolBtn
+          isOpenEditTool={currentTool?.name == 'emoji' ? true : false}
+          title="emoji"
+          toolTitle={tools.emoji.title}
+          onSelect={() => {
+            onResetShape();
+            onToolChange(tools.emoji);
+          }}
+          icon={tools.emoji.icon}
+          active={isActive(tools.emoji)}
+          placement="right"
+          toolSubPanelClasses={styles.wrapper}
+        >
+          <div id="pickerContainer">
+            {' '}
+            <Picker
+              // set={'twitter'}
+              data={data}
+              autofocus={true}
+              icons={'solid'}
+              perLine={5}
+              maxFrequentRows={5}
+              emojiSize={40}
+              emojiButtonRadius={'1rem'}
+              emojiButtonSize={65}
+              emojiButtonColors={['hsl(var(--foreground) / 0.1)']}
+              onEmojiSelect={(emoji: Emoji) => selectEmoji(emoji)}
+              previewEmoji={emojiOptions.id}
+            />{' '}
+          </div>
+        </ToolBtn>
+      </ToolsRow>
+      <ToolsRow>
+        <ToolBtn
+          isOpenEditTool={currentTool?.name == 'figure' ? true : false}
+          title="figure"
+          toolTitle="Shapes"
+          onSelect={() => {
+            onResetShape();
+            onToolChange(activeShapeTool());
+          }}
+          icon={activeShapeTool().icon}
+          active={isActive(activeShapeTool())}
+        >
+          <div>
+            <div className={styles.flexContainer}>
+              <ToolSubPanelBtn
+                onSelect={() => {
+                  onResetShape();
+                  onToolChange(tools.elipse);
+                }}
+                icon={tools.elipse.icon}
+                active={isActive(tools.elipse)}
+                toolTitle={tools.elipse.title}
+              />
+
+              <ToolSubPanelBtn
+                icon={tools.square.icon}
+                active={isActive(tools.square)}
+                onSelect={() => {
+                  onResetShape();
+                  onToolChange(tools.square);
+                }}
+                toolTitle={tools.square.title}
+              />
+
+              <ToolSubPanelBtn
+                icon={tools.blob.icon}
+                active={isActive(tools.blob)}
+                onSelect={() => {
+                  onResetShape();
+                  onToolChange(tools.blob);
+                }}
+                toolTitle={tools.blob.title}
+              />
+
+              <ToolSubPanelBtn
+                icon={tools.triangle.icon}
+                active={isActive(tools.triangle)}
+                onSelect={() => {
+                  onResetShape();
+                  onToolChange(tools.triangle);
+                }}
+                toolTitle={tools.triangle.title}
+              />
+            </div>
+
+            <div className={styles.flexContainer}>
+              <ToolSubPanelBtn
+                icon={tools.star.icon}
+                active={isActive(tools.star)}
+                onSelect={() => {
+                  onResetShape();
+                  onToolChange(tools.star);
+                }}
+                toolTitle={tools.star.title}
+              />
+
+              <ToolSubPanelBtn
+                icon={tools.heart.icon}
+                active={isActive(tools.heart)}
+                onSelect={() => {
+                  onResetShape();
+                  onToolChange(tools.heart);
+                }}
+                toolTitle={tools.heart.title}
+              />
+
+              <ToolSubPanelBtn
+                icon={tools.rect.icon}
+                active={isActive(tools.rect)}
+                onSelect={() => {
+                  onResetShape();
+                  onToolChange(tools.rect);
+                }}
+                toolTitle={tools.rect.title}
+              />
+
+              <ToolSubPanelBtn
+                icon={tools.comment.icon}
+                active={isActive(tools.comment)}
+                onSelect={() => {
+                  onResetShape();
+                  onToolChange(tools.comment);
+                }}
+                toolTitle={tools.comment.title}
+              />
+            </div>
+
+            <div className={styles.selectorWrapper}>
+              <ColorSelector
+                color={shapeGroupOptions.strokeColor}
+                onChange={(val) =>
+                  shapeGroupOptionsChangeHandler('strokeColor', val)
+                }
+                className={styles.spacingRight}
+              />
+
+              <StrokeWidthSelector
+                width={shapeGroupOptions.strokeWidth}
+                onChange={(val) =>
+                  shapeGroupOptionsChangeHandler('strokeWidth', val)
+                }
+              />
+
+              <ColorSelector
+                icon={fullFillerIcon}
+                color={shapeGroupOptions.fillColor}
+                colorIndicator={true}
+                onChange={(val) =>
+                  shapeGroupOptionsChangeHandler('fillColor', val)
+                }
+                className={styles.spacingRight}
+              />
+            </div>
+          </div>
+        </ToolBtn>
+
+        <ToolBtn
+          isOpenEditTool={false}
+          onSelect={() => onToolChange(tools.blur)}
+          icon={tools.blur.icon}
+          active={isActive(tools.blur)}
+          toolTitle={tools.blur.title}
+          placement="right"
+        ></ToolBtn>
+      </ToolsRow>
+      <ToolsRow>
+        <ToolBtn
+          isOpenEditTool={currentTool?.name == 'conversation' ? true : false}
+          title="conversation"
+          toolTitle={tools.conversation.title}
+          onSelect={() => {
+            onToolChange(tools.conversation);
+            onResetShape();
+          }}
+          icon={tools.conversation.icon}
+          active={isActive(tools.conversation)}
+          toolSubPanelClasses={styles.buttonContainer}
+        >
+          <Tabs
+            tabBarStyle={{
+              margin: '0px',
+              borderRadius: '10px 10px 0px 0px',
+              overflow: 'hidden',
+            }}
+            hideAdd
+            type="card"
+            activeKey={conversationOptions.category}
+          >
+            <TabPane
+              className="tabs"
+              tab={
+                <span
+                  className="styled-tabs"
+                  id="corporate"
+                  onClick={() =>
+                    conversationOptionsChangeHandler('category', 'corporate')
+                  }
+                >
+                  Corporate
+                </span>
+              }
+              key="corporate"
+            >
+              <div className={styles.containerWrapper}>
+                {conversationData.map((data, index) =>
+                  data.category === 'corporate' ? (
+                    <div
+                      className={classNames(
+                        styles.innerWrapper,
+                        conversationOptions.filename ===
+                          data.fileName.toString()
+                          ? styles.bgColor
+                          : '',
+                      )}
+                      key={`conversation_${index}`}
+                      onClick={() => {
+                        onResetShape();
+                        onToolChange(tools.conversation);
+                        onConversationOptionsChange({
+                          category: data.category,
+                          filename: data.fileName,
+                          fillColor: data.fillColor,
+                          fontFamily: data.fontFamily,
+                          strokeColor: data.strokeColor,
+                          strokeWidth: data.strokeWidth,
+                          textColor: data.textColor,
+                          textSize: data.textSize,
+                          textStrokeColor: data.textStrokeColor,
+                          textStrokeWidth: data.textStrokeWidth,
+                          data: data.data,
+                          dash: data.dash,
+                        });
+                      }}
+                    >
+                      <Image
+                        loader={imgSrcLoader}
+                        src={`${baseURL}/images/conversation/${data.fileName}`}
+                        width={70}
+                        height={70}
+                        alt={`${data.category}`}
+                        unoptimized={true}
+                      />
+                    </div>
+                  ) : null,
+                )}
+              </div>
+            </TabPane>
+            <TabPane
+              className="tabs"
+              tab={
+                <span
+                  className="styled-tabs"
+                  id="fun"
+                  onClick={() =>
+                    conversationOptionsChangeHandler('category', 'fun')
+                  }
+                >
+                  {' '}
+                  Fun{' '}
+                </span>
+              }
+              key="fun"
+            >
+              <div className={styles.containerWrapper}>
+                {conversationData.map((data, index) =>
+                  data.category === 'fun' ? (
+                    <div
+                      className={classNames(
+                        styles.innerWrapper,
+                        conversationOptions.filename ===
+                          data.fileName.toString()
+                          ? styles.bgColor
+                          : '',
+                      )}
+                      key={`conversation_${index}`}
+                      onClick={() => {
+                        onResetShape();
+                        onToolChange(tools.conversation);
+                        onConversationOptionsChange({
+                          category: data.category,
+                          filename: data.fileName,
+                          fillColor: data.fillColor,
+                          fontFamily: data.fontFamily,
+                          strokeColor: data.strokeColor,
+                          strokeWidth: data.strokeWidth,
+                          textColor: data.textColor,
+                          textSize: data.textSize,
+                          textStrokeColor: data.textStrokeColor,
+                          textStrokeWidth: data.textStrokeWidth,
+                          data: data.data,
+                          dash: data.dash,
+                        });
+                      }}
+                    >
+                      <Image
+                        loader={imgSrcLoader}
+                        src={`${baseURL}/images/conversation/${data.fileName}`}
+                        width={70}
+                        height={70}
+                        alt={`${data.category}`}
+                        unoptimized={true}
+                      />
+                    </div>
+                  ) : null,
+                )}
+              </div>
+            </TabPane>
+            <TabPane
+              className="tabs"
+              tab={
+                <span
+                  className="styled-tabs"
+                  id="colorful"
+                  onClick={() =>
+                    conversationOptionsChangeHandler('category', 'colorful')
+                  }
+                >
+                  {' '}
+                  Colorful{' '}
+                </span>
+              }
+              key="colorful"
+            >
+              <div className={styles.containerWrapper}>
+                {conversationData.map((data, index) =>
+                  data.category === 'colorful' ? (
+                    <div
+                      className={classNames(
+                        styles.innerWrapper,
+                        conversationOptions.filename ===
+                          data.fileName.toString()
+                          ? styles.bgColor
+                          : '',
+                      )}
+                      key={`conversation_${index}`}
+                      onClick={() => {
+                        onResetShape();
+                        onToolChange(tools.conversation);
+                        onConversationOptionsChange({
+                          category: data.category,
+                          filename: data.fileName,
+                          fillColor: data.fillColor,
+                          fontFamily: data.fontFamily,
+                          strokeColor: data.strokeColor,
+                          strokeWidth: data.strokeWidth,
+                          textColor: data.textColor,
+                          textSize: data.textSize,
+                          textStrokeColor: data.textStrokeColor,
+                          textStrokeWidth: data.textStrokeWidth,
+                          data: data.data,
+                          dash: data.dash,
+                        });
+                      }}
+                    >
+                      <Image
+                        loader={imgSrcLoader}
+                        src={`${baseURL}/images/conversation/${data.fileName}`}
+                        width={70}
+                        height={70}
+                        alt={`${data.category}`}
+                        unoptimized={true}
+                      />
+                    </div>
+                  ) : null,
+                )}
+              </div>
+            </TabPane>
+            <TabPane
+              className="tabs"
+              tab={
+                <span
+                  className="styled-tabs"
+                  id="outline"
+                  onClick={() =>
+                    conversationOptionsChangeHandler('category', 'outline')
+                  }
+                >
+                  {' '}
+                  Outline{' '}
+                </span>
+              }
+              key="outline"
+            >
+              <div className={styles.containerWrapper}>
+                {conversationData.map((data, index) =>
+                  data.category === 'outline' ? (
+                    <div
+                      className={classNames(
+                        styles.innerWrapper,
+                        conversationOptions.filename ===
+                          data.fileName.toString()
+                          ? styles.bgColor
+                          : '',
+                      )}
+                      key={`conversation_${index}`}
+                      onClick={() => {
+                        onResetShape();
+                        onToolChange(tools.conversation);
+                        onConversationOptionsChange({
+                          category: data.category,
+                          filename: data.fileName,
+                          fillColor: data.fillColor,
+                          fontFamily: data.fontFamily,
+                          strokeColor: data.strokeColor,
+                          strokeWidth: data.strokeWidth,
+                          textColor: data.textColor,
+                          textSize: data.textSize,
+                          textStrokeColor: data.textStrokeColor,
+                          textStrokeWidth: data.textStrokeWidth,
+                          data: data.data,
+                          dash: data.dash,
+                        });
+                      }}
+                    >
+                      <Image
+                        loader={imgSrcLoader}
+                        src={`${baseURL}/images/conversation/${data.fileName}`}
+                        width={70}
+                        height={70}
+                        alt={`${data.category}`}
+                        unoptimized={true}
+                      />
+                    </div>
+                  ) : null,
+                )}
+              </div>
+            </TabPane>
+          </Tabs>
+          <div style={{ paddingLeft: '1.25rem', paddingRight: '1.25rem' }}>
+            <PanelSplitter />
+          </div>
+
+          <div className={styles.colorSelectorContainer}>
+            <ColorSelector
+              icon={FillTIcon}
+              color={conversationOptions.textColor}
+              onChange={(val) =>
+                conversationOptionsChangeHandler('textColor', val)
+              }
+              className={styles.spacingRight}
+            />
+
+            <ColorSelector
+              icon={textStrokeIcon}
+              color={conversationOptions.textStrokeColor}
+              onChange={(val) =>
+                conversationOptionsChangeHandler('textStrokeColor', val)
+              }
+              className={styles.spacingRight}
+            />
+
+            <ColorSelector
+              icon={fullFillerIcon}
+              color={conversationOptions.fillColor}
+              colorIndicator={true}
+              onChange={(val) =>
+                conversationOptionsChangeHandler('fillColor', val)
+              }
+              className={styles.spacingRight}
+            />
+            <ColorSelector
+              color={conversationOptions.strokeColor}
+              onChange={(val) =>
+                conversationOptionsChangeHandler('strokeColor', val)
+              }
+              className={styles.spacingRight}
+            />
+            <StrokeWidthSelector
+              width={conversationOptions.strokeWidth}
+              onChange={(val) =>
+                conversationOptionsChangeHandler('strokeWidth', val)
+              }
+            />
+          </div>
+
+          <div className={styles.wrapperContainer}>
+            <Select
+              value={conversationOptions.fontFamily}
+              style={{
+                fontFamily: conversationOptions.fontFamily,
+              }}
+              size={'large'}
+              onChange={(val) =>
+                conversationOptionsChangeHandler('fontFamily', val)
+              }
+              className={classNames('app-selectable', styles.optionWrapper)}
+            >
+              {fonts.map((font, index) => (
+                <Select.Option
+                  key={`font_${index}`}
+                  value={font}
+                  className="app-selectable"
+                  style={{ fontFamily: font }}
+                >
+                  {font}
+                </Select.Option>
+              ))}
+            </Select>
+
+            <div className={styles.numberSelector}>
+              {' '}
+              <AppNumberSelector
+                value={conversationOptions.textSize}
+                max={128}
+                min={8}
+                valuesArr={[]}
+                light
+                step={8}
+                onChange={(val) =>
+                  conversationOptionsChangeHandler('textSize', val)
+                }
+              />
+            </div>
+          </div>
+        </ToolBtn>
+
+        <WatermarkToolBtn
+          scale={stageScale}
+          isOpenEditTool={currentTool?.name == 'watermark' ? true : false}
+          stage={stage}
+          options={watermarkOptions}
+          isActive={isActive(tools.watermark)}
+          onChange={onWatermarkOptionsChange}
+          onToolChange={onToolChange}
+          onSaveHistory={onSaveHistory}
+        />
+      </ToolsRow>
+
+      <ToolsRow>
+        <ToolBtn
+          onSelect={() => {
+            onUndo();
+            setTimeout(() => {
+              onToolChange(tools.undo);
+            });
+          }}
+          icon={tools.undo.icon}
+          disabled={!canUndo}
+          isOpenEditTool={false}
+          toolTitle={tools.undo.title}
+        />
+        <ToolBtn
+          onSelect={() => {
+            onRedo();
+            setTimeout(() => {
+              onToolChange(tools.redo);
+            });
+          }}
+          toolTitle={tools.redo.title}
+          icon={tools.redo.icon}
+          disabled={!canRedo}
+          isOpenEditTool={false}
+          placement="right"
+        />
+      </ToolsRow>
+      <ToolsRow>
+        <ToolBtn
+          onSelect={() => {
+            onUndo(true);
+            setTimeout(() => {
+              onToolChange(tools.clear);
+            });
+          }}
+          toolTitle={tools.clear.title}
+          icon={tools.clear.icon}
+          disabled={!canUndo}
+          isOpenEditTool={false}
+        />
+        <ToolBtn
+          onSelect={onCut}
+          icon={cutIcon}
+          toolTitle="Cut"
+          disabled={!isActive(tools.pointer) || !pointerTarget}
+          isOpenEditTool={false}
+          placement="right"
+        />
+      </ToolsRow>
+
+      {/* <ToolsRow>
+      <ToolBtn
+        onSelect={onSaveAsJPG}
+        icon={jpgIcon}
+        isOpenEditTool={false}
+      />
+
+      <ToolBtn
+        onSelect={onSaveAsPNG}
+        icon={pngIcon}
+        isOpenEditTool={false}
+      />
+      </ToolsRow> */}
+
+      <ToolsRow>
+        {/* <ToolBtn
+        onSelect={onSaveAsPDF}
+        icon={pdfIcon}
+        isOpenEditTool={false}
+      /> */}
+
+        {/* <GoogleDriveTool
+          onOk={onUploadToDrive}
+          isOpenDriveTool={false}
+          onSelect={onToolChange}
+          active={isActive(tools.drive)}
+          oldName={oldName}
+        /> */}
+      </ToolsRow>
+    </>
+  );
+
+  const shareTools = (
+    <ToolsRow>
+      <ToolBtn
+        disabled={!clipboardCopyEnabled}
+        onSelect={clipboardCopy}
+        icon={copyIcon}
+        isOpenEditTool={false}
+        toolTitle={'Copy'}
+      />
+
+      {/* <SendEmailTool
+        isOpenEmailTool={false}
+        onSelect={onToolChange}
+        active={isActive(tools.email)}
+        onSave={onSave}
+      /> */}
+
+      <ShareTool
+        image={editorImage}
+        isOpenEditTool={currentTool?.name == 'share' ? true : false}
+        active={isActive(tools.share)}
+        onToolChange={onToolChange}
+        onResetShape={onResetShape}
+        title="share"
+        save={onSave}
+      />
+    </ToolsRow>
+  );
+
+  const savingTools = (
+    <ToolsRow>
+      {/* <CommentsTool
+        options={commentsOptions}
+        isOpenEditTool={currentTool?.name == 'comments' ? true : false}
+        active={isActive(tools.comments)}
+        onToolChange={onToolChange}
+        onResetShape={onResetShape}
+        title="comments"
+        onChange={onCommentsOptionsChange}
+      /> */}
+      <SavingTool
+        isOpenEditTool={currentTool?.name == 'saving' ? true : false}
+        active={isActive(tools.saving)}
+        onToolChange={onToolChange}
+        onResetShape={onResetShape}
+        title="saving"
+        downloadPng={onSaveAsPNG}
+        downloadPdf={onSaveAsPDF}
+        downloadJpg={onSaveAsJPG}
+        saveToDrive={onUploadToDrive}
+        image={editorImage}
+        stage={stage}
+        stageScale={stageScale}
+        initialDimentions={initialDimentions}
+        resizeDimentions={resizeDimentions}
+        setLoading={setLoading}
+      />
+    </ToolsRow>
+  );
+
+  const zoomControl = (
+    <AppNumberSelector
+      value={stageScale}
+      min={25}
+      max={200}
+      suffix="%"
+      step={25}
+      onChange={onStageScaleChange}
+    />
+  );
+
+  const downloadButton = (
+    <AppButton
+      className={isPhone ? styles.phoneAction : styles.buttonWrapper}
+      onClick={onSaveAsJPG}
+      full={!isPhone}
+      outlined
+      twPadding={isPhone ? 'tw-px-3 tw-py-0' : 'tw-px-1 tw-py-0'}
+    >
+      <div className={styles.font}>Download</div>
+    </AppButton>
+  );
+
+  const saveButton = (
+    <AppButton
+      className={isPhone ? styles.phoneAction : styles.saveBtn}
+      onClick={saveScreenshot}
+      full={!isPhone}
+      twPadding={isPhone ? 'tw-px-3 tw-py-0' : 'tw-px-1 tw-py-0'}
+    >
+      <div className={styles.font}>Save </div>
+    </AppButton>
+  );
+
+  const cancelButton = (
+    <AppButton
+      className={isPhone ? styles.phoneAction : styles.cancelBtn}
+      onClick={() => {
+        onCancelHandler();
+      }}
+      full={!isPhone}
+      bgColor="tw-bg-transparent"
+      twPadding={isPhone ? 'tw-px-3 tw-py-0' : 'tw-px-1 tw-py-0'}
+    >
+      <div className={styles.font}>{fromExisted ? 'Back' : 'Cancel'}</div>
+    </AppButton>
+  );
+
+  if (isPhone) {
+    return (
+      <>
+        <div className={styles.phoneTopBar}>
+          <div className={styles.phoneLogo}>{logo}</div>
+          <div className={styles.phoneActions}>
+            {cancelButton}
+            {downloadButton}
+            {saveButton}
+          </div>
+        </div>
+        <div className={styles.phoneToolBar}>
+          <div className={styles.phoneTools}>
+            {primaryTools}
+            {secondaryTools}
+            {shareTools}
+            {savingTools}
+          </div>
+        </div>
+        <div className={styles.phoneZoom}>{zoomControl}</div>
+      </>
+    );
+  }
+
   return (
     <Draggable onStop={handleStop} position={{ x: x, y: y }} disabled={locked}>
       <div className={classNames(styles.mainContainer, styles.toolswrapper)}>
@@ -404,55 +1336,9 @@ const ToolsPanel: React.FC<IToolsPanelProps> = ({
           </div>
         </div>
         <div className={styles.toolboxstart}>
-          <div onClick={() => switch3D()} className={styles.container}>
-            <Logo width={89} height={24} type="default" />
-            <div className={styles.absoluteContainer}></div>
-          </div>{' '}
+          {logo}{' '}
           <ToolsColumn>
-            <ToolBtn
-              toolTitle={tools.video.title}
-              large={true}
-              panel3D={panel3D}
-              isOpenEditTool={false}
-              onSelect={() => {
-                onResetShape();
-                onVideoRecordHandler();
-              }}
-              icon={recordingIcon}
-              active={isActive(tools.video)}
-              disabled={
-                recordingStatus == 'resume' || recordingStatus == 'pause'
-              }
-            />
-
-            <MarkerTool
-              options={markerOptions}
-              isOpenEditTool={currentTool?.name == 'marker' ? true : false}
-              active={isActive(tools.marker)}
-              onToolChange={onToolChange}
-              onResetShape={onResetShape}
-              title="marker"
-              onChange={onMarkerOptionsChange}
-            />
-
-            <TextTool
-              isOpenEditTool={currentTool?.name == 'text' ? true : false}
-              options={textOptions}
-              active={isActive(tools.text)}
-              onChange={onTextOptionsChange}
-              onToolChange={onToolChange}
-              onResetShape={onResetShape}
-              title="text"
-            />
-            <ArrowTool
-              isOpenEditTool={currentTool?.name == 'arrow' ? true : false}
-              title="arrow"
-              options={arrowGroupOptions}
-              activeTool={activeTool}
-              onChange={onArrowGroupOptionsChange}
-              onToolChange={onToolChange}
-              onResetShape={onResetShape}
-            />
+            {primaryTools}
 
             {!show ? (
               <div
@@ -484,779 +1370,8 @@ const ToolsPanel: React.FC<IToolsPanelProps> = ({
           </ToolsColumn>
         </div>
 
-        <div className={`${show ? styles.hidden : ''}`}>
-          <ToolsRow>
-            <ResizeTool
-              isOpenEditTool={currentTool?.name == 'resize' ? true : false}
-              onSelect={onToolChange}
-              active={isActive(tools.resize)}
-              initialWidth={stage.width()}
-              initialHeight={stage.height()}
-              onResize={resizeHandler}
-            />
-
-            <ToolBtn
-              panel3D={panel3D}
-              isOpenEditTool={false}
-              onSelect={() => {
-                onResetShape();
-                onToolChange(tools.crop);
-              }}
-              icon={tools.crop.icon}
-              active={isActive(tools.crop)}
-              toolTitle={tools.crop.title}
-              placement="right"
-            />
-          </ToolsRow>
-          {/* <PanelSplitter /> */}
-          <ToolsRow>
-            <ToolBtn
-              panel3D={panel3D}
-              isOpenEditTool={false}
-              onSelect={() => {
-                onResetShape();
-                onToolChange(tools.pointer);
-              }}
-              icon={tools.pointer.icon}
-              active={isActive(tools.pointer)}
-              toolTitle={tools.pointer.title}
-            />
-
-            <EraserTool
-              isOpenEditTool={currentTool?.name == 'eraser' ? true : false}
-              onToolChange={onToolChange}
-              active={isActive(tools.eraser)}
-              options={pencilGroupOptions}
-              onChange={onPencilGroupOptionsChange}
-              onResetShape={() => {
-                onResetShape();
-                onPencilGroupOptionsChange({
-                  strokeWidth: pencilGroupOptions.strokeWidth,
-                  strokeColor: 'rgb(0,0,0)',
-                });
-              }}
-            />
-          </ToolsRow>
-          <ToolsRow>
-            <ToolBtn
-              panel3D={panel3D}
-              isOpenEditTool={currentTool?.name == 'free' ? true : false}
-              title="free"
-              toolTitle={tools.roller.title}
-              onSelect={() => {
-                onToolChange(
-                  isActive(tools.roller) ? tools.roller : tools.pencil,
-                );
-                onResetShape();
-                if (!isActive(tools.pencil) && !isActive(tools.roller)) {
-                  onPencilGroupOptionsChange({
-                    strokeWidth: 2,
-                    strokeColor: 'rgb(0,0,0)',
-                  });
-                }
-              }}
-              icon={
-                isActive(tools.roller) ? tools.roller.icon : tools.pencil.icon
-              }
-              active={isActive(tools.pencil) || isActive(tools.roller)}
-            >
-              <div>
-                <div className={styles.flexContainer}>
-                  <ToolSubPanelBtn
-                    onSelect={() => {
-                      onToolChange(tools.pencil);
-                      onResetShape();
-                      onPencilGroupOptionsChange({
-                        strokeWidth: 2,
-                        strokeColor: 'rgb(0,0,0)',
-                      });
-                    }}
-                    icon={tools.pencil.icon}
-                    active={isActive(tools.pencil)}
-                    toolTitle={tools.pencil.title}
-                  />
-
-                  <ToolSubPanelBtn
-                    icon={tools.roller.icon}
-                    active={isActive(tools.roller)}
-                    onSelect={() => {
-                      onToolChange(tools.roller);
-                      onResetShape();
-                      onPencilGroupOptionsChange({
-                        strokeWidth: 6,
-                        strokeColor: 'rgba(0,0,0,0.5)',
-                      });
-                    }}
-                    toolTitle={tools.roller.title}
-                  />
-                </div>
-
-                <div className={styles.selectorWrapper}>
-                  <ColorSelector
-                    color={pencilGroupOptions.strokeColor}
-                    onChange={(val) =>
-                      pencilGroupOptionsChangeHandler('strokeColor', val)
-                    }
-                    className={styles.selectorWidth}
-                  />
-
-                  <StrokeWidthSelector
-                    tool={
-                      pencilGroupOptions.strokeWidth >= 32 ||
-                      String(activeTool?.tool) === 'roller'
-                        ? 'roller'
-                        : 'pencil'
-                    }
-                    width={pencilGroupOptions.strokeWidth}
-                    onChange={(val) =>
-                      pencilGroupOptionsChangeHandler('strokeWidth', val)
-                    }
-                  />
-                </div>
-              </div>
-            </ToolBtn>
-
-            <ToolBtn
-              isOpenEditTool={currentTool?.name == 'emoji' ? true : false}
-              title="emoji"
-              toolTitle={tools.emoji.title}
-              onSelect={() => {
-                onResetShape();
-                onToolChange(tools.emoji);
-              }}
-              icon={tools.emoji.icon}
-              active={isActive(tools.emoji)}
-              placement="right"
-              toolSubPanelClasses={styles.wrapper}
-            >
-              <div id="pickerContainer">
-                {' '}
-                <Picker
-                  // set={'twitter'}
-                  data={data}
-                  autofocus={true}
-                  icons={'solid'}
-                  perLine={5}
-                  maxFrequentRows={5}
-                  emojiSize={40}
-                  emojiButtonRadius={'1rem'}
-                  emojiButtonSize={65}
-                  emojiButtonColors={['hsl(var(--foreground) / 0.1)']}
-                  onEmojiSelect={(emoji: Emoji) => selectEmoji(emoji)}
-                  previewEmoji={emojiOptions.id}
-                />{' '}
-              </div>
-            </ToolBtn>
-          </ToolsRow>
-          <ToolsRow>
-            <ToolBtn
-              isOpenEditTool={currentTool?.name == 'figure' ? true : false}
-              title="figure"
-              toolTitle="Shapes"
-              onSelect={() => {
-                onResetShape();
-                onToolChange(activeShapeTool());
-              }}
-              icon={activeShapeTool().icon}
-              active={isActive(activeShapeTool())}
-            >
-              <div>
-                <div className={styles.flexContainer}>
-                  <ToolSubPanelBtn
-                    onSelect={() => {
-                      onResetShape();
-                      onToolChange(tools.elipse);
-                    }}
-                    icon={tools.elipse.icon}
-                    active={isActive(tools.elipse)}
-                    toolTitle={tools.elipse.title}
-                  />
-
-                  <ToolSubPanelBtn
-                    icon={tools.square.icon}
-                    active={isActive(tools.square)}
-                    onSelect={() => {
-                      onResetShape();
-                      onToolChange(tools.square);
-                    }}
-                    toolTitle={tools.square.title}
-                  />
-
-                  <ToolSubPanelBtn
-                    icon={tools.blob.icon}
-                    active={isActive(tools.blob)}
-                    onSelect={() => {
-                      onResetShape();
-                      onToolChange(tools.blob);
-                    }}
-                    toolTitle={tools.blob.title}
-                  />
-
-                  <ToolSubPanelBtn
-                    icon={tools.triangle.icon}
-                    active={isActive(tools.triangle)}
-                    onSelect={() => {
-                      onResetShape();
-                      onToolChange(tools.triangle);
-                    }}
-                    toolTitle={tools.triangle.title}
-                  />
-                </div>
-
-                <div className={styles.flexContainer}>
-                  <ToolSubPanelBtn
-                    icon={tools.star.icon}
-                    active={isActive(tools.star)}
-                    onSelect={() => {
-                      onResetShape();
-                      onToolChange(tools.star);
-                    }}
-                    toolTitle={tools.star.title}
-                  />
-
-                  <ToolSubPanelBtn
-                    icon={tools.heart.icon}
-                    active={isActive(tools.heart)}
-                    onSelect={() => {
-                      onResetShape();
-                      onToolChange(tools.heart);
-                    }}
-                    toolTitle={tools.heart.title}
-                  />
-
-                  <ToolSubPanelBtn
-                    icon={tools.rect.icon}
-                    active={isActive(tools.rect)}
-                    onSelect={() => {
-                      onResetShape();
-                      onToolChange(tools.rect);
-                    }}
-                    toolTitle={tools.rect.title}
-                  />
-
-                  <ToolSubPanelBtn
-                    icon={tools.comment.icon}
-                    active={isActive(tools.comment)}
-                    onSelect={() => {
-                      onResetShape();
-                      onToolChange(tools.comment);
-                    }}
-                    toolTitle={tools.comment.title}
-                  />
-                </div>
-
-                <div className={styles.selectorWrapper}>
-                  <ColorSelector
-                    color={shapeGroupOptions.strokeColor}
-                    onChange={(val) =>
-                      shapeGroupOptionsChangeHandler('strokeColor', val)
-                    }
-                    className={styles.spacingRight}
-                  />
-
-                  <StrokeWidthSelector
-                    width={shapeGroupOptions.strokeWidth}
-                    onChange={(val) =>
-                      shapeGroupOptionsChangeHandler('strokeWidth', val)
-                    }
-                  />
-
-                  <ColorSelector
-                    icon={fullFillerIcon}
-                    color={shapeGroupOptions.fillColor}
-                    colorIndicator={true}
-                    onChange={(val) =>
-                      shapeGroupOptionsChangeHandler('fillColor', val)
-                    }
-                    className={styles.spacingRight}
-                  />
-                </div>
-              </div>
-            </ToolBtn>
-
-            <ToolBtn
-              isOpenEditTool={false}
-              onSelect={() => onToolChange(tools.blur)}
-              icon={tools.blur.icon}
-              active={isActive(tools.blur)}
-              toolTitle={tools.blur.title}
-              placement="right"
-            ></ToolBtn>
-          </ToolsRow>
-          <ToolsRow>
-            <ToolBtn
-              isOpenEditTool={
-                currentTool?.name == 'conversation' ? true : false
-              }
-              title="conversation"
-              toolTitle={tools.conversation.title}
-              onSelect={() => {
-                onToolChange(tools.conversation);
-                onResetShape();
-              }}
-              icon={tools.conversation.icon}
-              active={isActive(tools.conversation)}
-              toolSubPanelClasses={styles.buttonContainer}
-            >
-              <Tabs
-                tabBarStyle={{
-                  margin: '0px',
-                  borderRadius: '10px 10px 0px 0px',
-                  overflow: 'hidden',
-                }}
-                hideAdd
-                type="card"
-                activeKey={conversationOptions.category}
-              >
-                <TabPane
-                  className="tabs"
-                  tab={
-                    <span
-                      className="styled-tabs"
-                      id="corporate"
-                      onClick={() =>
-                        conversationOptionsChangeHandler(
-                          'category',
-                          'corporate',
-                        )
-                      }
-                    >
-                      Corporate
-                    </span>
-                  }
-                  key="corporate"
-                >
-                  <div className={styles.containerWrapper}>
-                    {conversationData.map((data, index) =>
-                      data.category === 'corporate' ? (
-                        <div
-                          className={classNames(
-                            styles.innerWrapper,
-                            conversationOptions.filename ===
-                              data.fileName.toString()
-                              ? styles.bgColor
-                              : '',
-                          )}
-                          key={`conversation_${index}`}
-                          onClick={() => {
-                            onResetShape();
-                            onToolChange(tools.conversation);
-                            onConversationOptionsChange({
-                              category: data.category,
-                              filename: data.fileName,
-                              fillColor: data.fillColor,
-                              fontFamily: data.fontFamily,
-                              strokeColor: data.strokeColor,
-                              strokeWidth: data.strokeWidth,
-                              textColor: data.textColor,
-                              textSize: data.textSize,
-                              textStrokeColor: data.textStrokeColor,
-                              textStrokeWidth: data.textStrokeWidth,
-                              data: data.data,
-                              dash: data.dash,
-                            });
-                          }}
-                        >
-                          <Image
-                            loader={imgSrcLoader}
-                            src={`${baseURL}/images/conversation/${data.fileName}`}
-                            width={70}
-                            height={70}
-                            alt={`${data.category}`}
-                            unoptimized={true}
-                          />
-                        </div>
-                      ) : null,
-                    )}
-                  </div>
-                </TabPane>
-                <TabPane
-                  className="tabs"
-                  tab={
-                    <span
-                      className="styled-tabs"
-                      id="fun"
-                      onClick={() =>
-                        conversationOptionsChangeHandler('category', 'fun')
-                      }
-                    >
-                      {' '}
-                      Fun{' '}
-                    </span>
-                  }
-                  key="fun"
-                >
-                  <div className={styles.containerWrapper}>
-                    {conversationData.map((data, index) =>
-                      data.category === 'fun' ? (
-                        <div
-                          className={classNames(
-                            styles.innerWrapper,
-                            conversationOptions.filename ===
-                              data.fileName.toString()
-                              ? styles.bgColor
-                              : '',
-                          )}
-                          key={`conversation_${index}`}
-                          onClick={() => {
-                            onResetShape();
-                            onToolChange(tools.conversation);
-                            onConversationOptionsChange({
-                              category: data.category,
-                              filename: data.fileName,
-                              fillColor: data.fillColor,
-                              fontFamily: data.fontFamily,
-                              strokeColor: data.strokeColor,
-                              strokeWidth: data.strokeWidth,
-                              textColor: data.textColor,
-                              textSize: data.textSize,
-                              textStrokeColor: data.textStrokeColor,
-                              textStrokeWidth: data.textStrokeWidth,
-                              data: data.data,
-                              dash: data.dash,
-                            });
-                          }}
-                        >
-                          <Image
-                            loader={imgSrcLoader}
-                            src={`${baseURL}/images/conversation/${data.fileName}`}
-                            width={70}
-                            height={70}
-                            alt={`${data.category}`}
-                            unoptimized={true}
-                          />
-                        </div>
-                      ) : null,
-                    )}
-                  </div>
-                </TabPane>
-                <TabPane
-                  className="tabs"
-                  tab={
-                    <span
-                      className="styled-tabs"
-                      id="colorful"
-                      onClick={() =>
-                        conversationOptionsChangeHandler('category', 'colorful')
-                      }
-                    >
-                      {' '}
-                      Colorful{' '}
-                    </span>
-                  }
-                  key="colorful"
-                >
-                  <div className={styles.containerWrapper}>
-                    {conversationData.map((data, index) =>
-                      data.category === 'colorful' ? (
-                        <div
-                          className={classNames(
-                            styles.innerWrapper,
-                            conversationOptions.filename ===
-                              data.fileName.toString()
-                              ? styles.bgColor
-                              : '',
-                          )}
-                          key={`conversation_${index}`}
-                          onClick={() => {
-                            onResetShape();
-                            onToolChange(tools.conversation);
-                            onConversationOptionsChange({
-                              category: data.category,
-                              filename: data.fileName,
-                              fillColor: data.fillColor,
-                              fontFamily: data.fontFamily,
-                              strokeColor: data.strokeColor,
-                              strokeWidth: data.strokeWidth,
-                              textColor: data.textColor,
-                              textSize: data.textSize,
-                              textStrokeColor: data.textStrokeColor,
-                              textStrokeWidth: data.textStrokeWidth,
-                              data: data.data,
-                              dash: data.dash,
-                            });
-                          }}
-                        >
-                          <Image
-                            loader={imgSrcLoader}
-                            src={`${baseURL}/images/conversation/${data.fileName}`}
-                            width={70}
-                            height={70}
-                            alt={`${data.category}`}
-                            unoptimized={true}
-                          />
-                        </div>
-                      ) : null,
-                    )}
-                  </div>
-                </TabPane>
-                <TabPane
-                  className="tabs"
-                  tab={
-                    <span
-                      className="styled-tabs"
-                      id="outline"
-                      onClick={() =>
-                        conversationOptionsChangeHandler('category', 'outline')
-                      }
-                    >
-                      {' '}
-                      Outline{' '}
-                    </span>
-                  }
-                  key="outline"
-                >
-                  <div className={styles.containerWrapper}>
-                    {conversationData.map((data, index) =>
-                      data.category === 'outline' ? (
-                        <div
-                          className={classNames(
-                            styles.innerWrapper,
-                            conversationOptions.filename ===
-                              data.fileName.toString()
-                              ? styles.bgColor
-                              : '',
-                          )}
-                          key={`conversation_${index}`}
-                          onClick={() => {
-                            onResetShape();
-                            onToolChange(tools.conversation);
-                            onConversationOptionsChange({
-                              category: data.category,
-                              filename: data.fileName,
-                              fillColor: data.fillColor,
-                              fontFamily: data.fontFamily,
-                              strokeColor: data.strokeColor,
-                              strokeWidth: data.strokeWidth,
-                              textColor: data.textColor,
-                              textSize: data.textSize,
-                              textStrokeColor: data.textStrokeColor,
-                              textStrokeWidth: data.textStrokeWidth,
-                              data: data.data,
-                              dash: data.dash,
-                            });
-                          }}
-                        >
-                          <Image
-                            loader={imgSrcLoader}
-                            src={`${baseURL}/images/conversation/${data.fileName}`}
-                            width={70}
-                            height={70}
-                            alt={`${data.category}`}
-                            unoptimized={true}
-                          />
-                        </div>
-                      ) : null,
-                    )}
-                  </div>
-                </TabPane>
-              </Tabs>
-              <div style={{ paddingLeft: '1.25rem', paddingRight: '1.25rem' }}>
-                <PanelSplitter />
-              </div>
-
-              <div className={styles.colorSelectorContainer}>
-                <ColorSelector
-                  icon={FillTIcon}
-                  color={conversationOptions.textColor}
-                  onChange={(val) =>
-                    conversationOptionsChangeHandler('textColor', val)
-                  }
-                  className={styles.spacingRight}
-                />
-
-                <ColorSelector
-                  icon={textStrokeIcon}
-                  color={conversationOptions.textStrokeColor}
-                  onChange={(val) =>
-                    conversationOptionsChangeHandler('textStrokeColor', val)
-                  }
-                  className={styles.spacingRight}
-                />
-
-                <ColorSelector
-                  icon={fullFillerIcon}
-                  color={conversationOptions.fillColor}
-                  colorIndicator={true}
-                  onChange={(val) =>
-                    conversationOptionsChangeHandler('fillColor', val)
-                  }
-                  className={styles.spacingRight}
-                />
-                <ColorSelector
-                  color={conversationOptions.strokeColor}
-                  onChange={(val) =>
-                    conversationOptionsChangeHandler('strokeColor', val)
-                  }
-                  className={styles.spacingRight}
-                />
-                <StrokeWidthSelector
-                  width={conversationOptions.strokeWidth}
-                  onChange={(val) =>
-                    conversationOptionsChangeHandler('strokeWidth', val)
-                  }
-                />
-              </div>
-
-              <div className={styles.wrapperContainer}>
-                <Select
-                  value={conversationOptions.fontFamily}
-                  style={{
-                    fontFamily: conversationOptions.fontFamily,
-                  }}
-                  size={'large'}
-                  onChange={(val) =>
-                    conversationOptionsChangeHandler('fontFamily', val)
-                  }
-                  className={classNames('app-selectable', styles.optionWrapper)}
-                >
-                  {fonts.map((font, index) => (
-                    <Select.Option
-                      key={`font_${index}`}
-                      value={font}
-                      className="app-selectable"
-                      style={{ fontFamily: font }}
-                    >
-                      {font}
-                    </Select.Option>
-                  ))}
-                </Select>
-
-                <div className={styles.numberSelector}>
-                  {' '}
-                  <AppNumberSelector
-                    value={conversationOptions.textSize}
-                    max={128}
-                    min={8}
-                    valuesArr={[]}
-                    light
-                    step={8}
-                    onChange={(val) =>
-                      conversationOptionsChangeHandler('textSize', val)
-                    }
-                  />
-                </div>
-              </div>
-            </ToolBtn>
-
-            <WatermarkToolBtn
-              scale={stageScale}
-              isOpenEditTool={currentTool?.name == 'watermark' ? true : false}
-              stage={stage}
-              options={watermarkOptions}
-              isActive={isActive(tools.watermark)}
-              onChange={onWatermarkOptionsChange}
-              onToolChange={onToolChange}
-              onSaveHistory={onSaveHistory}
-            />
-          </ToolsRow>
-
-          <ToolsRow>
-            <ToolBtn
-              onSelect={() => {
-                onUndo();
-                setTimeout(() => {
-                  onToolChange(tools.undo);
-                });
-              }}
-              icon={tools.undo.icon}
-              disabled={!canUndo}
-              isOpenEditTool={false}
-              toolTitle={tools.undo.title}
-            />
-            <ToolBtn
-              onSelect={() => {
-                onRedo();
-                setTimeout(() => {
-                  onToolChange(tools.redo);
-                });
-              }}
-              toolTitle={tools.redo.title}
-              icon={tools.redo.icon}
-              disabled={!canRedo}
-              isOpenEditTool={false}
-              placement="right"
-            />
-          </ToolsRow>
-          <ToolsRow>
-            <ToolBtn
-              onSelect={() => {
-                onUndo(true);
-                setTimeout(() => {
-                  onToolChange(tools.clear);
-                });
-              }}
-              toolTitle={tools.clear.title}
-              icon={tools.clear.icon}
-              disabled={!canUndo}
-              isOpenEditTool={false}
-            />
-            <ToolBtn
-              onSelect={onCut}
-              icon={cutIcon}
-              toolTitle="Cut"
-              disabled={!isActive(tools.pointer) || !pointerTarget}
-              isOpenEditTool={false}
-              placement="right"
-            />
-          </ToolsRow>
-
-          {/* <ToolsRow>
-          <ToolBtn
-            onSelect={onSaveAsJPG}
-            icon={jpgIcon}
-            isOpenEditTool={false}
-          />
-
-          <ToolBtn
-            onSelect={onSaveAsPNG}
-            icon={pngIcon}
-            isOpenEditTool={false}
-          />
-        </ToolsRow> */}
-
-          <ToolsRow>
-            {/* <ToolBtn
-            onSelect={onSaveAsPDF}
-            icon={pdfIcon}
-            isOpenEditTool={false}
-          /> */}
-
-            {/* <GoogleDriveTool
-              onOk={onUploadToDrive}
-              isOpenDriveTool={false}
-              onSelect={onToolChange}
-              active={isActive(tools.drive)}
-              oldName={oldName}
-            /> */}
-          </ToolsRow>
-        </div>
-        <ToolsRow>
-          <ToolBtn
-            disabled={!clipboardCopyEnabled}
-            onSelect={clipboardCopy}
-            icon={copyIcon}
-            isOpenEditTool={false}
-            toolTitle={'Copy'}
-          />
-
-          {/* <SendEmailTool
-            isOpenEmailTool={false}
-            onSelect={onToolChange}
-            active={isActive(tools.email)}
-            onSave={onSave}
-          /> */}
-
-          <ShareTool
-            image={editorImage}
-            isOpenEditTool={currentTool?.name == 'share' ? true : false}
-            active={isActive(tools.share)}
-            onToolChange={onToolChange}
-            onResetShape={onResetShape}
-            title="share"
-            save={onSave}
-          />
-        </ToolsRow>
+        <div className={`${show ? styles.hidden : ''}`}>{secondaryTools}</div>
+        {shareTools}
         {/*
         <ToolsRow>
           {user && user.isSlackIntegrate && (
@@ -1277,45 +1392,9 @@ const ToolsPanel: React.FC<IToolsPanelProps> = ({
           />
         </ToolsRow> */}
 
-        <ToolsRow>
-          {/* <CommentsTool
-            options={commentsOptions}
-            isOpenEditTool={currentTool?.name == 'comments' ? true : false}
-            active={isActive(tools.comments)}
-            onToolChange={onToolChange}
-            onResetShape={onResetShape}
-            title="comments"
-            onChange={onCommentsOptionsChange}
-          /> */}
-          <SavingTool
-            isOpenEditTool={currentTool?.name == 'saving' ? true : false}
-            active={isActive(tools.saving)}
-            onToolChange={onToolChange}
-            onResetShape={onResetShape}
-            title="saving"
-            downloadPng={onSaveAsPNG}
-            downloadPdf={onSaveAsPDF}
-            downloadJpg={onSaveAsJPG}
-            saveToDrive={onUploadToDrive}
-            image={editorImage}
-            stage={stage}
-            stageScale={stageScale}
-            initialDimentions={initialDimentions}
-            resizeDimentions={resizeDimentions}
-            setLoading={setLoading}
-          />
-        </ToolsRow>
+        {savingTools}
         <div style={{ paddingLeft: '0.5rem', paddingRight: '0.5rem' }}>
-          <div className={styles.childContainer}>
-            <AppNumberSelector
-              value={stageScale}
-              min={25}
-              max={200}
-              suffix="%"
-              step={25}
-              onChange={onStageScaleChange}
-            />
-          </div>
+          <div className={styles.childContainer}>{zoomControl}</div>
         </div>
         <div className={styles.toolboxend}>
           <div
@@ -1325,36 +1404,9 @@ const ToolsPanel: React.FC<IToolsPanelProps> = ({
               paddingRight: '0.25rem',
             }}
           >
-            <AppButton
-              className={styles.buttonWrapper}
-              onClick={onSaveAsJPG}
-              full
-              outlined
-              twPadding="tw-px-1 tw-py-0"
-            >
-              <div className={styles.font}>Download</div>
-            </AppButton>
-            <AppButton
-              className={styles.saveBtn}
-              onClick={saveScreenshot}
-              full
-              twPadding="tw-px-1 tw-py-0"
-            >
-              <div className={styles.font}>Save </div>
-            </AppButton>
-            <AppButton
-              className={styles.cancelBtn}
-              onClick={() => {
-                onCancelHandler();
-              }}
-              full
-              bgColor="tw-bg-transparent"
-              twPadding="tw-px-1 tw-py-0"
-            >
-              <div className={styles.font}>
-                {fromExisted ? 'Back' : 'Cancel'}
-              </div>
-            </AppButton>
+            {downloadButton}
+            {saveButton}
+            {cancelButton}
           </div>
         </div>
       </div>
