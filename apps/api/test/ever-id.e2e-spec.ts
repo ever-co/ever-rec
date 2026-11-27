@@ -224,6 +224,39 @@ describe('Ever ID sign-in (e2e)', () => {
     return session.body.data;
   }
 
+  /** The session of a linked sign-in. */
+  async function linkedSession(subject: string) {
+    // Create the account through the confirmation screen, then sign in again (the Gauzy chain
+    // needs the ID token of the request, which only a linked sign-in has).
+    await signUp(subject);
+    issuer.nextClaims = { sub: subject };
+    const landing = await authorize();
+    const session = await exchange(landing.searchParams.get('code')!);
+    expect(session.status).toBe(201);
+    return session.body.data;
+  }
+
+  /** Signs `subject` up, refreshes twice, logs that Ever ID session out: every reference is refused. */
+  async function refreshThenLogout(subject: string) {
+    const session = await signUp(subject);
+    const first = await refresh(session.refreshToken);
+    expect(first.status).toBe(200);
+    // A reference token again, never the bare Firebase refresh token.
+    expect(first.body.refreshToken).toMatch(/^eyJ/);
+    const second = await refresh(first.body.refreshToken);
+    expect(second.status).toBe(200);
+
+    const token = await issuer.logoutToken({ sid: `sid-${subject}` });
+    expect((await logout(token)).status).toBe(200);
+    for (const reference of [
+      session.refreshToken,
+      first.body.refreshToken,
+      second.body.refreshToken,
+    ]) {
+      expect((await refresh(reference)).status).toBeGreaterThanOrEqual(400);
+    }
+  }
+
   beforeAll(async () => {
     nock.disableNetConnect();
     nock.enableNetConnect(LOOPBACK);
@@ -803,18 +836,6 @@ describe('Ever ID sign-in (e2e)', () => {
       await new Promise<void>((resolve) => gauzy.close(() => resolve()));
     });
 
-    /** The session of a linked sign-in. */
-    async function linkedSession(subject: string) {
-      // Create the account through the confirmation screen, then sign in again (the chain needs
-      // the ID token of the request, which only a linked sign-in has).
-      await signUp(subject);
-      issuer.nextClaims = { sub: subject };
-      const landing = await authorize();
-      const session = await exchange(landing.searchParams.get('code')!);
-      expect(session.status).toBe(201);
-      return session.body.data;
-    }
-
     async function linkedSignIn(subject: string) {
       const session = await linkedSession(subject);
       return t.app.get(MergeTokenPolicy).decode<any>(session.refreshToken);
@@ -912,27 +933,6 @@ describe('Ever ID sign-in (e2e)', () => {
       // The same logout token is accepted once.
       expect((await logout(token)).status).toBe(400);
     });
-
-    /** Signs `subject` up, refreshes twice, logs that Ever ID session out: every reference is refused. */
-    async function refreshThenLogout(subject: string) {
-      const session = await signUp(subject);
-      const first = await refresh(session.refreshToken);
-      expect(first.status).toBe(200);
-      // A reference token again, never the bare Firebase refresh token.
-      expect(first.body.refreshToken).toMatch(/^eyJ/);
-      const second = await refresh(first.body.refreshToken);
-      expect(second.status).toBe(200);
-
-      const token = await issuer.logoutToken({ sid: `sid-${subject}` });
-      expect((await logout(token)).status).toBe(200);
-      for (const reference of [
-        session.refreshToken,
-        first.body.refreshToken,
-        second.body.refreshToken,
-      ]) {
-        expect((await refresh(reference)).status).toBeGreaterThanOrEqual(400);
-      }
-    }
 
     it('keeps a refreshed session revocable by the logout', async () => {
       await refreshThenLogout('refreshing-person');
