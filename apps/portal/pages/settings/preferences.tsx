@@ -157,13 +157,14 @@ const Preferences: FC = () => {
                 const forward =
                   direction === 'rtl' ? 'ArrowLeft' : 'ArrowRight';
                 const back = direction === 'rtl' ? 'ArrowRight' : 'ArrowLeft';
-                const step =
-                  event.key === forward || event.key === 'ArrowDown'
-                    ? 1
-                    : event.key === back || event.key === 'ArrowUp'
-                      ? -1
-                      : 0;
-                if (!step) return;
+                let step = 0;
+                if (event.key === forward || event.key === 'ArrowDown') {
+                  step = 1;
+                } else if (event.key === back || event.key === 'ArrowUp') {
+                  step = -1;
+                } else {
+                  return;
+                }
 
                 event.preventDefault();
                 const current = Math.max(

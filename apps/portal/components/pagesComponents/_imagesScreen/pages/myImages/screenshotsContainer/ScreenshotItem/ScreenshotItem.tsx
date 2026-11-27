@@ -245,7 +245,12 @@ const ScreenshotItem: React.FC<IScreenshotItemProps> = ({
         </div>
       </div>
 
-      <div onClick={(e) => e.preventDefault()} className="tw-mt-3 tw-ms-0.5">
+      {/* Only keeps a click on the title area from following the card's link. */}
+      <div
+        role="presentation"
+        onClick={(e) => e.preventDefault()}
+        className="tw-mt-3 tw-ms-0.5"
+      >
         <div
           className={classNames(
             'tw-flex tw-items-start tw-justify-between tw-mt-4 tw-mb-1 tw-pe-1.5',

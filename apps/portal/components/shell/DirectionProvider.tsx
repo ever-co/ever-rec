@@ -1,11 +1,7 @@
 import { FC, ReactNode, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ConfigProvider, message } from 'antd';
-import {
-  DirectionContext,
-  useDirection,
-  useDocumentDirection,
-} from 'i18n/direction';
+import { DirectionContext, useDocumentDirection } from 'i18n/direction';
 
 /**
  * Lays the app out right to left for Arabic and Hebrew: `<html lang/dir>` follow i18next (the
@@ -28,5 +24,4 @@ const DirectionProvider: FC<{ children: ReactNode }> = ({ children }) => {
   );
 };
 
-export { useDirection };
 export default DirectionProvider;

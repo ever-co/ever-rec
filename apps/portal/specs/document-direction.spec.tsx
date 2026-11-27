@@ -41,6 +41,10 @@ const Probe = () => {
 const probe = () =>
   document.querySelector('[data-testid="probe"]')?.textContent;
 
+/** `<html lang>`, `<html dir>`, and what `useDirection()` / antd see: `ar rtl rtl/rtl`. */
+const page = () =>
+  `${html.getAttribute('lang')} ${html.getAttribute('dir')} ${probe()}`;
+
 describe('directionOf', () => {
   it('reads Arabic and Hebrew right to left, region or not', () => {
     expect([...RTL_LANGUAGES].sort()).toEqual(['ar', 'he']);
@@ -113,42 +117,29 @@ describe('DirectionProvider', () => {
     });
 
   it('sets lang and dir at the first render', () => {
-    expect(html.getAttribute('lang')).toBe('en');
-    expect(html.getAttribute('dir')).toBe('ltr');
-    expect(probe()).toBe('ltr/ltr');
+    expect(page()).toBe('en ltr ltr/ltr');
   });
 
   it('flips to right to left for Arabic and Hebrew, and back', async () => {
-    await switchTo('ar');
-    expect(html.getAttribute('lang')).toBe('ar');
-    expect(html.getAttribute('dir')).toBe('rtl');
-    expect(probe()).toBe('rtl/rtl');
-
-    await switchTo('fr');
-    expect(html.getAttribute('lang')).toBe('fr');
-    expect(html.getAttribute('dir')).toBe('ltr');
-    expect(probe()).toBe('ltr/ltr');
-
-    await switchTo('he');
-    expect(html.getAttribute('lang')).toBe('he');
-    expect(html.getAttribute('dir')).toBe('rtl');
-    expect(probe()).toBe('rtl/rtl');
-
-    await switchTo('en');
-    expect(html.getAttribute('dir')).toBe('ltr');
-    expect(probe()).toBe('ltr/ltr');
+    for (const [language, expected] of [
+      ['ar', 'ar rtl rtl/rtl'],
+      ['fr', 'fr ltr ltr/ltr'],
+      ['he', 'he rtl rtl/rtl'],
+      ['en', 'en ltr ltr/ltr'],
+    ]) {
+      await switchTo(language);
+      expect(page()).toBe(expected);
+    }
   });
 
   it('uses the language shown, not the one asked for', async () => {
     // The browser asks for Egyptian Arabic: the strings, and the layout, are Arabic.
     await switchTo('ar-EG');
-    expect(html.getAttribute('lang')).toBe('ar');
-    expect(html.getAttribute('dir')).toBe('rtl');
+    expect(page()).toBe('ar rtl rtl/rtl');
 
     // A language the portal does not ship falls back to English, left to right.
     await switchTo('ja');
-    expect(html.getAttribute('lang')).toBe('en');
-    expect(html.getAttribute('dir')).toBe('ltr');
+    expect(page()).toBe('en ltr ltr/ltr');
   });
 
   it('stops following i18next once unmounted', async () => {
@@ -161,8 +152,6 @@ describe('DirectionProvider', () => {
 });
 
 describe('documentLanguageScript (before the first paint)', () => {
-  const run = () => new Function(documentLanguageScript)();
-
   beforeEach(() => {
     html.removeAttribute('lang');
     html.removeAttribute('dir');
@@ -170,30 +159,18 @@ describe('documentLanguageScript (before the first paint)', () => {
     window.history.replaceState(null, '', '/');
   });
 
-  it('reads the language i18next stored', () => {
-    window.localStorage.setItem('i18nextLng', 'he');
-    run();
-    expect(html.getAttribute('lang')).toBe('he');
-    expect(html.getAttribute('dir')).toBe('rtl');
-
-    window.localStorage.setItem('i18nextLng', 'de');
-    run();
-    expect(html.getAttribute('lang')).toBe('de');
-    expect(html.getAttribute('dir')).toBe('ltr');
-  });
-
-  it('prefers the lng query parameter, as the detector does', () => {
-    window.localStorage.setItem('i18nextLng', 'en');
-    window.history.replaceState(null, '', '/media/images?lng=ar');
-    run();
-    expect(html.getAttribute('lang')).toBe('ar');
-    expect(html.getAttribute('dir')).toBe('rtl');
-  });
-
-  it('falls back to English for a language the portal does not ship', () => {
-    window.localStorage.setItem('i18nextLng', 'ja');
-    run();
-    expect(html.getAttribute('lang')).toBe('en');
-    expect(html.getAttribute('dir')).toBe('ltr');
+  it.each([
+    ['the language i18next stored', '/', 'he', 'he rtl'],
+    ['the stored language, left to right', '/', 'de', 'de ltr'],
+    // As the detector does, the `lng` query parameter wins over the stored language.
+    ['the lng query parameter first', '/media/images?lng=ar', 'en', 'ar rtl'],
+    ['English for a language the portal does not ship', '/', 'ja', 'en ltr'],
+  ])('reads %s', (_, url, stored, expected) => {
+    window.history.replaceState(null, '', url);
+    window.localStorage.setItem('i18nextLng', stored);
+    new Function(documentLanguageScript)();
+    expect(`${html.getAttribute('lang')} ${html.getAttribute('dir')}`).toBe(
+      expected,
+    );
   });
 });
