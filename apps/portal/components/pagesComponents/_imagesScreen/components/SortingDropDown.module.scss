@@ -29,7 +29,8 @@
 
 .sortText {
   display: flex;
-  justify-content: flex-start;
+  // Right-aligned: the control sits at the end of a section's title row.
+  justify-content: flex-end;
   align-items: center;
   cursor: pointer;
   color: hsl(var(--foreground));

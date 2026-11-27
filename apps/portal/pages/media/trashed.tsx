@@ -159,7 +159,7 @@ const Trashed: React.FC = () => {
                       twPadding="tw-py-[7px] tw-px-4"
                       onClick={() => setDeleteModal(true)}
                     >
-                      {t('common.bulkActions.deleteAll')}
+                      {t('page.trashed.actions.deleteAll')}
                     </AppButton>
                   </div>
                   <div
@@ -171,7 +171,7 @@ const Trashed: React.FC = () => {
                       twPadding="tw-py-[7px] tw-px-4"
                       onClick={() => setRestoreModal(true)}
                     >
-                      {t('common.bulkActions.restoreAll')}
+                      {t('page.trashed.actions.restoreAll')}
                     </AppButton>
                   </div>
                 </div>
@@ -207,7 +207,7 @@ const Trashed: React.FC = () => {
         onCancel={() => setRestoreModal(false)}
         onOk={restoreAllItems}
         title={t('page.trashed.dialog.restoreAll.message')}
-        confirmText={t('common.bulkActions.restoreAll')}
+        confirmText={t('page.trashed.dialog.restoreAll.restoreAll')}
       />
 
       <TrashModal
@@ -215,7 +215,7 @@ const Trashed: React.FC = () => {
         onCancel={() => setDeleteModal(false)}
         onOk={deleteAllItems}
         title={t('page.trashed.dialog.deleteAll.message')}
-        confirmText={t('common.bulkActions.deleteAll')}
+        confirmText={t('page.trashed.dialog.deleteAll.deleteAll')}
         confirmClass="tw-bg-red"
       />
 
