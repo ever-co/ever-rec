@@ -9,12 +9,14 @@ import { Tabs } from 'antd';
 import { Stage } from 'konva/lib/Stage';
 import type { MenuProps } from 'antd';
 import { Menu } from 'antd';
-import { MenuItem } from 'rc-menu';
-import SubMenu from 'antd/lib/menu/SubMenu';
 import {
   destroyPointerTransformer,
   initPointerTransformer,
 } from '../whiteboardHelpers/WhiteboardTransformer';
+
+// From antd's own Menu: an item imported from `rc-menu` (or from `antd/lib`) can come from another
+// copy of the module, finds no menu around it and the page stops with an error.
+const { Item: MenuItem, SubMenu } = Menu;
 
 interface ISidebarProps {
   stageScale: number;
@@ -102,6 +104,7 @@ const WhiteboardSidebar: React.FC<ISidebarProps> = ({
                     </SubMenu>
                   ) : (
                     <MenuItem
+                      key={`frame-${index}`}
                       className="tw-cursor-pointer"
                       onClick={() => {
                         document

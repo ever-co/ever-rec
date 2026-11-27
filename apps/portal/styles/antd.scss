@@ -463,6 +463,30 @@ a {
     border-right-color: hsl(var(--brand));
   }
 
+  // A horizontal menu (the whiteboards tabs on a phone): no rule under the bar, the open tab in the
+  // text colour with the brand under it.
+  .ant-menu-horizontal {
+    border-bottom: 0;
+    line-height: 2.75rem;
+  }
+
+  .ant-menu-horizontal:not(.ant-menu-dark) > .ant-menu-item:hover,
+  .ant-menu-horizontal:not(.ant-menu-dark) > .ant-menu-item-selected,
+  .ant-menu-horizontal:not(.ant-menu-dark) > .ant-menu-submenu:hover,
+  .ant-menu-horizontal:not(.ant-menu-dark) > .ant-menu-submenu-selected {
+    color: hsl(var(--foreground));
+  }
+
+  .ant-menu-horizontal:not(.ant-menu-dark) > .ant-menu-item::after,
+  .ant-menu-horizontal:not(.ant-menu-dark) > .ant-menu-submenu::after {
+    border-bottom-color: transparent;
+  }
+
+  .ant-menu-horizontal:not(.ant-menu-dark) > .ant-menu-item-selected::after,
+  .ant-menu-horizontal:not(.ant-menu-dark) > .ant-menu-submenu-selected::after {
+    border-bottom-color: hsl(var(--brand));
+  }
+
   .ant-menu-item-divider {
     border-color: hsl(var(--border));
   }

@@ -24,13 +24,13 @@ const WhiteboardContainer: React.FC<IProps> = ({ whiteboards, currentTab }) => {
 
   return (
     <div
-      className="scroll-div tw-overflow-y-auto mx-md:tw-h-90vh tw-w-full"
+      className="scroll-div tw-w-full tw-overflow-y-auto mx-md:tw-min-h-0 mx-md:tw-flex-1"
       id="scrollableDivItems"
       ref={scrollableDivRef}
     >
       <div className="tw-h-50px tw-w-full tw-border-b tw-border-border tw-sticky tw-top-0 tw-bg-background tw-z-20"></div>
       <div className="tw-w-full tw-h-full">
-        <div className="tw-px-20 tw-py-10 tw-w-full">
+        <div className="tw-w-full tw-px-20 tw-py-10 mx-md:tw-px-4 mx-md:tw-py-6">
           <InfiniteScroll
             dataLength={itemsToLoad}
             next={loadMoreItems}

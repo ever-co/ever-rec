@@ -4,6 +4,7 @@ import AppButton from 'components/controls/AppButton';
 import plusIcon from 'public/assets/svg/whiteboard-tools-panel/Plus.svg';
 import bin from 'public/whiteboards/bin.svg';
 import AppSvg from 'components/elements/AppSvg';
+import useWindowSize from 'hooks/useWindowSize';
 import recent from 'public/whiteboards/recent.svg';
 import shared from 'public/whiteboards/share.svg';
 import frog from 'public/whiteboards/frog.svg';
@@ -65,9 +66,14 @@ const WhiteboardsSidebar: React.FC<IProps> = ({
   setCurrentTab,
   currentTab,
 }) => {
+  // Below 768px the column becomes a bar: "New", then the tabs side by side (the ones that do not
+  // fit go under the menu's own "more").
+  const { width } = useWindowSize();
+  const narrow = width > 0 && width < 768;
+
   return (
-    <div className="tw-border-r tw-border-border tw-h-93p  tw-w-280px tw-absolute tw-top-60px tw-left-0 tw-bg-card">
-      <div className="tw-w-full tw-h-16 tw-flex tw-items-center tw-justify-center tw-border-b tw-border-border">
+    <div className="tw-absolute tw-left-0 tw-top-60px tw-h-93p tw-w-280px tw-border-r tw-border-border tw-bg-card mx-md:tw-static mx-md:tw-flex mx-md:tw-h-auto mx-md:tw-w-full mx-md:tw-shrink-0 mx-md:tw-items-center mx-md:tw-border-b mx-md:tw-border-r-0">
+      <div className="tw-flex tw-h-16 tw-w-full tw-items-center tw-justify-center tw-border-b tw-border-border mx-md:tw-h-12 mx-md:tw-w-auto mx-md:tw-shrink-0 mx-md:tw-border-b-0 mx-md:tw-px-3">
         <AppButton
           onClick={() => {
             addNew(true);
@@ -86,7 +92,8 @@ const WhiteboardsSidebar: React.FC<IProps> = ({
       <Menu
         selectedKeys={[currentTab]}
         items={items}
-        mode="inline"
+        mode={narrow ? 'horizontal' : 'inline'}
+        className="mx-md:tw-min-w-0 mx-md:tw-flex-1"
         style={{ background: 'transparent', borderRight: 0 }}
         onClick={(key) => setCurrentTab(key.key)}
       ></Menu>
