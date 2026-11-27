@@ -158,11 +158,12 @@ export class WorkspacesService {
         // whether the account administers a workspace, so either it sees this workspace (and keeps
         // the account) or this sees its mark, and the workspace is undone (also when the mark
         // could not be read).
-        const undo = () =>
-          Promise.all([
-            workspaceRef.remove(),
-            removeUserWorkspaceId(uid, workspaceId),
-          ]);
+        // The workspace goes first: the deletion finds what the account administers through the
+        // account's list, so the list keeps the id while the workspace may still be there.
+        const undo = async () => {
+          await workspaceRef.remove();
+          await removeUserWorkspaceId(uid, workspaceId);
+        };
         let deleting = false;
         try {
           deleting = !!(await this.accountDeletions?.deletionStarted(uid));

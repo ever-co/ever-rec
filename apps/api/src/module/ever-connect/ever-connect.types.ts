@@ -190,19 +190,25 @@ export const PERSON_REQUEST_KEPT_MS = 90 * 24 * 3600 * 1000;
 /**
  * `ever_connect/account_deletions/<uid>/<run>`: one attempt to delete the account for Ever Platform,
  * from just before its last check of what holds the account (see `EverConnectPersonService`).
- * Removed when the account was kept; once it is deleted, `deletedAt` is set.
+ * Removed when the account was kept; once it is deleted, `deletedAt` is set. While Rec's account
+ * deletion runs, `aliveAt` is set again every {@link ACCOUNT_DELETION_MARK_BEAT_MS}.
  */
 export interface AccountDeletionMark {
   startedAt: number;
+  aliveAt?: number;
   deletedAt?: number;
 }
 
 /**
- * How long an account deletion's mark is kept: far longer than any request that may still be making
- * the account a workspace's admin. An attempt that never ended (the process stopped) then no longer
- * keeps the account from creating workspaces.
+ * How long an account deletion's mark is kept after its last sign of life (its start, a beat while
+ * the deletion runs, or its end): far longer than any request that may still be making the account
+ * a workspace's admin. A deletion still running keeps its mark however long it takes; an attempt
+ * that never ended (the process stopped) no longer keeps the account from creating workspaces.
  */
 export const ACCOUNT_DELETION_MARK_KEPT_MS = 24 * 3600 * 1000;
+
+/** How often a running account deletion renews its mark: well inside {@link ACCOUNT_DELETION_MARK_KEPT_MS}. */
+export const ACCOUNT_DELETION_MARK_BEAT_MS = 3600 * 1000;
 
 /** An answer this installation gives to a person's request (the contract's set, as Rec uses it). */
 export type PersonRequestResult = 'deleted' | 'no_account' | 'exported' | 'failed';

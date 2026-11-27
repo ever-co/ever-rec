@@ -19,6 +19,7 @@ import {
 import { EVER_ID_LINK_ROOTS } from '../../ever-id/services/ever-id-link.service';
 import { open, seal } from '../ever-connect.crypto';
 import {
+  ACCOUNT_DELETION_MARK_BEAT_MS,
   AccountDeletionMark,
   EVER_CONNECT_EVENTS,
   EVER_CONNECT_PATHS,
@@ -467,7 +468,9 @@ export class EverConnectPersonService implements EverConnectAccountDeletions {
    * the mark is removed only when the account is kept. A workspace created for the account at the
    * same time checks the mark once it wrote the workspace, and undoes it when the mark is there:
    * either this check sees the new workspace (the account is kept), or the creation sees the mark
-   * (the workspace is undone). The account never goes while it administers a workspace.
+   * (the workspace is undone). The account never goes while it administers a workspace. While Rec's
+   * deletion of the account runs, the mark is renewed, so the sweep never removes it under a deletion
+   * that is slow.
    */
   private async deleteAccounts(uids: string[]): Promise<Decided> {
     const deleter = this.accountDeleter;
@@ -498,12 +501,19 @@ export class EverConnectPersonService implements EverConnectAccountDeletions {
       }
       started = true;
       let deleted = false;
+      const beat = setInterval(() => {
+        const alive: Partial<AccountDeletionMark> = { aliveAt: this.clock() };
+        mark.update(alive).catch(() => undefined);
+      }, ACCOUNT_DELETION_MARK_BEAT_MS);
+      beat.unref?.();
       try {
         deleted = await deleter.delete(uid);
       } catch (error) {
         this.logger.warn(
           `A person's account could not be deleted (${errorCode(error)}).`,
         );
+      } finally {
+        clearInterval(beat);
       }
       // Not done: the mark stays while the deletion is still under way (run again later).
       if (!deleted) return { ...pendingDeletion(), incomplete: true };
@@ -525,9 +535,10 @@ export class EverConnectPersonService implements EverConnectAccountDeletions {
   /**
    * {@link EverConnectAccountDeletions}: whether a deletion of the account has started here and was
    * not called off to keep the account (see {@link deleteAccounts}). Read from the database, so a
-   * deletion run by another process of this installation counts too. A finished deletion counts
-   * until the sweep removes its mark, a day later: a request made by the deleted account before
-   * it went can then no longer make it a workspace's admin.
+   * deletion run by another process of this installation counts too. A running deletion counts
+   * however long it takes, and a finished one until the sweep removes its mark, a day later: a
+   * request made by the deleted account before it went can then no longer make it a workspace's
+   * admin.
    */
   async deletionStarted(uid: string): Promise<boolean> {
     if (!isDbKey(uid)) return false;

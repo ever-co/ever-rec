@@ -310,8 +310,9 @@ export class EverConnectStoreService {
   }
 
   /**
-   * Deletes the marks of account deletions started more than {@link ACCOUNT_DELETION_MARK_KEPT_MS}
-   * ago, done or not; answers how many.
+   * Deletes the marks of account deletions whose last sign of life (start, beat or end) is more
+   * than {@link ACCOUNT_DELETION_MARK_KEPT_MS} ago, done or not; answers how many. A deletion still
+   * running renews its mark, so it never loses it.
    */
   async sweepAccountDeletions(now: number): Promise<number> {
     const all =
@@ -324,7 +325,7 @@ export class EverConnectStoreService {
         // A mark without its start (never written by this module) goes too.
         if (
           typeof mark?.startedAt !== 'number' ||
-          mark.startedAt < now - ACCOUNT_DELETION_MARK_KEPT_MS
+          lastSignOfLife(mark) < now - ACCOUNT_DELETION_MARK_KEPT_MS
         ) {
           old.push(`${uid}/${run}`);
         }
@@ -345,4 +346,13 @@ export class EverConnectStoreService {
     if (!isDbKey(workspaceId)) return null;
     return this.read(`workspaces/${workspaceId}`);
   }
+}
+
+/** The latest of an account deletion mark's times (each one written by the deletion itself). */
+function lastSignOfLife(mark: AccountDeletionMark): number {
+  return Math.max(
+    ...[mark.startedAt, mark.aliveAt, mark.deletedAt].filter(
+      (time): time is number => typeof time === 'number',
+    ),
+  );
 }

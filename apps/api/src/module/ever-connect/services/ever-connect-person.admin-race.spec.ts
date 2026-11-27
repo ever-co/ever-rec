@@ -16,6 +16,7 @@ import { WorkspaceUtilitiesService } from '../../workspace/services/utilities.se
 import { WorkspacesService } from '../../workspace/services/workspace.service';
 import { readEverConnectConfig } from '../ever-connect.config';
 import {
+  ACCOUNT_DELETION_MARK_BEAT_MS,
   ACCOUNT_DELETION_MARK_KEPT_MS,
   EVER_CONNECT_PATHS,
 } from '../ever-connect.types';
@@ -58,6 +59,7 @@ function setup() {
       (await db.ref(`workspaces/${id}`).get()).val(),
   };
   const hooks: { beforeDelete?: () => Promise<void> } = {};
+  const time = { now: NOW };
   const deleter = {
     delete: jest.fn(async (uid: string) => {
       if (hooks.beforeDelete) await hooks.beforeDelete();
@@ -69,7 +71,7 @@ function setup() {
     store as any,
     client as any,
     { write: jest.fn(async () => undefined) } as any,
-    () => NOW,
+    () => time.now,
     {
       installSource: 'self-hosted',
       operatorUids: new Set(['uid-operator']),
@@ -134,6 +136,7 @@ function setup() {
     acks,
     deleter,
     hooks,
+    time,
     person,
     requestDeletion,
     createWorkspace,
@@ -266,6 +269,82 @@ describe('a deletion for Ever Platform while the account creates a workspace', (
     expect(t.deleter.delete).not.toHaveBeenCalled();
     expect(t.marks()).toBeNull();
     expect((await t.createWorkspace()).status).toBe(ResStatusEnum.success);
+  });
+
+  it('created while a slow deletion runs past a day: the mark is still there, the workspace is undone', async () => {
+    const t = setup();
+    // The deletion's beat, run by hand instead of on its hourly timer
+    const beats: Array<() => void> = [];
+    jest.spyOn(global, 'setInterval').mockImplementation(((
+      beat: () => void,
+      every: number,
+    ) => {
+      expect(every).toBe(ACCOUNT_DELETION_MARK_BEAT_MS);
+      beats.push(beat);
+      return { unref: () => undefined } as unknown as NodeJS.Timeout;
+    }) as typeof setInterval);
+    const store = new EverConnectStoreService(mockFirebase as any);
+    let created!: Awaited<ReturnType<typeof t.createWorkspace>>;
+    let swept = -1;
+    t.hooks.beforeDelete = async () => {
+      // Rec's account deletion still runs, five hours past a day after it started.
+      for (let hour = 1; hour <= 29; hour++) {
+        t.time.now = NOW + hour * ACCOUNT_DELETION_MARK_BEAT_MS;
+        beats.forEach((beat) => beat());
+        await new Promise((resolve) => setImmediate(resolve));
+      }
+      swept = await store.sweepAccountDeletions(t.time.now);
+      created = await t.createWorkspace();
+    };
+
+    await t.requestDeletion();
+
+    expect(beats).toHaveLength(1);
+    expect(swept).toBe(0);
+    expect(created.status).toBe(ResStatusEnum.error);
+    expect(t.administered()).toEqual([]);
+    expect(t.acks).toEqual([{ job_id: 'job-d1', result: 'deleted' }]);
+  });
+
+  it('an undo that cannot remove the workspace leaves it listed: the deletion sees it and keeps the account', async () => {
+    const t = setup();
+    const { set, remove } = FakeReference.prototype;
+    const path = (ref: FakeReference) =>
+      (ref as unknown as { parts: string[] }).parts.join('/');
+    jest
+      .spyOn(FakeReference.prototype, 'remove')
+      .mockImplementation(async function (this: FakeReference) {
+        if (path(this).startsWith('workspaces/')) {
+          throw new Error('database unavailable');
+        }
+        return remove.call(this);
+      });
+    let created: Promise<Awaited<ReturnType<typeof t.createWorkspace>>>;
+    jest
+      .spyOn(FakeReference.prototype, 'set')
+      .mockImplementation(async function (this: FakeReference, value: any) {
+        await set.call(this, value);
+        if (
+          !created &&
+          path(this).startsWith(`${EVER_CONNECT_PATHS.accountDeletions}/`)
+        ) {
+          created = t.createWorkspace();
+          await created;
+        }
+      });
+
+    await t.requestDeletion();
+
+    expect((await created).status).toBe(ResStatusEnum.error);
+    expect(t.administered()).toEqual(['Mine']);
+    expect(t.deleter.delete).not.toHaveBeenCalled();
+    expect(t.acks).toEqual([
+      {
+        job_id: 'job-d1',
+        result: 'failed',
+        detail: { reason_code: 'account_deletion_pending' },
+      },
+    ]);
   });
 
   it('marks a finished deletion until the sweep removes it, a day later', async () => {
