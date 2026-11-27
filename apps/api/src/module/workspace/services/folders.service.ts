@@ -348,6 +348,9 @@ export class WorkspaceFoldersService {
         }
       });
 
+      // A move that did not commit leaves its item where it was (its entry above is not the stored
+      // one, so nothing of the lists is answered). The moves that did commit stay: each is right on
+      // its own, and an item moved out of a folder that is gone is what the delete is for.
       if (moves.some((move) => move.ok === false)) {
         return sendError('Error while trying to delete workspace folder.');
       }

@@ -750,7 +750,8 @@ describe('overlapping writes to a workspace', () => {
   describe('deleting a folder moves its items to the top level only while they are still in it', () => {
     let files: WorkspaceFilesService;
 
-    // fold1 holds shot1 and vid1; fold3 is under fold2.
+    // fold1 is under a parent folder and holds shot1 and vid1, which the parent counts too; fold3
+    // is under fold2.
     beforeEach(async () => {
       files = new WorkspaceFilesService(
         utilities,
@@ -771,25 +772,42 @@ describe('overlapping writes to a workspace', () => {
         refName: 'clip.mp4',
         parentId: 'fold1',
       });
-      await mockFirebase.db.ref(`${WORKSPACE}/folders/fold1/items`).set(2);
+      await mockFirebase.db.ref(`${WORKSPACE}/folders/parent`).set({
+        id: 'parent',
+        name: 'Parent',
+        creator: 'uid-admin',
+        parentId: false,
+        nestLevel: 0,
+        items: 2,
+      });
+      await mockFirebase.db
+        .ref(`${WORKSPACE}/folders/fold1`)
+        .update({ parentId: 'parent', nestLevel: 1, items: 2 });
       await mockFirebase.db
         .ref(`${WORKSPACE}/folders/fold3`)
         .update({ parentId: 'fold2', nestLevel: 1 });
     });
 
     const deleteFold1 = () =>
-      foldersService.deleteFolder('uid-admin', 'ws1', 'fold1', false);
+      foldersService.deleteFolder('uid-admin', 'ws1', 'fold1', 'parent');
     const counts = () =>
       Object.fromEntries(folders().map((x) => [x.id, x.items]));
     // What each folder should count: the items stored in it and in the folders under it.
     const itemsUnder = () => {
       const all = folders();
+      const parentOf = new Map<string, string | false>(
+        all.map((x) => [x.id, x.parentId]),
+      );
       const items = [
         ...parseCollectionToArray<any>(stored('screenshots')),
         ...parseCollectionToArray<any>(stored('videos')),
       ].filter(Boolean);
       const isUnder = (id: string | false, ancestorId: string) => {
-        for (let at = id; at; at = all.find((x) => x.id === at)?.parentId) {
+        for (
+          let at: string | false | undefined = id;
+          at;
+          at = parentOf.get(at)
+        ) {
           if (at === ancestorId) {
             return true;
           }
@@ -851,6 +869,7 @@ describe('overlapping writes to a workspace', () => {
       expect(folder('fold1')).toBeUndefined();
       expect(stored('screenshots/shot1/parentId')).toBe(false);
       expect(stored('videos/vid1/parentId')).toBe(false);
+      expect(counts()).toEqual({ parent: 0, fold2: 0, fold3: 0 });
       expect(counts()).toEqual(itemsUnder());
     });
 
@@ -871,6 +890,8 @@ describe('overlapping writes to a workspace', () => {
         // Not an item that holds only a `parentId`.
         expect(stored(item)).toBeNull();
         expect(stored(`${other}/parentId`)).toBe(false);
+        // The delete took both items out of the parent; the item's own delete takes nothing more.
+        expect(counts()).toEqual({ parent: 0, fold2: 0, fold3: 0 });
         expect(counts()).toEqual(itemsUnder());
       },
     );
@@ -890,8 +911,8 @@ describe('overlapping writes to a workspace', () => {
         expect(folder('fold1')).toBeUndefined();
         expect(stored(`${item}/parentId`)).toBe('fold3');
         expect(stored(`${other}/parentId`)).toBe(false);
-        // fold3 and fold2 above it count the item, and hold it.
-        expect(counts()).toEqual({ fold2: 1, fold3: 1 });
+        // fold3 and fold2 above it count the item, and hold it; the parent holds neither item.
+        expect(counts()).toEqual({ parent: 0, fold2: 1, fold3: 1 });
         expect(counts()).toEqual(itemsUnder());
       },
     );
