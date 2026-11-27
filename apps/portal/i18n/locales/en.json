@@ -1143,6 +1143,7 @@
     "joinedWorkspaceSuccess": "Successfully joined the workspace. Redirecting to the new workspace..."
   },
   "shell": {
+    "loading": "Loading",
     "myLibrary": "My library",
     "workspaces": "Workspaces",
     "noOtherWorkspace": "No other workspace",

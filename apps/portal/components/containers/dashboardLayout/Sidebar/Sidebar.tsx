@@ -187,14 +187,16 @@ const Sidebar: FC<IProps> = ({
         )}
 
         {navItems.map((item) => {
-          const key = (item as any).id || item.route; // use unique key if available
           const isStarred = item.type === 'favFolders';
           const starredLabel = showStarredFolders
             ? t('shell.hideStarredFolders')
             : t('shell.showStarredFolders');
 
           return (
-            <div key={key} className={collapsed ? undefined : 'tw-w-full'}>
+            <div
+              key={item.route}
+              className={collapsed ? undefined : 'tw-w-full'}
+            >
               <SidebarMenuItem
                 href={item.route}
                 icon={item.icon}

@@ -46,7 +46,7 @@ const SCHeader: FC<ISCHeaderProps> = ({
   const clickedNotifications = useRef(false); // to be removed when implemented
   const clickedHelpCenter = useRef(false); // to be removed when implemented
   const router = useRouter();
-  const { setDrawerOpen } = useShell();
+  const { setDrawerOpen, drawerTriggerRef } = useShell();
 
   const goToWorkspace = () => {
     const { workspaceId } = router.query;
@@ -70,7 +70,7 @@ const SCHeader: FC<ISCHeaderProps> = ({
           className="-tw-ml-1 md:tw-hidden"
           aria-label={t('shell.openNavigation')}
           aria-haspopup="dialog"
-          data-shell-drawer-trigger=""
+          ref={drawerTriggerRef}
           onClick={() => setDrawerOpen(true)}
         >
           <MenuIcon />

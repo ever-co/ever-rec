@@ -26,7 +26,7 @@ const DashboardLayout: FC<IProps> = ({
   assistant,
 }) => {
   const { t } = useTranslation();
-  const { drawerOpen, setDrawerOpen } = useShell();
+  const { drawerOpen, setDrawerOpen, drawerTriggerRef } = useShell();
 
   return (
     <div className="tw-flex tw-h-[100dvh] tw-w-full tw-overflow-hidden tw-bg-sidebar tw-text-foreground">
@@ -49,11 +49,9 @@ const DashboardLayout: FC<IProps> = ({
             aria-describedby={undefined}
             onCloseAutoFocus={(event) => {
               // The button that opens the drawer lives in the page's top bar, not in this
-              // dialog, so hand focus back to it ourselves.
-              const opener = document.querySelector<HTMLElement>(
-                '[data-shell-drawer-trigger]',
-              );
-              if (opener) {
+              // dialog, so hand focus back to it ourselves. Without one, Radix decides.
+              const opener = drawerTriggerRef.current;
+              if (opener?.isConnected) {
                 event.preventDefault();
                 opener.focus();
               }

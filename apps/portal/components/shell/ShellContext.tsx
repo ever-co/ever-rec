@@ -6,7 +6,9 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
+  RefObject,
 } from 'react';
 import { useRouter } from 'next/router';
 
@@ -19,6 +21,8 @@ interface IShellState {
   /** Phone: the sidebar is a drawer; this is whether it is open. */
   drawerOpen: boolean;
   setDrawerOpen: (open: boolean) => void;
+  /** The top-bar button that opens the drawer: focus goes back to it when the drawer closes. */
+  drawerTriggerRef: RefObject<HTMLButtonElement>;
 }
 
 const ShellContext = createContext<IShellState>({
@@ -26,6 +30,7 @@ const ShellContext = createContext<IShellState>({
   toggleCollapsed: () => void 0,
   drawerOpen: false,
   setDrawerOpen: () => void 0,
+  drawerTriggerRef: { current: null },
 });
 
 /** Lives in `_app`, so the choice survives page changes (each page mounts its own layout). */
@@ -33,6 +38,7 @@ export const ShellProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const router = useRouter();
   const [collapsed, setCollapsed] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const drawerTriggerRef = useRef<HTMLButtonElement>(null);
 
   // Read after mount: the server cannot know the stored choice.
   useEffect(() => {
@@ -68,6 +74,7 @@ export const ShellProvider: FC<{ children: ReactNode }> = ({ children }) => {
       toggleCollapsed,
       drawerOpen,
       setDrawerOpen,
+      drawerTriggerRef,
     }),
     [collapsed, toggleCollapsed, drawerOpen],
   );

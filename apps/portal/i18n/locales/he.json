@@ -831,6 +831,7 @@
     "joinedWorkspaceSuccess": "הצטרפת לסביבת העבודה בהצלחה. מעביר אותך לסביבת העבודה החדשה..."
   },
   "shell": {
+    "loading": "טוען",
     "myLibrary": "הספרייה שלי",
     "workspaces": "סביבות עבודה",
     "noOtherWorkspace": "אין סביבת עבודה נוספת",

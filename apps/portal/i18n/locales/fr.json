@@ -831,6 +831,7 @@
     "joinedWorkspaceSuccess": "Vous avez rejoint l'espace de travail avec succès. Redirection vers le nouvel espace de travail..."
   },
   "shell": {
+    "loading": "Chargement",
     "myLibrary": "Ma bibliothèque",
     "workspaces": "Espaces de travail",
     "noOtherWorkspace": "Aucun autre espace de travail",

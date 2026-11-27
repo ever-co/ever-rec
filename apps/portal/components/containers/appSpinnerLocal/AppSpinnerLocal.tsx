@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import styles from './AppSpinnerLocal.module.scss';
 
 /**
@@ -5,7 +6,15 @@ import styles from './AppSpinnerLocal.module.scss';
  * `currentColor`, so it reads on any button in the light and the dark theme.
  */
 const AppSpinnerLocal = () => {
-  return <div className={styles.loadingSpinner} role="status"></div>;
+  const { t } = useTranslation();
+
+  return (
+    <div
+      className={styles.loadingSpinner}
+      role="status"
+      aria-label={t('shell.loading')}
+    ></div>
+  );
 };
 
 export default AppSpinnerLocal;

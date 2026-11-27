@@ -831,6 +831,7 @@
     "joinedWorkspaceSuccess": "Pomyślnie dołączono do obszaru roboczego. Przekierowywanie do nowego obszaru roboczego..."
   },
   "shell": {
+    "loading": "Ładowanie",
     "myLibrary": "Moja biblioteka",
     "workspaces": "Przestrzenie robocze",
     "noOtherWorkspace": "Brak innej przestrzeni roboczej",

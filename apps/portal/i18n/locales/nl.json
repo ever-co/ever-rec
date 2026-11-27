@@ -831,6 +831,7 @@
     "joinedWorkspaceSuccess": "U bent succesvol lid geworden van de werkruimte. U wordt doorgestuurd naar de nieuwe werkruimte..."
   },
   "shell": {
+    "loading": "Laden",
     "myLibrary": "Mijn bibliotheek",
     "workspaces": "Werkruimtes",
     "noOtherWorkspace": "Geen andere werkruimte",

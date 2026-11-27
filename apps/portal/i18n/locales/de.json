@@ -831,6 +831,7 @@
     "joinedWorkspaceSuccess": "Erfolgreich dem Arbeitsbereich beigetreten. Weiterleitung zum neuen Arbeitsbereich..."
   },
   "shell": {
+    "loading": "Wird geladen",
     "myLibrary": "Meine Bibliothek",
     "workspaces": "Arbeitsbereiche",
     "noOtherWorkspace": "Kein weiterer Arbeitsbereich",
