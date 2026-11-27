@@ -34,9 +34,10 @@ a {
   color: hsl(var(--brand-text));
   transition: color $t-fast;
 
+  // Hover and active only, as in antd's own reset: a focused link keeps the colour its component
+  // gave it.
   &:hover,
-  &:active,
-  &:focus {
+  &:active {
     color: hsl(var(--brand-text));
   }
 }
