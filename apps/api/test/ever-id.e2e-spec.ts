@@ -803,7 +803,8 @@ describe('Ever ID sign-in (e2e)', () => {
       await new Promise<void>((resolve) => gauzy.close(() => resolve()));
     });
 
-    async function linkedSignIn(subject: string) {
+    /** The session of a linked sign-in. */
+    async function linkedSession(subject: string) {
       // Create the account through the confirmation screen, then sign in again (the chain needs
       // the ID token of the request, which only a linked sign-in has).
       await signUp(subject);
@@ -811,9 +812,12 @@ describe('Ever ID sign-in (e2e)', () => {
       const landing = await authorize();
       const session = await exchange(landing.searchParams.get('code')!);
       expect(session.status).toBe(201);
-      return t.app
-        .get(MergeTokenPolicy)
-        .decode<any>(session.body.data.refreshToken);
+      return session.body.data;
+    }
+
+    async function linkedSignIn(subject: string) {
+      const session = await linkedSession(subject);
+      return t.app.get(MergeTokenPolicy).decode<any>(session.refreshToken);
     }
 
     it('adds the Gauzy session when Gauzy accepts the ID token', async () => {
@@ -857,12 +861,7 @@ describe('Ever ID sign-in (e2e)', () => {
         gauzyApiUrl: `http://127.0.0.1:${port}/api`,
       });
       const policy = t.app.get(MergeTokenPolicy);
-      await signUp('gauzy-connection');
-      issuer.nextClaims = { sub: 'gauzy-connection' };
-      const landing = await authorize();
-      const session = await exchange(landing.searchParams.get('code')!);
-      expect(session.status).toBe(201);
-      const signIn = session.body.data.refreshToken;
+      const signIn = (await linkedSession('gauzy-connection')).refreshToken;
       expect((await policy.decode<any>(signIn)).has(AuthProviderId.GAUZY)).toBe(
         true,
       );
@@ -914,8 +913,9 @@ describe('Ever ID sign-in (e2e)', () => {
       expect((await logout(token)).status).toBe(400);
     });
 
-    it('keeps a refreshed session revocable by the logout', async () => {
-      const session = await signUp('refreshing-person');
+    /** Signs `subject` up, refreshes twice, logs that Ever ID session out: every reference is refused. */
+    async function refreshThenLogout(subject: string) {
+      const session = await signUp(subject);
       const first = await refresh(session.refreshToken);
       expect(first.status).toBe(200);
       // A reference token again, never the bare Firebase refresh token.
@@ -923,7 +923,7 @@ describe('Ever ID sign-in (e2e)', () => {
       const second = await refresh(first.body.refreshToken);
       expect(second.status).toBe(200);
 
-      const token = await issuer.logoutToken({ sid: 'sid-refreshing-person' });
+      const token = await issuer.logoutToken({ sid: `sid-${subject}` });
       expect((await logout(token)).status).toBe(200);
       for (const reference of [
         session.refreshToken,
@@ -932,6 +932,10 @@ describe('Ever ID sign-in (e2e)', () => {
       ]) {
         expect((await refresh(reference)).status).toBeGreaterThanOrEqual(400);
       }
+    }
+
+    it('keeps a refreshed session revocable by the logout', async () => {
+      await refreshThenLogout('refreshing-person');
     });
 
     it('ends a refreshed session after its sign-in reference has expired', async () => {
@@ -1046,23 +1050,7 @@ describe('Ever ID sign-in (e2e)', () => {
           (await request(server()).get('/api/v1/auth/ever-id/config')).body,
         ).toEqual({ enabled: true, issuer: issuer.issuer, buttonLabel: 'Ever ID' });
 
-        const session = await signUp('connection-person');
-        const first = await refresh(session.refreshToken);
-        expect(first.status).toBe(200);
-        // A reference token again, never the bare Firebase refresh token.
-        expect(first.body.refreshToken).toMatch(/^eyJ/);
-        const second = await refresh(first.body.refreshToken);
-        expect(second.status).toBe(200);
-
-        const token = await issuer.logoutToken({ sid: 'sid-connection-person' });
-        expect((await logout(token)).status).toBe(200);
-        for (const reference of [
-          session.refreshToken,
-          first.body.refreshToken,
-          second.body.refreshToken,
-        ]) {
-          expect((await refresh(reference)).status).toBeGreaterThanOrEqual(400);
-        }
+        await refreshThenLogout('connection-person');
       });
     });
   });
