@@ -391,7 +391,7 @@ const WhiteboardEditor: React.FC = () => {
         {' '}
         <OutsideClickHandler onOutsideClick={outsideClickHandler}>
           {openVideoPanel ? (
-            <div className="tw-flex tw-items-center tw-rounded-lg tw-bg-card tw-p-1 tw-ring-1 tw-ring-border tw-shadow-[shadow:var(--shadow-float)]">
+            <div className="tw-flex tw-items-center tw-rounded-lg tw-bg-card tw-p-1 tw-ring-1 tw-ring-border tw-shadow-float">
               <ToolButton
                 active={active_tool === tools.record ? true : false}
                 onSelect={() => {
