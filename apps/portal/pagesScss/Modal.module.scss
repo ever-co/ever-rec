@@ -16,6 +16,8 @@
 
   .inputFieldCombined {
     display: flex;
+    // The eye button sits in the middle of the field's height.
+    align-items: center;
 
     div {
       width: 100%;
