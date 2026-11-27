@@ -7,6 +7,8 @@ const config = {
     './components/**/*.{js,ts,jsx,tsx,mdx}',
     './app/**/*.{js,ts,jsx,tsx,mdx}',
     './misc/**/*.{js,ts,jsx,tsx,mdx}',
+    // Some hooks return markup (comments, item titles): their classes must be generated too.
+    './hooks/**/*.{js,ts,jsx,tsx,mdx}',
   ],
   // next-themes sets `class="dark"` (CSS variables) and `data-theme="dark"` on <html>.
   // The variant uses the attribute: with `prefix`, a class selector would become `.tw-dark`.

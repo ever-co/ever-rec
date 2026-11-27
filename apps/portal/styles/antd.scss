@@ -532,6 +532,30 @@ a {
     width: 5px;
   }
 
+  // A field with an error: the danger ink, not antd's own red.
+  .ant-input-status-error:not(.ant-input-disabled):not(
+      .ant-input-borderless
+    ).ant-input,
+  .ant-input-status-error:not(.ant-input-disabled):not(
+      .ant-input-borderless
+    ).ant-input:hover,
+  .ant-input-affix-wrapper-status-error:not(
+      .ant-input-affix-wrapper-disabled
+    ):not(.ant-input-affix-wrapper-borderless).ant-input-affix-wrapper {
+    border-color: hsl(var(--destructive-text));
+    background: transparent;
+  }
+
+  .ant-input-status-error:not(.ant-input-disabled):not(
+      .ant-input-borderless
+    ).ant-input:focus,
+  .ant-input-affix-wrapper-status-error:not(
+      .ant-input-affix-wrapper-disabled
+    ):not(.ant-input-affix-wrapper-borderless).ant-input-affix-wrapper-focused {
+    border-color: hsl(var(--destructive-text));
+    box-shadow: 0 0 0 3px hsl(var(--destructive-text) / 0.2);
+  }
+
   .ant-input[disabled],
   .ant-input-affix-wrapper-disabled,
   .ant-input-number-disabled {
