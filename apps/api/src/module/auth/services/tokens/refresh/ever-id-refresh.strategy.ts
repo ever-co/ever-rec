@@ -4,9 +4,7 @@ import {
   Logger,
   UnauthorizedException,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { isEverIdConfigured } from '../../../../ever-id/ever-id.config';
 import { FirebaseAdminService } from '../../../../firebase/services/firebase-admin.service';
 import { FirebaseRestService } from '../../../../firebase/services/firebase-rest.service';
 import { GAUZY_AVAILABLE, GauzyAuthService } from '../../../../gauzy';
@@ -17,11 +15,13 @@ import {
   TokenContainer,
 } from '../../../interfaces/auth.interface';
 import { RefreshResponse } from '../interfaces/token.interface';
-import { MergeTokenPolicy } from '../policies/merge-token.policy';
 import { TokenStorageService } from '../token-storage.service';
 import { UserFactory } from '../user.factory';
 
 type ProviderMap = AuthContextResult<TokenContainer<unknown>>;
+type ProviderEntries = Array<
+  [AuthProviderId, AuthStateResult<TokenContainer<unknown>>]
+>;
 
 /**
  * Refreshes sessions opened by an Ever ID sign-in.
@@ -33,17 +33,15 @@ type ProviderMap = AuthContextResult<TokenContainer<unknown>>;
  * the same storage entry, and the answer is a fresh reference to that entry. The token format is
  * the one `MergeTokenPolicy` produces.
  *
- * Only reference tokens whose provider map holds an `EVER_ID` entry take this path, and only while
- * Ever ID sign-in is configured; every other token goes through the existing chain unchanged.
+ * Every reference token whose stored provider map holds an `EVER_ID` entry takes this path, wherever
+ * the Ever ID client came from (the environment or the Ever Platform connection) and even after the
+ * provider was switched off; every other token goes through the existing chain unchanged.
  */
 @Injectable()
 export class EverIdRefreshStrategy {
   private readonly logger = new Logger(EverIdRefreshStrategy.name);
-  private readonly enabled: boolean;
 
   constructor(
-    configService: ConfigService,
-    private readonly mergeTokenPolicy: MergeTokenPolicy,
     private readonly jwtService: JwtService,
     private readonly tokenStorageService: TokenStorageService,
     private readonly firebaseRest: FirebaseRestService,
@@ -52,25 +50,49 @@ export class EverIdRefreshStrategy {
     private readonly gauzyAuthService: GauzyAuthService,
     @Inject(GAUZY_AVAILABLE)
     private readonly isGauzyAvailable: boolean,
-  ) {
-    this.enabled = isEverIdConfigured({
-      EVER_ID_ISSUER_URL: configService.get<string>('EVER_ID_ISSUER_URL'),
-      EVER_ID_ISSUER: configService.get<string>('EVER_ID_ISSUER'),
-    });
-  }
+  ) {}
 
-  /** The provider map of a reference token opened by an Ever ID sign-in, else `null`. Never throws. */
+  /**
+   * The provider map of a reference token opened by an Ever ID sign-in, else `null`.
+   *
+   * Decided from the stored provider map of the session, never from the configuration: the
+   * environment names no issuer when the Ever ID client comes from the Ever Platform connection
+   * (ever-co/ever-rec#257), and such a session must end with a back-channel logout all the same.
+   *
+   * `null` only when the token cannot belong to an Ever ID session: it is not a reference this API
+   * signed (a bare Firebase refresh token, an expired reference), its entry was removed (a logout),
+   * or its provider map has no `EVER_ID` entry. The general chain refuses the first two as well. A
+   * failed storage read is thrown instead: the general chain would renew an Ever ID session as a
+   * token that a back-channel logout no longer reaches.
+   */
   async match(token: string): Promise<ProviderMap | null> {
-    if (!this.enabled) {
+    const id = await this.verified<{ id?: unknown }>(token).then(
+      (payload) => payload?.id,
+    );
+    if (typeof id !== 'string' || !id) {
       return null;
     }
+    const stored = await this.tokenStorageService.findById(id);
+    if (!stored) {
+      return null;
+    }
+    const entries = await this.verified<{ entries?: ProviderEntries }>(
+      stored.token,
+    ).then((payload) => payload?.entries);
+    if (!Array.isArray(entries)) {
+      return null;
+    }
+    const providers: ProviderMap = new Map(entries);
+    return providers.has(AuthProviderId.EVER_ID) &&
+      providers.has(AuthProviderId.FIREBASE)
+      ? providers
+      : null;
+  }
+
+  /** The payload of a token this API signed and that has not expired, else `null`. */
+  private async verified<T extends object>(token: string): Promise<T | null> {
     try {
-      const providers =
-        await this.mergeTokenPolicy.decode<TokenContainer<unknown>>(token);
-      return providers.has(AuthProviderId.EVER_ID) &&
-        providers.has(AuthProviderId.FIREBASE)
-        ? providers
-        : null;
+      return await this.jwtService.verifyAsync<T>(token);
     } catch {
       return null;
     }
