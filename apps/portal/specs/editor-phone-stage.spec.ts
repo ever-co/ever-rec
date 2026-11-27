@@ -205,6 +205,47 @@ describe('attachPinchZoom', () => {
   });
 });
 
+describe('attachPinchZoom with a text box over the stage', () => {
+  it('leaves a finger on the text box to the browser, out of the stage', () => {
+    const container = document.createElement('div');
+    const content = document.createElement('div');
+    const textarea = document.createElement('textarea');
+    content.appendChild(textarea);
+    container.appendChild(content);
+    document.body.appendChild(container);
+    const state = createPhoneTouchState();
+    const detach = attachPinchZoom(container, state, () => 100, jest.fn());
+    // Konva listens on its content element.
+    const reachedStage = jest.fn();
+    ['touchstart', 'touchmove', 'touchend'].forEach((type) =>
+      content.addEventListener(type, reachedStage),
+    );
+
+    const touch = (type: string, count: number) => {
+      const event = new Event(type, { bubbles: true, cancelable: true });
+      Object.defineProperty(event, 'touches', {
+        value: Array.from({ length: count }, () => ({
+          clientX: 5,
+          clientY: 5,
+        })),
+      });
+      textarea.dispatchEvent(event);
+      return event;
+    };
+    const start = touch('touchstart', 1);
+    touch('touchmove', 1);
+    touch('touchend', 0);
+
+    expect(reachedStage).not.toHaveBeenCalled();
+    // Not prevented: the browser places the caret.
+    expect(start.defaultPrevented).toBe(false);
+    expect(state.gesture).toBe(false);
+
+    detach();
+    container.remove();
+  });
+});
+
 describe('phoneFitScale', () => {
   const box = (width: number, padding: number) => {
     const el = document.createElement('div');

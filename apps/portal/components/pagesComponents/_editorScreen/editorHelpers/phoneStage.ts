@@ -119,6 +119,8 @@ const clampZoom = (value: number) =>
 // Two fingers on the scrolling area around the stage: pinch to zoom (the same 25 to 200% as the
 // zoom control), move to pan. Listens in the capture phase so the stage never sees the fingers of
 // a pinch; the lift that ends it still reaches the stage when a tool was pressed before it began.
+// One finger on a text box over the stage (the text tool's) is left to the browser, to place the
+// caret: Konva would take it as a press on the stage, and the box would close.
 export const attachPinchZoom = (
   container: HTMLElement,
   state: IPhoneTouchState,
@@ -132,6 +134,10 @@ export const attachPinchZoom = (
     fx: number;
     fy: number;
   } | null = null;
+  let inField = false;
+
+  const isField = (target: EventTarget | null) =>
+    target instanceof Element && !!target.closest('textarea, input');
 
   const centre = (touches: TouchList) => {
     const box = container.getBoundingClientRect();
@@ -160,7 +166,13 @@ export const attachPinchZoom = (
   };
 
   const onStart = (e: TouchEvent) => {
+    if (e.touches.length === 1 && isField(e.target)) inField = true;
+    if (inField && e.touches.length === 1) {
+      e.stopPropagation();
+      return;
+    }
     if (e.touches.length >= 2) {
+      inField = false;
       state.gesture = true;
       state.pending = null;
       begin(e.touches);
@@ -172,6 +184,10 @@ export const attachPinchZoom = (
   };
 
   const onMove = (e: TouchEvent) => {
+    if (inField) {
+      e.stopPropagation();
+      return;
+    }
     if (!state.gesture) return;
     if (e.cancelable) e.preventDefault();
     e.stopPropagation();
@@ -188,6 +204,11 @@ export const attachPinchZoom = (
   };
 
   const onEnd = (e: TouchEvent) => {
+    if (inField) {
+      if (e.touches.length === 0) inField = false;
+      e.stopPropagation();
+      return;
+    }
     if (!state.gesture) return;
     if (e.touches.length >= 2) {
       begin(e.touches);
