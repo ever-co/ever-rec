@@ -250,6 +250,13 @@ pre {
   opacity: 1;
 }
 
+// The app shell fills the window. `dvh` follows a phone's address bar as it shows and hides; a
+// browser that does not know the unit keeps the first line.
+.shell-viewport {
+  height: 100vh;
+  height: 100dvh;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;

@@ -36,7 +36,7 @@ const DashboardLayout: FC<IProps> = ({
   const keepFocusWhereItIs = useRef(false);
 
   return (
-    <div className="tw-flex tw-h-[100dvh] tw-w-full tw-overflow-hidden tw-bg-sidebar tw-text-foreground">
+    <div className="shell-viewport tw-flex tw-w-full tw-overflow-hidden tw-bg-sidebar tw-text-foreground">
       {/* Desktop sidebar */}
       <div className="tw-hidden tw-h-full tw-shrink-0 md:tw-block">
         <Sidebar
