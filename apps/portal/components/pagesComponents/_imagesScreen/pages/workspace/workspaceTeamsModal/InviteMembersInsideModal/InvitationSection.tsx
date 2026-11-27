@@ -120,7 +120,7 @@ const EmailLabel: FC<IEmailLabelProps> = ({ email, onRemoveEmail }) => {
       {email}
 
       <div
-        className="tw-ml-1 tw-flex tw-size-4 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded tw-text-muted-foreground tw-transition-colors tw-duration-150 hover:tw-bg-foreground/10 hover:tw-text-foreground"
+        className="tw-ms-1 tw-flex tw-size-4 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded tw-text-muted-foreground tw-transition-colors tw-duration-150 hover:tw-bg-foreground/10 hover:tw-text-foreground"
         onClick={onRemoveEmail}
       >
         <X className="tw-size-3" aria-hidden="true" />

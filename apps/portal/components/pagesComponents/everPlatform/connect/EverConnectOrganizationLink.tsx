@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Button, Input, Modal } from 'antd';
 import { useTranslation } from 'react-i18next';
+import { useDirection } from 'i18n/direction';
 import {
   getWorkspaceLink,
   IEverConnectLinkView,
@@ -26,6 +27,8 @@ const EverConnectOrganizationLink: React.FC<{ workspaceId: string }> = ({
   workspaceId,
 }) => {
   const { t } = useTranslation();
+  // antd's Modal.confirm renders outside ConfigProvider: it takes the direction itself.
+  const direction = useDirection();
   const errorMessage = useErrorMessage();
   const [view, setView] = useState<IEverConnectLinkView | null>(null);
   const [code, setCode] = useState('');
@@ -153,6 +156,7 @@ const EverConnectOrganizationLink: React.FC<{ workspaceId: string }> = ({
               disabled={busy}
               onClick={() =>
                 Modal.confirm({
+                  direction,
                   title: t('page.everPlatform.connect.link.unlinkTitle'),
                   content: t('page.everPlatform.connect.link.unlinkConfirm'),
                   okText: t('page.everPlatform.connect.link.unlink'),

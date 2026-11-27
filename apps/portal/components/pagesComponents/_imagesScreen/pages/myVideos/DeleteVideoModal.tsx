@@ -40,7 +40,7 @@ const DeleteVideoModal: React.FC<IDeleteVideoModalProps> = ({
         </div>
       }
     >
-      <h2 className="tw-pr-6 tw-text-base tw-font-semibold tw-text-foreground">
+      <h2 className="tw-pe-6 tw-text-base tw-font-semibold tw-text-foreground">
         {t('modals.deleteVideoInfo')}{' '}
       </h2>
     </Modal>

@@ -18,6 +18,7 @@ import {
   DropdownMenuTrigger,
 } from 'components/ui/dropdown-menu';
 import { initialsOf } from 'components/ui/avatar';
+import { inlineEndSide, useDirection } from 'i18n/direction';
 
 const PRODUCT_NAME = 'Ever Rec';
 
@@ -61,6 +62,7 @@ const WorkspaceSwitcher: FC<IWorkspaceSwitcherProps> = ({
   onAddWorkspace,
 }) => {
   const { t } = useTranslation();
+  const outward = inlineEndSide(useDirection());
   const router = useRouter();
   const dispatch = useDispatch();
   const user: IUser | null = useSelector(
@@ -103,7 +105,7 @@ const WorkspaceSwitcher: FC<IWorkspaceSwitcherProps> = ({
           aria-label={`${t('shell.switchWorkspace')}: ${currentName}`}
           title={collapsed ? currentName : undefined}
           className={cn(
-            'tw-flex tw-min-w-0 tw-items-center tw-gap-2 tw-rounded-lg tw-bg-transparent tw-text-left tw-outline-none tw-transition-colors tw-duration-150 hover:tw-bg-sidebar-accent focus-visible:tw-ring-2 focus-visible:tw-ring-ring data-[state=open]:tw-bg-sidebar-accent',
+            'tw-flex tw-min-w-0 tw-items-center tw-gap-2 tw-rounded-lg tw-bg-transparent tw-text-start tw-outline-none tw-transition-colors tw-duration-150 hover:tw-bg-sidebar-accent focus-visible:tw-ring-2 focus-visible:tw-ring-ring data-[state=open]:tw-bg-sidebar-accent',
             collapsed
               ? 'tw-size-10 tw-justify-center'
               : 'tw-h-12 tw-flex-1 tw-px-1.5',
@@ -116,7 +118,12 @@ const WorkspaceSwitcher: FC<IWorkspaceSwitcherProps> = ({
           {!collapsed && (
             <>
               <span className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col">
-                <span className="tw-truncate tw-text-sm tw-font-semibold tw-leading-5 tw-text-foreground">
+                {/* A name reads in its own direction (an English one is cut at its end) but lines
+                    up with the page. */}
+                <span
+                  dir="auto"
+                  className="tw-truncate tw-text-sm tw-font-semibold tw-leading-5 tw-text-foreground [text-align:match-parent]"
+                >
                   {currentName}
                 </span>
                 <span className="tw-truncate tw-text-xs tw-leading-4 tw-text-muted-foreground">
@@ -134,7 +141,7 @@ const WorkspaceSwitcher: FC<IWorkspaceSwitcherProps> = ({
 
       <DropdownMenuContent
         align="start"
-        side={collapsed ? 'right' : 'bottom'}
+        side={collapsed ? outward : 'bottom'}
         className="tw-w-64"
       >
         <DropdownMenuItem onSelect={openLibrary}>

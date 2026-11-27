@@ -77,7 +77,7 @@ const UploadToCloudModal: React.FC<IUploadToCloudModalProps> = ({
       }
       footer={
         <div className="tw-flex tw-justify-end tw-mt-4">
-          <AppButton onClick={onClose} outlined className="tw-mr-2">
+          <AppButton onClick={onClose} outlined className="tw-me-2">
             {t('common.cancel')}
           </AppButton>
           <AppButton onClick={onOkHandler} disabled={!valid}>
@@ -90,13 +90,13 @@ const UploadToCloudModal: React.FC<IUploadToCloudModalProps> = ({
         {!type && (
           <MdOutlineAddToDrive
             size={20}
-            className="tw-mr-2 tw-shrink-0 tw-text-muted-foreground"
+            className="tw-me-2 tw-shrink-0 tw-text-muted-foreground"
           />
         )}
         {type == 'dropbox' && (
           <AiOutlineDropbox
             size={20}
-            className="tw-mr-2 tw-shrink-0 tw-text-muted-foreground"
+            className="tw-me-2 tw-shrink-0 tw-text-muted-foreground"
           />
         )}
         <h2 className="tw-text-base tw-font-semibold tw-text-foreground">

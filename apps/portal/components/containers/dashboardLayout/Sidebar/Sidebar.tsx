@@ -17,6 +17,7 @@ import StarredFolders from 'components/shell/StarredFolders';
 import UserBlock from 'components/shell/UserBlock';
 import { useShell } from 'components/shell/ShellContext';
 import { Hint } from 'components/ui/tooltip';
+import { inlineEndSide, useDirection } from 'i18n/direction';
 
 interface IProps {
   isProfilePage?: boolean;
@@ -44,6 +45,7 @@ const Sidebar: FC<IProps> = ({
   const router = useRouter();
   const dispatch = useDispatch();
   const shell = useShell();
+  const outward = inlineEndSide(useDirection());
   const collapsed = inDrawer ? false : shell.collapsed;
   const { mainMenuItems, getWorkspaceSettingsMenuItems, settingsMenuItems } =
     useMenuItems();
@@ -119,7 +121,7 @@ const Sidebar: FC<IProps> = ({
       <X className="tw-size-4" aria-hidden="true" />
     </button>
   ) : (
-    <Hint label={collapseLabel} side={collapsed ? 'right' : 'bottom'}>
+    <Hint label={collapseLabel} side={collapsed ? outward : 'bottom'}>
       <button
         type="button"
         aria-label={collapseLabel}
@@ -212,7 +214,7 @@ const Sidebar: FC<IProps> = ({
                       aria-label={starredLabel}
                       aria-expanded={showStarredFolders}
                       onClick={() => setShowStarredFolders((open) => !open)}
-                      className="tw-mr-1.5 tw-flex tw-size-6 tw-shrink-0 tw-items-center tw-justify-center tw-rounded tw-bg-transparent tw-text-muted-foreground tw-outline-none hover:tw-text-foreground focus-visible:tw-ring-2 focus-visible:tw-ring-ring"
+                      className="tw-me-1.5 tw-flex tw-size-6 tw-shrink-0 tw-items-center tw-justify-center tw-rounded tw-bg-transparent tw-text-muted-foreground tw-outline-none hover:tw-text-foreground focus-visible:tw-ring-2 focus-visible:tw-ring-ring"
                     >
                       <ChevronDown
                         className={cn(

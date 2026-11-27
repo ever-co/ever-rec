@@ -242,12 +242,16 @@ const WorkspaceTeams: FC = () => {
         <DashboardCard className={styles.dashboardCard}>
           <div className={classNames(styles.mainHeader, styles.teamHeader)}>
             <div className={styles.teamHeading}>
-              <DrawerButton className="-tw-ml-1" />
+              <DrawerButton className="-tw-ms-1" />
               <Link
                 href={`${preRoutes.media}${panelRoutes.manageWorkspaces}`}
                 passHref
               >
-                <ArrowLeft strokeWidth={1.75} aria-hidden="true" />
+                <ArrowLeft
+                  strokeWidth={1.75}
+                  className="rtl:-tw-scale-x-100"
+                  aria-hidden="true"
+                />
               </Link>
               {activeWorkspace?.name} - {t('workspace.teamsOverview')}
             </div>

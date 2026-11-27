@@ -110,7 +110,7 @@ const FeatCard: React.FC<IFeatureCard> = ({
         <div className="tw-flex tw-flex-col">
           <div className="tw-flex tw-items-start tw-text-foreground">
             <AppSvg className="tw-shrink-0" path={imgPath} size="30" />
-            <div className="tw-ml-3 tw-flex tw-flex-col">
+            <div className="tw-ms-3 tw-flex tw-flex-col">
               <h4 className="tw-m-0 tw-text-base tw-font-semibold tw-text-foreground">
                 {title}
               </h4>

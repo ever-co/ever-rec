@@ -164,7 +164,7 @@ tw-items-center tw-justify-center tw-h-600px"
                       {!editTitle && (
                         <BsPencil
                           size={16}
-                          className="tw-ml-3 tw-cursor-pointer tw-shrink-0 tw-text-muted-foreground tw-transition-colors tw-duration-150 hover:tw-text-foreground"
+                          className="tw-ms-3 tw-cursor-pointer tw-shrink-0 tw-text-muted-foreground tw-transition-colors tw-duration-150 hover:tw-text-foreground"
                           onClick={() => setTitleFocus()}
                         />
                       )}
@@ -178,7 +178,7 @@ tw-items-center tw-justify-center tw-h-600px"
                       fullNameClasses="tw-text-sm tw-font-medium tw-truncate"
                       emailClasses="tw-text-xs"
                     />
-                    <div className="tw-ml-auto tw-flex tw-flex-col default:tw-justify-center mx-lg:tw-mt-25px mx-sm:tw-w-full mx-sm:tw-flex mx-sm:tw-items-end ">
+                    <div className="tw-ms-auto tw-flex tw-flex-col default:tw-justify-center mx-lg:tw-mt-25px mx-sm:tw-w-full mx-sm:tw-flex mx-sm:tw-items-end ">
                       <div className="tw-flex tw-flex-col tw-items-end">
                         <div className="tw-flex tw-justify-end">
                           <div
@@ -187,16 +187,16 @@ tw-items-center tw-justify-center tw-h-600px"
                           >
                             <IoLinkOutline
                               size={16}
-                              className="tw-shrink-0 tw-mr-2"
+                              className="tw-shrink-0 tw-me-2"
                             />
                             <div className="tw-text-[13px]">Source URL</div>
                           </div>
                         </div>
                         <div className="tw-flex tw-flex-wrap tw-justify-end tw-mt-2 tw-items-center tw-text-[13px] tw-text-muted-foreground">
-                          <div className="tw-mr-2 tw-whitespace-nowrap">{`${
+                          <div className="tw-me-2 tw-whitespace-nowrap">{`${
                             image.dbData?.likes?.length || 'No'
                           } likes`}</div>
-                          <div className="tw-mr-2">&bull;</div>
+                          <div className="tw-me-2">&bull;</div>
                           <UniqueViews
                             item={image}
                             user={user}
@@ -204,7 +204,7 @@ tw-items-center tw-justify-center tw-h-600px"
                             itemType="image"
                             hasBorderStyle={false}
                           />
-                          <div className="tw-mr-2">&bull;</div>
+                          <div className="tw-me-2">&bull;</div>
                           <div className="tw-flex tw-justify-end tw-whitespace-nowrap">
                             {created}
                           </div>

@@ -102,7 +102,7 @@ const FoldersSidebarExplorer: React.FC = () => {
             <HorizontalDivider className="tw-my-5 tw-opacity-50" />
             <div>
               <div className="tw-flex tw-justify-between tw-items-center">
-                <h3 className="tw-text-sm tw-font-semibold tw-pl-3">
+                <h3 className="tw-text-sm tw-font-semibold tw-ps-3">
                   {t('unique.imageFolders')}
                 </h3>
                 <button
@@ -144,7 +144,7 @@ const FoldersSidebarExplorer: React.FC = () => {
             <HorizontalDivider className="tw-my-5 tw-opacity-50" />
             <div>
               <div className="tw-flex tw-justify-between tw-items-center">
-                <h3 className="tw-text-sm tw-font-semibold tw-pl-3">
+                <h3 className="tw-text-sm tw-font-semibold tw-ps-3">
                   {t('unique.videoFolders')}
                 </h3>
                 <button

@@ -8,7 +8,7 @@
   font-size: 16px;
   font-weight: 600;
   line-height: 24px;
-  text-align: left;
+  text-align: start;
   margin-bottom: 4px;
   @include truncate;
 }
@@ -17,7 +17,7 @@
   font-size: 14px;
   font-weight: 400;
   line-height: 20px;
-  text-align: left;
+  text-align: start;
   color: hsl(var(--muted-foreground));
   margin-bottom: 0;
 }
@@ -55,5 +55,5 @@
 // The one action of the dialog, at the right of the footer.
 .appButton {
   margin-top: 1.5rem;
-  margin-left: auto;
+  margin-inline-start: auto;
 }

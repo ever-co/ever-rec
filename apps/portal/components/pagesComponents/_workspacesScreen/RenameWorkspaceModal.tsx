@@ -50,7 +50,7 @@ const RenameWorkspaceModal: React.FC<IProps> = ({
         </div>
       }
     >
-      <h2 className="tw-m-0 tw-mb-2 tw-pr-6 tw-text-base tw-font-semibold tw-text-foreground">
+      <h2 className="tw-m-0 tw-mb-2 tw-pe-6 tw-text-base tw-font-semibold tw-text-foreground">
         {t('workspace.renameWorkspace')}
       </h2>
       <p className="tw-m-0 tw-text-sm tw-text-muted-foreground">

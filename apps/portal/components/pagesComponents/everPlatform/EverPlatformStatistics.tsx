@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Button, Modal, Switch } from 'antd';
 import { useTranslation } from 'react-i18next';
+import { useDirection } from 'i18n/direction';
 import {
   EVER_STATS_DOCS_URL,
   getHealth,
@@ -45,6 +46,8 @@ const pretty = (text: string) => {
  */
 const EverPlatformStatistics: React.FC = () => {
   const { t } = useTranslation();
+  // antd's Modal.confirm renders outside ConfigProvider: it takes the direction itself.
+  const direction = useDirection();
   const [load, setLoad] = useState<Load>('loading');
   const [status, setStatus] = useState<IEverStatsStatus | null>(null);
   const [whatIsSent, setWhatIsSent] = useState<IEverStatsPreview | null>(null);
@@ -228,6 +231,7 @@ const EverPlatformStatistics: React.FC = () => {
           disabled={busy}
           onClick={() =>
             Modal.confirm({
+              direction,
               title: t('page.everPlatform.statistics.resetTitle'),
               content: t('page.everPlatform.statistics.resetConfirm'),
               okText: t('page.everPlatform.statistics.reset'),

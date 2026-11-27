@@ -2,8 +2,16 @@ import * as React from 'react';
 import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
 import { Check, ChevronRight } from 'lucide-react';
 import { cn } from 'app/utilities/cn';
+import { useDirection } from 'i18n/direction';
 
-const DropdownMenu = DropdownMenuPrimitive.Root;
+/** The menu root, in the page's direction: sub-menus open towards the line end, arrow keys follow. */
+const DropdownMenu = ({
+  dir,
+  ...props
+}: React.ComponentProps<typeof DropdownMenuPrimitive.Root>) => {
+  const direction = useDirection();
+  return <DropdownMenuPrimitive.Root dir={dir ?? direction} {...props} />;
+};
 const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger;
 const DropdownMenuGroup = DropdownMenuPrimitive.Group;
 const DropdownMenuPortal = DropdownMenuPrimitive.Portal;
@@ -27,13 +35,13 @@ const DropdownMenuSubTrigger = React.forwardRef<
     className={cn(
       itemClasses,
       'data-[state=open]:tw-bg-accent',
-      inset && 'tw-pl-8',
+      inset && 'tw-ps-8',
       className,
     )}
     {...props}
   >
     {children}
-    <ChevronRight className="tw-ml-auto rtl:tw-rotate-180" />
+    <ChevronRight className="tw-ms-auto rtl:tw-rotate-180" />
   </DropdownMenuPrimitive.SubTrigger>
 ));
 DropdownMenuSubTrigger.displayName = 'DropdownMenuSubTrigger';
@@ -76,7 +84,7 @@ const DropdownMenuItem = React.forwardRef<
     ref={ref}
     className={cn(
       itemClasses,
-      inset && 'tw-pl-8',
+      inset && 'tw-ps-8',
       variant === 'destructive' &&
         'tw-text-destructive focus:tw-bg-destructive/10 focus:tw-text-destructive [&_svg]:tw-text-destructive',
       className,
@@ -92,11 +100,11 @@ const DropdownMenuRadioItem = React.forwardRef<
 >(({ className, children, ...props }, ref) => (
   <DropdownMenuPrimitive.RadioItem
     ref={ref}
-    className={cn(itemClasses, 'tw-pr-8', className)}
+    className={cn(itemClasses, 'tw-pe-8', className)}
     {...props}
   >
     {children}
-    <span className="tw-absolute tw-right-2 tw-flex tw-size-4 tw-items-center tw-justify-center">
+    <span className="tw-absolute tw-end-2 tw-flex tw-size-4 tw-items-center tw-justify-center">
       <DropdownMenuPrimitive.ItemIndicator>
         <Check className="!tw-text-foreground" />
       </DropdownMenuPrimitive.ItemIndicator>
@@ -115,7 +123,7 @@ const DropdownMenuLabel = React.forwardRef<
     ref={ref}
     className={cn(
       'tw-px-2 tw-py-1.5 tw-text-xs tw-font-normal tw-text-muted-foreground',
-      inset && 'tw-pl-8',
+      inset && 'tw-ps-8',
       className,
     )}
     {...props}

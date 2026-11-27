@@ -32,7 +32,11 @@ const ProfileDetail: FC<IProps> = ({
         {value && <span style={{ color: valueColor }}>{value}</span>}
 
         <div className={styles.profileDetailRightArrow}>
-          <AppSvg path="/settings/profile/right-arrow.svg" size="20px" />
+          <AppSvg
+            path="/settings/profile/right-arrow.svg"
+            size="20px"
+            className="rtl:-tw-scale-x-100"
+          />
         </div>
       </div>
     </div>

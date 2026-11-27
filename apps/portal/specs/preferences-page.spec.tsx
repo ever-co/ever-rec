@@ -35,6 +35,7 @@ jest.mock('components/shared/SCHeader/SCHeader', () => ({
 
 import Preferences from '../pages/settings/preferences';
 import { languages } from '../i18n/constants';
+import { DirectionContext } from '../i18n/direction';
 
 // React 18.3 exports `act`; the pinned type definitions do not declare it yet.
 const act: (callback: () => void | Promise<void>) => Promise<void> = (
@@ -190,6 +191,36 @@ describe('Preferences: theme', () => {
           'data-theme-choice',
         ),
       ).toBe(to);
+    },
+  );
+
+  it.each([
+    ['ArrowLeft', 'light', 'dark'],
+    ['ArrowRight', 'dark', 'light'],
+    ['ArrowDown', 'dark', 'system'],
+  ])(
+    'right to left, %s from %s chooses %s (the next tile is on the left)',
+    async (key, from, to) => {
+      mockTheme = from;
+      await act(async () => {
+        root.render(
+          <DirectionContext.Provider value="rtl">
+            <Preferences />
+          </DirectionContext.Provider>,
+        );
+      });
+
+      await act(async () => {
+        container.querySelector('[role="radiogroup"]')?.dispatchEvent(
+          new KeyboardEvent('keydown', {
+            key,
+            bubbles: true,
+            cancelable: true,
+          }),
+        );
+      });
+
+      expect(setTheme).toHaveBeenCalledWith(to);
     },
   );
 });

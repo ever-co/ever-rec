@@ -67,11 +67,11 @@ const WorkspaceFolderHistory: FC<IFoldersProps> = ({
       <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-x-2">
         <div
           onClick={() => switchFolder(undefined)}
-          className="-tw-ml-1.5 tw-flex tw-size-8 tw-shrink-0 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-md tw-text-muted-foreground tw-transition-colors tw-duration-150 hover:tw-bg-accent hover:tw-text-foreground"
+          className="-tw-ms-1.5 tw-flex tw-size-8 tw-shrink-0 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-md tw-text-muted-foreground tw-transition-colors tw-duration-150 hover:tw-bg-accent hover:tw-text-foreground"
         >
           <AppSvg
             path="/common/arrow_back-light.svg"
-            className="tw-cursor-pointer"
+            className="tw-cursor-pointer rtl:-tw-scale-x-100"
             size="20px"
           />
         </div>
@@ -85,7 +85,7 @@ const WorkspaceFolderHistory: FC<IFoldersProps> = ({
           <AppSvg
             path="/common/Chevron_right.svg"
             size="20px"
-            className="tw-mx-1 tw-text-muted-foreground"
+            className="tw-mx-1 tw-text-muted-foreground rtl:-tw-scale-x-100"
           />
           {navigationFolders?.map((folder, index, { length }) => {
             const isLastFolder = length - 1 === index;
@@ -106,7 +106,7 @@ const WorkspaceFolderHistory: FC<IFoldersProps> = ({
                   <AppSvg
                     path="/common/Chevron_right.svg"
                     size="20px"
-                    className="tw-mx-1 tw-text-muted-foreground"
+                    className="tw-mx-1 tw-text-muted-foreground rtl:-tw-scale-x-100"
                   />
                 )}
               </div>

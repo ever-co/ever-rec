@@ -99,7 +99,7 @@ const UniqueViews: React.FC<IUniqueViewsProps> = ({
           </div>
         ) : (
           <div className={classNames(`${styles.bgColor}`, 'tw-p-4')}>
-            <div className="tw-text-sm tw-font-semibold tw-text-left tw-mb-2">
+            <div className="tw-text-sm tw-font-semibold tw-text-start tw-mb-2">
               {t('page.image.viewInsights')}
             </div>
             <div className="tw-text-xs tw-text-center tw-text-muted-foreground tw-mb-2 tw-bg-muted tw-px-3 tw-py-2 tw-rounded-md tw-whitespace-nowrap">
@@ -109,7 +109,7 @@ const UniqueViews: React.FC<IUniqueViewsProps> = ({
               <div
                 className={classNames(
                   'scroll-div scroll-div-unique-views tw-overflow-y-auto tw-max-h-200px',
-                  uniqueLength > 3 && 'tw-pr-2',
+                  uniqueLength > 3 && 'tw-pe-2',
                 )}
               >
                 {uniqueViews.map((view) => (
@@ -117,7 +117,7 @@ const UniqueViews: React.FC<IUniqueViewsProps> = ({
                     key={view.id}
                     className={classNames(
                       'tw-flex tw-items-center tw-py-1 tw-text-sm tw-text-foreground',
-                      uniqueLength > 3 && 'tw-pr-2',
+                      uniqueLength > 3 && 'tw-pe-2',
                     )}
                   >
                     <UserShortInfo
@@ -145,7 +145,7 @@ const UniqueViews: React.FC<IUniqueViewsProps> = ({
         {icon}
 
         {uniqueViews.length >= 1 && (
-          <div className="tw-flex tw-items-center tw-mr-4">
+          <div className="tw-flex tw-items-center tw-me-4">
             {uniqueViews.map(
               (view, index) =>
                 index < 3 && <UniqueImage key={index} view={view} />,

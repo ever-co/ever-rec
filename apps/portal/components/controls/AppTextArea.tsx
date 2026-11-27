@@ -66,7 +66,7 @@ const AppTextArea: React.FC<AppTextAreaProps> = ({
       )}
     >
       {!!label && (
-        <div className={classNames('tw-mr-3 tw-mt-1', labelClass)}>
+        <div className={classNames('tw-me-3 tw-mt-1', labelClass)}>
           <label htmlFor={label}>{label}</label>
         </div>
       )}

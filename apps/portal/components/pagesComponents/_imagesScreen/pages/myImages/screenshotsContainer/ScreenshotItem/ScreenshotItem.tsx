@@ -161,7 +161,7 @@ const ScreenshotItem: React.FC<IScreenshotItemProps> = ({
 
         <div
           className={classNames(
-            'screenshot-item-overlay tw-absolute tw-bg-[hsl(var(--overlay)/0.6)] tw-text-[hsl(var(--on-overlay))] tw-top-0 tw-left-0 tw-w-full tw-h-full tw-flex tw-p-2',
+            'screenshot-item-overlay tw-absolute tw-bg-[hsl(var(--overlay)/0.6)] tw-text-[hsl(var(--on-overlay))] tw-top-0 tw-start-0 tw-w-full tw-h-full tw-flex tw-p-2',
             selectedItems?.state ? null : 'tw-invisible',
             hasRestore
               ? 'tw-justify-center tw-items-center'
@@ -243,10 +243,10 @@ const ScreenshotItem: React.FC<IScreenshotItemProps> = ({
         </div>
       </div>
 
-      <div onClick={(e) => e.preventDefault()} className="tw-mt-3 tw-ml-0.5">
+      <div onClick={(e) => e.preventDefault()} className="tw-mt-3 tw-ms-0.5">
         <div
           className={classNames(
-            'tw-flex tw-items-start tw-justify-between tw-mt-4 tw-mb-1 tw-pr-1.5',
+            'tw-flex tw-items-start tw-justify-between tw-mt-4 tw-mb-1 tw-pe-1.5',
           )}
         >
           <div
@@ -256,7 +256,7 @@ const ScreenshotItem: React.FC<IScreenshotItemProps> = ({
           </div>
           {!editTitle && canEditTitle && (
             <div
-              className="tw-ml-3 tw-cursor-pointer tw-min-w-20px tw-text-muted-foreground tw-transition-colors tw-duration-150 hover:tw-text-foreground"
+              className="tw-ms-3 tw-cursor-pointer tw-min-w-20px tw-text-muted-foreground tw-transition-colors tw-duration-150 hover:tw-text-foreground"
               onClick={setTitleFocus}
             >
               {/* The file's ink is a fixed light grey: it follows the text colour instead. */}

@@ -70,7 +70,7 @@ export const FilterDropdown: FC<IProps> = ({
     <Dropdown trigger={['click']} overlay={menu}>
       <Button
         style={{
-          marginLeft: '.5rem',
+          marginInlineStart: '.5rem',
           marginTop: '1px',
           padding: '3px !important',
           display: 'flex',

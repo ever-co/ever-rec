@@ -50,7 +50,7 @@ const UploadImageModal: React.FC<Props> = ({
         </div>
       }
     >
-      <h2 className="tw-mb-0 tw-pr-6 tw-text-base tw-font-semibold">
+      <h2 className="tw-mb-0 tw-pe-6 tw-text-base tw-font-semibold">
         {t('page.image.uploadImages')}
       </h2>
     </Modal>

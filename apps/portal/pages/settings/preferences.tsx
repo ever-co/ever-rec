@@ -8,6 +8,7 @@ import SCHeader from 'components/shared/SCHeader/SCHeader';
 import { ThemeChoice } from 'components/theme/ThemeProvider';
 import LanguageMenu from 'components/shell/LanguageMenu';
 import { cn } from 'app/utilities/cn';
+import { useDirection } from 'i18n/direction';
 
 // The tiles are pictures of the two themes, so their colours are fixed on purpose: a light tile
 // must look light inside the dark theme too.
@@ -89,6 +90,7 @@ const Section: FC<{ title: string; hint: string; children: ReactNode }> = ({
 
 const Preferences: FC = () => {
   const { t } = useTranslation();
+  const direction = useDirection();
   const { theme, setTheme } = useTheme();
   // The stored theme is only known in the browser.
   const [mounted, setMounted] = useState(false);
@@ -151,10 +153,14 @@ const Preferences: FC = () => {
               aria-label={t('page.appearance.theme')}
               className="tw-grid tw-grid-cols-3 tw-gap-3"
               onKeyDown={(event) => {
+                // Right to left, the next tile is on the left.
+                const forward =
+                  direction === 'rtl' ? 'ArrowLeft' : 'ArrowRight';
+                const back = direction === 'rtl' ? 'ArrowRight' : 'ArrowLeft';
                 const step =
-                  event.key === 'ArrowRight' || event.key === 'ArrowDown'
+                  event.key === forward || event.key === 'ArrowDown'
                     ? 1
-                    : event.key === 'ArrowLeft' || event.key === 'ArrowUp'
+                    : event.key === back || event.key === 'ArrowUp'
                       ? -1
                       : 0;
                 if (!step) return;
@@ -191,7 +197,7 @@ const Preferences: FC = () => {
                     data-theme-choice={tile.value}
                     onClick={() => setTheme(tile.value)}
                     className={cn(
-                      'tw-group tw-flex tw-flex-col tw-gap-2 tw-rounded-lg tw-bg-transparent tw-p-0 tw-text-left tw-outline-none',
+                      'tw-group tw-flex tw-flex-col tw-gap-2 tw-rounded-lg tw-bg-transparent tw-p-0 tw-text-start tw-outline-none',
                     )}
                   >
                     <span

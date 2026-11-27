@@ -9,7 +9,7 @@
 // Duration badge. It sits over media, so it is dark in both themes.
 .label {
   position: absolute;
-  right: 0.5rem;
+  inset-inline-end: 0.5rem;
   bottom: 0.5rem;
   padding: 0.125rem 0.375rem;
   border-radius: 0.375rem;
@@ -65,7 +65,7 @@
 
 .editIcon {
   cursor: pointer;
-  margin-left: 0.75rem;
+  margin-inline-start: 0.75rem;
   min-width: 1.25rem;
   color: hsl(var(--muted-foreground));
 }

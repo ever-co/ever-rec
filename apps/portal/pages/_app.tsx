@@ -17,6 +17,7 @@ import ThemeProvider from 'components/theme/ThemeProvider';
 import ThemedToastContainer from 'components/theme/ThemedToastContainer';
 import { TooltipProvider } from 'components/ui/tooltip';
 import { ShellProvider } from 'components/shell/ShellContext';
+import DirectionProvider from 'components/shell/DirectionProvider';
 import TermsGate from 'components/shared/TermsGate';
 import '../i18n/config';
 
@@ -28,24 +29,26 @@ function CustomApp({ Component, pageProps }: AppProps) {
   return (
     <Provider store={store}>
       <ThemeProvider>
-        <GoogleOAuthProvider
-          clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ''}
-        >
-          <TooltipProvider delayDuration={200}>
-            <Index />
-            <TermsGate />
-            <Head>
-              <title>Rec</title>
-              <link rel="shortcut icon" href="/icons/16.png" />
-            </Head>
-            <ThemedToastContainer />
-            <ShellProvider>
-              <main className="app">
-                <Component {...pageProps} />
-              </main>
-            </ShellProvider>
-          </TooltipProvider>
-        </GoogleOAuthProvider>
+        <DirectionProvider>
+          <GoogleOAuthProvider
+            clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ''}
+          >
+            <TooltipProvider delayDuration={200}>
+              <Index />
+              <TermsGate />
+              <Head>
+                <title>Rec</title>
+                <link rel="shortcut icon" href="/icons/16.png" />
+              </Head>
+              <ThemedToastContainer />
+              <ShellProvider>
+                <main className="app">
+                  <Component {...pageProps} />
+                </main>
+              </ShellProvider>
+            </TooltipProvider>
+          </GoogleOAuthProvider>
+        </DirectionProvider>
       </ThemeProvider>
     </Provider>
   );

@@ -98,7 +98,7 @@ const CommentElement: FC<IProps> = ({
 
           <div>
             <span className={styles.dotSeparator}>●</span>
-            <span>{dateElapsed}</span>
+            <span dir="auto">{dateElapsed}</span>
             {isEdited && <span>{t('page.video.editBrackets')}</span>}
           </div>
         </div>
@@ -112,7 +112,8 @@ const CommentElement: FC<IProps> = ({
             />
           ) : (
             <div className={styles.commentContent}>
-              <p>{comment.content}</p>
+              {/* A comment reads in its own language's direction, whatever the page's. */}
+              <p dir="auto">{comment.content}</p>
 
               {comment.isOwn && user?.id && (
                 <Dropdown

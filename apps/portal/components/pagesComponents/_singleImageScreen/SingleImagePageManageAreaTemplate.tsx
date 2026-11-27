@@ -487,7 +487,7 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
               <div>{t('page.image.manage')}</div>
             </Tab>
             {/* <Tab className="tw-flex tw-justify-center tw-items-center tw-w-1/2 tw-h-50px tw-cursor-pointer tw-outline-none">
-              <div className="tw-mr-2">
+              <div className="tw-me-2">
                 <AppSvg path="/images/comments.svg" size="25px" />
               </div>
               <div>Comments</div>
@@ -511,7 +511,11 @@ const SingleImagePageManageAreaTemplate: React.FC<Props> = ({
               >
                 <div className={styles.moveToFolderInner}>
                   <div>{t('page.image.moveToFolder')}</div>
-                  <AppSvg size="16px" path="/images/right-arrow.svg" />
+                  <AppSvg
+                    size="16px"
+                    path="/images/right-arrow.svg"
+                    className="rtl:-tw-scale-x-100"
+                  />
                 </div>
               </button>
             </ImageActionsCard>

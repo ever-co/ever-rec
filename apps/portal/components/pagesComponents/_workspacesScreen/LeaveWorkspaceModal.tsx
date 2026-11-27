@@ -50,7 +50,7 @@ const LeaveWorkspaceModal: React.FC<IProps> = ({
         </div>
       }
     >
-      <h2 className="tw-m-0 tw-mb-2 tw-pr-6 tw-text-base tw-font-semibold tw-text-foreground">
+      <h2 className="tw-m-0 tw-mb-2 tw-pe-6 tw-text-base tw-font-semibold tw-text-foreground">
         <Trans
           values={{
             action: action === 'leave' ? t('common.leave') : t('common.delete'),

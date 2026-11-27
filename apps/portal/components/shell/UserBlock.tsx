@@ -15,6 +15,7 @@ import { infoMessage } from 'app/services/helpers/toastMessages';
 import { panelRoutes, preRoutes } from 'components/_routes';
 import { cn } from 'app/utilities/cn';
 import useSignOut from 'hooks/useSignOut';
+import { inlineEndSide, useDirection } from 'i18n/direction';
 import {
   Avatar,
   AvatarFallback,
@@ -36,6 +37,7 @@ import {
  */
 const UserBlock: FC<{ collapsed?: boolean }> = ({ collapsed = false }) => {
   const { t } = useTranslation();
+  const outward = inlineEndSide(useDirection());
   const router = useRouter();
   const signOut = useSignOut();
   const user: IUser | null = useSelector(
@@ -74,7 +76,7 @@ const UserBlock: FC<{ collapsed?: boolean }> = ({ collapsed = false }) => {
           aria-label={`${t('shell.accountMenu')}: ${name}`}
           title={collapsed ? name : undefined}
           className={cn(
-            'tw-flex tw-w-full tw-min-w-0 tw-items-center tw-gap-2 tw-rounded-lg tw-bg-transparent tw-text-left tw-outline-none tw-transition-colors tw-duration-150 hover:tw-bg-sidebar-accent focus-visible:tw-ring-2 focus-visible:tw-ring-ring data-[state=open]:tw-bg-sidebar-accent',
+            'tw-flex tw-w-full tw-min-w-0 tw-items-center tw-gap-2 tw-rounded-lg tw-bg-transparent tw-text-start tw-outline-none tw-transition-colors tw-duration-150 hover:tw-bg-sidebar-accent focus-visible:tw-ring-2 focus-visible:tw-ring-ring data-[state=open]:tw-bg-sidebar-accent',
             collapsed ? 'tw-size-10 tw-justify-center' : 'tw-h-12 tw-px-2',
           )}
         >
@@ -98,7 +100,7 @@ const UserBlock: FC<{ collapsed?: boolean }> = ({ collapsed = false }) => {
       </DropdownMenuTrigger>
 
       <DropdownMenuContent
-        side={collapsed ? 'right' : 'top'}
+        side={collapsed ? outward : 'top'}
         align={collapsed ? 'end' : 'start'}
         className="tw-w-64"
       >

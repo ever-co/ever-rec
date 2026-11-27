@@ -146,14 +146,14 @@ const PanelLogin: React.FC = () => {
             type={passwordShown ? 'text' : 'password'}
             placeholder={t('page.auth.common.password')}
             className="tw-w-full"
-            inputClass="tw-pr-10"
+            inputClass="tw-pe-10"
             errors={password.errors}
             rules={passwordRules}
             onChange={passwordChangeHandler}
             onKeyDown={handleInputKeyDown}
           />
           <PasswordEye
-            className="tw-relative tw-right-2"
+            className="tw-relative tw-end-2"
             togglePassword={togglePassword}
             passwordShown={passwordShown}
           />

@@ -135,7 +135,7 @@ const CreateTrelloTicketModal: React.FC<ICreateTrelloTicketModalProps> = ({
         />
       }
     >
-      <h2 className="tw-mb-4 tw-pr-6 tw-text-base tw-font-semibold">
+      <h2 className="tw-mb-4 tw-pe-6 tw-text-base tw-font-semibold">
         {t('modals.createTrello')}{' '}
       </h2>
 
@@ -241,7 +241,7 @@ const Footer: React.FC<IFooterProps> = ({
       {hideBoardsText ? (
         <div></div>
       ) : (
-        <p className="tw-mb-0 tw-text-left tw-text-sm tw-text-muted-foreground">
+        <p className="tw-mb-0 tw-text-start tw-text-sm tw-text-muted-foreground">
           {t('modals.noTrelloBoards')}
         </p>
       )}

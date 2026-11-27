@@ -47,7 +47,7 @@ const DeleteCommentModal: React.FC<IDeleteScreenshotModalProps> = ({
         </div>
       }
     >
-      <h2 className="tw-mb-0 tw-pr-6 tw-text-base tw-font-semibold">
+      <h2 className="tw-mb-0 tw-pe-6 tw-text-base tw-font-semibold">
         {t('modals.deleteComment')}
       </h2>
     </Modal>

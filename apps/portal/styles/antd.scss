@@ -253,7 +253,10 @@ a {
   // One close button for every dialog: a 32px ghost icon button in the frame's corner.
   .ant-modal-close {
     top: 0.75rem;
-    right: 0.75rem;
+    // The corner at the line end: top right, top left right to left (antd's own RTL rule says
+    // `left: 0`, so the other side is reset too).
+    inset-inline-end: 0.75rem;
+    inset-inline-start: auto;
     width: 2rem;
     height: 2rem;
     border-radius: 0.375rem;
@@ -916,7 +919,7 @@ a {
       border-bottom: 1px solid hsl(var(--border));
     }
     .ant-tabs-tab {
-      margin-right: 3px !important;
+      margin-inline-end: 3px !important;
       height: auto;
       padding: 10px 0px !important;
     }

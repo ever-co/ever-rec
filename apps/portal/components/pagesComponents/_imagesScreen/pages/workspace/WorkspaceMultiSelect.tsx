@@ -142,7 +142,7 @@ const WorkspaceMultiSelect: React.FC<Props> = ({
   // the personal library's bar). It takes the middle of the items header, between the heading and
   // the filter and sort; on a narrow screen it gets a row of its own under them.
   return (
-    <div className="multi-items -tw-order-1 tw-mr-auto tw-flex tw-flex-wrap tw-items-center tw-justify-around tw-rounded-lg tw-border tw-border-solid tw-border-border tw-bg-popover tw-p-1 tw-text-popover-foreground tw-shadow-float mx-lg:tw-order-last mx-lg:tw-mr-0 mx-lg:tw-mt-2 mx-lg:tw-w-full">
+    <div className="multi-items -tw-order-1 tw-me-auto tw-flex tw-flex-wrap tw-items-center tw-justify-around tw-rounded-lg tw-border tw-border-solid tw-border-border tw-bg-popover tw-p-1 tw-text-popover-foreground tw-shadow-float mx-lg:tw-order-last mx-lg:tw-me-0 mx-lg:tw-mt-2 mx-lg:tw-w-full">
       <div className="tw-flex">
         <AppButton
           onClick={selectAllHandler}

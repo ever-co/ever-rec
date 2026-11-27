@@ -14,12 +14,12 @@
 
 .headingContainerHeading {
   @include shared.section-title;
-  margin-right: 1rem;
+  margin-inline-end: 1rem;
 }
 
 .appInput {
-  margin-left: 0.5rem;
-  margin-right: 1rem;
+  margin-inline-start: 0.5rem;
+  margin-inline-end: 1rem;
 }
 
 .addItemButtonContainer {

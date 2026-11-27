@@ -92,7 +92,7 @@ export const useMenuItems = () => {
       type: 'back',
       title: t('shell.backToApp'),
       route: preRoutes.media + panelRoutes.images,
-      icon: <ArrowLeft />,
+      icon: <ArrowLeft className="rtl:tw-rotate-180" />,
       imgName: '',
     },
     {
@@ -128,7 +128,7 @@ export const useMenuItems = () => {
         title: t('shell.backToApp'),
         route: preRoutes.media + panelRoutes.getWorkspaceMain(workspaceId),
         isWorkspaceRoute: true,
-        icon: <ArrowLeft />,
+        icon: <ArrowLeft className="rtl:tw-rotate-180" />,
       },
       {
         type: 'company-profile',

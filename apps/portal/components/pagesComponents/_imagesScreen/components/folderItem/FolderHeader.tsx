@@ -67,6 +67,9 @@ interface FolderNameProps {
 const FolderName: FC<FolderNameProps> = ({ name }) => {
   return (
     <div
+      // A name reads in its own direction (an English one is cut at its end); the style keeps
+      // it lined up with the page.
+      dir="auto"
       className={classNames(styles.folderName)}
       title={name.length > 25 ? name : undefined}
     >

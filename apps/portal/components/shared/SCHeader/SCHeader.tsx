@@ -56,7 +56,7 @@ const SCHeader: FC<ISCHeaderProps> = ({
   return (
     <header className="tw-flex tw-h-14 tw-shrink-0 tw-items-center tw-justify-between tw-gap-3 tw-border-0 tw-border-b tw-border-solid tw-border-border tw-px-4 md:tw-px-6">
       <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-2">
-        <DrawerButton className="-tw-ml-1" />
+        <DrawerButton className="-tw-ms-1" />
 
         {canSearch ? (
           <label className="tw-flex tw-h-8 tw-w-full tw-max-w-sm tw-items-center tw-gap-2 tw-rounded-md tw-border tw-border-solid tw-border-border tw-bg-card tw-px-2.5 tw-text-sm tw-text-muted-foreground tw-transition-colors tw-duration-150 focus-within:tw-border-ring focus-within:tw-ring-2 focus-within:tw-ring-ring/20">
@@ -84,7 +84,7 @@ const SCHeader: FC<ISCHeaderProps> = ({
           <>
             <Button
               size="sm"
-              className="tw-mr-1 tw-hidden sm:tw-inline-flex"
+              className="tw-me-1 tw-hidden sm:tw-inline-flex"
               onClick={onInviteMembersButtonClick}
             >
               <UserPlus />

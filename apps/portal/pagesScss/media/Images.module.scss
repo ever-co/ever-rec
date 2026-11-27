@@ -7,7 +7,7 @@
   font-weight: 600;
   line-height: 2rem;
   letter-spacing: -0.01em;
-  margin-right: 1rem;
+  margin-inline-end: 1rem;
 }
 
 .mainSection {
@@ -17,16 +17,16 @@
   height: 100%;
 
   .foldersDashboardCard {
-    padding-left: 0;
-    padding-right: 0;
+    padding-inline-start: 0;
+    padding-inline-end: 0;
 
     .foldersSectionMainHeader {
       display: flex;
       flex-wrap: wrap;
       justify-content: space-between;
       align-items: center;
-      margin-left: 0;
-      margin-right: 0;
+      margin-inline-start: 0;
+      margin-inline-end: 0;
     }
 
     .foldersSectionMainHeaderCreateFolder {
@@ -54,8 +54,8 @@
 
   .contentDashboardCard {
     flex: 1;
-    padding-left: 0;
-    padding-right: 0;
+    padding-inline-start: 0;
+    padding-inline-end: 0;
     padding-top: 0;
   }
 

@@ -32,7 +32,7 @@ const VideoChapterCaveatPopover: FC<IProps> = ({ caveat = 'default' }) => {
 
   return (
     <Popover content={CaveatComponent} trigger="hover">
-      <div className="tw-inline-flex tw-ml-2 tw-cursor-pointer">
+      <div className="tw-inline-flex tw-ms-2 tw-cursor-pointer">
         <AppSvg
           path="/common/circle-info-solid.svg"
           size="14px"

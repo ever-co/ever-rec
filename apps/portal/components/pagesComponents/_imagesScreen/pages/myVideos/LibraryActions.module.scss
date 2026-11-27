@@ -7,13 +7,13 @@
   padding: 1.25rem 1.5rem 0;
 
   @media (max-width: 767px) {
-    padding-left: 1rem;
-    padding-right: 1rem;
+    padding-inline-start: 1rem;
+    padding-inline-end: 1rem;
   }
 
   @media (min-width: 1200px) {
-    padding-left: 2rem;
-    padding-right: 2rem;
+    padding-inline-start: 2rem;
+    padding-inline-end: 2rem;
   }
 
   .buttonInner {
@@ -21,7 +21,7 @@
     align-items: center;
 
     svg {
-      margin-right: 0.75rem;
+      margin-inline-end: 0.75rem;
     }
   }
 }
