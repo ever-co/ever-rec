@@ -19,9 +19,6 @@
   box-shadow: 0 0 0 rgba(204, 44, 44, 0.4);
   animation: pulse 1s infinite;
   margin-bottom: 2px;
-  transition-property: all;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 150ms;
 }
 
 @-webkit-keyframes pulse {
@@ -51,10 +48,12 @@
 }
 
 .container {
-    margin-left: 0.75rem; 
+    margin-left: 0.75rem;
     font-weight: 600;
     font-size: 1.25rem;
     line-height: 1.75rem;
+    color: hsl(var(--foreground));
+    font-variant-numeric: tabular-nums;
 }
 
 .iconWrapper {
@@ -63,13 +62,14 @@
     justify-content: flex-start;
 }
 
+// Accept the recording: the one filled control here (its tick is a white image, black in dark).
 .firstIcon {
     padding: 1px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #5b4dbe;
-    border-radius: 0.25rem;
+    background: hsl(var(--primary));
+    border-radius: 0.375rem;
     height: 30px;
     width: 30px;
 }
@@ -79,7 +79,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 9999px;
+    border-radius: 0.375rem;
     height: 30px;
     width: 30px;
+    transition: background-color 150ms var(--ease-out);
+
+    &:hover {
+        background: hsl(var(--accent));
+    }
 }

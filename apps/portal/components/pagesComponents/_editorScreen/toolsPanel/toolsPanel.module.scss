@@ -244,7 +244,7 @@
   border: 1px solid hsl(var(--input));
 }
 
-// The plus and minus of the number selector are black image files: white ink in dark.
+// The plus and minus of the number selector are image files with a dark ink, lightened in dark.
 :global(.dark) .numberSelector img,
 :global(.dark) .childContainer img {
   filter: brightness(0) invert(1);

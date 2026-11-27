@@ -89,18 +89,18 @@ const WorkspaceInvite: FC<any> = () => {
         className={classNames(
           'tw-w-full default:tw-px-2 sm:tw-px-2 md:tw-px-2 lg:tw-px-2 xl:tw-px-12 2xl:tw-px-32',
           'workspace-invite',
-          'tw-flex tw-flex-1 tw-flex-col tw-justify-center tw-overflow-y-auto tw-py-12',
+          'tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-overflow-y-auto tw-py-12',
         )}
       >
         {/* The inviter is empty when that account was deleted: the invite still works. */}
         {workspaceName && (
-          <div className="tw-flex tw-flex-col tw-items-center">
+          <div className="tw-my-auto tw-flex tw-flex-col tw-items-center">
             {workspaceInviter && (
-              <h1 className="tw-m-0 tw-text-center tw-text-2xl tw-font-semibold tw-text-foreground">
+              <h1 className="tw-m-0 tw-text-balance tw-text-center tw-text-2xl tw-font-semibold tw-text-foreground">
                 {workspaceInviter} {t('workspace.invitedToJoin')}
               </h1>
             )}
-            <h1 className="tw-m-0 tw-text-center tw-text-2xl tw-font-semibold tw-text-foreground">
+            <h1 className="tw-m-0 tw-text-balance tw-text-center tw-text-2xl tw-font-semibold tw-text-foreground">
               {/* The name is escaped so Trans never reads it as markup, then shown as typed. */}
               <Trans
                 i18nKey="workspace.joinWorkspaceOnRec"
@@ -128,7 +128,7 @@ const WorkspaceInvite: FC<any> = () => {
           </div>
         )}
         {error && (
-          <div className="tw-flex tw-flex-col tw-items-center">
+          <div className="tw-my-auto tw-flex tw-flex-col tw-items-center">
             <h1 className="tw-m-0 tw-text-center tw-text-xl tw-font-semibold tw-text-foreground">
               {t('workspace.workspaceInviteExpired')}
             </h1>

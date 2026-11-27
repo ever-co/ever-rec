@@ -4,7 +4,8 @@
   display: flex;
   flex-direction: row-reverse;
   justify-content: flex-start;
-  align-items: center;
+  // Stretch: the cancel takes the height of the action button beside it.
+  align-items: stretch;
   gap: 0.5rem;
   margin-top: 1.5rem;
 

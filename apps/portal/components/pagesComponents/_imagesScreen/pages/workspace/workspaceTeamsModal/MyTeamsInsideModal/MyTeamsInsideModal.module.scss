@@ -55,7 +55,7 @@
   }
 }
 
-// The stock team picture is black ink inside an <img>, so it cannot take the text colour: it is
+// The stock team picture is dark ink inside an <img>, so it cannot take the text colour: it is
 // dimmed to the quiet text, and turned to light ink on the dark theme.
 .stockAvatar img {
   opacity: 0.6;

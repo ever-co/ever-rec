@@ -1,4 +1,4 @@
-import { FC, useEffect, useRef, useState } from 'react';
+import { CSSProperties, FC, useEffect, useRef, useState } from 'react';
 import { GetServerSideProps, GetServerSidePropsContext } from 'next';
 import { useRouter } from 'next/router';
 import { addUniqueView } from 'app/services/imageandvideo';
@@ -93,15 +93,19 @@ const EmbeddedSharedVideo: FC = () => {
   return (
     <div
       // The frame around an embedded player: dark in both themes, like everything over media.
-      style={{
-        width: '100vw',
-        height: '100vh',
-        background: 'hsl(var(--overlay))',
-        color: 'hsl(var(--on-overlay))',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
+      // The player's own letterbox takes the same ground, so the frame reads as one surface.
+      style={
+        {
+          width: '100vw',
+          height: '100vh',
+          background: 'hsl(var(--overlay))',
+          color: 'hsl(var(--on-overlay))',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          '--plyr-video-background': 'hsl(var(--overlay))',
+        } as CSSProperties
+      }
     >
       {notFound ? (
         t('page.video.noAccess')

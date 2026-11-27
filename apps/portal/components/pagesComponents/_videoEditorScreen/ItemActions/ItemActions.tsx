@@ -208,9 +208,7 @@ const renderMoreMenuJSX = (
         <Menu.Item
           key="change-folder"
           className={''}
-          icon={
-            <AppSvg path="/common/icon-folder-move.svg" size="16px" />
-          }
+          icon={<AppSvg path="/common/icon-folder-move.svg" size="16px" />}
           onClick={changeFolderClicked}
         >
           <span className={styles.menuItemSpan}>
@@ -251,9 +249,7 @@ const renderMoreMenuJSX = (
 
       {!isPublic && (
         <Menu.Item
-          icon={
-            <AppSvg size="16px" path="/common/collection.svg" />
-          }
+          icon={<AppSvg size="16px" path="/common/collection.svg" />}
           onClick={updateChaptersEnabled}
           key="menu_item_chapters_enabled"
         >

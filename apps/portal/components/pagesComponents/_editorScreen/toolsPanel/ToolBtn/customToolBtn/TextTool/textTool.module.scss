@@ -7,7 +7,6 @@
 .select {
     width: 100%;
     border-radius: 0.25rem;
-    background-color: white;
 }
 .flexContainer {
     display: flex;
@@ -21,13 +20,18 @@
     cursor: pointer;
 }
 
+// The font-size stepper: a bordered control (its plus and minus are black image files).
 .container {
-    border-radius: 1rem;
-    background-color: white;
+    border-radius: 0.5rem;
+    background-color: transparent;
     display: flex;
     justify-content: center;
-    margin: 5px 0 5px 10px;
-    border: 2px solid #D8D8D8;
+    margin: 4px 0 4px 8px;
+    border: 1px solid hsl(var(--input));
+}
+
+:global(.dark) .container img {
+    filter: brightness(0) invert(1);
 }
 
 .colorSelectorWrapper {

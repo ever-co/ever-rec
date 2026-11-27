@@ -381,39 +381,34 @@ const MarkerContentPopup: React.FC<IMarkersMediaProps> = ({
               <Popover content={content} trigger="focus">
                 <Button
                   title="Emojis"
-                  style={{ color: 'black', backgroundColor: 'white' }}
                   icon={<SmileOutlined style={{ fontSize: '18px' }} />}
-                  shape="circle"
+                  type="text"
                 ></Button>
               </Popover>
 
               <Button
-                style={{ color: 'black', backgroundColor: 'white' }}
                 icon={<TagOutlined style={{ fontSize: '18px' }} />}
-                shape="circle"
+                type="text"
                 onClick={() =>
                   infoMessage('We are working hard to add this feature!')
                 }
               ></Button>
 
               <Button
-                style={{ color: 'black', backgroundColor: 'white' }}
                 icon={<AudioOutlined style={{ fontSize: '18px' }} />}
-                shape="circle"
+                type="text"
                 onClick={() => setUploadState('voice')}
               ></Button>
 
               <Button
-                style={{ color: 'black', backgroundColor: 'white' }}
                 icon={<VideoCameraOutlined style={{ fontSize: '18px' }} />}
-                shape="circle"
+                type="text"
                 onClick={() => setVideoModalVisibility(true)}
               ></Button>
 
               <Button
-                style={{ color: 'black', backgroundColor: 'white' }}
                 icon={<PictureOutlined style={{ fontSize: '18px' }} />}
-                shape="circle"
+                type="text"
                 onClick={() => setImageModalVisibility(true)}
               ></Button>
             </div>
@@ -422,15 +417,13 @@ const MarkerContentPopup: React.FC<IMarkersMediaProps> = ({
               disabled={
                 !(comment?.content || comment?.imageSrc || comment?.videoSrc)
               }
+              type="primary"
               style={{
-                color: 'white',
-                backgroundColor: 'rgb(91, 77, 190)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
               }}
               icon={<SendOutlined style={{ fontSize: '15px' }} />}
-              shape="round"
               onClick={async () => {
                 if (comment.content || comment.imageSrc || comment.videoSrc) {
                   const markerId = currentShape.getAttr('id');

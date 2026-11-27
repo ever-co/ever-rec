@@ -18,9 +18,21 @@ const WatermarkToolSlider: React.FC<IWatermarkToolSliderProps> = ({
 }) => {
   return (
     <div style={{marginTop: '1rem'}}>
-      <div style={{display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem', lineHeight: '1.25rem'}}>
-        <div>{title}</div>
-        <div>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          fontSize: '0.8125rem',
+          lineHeight: '1.25rem',
+        }}
+      >
+        <div style={{ color: 'hsl(var(--muted-foreground))' }}>{title}</div>
+        <div
+          style={{
+            color: 'hsl(var(--foreground))',
+            fontVariantNumeric: 'tabular-nums',
+          }}
+        >
           {value} {title === 'Angle' ? '°' : '%'}{' '}
         </div>
       </div>

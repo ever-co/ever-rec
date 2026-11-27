@@ -90,7 +90,8 @@ const useInitImageVideoItem = ({
             fontSize: forSinglePage ? '1.25rem' : '1rem',
             height: forSinglePage ? 40 : undefined,
             lineHeight: !forSinglePage ? 1.17 : '1.75rem',
-            borderColor: forSinglePage && !editTitle ? 'transparent' : undefined,
+            borderColor:
+              forSinglePage && !editTitle ? 'transparent' : undefined,
           }}
           maxLength={200}
         />

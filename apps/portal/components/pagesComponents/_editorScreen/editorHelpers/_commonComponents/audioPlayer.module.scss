@@ -1,13 +1,14 @@
+// A voice note inside a comment: a quiet chip with a round play button.
 .audioContainer {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background-color: #d4d2d4;
+    background-color: hsl(var(--background));
+    border: 1px solid hsl(var(--border));
     width: 200px;
     padding: 0.25rem;
     padding-left: 0.5rem;
     border-radius: 9999px;
-    box-shadow: inset 0 2px 4px 0 rgb(0 0 0 / 0.05);
 }
 
 .iconWrapper {
@@ -17,32 +18,38 @@
     margin-top: 2px;
 }
 
+// The microphone is an injected SVG with a fixed dark violet ink.
 .icon {
     margin-right: 0.25rem;
     margin-top: 1px;
-    opacity: 70;
+    color: hsl(var(--muted-foreground));
+
+    svg path {
+        fill: currentColor !important;
+    }
 }
 
 .label {
-    color: #5b4dbe;
-    opacity: 75;
-    font-weight: 600;
+    color: hsl(var(--foreground));
+    font-size: 0.8125rem;
+    font-weight: 500;
 }
 
 .duration {
-    opacity: 75;
-    font-weight: 600;
+    color: hsl(var(--muted-foreground));
+    font-size: 0.8125rem;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
     margin-top: 0.25rem;
 }
 
 .playButton {
     border-radius: 9999px;
-    background-color: white;
+    background-color: hsl(var(--card));
     display: flex;
     align-items: center;
     justify-content: center;
-    border-color: #cdbbff;
-    box-shadow: inset 0 2px 4px 0 rgb(0 0 0 / 0.05);
+    border-color: hsl(var(--input));
     padding: 0;
     width: 30px !important;
     height: 30px !important;

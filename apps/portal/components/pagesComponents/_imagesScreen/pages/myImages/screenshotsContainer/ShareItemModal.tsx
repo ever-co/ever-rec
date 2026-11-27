@@ -62,15 +62,19 @@ const ShareItemModal: React.FC<IShareItemModalProps> = ({
       footer={
         <div className="tw-flex tw-justify-center tw-items-center tw-mt-6">
           <AppButton onClick={copyLinkHandler} full>
+            {/* Both files fix their ink (an inline light fill): it follows the button's text. */}
             {copystate ? (
-              // The file's ink is a fixed light colour: it follows the button's text instead.
               <AppSvg
                 path="/common/done.svg"
                 size="16px"
                 className="[&_path]:!tw-fill-current"
               />
             ) : (
-              <AppSvg path="/common/copy.svg" size="16px" />
+              <AppSvg
+                path="/common/copy.svg"
+                size="16px"
+                className="[&_path]:!tw-fill-current"
+              />
             )}
             {t('modals.copyLink')}
           </AppButton>

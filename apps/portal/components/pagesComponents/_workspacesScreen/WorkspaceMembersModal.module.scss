@@ -1,9 +1,9 @@
 @use 'pagesScss/partials/_reactTabs.scss';
 
-// The dialog's title: the name of the team.
+// The dialog's title: the name of the team. It starts where the tab labels and the rows start.
 .Heading {
   margin-bottom: 1rem;
-  padding-right: 1.5rem;
+  padding: 0 1.5rem 0 0.75rem;
   color: hsl(var(--foreground));
   font-size: 1rem;
   font-weight: 600;

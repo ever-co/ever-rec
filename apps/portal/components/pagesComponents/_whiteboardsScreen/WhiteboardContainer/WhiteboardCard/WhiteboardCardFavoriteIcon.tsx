@@ -18,7 +18,7 @@ const WhiteboardCardFavoriteIcon: FC<IProps> = ({
     !isTrash && (
       <div
         style={{ cursor: 'pointer' }}
-        className="tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-md tw-text-muted-foreground tw-transition-colors tw-duration-150 hover:tw-bg-foreground/10 hover:tw-text-foreground"
+        className="tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-md tw-transition-colors tw-duration-150 hover:tw-bg-[hsl(var(--on-overlay)/0.16)]"
         onClick={() => setFavorite((prev) => !prev)}
       >
         {/* The empty mark follows the text colour; the filled one keeps its own red. */}

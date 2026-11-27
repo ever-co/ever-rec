@@ -106,6 +106,7 @@ const SendEmailTool: React.FC<IEmailToolProps> = ({
                     size="15px"
                     onSelect={() => removeEmail(index)}
                     icon={closeIcon}
+                    className="tw-opacity-60 tw-brightness-0 dark:tw-invert"
                   />
                 </div>
               );
@@ -121,7 +122,7 @@ const SendEmailTool: React.FC<IEmailToolProps> = ({
               checked={messagestatus}
               onChange={() => setMesagestatus(!messagestatus)}
             >
-              <span style={{ color: 'black' }}> Add message</span>
+              <span> Add message</span>
             </Checkbox>
             {messagestatus ? (
               <TextArea

@@ -146,8 +146,9 @@
 }
 
 // "Delete team" starts as an outline in the danger ink; only the confirm step is a filled
-// danger button.
-.deleteTeamBtn:hover {
+// danger button. (The doubled class outweighs the button's own hover surface without
+// `!important`.)
+.deleteTeamBtn.deleteTeamBtn:hover {
   background-color: hsl(var(--destructive-muted));
 }
 

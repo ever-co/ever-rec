@@ -139,7 +139,7 @@ const Auth: React.FC<SignFlowComponent> = ({ children, componentType }) => {
                       {(componentType === 'login' ||
                         componentType === 'register') && <EverIdButton />}
 
-                      <div className="tw-mt-6 tw-flex tw-flex-wrap tw-items-center tw-justify-center tw-gap-y-2">
+                      <div className="tw-mt-6 tw-flex tw-items-center tw-justify-center tw-text-center">
                         {filteredLinks().map((link, index, arr) => (
                           <React.Fragment key={`link_${index}`}>
                             {componentType !== link.name && (

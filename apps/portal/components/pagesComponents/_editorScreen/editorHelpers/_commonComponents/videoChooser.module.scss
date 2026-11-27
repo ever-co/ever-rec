@@ -9,46 +9,49 @@
 
     &:hover {
       img {
-        box-shadow: 0px 0px 0px 5px rgba(155, 145, 243, 0.808);
-        -webkit-box-shadow: 0px 0px 0px 5px rgba(155, 145, 243, 0.808);
-        -moz-box-shadow: 0px 0px 0px 5px rgba(155, 145, 243, 0.808);
+        box-shadow: 0 0 0 2px hsl(var(--ring));
       }
     }
   }
 }
 
+// The frame around a video to pick: the player sits on the media ground (dark in both themes).
 .btnWrapper {
-  border: 4px solid #5b4dbe;
+  border: 1px solid hsl(var(--border));
   border-radius: 0.5rem;
-  background: black;
+  background: hsl(var(--overlay));
   display: flex;
   align-items: center;
   justify-content: center;
   flex-direction: column;
 }
 
+// "Choose" sits on top of the video.
 .button {
   position: absolute;
   z-index: 10;
   right: 20px;
   top: 10px;
   padding: 0.25rem;
-  height: 45px;
+  height: 36px;
   width: 90px;
-  background: rgba(0, 0, 0, 0.553);
-  color: white;
+  background: hsl(var(--overlay) / 0.6);
+  border-color: transparent;
+  color: hsl(var(--on-overlay));
   border-radius: 0.5rem;
   &:hover {
-    color: white !important;
-    background: rgba(0, 0, 0, 0.253) !important;
-    box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+    color: hsl(var(--on-overlay)) !important;
+    border-color: transparent !important;
+    background: hsl(var(--overlay) / 0.8) !important;
   }
 }
 
 .title {
   text-align: left;
-  font-size: 1.125rem;
-  line-height: 1.75rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 500;
+  color: hsl(var(--foreground));
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -65,18 +68,18 @@
 
 .videosInnerContainer {
     margin-bottom: 1.5rem;
-    font-size: 1.25rem;
+    font-size: 1.125rem;
     line-height: 1.75rem;
-    font-weight: 700;
+    font-weight: 600;
+    color: hsl(var(--foreground));
 }
 
 .appButton {
-    color: white;
     padding-bottom: 0.5rem;
     padding-top: 0.5rem;
 }
 
 .appBtnPadding {
-    padding-left: 3.5rem;
-    padding-right: 3.5rem;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
 }
