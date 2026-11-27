@@ -176,8 +176,12 @@ const config = {
         '4xl': '40px',
       },
       boxShadow: {
-        'app-blocks': '0px 16px 40px rgba(112, 144, 176, 0.2)',
-        'round-sm': '0px 0px 16px 3px rgba(0,0,0,0.2)',
+        // `tw-shadow-float` / `tw-shadow-card`. Not `tw-shadow-[var(--shadow-float)]`: Tailwind reads
+        // an arbitrary `var()` there as a shadow colour and emits no box-shadow.
+        float: 'var(--shadow-float)',
+        card: 'var(--shadow-sm)',
+        'app-blocks': 'var(--shadow-float)',
+        'round-sm': 'var(--shadow-float)',
       },
       spacing: {
         '13negative': '-13px',

@@ -11,7 +11,7 @@ const DropdownMenuSub = DropdownMenuPrimitive.Sub;
 const DropdownMenuRadioGroup = DropdownMenuPrimitive.RadioGroup;
 
 const contentClasses =
-  'tw-z-[1100] tw-min-w-[8rem] tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-border tw-bg-popover tw-p-1 tw-text-popover-foreground tw-shadow-[var(--shadow-float)] data-[state=open]:tw-animate-in data-[state=closed]:tw-animate-out data-[state=closed]:tw-fade-out-0 data-[state=open]:tw-fade-in-0 data-[state=closed]:tw-zoom-out-95 data-[state=open]:tw-zoom-in-95 data-[side=bottom]:tw-slide-in-from-top-2 data-[side=left]:tw-slide-in-from-right-2 data-[side=right]:tw-slide-in-from-left-2 data-[side=top]:tw-slide-in-from-bottom-2';
+  'tw-z-[1100] tw-min-w-[8rem] tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-border tw-bg-popover tw-p-1 tw-text-popover-foreground tw-shadow-float data-[state=open]:tw-animate-in data-[state=closed]:tw-animate-out data-[state=closed]:tw-fade-out-0 data-[state=open]:tw-fade-in-0 data-[state=closed]:tw-zoom-out-95 data-[state=open]:tw-zoom-in-95 data-[side=bottom]:tw-slide-in-from-top-2 data-[side=left]:tw-slide-in-from-right-2 data-[side=right]:tw-slide-in-from-left-2 data-[side=top]:tw-slide-in-from-bottom-2';
 
 const itemClasses =
   'tw-relative tw-flex tw-cursor-pointer tw-select-none tw-items-center tw-gap-2 tw-rounded-md tw-px-2 tw-py-1.5 tw-text-sm tw-outline-none tw-transition-colors focus:tw-bg-accent focus:tw-text-accent-foreground data-[disabled]:tw-pointer-events-none data-[disabled]:tw-opacity-50 [&_svg]:tw-pointer-events-none [&_svg]:tw-size-4 [&_svg]:tw-shrink-0 [&_svg]:tw-text-muted-foreground';

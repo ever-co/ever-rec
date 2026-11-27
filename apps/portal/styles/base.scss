@@ -102,30 +102,44 @@ pre {
   overflow: hidden;
 }
 
-// Icons drawn by <AppSvg> (inline SVG files from /public). Their ink was hard-coded black or the
-// old dark grey, which disappears on a dark surface: icon-sized drawings take the text colour.
+// Icons drawn by <AppSvg> (inline SVG files from /public). Their ink was hard-coded: black, one of
+// the old dark greys, or nothing at all (the SVG default, black). That disappears on a dark
+// surface, so icon-sized drawings take the text colour of the place they sit in.
 .app-svg-icon svg {
-  [stroke='black'],
-  [stroke='#000'],
-  [stroke='#000000'],
-  [stroke='#2A292F'],
-  [stroke='#2a292f'],
-  [stroke='#1C1C1E'],
-  [stroke='#1c1c1e'],
-  [stroke='#24262F'],
-  [stroke='#383C44'] {
+  // No fill on the root: its shapes fall back to black.
+  &:not([fill]) {
+    fill: currentColor;
+  }
+
+  [stroke='black' i],
+  [stroke='#000' i],
+  [stroke='#000000' i],
+  [stroke='#1c1c1e' i],
+  [stroke='#1d1d1d' i],
+  [stroke='#200e32' i],
+  [stroke='#24262f' i],
+  [stroke='#2a292f' i],
+  [stroke='#373444' i],
+  [stroke='#383c44' i],
+  [stroke='#3a3a3a' i],
+  [stroke='#636366' i],
+  [stroke='#6e6e6e' i] {
     stroke: currentColor;
   }
 
-  [fill='black'],
-  [fill='#000'],
-  [fill='#000000'],
-  [fill='#2A292F'],
-  [fill='#2a292f'],
-  [fill='#1C1C1E'],
-  [fill='#1c1c1e'],
-  [fill='#24262F'],
-  [fill='#383C44'] {
+  [fill='black' i],
+  [fill='#000' i],
+  [fill='#000000' i],
+  [fill='#1c1c1e' i],
+  [fill='#1d1d1d' i],
+  [fill='#200e32' i],
+  [fill='#24262f' i],
+  [fill='#2a292f' i],
+  [fill='#373444' i],
+  [fill='#383c44' i],
+  [fill='#3a3a3a' i],
+  [fill='#636366' i],
+  [fill='#6e6e6e' i] {
     fill: currentColor;
   }
 }
