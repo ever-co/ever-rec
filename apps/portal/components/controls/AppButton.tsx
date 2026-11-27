@@ -135,7 +135,7 @@ const AppButton: React.FC<AppInputProps> = ({
         full ? 'tw-w-full' : 'tw-w-max',
         ground,
         darkBgColor,
-        twPadding ? twPadding : 'tw-py-2 tw-px-4',
+        twPadding ? twPadding : 'tw-py-[7px] tw-px-4',
         className,
         twRounded ? twRounded : 'tw-rounded-md',
       )}

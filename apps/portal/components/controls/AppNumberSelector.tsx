@@ -67,7 +67,13 @@ const AppNumberSelector: React.FC<IAppNumberSelectorProps> = ({
             className="tw-cursor-pointer tw-flex tw-items-center tw-justify-center tw-text-foreground "
             onClick={increase}
           >
-            <Image src={zoomIn} width={20} height={20} alt={'plus'} />
+            <Image
+              src={zoomIn}
+              width={20}
+              height={20}
+              alt={'plus'}
+              className="dark:tw-invert"
+            />
           </div>
 
           <div className="tw-flex tw-items-center  tw-justify-center tw-text-foreground ">
@@ -81,7 +87,13 @@ const AppNumberSelector: React.FC<IAppNumberSelectorProps> = ({
             className="tw-cursor-pointer tw-flex tw-items-center tw-justify-center tw-text-foreground "
             onClick={decrease}
           >
-            <Image src={zoomOut} width={20} height={20} alt={'plus'} />
+            <Image
+              src={zoomOut}
+              width={20}
+              height={20}
+              alt={'plus'}
+              className="dark:tw-invert"
+            />
           </div>
         </div>
       ) : (
@@ -95,7 +107,13 @@ const AppNumberSelector: React.FC<IAppNumberSelectorProps> = ({
             className="tw-cursor-pointer tw-flex tw-items-center tw-justify-center tw-text-foreground "
             onClick={increase}
           >
-            <Image src={zoomIn} width={20} height={20} alt={'plus'} />
+            <Image
+              src={zoomIn}
+              width={20}
+              height={20}
+              alt={'plus'}
+              className="dark:tw-invert"
+            />
           </div>
 
           <div className="tw-flex tw-items-center tw-justify-center tw-text-foreground ">
@@ -109,7 +127,13 @@ const AppNumberSelector: React.FC<IAppNumberSelectorProps> = ({
             className="tw-cursor-pointer tw-flex tw-items-center tw-justify-center tw-text-foreground "
             onClick={decrease}
           >
-            <Image src={zoomOut} width={20} height={20} alt={'minus'} />
+            <Image
+              src={zoomOut}
+              width={20}
+              height={20}
+              alt={'minus'}
+              className="dark:tw-invert"
+            />
           </div>
         </div>
       )}

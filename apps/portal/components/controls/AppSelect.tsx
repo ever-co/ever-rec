@@ -47,7 +47,7 @@ const AppSelect: React.FC<AppSelectProps> = ({
     <div
       className={classNames(
         'tw-flex tw-items-center tw-grid',
-        { 'tw-h-14': !dense },
+        { 'tw-min-h-14': !dense },
         className,
       )}
     >

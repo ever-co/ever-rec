@@ -127,7 +127,7 @@ const CreateTrelloTicketModal: React.FC<ICreateTrelloTicketModalProps> = ({
       onCancel={onCancel}
       footer={
         <Footer
-          hideBoardsText={boards === null || boards.length > 0}
+          hideBoardsText={boards === null || (boards?.length ?? 0) > 0}
           isFormValid={!!isFormValid}
           projectLoading={loading}
           handleOnSubmit={handleOnSubmit}

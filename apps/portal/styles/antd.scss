@@ -406,6 +406,12 @@ a {
     box-shadow: none;
   }
 
+  // The little arrow some menus draw is a white square in antd.
+  .ant-dropdown-arrow {
+    --antd-arrow-background-color: hsl(var(--popover));
+    display: none;
+  }
+
   .ant-menu {
     border-color: hsl(var(--border));
     background: hsl(var(--popover));
@@ -881,7 +887,15 @@ a {
     }
   }
 
-  // Sticker themes of the editor: fixed sample colours, not chrome.
+  // Sticker themes of the editor: fixed sample colours, not chrome. Their grounds are pastel in
+  // both themes, so the label on them is a fixed dark ink.
+  #corporate,
+  #fun,
+  #colorful,
+  #outline {
+    color: #1c1c1e !important;
+  }
+
   #corporate {
     background-color: #e2dffa;
   }
@@ -967,6 +981,11 @@ a {
   .ant-avatar {
     background: hsl(var(--muted));
     color: hsl(var(--muted-foreground));
+  }
+
+  // Stacked avatars are ringed in the ground they sit on (antd rings them in white).
+  .ant-avatar-group .ant-avatar {
+    border-color: hsl(var(--background));
   }
 
   .ant-badge-count {
@@ -1097,6 +1116,14 @@ a {
   }
   .ant-menu-root.ant-menu-inline {
     width: 100% !important;
+  }
+
+  // The inline menus sit on the sidebar's own ground.
+  .ant-menu-inline,
+  .ant-menu-inline .ant-menu-sub {
+    border-right: 0;
+    background: transparent;
+    box-shadow: none;
   }
 
   .ant-dropdown-trigger {
