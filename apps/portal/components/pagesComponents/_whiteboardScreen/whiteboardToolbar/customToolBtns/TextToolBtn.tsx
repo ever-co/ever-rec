@@ -190,7 +190,11 @@ const TextTool: React.FC<ITextToolProps> = ({
           />
 
           <ToolSubPanelBtn
-            icon={BlackTTIcon}
+            icon={
+              options.fontVariant === 'all-small-caps'
+                ? WhiteTTIcon
+                : BlackTTIcon
+            }
             active={options.fontVariant === 'all-small-caps' ? true : false}
             onSelect={() => {
               infoMessage('This option is not supported yet');
@@ -200,7 +204,7 @@ const TextTool: React.FC<ITextToolProps> = ({
             }}
           />
           <ToolSubPanelBtn
-            icon={BlacktIcon}
+            icon={options.fontVariant === 'normal' ? WhitetIcon : BlacktIcon}
             active={options.fontVariant === 'normal' ? true : false}
             onSelect={() => {
               // eslint-disable-next-line @typescript-eslint/no-unused-expressions
@@ -210,7 +214,9 @@ const TextTool: React.FC<ITextToolProps> = ({
             }}
           />
           <ToolSubPanelBtn
-            icon={BlackT2Icon}
+            icon={
+              options.fontVariant === 'small-caps' ? WhiteT2Icon : BlackT2Icon
+            }
             active={options.fontVariant === 'small-caps' ? true : false}
             onSelect={() => {
               // eslint-disable-next-line @typescript-eslint/no-unused-expressions

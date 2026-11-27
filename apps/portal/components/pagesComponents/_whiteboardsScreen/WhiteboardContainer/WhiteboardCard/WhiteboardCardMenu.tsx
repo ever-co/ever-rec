@@ -102,10 +102,10 @@ const WhiteboardCardMenu: FC<IProps> = ({
       <Button
         // The button itself is only the hit area, sized here: a rule for the page's own dropdown
         // trigger (antd.scss, `.whiteboards .ant-dropdown-trigger`) would otherwise stretch and
-        // pad it. The icon paints the quiet ink and the hover ground, like its neighbour.
+        // pad it. It sits over the preview, so the icon paints the over-media ink and hover.
         style={{
-          width: 28,
-          height: 28,
+          width: 32,
+          height: 32,
           margin: 0,
           padding: 0,
           border: 0,
@@ -113,7 +113,7 @@ const WhiteboardCardMenu: FC<IProps> = ({
         }}
         icon={
           <AppSvg
-            className="tw-flex tw-size-full tw-items-center tw-justify-center tw-rounded-sm tw-text-muted-foreground tw-transition-colors tw-duration-150 [.ant-btn:hover_&]:tw-bg-accent [.ant-btn:hover_&]:tw-text-foreground [.ant-dropdown-open_&]:tw-bg-accent [.ant-dropdown-open_&]:tw-text-foreground"
+            className="tw-flex tw-size-full tw-items-center tw-justify-center tw-rounded-md tw-text-[hsl(var(--on-overlay))] tw-transition-colors tw-duration-150 [.ant-btn:hover_&]:tw-bg-[hsl(var(--on-overlay)/0.16)] [.ant-dropdown-open_&]:tw-bg-[hsl(var(--on-overlay)/0.16)]"
             size="20px"
             path={optionsIcon.src}
           />

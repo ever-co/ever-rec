@@ -97,8 +97,9 @@ const ToolButton: React.FC<IToolButton> = (props: IToolButton) => {
           className={classNames(
             `tw-size-9 tw-shrink-0 tw-rounded-md tw-flex tw-items-center tw-justify-center tw-cursor-pointer tw-transition-colors tw-duration-150`,
             className,
+            // The selected tool, as in the image editor: the accent tint with a thin accent ring.
             active
-              ? 'tw-bg-brand-muted tw-text-brand-text'
+              ? 'tw-bg-brand-muted tw-text-brand-text tw-shadow-[inset_0_0_0_1px_hsl(var(--brand)/0.45)]'
               : 'tw-text-muted-foreground hover:tw-bg-accent hover:tw-text-foreground',
           )}
         >
