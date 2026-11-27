@@ -52,6 +52,7 @@ import WorkspaceSwitcher from 'components/shell/WorkspaceSwitcher';
 import UserBlock from 'components/shell/UserBlock';
 import ThemeToggle from 'components/shell/ThemeToggle';
 import SCHeader from 'components/shared/SCHeader/SCHeader';
+import SidebarMenuItem from 'components/containers/dashboardLayout/elements/SidebarMenuItems/SidebarMenuItem';
 import { TooltipProvider } from 'components/ui/tooltip';
 import { infoMessage } from 'app/services/helpers/toastMessages';
 
@@ -357,5 +358,86 @@ describe('SCHeader (the top bar)', () => {
     await click(bell);
     expect(infoMessage).toHaveBeenCalledTimes(1);
     expect(infoMessage).toHaveBeenCalledWith('header.notificationsSoon');
+  });
+});
+
+describe('SidebarMenuItem (a row of the navigation)', () => {
+  const row = (
+    props: Partial<React.ComponentProps<typeof SidebarMenuItem>>,
+  ) => (
+    <SidebarMenuItem
+      href="/media/videos"
+      icon={<svg />}
+      title="My Videos"
+      active={false}
+      {...props}
+    />
+  );
+
+  it('is one link: reachable from the keyboard, with the page it leads to', async () => {
+    await render(row({}));
+
+    const links = container.querySelectorAll('a');
+    expect(links).toHaveLength(1);
+    expect(links[0].getAttribute('href')).toBe('/media/videos');
+    expect(links[0].textContent).toBe('My Videos');
+    expect(links[0].hasAttribute('aria-current')).toBe(false);
+    // Nothing else in the row takes a click.
+    expect(
+      container.querySelector('[role="button"], span[onclick]'),
+    ).toBeNull();
+  });
+
+  it('marks the open page', async () => {
+    await render(row({ active: true }));
+
+    expect(container.querySelector('a')?.getAttribute('aria-current')).toBe(
+      'page',
+    );
+  });
+
+  it('runs its handler when the link is followed', async () => {
+    const onClick = jest.fn();
+    await render(row({ onClick }));
+
+    await click(container.querySelector('a') as HTMLElement);
+    expect(onClick).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps a trailing control beside the link, not inside it', async () => {
+    const onToggle = jest.fn();
+    const onClick = jest.fn();
+    await render(
+      row({
+        onClick,
+        trailing: (
+          <button type="button" aria-label="Show starred" onClick={onToggle} />
+        ),
+      }),
+    );
+
+    const toggle = container.querySelector(
+      'button[aria-label="Show starred"]',
+    ) as HTMLElement;
+    expect(toggle.closest('a')).toBeNull();
+
+    await click(toggle);
+    expect(onToggle).toHaveBeenCalledTimes(1);
+    expect(onClick).not.toHaveBeenCalled();
+  });
+
+  it('collapsed: icon only, still named, and no trailing control', async () => {
+    await render(
+      row({
+        collapsed: true,
+        trailing: <button type="button" aria-label="Show starred" />,
+      }),
+    );
+
+    const link = container.querySelector('a') as HTMLElement;
+    expect(link.getAttribute('title')).toBe('My Videos');
+    expect(link.textContent).toBe('My Videos');
+    expect(link.querySelector('.tw-sr-only')?.textContent).toBe('My Videos');
+    expect(container.querySelector('button')).toBeNull();
   });
 });

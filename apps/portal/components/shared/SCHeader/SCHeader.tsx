@@ -69,6 +69,8 @@ const SCHeader: FC<ISCHeaderProps> = ({
           size="icon-sm"
           className="-tw-ml-1 md:tw-hidden"
           aria-label={t('shell.openNavigation')}
+          aria-haspopup="dialog"
+          data-shell-drawer-trigger=""
           onClick={() => setDrawerOpen(true)}
         >
           <MenuIcon />

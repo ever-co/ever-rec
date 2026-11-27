@@ -47,6 +47,17 @@ const DashboardLayout: FC<IProps> = ({
           <Dialog.Overlay className="tw-fixed tw-inset-0 tw-z-[900] tw-bg-[hsl(var(--overlay)/var(--overlay-opacity))] data-[state=open]:tw-animate-in data-[state=closed]:tw-animate-out data-[state=closed]:tw-fade-out-0 data-[state=open]:tw-fade-in-0 md:tw-hidden" />
           <Dialog.Content
             aria-describedby={undefined}
+            onCloseAutoFocus={(event) => {
+              // The button that opens the drawer lives in the page's top bar, not in this
+              // dialog, so hand focus back to it ourselves.
+              const opener = document.querySelector<HTMLElement>(
+                '[data-shell-drawer-trigger]',
+              );
+              if (opener) {
+                event.preventDefault();
+                opener.focus();
+              }
+            }}
             className="tw-fixed tw-inset-y-0 tw-left-0 tw-z-[901] tw-flex tw-w-[18rem] tw-max-w-[85vw] tw-border-0 tw-border-r tw-border-solid tw-border-sidebar-border tw-bg-sidebar tw-outline-none tw-duration-200 data-[state=open]:tw-animate-in data-[state=closed]:tw-animate-out data-[state=closed]:tw-slide-out-to-left data-[state=open]:tw-slide-in-from-left rtl:tw-left-auto rtl:tw-right-0 rtl:data-[state=closed]:tw-slide-out-to-right rtl:data-[state=open]:tw-slide-in-from-right md:tw-hidden"
           >
             <Dialog.Title className="tw-sr-only">
