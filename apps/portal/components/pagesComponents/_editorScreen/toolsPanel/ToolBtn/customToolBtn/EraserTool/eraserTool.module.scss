@@ -1,9 +1,9 @@
 .container {
-    color: rgb(0 0 0);
+    color: hsl(var(--popover-foreground));
 }
 
 .flexContainer {
     display: flex;
     justify-content: center;
-    color: rgb(0 0 0);
+    color: hsl(var(--popover-foreground));
 }

@@ -51,21 +51,34 @@ const ScaleSelector: React.FC<IAppNumberSelectorProps> = ({
       )}
     >
       <div
-        className="tw-cursor-pointer tw-flex tw-items-center tw-justify-center tw-text-black "
+        className="tw-cursor-pointer tw-flex tw-items-center tw-justify-center tw-rounded-md tw-text-foreground tw-transition-colors tw-duration-150 hover:tw-bg-accent"
         onClick={decrease}
       >
-        <Image src={zoomOut} width={24} height={24} alt={'minus'} />
+        {/* The zoom drawings are black-ink image files: inverted on the dark theme. */}
+        <Image
+          src={zoomOut}
+          width={24}
+          height={24}
+          alt={'minus'}
+          className="dark:tw-invert"
+        />
       </div>
-      <div className="tw-flex tw-items-center tw-justify-center tw-text-black ">
+      <div className="tw-flex tw-items-center tw-justify-center tw-text-foreground tw-tabular-nums">
         <span className="tw-text-sm tw-select-none">{value}</span>
         {suffix && <div className="tw-select-none tw-text-xs">{suffix}</div>}
       </div>
 
       <div
-        className="tw-cursor-pointer tw-flex tw-items-center tw-justify-center tw-text-black "
+        className="tw-cursor-pointer tw-flex tw-items-center tw-justify-center tw-rounded-md tw-text-foreground tw-transition-colors tw-duration-150 hover:tw-bg-accent"
         onClick={increase}
       >
-        <Image src={zoomIn} width={24} height={24} alt={'plus'} />
+        <Image
+          src={zoomIn}
+          width={24}
+          height={24}
+          alt={'plus'}
+          className="dark:tw-invert"
+        />
       </div>
     </div>
   );

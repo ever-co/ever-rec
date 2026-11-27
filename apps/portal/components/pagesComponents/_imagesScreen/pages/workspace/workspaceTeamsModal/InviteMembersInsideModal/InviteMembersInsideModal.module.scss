@@ -13,7 +13,7 @@
     }
 
     p {
-      margin-bottom: 1.5rem;
+      margin: 0 0 1.5rem;
       color: hsl(var(--muted-foreground));
       font-size: 0.875rem;
       line-height: 1.25rem;
@@ -37,6 +37,7 @@
       flex: 1 1 0;
       min-width: 0;
       height: 2.5rem;
+      margin: 0;
       padding: 0 0.75rem;
       border: 1px solid hsl(var(--input));
       border-radius: calc(var(--radius) - 2px);

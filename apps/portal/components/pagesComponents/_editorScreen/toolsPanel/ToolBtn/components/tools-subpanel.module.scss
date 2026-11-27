@@ -1,18 +1,10 @@
-/* width */
+// A tool's option panel: a floating surface with a hairline (the wrapper in ToolBtn adds the shadow).
 .toolssubpanel {
   padding: 20px;
-  color: black;
+  color: hsl(var(--popover-foreground));
   border-radius: 10px;
-  background-color: #e9e7f0;
-  background-image: radial-gradient(
-      at 47% 83%,
-      rgb(211, 205, 248) 0,
-      transparent 59%
-    ),
-    radial-gradient(at 82% 65%, hsl(253.33, 23%, 92%) 0, transparent 55%);
-    -webkit-box-shadow: inset 0px 22px 10px -15px #FFFFFF; 
-    box-shadow: inset 0px 22px 10px -15px #FFFFFF;
-  
+  background-color: hsl(var(--popover));
+  border: 1px solid hsl(var(--border));
 }
 
 .toolssubpanel::-webkit-scrollbar {
@@ -21,12 +13,12 @@
 
 /* Track */
 .toolssubpanel::-webkit-scrollbar-track {
-  background: #ebebeb;
+  background: transparent;
   border-radius: 5px;
 }
 
 /* Handle */
 .toolssubpanel::-webkit-scrollbar-thumb {
-  background: #5b4dbe;
-  border-radius: 3px 0px 0px 3px;
+  background: hsl(var(--foreground) / 0.18);
+  border-radius: 9999px;
 }

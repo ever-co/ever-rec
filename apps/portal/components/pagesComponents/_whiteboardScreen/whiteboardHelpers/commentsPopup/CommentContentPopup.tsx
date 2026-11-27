@@ -77,7 +77,7 @@ const CommentContentPopup: React.FC<ICommentsMediaProps> = ({
   return currentShape?.attrs.shapeType === tools.comments.tool ? (
     <div
       id="whiteboard-comment"
-      className={classNames('tw-absolute tw-w-344px', styles.whiteboardComment)}
+      className={classNames('tw-absolute', styles.whiteboardComment)}
     >
       <div className="tw-w-full ">
         <div
@@ -104,8 +104,8 @@ const CommentContentPopup: React.FC<ICommentsMediaProps> = ({
           <div className="tw-flex tw-items-center">
             <div className="tw-relative tw-inline-block tw-text-left">
               <div>
-                <button className="tw-flex tw-w-full tw-rounded-3xl tw-bg-primary-violet-30 tw-px-4 tw-py-2 tw-shadow-sm tw-items-center">
-                  <AppSvg path={chevronIcon.src} className="tw-mr-1.5" />
+                <button className="tw-flex tw-w-full tw-rounded-md tw-bg-muted tw-px-2 tw-py-2 tw-items-center tw-text-muted-foreground tw-transition-colors tw-duration-150 hover:tw-bg-accent hover:tw-text-foreground">
+                  <AppSvg path={chevronIcon.src} className="tw-mr-1.5" themed />
                   <AppSvg path={questionIcon.src} />
                 </button>
               </div>
@@ -126,8 +126,8 @@ const CommentContentPopup: React.FC<ICommentsMediaProps> = ({
                   path={sendIcon.src}
                   className={classNames(
                     activeMicBtn
-                      ? 'tw-text-primary-purple'
-                      : 'tw-text-grey-light4',
+                      ? 'tw-text-brand-text'
+                      : 'tw-text-muted-foreground',
                   )}
                 />
               </button>
@@ -136,8 +136,8 @@ const CommentContentPopup: React.FC<ICommentsMediaProps> = ({
                   path={video.src}
                   className={classNames(
                     activeVideoBtn
-                      ? 'tw-text-primary-purple'
-                      : 'tw-text-grey-dark2',
+                      ? 'tw-text-brand-text'
+                      : 'tw-text-muted-foreground',
                   )}
                 />
               </button>
@@ -146,8 +146,8 @@ const CommentContentPopup: React.FC<ICommentsMediaProps> = ({
                   path={mic.src}
                   className={classNames(
                     activeSendBtn
-                      ? 'tw-text-primary-purple'
-                      : 'tw-text-grey-dark2',
+                      ? 'tw-text-brand-text'
+                      : 'tw-text-muted-foreground',
                   )}
                 />
               </button>

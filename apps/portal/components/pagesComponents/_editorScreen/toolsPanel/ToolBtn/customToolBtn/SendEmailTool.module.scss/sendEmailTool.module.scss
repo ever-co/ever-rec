@@ -13,25 +13,35 @@
 }
 
 .title {
-    font-size: 1.5rem;
-    line-height: 2rem; 
+    font-size: 1rem;
+    line-height: 1.5rem;
     font-weight: 600;
     margin-bottom: 0.5rem;
 }
 
-.emailContainer {
-    border: 1px solid #998fff;
-    border-radius: 5px;
+// The address field (react-multi-email ships a white field with its own focus colour).
+.emailContainer.emailContainer {
+    border: 1px solid hsl(var(--input));
+    border-radius: 8px;
     width: 100%;
+    background: transparent;
+    color: hsl(var(--foreground));
+
+    &:global(.focused) {
+        border-color: hsl(var(--ring));
+        background: transparent;
+        box-shadow: 0 0 0 3px hsl(var(--ring) / 0.2);
+    }
 }
 
-.emailInput {
-    background-color: white;
+.emailInput.emailInput {
+    background-color: hsl(var(--muted));
+    color: hsl(var(--foreground));
     padding: 0;
 }
 
 .wrapper {
-    padding-top: 13px;
+    padding-top: 12px;
     display: flex;
     width: 100%;
     align-items: flex-start;

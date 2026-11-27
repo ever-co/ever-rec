@@ -1,36 +1,39 @@
+// A tile of the share and download panels. The mark inside (file type, cloud service) keeps its
+// own colours; the tile is a card with a hairline.
 .buttonContainer {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 70px;
   height: 70px;
-  background: white;
+  background: hsl(var(--card));
   padding: 1rem;
   margin-right: 1rem;
   border-radius: 0.5rem;
-  transition-property: all;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 300ms;
-  border: 2px solid white;
+  transition:
+    background-color 150ms var(--ease-out),
+    border-color 150ms var(--ease-out);
+  border: 1px solid hsl(var(--border));
 }
 
 .disabled {
   filter: grayscale(100%);
-  opacity: 75;
+  opacity: 0.5;
   &:hover {
     cursor: pointer !important;
-    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1),
-      0 4px 6px -4px rgb(0 0 0 / 0.1);
-    background: #cdbbff;
   }
+}
+
+// A greyed dark mark would sink into the dark tile.
+:global(.dark) .disabled {
+  filter: grayscale(100%) brightness(1.6);
 }
 
 .enabled {
   filter: grayscale(0);
   &:hover {
     cursor: pointer;
-    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1),
-      0 4px 6px -4px rgb(0 0 0 / 0.1);
-    background: #cdbbff;
+    background: hsl(var(--accent));
+    border-color: hsl(var(--foreground) / 0.25);
   }
 }

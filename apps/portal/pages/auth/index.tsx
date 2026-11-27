@@ -93,16 +93,16 @@ const Auth: React.FC<SignFlowComponent> = ({ children, componentType }) => {
   };
 
   return (
-    <div className="mx-lg:tw-grid-cols-1 tw-inline-grid tw-grid-cols-2 tw-p-4 tw-min-h-screen tw-w-screen">
+    <div className="tw-relative tw-grid tw-min-h-screen tw-w-full tw-grid-cols-2 tw-gap-4 tw-bg-background tw-p-4 mx-lg:tw-grid-cols-1">
       <div className="tw-absolute tw-left-5 tw-top-5 tw-z-10 tw-flex tw-items-center tw-gap-1">
         <LanguageMenu variant="compact" />
         <ThemeToggle className="tw-size-8" />
       </div>
-      <div className="tw-flex tw-flex-col tw-items-center">
-        <div className="tw-flex-1 tw-pt-16 tw-relative">
+      <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-px-4 tw-py-16">
+        <div className="tw-relative tw-w-full tw-max-w-[24rem]">
           <LogoWrapper />
-          <div className="mx-sm:max-w-xs tw-w-full">
-            <div className="tw-w-26rem">
+          <div className="tw-w-full">
+            <div className="tw-w-full">
               <AppHeader
                 part1=""
                 part2=""
@@ -113,20 +113,15 @@ const Auth: React.FC<SignFlowComponent> = ({ children, componentType }) => {
                       ? t('page.auth.login.welcomeTitle')
                       : t('page.register.title')
                 }
-                className="tw-mb-6 tw-font-bold"
+                className="tw-font-semibold"
               />
-              <p className="tw-mb-6 !tw-text-sm !tw-font-extralight">
-                <b>
-                  {currentPathname ? t('page.auth.login.welcomeTitle') : ''}
-                </b>
-              </p>
-              <p className="tw-mb-16 !tw-text-sm !tw-font-extralight">
-                <b>
-                  {currentPathname
-                    ? t('page.auth.login.welcomeDescription')
-                    : ''}
-                </b>
-              </p>
+              {/* One quiet line under the title (the title keeps 24px under it, so the line
+                  moves up to sit 8px below). Only the sign-in page has one. */}
+              {currentPathname && (
+                <p className="-tw-mt-4 tw-mb-8 tw-text-sm tw-text-muted-foreground">
+                  {t('page.auth.login.welcomeDescription')}
+                </p>
+              )}
 
               <Layout>
                 <div className="">
@@ -134,7 +129,7 @@ const Auth: React.FC<SignFlowComponent> = ({ children, componentType }) => {
                   {componentType != 'newResetPassword' && (
                     <>
                       {componentType != 'register' ? (
-                        <div className="tw-text-center tw-my-7 tw-flex tw-justify-center"></div>
+                        <div className="tw-my-3 tw-flex tw-justify-center tw-text-center"></div>
                       ) : (
                         ''
                       )}
@@ -144,12 +139,12 @@ const Auth: React.FC<SignFlowComponent> = ({ children, componentType }) => {
                       {(componentType === 'login' ||
                         componentType === 'register') && <EverIdButton />}
 
-                      <div className="tw-flex tw-justify-center tw-mt-7">
+                      <div className="tw-mt-6 tw-flex tw-flex-wrap tw-items-center tw-justify-center tw-gap-y-2">
                         {filteredLinks().map((link, index, arr) => (
                           <React.Fragment key={`link_${index}`}>
                             {componentType !== link.name && (
                               <AppLink
-                                className="tw-text-primary-purple !tw-text-sm"
+                                className="tw-text-sm"
                                 onClick={() =>
                                   router.push(
                                     `${preRoutes.auth}${link.route}${params}`,
@@ -171,14 +166,14 @@ const Auth: React.FC<SignFlowComponent> = ({ children, componentType }) => {
           </div>
         </div>
       </div>
-      <div className="onboarding-section">
-        <div className="tw-flex-1">
+      <div className="onboarding-section tw-flex tw-items-center tw-justify-center">
+        <div className="tw-w-full">
           {componentType == 'register' ? (
             <FeaturesSection features={features} />
           ) : componentType == 'login' ? (
             <FeaturesSection features={newFeatures} />
           ) : (
-            <div className="tw-h-full tw-flex tw-justify-center">
+            <div className="tw-flex tw-justify-center tw-p-8">
               <Image
                 src="/sign/signin1.svg"
                 alt="Google"

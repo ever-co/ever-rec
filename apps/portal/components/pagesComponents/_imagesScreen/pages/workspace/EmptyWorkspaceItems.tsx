@@ -20,7 +20,9 @@ const EmptyWorkspaceItems = ({ workspace }: { workspace: IWorkspace }) => {
         <Trans
           i18nKey="unique.emptyItemMessage"
           values={{ workspaceName: workspace?.name }}
-          components={{ 1: <b className="tw-font-medium tw-text-foreground" /> }}
+          components={{
+            1: <b className="tw-font-medium tw-text-foreground" />,
+          }}
         />
         <br />
       </p>

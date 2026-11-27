@@ -36,9 +36,10 @@
   }
 }
 
-// The chosen destination: the accent tint, so it stays apart from a hovered row.
+// The chosen destination: the accent tint and ring, so it stays apart from a hovered row.
 .folder.highlighted,
 .folder.highlighted:hover {
   background: hsl(var(--brand-muted));
   color: hsl(var(--foreground));
+  box-shadow: inset 0 0 0 2px hsl(var(--brand));
 }

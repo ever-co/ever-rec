@@ -15,7 +15,8 @@ function validateDeeplink(rawUrl: string | null): string | null {
     const url = new URL(rawUrl);
 
     // Allowed schemes — extend as needed
-    const allowedProtocols = new Set([process.env.NEXT_PUBLIC_DESKTOP_PROTOCOL, // e.g. "ever-rec:"
+    const allowedProtocols = new Set([
+      process.env.NEXT_PUBLIC_DESKTOP_PROTOCOL, // e.g. "ever-rec:"
     ]);
 
     if (allowedProtocols.size === 0) {
@@ -46,7 +47,7 @@ export default function AuthorizePage() {
 
     if (oauthData.access_token || oauthData.id_token) {
       candidateUrl = `${process.env.NEXT_PUBLIC_DESKTOP_PROTOCOL}//oauth?${new URLSearchParams(
-        oauthData
+        oauthData,
       ).toString()}`;
     } else if (router.query.deep_link) {
       candidateUrl = String(router.query.deep_link);
@@ -78,12 +79,15 @@ export default function AuthorizePage() {
       <div className="tw-flex tw-min-h-screen tw-items-center tw-justify-center tw-bg-background tw-py-12">
         <div className="tw-flex tw-w-full tw-max-w-md tw-flex-col tw-items-center">
           <LogoWrapper />
-          <h1 className="tw-m-0 tw-text-center tw-text-2xl tw-font-semibold tw-text-foreground" aria-live="polite">
+          <h1
+            className="tw-m-0 tw-text-center tw-text-2xl tw-font-semibold tw-text-foreground"
+            aria-live="polite"
+          >
             Processing login...
           </h1>
           <p className="tw-m-0 tw-mt-2 tw-text-center tw-text-sm tw-text-muted-foreground">
-            Redirecting to Ever Rec Desktop. If it doesn’t open automatically, click the
-            button below.
+            Redirecting to Ever Rec Desktop. If it doesn’t open automatically,
+            click the button below.
           </p>
 
           {deeplinkUrl && showButton && (

@@ -15,6 +15,7 @@ import underlineIcon from 'public/assets/svg/tools-panel/underline.svg';
 import alignCenterIcon from 'public/assets/svg/tools-panel/align-center.svg';
 import alignLeftIcon from 'public/assets/svg/tools-panel/align-left.svg';
 import alignRightIcon from 'public/assets/svg/tools-panel/align-right.svg';
+// One black-ink drawing per button, like the rest of the row: ToolSubPanelBtn paints its states.
 import BlackTTIcon from 'public/assets/svg/tools-panel/blackTT.svg';
 import BlacktIcon from 'public/assets/svg/tools-panel/normalTt_black.svg';
 import BlackT2Icon from 'public/assets/svg/tools-panel/blackT_2.svg';
@@ -50,7 +51,7 @@ const TextTool: React.FC<ITextToolProps> = ({
   setActiveTool,
   onResetShape,
   title,
-  iconMore
+  iconMore,
 }) => {
   const optionsChangeHandler = (field: string, value: any) => {
     onChange({ ...options, [field]: value });
@@ -75,7 +76,7 @@ const TextTool: React.FC<ITextToolProps> = ({
           style={{ fontFamily: options.fontFamily }}
           onChange={(val) => optionsChangeHandler('fontFamily', val)}
           className="tw-w-full tw-rounded-md tw-border tw-border-input app-selectable"
-    >
+        >
           {fonts.map((font, index) => (
             <Select.Option
               key={`font_${index}`}
@@ -96,10 +97,10 @@ const TextTool: React.FC<ITextToolProps> = ({
               options.fontStyle === ''
                 ? optionsChangeHandler('fontStyle', 'bold')
                 : options.fontStyle === 'italic'
-                ? optionsChangeHandler('fontStyle', 'italic bold')
-                : options.fontStyle === 'italic bold'
-                ? optionsChangeHandler('fontStyle', 'italic')
-                : optionsChangeHandler('fontStyle', '');
+                  ? optionsChangeHandler('fontStyle', 'italic bold')
+                  : options.fontStyle === 'italic bold'
+                    ? optionsChangeHandler('fontStyle', 'italic')
+                    : optionsChangeHandler('fontStyle', '');
             }}
           />
 
@@ -110,10 +111,10 @@ const TextTool: React.FC<ITextToolProps> = ({
               options.fontStyle === ''
                 ? optionsChangeHandler('fontStyle', 'italic')
                 : options.fontStyle === 'bold'
-                ? optionsChangeHandler('fontStyle', 'italic bold')
-                : options.fontStyle === 'italic bold'
-                ? optionsChangeHandler('fontStyle', 'bold')
-                : optionsChangeHandler('fontStyle', '');
+                  ? optionsChangeHandler('fontStyle', 'italic bold')
+                  : options.fontStyle === 'italic bold'
+                    ? optionsChangeHandler('fontStyle', 'bold')
+                    : optionsChangeHandler('fontStyle', '');
             }}
           />
 

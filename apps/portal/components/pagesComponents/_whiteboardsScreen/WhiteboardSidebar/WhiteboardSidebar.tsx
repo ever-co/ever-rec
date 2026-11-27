@@ -67,10 +67,7 @@ const WhiteboardsSidebar: React.FC<IProps> = ({
 }) => {
   return (
     <div className="tw-border-r tw-border-border tw-h-93p  tw-w-280px tw-absolute tw-top-60px tw-left-0 tw-bg-card">
-      <div
-        className="tw-w-full tw-h-16 tw-flex tw-items-center tw-justify-center tw-border-b tw-border-border"
-        data-testid="new-whiteboard"
-      >
+      <div className="tw-w-full tw-h-16 tw-flex tw-items-center tw-justify-center tw-border-b tw-border-border">
         <AppButton
           onClick={() => {
             addNew(true);
