@@ -298,6 +298,12 @@
     "companyProfile": "Company Profile"
   },
   "page": {
+    "dataExport": {
+      "title": "Your data export",
+      "intro": "The export of this account that you asked for on app.ever.co: its profile, its Ever ID links, its workspaces and the list of its own images and videos (titles and dates, no files). Only this account can download it, for 7 days after it was made.",
+      "unavailable": "This export is not available: it was made for another account, it is older than 7 days, or the link is not complete. Sign in with the account you asked for, or ask for a new export on app.ever.co.",
+      "download": "Download (JSON)"
+    },
     "everPlatform": {
       "title": "Ever Platform",
       "loading": "Loading…",

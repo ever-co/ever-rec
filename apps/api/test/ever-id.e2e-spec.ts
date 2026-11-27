@@ -5,10 +5,13 @@
  */
 import { createServer, get as httpGet, Server } from 'node:http';
 import { AddressInfo } from 'node:net';
+import { DynamicModule } from '@nestjs/common';
 import nock from 'nock';
 import request from 'supertest';
 import { AuthProviderId } from '../src/module/auth/interfaces/auth.interface';
 import { MergeTokenPolicy } from '../src/module/auth/services/tokens/policies/merge-token.policy';
+import { EverConnectOidcConfig } from '../src/module/ever-id/ever-id.config';
+import { EVER_CONNECT_OIDC_CONFIG } from '../src/module/ever-id/ever-id.tokens';
 import {
   hashHandle,
   identityKey,
@@ -62,6 +65,26 @@ function onEnv(
     EVER_ID_CLIENT_SECRET: CLIENT_SECRET,
     EVER_ID_REDIRECT_URL: REDIRECT_URL,
     ...extra,
+  };
+}
+
+/**
+ * The Ever ID client handed over the way the Ever Platform connection does it (a global module
+ * providing `EVER_CONNECT_OIDC_CONFIG`), with no issuer in the environment.
+ */
+function connectionClient(issuer: MockOidcIssuer): DynamicModule {
+  const client: EverConnectOidcConfig = {
+    enabled: true,
+    issuer: issuer.issuer,
+    clientId: CLIENT_ID,
+    clientSecret: CLIENT_SECRET,
+    redirectUrl: REDIRECT_URL,
+  };
+  return {
+    module: class EverConnectOidcStandIn {},
+    global: true,
+    providers: [{ provide: EVER_CONNECT_OIDC_CONFIG, useValue: client }],
+    exports: [EVER_CONNECT_OIDC_CONFIG],
   };
 }
 
@@ -160,6 +183,16 @@ describe('Ever ID sign-in (e2e)', () => {
       .send({ code, binding: PORTAL_BINDING });
   }
 
+  const refresh = (token: string) =>
+    request(server())
+      .get('/api/v1/auth/refresh-token')
+      .set('refreshToken', token);
+  const logout = (token: string) =>
+    request(server())
+      .post('/api/v1/auth/ever-id/backchannel-logout')
+      .type('form')
+      .send({ logout_token: token });
+
   /** A signed-in Rec account with a password, and its Firebase ID token. */
   async function passwordAccount(email: string) {
     const user = t.firebase.authService.addUser({
@@ -189,6 +222,39 @@ describe('Ever ID sign-in (e2e)', () => {
     const session = await exchange(confirm.body.code);
     expect(session.status).toBe(201);
     return session.body.data;
+  }
+
+  /** The session of a linked sign-in. */
+  async function linkedSession(subject: string) {
+    // Create the account through the confirmation screen, then sign in again (the Gauzy chain
+    // needs the ID token of the request, which only a linked sign-in has).
+    await signUp(subject);
+    issuer.nextClaims = { sub: subject };
+    const landing = await authorize();
+    const session = await exchange(landing.searchParams.get('code')!);
+    expect(session.status).toBe(201);
+    return session.body.data;
+  }
+
+  /** Signs `subject` up, refreshes twice, logs that Ever ID session out: every reference is refused. */
+  async function refreshThenLogout(subject: string) {
+    const session = await signUp(subject);
+    const first = await refresh(session.refreshToken);
+    expect(first.status).toBe(200);
+    // A reference token again, never the bare Firebase refresh token.
+    expect(first.body.refreshToken).toMatch(/^eyJ/);
+    const second = await refresh(first.body.refreshToken);
+    expect(second.status).toBe(200);
+
+    const token = await issuer.logoutToken({ sid: `sid-${subject}` });
+    expect((await logout(token)).status).toBe(200);
+    for (const reference of [
+      session.refreshToken,
+      first.body.refreshToken,
+      second.body.refreshToken,
+    ]) {
+      expect((await refresh(reference)).status).toBeGreaterThanOrEqual(400);
+    }
   }
 
   beforeAll(async () => {
@@ -771,16 +837,8 @@ describe('Ever ID sign-in (e2e)', () => {
     });
 
     async function linkedSignIn(subject: string) {
-      // Create the account through the confirmation screen, then sign in again (the chain needs
-      // the ID token of the request, which only a linked sign-in has).
-      await signUp(subject);
-      issuer.nextClaims = { sub: subject };
-      const landing = await authorize();
-      const session = await exchange(landing.searchParams.get('code')!);
-      expect(session.status).toBe(201);
-      return t.app
-        .get(MergeTokenPolicy)
-        .decode<any>(session.body.data.refreshToken);
+      const session = await linkedSession(subject);
+      return t.app.get(MergeTokenPolicy).decode<any>(session.refreshToken);
     }
 
     it('adds the Gauzy session when Gauzy accepts the ID token', async () => {
@@ -813,22 +871,44 @@ describe('Ever ID sign-in (e2e)', () => {
       expect(providers.has(AuthProviderId.GAUZY)).toBe(false);
       expect(providers.has(AuthProviderId.FIREBASE)).toBe(true);
     });
+
+    // ever-co/ever-rec#257: through the general chain this refresh would revoke the sign-in reference
+    // and answer a new one without the `EVER_ID` entry, which the back-channel logout never finds.
+    it('keeps a refreshed session revocable with the Ever ID client of the Ever Platform connection', async () => {
+      gauzyStatus = 200;
+      const { port } = gauzy.address() as AddressInfo;
+      t = await createTestApp({
+        imports: [connectionClient(issuer)],
+        gauzyApiUrl: `http://127.0.0.1:${port}/api`,
+      });
+      const policy = t.app.get(MergeTokenPolicy);
+      const signIn = (await linkedSession('gauzy-connection')).refreshToken;
+      expect((await policy.decode<any>(signIn)).has(AuthProviderId.GAUZY)).toBe(
+        true,
+      );
+
+      const first = await refresh(signIn);
+      expect(first.status).toBe(200);
+      // Refreshed in the entry of the sign-in: Ever ID and Gauzy entries kept.
+      const providers = await policy.decode<any>(first.body.refreshToken);
+      expect(providers.has(AuthProviderId.EVER_ID)).toBe(true);
+      expect(providers.get(AuthProviderId.GAUZY)).toMatchObject({
+        accessToken: 'gauzy-access',
+        refreshToken: 'gauzy-refresh',
+      });
+
+      const token = await issuer.logoutToken({ sid: 'sid-gauzy-connection' });
+      expect((await logout(token)).status).toBe(200);
+      for (const reference of [signIn, first.body.refreshToken]) {
+        expect((await refresh(reference)).status).toBeGreaterThanOrEqual(400);
+      }
+    });
   });
 
   describe('back-channel logout', () => {
     beforeEach(async () => {
       t = await createTestApp({ env: onEnv(issuer) });
     });
-
-    const refresh = (token: string) =>
-      request(server())
-        .get('/api/v1/auth/refresh-token')
-        .set('refreshToken', token);
-    const logout = (token: string) =>
-      request(server())
-        .post('/api/v1/auth/ever-id/backchannel-logout')
-        .type('form')
-        .send({ logout_token: token });
 
     it('ends only the sessions opened with that Ever ID session, once', async () => {
       const mine = await signUp('logout-person');
@@ -855,23 +935,7 @@ describe('Ever ID sign-in (e2e)', () => {
     });
 
     it('keeps a refreshed session revocable by the logout', async () => {
-      const session = await signUp('refreshing-person');
-      const first = await refresh(session.refreshToken);
-      expect(first.status).toBe(200);
-      // A reference token again, never the bare Firebase refresh token.
-      expect(first.body.refreshToken).toMatch(/^eyJ/);
-      const second = await refresh(first.body.refreshToken);
-      expect(second.status).toBe(200);
-
-      const token = await issuer.logoutToken({ sid: 'sid-refreshing-person' });
-      expect((await logout(token)).status).toBe(200);
-      for (const reference of [
-        session.refreshToken,
-        first.body.refreshToken,
-        second.body.refreshToken,
-      ]) {
-        expect((await refresh(reference)).status).toBeGreaterThanOrEqual(400);
-      }
+      await refreshThenLogout('refreshing-person');
     });
 
     it('ends a refreshed session after its sign-in reference has expired', async () => {
@@ -970,6 +1034,24 @@ describe('Ever ID sign-in (e2e)', () => {
       const response = await logout(await issuer.logoutToken({ sid: 'sid-z' }));
       expect(response.status).toBe(404);
       expect(response.body.code).toBe('provider_disabled');
+    });
+
+    // ever-co/ever-rec#257: the session itself, not where the Ever ID client came from, keeps its
+    // refreshes revocable.
+    describe('with the Ever ID client of the Ever Platform connection', () => {
+      beforeEach(async () => {
+        await t.close();
+        t = await createTestApp({ imports: [connectionClient(issuer)] });
+      });
+
+      it('keeps a refreshed session revocable by the logout', async () => {
+        // On, with the issuer of the connection and none in the environment.
+        expect(
+          (await request(server()).get('/api/v1/auth/ever-id/config')).body,
+        ).toEqual({ enabled: true, issuer: issuer.issuer, buttonLabel: 'Ever ID' });
+
+        await refreshThenLogout('connection-person');
+      });
     });
   });
 

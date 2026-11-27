@@ -21,11 +21,13 @@ import {
   everConnectConfigFactory,
 } from './ever-connect.config';
 import {
+  EVER_CONNECT_ACCOUNT_DELETER,
   EVER_CONNECT_AUTOSTART,
   EVER_CONNECT_CLOCK,
   EVER_CONNECT_FETCH,
   EVER_CONNECT_LOCAL_PLATFORM,
   EVER_CONNECT_WORKSPACE_CREATOR,
+  EverConnectAccountDeleter,
   EverConnectLocalPlatform,
   EverConnectWorkspaceCreator,
   systemClock,
@@ -145,6 +147,35 @@ const logger = new Logger('EverConnect');
             );
           }
           return id;
+        },
+      }),
+      inject: [ModuleRef],
+    },
+    {
+      provide: EVER_CONNECT_ACCOUNT_DELETER,
+      useFactory: (moduleRef: ModuleRef): EverConnectAccountDeleter => ({
+        async delete(uid) {
+          // Resolved when used, as the workspace service is: the account deletion (and what it
+          // loads) stays out of this module's own import graph.
+          const { AuthOrchestratorService } =
+            // eslint-disable-next-line @typescript-eslint/no-require-imports
+            require('../auth/services/auth-orchestrator.service');
+          let accounts: {
+            deleteUser(uid: string): Promise<{ status?: string }>;
+          } | null = null;
+          try {
+            accounts = moduleRef.get(AuthOrchestratorService, { strict: false });
+          } catch {
+            accounts = null;
+          }
+          if (!accounts) {
+            throw Object.assign(
+              new Error('The account deletion is not available.'),
+              { code: 'account_deletion_missing' },
+            );
+          }
+          const answer = await accounts.deleteUser(uid);
+          return answer?.status === 'success';
         },
       }),
       inject: [ModuleRef],

@@ -1,0 +1,11 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /termsAcceptances/{acceptanceId} {
+      allow read:   if request.auth != null && resource.data.subjectId == request.auth.uid;
+      allow create: if false;   // server-side only, via the Admin SDK
+      allow update: if false;   // acceptance records are append-only
+      allow delete: if false;
+    }
+  }
+}

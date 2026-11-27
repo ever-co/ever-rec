@@ -567,6 +567,13 @@ export class FakeEverPlatform {
       return this.json(204);
     }
     if (method === 'POST' && path === '/v1/instances/me/ack') {
+      // As Ever Platform: an `exported` receipt names the https address of the product's export.
+      if (
+        r.body?.result === 'exported' &&
+        !/^https:\/\/[^/@\s]+/.test(String(r.body?.export_url ?? ''))
+      ) {
+        return this.problem(422, 'validation_failed');
+      }
       instance.acks.push(r.body);
       return this.json(204);
     }

@@ -132,17 +132,22 @@ export type ItemMoveResult =
  * changed: an item already in `parentId` (a move sent again, an id named twice, a move made
  * meanwhile) is not counted twice. An item that is not stored (deleted meanwhile) is not written: a
  * write of its `parentId` alone would bring it back as an item that holds only a `parentId`.
+ *
+ * With `onlyFrom`, the item moves only while it is stored in one of those folders: an item moved
+ * into another folder meanwhile stays where that move put it, and is counted there.
  */
 export async function moveWorkspaceItem(
   workspaceId: string,
   collection: 'screenshots' | 'videos',
   itemId: string,
   parentId: string | false,
+  onlyFrom?: ReadonlyArray<string | false>,
 ): Promise<ItemMoveResult> {
   // What the last run saw: the run whose write is stored.
-  const seen: { stored: boolean; from: string | false } = {
+  const seen: { stored: boolean; from: string | false; moved: boolean } = {
     stored: false,
     from: false,
+    moved: false,
   };
   let result: { committed: boolean; snapshot: { val(): unknown } };
 
@@ -153,6 +158,7 @@ export async function moveWorkspaceItem(
       .transaction((current: unknown) => {
         seen.stored = !!current && typeof current === 'object';
         seen.from = false;
+        seen.moved = false;
         if (!seen.stored) {
           // Not stored, or the first run's local guess (`null` for an item that exists): written
           // back as seen, never an abort (see `changeWorkspaceCollection`). `null` writes nothing;
@@ -161,7 +167,9 @@ export async function moveWorkspaceItem(
         }
         const item = current as { parentId?: string | false };
         seen.from = item.parentId || false;
-        return seen.from === parentId ? current : { ...item, parentId };
+        seen.moved =
+          seen.from !== parentId && (!onlyFrom || onlyFrom.includes(seen.from));
+        return seen.moved ? { ...item, parentId } : current;
       });
   } catch (e) {
     // Not committed (retried too often, or cancelled by another write of the same path).
@@ -175,7 +183,7 @@ export async function moveWorkspaceItem(
   const item = result.snapshot.val();
   return {
     ok: true,
-    moved: seen.stored && seen.from !== parentId,
+    moved: seen.moved,
     from: seen.from,
     item:
       seen.stored && item && typeof item === 'object'

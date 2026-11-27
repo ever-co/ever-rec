@@ -164,6 +164,11 @@
       "source": "router"
     },
     {
+      "path": "/settings/data-export",
+      "file": "apps/portal/pages/settings/data-export.tsx",
+      "source": "router"
+    },
+    {
       "path": "/settings/ever-platform",
       "file": "apps/portal/pages/settings/ever-platform.tsx",
       "source": "router"
