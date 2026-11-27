@@ -831,6 +831,7 @@
     "joinedWorkspaceSuccess": "Se ha unido al espacio de trabajo correctamente. Redirigiendo al nuevo espacio de trabajo..."
   },
   "shell": {
+    "select": "Seleccionar",
     "loading": "Cargando",
     "myLibrary": "Mi biblioteca",
     "workspaces": "Espacios de trabajo",

@@ -1,6 +1,7 @@
 import { Dropdown } from 'antd';
 import classNames from 'classnames';
 import { Check, MoreHorizontal } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import IEditorVideo from 'app/interfaces/IEditorVideo';
 import { IWorkspace } from 'app/interfaces/IWorkspace';
 import { IDropdownAvailableActions } from 'components/pagesComponents/_imagesScreen/components/contextMenu/ItemDropdownActions';
@@ -130,16 +131,24 @@ const SelectButton = ({
 const OverlayButton: React.FC<{
   checked: boolean;
   onClick: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
-}> = ({ onClick, checked }) => (
-  <AppButton
-    bgColor="tw-bg-transparent hover:tw-bg-[hsl(var(--on-overlay)/0.16)]"
-    twPadding="tw-p-1.5"
-    onClick={onClick}
-  >
-    <span
-      className={classNames(styles.checkbox, checked && styles.checkboxChecked)}
+}> = ({ onClick, checked }) => {
+  const { t } = useTranslation();
+
+  return (
+    <AppButton
+      bgColor="tw-bg-transparent hover:tw-bg-[hsl(var(--on-overlay)/0.16)]"
+      twPadding="tw-p-1.5"
+      onClick={onClick}
+      ariaLabel={t('shell.select')}
     >
-      {checked && <Check strokeWidth={3} aria-hidden="true" />}
-    </span>
-  </AppButton>
-);
+      <span
+        className={classNames(
+          styles.checkbox,
+          checked && styles.checkboxChecked,
+        )}
+      >
+        {checked && <Check strokeWidth={3} aria-hidden="true" />}
+      </span>
+    </AppButton>
+  );
+};

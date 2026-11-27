@@ -831,6 +831,7 @@
     "joinedWorkspaceSuccess": "已成功加入工作区。正在重定向到新工作区..."
   },
   "shell": {
+    "select": "选择",
     "loading": "加载中",
     "myLibrary": "我的媒体库",
     "workspaces": "工作区",

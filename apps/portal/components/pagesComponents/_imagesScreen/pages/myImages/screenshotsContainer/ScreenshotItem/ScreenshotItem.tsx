@@ -18,6 +18,7 @@ import {
 } from 'app/interfaces/IWorkspace';
 import styles from './ScreenshotItem.module.scss';
 import { MoreHorizontal } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 // Controls over the thumbnail's scrim: light ink and a light hover veil in both themes (the
 // theme's own hover surface would be a pale block over the picture in the light theme).
@@ -68,6 +69,7 @@ const ScreenshotItem: React.FC<IScreenshotItemProps> = ({
   onDropdownAction,
   onDropdownVisibleChange,
 }) => {
+  const { t } = useTranslation();
   const canEditTitle = useMemo(
     () => (workspace && canEdit) || !workspace,
     [workspace, canEdit],
@@ -183,7 +185,11 @@ const ScreenshotItem: React.FC<IScreenshotItemProps> = ({
             <>
               {/* TODO fix selecting items for workspace */}
               {addSelected && (
-                <AppButton bgColor={OVER_MEDIA_GROUND} onClick={selectItem}>
+                <AppButton
+                  bgColor={OVER_MEDIA_GROUND}
+                  onClick={selectItem}
+                  ariaLabel={t('shell.select')}
+                >
                   <AppSvg
                     className={OVER_MEDIA_INK}
                     path={

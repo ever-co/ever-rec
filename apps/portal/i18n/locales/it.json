@@ -831,6 +831,7 @@
     "joinedWorkspaceSuccess": "Ti sei unito all'area di lavoro con successo. Reindirizzamento alla nuova area di lavoro..."
   },
   "shell": {
+    "select": "Seleziona",
     "loading": "Caricamento",
     "myLibrary": "La mia libreria",
     "workspaces": "Aree di lavoro",
