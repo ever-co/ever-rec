@@ -1,10 +1,21 @@
-const videoDurationConverter = (length: number) => {
-  const date = new Date(0);
-  date.setSeconds(length);
-  let durationMain = date.toISOString().substr(11, 8);
-  durationMain = durationMain.substr(3, durationMain.length);
+const pad = (value: number) => String(value).padStart(2, '0');
 
-  return durationMain;
+/**
+ * Formats a length in seconds as `MM:SS`, or as `HH:MM:SS` once the length
+ * reaches one hour so long recordings do not lose their hours.
+ * Invalid input (NaN, Infinity, negative) is formatted as `00:00`.
+ */
+const videoDurationConverter = (length: number) => {
+  const totalSeconds =
+    Number.isFinite(length) && length > 0 ? Math.floor(length) : 0;
+
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+
+  return hours > 0
+    ? `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`
+    : `${pad(minutes)}:${pad(seconds)}`;
 };
 
 export { videoDurationConverter };
