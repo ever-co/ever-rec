@@ -4,6 +4,14 @@
  * previously stored asset with the server's own provider credentials. So a caller may only store
  * an asset that was created for them: a foreign asset is refused (403) before anything is written
  * or deleted, an unknown service type or a malformed id is a 400, and their own asset still saves.
+ * A request without the video file (no `blob` part, or JSON) is a 400 too, before anything is
+ * written, deleted or uploaded: it used to read `blob.mimetype` of nothing and answer 500.
+ * So is a video of a type we have no file extension for (such as video/x-matroska) a 415, as on
+ * the upload routes, and its temporary file is removed: it used to be stored as `<id>undefined`,
+ * a name ffmpeg cannot convert to, so its master file never reached the bucket. The same goes
+ * for a type that has a file extension but is no video container ffmpeg can write (text/plain,
+ * which is what a part without a Content-Type is reported as, application/octet-stream or
+ * application/pdf): it used to be stored as `<id>.xdr`, `<id>.xtp` or `<id>.pdf`.
  * The download link is the streaming provider's, never the `downloadUrl` the client sends: the
  * Jira and Trello export used to fetch that URL from the server.
  *
@@ -18,7 +26,10 @@
 import { INestApplication } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
+import { existsSync, readdirSync, rmSync } from 'fs';
+import { join } from 'path';
 import request from 'supertest';
+import { TMP_PATH } from 'src/enums/tmpPathsEnums';
 import { TokenService } from '../auth/services/tokens';
 import { MuxService } from './mux/mux.service';
 import { ApiVideoService } from './api-video/api-video.service';
@@ -38,10 +49,13 @@ const mockUpload = jest.fn<Promise<unknown>, unknown[]>(
 jest.mock('src/services/utils/uploadVideoToBucket', () => ({
   fixVideoAndUploadToBucket: (...args: unknown[]) => mockUpload(...args),
 }));
-// Keep the uploaded file in memory instead of writing it to the tmp folder.
-jest.mock('multer', () => {
-  const actual = jest.requireActual('multer');
-  return Object.assign(actual, { diskStorage: () => actual.memoryStorage() });
+// Uploads are written to a directory of their own, so a test can see what is left behind.
+jest.mock('src/enums/tmpPathsEnums', () => {
+  const { mkdtempSync } = jest.requireActual('fs');
+  const { tmpdir } = jest.requireActual('os');
+  const { join } = jest.requireActual('path');
+  const dir = mkdtempSync(join(tmpdir(), 'ever-stream-save-data-spec-')) + '/';
+  return { TMP_PATH: dir, TMP_PATH_FIXED: dir };
 });
 
 const mockDb: {
@@ -156,11 +170,16 @@ describe('stream save-data routes', () => {
 
   afterAll(async () => {
     await app.close();
+    rmSync(TMP_PATH, { recursive: true, force: true });
   });
 
   beforeEach(() => {
     jest.spyOn(console, 'log').mockImplementation(() => undefined);
     jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    // The bucket upload stand-in does not remove the upload the way the real one does.
+    for (const name of readdirSync(TMP_PATH)) {
+      rmSync(join(TMP_PATH, name), { force: true });
+    }
     mockDb.writes = [];
     mockDb.payloads = [];
     mockDb.data = {
@@ -212,6 +231,7 @@ describe('stream save-data routes', () => {
     path: string,
     fields: Record<string, string>,
     uid = 'uid-me',
+    contentType = 'video/webm',
   ) => {
     let req = request(app.getHttpServer())
       .post(`/stream/save-data${path}`)
@@ -221,8 +241,46 @@ describe('stream save-data routes', () => {
     }
     return req.attach('blob', Buffer.from('video'), {
       filename: 'rec.webm',
-      contentType: 'video/webm',
+      contentType,
     });
+  };
+
+  /** The same form, written by hand: its `blob` part has no Content-Type header at all. */
+  const saveWithoutContentType = (
+    path: string,
+    fields: Record<string, string>,
+  ) => {
+    const boundary = 'ever-rec-spec-boundary';
+    const parts = Object.entries(fields).map(
+      ([key, value]) =>
+        `--${boundary}\r\nContent-Disposition: form-data; name="${key}"\r\n\r\n${value}\r\n`,
+    );
+    parts.push(
+      `--${boundary}\r\nContent-Disposition: form-data; name="blob"; filename="rec"\r\n\r\nvideo\r\n`,
+    );
+    return request(app.getHttpServer())
+      .post(`/stream/save-data${path}`)
+      .set({
+        Authorization: 'Bearer uid-me',
+        'Content-Type': `multipart/form-data; boundary=${boundary}`,
+      })
+      .send(`${parts.join('')}--${boundary}--\r\n`);
+  };
+
+  /** The same form without its `blob` part, or the fields sent as JSON. */
+  const saveWithoutFile = (
+    path: string,
+    fields: Record<string, string>,
+    as: 'form' | 'json' = 'form',
+  ) => {
+    let req = request(app.getHttpServer())
+      .post(`/stream/save-data${path}`)
+      .set({ Authorization: 'Bearer uid-me' });
+    if (as === 'json') return req.send(fields);
+    for (const [key, value] of Object.entries(fields)) {
+      req = req.field(key, value);
+    }
+    return req;
   };
 
   const fields = (assetId: string, serviceType = 'mux') => ({
@@ -279,6 +337,17 @@ describe('stream save-data routes', () => {
       expect(mux.getAssetOwner).not.toHaveBeenCalled();
       expect(mockDb.writes).toEqual([]);
     });
+
+    it.each(['form', 'json'] as const)(
+      'refuses a request without a video file (%s), writing nothing and uploading nothing',
+      async (as) => {
+        const res = await saveWithoutFile('', fields('mine'), as).expect(400);
+        expect(res.body.message).toBe('A video file is required');
+        expect(mux.getAssetOwner).not.toHaveBeenCalled();
+        expect(mockDb.writes).toEqual([]);
+        expect(mockUpload).not.toHaveBeenCalled();
+      },
+    );
   });
 
   describe('POST stream/save-data/:videoId', () => {
@@ -318,6 +387,101 @@ describe('stream save-data routes', () => {
       expect(mockDb.writes).toEqual([]);
       expect(mux.deleteAsset).not.toHaveBeenCalled();
     });
+
+    it.each(['form', 'json'] as const)(
+      'refuses a request without a video file (%s), without writing, deleting or uploading',
+      async (as) => {
+        const res = await saveWithoutFile('/vid1', fields('mine'), as).expect(
+          400,
+        );
+        expect(res.body.message).toBe('A video file is required');
+        expect(mux.getAssetOwner).not.toHaveBeenCalled();
+        expect(mockDb.writes).toEqual([]);
+        expect(mux.deleteAsset).not.toHaveBeenCalled();
+        expect(mockUpload).not.toHaveBeenCalled();
+        expect(mockDb.data.users['uid-me'].videos.vid1.streamData).toEqual({
+          serviceType: 'mux',
+          assetId: 'old-asset',
+        });
+      },
+    );
+  });
+
+  describe.each([
+    ['POST stream/save-data', ''],
+    ['POST stream/save-data/:videoId', '/vid1'],
+  ])('the type of the video file on %s', (_, path) => {
+    const expectNothingStored = () => {
+      expect(mux.getAssetOwner).not.toHaveBeenCalled();
+      expect(mockDb.writes).toEqual([]);
+      expect(mux.deleteAsset).not.toHaveBeenCalled();
+      expect(apiVideo.deleteAsset).not.toHaveBeenCalled();
+      expect(mockUpload).not.toHaveBeenCalled();
+      expect(mockDb.data.users['uid-me'].videos.vid1.streamData).toEqual({
+        serviceType: 'mux',
+        assetId: 'old-asset',
+      });
+      // No interceptor removes the upload on these routes: the refusal does.
+      expect(readdirSync(TMP_PATH)).toEqual([]);
+    };
+
+    it.each([
+      'video/x-matroska',
+      'application/x-not-a-video',
+      // These have a file extension, but ffmpeg cannot write a video under it.
+      'text/plain',
+      'application/octet-stream',
+      'application/pdf',
+    ])(
+      'refuses a type that is no video container ffmpeg can write (%s) with a 415, writing, deleting and uploading nothing',
+      async (type) => {
+        const res = await save(path, fields('mine'), 'uid-me', type).expect(
+          415,
+        );
+        expect(res.body.message).toBe(`Unsupported media type: ${type}`);
+        expectNothingStored();
+      },
+    );
+
+    it('refuses a video part without a Content-Type (read as text/plain) with a 415, writing, deleting and uploading nothing', async () => {
+      const res = await saveWithoutContentType(path, fields('mine')).expect(
+        415,
+      );
+      expect(res.body.message).toBe('Unsupported media type: text/plain');
+      expectNothingStored();
+    });
+
+    it.each([
+      ['video/mp4', '.mp4'],
+      ['video/webm', '.webm'],
+      ['video/quicktime', '.mov'],
+      ['video/ogg', '.ogg'],
+      ['audio/ogg', '.ogg'],
+    ])(
+      'still saves a %s video, converted under its id plus %s',
+      async (type, extension) => {
+        await save(path, fields('mine'), 'uid-me', type).expect(201);
+
+        expect(mockUpload).toHaveBeenCalledTimes(1);
+        const [blob, fullFilename] = mockUpload.mock.calls[0] as [
+          Express.Multer.File,
+          string,
+        ];
+        expect(blob.filename).toMatch(/^[0-9a-f-]{36}$/);
+        expect(fullFilename).toBe(`${blob.filename}${extension}`);
+        // The bucket upload reads it in the background, so it stays.
+        expect(existsSync(blob.path)).toBe(true);
+      },
+    );
+  });
+
+  it('save-data stores the recording under its id plus the extension of its type', async () => {
+    await save('', fields('mine'), 'uid-me', 'video/mp4').expect(201);
+
+    const [blob] = mockUpload.mock.calls[0] as [Express.Multer.File];
+    expect(mockDb.data.users['uid-me'].videos.newVideoId.refName).toBe(
+      `${blob.filename}.mp4`,
+    );
   });
 
   describe('the stored download link', () => {

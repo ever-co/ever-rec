@@ -58,8 +58,8 @@ importers:
         specifier: 1.0.0-rc.8
         version: 1.0.0-rc.8
       '@ever-co/legal':
-        specifier: ^0.1.0
-        version: 0.1.2
+        specifier: ^0.7.1
+        version: 0.7.1
       '@firebase/storage':
         specifier: ^0.13.1
         version: 0.13.14(@firebase/app@0.10.13)
@@ -3524,8 +3524,8 @@ packages:
     resolution: {integrity: sha512-vbJy0CpKJNGxkwyZh+OVFw18otpA03wMRJU31HCcqSg5s4hTbOvCKfYWoN4vu/Qk03QdLSs+PQoxmWnzGwjAEw==}
     engines: {node: '>=20'}
 
-  '@ever-co/legal@0.1.2':
-    resolution: {integrity: sha512-TbnRbXD2AhGBI0F/odq+TC5eCFrp4eTDziDy3gJhautda9td5Po23GRCQ6PfvW58J8xQrZXNMBIKYle36Kv1/g==}
+  '@ever-co/legal@0.7.1':
+    resolution: {integrity: sha512-Ucbe5GeszADVY8khlnj/x98Rw7Ju8z/lb8CE6tvJk6RW+zk/VxSCGiWRI8n3uDunH1IdJqQzzlTn7AKpHYWR8w==}
     engines: {node: '>=20'}
 
   '@ever-gauzy/desktop-core@0.1.0':
@@ -24232,7 +24232,7 @@ snapshots:
       '@ever-co/connect-contracts': 1.0.0-rc.8
       ajv: 8.20.0
 
-  '@ever-co/legal@0.1.2': {}
+  '@ever-co/legal@0.7.1': {}
 
   '@ever-gauzy/desktop-core@0.1.0':
     dependencies:

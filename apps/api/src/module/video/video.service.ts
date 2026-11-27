@@ -34,6 +34,7 @@ import { fixVideoWithFFMPEG } from '../../services/utils/fixVideoWithFFMPEG';
 import { sendError, sendResponse } from '../../services/utils/sendResponse';
 import { StreamServiceService } from '../video-services/streamService.service';
 import { is_id } from '../workspace/validators/id.validator';
+import { keepOwnThumbnails } from './utilities/chapterThumbnail';
 import { toPublicLikes } from '../../services/utils/likes';
 import {
   PUBLIC_VIDEO_FIELDS,
@@ -224,7 +225,12 @@ export class VideoService {
         };
 
         const allViews = formatDataToArray(videoData.views);
-        const chapters = parseCollectionToArray(videoData.chapters);
+        // Every viewer's browser loads the chapter thumbnails, so only the API's own signed
+        // links go out, also for chapters saved before the thumbnail check.
+        const chapters = keepOwnThumbnails(
+          parseCollectionToArray(videoData.chapters),
+          () => admin.storage().bucket().name,
+        );
         // Anyone with the link reads this answer, so it carries only the fields the share and
         // embed pages read. The viewers (names, emails) go to the owner only, through
         // `shared/get-view-info`; the Drive and Dropbox copies (owner's emails) never go out.
@@ -722,12 +728,17 @@ export class VideoService {
     return this.getVideoByIdPrivate(uid, id);
   }
 
-  async updateVideo(uid: string, blob: any, refName: string): Promise<string> {
+  async updateVideo(
+    uid: string,
+    blob: Express.Multer.File,
+    refName: string,
+  ): Promise<string> {
     const bucket = admin.storage().bucket();
-    const buffer = blob.buffer;
     const fileRef = bucket.file(`users/${uid}/videos/${refName}`);
 
-    await fileRef.save(buffer);
+    // The route writes the video to the API disk: it is streamed to the bucket from there, never
+    // read into memory.
+    await bucket.upload(blob.path, { destination: fileRef });
 
     // create a new signed url so that the browser doesn't cache the video url with previous data ranges
     const newConfig = this.config;

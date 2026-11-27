@@ -8,6 +8,7 @@
  * check and the chapter service are replaced.
  */
 import { INestApplication } from '@nestjs/common';
+import { INTERCEPTORS_METADATA } from '@nestjs/common/constants';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import { TokenService } from '../../auth/services/tokens';
@@ -396,8 +397,9 @@ describe('VideoChapterController workspace access', () => {
   // The service pairs the n-th thumbnail with the n-th entry of `chaptersBlobs`, and multer keeps
   // every uploaded file in memory, so the count and the size of the thumbnails are capped.
   describe('the thumbnails sent when saving', () => {
-    // The editors send 1000x562 JPEG thumbnails of well under 1 MB.
-    const MAX_THUMBNAIL_BYTES = 2 * 1024 * 1024;
+    // The editors send 1000x562 JPEG thumbnails at quality 0.75: even a frame of pure noise makes
+    // one of about 320 KB, and a real frame far less.
+    const MAX_THUMBNAIL_BYTES = 448 * 1024;
     const blobList = (count: number) =>
       JSON.stringify(
         Array.from({ length: count }, (_, index) => ({
@@ -471,6 +473,76 @@ describe('VideoChapterController workspace access', () => {
       ).expect(400);
       // Refused by the upload limit, not by the count check after every file was read.
       expect(response.body.message).toMatch(/too many files/i);
+      expect(saveChapters).not.toHaveBeenCalled();
+    });
+
+    it('reach the service when there are MAX_CHAPTERS of them', async () => {
+      await saveWithThumbnails(
+        blobList(MAX_CHAPTERS),
+        thumbnails(MAX_CHAPTERS),
+      ).expect(201);
+      expect(saveChapters.mock.calls[0][4]).toHaveLength(MAX_CHAPTERS);
+    });
+
+    // Multer holds the whole save in memory: at most MAX_CHAPTERS thumbnails at the cap, plus the
+    // two chapter lists. It used to be 200 thumbnails of 2 MB (about 400 MB) and any number of
+    // 1 MB text fields.
+    it('keep the most one save can hold under 100 MB', () => {
+      const [Interceptor] = Reflect.getMetadata(
+        INTERCEPTORS_METADATA,
+        VideoChapterController.prototype.saveChapters,
+      );
+      const limits = new Interceptor().multer.limits;
+      const mostBytes =
+        limits.files * limits.fileSize + limits.fields * limits.fieldSize;
+
+      expect(limits.files).toBe(MAX_CHAPTERS);
+      expect(limits.fileSize).toBe(MAX_THUMBNAIL_BYTES);
+      expect(Number.isFinite(limits.parts)).toBe(true);
+      expect(Number.isFinite(mostBytes)).toBe(true);
+      expect(mostBytes).toBeLessThan(100 * 1000 * 1000);
+    });
+  });
+
+  // A review probe sent 20 junk 1 MB text fields with a save and got 201: multer read each of them
+  // into memory, and nothing capped how many there were.
+  describe('the text fields sent when saving', () => {
+    const saveWithFields = (fields: Record<string, string>) =>
+      Object.entries(fields).reduce(
+        (req, [name, value]) => req.field(name, value),
+        request(app.getHttpServer())
+          .post('/video/chapter/save-changes/v1')
+          .set(as('uid-member'))
+          .field('chapters', '[]')
+          .field('chaptersBlobs', '[]'),
+      );
+
+    it('are refused with 400 when junk fields come with the two lists', async () => {
+      const junk = Object.fromEntries(
+        Array.from({ length: 20 }, (_, index) => [
+          `junk${index}`,
+          'x'.repeat(1024),
+        ]),
+      );
+
+      const response = await saveWithFields(junk).expect(400);
+      expect(response.body.message).toMatch(/too many fields/i);
+      expect(saveChapters).not.toHaveBeenCalled();
+    });
+
+    it('are refused with 400 when even one junk field comes with the two lists', async () => {
+      await saveWithFields({ junk: 'x' }).expect(400);
+      expect(saveChapters).not.toHaveBeenCalled();
+    });
+
+    it('are refused with 400 when a list is longer than 1 MB', async () => {
+      const response = await request(app.getHttpServer())
+        .post('/video/chapter/save-changes/v1')
+        .set(as('uid-member'))
+        .field('chapters', `[${' '.repeat(1024 * 1024)}]`)
+        .field('chaptersBlobs', '[]')
+        .expect(400);
+      expect(response.body.message).toMatch(/field value too long/i);
       expect(saveChapters).not.toHaveBeenCalled();
     });
   });

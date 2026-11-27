@@ -44,9 +44,9 @@ jobs:
         run: pnpm --filter ever-rec-api exec jest src/module/video
       # Jest reads each path as a pattern, so `src/module/video` above also runs src/module/video-services.
       # This step runs the specs no step above matches: the auth guards and services, comment
-      # authorization, images, shared items and links, the utils, and the integrations.
-      - name: Unit tests (auth, sharing, images and integrations)
-        run: pnpm --filter ever-rec-api exec jest src/module/auth src/module/comments.authorization.spec.ts src/module/image src/services src/module/email src/module/dropbox src/module/drive src/module/slack src/module/atlassian src/module/soundshot src/module/whiteboards src/module/editor-websocket-module
+      # authorization, terms acceptance, images, shared items and links, the utils, and the integrations.
+      - name: Unit tests (auth, terms, sharing, images and integrations)
+        run: pnpm --filter ever-rec-api exec jest src/module/auth src/module/terms src/module/comments.authorization.spec.ts src/module/image src/services src/module/email src/module/dropbox src/module/drive src/module/slack src/module/atlassian src/module/soundshot src/module/whiteboards src/module/editor-websocket-module
 
   api-e2e:
     name: API end-to-end tests (sign-in providers, existing sign-in routes)

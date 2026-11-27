@@ -11,6 +11,10 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import {
+  UPLOAD_FILE_BYTES,
+  uploadOptions,
+} from '../../common/multipart/upload-limits';
 import type { Request } from 'express';
 import { IDataResponse } from '../../interfaces/_types';
 import { SharedService } from '../../services/shared/shared.service';
@@ -28,6 +32,7 @@ import { AuthGuard, IRequestUser } from './guards/auth.guard';
 import { EmailOwnershipGuard } from './guards/email-ownership.guard';
 import { AuthOrchestratorService } from './services/auth-orchestrator.service';
 import { RefreshResponse, TokenService } from './services/tokens';
+import { getClientIp } from './client-ip';
 
 @Controller('auth')
 export class AuthController {
@@ -54,27 +59,9 @@ export class AuthController {
     // that retains raw addresses is a tracking database.
     return this.authOrchestratorService.register({
       ...body,
-      ip: this.getClientIp(request),
+      ip: getClientIp(request),
       userAgent: request?.headers?.['user-agent'] ?? null,
     });
-  }
-
-  /**
-   * First hop of `x-forwarded-for`, else the socket address.
-   *
-   * Only ever handed to `TermsAcceptanceService`, which hashes it with a
-   * per-deployment salt. A spoofed `x-forwarded-for` therefore corrupts one
-   * non-authoritative field of an audit row and nothing else.
-   */
-  private getClientIp(request: Request): string | null {
-    const forwarded = request?.headers?.['x-forwarded-for'];
-    const first = Array.isArray(forwarded) ? forwarded[0] : forwarded;
-
-    if (typeof first === 'string' && first.trim()) {
-      return first.split(',')[0].trim();
-    }
-
-    return request?.ip ?? null;
   }
 
   @Post('login')
@@ -98,7 +85,12 @@ export class AuthController {
 
   @UseGuards(AuthGuard)
   @Put('user-data')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(
+    FileInterceptor(
+      'file',
+      uploadOptions({ fileSize: UPLOAD_FILE_BYTES.picture }),
+    ),
+  )
   async updateUserData(
     @User() user: IRequestUser,
     @Body() body: UpdateUserDto,
@@ -115,7 +107,12 @@ export class AuthController {
 
   @UseGuards(AuthGuard)
   @Post('upload-avatar')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(
+    FileInterceptor(
+      'file',
+      uploadOptions({ fileSize: UPLOAD_FILE_BYTES.picture }),
+    ),
+  )
   async updateUserAvatar(
     @User() user: IRequestUser,
     @UploadedFile() file: Express.Multer.File,

@@ -30,7 +30,7 @@ import {
   UniqueViewsSharedService,
 } from 'src/services/shared/uniqueViews.shared.service';
 import { getClientIp } from 'src/services/utils/clientIp';
-import { fileExtensionMap } from 'src/services/utils/fileExtensionMap';
+import { videoFileExtension } from 'src/services/utils/fileExtensionMap';
 import { parseBooleanFlag } from 'src/services/utils/parseBooleanFlag';
 import { v4 as uuidv4 } from 'uuid';
 import { TMP_PATH } from '../../enums/tmpPathsEnums';
@@ -55,6 +55,11 @@ import { ValidateId } from '../workspace/pipes/validate-id.pipe';
 import { isWorkspaceMember } from '../workspace/guards/CanAccessWorkspace.guard';
 import { is_id } from '../workspace/validators/id.validator';
 import { RemoveUploadInterceptor } from '../../common/interceptors/remove-upload.interceptor';
+import {
+  MAX_UPLOAD_FIELD_BYTES,
+  UPLOAD_FILE_BYTES,
+  uploadOptions,
+} from '../../common/multipart/upload-limits';
 
 @Controller('video')
 export class VideoController {
@@ -144,7 +149,14 @@ export class VideoController {
 
   @UseGuards(AuthGuard)
   @Post('/:ownerId/comment')
-  @UseInterceptors(FileFieldsInterceptor([{ name: 'comment', maxCount: 1 }]))
+  // The clients send the comment as JSON. A form may carry it as text, and a
+  // file in its place is capped like a text field.
+  @UseInterceptors(
+    FileFieldsInterceptor(
+      [{ name: 'comment', maxCount: 1 }],
+      uploadOptions({ fileSize: MAX_UPLOAD_FIELD_BYTES }),
+    ),
+  )
   async postNewComment(
     @Param('ownerId', ValidateId) ownerId: string,
     @Req() request,
@@ -296,18 +308,23 @@ export class VideoController {
 
   @UseGuards(AuthGuard)
   @UseInterceptors(
-    FileInterceptor('blob', {
-      limits: { fileSize: 1024 * 1024 * 1024 },
-      storage: diskStorage({
-        destination: (req, file, callback) => {
-          callback(null, TMP_PATH);
+    FileInterceptor(
+      'blob',
+      uploadOptions(
+        { fileSize: UPLOAD_FILE_BYTES.video },
+        {
+          storage: diskStorage({
+            destination: (req, file, callback) => {
+              callback(null, TMP_PATH);
+            },
+            filename: (req, file, cb) => {
+              const randomName = uuidv4();
+              return cb(null, randomName);
+            },
+          }),
         },
-        filename: (req, file, cb) => {
-          const randomName = uuidv4();
-          return cb(null, randomName);
-        },
-      }),
-    }),
+      ),
+    ),
     // Multer has already written the upload to TMP_PATH: it goes however the request ends.
     RemoveUploadInterceptor,
   )
@@ -321,7 +338,8 @@ export class VideoController {
       throw new BadRequestException('Missing uploaded file or file metadata.');
     }
 
-    const fileExtension = fileExtensionMap[blob.mimetype];
+    // Only a container ffmpeg can write: it picks the output format from this extension.
+    const fileExtension = videoFileExtension(blob.mimetype);
 
     if (!fileExtension) {
       throw new UnsupportedMediaTypeException(
@@ -340,18 +358,23 @@ export class VideoController {
 
   @UseGuards(AuthGuard)
   @UseInterceptors(
-    FileInterceptor('file', {
-      limits: { fileSize: 1024 * 1024 * 1024 },
-      storage: diskStorage({
-        destination: (req, file, callback) => {
-          callback(null, TMP_PATH);
+    FileInterceptor(
+      'file',
+      uploadOptions(
+        { fileSize: UPLOAD_FILE_BYTES.video },
+        {
+          storage: diskStorage({
+            destination: (req, file, callback) => {
+              callback(null, TMP_PATH);
+            },
+            filename: (req, file, cb) => {
+              const randomName = uuidv4();
+              return cb(null, randomName);
+            },
+          }),
         },
-        filename: (req, file, cb) => {
-          const randomName = uuidv4();
-          return cb(null, randomName);
-        },
-      }),
-    }),
+      ),
+    ),
     // Also when @RefreshToken() refuses (401) or no uploader takes the token (empty answer).
     RemoveUploadInterceptor,
   )
@@ -366,7 +389,8 @@ export class VideoController {
       throw new BadRequestException('Missing uploaded file or file metadata.');
     }
 
-    const fileExtension = fileExtensionMap[blob.mimetype];
+    // Only a container ffmpeg can write: it picks the output format from this extension.
+    const fileExtension = videoFileExtension(blob.mimetype);
 
     if (!fileExtension) {
       throw new UnsupportedMediaTypeException(
@@ -415,10 +439,10 @@ export class VideoController {
     return await this.videoService.getVideoByIdPrivate(req.user?.id, id, 'get');
   }
 
+  // The web app and the extension send JSON here, never a form.
   @UseGuards(AuthGuard)
   @Put('single-data')
-  @UseInterceptors(FileInterceptor('blob'))
-  async updateVideoData(@Req() req, @Body() body, @UploadedFile() blob: any) {
+  async updateVideoData(@Req() req, @Body() body) {
     return await this.videoService.updateVideoData(
       req.user?.id,
       body.id,
@@ -429,10 +453,41 @@ export class VideoController {
     );
   }
 
+  // The video editors send the trimmed video, up to the size of the video
+  // itself, so it is written to disk like the other video uploads, not kept in
+  // memory.
   @UseGuards(AuthGuard)
   @Put('single')
-  @UseInterceptors(FileInterceptor('blob'))
-  async updateVideo(@Req() req, @UploadedFile() blob: any, @Body() body) {
+  @UseInterceptors(
+    FileInterceptor(
+      'blob',
+      uploadOptions(
+        { fileSize: UPLOAD_FILE_BYTES.video },
+        {
+          storage: diskStorage({
+            destination: (req, file, callback) => {
+              callback(null, TMP_PATH);
+            },
+            filename: (req, file, cb) => {
+              const randomName = uuidv4();
+              return cb(null, randomName);
+            },
+          }),
+        },
+      ),
+    ),
+    // The service is done with the upload when it returns: it goes however the request ends.
+    RemoveUploadInterceptor,
+  )
+  async updateVideo(
+    @Req() req,
+    @UploadedFile() blob: Express.Multer.File,
+    @Body() body,
+  ) {
+    if (!blob?.path) {
+      throw new BadRequestException('Missing uploaded file.');
+    }
+
     return await this.videoService.updateVideo(
       req.user?.id,
       blob,
@@ -575,7 +630,13 @@ export class VideoController {
 
   @UseGuards(AuthGuard)
   @Post('setPosterRef')
-  @UseInterceptors(FileInterceptor('templateBase64'))
+  // A PNG of one frame of the video, at the size of the video.
+  @UseInterceptors(
+    FileInterceptor(
+      'templateBase64',
+      uploadOptions({ fileSize: UPLOAD_FILE_BYTES.image }),
+    ),
+  )
   async uploadPoster(
     @Req() req,
     @Body() posterBody,
