@@ -24,7 +24,8 @@ export class TokenStrategyChain {
     if (!refreshToken) {
       throw new BadRequestException('Refresh token is required');
     }
-    // Sessions opened by an Ever ID sign-in keep one revocable reference (no-op unless configured).
+    // Sessions opened by an Ever ID sign-in keep one revocable reference, whatever the configuration
+    // says now: the stored provider map of the session decides (ever-co/ever-rec#257).
     const everId = await this.everIdRefreshStrategy.match(refreshToken);
     if (everId) {
       return this.everIdRefreshStrategy.refresh(refreshToken, request, everId);

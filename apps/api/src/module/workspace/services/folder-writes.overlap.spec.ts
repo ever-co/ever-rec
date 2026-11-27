@@ -11,9 +11,11 @@
  * folder changed, from the folder each one was in, so a move sent twice or two moves of one item
  * keep every count exact. A folder delete lowers the folders above it by the item count stored in
  * the folder when the delete is made, so an item uploaded into it or moved out of it meanwhile is
- * taken off once. A deleted image or video loses its files only while they have the generation
- * read before its record was removed, so an upload under the same name once the record is gone
- * keeps the files it wrote.
+ * taken off once. Its items then move to the top level each in a transaction of its own, and only
+ * while they are still in a deleted folder, so an item deleted meanwhile is not brought back and an
+ * item moved meanwhile stays in the folder that counts it. A deleted image or video loses its files
+ * only while they have the generation read before its record was removed, so an upload under the
+ * same name once the record is gone keeps the files it wrote.
  *
  * `overlap(first, second)` runs `second` from start to end right after `first` reads anything of
  * the workspace for the first time: `second` lands between that read and the writes `first` makes.
@@ -742,6 +744,197 @@ describe('overlapping writes to a workspace', () => {
       expect(folder('fold3')?.items).toBe(1);
       // The move took the item out of the parent; the delete must not take it out again.
       expect(folder('parent')?.items).toBe(0);
+    });
+  });
+
+  describe('deleting a folder moves its items to the top level only while they are still in it', () => {
+    let files: WorkspaceFilesService;
+
+    // fold1 is under a parent folder and holds shot1 and vid1, which the parent counts too; fold3
+    // is under fold2.
+    beforeEach(async () => {
+      files = new WorkspaceFilesService(
+        utilities,
+        // A deleted video's streaming asset goes with it.
+        { deleteAsset: () => Promise.resolve() } as any,
+        new WorkspaceShareService(utilities, new EventEmitter2()),
+        {} as any,
+        new EventEmitter2(),
+        {} as any,
+      );
+      await mockFirebase.db
+        .ref(`${WORKSPACE}/screenshots/shot1/parentId`)
+        .set('fold1');
+      await mockFirebase.db.ref(`${WORKSPACE}/videos/vid1`).set({
+        id: 'vid1',
+        uid: 'uid-admin',
+        title: 'Clip',
+        refName: 'clip.mp4',
+        parentId: 'fold1',
+      });
+      await mockFirebase.db.ref(`${WORKSPACE}/folders/parent`).set({
+        id: 'parent',
+        name: 'Parent',
+        creator: 'uid-admin',
+        parentId: false,
+        nestLevel: 0,
+        items: 2,
+      });
+      await mockFirebase.db
+        .ref(`${WORKSPACE}/folders/fold1`)
+        .update({ parentId: 'parent', nestLevel: 1, items: 2 });
+      await mockFirebase.db
+        .ref(`${WORKSPACE}/folders/fold3`)
+        .update({ parentId: 'fold2', nestLevel: 1 });
+    });
+
+    const deleteFold1 = () =>
+      foldersService.deleteFolder('uid-admin', 'ws1', 'fold1', 'parent');
+    const counts = () =>
+      Object.fromEntries(folders().map((x) => [x.id, x.items]));
+    // What each folder should count: the items stored in it and in the folders under it.
+    const itemsUnder = () => {
+      const all = folders();
+      const parentOf = new Map<string, string | false>(
+        all.map((x) => [x.id, x.parentId]),
+      );
+      const items = [
+        ...parseCollectionToArray<any>(stored('screenshots')),
+        ...parseCollectionToArray<any>(stored('videos')),
+      ].filter(Boolean);
+      const isUnder = (id: string | false, ancestorId: string) => {
+        for (
+          let at: string | false | undefined = id;
+          at;
+          at = parentOf.get(at)
+        ) {
+          if (at === ancestorId) {
+            return true;
+          }
+        }
+        return false;
+      };
+      return Object.fromEntries(
+        all.map((x) => [
+          x.id,
+          items.filter((item) => isUnder(item.parentId, x.id)).length,
+        ]),
+      );
+    };
+
+    // Runs `second` from start to end right after the delete has read the items of `collection`
+    // to move them out of the deleted folders, before it moves any of them.
+    async function afterItemsRead<A, B>(
+      collection: string,
+      first: () => Promise<A>,
+      second: () => Promise<B>,
+    ): Promise<[A, B]> {
+      let secondRun: Promise<B> | undefined;
+      const { get } = FakeQuery.prototype;
+      jest.spyOn(FakeQuery.prototype, 'get').mockImplementation(async function (
+        this: FakeQuery,
+      ) {
+        const snapshot = await get.call(this);
+        if (!secondRun && pathOf(this) === `${WORKSPACE}/${collection}`) {
+          await (secondRun = second());
+        }
+        return snapshot;
+      });
+      const firstResult = await first();
+      if (!secondRun) {
+        throw new Error(`${collection} was not read`);
+      }
+      return [firstResult, await secondRun];
+    }
+
+    const items: Array<[string, string, string, () => Promise<any>]> = [
+      [
+        'an image',
+        'screenshots/shot1',
+        'videos/vid1',
+        () => files.deleteImage('ws1', 'shot1'),
+      ],
+      [
+        'a video',
+        'videos/vid1',
+        'screenshots/shot1',
+        () => files.deleteVideo('ws1', 'vid1'),
+      ],
+    ];
+
+    it('moves every item of the folder to the top level', async () => {
+      const deleted = await deleteFold1();
+
+      expect(deleted.status).toBe('success');
+      expect(folder('fold1')).toBeUndefined();
+      expect(stored('screenshots/shot1/parentId')).toBe(false);
+      expect(stored('videos/vid1/parentId')).toBe(false);
+      expect(counts()).toEqual({ parent: 0, fold2: 0, fold3: 0 });
+      expect(counts()).toEqual(itemsUnder());
+    });
+
+    it.each(items)(
+      'does not bring back %s deleted after the delete read it',
+      async (_name, item, other, remove) => {
+        const [deleted, removed] = await afterItemsRead(
+          item.split('/')[0],
+          deleteFold1,
+          remove,
+        );
+
+        expect([deleted.status, removed.status]).toEqual([
+          'success',
+          'success',
+        ]);
+        expect(folder('fold1')).toBeUndefined();
+        // Not an item that holds only a `parentId`.
+        expect(stored(item)).toBeNull();
+        expect(stored(`${other}/parentId`)).toBe(false);
+        // The delete took both items out of the parent; the item's own delete takes nothing more.
+        expect(counts()).toEqual({ parent: 0, fold2: 0, fold3: 0 });
+        expect(counts()).toEqual(itemsUnder());
+      },
+    );
+
+    it.each(items)(
+      'keeps %s moved into another folder after the delete read it, counted there',
+      async (_name, item, other) => {
+        const [collection, itemId] = item.split('/');
+        const [deleted, moved] = await afterItemsRead(
+          collection,
+          deleteFold1,
+          () =>
+            foldersService.moveItemsToFolder(admin, 'ws1', [itemId], 'fold3'),
+        );
+
+        expect([deleted.status, moved.status]).toEqual(['success', 'success']);
+        expect(folder('fold1')).toBeUndefined();
+        expect(stored(`${item}/parentId`)).toBe('fold3');
+        expect(stored(`${other}/parentId`)).toBe(false);
+        // fold3 and fold2 above it count the item, and hold it; the parent holds neither item.
+        expect(counts()).toEqual({ parent: 0, fold2: 1, fold3: 1 });
+        expect(counts()).toEqual(itemsUnder());
+      },
+    );
+
+    it('answers an error when an item cannot be moved to the top level', async () => {
+      // The move of shot1 is refused, as when an overlapping write of the item cancels it.
+      const { transaction } = FakeReference.prototype;
+      jest
+        .spyOn(FakeReference.prototype, 'transaction')
+        .mockImplementation(function (this: FakeReference, ...args) {
+          if (pathOf(this) === `${WORKSPACE}/screenshots/shot1`) {
+            return Promise.reject(new Error('set'));
+          }
+          return transaction.apply(this, args);
+        });
+
+      const deleted = await deleteFold1();
+
+      expect(deleted.status).toBe('error');
+      expect(folder('fold1')).toBeUndefined();
+      // The other item still moves.
+      expect(stored('videos/vid1/parentId')).toBe(false);
     });
   });
 

@@ -148,6 +148,13 @@ export const disableIntegration = (key: string): Promise<IEverConnectIntegration
 export const acceptIntegration = (key: string, accepted: boolean): Promise<IEverConnectIntegration[]> =>
   api.post(`${BASE}/integrations/${encodeURIComponent(key)}/accept`, { accepted }) as any;
 
+/**
+ * The export of the signed-in account for an export request sent from app.ever.co (`404` when it
+ * was made of another account, or expired).
+ */
+export const getMyExport = (jobId: string): Promise<unknown> =>
+  api.get(`${BASE}/me/exports/${encodeURIComponent(jobId)}`);
+
 export const getAudit = (before?: string): Promise<{ rows: IEverConnectAuditRow[] }> =>
   api.get(`${BASE}/audit`, { params: { limit: 50, ...(before ? { before } : {}) } }) as any;
 

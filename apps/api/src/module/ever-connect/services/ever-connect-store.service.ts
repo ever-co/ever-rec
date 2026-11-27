@@ -10,6 +10,8 @@ import {
   IntegrationRecord,
   LinkRecord,
   PersonExportRecord,
+  PersonRequestRecord,
+  PERSON_REQUEST_KEPT_MS,
   PolicyRecord,
   PublicUrlRecord,
   RecIntegrationKey,
@@ -270,6 +272,39 @@ export class EverConnectStoreService {
         .update(Object.fromEntries(expired.map((key) => [key, null])));
     }
     return expired.length;
+  }
+
+  /**
+   * Deletes the person requests answered more than {@link PERSON_REQUEST_KEPT_MS} ago (until then a
+   * request read again gets the same answer), and any decided twice as long ago that never got an
+   * answer through; answers how many. A deletion still to finish (`incomplete`) is kept until it is
+   * done: the heartbeat's retry needs its record.
+   */
+  async sweepPersonRequests(now: number): Promise<number> {
+    const all =
+      (await this.read<Record<string, PersonRequestRecord>>(
+        EVER_CONNECT_PATHS.personRequests,
+      )) ?? {};
+    const old = Object.entries(all)
+      .filter(([, record]) => {
+        if (!record) return true;
+        if (record.incomplete === true) return false;
+        if (typeof record.answeredAt === 'number') {
+          return record.answeredAt < now - PERSON_REQUEST_KEPT_MS;
+        }
+        // Not answered yet: counted from its latest decision (a deletion finished late is decided
+        // again), never from when the request arrived.
+        const since =
+          typeof record.decidedAt === 'number' ? record.decidedAt : record.receivedAt;
+        return typeof since === 'number' && since < now - 2 * PERSON_REQUEST_KEPT_MS;
+      })
+      .map(([jobId]) => jobId);
+    if (old.length) {
+      await this.db()
+        .ref(EVER_CONNECT_PATHS.personRequests)
+        .update(Object.fromEntries(old.map((jobId) => [jobId, null])));
+    }
+    return old.length;
   }
 
   /** Reads a workspace record (the product's own data; read only). */

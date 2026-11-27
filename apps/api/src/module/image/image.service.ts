@@ -936,6 +936,16 @@ export class ImageService {
     newId: string,
     parentId: string | false,
   ): Promise<IDataResponse<IDbFolder>> {
+    // Both ids go into a database path: a sub-path such as `<id>/children` would write inside
+    // another folder.
+    if (
+      typeof newId !== 'string' ||
+      !is_id(newId) ||
+      (parentId && (typeof parentId !== 'string' || !is_id(parentId)))
+    ) {
+      throw new BadRequestException('Invalid folder id');
+    }
+
     const db = admin.database();
 
     const created = new Date().toISOString();
@@ -947,7 +957,15 @@ export class ImageService {
       const parentFolderRef = db.ref(`users/${uid}/folders/${parentId}`);
       const parentFolderSnap = await parentFolderRef.get();
       const parentFolderVal = parentFolderSnap.val();
+
+      // A parent deleted in the meantime (in another tab): nothing is written.
+      if (!parentFolderVal) {
+        return sendError('Parent folder not found.');
+      }
+
       const folderChildren = parentFolderVal.children || [];
+      // The level comes from the parent before the limit is checked.
+      nestLevel = (parentFolderVal.nestLevel || 0) + 1;
 
       if (nestLevel > 2) {
         return {
@@ -959,7 +977,6 @@ export class ImageService {
       }
 
       parentFolderRef.update({ children: [...folderChildren, newId] });
-      nestLevel = parentFolderVal.nestLevel + 1;
     }
     const newFolder: DbFolderDataRaw = {
       name,
