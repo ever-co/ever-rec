@@ -297,44 +297,70 @@ export class WorkspaceFoldersService {
       );
 
       // The items move from the lists stored now, not the ones read above: an item uploaded into a
-      // deleted folder meanwhile would keep a folder that is gone. Only their `parentId` is
-      // written: a write of the whole lists would undo every item added, changed or deleted.
+      // deleted folder meanwhile would keep a folder that is gone. Each one moves to the top level
+      // in a transaction of its own, and only while it is still stored in a deleted folder: a write
+      // of the `parentId`s read here would bring back an item deleted since as one that holds only
+      // a `parentId`, and undo a move made since, so the folder it went to would count an item it
+      // does not hold.
       const [storedScreenshots, storedVideos] = await Promise.all([
         workspaceRef.child('screenshots').get(),
         workspaceRef.child('videos').get(),
       ]);
-      const movedItems: Record<string, false> = {};
-      const updatedScreenshots = parseCollectionToArray(
-        storedScreenshots.val(),
-      ).map((screenshot) => {
-        if (deletedFolderIds.includes(screenshot.parentId)) {
-          movedItems[`screenshots/${screenshot.id}/parentId`] = false;
-          return { ...screenshot, parentId: false };
+      const screenshots = parseCollectionToIdValueObj(storedScreenshots.val());
+      const videos = parseCollectionToIdValueObj(storedVideos.val());
+      const toMove: Array<{
+        collection: Record<string, any>;
+        collectionName: 'screenshots' | 'videos';
+        itemId: string;
+      }> = [];
+      for (const [collectionName, collection] of [
+        ['screenshots', screenshots],
+        ['videos', videos],
+      ] as const) {
+        for (const [itemId, item] of Object.entries<any>(collection)) {
+          if (item && deletedFolderIds.includes(item.parentId)) {
+            toMove.push({ collection, collectionName, itemId });
+          }
         }
-        return screenshot;
+      }
+
+      const moves = await Promise.all(
+        toMove.map(({ collectionName, itemId }) =>
+          moveWorkspaceItem(
+            workspaceId,
+            collectionName,
+            itemId,
+            false,
+            deletedFolderIds,
+          ),
+        ),
+      );
+      // The answer shows each moved item as it is stored now, and not one deleted meanwhile.
+      toMove.forEach(({ collection, itemId }, i) => {
+        const move = moves[i];
+        if (move.ok === false) {
+          return;
+        }
+        if (move.item) {
+          collection[itemId] = move.item;
+        } else {
+          delete collection[itemId];
+        }
       });
 
-      const updatedVideos = parseCollectionToArray(storedVideos.val()).map(
-        (video) => {
-          if (deletedFolderIds.includes(video.parentId)) {
-            movedItems[`videos/${video.id}/parentId`] = false;
-            return { ...video, parentId: false };
-          }
-          return video;
-        },
-      );
-
-      if (Object.keys(movedItems).length > 0) {
-        await workspaceRef.update(movedItems);
+      if (moves.some((move) => move.ok === false)) {
+        return sendError('Error while trying to delete workspace folder.');
       }
 
       const updatedWorkspace = await this.utilitiesService.parseWorkspaceItems({
         ...workspaceVal,
         folders: updatedFolders,
-        screenshots: updatedScreenshots.filter(
+        screenshots: parseCollectionToArray(screenshots).filter(
           (x) => x.parentId === currentFolderId,
         ),
-        videos: updatedVideos.filter((x) => x.parentId === currentFolderId),
+        videos: parseCollectionToArray(videos).filter(
+          (x) => x.parentId === currentFolderId,
+        ),
       });
 
       return sendResponse<IWorkspace & { favFolders: IFavoriteFolders }>({
