@@ -183,7 +183,7 @@ const FavFoldersSidebarSection = ({ visible, setVisible }: Props) => {
         </div>
         <div className={styles.foldersOuterWrapper}>
           <div className={styles.innerWrapper}>
-            <h2 className={styles.heading}>Favorite Folders</h2>
+            <h2 className={styles.heading}>Favorite folders</h2>
             <hr className={styles.hr} />
             <div className={classNames(styles.foldersWrapper, 'scroll-div')}>
               {favorites.length ? (

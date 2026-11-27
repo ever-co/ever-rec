@@ -60,7 +60,7 @@ const AudioPlayer: React.FC<IPlayerProps> = ({ audioSrc, audioDuration }) => {
       <div className={styles.audioContainer}>
         <div className={styles.iconWrapper}>
           <AppSvg path={micIcon.src} size="17px" className={styles.icon} />
-          <label className={styles.label}>Voice Note</label>
+          <label className={styles.label}>Voice note</label>
         </div>
 
         <div className={styles.duration}>

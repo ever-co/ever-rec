@@ -88,7 +88,7 @@ const WorkspaceTeamsModal: FC<IProps> = ({
               {t('workspace.teams')}
             </Tab>
             {/* <Tab className={classNames('react-tabs__tab', styles.tab)}>
-              Invite Members
+              Invite members
             </Tab> */}
           </TabList>
 

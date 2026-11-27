@@ -52,7 +52,7 @@ jest.mock('components/containers/dashboardLayout/Sidebar/Sidebar', () => {
       react.createElement(
         'nav',
         { 'data-place': inDrawer ? 'drawer' : 'desktop' },
-        react.createElement('a', { href: '/media/images' }, 'My Images'),
+        react.createElement('a', { href: '/media/images' }, 'My images'),
         react.createElement(
           'button',
           { type: 'button', 'data-add-workspace': '', onClick: onAddWorkspace },

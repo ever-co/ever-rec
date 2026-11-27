@@ -650,7 +650,8 @@
       "system": "النظام",
       "languageHint": "لغة التطبيق على هذا المتصفح",
       "saving": "حفظ لقطات الشاشة",
-      "savingHint": "تنسيق الملف ومجلد التنزيل وروابط Google Drive لإضافة المتصفح"
+      "savingHint": "تنسيق الملف ومجلد التنزيل وروابط Google Drive لإضافة المتصفح",
+      "savingPreferences": "الحفظ التفضيلات"
     }
   },
   "modals": {

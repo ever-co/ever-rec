@@ -650,7 +650,8 @@
       "system": "מערכת",
       "languageHint": "שפת האפליקציה בדפדפן הזה",
       "saving": "שמירת צילומי מסך",
-      "savingHint": "פורמט קובץ, תיקיית הורדות וקישורי Google Drive עבור תוסף הדפדפן"
+      "savingHint": "פורמט קובץ, תיקיית הורדות וקישורי Google Drive עבור תוסף הדפדפן",
+      "savingPreferences": "שמירה העדפות"
     }
   },
   "modals": {

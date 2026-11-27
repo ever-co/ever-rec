@@ -247,7 +247,7 @@ const Preferences: FC = () => {
               className="tw-flex tw-h-9 tw-w-full tw-max-w-xs tw-items-center tw-justify-between tw-gap-2 tw-rounded-md tw-border tw-border-solid tw-border-input tw-bg-card tw-px-3 tw-text-sm tw-text-foreground tw-outline-none tw-transition-colors tw-duration-150 hover:tw-bg-accent hover:tw-text-foreground focus-visible:tw-ring-2 focus-visible:tw-ring-ring"
             >
               <span className="tw-truncate">
-                {t('page.preference.saving')} {t('page.preference.preferences')}
+                {t('page.appearance.savingPreferences')}
               </span>
               <ChevronRight
                 className="tw-size-4 tw-shrink-0 tw-text-muted-foreground rtl:tw-rotate-180"

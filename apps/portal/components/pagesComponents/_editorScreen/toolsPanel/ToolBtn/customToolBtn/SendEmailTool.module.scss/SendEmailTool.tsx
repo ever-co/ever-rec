@@ -87,7 +87,7 @@ const SendEmailTool: React.FC<IEmailToolProps> = ({
         <div className={styles.innerContainer}>
           <h2 className={styles.title}>Email to</h2>
           <ReactMultiEmail
-            placeholder="Add Email"
+            placeholder="Add email"
             className={styles.emailContainer}
             emails={emailcollection?.emails || emails}
             onChange={(_emails: string[]) => {

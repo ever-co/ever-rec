@@ -650,7 +650,8 @@
       "system": "Sistema",
       "languageHint": "O idioma do aplicativo neste navegador",
       "saving": "Salvamento de capturas",
-      "savingHint": "Formato de arquivo, pasta de downloads e links do Google Drive para a extensão do navegador"
+      "savingHint": "Formato de arquivo, pasta de downloads e links do Google Drive para a extensão do navegador",
+      "savingPreferences": "Salvando Preferências"
     }
   },
   "modals": {

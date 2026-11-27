@@ -132,7 +132,7 @@ const FavoritesPage: React.FC = () => {
           </div>
           <>
             <div className={styles.foldersHeadingContainer}>
-              <h3 className={styles.heading}>Images Folders</h3>
+              <h3 className={styles.heading}>Images folders</h3>
             </div>
             {favoritesImages.length ? (
               <div className="tw-h-fit tw-overflow-y-auto">
@@ -179,7 +179,7 @@ const FavoritesPage: React.FC = () => {
 
             <div className="tw-flex tw-flex-grow tw-flex-col">
               <div className={styles.foldersHeadingContainer}>
-                <h3 className={styles.heading}>Videos Folders</h3>
+                <h3 className={styles.heading}>Videos folders</h3>
               </div>
               {favoritesVideos.length ? (
                 <div className="tw-h-fit tw-overflow-y-auto">

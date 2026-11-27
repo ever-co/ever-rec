@@ -368,7 +368,7 @@ describe('SidebarMenuItem (a row of the navigation)', () => {
     <SidebarMenuItem
       href="/media/videos"
       icon={<svg />}
-      title="My Videos"
+      title="My videos"
       active={false}
       {...props}
     />
@@ -380,7 +380,7 @@ describe('SidebarMenuItem (a row of the navigation)', () => {
     const links = container.querySelectorAll('a');
     expect(links).toHaveLength(1);
     expect(links[0].getAttribute('href')).toBe('/media/videos');
-    expect(links[0].textContent).toBe('My Videos');
+    expect(links[0].textContent).toBe('My videos');
     expect(links[0].hasAttribute('aria-current')).toBe(false);
     // Nothing else in the row takes a click.
     expect(
@@ -435,9 +435,9 @@ describe('SidebarMenuItem (a row of the navigation)', () => {
     );
 
     const link = container.querySelector('a') as HTMLElement;
-    expect(link.getAttribute('title')).toBe('My Videos');
-    expect(link.textContent).toBe('My Videos');
-    expect(link.querySelector('.tw-sr-only')?.textContent).toBe('My Videos');
+    expect(link.getAttribute('title')).toBe('My videos');
+    expect(link.textContent).toBe('My videos');
+    expect(link.querySelector('.tw-sr-only')?.textContent).toBe('My videos');
     expect(container.querySelector('button')).toBeNull();
   });
 });

@@ -278,6 +278,10 @@ describe('Preferences: the saving preferences of the extension', () => {
   it('still leads to the stand-alone page', async () => {
     await render();
 
-    expect(container.querySelector('a[href="/preferences"]')).not.toBeNull();
+    const link = container.querySelector('a[href="/preferences"]');
+    expect(link).not.toBeNull();
+    // One string, not two words glued together, so each language can write it its own way
+    // (English: "Saving preferences", in sentence case).
+    expect(link?.textContent).toBe('page.appearance.savingPreferences');
   });
 });
