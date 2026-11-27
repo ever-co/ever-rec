@@ -78,20 +78,29 @@ describe('TokenStorageService on the Realtime Database emulator', () => {
     return { storage: new TokenStorageService(firebaseAdmin), attempts };
   };
 
-  /** What a refresh racing the logout came to: written before the delete, or refused after it. */
+  /**
+   * What a refresh racing the logout came to: written before the delete, refused after it, or (same
+   * process only) aborted by it: the SDK aborts a pending transaction when a `set()` (here the
+   * logout's `remove()`) lands on its location through the same app, and rejects it with
+   * `Error('set')`. Any other error fails the race.
+   */
   const outcome = (result: PromiseSettledResult<IToken>): string => {
     if (result.status === 'fulfilled') {
       return result.value?.token === REFRESHED
         ? 'written before the logout'
         : `wrote ${JSON.stringify(result.value)}`;
     }
-    return result.reason instanceof NotFoundException
-      ? 'refused after the logout'
+    if (result.reason instanceof NotFoundException) {
+      return 'refused after the logout';
+    }
+    return result.reason instanceof Error && result.reason.message === 'set'
+      ? 'aborted by the logout'
       : `failed: ${String(result.reason)}`;
   };
   const RACE_OUTCOMES = [
     'written before the logout',
     'refused after the logout',
+    'aborted by the logout',
   ];
 
   beforeAll(async () => {
@@ -144,7 +153,8 @@ describe('TokenStorageService on the Realtime Database emulator', () => {
       const api = storageOf(newProcess());
 
       // The refresh starts first: its first attempt (on the cold cache) is under way when the
-      // logout reads the entry. That read must see the stored entry, not the attempt's guess.
+      // logout reads the entry. That read must see the stored entry, not the attempt's guess. The
+      // logout's remove() then aborts the pending refresh, unless the server committed it first.
       const [updated, deleted] = await Promise.allSettled([
         api.update(entry.id, REFRESHED),
         api.delete(entry.id),
