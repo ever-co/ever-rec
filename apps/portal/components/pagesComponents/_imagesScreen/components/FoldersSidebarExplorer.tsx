@@ -105,16 +105,18 @@ const FoldersSidebarExplorer: React.FC = () => {
                 <h3 className="tw-text-sm tw-font-semibold tw-pl-3">
                   {t('unique.imageFolders')}
                 </h3>
-                <div
+                <button
+                  type="button"
                   onClick={openModal}
-                  className="tw-text-muted-foreground tw-transition-colors tw-duration-150 hover:tw-text-foreground"
+                  aria-label={t('common.newFolder')}
+                  className="tw-rounded tw-bg-transparent tw-text-muted-foreground tw-outline-none tw-transition-colors tw-duration-150 hover:tw-text-foreground focus-visible:tw-ring-2 focus-visible:tw-ring-ring"
                 >
                   <AppSvg
                     path="/common/add_new.svg"
                     className="tw-cursor-pointer"
                     themed
                   />
-                </div>
+                </button>
               </div>
               <div className="tw-mt-4 scroll-div tw-overflow-auto tw-max-h-200px">
                 {folderImageData &&
@@ -145,16 +147,18 @@ const FoldersSidebarExplorer: React.FC = () => {
                 <h3 className="tw-text-sm tw-font-semibold tw-pl-3">
                   {t('unique.videoFolders')}
                 </h3>
-                <div
+                <button
+                  type="button"
                   onClick={openModal}
-                  className="tw-text-muted-foreground tw-transition-colors tw-duration-150 hover:tw-text-foreground"
+                  aria-label={t('common.newFolder')}
+                  className="tw-rounded tw-bg-transparent tw-text-muted-foreground tw-outline-none tw-transition-colors tw-duration-150 hover:tw-text-foreground focus-visible:tw-ring-2 focus-visible:tw-ring-ring"
                 >
                   <AppSvg
                     path="/common/add_new.svg"
                     className="tw-cursor-pointer"
                     themed
                   />
-                </div>
+                </button>
               </div>
               <div className="tw-mt-4 scroll-div tw-overflow-auto tw-max-h-320px">
                 {folderVideoData &&

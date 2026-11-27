@@ -1,7 +1,6 @@
 import { FC, useCallback, useState } from 'react';
 import { useRouter } from 'next/router';
 import { RootStateOrAny, useDispatch, useSelector } from 'react-redux';
-import Link from 'next/link';
 import { useTranslation } from 'react-i18next';
 import { ChevronDown, PanelLeft, X } from 'lucide-react';
 import SidebarMenuItem from '../elements/SidebarMenuItems/SidebarMenuItem';
@@ -95,16 +94,11 @@ const Sidebar: FC<IProps> = ({
     [router], // Dependency array
   );
 
-  let menuItems: IMainMenuItem[];
-
-  if (isWorkspaceSettingsPage) {
-    const { workspaceId } = router.query;
-    menuItems = getWorkspaceSettingsMenuItems(workspaceId as string);
-  } else if (isProfilePage) {
-    menuItems = [...settingsMenuItems];
-  } else {
-    menuItems = [...mainMenuItems];
-  }
+  const menuItems: IMainMenuItem[] = isWorkspaceSettingsPage
+    ? getWorkspaceSettingsMenuItems(router.query.workspaceId as string)
+    : isProfilePage
+      ? [...settingsMenuItems]
+      : [...mainMenuItems];
   const createClickHandler = useCallback(
     (item: any) => () => handleItemClick(item),
     [handleItemClick],
@@ -174,15 +168,14 @@ const Sidebar: FC<IProps> = ({
       >
         {backItem && (
           <>
-            <Link href={backItem.route} className="tw-block">
-              <SidebarMenuItem
-                icon={backItem.icon}
-                title={backItem.title}
-                active={false}
-                collapsed={collapsed}
-                onClick={createClickHandler(backItem)}
-              />
-            </Link>
+            <SidebarMenuItem
+              href={backItem.route}
+              icon={backItem.icon}
+              title={backItem.title}
+              active={false}
+              collapsed={collapsed}
+              onClick={createClickHandler(backItem)}
+            />
             {!collapsed && (
               <div className="tw-px-2.5 tw-pb-2 tw-pt-6 tw-text-xs tw-text-muted-foreground">
                 {isProfilePage
@@ -202,39 +195,34 @@ const Sidebar: FC<IProps> = ({
 
           return (
             <div key={key} className={collapsed ? undefined : 'tw-w-full'}>
-              <Link href={item.route} className="tw-block">
-                <SidebarMenuItem
-                  icon={item.icon}
-                  title={item.title}
-                  active={isActive(item)}
-                  collapsed={collapsed}
-                  onClick={createClickHandler(item)}
-                  trailing={
-                    isStarred ? (
-                      <button
-                        type="button"
-                        aria-label={starredLabel}
-                        aria-expanded={showStarredFolders}
-                        onClick={(event) => {
-                          // The row is a link; the chevron only opens the list.
-                          event.preventDefault();
-                          event.stopPropagation();
-                          setShowStarredFolders((open) => !open);
-                        }}
-                        className="-tw-mr-1 tw-flex tw-size-6 tw-shrink-0 tw-items-center tw-justify-center tw-rounded tw-bg-transparent tw-text-muted-foreground tw-outline-none hover:tw-text-foreground focus-visible:tw-ring-2 focus-visible:tw-ring-ring"
-                      >
-                        <ChevronDown
-                          className={cn(
-                            'tw-size-4 tw-transition-transform tw-duration-150',
-                            showStarredFolders && 'tw-rotate-180',
-                          )}
-                          aria-hidden="true"
-                        />
-                      </button>
-                    ) : undefined
-                  }
-                />
-              </Link>
+              <SidebarMenuItem
+                href={item.route}
+                icon={item.icon}
+                title={item.title}
+                active={isActive(item)}
+                collapsed={collapsed}
+                onClick={createClickHandler(item)}
+                trailing={
+                  isStarred ? (
+                    // Beside the link, not inside it: the chevron only opens the list.
+                    <button
+                      type="button"
+                      aria-label={starredLabel}
+                      aria-expanded={showStarredFolders}
+                      onClick={() => setShowStarredFolders((open) => !open)}
+                      className="tw-mr-1.5 tw-flex tw-size-6 tw-shrink-0 tw-items-center tw-justify-center tw-rounded tw-bg-transparent tw-text-muted-foreground tw-outline-none hover:tw-text-foreground focus-visible:tw-ring-2 focus-visible:tw-ring-ring"
+                    >
+                      <ChevronDown
+                        className={cn(
+                          'tw-size-4 tw-transition-transform tw-duration-150',
+                          showStarredFolders && 'tw-rotate-180',
+                        )}
+                        aria-hidden="true"
+                      />
+                    </button>
+                  ) : undefined
+                }
+              />
               {isStarred && showStarredFolders && !collapsed && (
                 <StarredFolders />
               )}

@@ -14,7 +14,10 @@
   justify-content: center;
   width: 2rem;
   height: 2rem;
+  padding: 0;
+  border: 0;
   border-radius: 0.5rem;
+  background: transparent;
   color: hsl(var(--on-overlay));
   cursor: pointer;
   transition: background-color 150ms var(--ease-out);
@@ -22,6 +25,11 @@
   &:hover,
   &:global(.ant-dropdown-open) {
     background-color: hsl(var(--on-overlay) / 0.16);
+  }
+
+  &:focus-visible {
+    outline: 2px solid hsl(var(--on-overlay));
+    outline-offset: 1px;
   }
 
   svg {

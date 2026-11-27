@@ -161,7 +161,11 @@
 }
 
 .pagerLink {
+  display: block;
   margin: 0.5rem 0;
+  padding: 0;
+  border: 0;
+  background: none;
   color: hsl(var(--brand-text));
   font-size: 0.8125rem;
   cursor: pointer;

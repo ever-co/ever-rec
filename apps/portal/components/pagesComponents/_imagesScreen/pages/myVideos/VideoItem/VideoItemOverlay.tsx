@@ -93,15 +93,16 @@ const Overlay: React.FC<OverlayProps> = ({
         placement="bottomRight"
         onOpenChange={onDropdownVisibleChange}
       >
-        <div
-          role="img"
+        <button
+          type="button"
           aria-label="options"
+          aria-haspopup="menu"
           className={styles.optionsButton}
           draggable={false}
           onClick={(event) => event.stopPropagation()}
         >
           <MoreHorizontal aria-hidden="true" />
-        </div>
+        </button>
       </Dropdown>
     </div>
   );

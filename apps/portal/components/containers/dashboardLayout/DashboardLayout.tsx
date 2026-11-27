@@ -1,8 +1,8 @@
-import { FC, ReactNode, useEffect } from 'react';
+import { FC, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
+import * as Dialog from '@radix-ui/react-dialog';
 import Sidebar from './Sidebar/Sidebar';
 import { useShell } from 'components/shell/ShellContext';
-import { cn } from 'app/utilities/cn';
 
 interface IProps {
   children?: ReactNode;
@@ -28,18 +28,6 @@ const DashboardLayout: FC<IProps> = ({
   const { t } = useTranslation();
   const { drawerOpen, setDrawerOpen } = useShell();
 
-  // Escape closes the drawer; the page behind it does not scroll while it is open.
-  useEffect(() => {
-    if (!drawerOpen) return;
-
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setDrawerOpen(false);
-    };
-    document.addEventListener('keydown', onKeyDown);
-
-    return () => document.removeEventListener('keydown', onKeyDown);
-  }, [drawerOpen, setDrawerOpen]);
-
   return (
     <div className="tw-flex tw-h-[100dvh] tw-w-full tw-overflow-hidden tw-bg-sidebar tw-text-foreground">
       {/* Desktop sidebar */}
@@ -50,42 +38,29 @@ const DashboardLayout: FC<IProps> = ({
         />
       </div>
 
-      {/* Phone drawer */}
-      <div
-        className={cn(
-          'tw-fixed tw-inset-0 tw-z-[900] md:tw-hidden',
-          drawerOpen ? 'tw-visible' : 'tw-invisible',
-        )}
-        aria-hidden={!drawerOpen}
-      >
-        <div
-          className={cn(
-            'tw-absolute tw-inset-0 tw-bg-[hsl(var(--overlay)/var(--overlay-opacity))] tw-transition-opacity tw-duration-200',
-            drawerOpen ? 'tw-opacity-100' : 'tw-opacity-0',
-          )}
-          onClick={() => setDrawerOpen(false)}
-        />
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-label={t('shell.openNavigation')}
-          className={cn(
-            'tw-absolute tw-inset-y-0 tw-left-0 tw-flex tw-w-[18rem] tw-max-w-[85vw] tw-border-0 tw-border-r tw-border-solid tw-border-sidebar-border tw-bg-sidebar tw-transition-transform tw-duration-200 tw-ease-out rtl:tw-left-auto rtl:tw-right-0',
-            drawerOpen
-              ? 'tw-translate-x-0'
-              : '-tw-translate-x-full rtl:tw-translate-x-full',
-          )}
-        >
-          {drawerOpen && (
+      {/*
+        Phone drawer. A modal dialog: focus moves into it and stays there, Escape and a tap on
+        the scrim close it, and focus goes back to the button that opened it.
+      */}
+      <Dialog.Root open={drawerOpen} onOpenChange={setDrawerOpen}>
+        <Dialog.Portal>
+          <Dialog.Overlay className="tw-fixed tw-inset-0 tw-z-[900] tw-bg-[hsl(var(--overlay)/var(--overlay-opacity))] data-[state=open]:tw-animate-in data-[state=closed]:tw-animate-out data-[state=closed]:tw-fade-out-0 data-[state=open]:tw-fade-in-0 md:tw-hidden" />
+          <Dialog.Content
+            aria-describedby={undefined}
+            className="tw-fixed tw-inset-y-0 tw-left-0 tw-z-[901] tw-flex tw-w-[18rem] tw-max-w-[85vw] tw-border-0 tw-border-r tw-border-solid tw-border-sidebar-border tw-bg-sidebar tw-outline-none tw-duration-200 data-[state=open]:tw-animate-in data-[state=closed]:tw-animate-out data-[state=closed]:tw-slide-out-to-left data-[state=open]:tw-slide-in-from-left rtl:tw-left-auto rtl:tw-right-0 rtl:data-[state=closed]:tw-slide-out-to-right rtl:data-[state=open]:tw-slide-in-from-right md:tw-hidden"
+          >
+            <Dialog.Title className="tw-sr-only">
+              {t('shell.openNavigation')}
+            </Dialog.Title>
             <Sidebar
               inDrawer
               onCloseDrawer={() => setDrawerOpen(false)}
               isProfilePage={isProfilePage}
               isWorkspaceSettingsPage={isWorkspaceSettingsPage}
             />
-          )}
-        </div>
-      </div>
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
 
       {assistant}
 

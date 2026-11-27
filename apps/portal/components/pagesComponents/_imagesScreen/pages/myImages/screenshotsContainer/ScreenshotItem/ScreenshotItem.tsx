@@ -213,15 +213,16 @@ const ScreenshotItem: React.FC<IScreenshotItemProps> = ({
                 placement="bottomRight"
                 onOpenChange={dropdownVisibleChangeHandler}
               >
-                <div
-                  role="img"
+                <button
+                  type="button"
                   aria-label="options"
+                  aria-haspopup="menu"
                   className={styles.optionsButton}
                   draggable={false}
                   onClick={(event) => event.stopPropagation()}
                 >
                   <MoreHorizontal aria-hidden="true" />
-                </div>
+                </button>
               </Dropdown>
             </>
           ) : (

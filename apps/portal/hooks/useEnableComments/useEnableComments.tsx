@@ -541,14 +541,22 @@ const useEnableComments = ({
             ))}
             <div className={styles.pager}>
               {loadButtonsState.loadLess && (
-                <div className={styles.pagerLink} onClick={loadLessComments}>
+                <button
+                  type="button"
+                  className={styles.pagerLink}
+                  onClick={loadLessComments}
+                >
                   {t('hooks.prev')}
-                </div>
+                </button>
               )}
               {loadButtonsState.loadMore && (
-                <div className={styles.pagerLink} onClick={loadMoreComments}>
+                <button
+                  type="button"
+                  className={styles.pagerLink}
+                  onClick={loadMoreComments}
+                >
                   {t('hooks.next')}
-                </div>
+                </button>
               )}
             </div>
           </div>
