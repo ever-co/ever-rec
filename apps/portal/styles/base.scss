@@ -250,19 +250,6 @@ pre {
   opacity: 1;
 }
 
-// The Ever mark turns once in 9 seconds, and stands still for people who asked for less motion.
-@keyframes ever-mark-spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .ever-mark-spin {
-    animation: ever-mark-spin 9s linear infinite;
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;

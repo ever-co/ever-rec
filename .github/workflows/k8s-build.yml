@@ -39,9 +39,9 @@ jobs:
       - id: t
         run: |
           case "${GITHUB_REF_NAME}" in
-            develop) echo "tag=dev" >> "$GITHUB_OUTPUT"; echo "api=https://apidev.rec.so" >> "$GITHUB_OUTPUT"; echo "web=https://appdev.rec.so" >> "$GITHUB_OUTPUT" ;;
-            stage) echo "tag=stage" >> "$GITHUB_OUTPUT"; echo "api=https://apistage.rec.so" >> "$GITHUB_OUTPUT"; echo "web=https://appstage.rec.so" >> "$GITHUB_OUTPUT" ;;
-            main) echo "tag=prod" >> "$GITHUB_OUTPUT"; echo "api=https://api.rec.so" >> "$GITHUB_OUTPUT"; echo "web=https://app.rec.so" >> "$GITHUB_OUTPUT" ;;
+            develop) echo "tag=dev" >> "$GITHUB_OUTPUT"; echo "api=https://apidev.rec.so" >> "$GITHUB_OUTPUT"; echo "web=https://appdev.rec.so" >> "$GITHUB_OUTPUT"; echo "apps=platform=https://app-dev.ever.co,works=https://app-dev.ever.works,teams=https://demo.ever.team,gauzy=https://demo.gauzy.co,demand=https://app.everdemand.co,rec=https://app.rec.so,traduora=https://demo.traduora.co,tech=https://ever.tech" >> "$GITHUB_OUTPUT" ;;
+            stage) echo "tag=stage" >> "$GITHUB_OUTPUT"; echo "api=https://apistage.rec.so" >> "$GITHUB_OUTPUT"; echo "web=https://appstage.rec.so" >> "$GITHUB_OUTPUT"; echo "apps=platform=https://app-stage.ever.co,works=https://app-stage.ever.works,teams=https://stage.ever.team,gauzy=https://stage.gauzy.co,demand=https://app.everdemand.co,rec=https://app.rec.so,traduora=https://app.traduora.co,tech=https://ever.tech" >> "$GITHUB_OUTPUT" ;;
+            main) echo "tag=prod" >> "$GITHUB_OUTPUT"; echo "api=https://api.rec.so" >> "$GITHUB_OUTPUT"; echo "web=https://app.rec.so" >> "$GITHUB_OUTPUT"; echo "apps=platform=https://app.ever.co,works=https://app.ever.works,teams=https://app.ever.team,gauzy=https://app.gauzy.co,demand=https://app.everdemand.co,rec=https://app.rec.so,traduora=https://app.traduora.co,tech=https://ever.tech" >> "$GITHUB_OUTPUT" ;;
             # Any other ref (a manual run on a feature branch) stops here: it must never publish an environment tag.
             *) echo "::error::k8s-build publishes only develop, stage and main (got ${GITHUB_REF_NAME})"; exit 1 ;;
           esac
@@ -49,6 +49,9 @@ jobs:
       # The API ignores these args (its Dockerfile declares only the FIREBASE_* ones, left empty here).
       # Static files come from the API host (apps/api serves public/), as the Dockerfile default says.
       # NEXT_PUBLIC_EXTENSION_NAME and _ID keep the Dockerfile defaults (Rec, the Chrome Web Store id).
+      # NEXT_PUBLIC_EVER_APP_LINKS: the Ever app switcher's links, each environment's own app hosts (a product
+      # with no host in an environment links to its production host: homelab
+      # docs/handoffs/HANDOVER-2026-11-26-ever-app-switcher-in-apps.md §1 and §3.2).
       - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
           context: .
@@ -61,6 +64,7 @@ jobs:
             NEXT_PUBLIC_GOOGLE_CLIENT_ID=${{ vars.NEXT_PUBLIC_GOOGLE_CLIENT_ID }}
             NEXT_PUBLIC_SENTRY_DSN=${{ vars.NEXT_PUBLIC_SENTRY_DSN }}
             NEXT_PUBLIC_EVER_CONNECT_ENABLED=${{ vars.NEXT_PUBLIC_EVER_CONNECT_ENABLED }}
+            NEXT_PUBLIC_EVER_APP_LINKS=${{ steps.t.outputs.apps }}
           tags: |
             ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}:${{ steps.t.outputs.tag }}
             ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}:${{ steps.t.outputs.tag }}-sha-${{ github.sha }}

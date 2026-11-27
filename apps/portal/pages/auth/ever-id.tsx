@@ -20,6 +20,7 @@ import { ITermsAcceptanceDocument } from 'app/interfaces/ITermsAcceptance';
 import { readEverIdBinding } from 'app/services/everIdBinding';
 import { panelRoutes, preRoutes } from 'components/_routes';
 import { cn } from 'app/utilities/cn';
+import { legalUrlFor } from 'app/services/helpers/legalDocumentUrl';
 
 type Mode = 'working' | 'confirm' | 'error';
 
@@ -193,7 +194,7 @@ const EverIdPage: React.FC = () => {
                 {t('page.register.terms.agree')}
                 <a
                   className={TERMS_LINK}
-                  href="https://rec.com/tos"
+                  href={legalUrlFor(termsDocuments, 'tos')}
                   target="_blank"
                   rel="noreferrer"
                 >
@@ -202,7 +203,7 @@ const EverIdPage: React.FC = () => {
                 {t('page.register.terms.and')}
                 <a
                   className={TERMS_LINK}
-                  href="https://rec.com/privacy"
+                  href={legalUrlFor(termsDocuments, 'privacy')}
                   target="_blank"
                   rel="noreferrer"
                 >

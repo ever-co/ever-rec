@@ -1,0 +1,188 @@
+// The Ever app switcher in the sidebar header, on the shared Ever tokens (styles/tokens.scss):
+// a ghost icon button for the mark, and a floating panel like every other menu of the app.
+
+$ease-out: var(--ease-out);
+
+.root {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+  transition: background-color 150ms $ease-out;
+
+  &:hover,
+  &[aria-expanded='true'] {
+    background: hsl(var(--sidebar-accent));
+  }
+
+  &:focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+}
+
+.mark {
+  display: block;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .mark {
+    animation: ever-mark-turn 9s linear infinite;
+  }
+}
+
+@keyframes ever-mark-turn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 1050;
+  width: 18rem;
+  max-width: calc(100vw - 16px);
+  padding: 4px;
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  background: hsl(var(--popover));
+  box-shadow: var(--shadow-float);
+  color: hsl(var(--popover-foreground));
+  font-family: var(--font-sans);
+  text-align: start;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .panel {
+    animation: ever-apps-open 160ms $ease-out;
+  }
+}
+
+@keyframes ever-apps-open {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+.title {
+  margin: 0;
+  padding: 8px 8px 4px;
+  color: hsl(var(--muted-foreground));
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+}
+
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  color: hsl(var(--popover-foreground));
+  text-decoration: none;
+}
+
+a.row {
+  cursor: pointer;
+  transition: background-color 150ms $ease-out;
+
+  &:hover {
+    background: hsl(var(--accent));
+    color: hsl(var(--accent-foreground));
+  }
+
+  &:focus-visible {
+    background: hsl(var(--accent));
+    color: hsl(var(--accent-foreground));
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: -2px;
+  }
+}
+
+// A white tile behind every logo, in both themes: the Platform and Demand marks are dark on a
+// transparent background, and a logo keeps its own colours.
+.tile {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  padding: 1px;
+  border-radius: 6px;
+  background: #fff;
+  box-shadow: 0 0 0 1px hsl(var(--border));
+  color: #18181b;
+  font-size: 12px;
+}
+
+.tile img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.name,
+.line {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.name {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+}
+
+.line {
+  color: hsl(var(--muted-foreground));
+  font-size: 12px;
+  line-height: 16px;
+}
+
+// The current app's check: selection is where the accent belongs.
+.check {
+  flex-shrink: 0;
+  color: hsl(var(--brand-text));
+  font-size: 16px;
+}
+
+.separator {
+  height: 1px;
+  margin: 4px 0;
+  background: hsl(var(--border));
+}

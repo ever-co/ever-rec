@@ -11,6 +11,10 @@ ARG NEXT_PUBLIC_SENTRY_DSN
 # Ever Platform connection tabs (Settings -> Ever Platform): shown only when built with `true` and the
 # API has the connection loaded. No default: unset keeps them hidden.
 ARG NEXT_PUBLIC_EVER_CONNECT_ENABLED
+# Ever app switcher (the rotating mark before the logo): `id=url` pairs, e.g.
+# `platform=https://app.ever.co,works=https://app.ever.works`. No default: unset hides the switcher, so a
+# self-hosted build shows nothing Ever-specific.
+ARG NEXT_PUBLIC_EVER_APP_LINKS
 ARG SENTRY_ORG=ever-co
 
 FROM node:26.12.1-alpine AS base
@@ -71,6 +75,7 @@ ARG NEXT_PUBLIC_WEBSITE_URL
 ARG NEXT_PUBLIC_STATIC_FILES_URL
 ARG NEXT_PUBLIC_SENTRY_DSN
 ARG NEXT_PUBLIC_EVER_CONNECT_ENABLED
+ARG NEXT_PUBLIC_EVER_APP_LINKS
 ENV NEXT_PUBLIC_EXTENSION_NAME=${NEXT_PUBLIC_EXTENSION_NAME} \
     NEXT_PUBLIC_EXTENSION_ID=${NEXT_PUBLIC_EXTENSION_ID} \
     NEXT_PUBLIC_GOOGLE_CLIENT_ID=${NEXT_PUBLIC_GOOGLE_CLIENT_ID} \
@@ -79,7 +84,8 @@ ENV NEXT_PUBLIC_EXTENSION_NAME=${NEXT_PUBLIC_EXTENSION_NAME} \
     NEXT_PUBLIC_WEBSITE_URL=${NEXT_PUBLIC_WEBSITE_URL} \
     NEXT_PUBLIC_STATIC_FILES_URL=${NEXT_PUBLIC_STATIC_FILES_URL} \
     NEXT_PUBLIC_SENTRY_DSN=${NEXT_PUBLIC_SENTRY_DSN} \
-    NEXT_PUBLIC_EVER_CONNECT_ENABLED=${NEXT_PUBLIC_EVER_CONNECT_ENABLED}
+    NEXT_PUBLIC_EVER_CONNECT_ENABLED=${NEXT_PUBLIC_EVER_CONNECT_ENABLED} \
+    NEXT_PUBLIC_EVER_APP_LINKS=${NEXT_PUBLIC_EVER_APP_LINKS}
 # Build the apps
 RUN pnpm build --filter=ever-rec-portal...
 # Prune dev deps

@@ -78,6 +78,22 @@
     "profile": "Profile",
     "administration": "Administration"
   },
+  "everApps": {
+    "title": "Apps",
+    "switchLabel": "Switch to another Ever platform or app",
+    "add": "Add",
+    "addLabel": "Add your own apps in Ever Platform",
+    "lines": {
+      "platform": "One account for every Ever app",
+      "works": "AI agents that run your business",
+      "teams": "Work and project management",
+      "gauzy": "ERP, CRM and HR in one app",
+      "rec": "Screen capture and recording",
+      "traduora": "Translation management for teams",
+      "demand": "Commerce and on-demand marketplaces",
+      "tech": "Engineers and operated agents for hire"
+    }
+  },
   "notFound": {
     "workspace": {
       "heading": "No Workspace Found",
@@ -938,6 +954,15 @@
       "languageHint": "The language of the app on this browser",
       "saving": "Saving screenshots",
       "savingHint": "File format, download folder and Google Drive links for the browser extension"
+    },
+    "termsReaccept": {
+      "title": "Please accept our terms",
+      "description": "To keep using Rec, please read and accept these documents.",
+      "updated": "v{{version}} (you accepted v{{accepted}})",
+      "new": "v{{version}}",
+      "accept": "I agree",
+      "signOut": "Sign out",
+      "failed": "Could not save your acceptance. Please try again."
     }
   },
   "modals": {

@@ -17,6 +17,7 @@ import ThemeProvider from 'components/theme/ThemeProvider';
 import ThemedToastContainer from 'components/theme/ThemedToastContainer';
 import { TooltipProvider } from 'components/ui/tooltip';
 import { ShellProvider } from 'components/shell/ShellContext';
+import TermsGate from 'components/shared/TermsGate';
 import '../i18n/config';
 
 export type NextApplicationPage<P = any, IP = P> = NextPage<P, IP> & {
@@ -32,6 +33,7 @@ function CustomApp({ Component, pageProps }: AppProps) {
         >
           <TooltipProvider delayDuration={200}>
             <Index />
+            <TermsGate />
             <Head>
               <title>Rec</title>
               <link rel="shortcut icon" href="/icons/16.png" />

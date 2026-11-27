@@ -5,6 +5,12 @@ import type { CorpusIndex, RequiredDocument } from 'terms-acceptance';
 export const TERMS_PRODUCT = 'ever-rec';
 
 /**
+ * Where the published texts are read: the Rec website serves each document at `/<document>`
+ * (https://rec.so/tos, /privacy). The forms link there, so the person can open what they accept.
+ */
+export const TERMS_SITE_URL = (process.env.TERMS_SITE_URL || 'https://rec.so').replace(/\/$/, '');
+
+/**
  * The published legal corpus.
  *
  * `require` rather than a JSON `import`: the API compiles to CommonJS without
@@ -27,6 +33,6 @@ export function getRequiredTermsDocuments(locale?: string): RequiredDocument[] {
   return selectRequiredDocuments(corpus, {
     product: TERMS_PRODUCT,
     locale,
-    url: (doc) => `/legal/${doc.document}`,
+    url: (doc) => `${TERMS_SITE_URL}/${doc.document}`,
   });
 }
