@@ -177,9 +177,13 @@ export class EditorService {
 
         const scaleX = width / imageWidth;
         const scaleY = height / imageHeight;
-        // On a phone the stage starts fitted to the width of the screen (zoom 100%).
+        // On a phone the stage starts fitted to the width of the screen (zoom 100%): the width it
+        // is shown at, which is the saved one when the image was resized or cropped before.
         const scale = isPhoneViewport()
-          ? phoneFitScale(stage.container(), imageWidth)
+          ? phoneFitScale(
+              stage.container(),
+              editorImage.dbData?.stage?.renderDimentions?.width || imageWidth,
+            )
           : Math.max(scaleX, scaleY);
         setMainScale(scale);
         setInitialDimentions({

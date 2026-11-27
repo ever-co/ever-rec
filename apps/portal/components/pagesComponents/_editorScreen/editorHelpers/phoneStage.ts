@@ -66,42 +66,69 @@ export const bridgeTouchToMouse = (
     if (state.pressed) fire(e.target, 'mousemove', e.evt as TouchEvent);
   });
 
+  const release = (target: Node | Stage, evt: TouchEvent) => {
+    if (!state.pressed) return;
+    state.pressed = false;
+    fire(target, 'mouseup', evt);
+
+    // Code outside Konva waits for the window's mouseup too (the text box commits on it), and
+    // the browser makes none up after a touch it was told to leave alone. Sent to the window
+    // only, so Konva (listening on its own element) does not take it as a second release.
+    const lifted = evt.changedTouches?.[0];
+    window.dispatchEvent(
+      new MouseEvent('mouseup', {
+        clientX: lifted?.clientX ?? 0,
+        clientY: lifted?.clientY ?? 0,
+      }),
+    );
+  };
+
   stage.on(`touchend${NAMESPACE}`, (e) => {
     if (state.pending) {
       press();
       stage.setPointersPositions(e.evt);
     }
-    if (state.pressed) {
-      state.pressed = false;
-      fire(e.target, 'mouseup', e.evt as TouchEvent);
-
-      // Code outside Konva waits for the window's mouseup too (the text box commits on it), and
-      // the browser makes none up after a touch it was told to leave alone. Sent to the window
-      // only, so Konva (listening on its own element) does not take it as a second release.
-      const lifted = (e.evt as TouchEvent).changedTouches?.[0];
-      window.dispatchEvent(
-        new MouseEvent('mouseup', {
-          clientX: lifted?.clientX ?? 0,
-          clientY: lifted?.clientY ?? 0,
-        }),
-      );
-    }
+    release(e.target, e.evt as TouchEvent);
   });
 
-  // A tap is a click. Konva has no `tap` listeners of the editor's to collide with.
+  // The browser can take a touch back (a system gesture, an alert). Konva reports that as a
+  // pointer event only: end the press here, as a lift, so the tool stops following the finger.
+  const container = stage.container();
+  const cancel = (evt: TouchEvent) => {
+    state.pending = null;
+    release(stage, evt);
+  };
+  container.addEventListener('touchcancel', cancel);
+
+  // A tap is a click, and a double tap a double click. Both wait for the current event to end:
+  // the press before them may have just selected a shape, and React mounts that shape's popup
+  // (a marker's comments) only then. With a mouse, the click is a separate event anyway.
+  const later = new Set<ReturnType<typeof setTimeout>>();
+  const fireLater = (target: Node | Stage, type: string, evt: TouchEvent) => {
+    const id = setTimeout(() => {
+      later.delete(id);
+      fire(target, type, evt);
+    });
+    later.add(id);
+  };
+
+  // Konva has no `tap` listeners of the editor's to collide with.
   stage.on(`tap${NAMESPACE}`, (e) => {
-    fire(e.target, 'click', e.evt as TouchEvent);
+    fireLater(e.target, 'click', e.evt as TouchEvent);
   });
 
-  // A double tap is a double click, except on shapes that already listen to `dbltap` (text and
-  // speech bubbles listen to both, and would open their editor twice).
+  // Not on shapes that already listen to `dbltap` (text and speech bubbles listen to both, and
+  // would open their editor twice).
   stage.on(`dbltap${NAMESPACE}`, (e) => {
     if (hasListeners(e.target, 'dbltap')) return;
-    fire(e.target, 'dblclick', e.evt as TouchEvent);
+    fireLater(e.target, 'dblclick', e.evt as TouchEvent);
   });
 
   return () => {
     stage.off(NAMESPACE);
+    container.removeEventListener('touchcancel', cancel);
+    later.forEach((id) => clearTimeout(id));
+    later.clear();
     state.pending = null;
     state.pressed = false;
   };

@@ -15,8 +15,13 @@ const makeStage = () => {
   const listeners: { name: string; ns: string; handler: Handler }[] = [];
   const fired: { type: string; target: string; pointer: unknown }[] = [];
   let pointer: unknown = null;
+  const element = document.createElement('div');
 
   const stage: any = {
+    container: () => element,
+    fire(type: string) {
+      fired.push({ type, target: 'stage', pointer });
+    },
     on(names: string, handler: Handler) {
       names.split(' ').forEach((full) => {
         const [name, ns = ''] = full.split('.');
@@ -52,7 +57,13 @@ const makeStage = () => {
     },
   });
 
-  return { stage, node, fired, listenerCount: () => listeners.length };
+  return {
+    stage,
+    node,
+    fired,
+    element,
+    listenerCount: () => listeners.length,
+  };
 };
 
 const touchEvent = (at: string) => ({
@@ -93,7 +104,8 @@ describe('bridgeTouchToMouse', () => {
     window.removeEventListener('mouseup', windowUps);
   });
 
-  it('turns a tap into a press and a release on the lift, and `tap` into `click`', () => {
+  it('turns a tap into a press and a release on the lift, and `tap` into a later `click`', () => {
+    jest.useFakeTimers();
     const { stage, node, fired } = makeStage();
     bridgeTouchToMouse(stage, createPhoneTouchState());
     const main = node('main');
@@ -101,8 +113,33 @@ describe('bridgeTouchToMouse', () => {
     stage.emit('touchstart', main, touchEvent('here'));
     stage.emit('touchend', main, touchEvent('here'));
     stage.emit('tap', main, touchEvent('here'));
+    // The click waits for the event to end: React mounts what the press selected first.
+    expect(fired.map((f) => f.type)).toEqual(['mousedown', 'mouseup']);
 
+    jest.runAllTimers();
     expect(fired.map((f) => f.type)).toEqual(['mousedown', 'mouseup', 'click']);
+    jest.useRealTimers();
+  });
+
+  it('ends a press the browser cancels, as a lift', () => {
+    const { stage, node, fired, element } = makeStage();
+    const state = createPhoneTouchState();
+    bridgeTouchToMouse(stage, state);
+    const main = node('main');
+
+    stage.emit('touchstart', main, touchEvent('landed'));
+    stage.emit('touchmove', main, touchEvent('moved'));
+    const cancel = new Event('touchcancel');
+    Object.defineProperty(cancel, 'changedTouches', { value: [] });
+    element.dispatchEvent(cancel);
+
+    expect(fired.map((f) => f.type)).toEqual([
+      'mousedown',
+      'mousemove',
+      'mouseup',
+    ]);
+    expect(fired[2].target).toBe('stage');
+    expect(state.pressed).toBe(false);
   });
 
   it('gives no press to the first finger of a pinch', () => {
@@ -123,15 +160,18 @@ describe('bridgeTouchToMouse', () => {
   });
 
   it('makes a double tap a double click, except on shapes that listen to dbltap', () => {
+    jest.useFakeTimers();
     const { stage, node, fired } = makeStage();
     bridgeTouchToMouse(stage, createPhoneTouchState());
 
     stage.emit('dbltap', node('marker'), touchEvent('x'));
     stage.emit('dbltap', node('text', { dbltap: [{}] }), touchEvent('x'));
+    jest.runAllTimers();
 
     expect(fired).toEqual([
       { type: 'dblclick', target: 'marker', pointer: null },
     ]);
+    jest.useRealTimers();
   });
 
   it('removes only its own listeners', () => {
