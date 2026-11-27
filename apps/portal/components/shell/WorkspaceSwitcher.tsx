@@ -26,6 +26,9 @@ interface IWorkspaceSwitcherProps {
   onAddWorkspace: () => void;
 }
 
+/** The first letter of a name, by code point: an emoji is not cut in half. */
+const firstLetter = (name: string) => Array.from(initialsOf(name))[0] ?? '';
+
 /** The square tile of a workspace: its picture, or its initial on a neutral plate. */
 const WorkspaceTile: FC<{
   name: string;
@@ -42,7 +45,7 @@ const WorkspaceTile: FC<{
     {avatar ? (
       <img src={avatar} alt="" className="tw-size-full tw-object-cover" />
     ) : (
-      (Array.from(initialsOf(name))[0] ?? '')
+      firstLetter(name)
     )}
   </span>
 );
