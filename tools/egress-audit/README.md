@@ -43,13 +43,13 @@ This directory holds only Ever Rec's inputs:
 | `positive_stats` | statistics on, reporting to the mock platform every 5 seconds | signed, schema-valid reports accepted (202), no other call |
 | control | `positive_stats` without the mock platform | must **fail** (exit 1): a green run is not a blind one |
 
-The job also runs the harness's `cloud-inference` scan over the statistics code (it never guesses
-where it runs). The connection module passes the same scan
-(`cloud-inference --dirs apps/api/src/module/ever-connect`).
+The job also runs the harness's `cloud-inference` scan over the statistics code and the connection
+module (`apps/api/src/module/ever-connect`): neither guesses where it runs.
 
-## Modes of the connection (API leg, on demand)
+## Modes of the connection (API leg, every change)
 
-These run with the same config (`--mode <name>`); they are not steps of the CI job yet.
+These run with the same config (`--mode <name>`), as steps of the same CI job after the statistics
+control.
 
 | Mode | The API | Passes when |
 |---|---|---|
