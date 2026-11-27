@@ -269,8 +269,8 @@ const WorkspaceTeams: FC = () => {
               className={classNames(styles.workspacesContainer, 'scroll-div')}
             >
               {teams.map((team) => {
-                const isTeamAdmin = user?.id === team?.admin;
-                const isInTeam = team?.members.find(
+                const isTeamAdmin = user?.id === team.admin;
+                const isInTeam = team.members.find(
                   (member) => member.id === user.id,
                 );
 
@@ -280,13 +280,13 @@ const WorkspaceTeams: FC = () => {
                       <div className={styles.thumbnailWrapper}>
                         <div className={styles.thumbnailImage}>
                           <Image
-                            src={team?.thumbnail || '/common/Thumbnail.svg'}
+                            src={team.thumbnail || '/common/Thumbnail.svg'}
                             alt="Team thumbnail"
-                            width={!team?.thumbnail ? '200' : undefined}
-                            height={!team?.thumbnail ? '150' : undefined}
-                            layout={team?.thumbnail ? 'fill' : 'fixed'}
+                            width={!team.thumbnail ? '200' : undefined}
+                            height={!team.thumbnail ? '150' : undefined}
+                            layout={team.thumbnail ? 'fill' : 'fixed'}
                             className={
-                              team?.thumbnail
+                              team.thumbnail
                                 ? styles.thumbnail
                                 : styles.thumbnailPlaceholder
                             }

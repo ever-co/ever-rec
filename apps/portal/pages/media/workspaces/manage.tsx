@@ -328,13 +328,13 @@ const ManageWorkspaces: React.FC = () => {
                   <div className={styles.thumbnailWrapper}>
                     <div className={styles.thumbnailImage}>
                       <Image
-                        src={workspace?.thumbnail || '/common/Thumbnail.svg'}
+                        src={workspace.thumbnail || '/common/Thumbnail.svg'}
                         alt="workspace thumbnail"
-                        width={!workspace?.thumbnail ? '200' : undefined}
-                        height={!workspace?.thumbnail ? '150' : undefined}
-                        layout={workspace?.thumbnail ? 'fill' : 'fixed'}
+                        width={!workspace.thumbnail ? '200' : undefined}
+                        height={!workspace.thumbnail ? '150' : undefined}
+                        layout={workspace.thumbnail ? 'fill' : 'fixed'}
                         className={
-                          workspace?.thumbnail
+                          workspace.thumbnail
                             ? styles.thumbnail
                             : styles.thumbnailPlaceholder
                         }
@@ -420,16 +420,16 @@ const ManageWorkspaces: React.FC = () => {
                         onClick={() =>
                           openLeaveDeleteModal(
                             workspace,
-                            workspace?.admin !== user?.id ? 'leave' : 'delete',
+                            workspace.admin !== user?.id ? 'leave' : 'delete',
                           )
                         }
                         title={
-                          workspace?.admin !== user?.id
+                          workspace.admin !== user?.id
                             ? t('workspace.leaveWorkspace')
                             : t('workspace.deleteWorkspace')
                         }
                       >
-                        {workspace?.admin !== user?.id ? (
+                        {workspace.admin !== user?.id ? (
                           <LogOut strokeWidth={1.75} aria-hidden="true" />
                         ) : (
                           <Trash2 strokeWidth={1.75} aria-hidden="true" />
