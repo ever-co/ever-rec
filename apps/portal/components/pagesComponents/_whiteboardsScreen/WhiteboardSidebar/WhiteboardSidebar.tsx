@@ -66,8 +66,8 @@ const WhiteboardsSidebar: React.FC<IProps> = ({
   setCurrentTab,
   currentTab,
 }) => {
-  // Below 768px the column becomes a bar: "New", then the tabs side by side (the ones that do not
-  // fit go under the menu's own "more").
+  // Below 768px the column becomes a bar: "New", then the tabs side by side. The bar scrolls
+  // sideways, so every tab stays in reach.
   const { width } = useWindowSize();
   const narrow = width > 0 && width < 768;
 
@@ -93,7 +93,8 @@ const WhiteboardsSidebar: React.FC<IProps> = ({
         selectedKeys={[currentTab]}
         items={items}
         mode={narrow ? 'horizontal' : 'inline'}
-        className="mx-md:tw-min-w-0 mx-md:tw-flex-1"
+        disabledOverflow={narrow}
+        className="mx-md:tw-min-w-0 mx-md:tw-flex-1 mx-md:tw-overflow-x-auto mx-md:tw-whitespace-nowrap mx-md:[scrollbar-width:none]"
         style={{ background: 'transparent', borderRight: 0 }}
         onClick={(key) => setCurrentTab(key.key)}
       ></Menu>
