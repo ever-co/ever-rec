@@ -36,6 +36,7 @@ export const EVER_CONNECT_PATHS = Object.freeze({
   keySet: 'ever_connect/key_set',
   personExports: 'ever_connect/person_exports',
   personRequests: 'ever_connect/person_requests',
+  accountDeletions: 'ever_connect/account_deletions',
   personLinksSynced: 'ever_connect/person_links_synced',
   personLinksDirtyAt: 'ever_connect/person_links_dirty_at',
   personLinkRemovals: 'ever_connect/person_link_removals',
@@ -185,6 +186,23 @@ export interface PersonExportRecord {
 
 /** How long the receipt of an answered person request is kept (a request read again gets the same answer). */
 export const PERSON_REQUEST_KEPT_MS = 90 * 24 * 3600 * 1000;
+
+/**
+ * `ever_connect/account_deletions/<uid>/<run>`: one attempt to delete the account for Ever Platform,
+ * from just before its last check of what holds the account (see `EverConnectPersonService`).
+ * Removed when the account was kept; once it is deleted, `deletedAt` is set.
+ */
+export interface AccountDeletionMark {
+  startedAt: number;
+  deletedAt?: number;
+}
+
+/**
+ * How long an account deletion's mark is kept: far longer than any request that may still be making
+ * the account a workspace's admin. An attempt that never ended (the process stopped) then no longer
+ * keeps the account from creating workspaces.
+ */
+export const ACCOUNT_DELETION_MARK_KEPT_MS = 24 * 3600 * 1000;
 
 /** An answer this installation gives to a person's request (the contract's set, as Rec uses it). */
 export type PersonRequestResult = 'deleted' | 'no_account' | 'exported' | 'failed';

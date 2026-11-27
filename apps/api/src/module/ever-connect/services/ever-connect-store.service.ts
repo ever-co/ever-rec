@@ -2,6 +2,8 @@ import { Inject, Injectable } from '@nestjs/common';
 import type * as admin from 'firebase-admin';
 import { FIREBASE_ADMIN } from '../../firebase/firebase.constants';
 import {
+  ACCOUNT_DELETION_MARK_KEPT_MS,
+  AccountDeletionMark,
   ConnectionRecord,
   EnvCodeRecord,
   EVER_CONNECT_FEED_SEEN_KEPT,
@@ -303,6 +305,31 @@ export class EverConnectStoreService {
       await this.db()
         .ref(EVER_CONNECT_PATHS.personRequests)
         .update(Object.fromEntries(old.map((jobId) => [jobId, null])));
+    }
+    return old.length;
+  }
+
+  /**
+   * Deletes the marks of account deletions started more than {@link ACCOUNT_DELETION_MARK_KEPT_MS}
+   * ago, done or not; answers how many.
+   */
+  async sweepAccountDeletions(now: number): Promise<number> {
+    const all =
+      (await this.read<Record<string, Record<string, AccountDeletionMark>>>(
+        EVER_CONNECT_PATHS.accountDeletions,
+      )) ?? {};
+    const old: string[] = [];
+    for (const [uid, runs] of Object.entries(all)) {
+      for (const [run, mark] of Object.entries(runs ?? {})) {
+        if (!(mark?.startedAt >= now - ACCOUNT_DELETION_MARK_KEPT_MS)) {
+          old.push(`${uid}/${run}`);
+        }
+      }
+    }
+    if (old.length) {
+      await this.db()
+        .ref(EVER_CONNECT_PATHS.accountDeletions)
+        .update(Object.fromEntries(old.map((key) => [key, null])));
     }
     return old.length;
   }

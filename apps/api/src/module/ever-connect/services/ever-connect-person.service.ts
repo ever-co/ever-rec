@@ -6,6 +6,7 @@ import {
   Optional,
 } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
+import { randomUUID } from 'node:crypto';
 import { RequestRefusedError, subjectHash } from '@ever-co/connect-sdk';
 import {
   EVER_IDENTITY_EVENTS,
@@ -18,11 +19,13 @@ import {
 import { EVER_ID_LINK_ROOTS } from '../../ever-id/services/ever-id-link.service';
 import { open, seal } from '../ever-connect.crypto';
 import {
+  AccountDeletionMark,
   EVER_CONNECT_EVENTS,
   EVER_CONNECT_PATHS,
   PersonRequestRecord,
   PersonRequestResult,
 } from '../ever-connect.types';
+import { EverConnectAccountDeletions } from '../../../common/ever-platform/tokens';
 import {
   EVER_CONNECT_ACCOUNT_DELETER,
   EVER_CONNECT_CLOCK,
@@ -146,7 +149,7 @@ const PROFILE_FIELDS = [
  * Bodies carry ids only, never an e-mail address.
  */
 @Injectable()
-export class EverConnectPersonService {
+export class EverConnectPersonService implements EverConnectAccountDeletions {
   private readonly logger = new Logger('EverConnect');
 
   constructor(
@@ -459,6 +462,12 @@ export class EverConnectPersonService {
    * became a workspace's admin meanwhile is kept). A deletion that did not complete is marked
    * `incomplete` and run again by {@link retryPersonRequests}: Rec's account deletion can
    * run again on an account it already partly deleted.
+   *
+   * Each account is marked as being deleted ({@link deletionStarted}) before that last check, and
+   * the mark is removed only when the account is kept. A workspace created for the account at the
+   * same time checks the mark once it wrote the workspace, and undoes it when the mark is there:
+   * either this check sees the new workspace (the account is kept), or the creation sees the mark
+   * (the workspace is undone). The account never goes while it administers a workspace.
    */
   private async deleteAccounts(uids: string[]): Promise<Decided> {
     const deleter = this.accountDeleter;
@@ -472,8 +481,10 @@ export class EverConnectPersonService {
     }
     let started = false;
     for (const uid of uids) {
+      const mark = await this.markDeletion(uid);
       const hold = await this.holdFor(uid);
       if (hold) {
+        await mark.remove();
         this.logger.warn(`A person's accounts were kept (${hold}).`);
         // Once one account is gone, the others are deleted as soon as nothing holds them.
         return started ? { ...pendingDeletion(), incomplete: true } : pendingDeletion();
@@ -487,9 +498,39 @@ export class EverConnectPersonService {
           `A person's account could not be deleted (${errorCode(error)}).`,
         );
       }
+      // Not done: the mark stays while the deletion is still under way (run again later).
       if (!deleted) return { ...pendingDeletion(), incomplete: true };
+      await mark.update({ deletedAt: this.clock() });
     }
     return { result: 'deleted' };
+  }
+
+  /** Marks one attempt to delete the account (`ever_connect/account_deletions/<uid>/<run>`). */
+  private async markDeletion(uid: string) {
+    const mark = this.store
+      .db()
+      .ref(`${EVER_CONNECT_PATHS.accountDeletions}/${uid}/${randomUUID()}`);
+    const value: AccountDeletionMark = { startedAt: this.clock() };
+    await mark.set(value);
+    return mark;
+  }
+
+  /**
+   * {@link EverConnectAccountDeletions}: whether a deletion of the account has started here and was
+   * not called off to keep the account (see {@link deleteAccounts}). Read from the database, so a
+   * deletion run by another process of this installation counts too.
+   */
+  async deletionStarted(uid: string): Promise<boolean> {
+    if (!isDbKey(uid)) return false;
+    const marks = (
+      await this.store
+        .db()
+        .ref(`${EVER_CONNECT_PATHS.accountDeletions}/${uid}`)
+        .get()
+    ).val();
+    return (
+      !!marks && typeof marks === 'object' && Object.keys(marks).length > 0
+    );
   }
 
   /**
