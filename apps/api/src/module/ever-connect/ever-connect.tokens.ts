@@ -31,3 +31,15 @@ export interface EverConnectWorkspaceCreator {
 export const EVER_CONNECT_WORKSPACE_CREATOR = Symbol(
   'ever connect workspace creator',
 );
+
+/**
+ * Deletes a Rec account by Rec's own account deletion (the routine behind `DELETE
+ * /api/v1/auth/user`): its shares, its files, its sign-in account, its Ever ID links and its
+ * record. Answers `false` when the deletion did not complete (it can be run again).
+ */
+export interface EverConnectAccountDeleter {
+  delete(uid: string): Promise<boolean>;
+}
+export const EVER_CONNECT_ACCOUNT_DELETER = Symbol(
+  'ever connect account deleter',
+);

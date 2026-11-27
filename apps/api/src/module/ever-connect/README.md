@@ -39,7 +39,7 @@ here (`apps/api/.eslintrc.js`); the rest of the API injects the optional tokens 
 | `services/ever-connect-links.service.ts` | Workspace links; the `everHandle` reader |
 | `services/ever-connect-integrations.service.ts` | Catalog, policy, consent links, switch-offs, and what each integration sends |
 | `services/ever-connect-oidc.service.ts` | The Ever ID client settings handed to the Ever ID module |
-| `services/ever-connect-person.service.ts` | Person links; export and deletion requests and their receipts |
+| `services/ever-connect-person.service.ts` | Person links; export and deletion requests and their receipts (`EVER_CONNECT_PERSON_EXPORT_ENABLED`, `EVER_CONNECT_PERSON_DELETION_ENABLED`) |
 | `services/ever-connect-provision.service.ts` | Ever Rec cloud provisioning (hand-off; `EVER_CONNECT_PROVISION_ENABLED`) |
 | `services/ever-connect-managed.service.ts` | Maintenance operations with the operator's opt-in (health report, backup, backup check) |
 | `services/ever-connect-feed.service.ts` | Reads, handles once and acknowledges the event feed |
@@ -59,6 +59,7 @@ here (`apps/api/.eslintrc.js`); the rest of the API injects the optional tokens 
 | `ever_connect/feed_cursor`, `ever_connect/feed_seen` | The feed position; event ids already handled |
 | `ever_connect/key_set` | The verified key manifest |
 | `ever_connect/person_exports/{jobId}` | A person's export, encrypted, 7 days |
+| `ever_connect/person_requests/{jobId}` | A person's request: what it matched, the receipt decided, when it was answered (90 days) |
 | `ever_connect/audit`, `ever_connect/lease` | The audit trail; the lease |
 
 ## Tests
