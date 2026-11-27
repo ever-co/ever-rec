@@ -6,7 +6,6 @@
  *
  * The real refresh chain runs on the in-memory Firebase doubles.
  */
-import { ConfigService } from '@nestjs/config';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { Test } from '@nestjs/testing';
 import {
@@ -58,9 +57,9 @@ describe('Ever ID sessions in the refresh chain', () => {
           signOptions: { expiresIn: '1h' },
         }),
       ],
+      // No configuration at all, so no `EVER_ID_ISSUER_URL`: as when the Ever ID client comes from
+      // the Ever Platform connection.
       providers: [
-        // No `EVER_ID_ISSUER_URL`: the Ever ID client came from the Ever Platform connection.
-        { provide: ConfigService, useValue: new ConfigService({}) },
         {
           provide: FirebaseAdminService,
           useValue: new FirebaseAdminService(firebase as any),
