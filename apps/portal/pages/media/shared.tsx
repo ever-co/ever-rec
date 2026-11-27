@@ -57,7 +57,7 @@ const Shared: React.FC = () => {
   return (
     <MediaIndex>
       <div
-        className="tw-relative"
+        className="tw-relative tw-flex tw-min-h-0 tw-flex-1 tw-flex-col"
         // sharedContainer
       >
         <SCHeader filterValue={null} userPhotoURL={user?.photoURL} />
@@ -70,7 +70,8 @@ const Shared: React.FC = () => {
           </div>
         </DashboardCard>
 
-        <DashboardCard style={{ minHeight: '100vh' }}>
+        {/* The items fill what is left of the page; the grid scrolls inside. */}
+        <DashboardCard className="tw-flex tw-min-h-0 tw-flex-1 tw-flex-col">
           <div className={styles.pageMainSectionWrapper}>
             <h3>{t('shared.videosAndImages')}</h3>
           </div>

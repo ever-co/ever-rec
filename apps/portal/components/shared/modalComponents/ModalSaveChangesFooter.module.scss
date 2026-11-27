@@ -1,13 +1,34 @@
-@import 'pagesScss/partials/_colors.scss';
-
+// The button row of a dialog. The markup is [action] [cancel]; the row is reversed so the action
+// sits on the right and the cancel to its left, as in every other Ever dialog.
 .footerContainer {
   display: flex;
-  justify-content: space-between;
+  flex-direction: row-reverse;
+  justify-content: flex-start;
   align-items: center;
-  margin-top: 1.7rem;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
 
+  // The cancel: an outline button.
   .cancelLink {
-    color: $primary-violet;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.25rem;
+    padding: 0 1rem;
+    border: 1px solid hsl(var(--input));
+    border-radius: calc(var(--radius) - 2px);
+    background-color: transparent;
+    color: hsl(var(--foreground));
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.25rem;
+    white-space: nowrap;
     cursor: pointer;
+    user-select: none;
+    transition: background-color 150ms var(--ease-out);
+
+    &:hover {
+      background-color: hsl(var(--accent));
+    }
   }
 }

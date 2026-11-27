@@ -33,6 +33,7 @@
 
   @media (prefers-reduced-motion: reduce) {
     &::before {
+      display: none;
       animation: none;
     }
   }

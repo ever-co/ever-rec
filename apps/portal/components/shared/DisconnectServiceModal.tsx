@@ -1,7 +1,6 @@
 import React from 'react';
 import { Modal } from 'antd';
 import AppButton from 'components/controls/AppButton';
-import AppSvg from '../elements/AppSvg';
 import { useTranslation } from 'react-i18next';
 
 interface IDisconnectServiceModalProps {
@@ -28,9 +27,6 @@ const DisconnectServiceModal: React.FC<IDisconnectServiceModalProps> = ({
     <Modal
       open={true}
       onCancel={onCancel}
-      closeIcon={
-        <AppSvg path="/common/close-icon.svg" className="modalCloseButton" />
-      }
       footer={
         <div className="tw-flex tw-justify-end tw-mt-6">
           <AppButton
@@ -43,7 +39,7 @@ const DisconnectServiceModal: React.FC<IDisconnectServiceModalProps> = ({
         </div>
       }
     >
-      <h2 className="tw-mb-2 tw-text-base tw-font-semibold">{title}</h2>
+      <h2 className="tw-mb-2 tw-pr-6 tw-text-base tw-font-semibold">{title}</h2>
       {subTitle}
     </Modal>
   );

@@ -72,7 +72,8 @@ const ImageModal: FC<IProps> = ({ imageUrl, visible, closeModal }) => {
   return (
     <div
       className={classNames(
-        'tw-bg-app-grey-darker tw-bg-opacity-90 tw-top-0 tw-left-0 tw-min-h-screen tw-overflow-y-auto tw-pr-20px tw-box-content tw-select-none',
+        // A scrim over the page: dark in both themes, like every layer that sits over media.
+        'tw-bg-[hsl(var(--overlay)/0.9)] tw-top-0 tw-left-0 tw-min-h-screen tw-overflow-y-auto tw-pr-20px tw-box-content tw-select-none',
         isZoomed
           ? zoomClasses + ' tw-p-0 tw-absolute'
           : 'tw-fixed tw-bottom-0 tw-w-screen tw-max-w-full',
@@ -84,7 +85,7 @@ const ImageModal: FC<IProps> = ({ imageUrl, visible, closeModal }) => {
           isZoomed ? 'tw-right-20px' : 'tw-right-35px',
         )}
       >
-        <div className="tw-border-solid tw-border-2 tw-border-dark-grey tw-flex tw-justify-between tw-px-4 tw-py-2 tw-bg-black tw-bg-opacity-90 tw-w-100px tw-rounded-md tw-text-white">
+        <div className="tw-border-solid tw-border tw-border-[hsl(var(--on-overlay)/0.2)] tw-flex tw-justify-between tw-px-4 tw-py-2 tw-bg-[hsl(var(--overlay)/0.9)] tw-w-100px tw-rounded-md tw-text-[hsl(var(--on-overlay))] tw-tabular-nums">
           <span
             onClick={handleZoomIn}
             className="tw-text-lg tw-cursor-pointer tw-flex tw-items-center"
@@ -100,14 +101,14 @@ const ImageModal: FC<IProps> = ({ imageUrl, visible, closeModal }) => {
             onClick={handleZoomOut}
             className="tw-text-lg tw-cursor-pointer tw-flex tw-items-center tw-mb-px"
           >
-            &#8211;
+            &ndash;
           </span>
         </div>
 
         <IoMdClose
-          size={40}
+          size={32}
           onClick={handleCloseModal}
-          className="tw-text-dark-grey tw-cursor-pointer"
+          className="tw-text-[hsl(var(--on-overlay)/0.8)] tw-transition-colors tw-duration-150 hover:tw-text-[hsl(var(--on-overlay))] tw-cursor-pointer"
         />
       </div>
 

@@ -135,24 +135,23 @@ const CreateTrelloTicketModal: React.FC<ICreateTrelloTicketModalProps> = ({
         />
       }
     >
-      <h2 className="tw-mb-4 tw-text-2xl tw-font-semibold">
+      <h2 className="tw-mb-4 tw-pr-6 tw-text-base tw-font-semibold">
         {t('modals.createTrello')}{' '}
       </h2>
 
-      <label className="tw-mb-1">{t('modals.selectBoard')}</label>
+      <label className="tw-mb-1 tw-block tw-text-[13px] tw-font-medium tw-text-foreground">
+        {t('modals.selectBoard')}
+      </label>
       <Select
         value={selectedBoard}
         size="large"
         placeholder={t('modals.selectAOption')}
         style={{ marginBottom: '1rem' }}
-        className="tw-w-full tw-bg-white tw-rounded"
+        className="tw-w-full tw-rounded-md tw-border tw-border-solid tw-border-input [&.ant-select-focused]:tw-border-ring [&.ant-select-focused]:tw-ring-2 [&.ant-select-focused]:tw-ring-ring/20"
         notFoundContent={
           !boards ? (
             <div style={{ width: '23px', height: '23px', margin: '1rem auto' }}>
-              <AppSpinnerLocal
-                circleColor="#5b4dbe"
-                circleInnerColor="#ffffff"
-              />
+              <AppSpinnerLocal />
             </div>
           ) : undefined
         }
@@ -173,13 +172,15 @@ const CreateTrelloTicketModal: React.FC<ICreateTrelloTicketModalProps> = ({
           ))}
       </Select>
 
-      <label>{t('modals.selectIssueType')}</label>
+      <label className="tw-mb-1 tw-block tw-text-[13px] tw-font-medium tw-text-foreground">
+        {t('modals.selectIssueType')}
+      </label>
       <Select
         value={selectedIssueType}
         size="large"
         placeholder={t('modals.selectAOption')}
         style={{ marginBottom: '1rem' }}
-        className="tw-w-full tw-bg-white tw-rounded"
+        className="tw-w-full tw-rounded-md tw-border tw-border-solid tw-border-input [&.ant-select-focused]:tw-border-ring [&.ant-select-focused]:tw-ring-2 [&.ant-select-focused]:tw-ring-ring/20"
         onChange={(value) => {
           setSelectedIssueType(value);
         }}
@@ -199,7 +200,6 @@ const CreateTrelloTicketModal: React.FC<ICreateTrelloTicketModalProps> = ({
         value={title}
         placeholder={t('modals.titleSummary')}
         className="tw-w-full"
-        inputClass="tw-bg-transparent tw-border-mid-grey tw-placeholder-black"
         onChange={(e) => setTitle(e.value)}
       />
 
@@ -208,7 +208,7 @@ const CreateTrelloTicketModal: React.FC<ICreateTrelloTicketModalProps> = ({
         canResize={false}
         placeholder={t('modals.cardDescription')}
         className="tw-mt-6 tw-w-full"
-        inputClass="scroll-div tw-outline-none tw-bg-transparent tw-border-mid-grey tw-placeholder-black"
+        inputClass="scroll-div"
         onChange={(e) => setDescription(e.value)}
       />
 
@@ -236,27 +236,26 @@ const Footer: React.FC<IFooterProps> = ({
 }) => {
   const { t } = useTranslation();
   return (
-    <div className="tw-flex tw-justify-between tw-items-center tw-mt-8">
+    <div className="tw-flex tw-justify-between tw-items-center tw-gap-4 tw-mt-6">
       {hideBoardsText ? (
         <div></div>
       ) : (
-        <p className="tw-text-sm tw-text-center">
+        <p className="tw-mb-0 tw-text-left tw-text-sm tw-text-muted-foreground">
           {t('modals.noTrelloBoards')}
         </p>
       )}
 
-      <div className="tw-flex">
+      <div className="tw-flex tw-shrink-0 tw-gap-2">
         <AppButton
           outlined
-          bgColor="tw-bg-app-grey-darker"
-          className="tw-px-8 tw-mx-4 tw-pb-1 tw-pt-1"
+          className="tw-flex tw-h-9 tw-items-center tw-justify-center tw-px-4 tw-py-0"
           onClick={onCancel}
         >
           {t('common.cancel')}
         </AppButton>
 
         <AppButton
-          className="tw-px-8 tw-pb-1 tw-pt-1"
+          className="tw-flex tw-h-9 tw-items-center tw-justify-center tw-px-4 tw-py-0"
           disabled={projectLoading || !isFormValid}
           onClick={handleOnSubmit}
         >

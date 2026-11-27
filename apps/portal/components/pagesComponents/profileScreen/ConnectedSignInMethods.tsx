@@ -12,7 +12,10 @@ import {
   unlinkEverIdAPI,
 } from 'app/services/api/everId';
 import { everIdErrorCode, everIdErrorMessageKey } from 'app/services/everId';
-import { errorMessage, successMessage } from 'app/services/helpers/toastMessages';
+import {
+  errorMessage,
+  successMessage,
+} from 'app/services/helpers/toastMessages';
 import { panelRoutes, preRoutes } from 'components/_routes';
 
 const SETTINGS_PROFILE = preRoutes.settings + panelRoutes.profile;
@@ -30,13 +33,19 @@ const ConnectedSignInMethods: React.FC = () => {
   const { t } = useTranslation();
   const { enabled } = useEverIdConfig();
   const [identities, setIdentities] = useState<IEverIdIdentity[]>([]);
-  const [pending, setPending] = useState<{ key: string; accountEmail: string; everIdEmail: string } | null>(null);
+  const [pending, setPending] = useState<{
+    key: string;
+    accountEmail: string;
+    everIdEmail: string;
+  } | null>(null);
   const [busy, setBusy] = useState(false);
   const handledQuery = useRef(false);
 
-  const showError = (error: unknown) => errorMessage(t(everIdErrorMessageKey(everIdErrorCode(error))));
+  const showError = (error: unknown) =>
+    errorMessage(t(everIdErrorMessageKey(everIdErrorCode(error))));
 
-  const clearQuery = () => router.replace(SETTINGS_PROFILE, undefined, { shallow: true });
+  const clearQuery = () =>
+    router.replace(SETTINGS_PROFILE, undefined, { shallow: true });
 
   useEffect(() => {
     if (!enabled) return;
@@ -101,7 +110,10 @@ const ConnectedSignInMethods: React.FC = () => {
   const disconnect = async (identity: IEverIdIdentity) => {
     setBusy(true);
     try {
-      const { identities } = await unlinkEverIdAPI(identity.issuer, identity.subject);
+      const { identities } = await unlinkEverIdAPI(
+        identity.issuer,
+        identity.subject,
+      );
       setIdentities(identities ?? []);
       successMessage(t('page.auth.everId.settings.disconnected'));
     } catch (error) {
@@ -117,7 +129,9 @@ const ConnectedSignInMethods: React.FC = () => {
       className="tw-grid tw-gap-4 tw-border-0 tw-border-t tw-border-solid tw-border-border tw-py-6 md:tw-grid-cols-[14rem_minmax(0,1fr)] md:tw-gap-8"
     >
       <div>
-        <h2 className="tw-m-0 tw-text-sm tw-font-medium tw-text-foreground">{t('page.auth.everId.settings.title')}</h2>
+        <h2 className="tw-m-0 tw-text-sm tw-font-medium tw-text-foreground">
+          {t('page.auth.everId.settings.title')}
+        </h2>
         <p className="tw-m-0 tw-mt-1 tw-text-[13px] tw-leading-5 tw-text-muted-foreground">
           {t('page.auth.everId.settings.description')}
         </p>
@@ -134,17 +148,32 @@ const ConnectedSignInMethods: React.FC = () => {
             </p>
             <p className="tw-m-0 tw-text-sm tw-text-muted-foreground">
               {t('page.auth.everId.settings.accountEmail')}:{' '}
-              <b className="tw-font-medium tw-text-foreground">{pending.accountEmail}</b>
+              <b className="tw-font-medium tw-text-foreground">
+                {pending.accountEmail}
+              </b>
             </p>
             <p className="tw-m-0 tw-mb-4 tw-text-sm tw-text-muted-foreground">
               {t('page.auth.everId.settings.everIdEmail')}:{' '}
-              <b className="tw-font-medium tw-text-foreground">{pending.everIdEmail}</b>
+              <b className="tw-font-medium tw-text-foreground">
+                {pending.everIdEmail}
+              </b>
             </p>
             <div className="tw-flex tw-gap-2">
-              <AppButton outlined onClick={cancel} disabled={busy} twPadding={SMALL_BUTTON} twTextSize="tw-text-[13px]">
+              <AppButton
+                outlined
+                onClick={cancel}
+                disabled={busy}
+                twPadding={SMALL_BUTTON}
+                twTextSize="tw-text-[13px]"
+              >
                 {t('page.auth.everId.cancel')}
               </AppButton>
-              <AppButton onClick={confirm} disabled={busy} twPadding={SMALL_BUTTON} twTextSize="tw-text-[13px]">
+              <AppButton
+                onClick={confirm}
+                disabled={busy}
+                twPadding={SMALL_BUTTON}
+                twTextSize="tw-text-[13px]"
+              >
                 {t('page.auth.everId.settings.confirm')}
               </AppButton>
             </div>
@@ -152,7 +181,9 @@ const ConnectedSignInMethods: React.FC = () => {
         )}
 
         {identities.length === 0 ? (
-          <p className="tw-m-0 tw-mb-4 tw-text-sm tw-text-muted-foreground">{t('page.auth.everId.settings.none')}</p>
+          <p className="tw-m-0 tw-mb-4 tw-text-sm tw-text-muted-foreground">
+            {t('page.auth.everId.settings.none')}
+          </p>
         ) : (
           <ul className="tw-m-0 tw-mb-4 tw-list-none tw-p-0">
             {identities.map((identity) => (
@@ -161,7 +192,9 @@ const ConnectedSignInMethods: React.FC = () => {
                 className="tw-flex tw-items-center tw-justify-between tw-gap-4 tw-border-0 tw-border-b tw-border-solid tw-border-border tw-py-3 first:tw-pt-0 last:tw-border-b-0"
               >
                 <span className="tw-min-w-0 tw-truncate tw-text-sm tw-text-foreground">
-                  {t('page.auth.everId.settings.connectedAs', { email: identity.email || identity.subject })}
+                  {t('page.auth.everId.settings.connectedAs', {
+                    email: identity.email || identity.subject,
+                  })}
                 </span>
                 <AppButton
                   outlined
@@ -179,7 +212,13 @@ const ConnectedSignInMethods: React.FC = () => {
         )}
 
         {!pending && (
-          <AppButton outlined onClick={connect} disabled={busy} twPadding={SMALL_BUTTON} twTextSize="tw-text-[13px]">
+          <AppButton
+            outlined
+            onClick={connect}
+            disabled={busy}
+            twPadding={SMALL_BUTTON}
+            twTextSize="tw-text-[13px]"
+          >
             {t('page.auth.everId.settings.connect')}
           </AppButton>
         )}

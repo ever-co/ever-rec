@@ -60,31 +60,30 @@ const ShareItemModal: React.FC<IShareItemModalProps> = ({
       open={visible}
       onCancel={onCancel}
       footer={
-        <div className="tw-flex tw-justify-center tw-items-center tw-mt-8">
-          <AppButton onClick={copyLinkHandler} className="tw-px-170px">
+        <div className="tw-flex tw-justify-center tw-items-center tw-mt-6">
+          <AppButton onClick={copyLinkHandler} full>
             {copystate ? (
+              // The file's ink is a fixed light colour: it follows the button's text instead.
               <AppSvg
                 path="/common/done.svg"
-                size="24px"
-                className="tw-mr-5px"
+                size="16px"
+                className="[&_path]:!tw-fill-current"
               />
             ) : (
-              <AppSvg
-                path="/common/copy.svg"
-                size="24px"
-                className="tw-mr-5px"
-              />
+              <AppSvg path="/common/copy.svg" size="16px" />
             )}
             {t('modals.copyLink')}
           </AppButton>
         </div>
       }
     >
-      <h2 className="tw-mb-3 tw-text-2xl tw-font-semibold">
+      <h2 className="tw-mb-4 tw-pr-6 tw-text-lg tw-font-semibold tw-text-foreground">
         {t('modals.shareLink')}
       </h2>
-      <label>{t('modals.linkToItem')}</label>
-      <p className="tw-border-black tw-border-b tw-py-5px tw-px-2px tw-mt-5px">
+      <label className="tw-text-sm tw-text-muted-foreground">
+        {t('modals.linkToItem')}
+      </label>
+      <p className="tw-mt-1.5 tw-break-all tw-rounded-md tw-border tw-border-solid tw-border-input tw-bg-muted tw-px-3 tw-py-2 tw-text-sm tw-text-foreground">
         {shareLink}
       </p>
     </Modal>

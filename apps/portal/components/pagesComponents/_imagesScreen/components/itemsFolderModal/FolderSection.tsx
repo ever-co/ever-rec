@@ -38,7 +38,7 @@ const FolderSection: React.FC<IFolderSectionProps> = ({
     initialOpened && setHighlightedRef(null);
   }, [initialOpened]);
 
-  const buildFolderTree = (folders: IDbFolderData[], leftMargin = 70) => {
+  const buildFolderTree = (folders: IDbFolderData[], leftMargin = 24) => {
     return folders.sort(sortFolders).map((folder) => {
       return (
         <Folder
@@ -49,7 +49,7 @@ const FolderSection: React.FC<IFolderSectionProps> = ({
           leftMargin={leftMargin}
           setHighlightedRef={setHighlightedRef}
         >
-          {folder.children && buildFolderTree(folder.children, leftMargin + 70)}
+          {folder.children && buildFolderTree(folder.children, leftMargin + 24)}
         </Folder>
       );
     });

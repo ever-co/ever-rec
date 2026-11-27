@@ -105,7 +105,10 @@ const Trashed: React.FC = () => {
 
   return (
     <MediaIndex>
-      <div className={styles.trashedContainer}>
+      <div
+        className="tw-flex tw-min-h-0 tw-flex-1 tw-flex-col"
+        // trashedContainer
+      >
         <SCHeader filterValue={null} userPhotoURL={user?.photoURL} />
 
         <DashboardCard className={styles.trashedHeadingContainer}>
@@ -114,11 +117,11 @@ const Trashed: React.FC = () => {
           </div>
         </DashboardCard>
 
-        <DashboardCard style={{ minHeight: '100vh' }}>
+        {/* The items fill what is left of the page; the grid scrolls inside. */}
+        <DashboardCard className="tw-flex tw-min-h-0 tw-flex-1 tw-flex-col">
           <div className={styles.trashedItemsHeaderContainer}>
             <div
-              className="tw-flex tw-justify-between tw-items-center mx-xl:tw-flex-col"
-              style={{ height: '52px' }}
+              className="tw-flex tw-min-h-[3rem] tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-2"
               // trashedItemsHeaderContainer
             >
               <div className={styles.trashedHeaderContainer}>
@@ -143,30 +146,29 @@ const Trashed: React.FC = () => {
                 // trashedItemsHeaderButtonsContainer
               >
                 <div
-                  className="tw-flex tw-justify-end tw-gap-2 mx-xl:tw-my-4"
+                  className="tw-flex tw-justify-end tw-gap-2"
                   // trashedItemsHeaderButtonsWrapper
                 >
                   <div
-                    className="default:tw-w-full lg:tw-w-160px lg:tw-mb-0"
+                    className="default:tw-w-full lg:tw-w-auto lg:tw-mb-0"
                     // trashedButton
                   >
                     <AppButton
                       full
                       outlined
-                      className="tw-mr-6"
-                      twPadding="tw-py-3 tw-px-7"
+                      twPadding="tw-py-[7px] tw-px-4"
                       onClick={() => setDeleteModal(true)}
                     >
                       {t('common.bulkActions.deleteAll')}
                     </AppButton>
                   </div>
                   <div
-                    className="default:tw-w-full lg:tw-w-160px lg:tw-mb-0"
+                    className="default:tw-w-full lg:tw-w-auto lg:tw-mb-0"
                     // trashedButton
                   >
                     <AppButton
                       full
-                      twPadding="tw-py-3 tw-px-6"
+                      twPadding="tw-py-[7px] tw-px-4"
                       onClick={() => setRestoreModal(true)}
                     >
                       {t('common.bulkActions.restoreAll')}

@@ -41,8 +41,12 @@ const ConfirmModal: React.FC<Props> = ({ visible, onClose, onOk }) => {
         </div>
       }
     >
-      <div className="tw-flex tw-gap-5px tw-mb-30px">
-        <AppSvg size="27px" path={trashIcon.src} />
+      <div className="tw-flex tw-items-center tw-gap-2 tw-mb-6">
+        <AppSvg
+          size="24px"
+          path={trashIcon.src}
+          className="tw-text-muted-foreground"
+        />
         <h2 className={styles.mainHeading}>
           Do you want to delete this whiteboard ?
         </h2>

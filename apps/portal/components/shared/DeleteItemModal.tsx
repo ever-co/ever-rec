@@ -2,7 +2,6 @@ import React from 'react';
 import { Modal } from 'antd';
 import { ItemType } from 'app/interfaces/ItemType';
 import AppButton from 'components/controls/AppButton';
-import AppSvg from 'components/elements/AppSvg';
 import { useTranslation } from 'react-i18next';
 
 interface IDeleteItemModalProps {
@@ -30,9 +29,6 @@ const DeleteItemModal: React.FC<IDeleteItemModalProps> = ({
       open={visible}
       onCancel={onCancel}
       closable={true}
-      closeIcon={
-        <AppSvg path="/common/close-icon.svg" className="modalCloseButton" />
-      }
       footer={
         <div className="tw-flex tw-justify-end tw-gap-2 tw-mt-6">
           <AppButton
@@ -52,7 +48,7 @@ const DeleteItemModal: React.FC<IDeleteItemModalProps> = ({
         </div>
       }
     >
-      <h2 className="tw-mb-0 tw-text-base tw-font-semibold">
+      <h2 className="tw-mb-0 tw-pr-6 tw-text-base tw-font-semibold">
         {t('modals.deleteItemConfirmation')}
       </h2>
     </Modal>

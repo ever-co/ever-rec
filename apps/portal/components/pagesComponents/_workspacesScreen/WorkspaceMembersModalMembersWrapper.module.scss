@@ -6,43 +6,79 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0.5rem 1rem;
-    border-radius: 0.25rem;
-    transition: background-color 0.1s;
+    gap: 0.75rem;
+    min-height: 3.5rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: calc(var(--radius) - 2px);
+    transition: background-color 150ms var(--ease-out);
 
     &:hover {
-      background-color: #fff;
+      background-color: hsl(var(--accent));
     }
 
     & > div:first-of-type {
       display: flex;
+      align-items: center;
+      min-width: 0;
 
       img {
-        border-radius: 1rem;
-        margin-right: 0.5rem;
+        flex-shrink: 0;
+        border-radius: 50%;
+        margin-right: 0.75rem;
         width: 2rem;
         height: 2rem;
+        object-fit: cover;
       }
     }
 
     .MemberInfo {
       display: flex;
       flex-direction: column;
+      min-width: 0;
 
-      span:first-of-type {
-        margin-bottom: 0.2rem;
+      span {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
+
+      // The name.
+      span:first-of-type {
+        color: hsl(var(--foreground));
+        font-size: 0.875rem;
+        font-weight: 500;
+        line-height: 1.25rem;
+      }
+
+      // The e-mail address.
+      span:last-of-type:not(:first-of-type) {
+        color: hsl(var(--muted-foreground));
+        font-size: 0.8125rem;
+        line-height: 1.25rem;
+      }
+    }
+
+    // The role ("Team owner").
+    i {
+      color: hsl(var(--muted-foreground));
+      font-size: 0.8125rem;
+      font-style: normal;
+      white-space: nowrap;
+    }
+
+    // "Add" / "Remove": one small size for every row.
+    .MemberButton {
+      display: flex;
+      flex-shrink: 0;
+      align-items: center;
+      justify-content: center;
+      width: 5rem;
+      height: 2rem;
     }
   }
 }
 
 .spinnerWrapper {
-  width: 20px;
-  height: 20px;
-}
-
-.MemberButton {
-  font-size: .85rem;
-  width: 80px;
-  height: 40px;
+  width: 16px;
+  height: 16px;
 }

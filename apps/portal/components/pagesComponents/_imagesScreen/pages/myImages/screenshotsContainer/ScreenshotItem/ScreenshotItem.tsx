@@ -17,6 +17,13 @@ import {
   IWorkspaceVideo,
 } from 'app/interfaces/IWorkspace';
 import styles from './ScreenshotItem.module.scss';
+import { MoreHorizontal } from 'lucide-react';
+
+// Controls over the thumbnail's scrim: light ink and a light hover veil in both themes (the
+// theme's own hover surface would be a pale block over the picture in the light theme).
+const OVER_MEDIA_GROUND =
+  'tw-bg-transparent hover:tw-bg-[hsl(var(--on-overlay)/0.16)]';
+const OVER_MEDIA_INK = 'tw-text-[hsl(var(--on-overlay))]';
 
 interface IScreenshotItemProps {
   id?: number;
@@ -131,10 +138,10 @@ const ScreenshotItem: React.FC<IScreenshotItemProps> = ({
       <div
         draggable={isDraggable}
         className={classNames(
-          'tw-rounded-2lg default:tw-h-42vw tw-relative tw-cursor-pointer tw-mt-4 tw-overflow-hidden tw-border tw-border-solid md:tw-h-60 lg:tw-h-44 xl:tw-h-52 2xl:tw-h-60',
+          'tw-rounded-2lg default:tw-h-42vw tw-relative tw-cursor-pointer tw-mt-4 tw-overflow-hidden tw-border tw-border-solid tw-bg-muted md:tw-h-60 lg:tw-h-44 xl:tw-h-52 2xl:tw-h-60',
           isSelected && selectedItems?.items.length !== 0
-            ? 'tw-border-primary-purple tw-shadow-xl tw-border-2 tw-border-dotted border-in'
-            : 'tw-border-app-grey tw-border-opacity-20',
+            ? 'tw-border-brand tw-shadow-[0_0_0_1px_hsl(var(--brand))]'
+            : 'tw-border-border hover:tw-border-foreground/25',
           styles.wrapper,
         )}
         onDragStart={(ev: DragEvent) => {
@@ -152,7 +159,7 @@ const ScreenshotItem: React.FC<IScreenshotItemProps> = ({
 
         <div
           className={classNames(
-            'screenshot-item-overlay tw-absolute tw-bg-opacity-60 tw-bg-overlay-black tw-top-0 tw-left-0 tw-w-full tw-h-full tw-flex tw-p-3',
+            'screenshot-item-overlay tw-absolute tw-bg-[hsl(var(--overlay)/0.6)] tw-text-[hsl(var(--on-overlay))] tw-top-0 tw-left-0 tw-w-full tw-h-full tw-flex tw-p-2',
             selectedItems?.state ? null : 'tw-invisible',
             hasRestore
               ? 'tw-justify-center tw-items-center'
@@ -164,9 +171,9 @@ const ScreenshotItem: React.FC<IScreenshotItemProps> = ({
           onClick={onSelect}
         >
           {hasRestore && onRestoreFromTrash && (
-            <AppButton onClick={onRestoreFromTrash} bgColor="tw-bg-transparent">
+            <AppButton onClick={onRestoreFromTrash} bgColor={OVER_MEDIA_GROUND}>
               <AppSvg
-                className="tw-text-white"
+                className={OVER_MEDIA_INK}
                 path="/images/restore.svg"
                 size="26px"
               />
@@ -176,9 +183,9 @@ const ScreenshotItem: React.FC<IScreenshotItemProps> = ({
             <>
               {/* TODO fix selecting items for workspace */}
               {addSelected && (
-                <AppButton bgColor="tw-bg-transparent" onClick={selectItem}>
+                <AppButton bgColor={OVER_MEDIA_GROUND} onClick={selectItem}>
                   <AppSvg
-                    className="tw-text-white"
+                    className={OVER_MEDIA_INK}
                     path={
                       isSelected && selectedItems?.items.length != 0
                         ? '/item/checked.svg'
@@ -206,23 +213,21 @@ const ScreenshotItem: React.FC<IScreenshotItemProps> = ({
                 placement="bottomRight"
                 onOpenChange={dropdownVisibleChangeHandler}
               >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src="/item/options.svg"
-                  alt="options"
-                  className="tw-py-2 tw-px-5"
+                <div
+                  role="img"
+                  aria-label="options"
+                  className={styles.optionsButton}
                   draggable={false}
-                  style={{
-                    height: '50px',
-                  }}
                   onClick={(event) => event.stopPropagation()}
-                />
+                >
+                  <MoreHorizontal aria-hidden="true" />
+                </div>
               </Dropdown>
             </>
           ) : (
-            <AppButton onClick={onDelete} bgColor="tw-bg-transparent">
+            <AppButton onClick={onDelete} bgColor={OVER_MEDIA_GROUND}>
               <AppSvg
-                className="tw-text-white"
+                className={OVER_MEDIA_INK}
                 path="/images/trash.svg"
                 size="26px"
               />
@@ -244,10 +249,15 @@ const ScreenshotItem: React.FC<IScreenshotItemProps> = ({
           </div>
           {!editTitle && canEditTitle && (
             <div
-              className="tw-ml-3 tw-cursor-pointer tw-min-w-20px tw-text-dark-grey"
+              className="tw-ml-3 tw-cursor-pointer tw-min-w-20px tw-text-muted-foreground tw-transition-colors tw-duration-150 hover:tw-text-foreground"
               onClick={setTitleFocus}
             >
-              <AppSvg path="/common/edit-pencil-light.svg" size="20px" />
+              {/* The file's ink is a fixed light grey: it follows the text colour instead. */}
+              <AppSvg
+                path="/common/edit-pencil-light.svg"
+                size="20px"
+                className="[&_path]:tw-fill-current"
+              />
             </div>
           )}
         </div>

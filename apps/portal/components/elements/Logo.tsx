@@ -1,6 +1,10 @@
 /* eslint-disable @next/next/no-img-element */
 import { MouseEventHandler, FC } from 'react';
 import Image from 'next/legacy/image';
+import classNames from 'classnames';
+
+// The wordmark file is black ink: inverted in the dark theme, where it would not show.
+const DARK_THEME_INK = 'dark:tw-invert';
 
 interface ILogoProps {
   type?: string;
@@ -19,11 +23,15 @@ const Logo: FC<ILogoProps> = ({ type, className, onClick, width, height }) => {
           alt="logo"
           width={width}
           height={height}
-          className={className}
+          className={classNames(className, DARK_THEME_INK)}
           objectFit="contain"
         />
       ) : (
-        <img src="/logo/logo_black.svg" alt="logo" className={className} />
+        <img
+          src="/logo/logo_black.svg"
+          alt="logo"
+          className={classNames(className, DARK_THEME_INK)}
+        />
       )}
     </div>
   );

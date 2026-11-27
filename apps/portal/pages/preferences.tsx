@@ -12,6 +12,10 @@ import { panelRoutes, preRoutes } from 'components/_routes';
 import { useRouter } from 'next/router';
 import { useTranslation } from 'react-i18next';
 
+// One setting: its label on the left, its control on the right.
+const ROW = 'tw-flex tw-items-center tw-justify-between tw-gap-6';
+const ROW_LABEL = 'tw-text-sm tw-font-medium tw-text-foreground';
+
 const Preferences: React.FC = () => {
   const { t } = useTranslation();
   const router = useRouter();
@@ -46,31 +50,30 @@ const Preferences: React.FC = () => {
   const allowImageExts: ImageExtention[] = ['png', 'jpg'];
 
   return (
-    <div className="tw-inline-grid tw-grid-cols-7 tw-p-4 tw-min-h-screen tw-w-screen tw-gap-36">
-      <div className="tw-col-span-3 tw-col-start-2 tw-flex">
-        <div>
+    <div className="tw-grid tw-min-h-screen tw-w-full tw-grid-cols-2 tw-gap-4 tw-bg-background tw-p-4 mx-lg:tw-grid-cols-1">
+      <div className="tw-flex tw-justify-center tw-px-4 tw-py-8">
+        <div className="tw-w-full tw-max-w-xl">
           <div
-            className="tw-flex tw-items-center tw-cursor-pointer tw-mt-10 tw-mb-20"
+            className="-tw-ml-3 tw-mb-8 tw-flex tw-h-9 tw-w-max tw-cursor-pointer tw-items-center tw-gap-2 tw-rounded-md tw-px-3 tw-text-sm tw-font-medium tw-text-foreground tw-transition-colors tw-duration-150 hover:tw-bg-accent"
             onClick={() => router.push(preRoutes.media + panelRoutes.images)}
           >
             <AppSvg
               path="/common/arrow_back-light.svg"
-              size={18 + 'px'}
-              className="tw-mr-2"
+              size={16 + 'px'}
+              className="tw-text-muted-foreground"
             />
             {t('navigation.back')}
           </div>
           <AppHeader
             part1={t('page.preference.saving')}
             part2={t('page.preference.preferences')}
-            className="tw-mb-10"
+            textSize="2xl"
+            className="tw-mb-6"
           />
           <PreferencePartition hasUpperDivider={false}>
-            <div className="tw-flex tw-justify-between">
-              <div className="tw-font-semibold">
-                {t('page.preference.downloadAs')}
-              </div>
-              <div className="tw-flex">
+            <div className={ROW}>
+              <div className={ROW_LABEL}>{t('page.preference.downloadAs')}</div>
+              <div className="tw-flex tw-shrink-0">
                 <Radio.Group
                   onChange={(e) => updatePreference('imageExt', e.target.value)}
                   value={preferences.imageExt}
@@ -86,8 +89,8 @@ const Preferences: React.FC = () => {
           </PreferencePartition>
 
           <PreferencePartition>
-            <div className="tw-flex tw-justify-between tw-items-center">
-              <div className="tw-font-semibold tw-mr-2">
+            <div className={ROW}>
+              <div className={ROW_LABEL}>
                 {t('page.preference.alwaysGetLink')}
               </div>
               <AppSwitch
@@ -101,8 +104,8 @@ const Preferences: React.FC = () => {
 
           <PreferencePartition>
             <div>
-              <div className="tw-flex tw-justify-between tw-items-center">
-                <div className="tw-font-semibold tw-mr-2">
+              <div className={ROW}>
+                <div className={ROW_LABEL}>
                   {t('page.preference.saveEachFile')}
                 </div>
                 <AppSwitch
@@ -112,7 +115,7 @@ const Preferences: React.FC = () => {
                   }
                 ></AppSwitch>
               </div>
-              <div className="tw-my-5">
+              <div className="tw-mb-4 tw-mt-2 tw-text-[13px] tw-leading-5 tw-text-muted-foreground">
                 {t('page.preference.saveEachFileDescription')}
               </div>
               <SavePathInput
@@ -123,8 +126,8 @@ const Preferences: React.FC = () => {
           </PreferencePartition>
 
           <PreferencePartition>
-            <div className="tw-flex tw-justify-between tw-items-center">
-              <div className="tw-font-semibold tw-mr-2">
+            <div className={ROW}>
+              <div className={ROW_LABEL}>
                 {t('page.preference.addDateAndUrl')}
               </div>
               <AppSwitch
@@ -137,7 +140,7 @@ const Preferences: React.FC = () => {
           </PreferencePartition>
         </div>
       </div>
-      <div className="tw-relative tw-col-span-3 tw-bg-blue-grey tw-rounded-3xl tw-flex tw-items-center tw-justify-center">
+      <div className="tw-relative tw-flex tw-items-center tw-justify-center tw-rounded-[0.75rem] tw-bg-muted mx-lg:tw-hidden">
         <img src={`/preferences/preferences.png`} className="tw-w-8/12" />
       </div>
     </div>

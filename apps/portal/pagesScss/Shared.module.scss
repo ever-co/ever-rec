@@ -95,10 +95,8 @@
   gap: 1rem;
   max-height: 9rem;
   overflow-y: auto;
-  scrollbar-gutter: stable;
-  // 2px above and below, so a tile's focus or selection ring is not cut by the scroll box. On the
-  // right the gutter includes the scrollbar (8px, see styles/base.scss).
-  padding: 2px calc(var(--page-gutter) - 0.5rem) 2px var(--page-gutter);
+  // 2px above and below, so a tile's focus or selection ring is not cut by the scroll box.
+  padding: 2px var(--page-gutter);
 }
 
 // The items section fills what is left of the page; its grid scrolls inside it.

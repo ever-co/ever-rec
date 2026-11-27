@@ -17,8 +17,11 @@ const FolderNavigationContainer: FC<IFolderHistoryContainerProps> = ({
   goToFolder,
 }) => {
   return (
-    <div className="tw-flex tw-items-center tw-gap-x-2 tw-px-8 tw-py-4">
-      <div onClick={goToParentFolder} className="tw-flex flex-shrink-0">
+    <div className="tw-flex tw-items-center tw-gap-x-2 tw-px-4 tw-pt-6 md:tw-px-6 xl:tw-px-8">
+      <div
+        onClick={goToParentFolder}
+        className="-tw-ml-1.5 tw-flex tw-size-8 tw-shrink-0 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-md tw-text-muted-foreground tw-transition-colors tw-duration-150 hover:tw-bg-accent hover:tw-text-foreground"
+      >
         <AppSvg
           path="/common/arrow_back-light.svg"
           className="tw-cursor-pointer"

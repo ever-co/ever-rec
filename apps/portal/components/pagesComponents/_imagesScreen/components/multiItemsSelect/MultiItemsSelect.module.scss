@@ -1,6 +1,12 @@
+// The bulk-selection bar: a floating bar on the popover surface, with a hairline.
 .MultiItemsSelect {
   order: 0;
   margin: 0 1rem;
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  background-color: hsl(var(--popover));
+  color: hsl(var(--popover-foreground));
+  box-shadow: var(--shadow-float);
 }
 
 @media (max-width: 1388px) {

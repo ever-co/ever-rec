@@ -261,6 +261,7 @@ const Profile: React.FC = () => {
             <Button
               variant="destructive"
               size="sm"
+              className="tw-text-[13px]"
               onClick={() => setShowDeleteAccountModal(true)}
             >
               {t('page.setting.deleteAccount')}

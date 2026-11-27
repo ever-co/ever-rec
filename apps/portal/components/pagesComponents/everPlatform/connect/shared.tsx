@@ -6,7 +6,8 @@ export const formatTime = (ms: number | null | undefined) =>
 
 /** The error code of an API answer, for a translated message. */
 export const errorCodeOf = (error: any): string | null => {
-  const code = error?.response?.data?.code ?? error?.response?.data?.message?.code;
+  const code =
+    error?.response?.data?.code ?? error?.response?.data?.message?.code;
   return typeof code === 'string' && /^[a-z_]{1,40}$/.test(code) ? code : null;
 };
 
@@ -15,7 +16,10 @@ export const useErrorMessage = () => {
   return (error: unknown) => {
     const code = errorCodeOf(error);
     return code
-      ? t(`page.everPlatform.connect.errors.${code}`, t('page.everPlatform.errors.generic'))
+      ? t(
+          `page.everPlatform.connect.errors.${code}`,
+          t('page.everPlatform.errors.generic'),
+        )
       : t('page.everPlatform.errors.generic');
   };
 };
@@ -23,16 +27,20 @@ export const useErrorMessage = () => {
 // The looks the Ever Platform panels share (Tailwind classes on the shared Ever tokens).
 
 /** The title of a panel's section. */
-export const SECTION_TITLE = 'tw-m-0 tw-text-base tw-font-semibold tw-text-foreground';
+export const SECTION_TITLE =
+  'tw-m-0 tw-text-base tw-font-semibold tw-text-foreground';
 
 /** The title of a block inside a section. */
-export const BLOCK_TITLE = 'tw-m-0 tw-text-sm tw-font-medium tw-text-foreground';
+export const BLOCK_TITLE =
+  'tw-m-0 tw-text-sm tw-font-medium tw-text-foreground';
 
 /** A quiet line of explanation. */
-export const MUTED_TEXT = 'tw-m-0 tw-text-[13px] tw-leading-5 tw-text-muted-foreground';
+export const MUTED_TEXT =
+  'tw-m-0 tw-text-[13px] tw-leading-5 tw-text-muted-foreground';
 
 /** A field: its label above the control. */
-export const FIELD_LABEL = 'tw-flex tw-max-w-md tw-flex-col tw-gap-1.5 tw-text-[13px] tw-font-medium tw-text-foreground';
+export const FIELD_LABEL =
+  'tw-flex tw-max-w-md tw-flex-col tw-gap-1.5 tw-text-[13px] tw-font-medium tw-text-foreground';
 
 /** The answer of the last action (done, or the error message). */
 export const NOTICE =
@@ -54,19 +62,23 @@ export const TABLE =
   'tw-w-full tw-border-collapse tw-text-left tw-text-[13px] tw-leading-5 tw-text-foreground [&_td]:tw-border-b [&_td]:tw-border-solid [&_td]:tw-border-border [&_td]:tw-px-3 [&_td]:tw-py-2 [&_td]:tw-align-top [&_th]:tw-border-b [&_th]:tw-border-solid [&_th]:tw-border-border [&_th]:tw-px-3 [&_th]:tw-py-2 [&_th]:tw-text-xs [&_th]:tw-font-medium [&_th]:tw-text-muted-foreground [&_tr:last-child>td]:tw-border-b-0';
 
 /** The frame around a table: a card that scrolls sideways when the table is wider. */
-export const TABLE_FRAME = 'tw-overflow-x-auto tw-rounded-[0.75rem] tw-border tw-border-solid tw-border-border tw-bg-card';
+export const TABLE_FRAME =
+  'tw-overflow-x-auto tw-rounded-[0.75rem] tw-border tw-border-solid tw-border-border tw-bg-card';
 
 /** A list of label / value rows on a card. Put `DetailRow`s inside. */
-export const DETAIL_LIST = 'tw-m-0 tw-rounded-[0.75rem] tw-border tw-border-solid tw-border-border tw-bg-card tw-px-4';
+export const DETAIL_LIST =
+  'tw-m-0 tw-rounded-[0.75rem] tw-border tw-border-solid tw-border-border tw-bg-card tw-px-4';
 
 /** One label / value row of a `DETAIL_LIST`. */
-export const DetailRow: React.FC<{ label: React.ReactNode; testId?: string; children: React.ReactNode }> = ({
-  label,
-  testId,
-  children,
-}) => (
+export const DetailRow: React.FC<{
+  label: React.ReactNode;
+  testId?: string;
+  children: React.ReactNode;
+}> = ({ label, testId, children }) => (
   <div className="tw-flex tw-flex-wrap tw-items-baseline tw-justify-between tw-gap-x-6 tw-gap-y-1 tw-border-0 tw-border-b tw-border-solid tw-border-border tw-py-3 last:tw-border-b-0">
-    <dt className="tw-text-[13px] tw-font-normal tw-leading-5 tw-text-muted-foreground">{label}</dt>
+    <dt className="tw-text-[13px] tw-font-normal tw-leading-5 tw-text-muted-foreground">
+      {label}
+    </dt>
     <dd
       data-testid={testId}
       className="tw-m-0 tw-min-w-0 tw-break-words tw-text-right tw-text-sm tw-tabular-nums tw-text-foreground [&_code]:tw-font-mono [&_code]:tw-text-xs"
@@ -77,9 +89,14 @@ export const DetailRow: React.FC<{ label: React.ReactNode; testId?: string; chil
 );
 
 /** A plain stat tile: a quiet label over its value. Put inside a `<dl>` grid. */
-export const StatTile: React.FC<{ label: React.ReactNode; children: React.ReactNode }> = ({ label, children }) => (
+export const StatTile: React.FC<{
+  label: React.ReactNode;
+  children: React.ReactNode;
+}> = ({ label, children }) => (
   <div className="tw-min-w-0 tw-rounded-[0.75rem] tw-border tw-border-solid tw-border-border tw-bg-card tw-p-4">
-    <dt className="tw-text-[13px] tw-font-normal tw-leading-5 tw-text-muted-foreground">{label}</dt>
+    <dt className="tw-text-[13px] tw-font-normal tw-leading-5 tw-text-muted-foreground">
+      {label}
+    </dt>
     <dd className="tw-m-0 tw-mt-1 tw-break-words tw-text-xl tw-font-semibold tw-tabular-nums tw-text-foreground [&_code]:tw-break-all [&_code]:tw-font-mono [&_code]:tw-text-base [&_code]:tw-font-medium">
       {children}
     </dd>
@@ -87,7 +104,9 @@ export const StatTile: React.FC<{ label: React.ReactNode; children: React.ReactN
 );
 
 /** The entitlement banner: grace (could not refresh since a date) or paused (reconnect). */
-export const LadderBanner: React.FC<{ ladder: IEverConnectLadder | null | undefined }> = ({ ladder }) => {
+export const LadderBanner: React.FC<{
+  ladder: IEverConnectLadder | null | undefined;
+}> = ({ ladder }) => {
   const { t } = useTranslation();
   if (!ladder || ladder.state === 'valid') return null;
   if (ladder.state === 'grace') {
@@ -96,7 +115,9 @@ export const LadderBanner: React.FC<{ ladder: IEverConnectLadder | null | undefi
         data-testid="ever-connect-banner-grace"
         className="tw-m-0 tw-rounded-lg tw-bg-[hsl(var(--warning-muted))] tw-px-4 tw-py-3 tw-text-sm tw-text-warning"
       >
-        {t('page.everPlatform.connect.ladder.grace', { date: formatTime(ladder.refreshedAt) })}
+        {t('page.everPlatform.connect.ladder.grace', {
+          date: formatTime(ladder.refreshedAt),
+        })}
       </p>
     );
   }

@@ -15,11 +15,8 @@ import underlineIcon from 'public/assets/svg/tools-panel/underline.svg';
 import alignCenterIcon from 'public/assets/svg/tools-panel/align-center.svg';
 import alignLeftIcon from 'public/assets/svg/tools-panel/align-left.svg';
 import alignRightIcon from 'public/assets/svg/tools-panel/align-right.svg';
-import WhiteTTIcon from 'public/assets/svg/tools-panel/whiteTT.svg';
 import BlackTTIcon from 'public/assets/svg/tools-panel/blackTT.svg';
 import BlacktIcon from 'public/assets/svg/tools-panel/normalTt_black.svg';
-import WhitetIcon from 'public/assets/svg/tools-panel/normalTt_white.svg';
-import WhiteT2Icon from 'public/assets/svg/tools-panel/whiteT_2.svg';
 import BlackT2Icon from 'public/assets/svg/tools-panel/blackT_2.svg';
 import StrokeIcon from 'public/assets/svg/tools-panel/T(Stroke).svg';
 import cross from 'public/assets/svg/tools-panel/cross.svg';
@@ -77,7 +74,7 @@ const TextTool: React.FC<ITextToolProps> = ({
           value={options.fontFamily}
           style={{ fontFamily: options.fontFamily }}
           onChange={(val) => optionsChangeHandler('fontFamily', val)}
-          className="tw-w-full tw-rounded tw-bg-primary-violet app-selectable"
+          className="tw-w-full tw-rounded-md tw-border tw-border-input app-selectable"
     >
           {fonts.map((font, index) => (
             <Select.Option
@@ -150,7 +147,7 @@ const TextTool: React.FC<ITextToolProps> = ({
             icon={StrokeIcon}
             className="tw-cursor-pointer"
           />
-          <div className=" tw-rounded-2xl  tw-bg-white tw-flex tw-justify-center tw-my-5px tw-ml-10px tw-border-2 tw-border-dark-grey">
+          <div className="tw-rounded-md tw-flex tw-justify-center tw-my-1 tw-ml-2 tw-border tw-border-input">
             {' '}
             <AppNumberSelector
               value={options.fontSize}
@@ -190,11 +187,7 @@ const TextTool: React.FC<ITextToolProps> = ({
           />
 
           <ToolSubPanelBtn
-            icon={
-              options.fontVariant === 'all-small-caps'
-                ? WhiteTTIcon
-                : BlackTTIcon
-            }
+            icon={BlackTTIcon}
             active={options.fontVariant === 'all-small-caps' ? true : false}
             onSelect={() => {
               infoMessage('This option is not supported yet');
@@ -204,7 +197,7 @@ const TextTool: React.FC<ITextToolProps> = ({
             }}
           />
           <ToolSubPanelBtn
-            icon={options.fontVariant === 'normal' ? WhitetIcon : BlacktIcon}
+            icon={BlacktIcon}
             active={options.fontVariant === 'normal' ? true : false}
             onSelect={() => {
               // eslint-disable-next-line @typescript-eslint/no-unused-expressions
@@ -214,9 +207,7 @@ const TextTool: React.FC<ITextToolProps> = ({
             }}
           />
           <ToolSubPanelBtn
-            icon={
-              options.fontVariant === 'small-caps' ? WhiteT2Icon : BlackT2Icon
-            }
+            icon={BlackT2Icon}
             active={options.fontVariant === 'small-caps' ? true : false}
             onSelect={() => {
               // eslint-disable-next-line @typescript-eslint/no-unused-expressions

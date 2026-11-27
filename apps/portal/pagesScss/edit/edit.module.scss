@@ -5,13 +5,15 @@
 
 .cropInnerContainer {
   width: 7rem;
-  font-weight: 600;
-  font-family: sans-serif;
+  font-weight: 500;
   display: flex;
   flex-direction: column;
-  padding: 10px;
-  background-color: #e5e4ed;
-  border-radius: 5px;
+  padding: 8px;
+  background-color: hsl(var(--popover));
+  color: hsl(var(--popover-foreground));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-float);
   font-size: 0.75rem;
   line-height: 1rem;
 }
@@ -19,11 +21,10 @@
 .cropBtn {
   padding: 1px 0.25rem;
   margin-bottom: 0.5rem;
-  border-radius: 1rem;
 }
 
 .cropBg {
-  background-color: #6e6e6e;
+  background-color: transparent;
 }
 
 .cropBtnContent {
@@ -34,15 +35,17 @@
 
 .cancelBtn {
   padding: 1px 0.25rem;
-  border-radius: 1rem;
-  border-color: #a1a1a1;
 }
 
+// The area around the canvas: one quiet surface, so a white screenshot stands out in light and the
+// stage edge reads in dark.
 .pageContainer {
   position: relative;
   min-height: 100vh;
   display: flex;
   align-items: center;
+  background-color: hsl(var(--muted));
+  color: hsl(var(--foreground));
 }
 
 .stageContainer {
@@ -66,11 +69,11 @@
 }
 
 .stageContainer::-webkit-scrollbar-thumb {
-  background-color: grey;
+  background-color: hsl(var(--foreground) / 0.18);
   border-radius: 9999px;
 }
 
 .stageContainer::-webkit-scrollbar-track {
-  background-color: lightgray;
+  background-color: transparent;
   border-radius: 9999px;
 }

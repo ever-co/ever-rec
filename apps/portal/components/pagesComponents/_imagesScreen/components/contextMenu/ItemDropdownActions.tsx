@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, ReactNode } from 'react';
 import { Menu } from 'antd';
 import AppSvg from 'components/elements/AppSvg';
 import { MENU_ID_IMAGE } from 'app/utilities/common';
@@ -42,12 +42,15 @@ const ItemDropdownActions: FC<IItemDropdownActionsProps> = ({
     onAction(key, event.domEvent);
   };
 
-  const menuItems = [
+  // Icons take the row's text colour; the delete row is in the danger ink.
+  const menuItems: {
+    key: ItemActionsEnum;
+    icon: JSX.Element;
+    label: ReactNode;
+  }[] = [
     {
       key: ItemActionsEnum.download,
-      icon: (
-        <AppSvg path="/item/download.svg" size="22px" className="tw-mr-3" />
-      ),
+      icon: <AppSvg path="/item/download.svg" size="18px" />,
       label: t('common.fileActions.download'),
     },
   ];
@@ -58,8 +61,8 @@ const ItemDropdownActions: FC<IItemDropdownActionsProps> = ({
       icon: (
         <AppSvg
           path="/common/permissions.svg"
-          size="22px"
-          className="tw-mr-3"
+          size="18px"
+          className="[&_svg]:tw-fill-current"
         />
       ),
       //label: 'Edit Permissions',
@@ -72,7 +75,7 @@ const ItemDropdownActions: FC<IItemDropdownActionsProps> = ({
   if (canShare) {
     const shareAction = {
       key: ItemActionsEnum.share,
-      icon: <AppSvg path="/common/share.svg" size="22px" className="tw-mr-3" />,
+      icon: <AppSvg path="/common/share.svg" size="18px" />,
       label: t('common.fileActions.shareLink'),
     };
 
@@ -82,8 +85,18 @@ const ItemDropdownActions: FC<IItemDropdownActionsProps> = ({
   if (canEdit) {
     const deleteAction = {
       key: ItemActionsEnum.delete,
-      icon: <AppSvg path="/item/delete.svg" size="22px" className="tw-mr-3" />,
-      label: t('common.fileActions.delete'),
+      icon: (
+        <AppSvg
+          path="/item/delete.svg"
+          size="18px"
+          className="tw-text-destructive-text [&_path]:tw-fill-current"
+        />
+      ),
+      label: (
+        <span className="tw-text-destructive-text">
+          {t('common.fileActions.delete')}
+        </span>
+      ),
     };
 
     menuItems.splice(menuItems.length, 0, deleteAction);
@@ -92,9 +105,7 @@ const ItemDropdownActions: FC<IItemDropdownActionsProps> = ({
   if (hasRestore) {
     const restoreAction = {
       key: ItemActionsEnum.restore,
-      icon: (
-        <AppSvg path="/images/restore.svg" size="20px" className="tw-mr-3" />
-      ),
+      icon: <AppSvg path="/images/restore.svg" size="18px" />,
       label: t('common.fileActions.restore'),
     };
 
@@ -104,13 +115,7 @@ const ItemDropdownActions: FC<IItemDropdownActionsProps> = ({
   if (AA.hasMove && canEdit) {
     const moveAction = {
       key: ItemActionsEnum.move,
-      icon: (
-        <AppSvg
-          path="/common/icon-folder-move.svg"
-          size="22px"
-          className="tw-mr-3"
-        />
-      ),
+      icon: <AppSvg path="/common/icon-folder-move.svg" size="18px" />,
       label: t('common.fileActions.move'),
     };
 
@@ -122,7 +127,11 @@ const ItemDropdownActions: FC<IItemDropdownActionsProps> = ({
     const moveToWorkspace = {
       key: ItemActionsEnum.moveToWorkspace,
       icon: (
-        <AppSvg path="/common/forward.svg" size="22px" className="tw-mr-3" />
+        <AppSvg
+          path="/common/forward.svg"
+          size="18px"
+          className="[&_path]:tw-fill-current"
+        />
       ),
       label: t('common.fileActions.moveToWorkspace'),
     };
@@ -136,9 +145,9 @@ const ItemDropdownActions: FC<IItemDropdownActionsProps> = ({
       icon: (
         <AppSvg
           path="/item/whatsApp.svg"
-          width="22px"
+          width="18px"
           height="18px"
-          className="tw-mr-3"
+          className="[&_svg]:tw-fill-current"
         />
       ),
       label: t('common.fileActions.shareOnWhatsApp'),
@@ -150,14 +159,7 @@ const ItemDropdownActions: FC<IItemDropdownActionsProps> = ({
   if (AA.hasSlackShareAction) {
     const slackShareAction = {
       key: ItemActionsEnum.shareSlack,
-      icon: (
-        <AppSvg
-          path="/common/slack-bg.svg"
-          width="22px"
-          height="18px"
-          className="tw-mr-3"
-        />
-      ),
+      icon: <AppSvg path="/common/slack-bg.svg" width="18px" height="18px" />,
       label: t('common.fileActions.shareOnSlack'),
     };
 
@@ -167,14 +169,7 @@ const ItemDropdownActions: FC<IItemDropdownActionsProps> = ({
   if (AA.hasJiraShareAction) {
     const jiraShareAction = {
       key: ItemActionsEnum.createJiraIssue,
-      icon: (
-        <AppSvg
-          path="/common/jira.svg"
-          width="22px"
-          height="18px"
-          className="tw-mr-3"
-        />
-      ),
+      icon: <AppSvg path="/common/jira.svg" width="18px" height="18px" />,
       label: t('common.fileActions.createJiraIssue'),
     };
 
@@ -187,9 +182,9 @@ const ItemDropdownActions: FC<IItemDropdownActionsProps> = ({
       icon: (
         <AppSvg
           path="/common/trello.svg"
-          width="22px"
+          width="18px"
           height="18px"
-          className="tw-mr-3"
+          className="[&_rect:first-of-type]:tw-fill-current [&_rect:not(:first-of-type)]:tw-fill-[hsl(var(--popover))]"
         />
       ),
       label: t('common.fileActions.createTrelloCard'),

@@ -33,12 +33,16 @@ export interface AdminWorkspace {
  * *Connection* (the operator of a self-hosted installation only): connect with a code from
  * app.ever.co, see the state, rotate the connect key, set the public address, disconnect.
  */
-const EverConnectConnection: React.FC<{ workspaces: AdminWorkspace[] }> = ({ workspaces }) => {
+const EverConnectConnection: React.FC<{ workspaces: AdminWorkspace[] }> = ({
+  workspaces,
+}) => {
   const { t } = useTranslation();
   const errorMessage = useErrorMessage();
   const [status, setStatus] = useState<IEverConnectStatus | null>(null);
   const [code, setCode] = useState('');
-  const [workspaceId, setWorkspaceId] = useState<string | undefined>(workspaces[0]?.id);
+  const [workspaceId, setWorkspaceId] = useState<string | undefined>(
+    workspaces[0]?.id,
+  );
   const [url, setUrl] = useState('');
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
@@ -80,7 +84,11 @@ const EverConnectConnection: React.FC<{ workspaces: AdminWorkspace[] }> = ({ wor
     return failed ? (
       <p data-testid="ever-connect-load-failed" className={MUTED_TEXT}>
         {t('page.everPlatform.errors.generic')}{' '}
-        <Button data-testid="ever-connect-retry" size="small" onClick={() => void refresh()}>
+        <Button
+          data-testid="ever-connect-retry"
+          size="small"
+          onClick={() => void refresh()}
+        >
           {t('page.everPlatform.connect.retry')}
         </Button>
       </p>
@@ -91,15 +99,27 @@ const EverConnectConnection: React.FC<{ workspaces: AdminWorkspace[] }> = ({ wor
     );
   }
 
-  const connected = status.status === 'active' || status.status === 'pending_approval';
+  const connected =
+    status.status === 'active' || status.status === 'pending_approval';
 
   return (
-    <div data-testid="ever-connect-connection" className="tw-flex tw-flex-col tw-gap-8">
+    <div
+      data-testid="ever-connect-connection"
+      className="tw-flex tw-flex-col tw-gap-8"
+    >
       <section className="tw-flex tw-flex-col tw-gap-1">
-        <h3 className={SECTION_TITLE}>{t('page.everPlatform.connect.connection.title')}</h3>
-        <p className={MUTED_TEXT}>{t('page.everPlatform.connect.connection.description')}</p>
+        <h3 className={SECTION_TITLE}>
+          {t('page.everPlatform.connect.connection.title')}
+        </h3>
+        <p className={MUTED_TEXT}>
+          {t('page.everPlatform.connect.connection.description')}
+        </p>
         <p className="tw-m-0 tw-text-[13px] tw-leading-5">
-          <a href={EVER_CONNECT_DOCS_URL} target="_blank" rel="noopener noreferrer">
+          <a
+            href={EVER_CONNECT_DOCS_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             {t('page.everPlatform.connect.docs')}
           </a>
         </p>
@@ -111,7 +131,10 @@ const EverConnectConnection: React.FC<{ workspaces: AdminWorkspace[] }> = ({ wor
       </section>
 
       {!connected && (
-        <section data-testid="ever-connect-connect-form" className="tw-flex tw-flex-col tw-items-start tw-gap-4">
+        <section
+          data-testid="ever-connect-connect-form"
+          className="tw-flex tw-flex-col tw-items-start tw-gap-4"
+        >
           <label className={`tw-w-full ${FIELD_LABEL}`}>
             {t('page.everPlatform.connect.connection.code')}
             <Input
@@ -129,28 +152,46 @@ const EverConnectConnection: React.FC<{ workspaces: AdminWorkspace[] }> = ({ wor
               className={SELECT}
               value={workspaceId}
               onChange={(value: string) => setWorkspaceId(value)}
-              options={workspaces.map((workspace) => ({ value: workspace.id, label: workspace.name }))}
+              options={workspaces.map((workspace) => ({
+                value: workspace.id,
+                label: workspace.name,
+              }))}
             />
           </label>
           <div
             data-testid="ever-connect-what-is-sent"
             className="tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-border tw-bg-muted tw-p-4 tw-text-[13px] tw-leading-5 tw-text-muted-foreground"
           >
-            <p className="tw-m-0 tw-font-medium tw-text-foreground">{t('page.everPlatform.connect.connection.whatIsSent')}</p>
+            <p className="tw-m-0 tw-font-medium tw-text-foreground">
+              {t('page.everPlatform.connect.connection.whatIsSent')}
+            </p>
             <ul className="tw-m-0 tw-my-2 tw-list-disc tw-pl-5">
-              <li>{t('page.everPlatform.connect.connection.sentProduct', { version: status.version })}</li>
-              <li>{t('page.everPlatform.connect.connection.sentInstallSource', { source: status.installSource })}</li>
+              <li>
+                {t('page.everPlatform.connect.connection.sentProduct', {
+                  version: status.version,
+                })}
+              </li>
+              <li>
+                {t('page.everPlatform.connect.connection.sentInstallSource', {
+                  source: status.installSource,
+                })}
+              </li>
               <li>{t('page.everPlatform.connect.connection.sentWorkspace')}</li>
               <li>{t('page.everPlatform.connect.connection.sentKey')}</li>
             </ul>
-            <p className="tw-m-0">{t('page.everPlatform.connect.connection.notSent')}</p>
+            <p className="tw-m-0">
+              {t('page.everPlatform.connect.connection.notSent')}
+            </p>
           </div>
           <Button
             data-testid="ever-connect-connect"
             type="primary"
             disabled={busy || !code.trim() || !workspaceId}
             onClick={() =>
-              run(() => connectInstallation(code.trim(), workspaceId as string), t('page.everPlatform.connect.connection.connected'))
+              run(
+                () => connectInstallation(code.trim(), workspaceId as string),
+                t('page.everPlatform.connect.connection.connected'),
+              )
             }
           >
             {t('page.everPlatform.connect.connection.connect')}
@@ -158,24 +199,46 @@ const EverConnectConnection: React.FC<{ workspaces: AdminWorkspace[] }> = ({ wor
         </section>
       )}
 
-      <section data-testid="ever-connect-state" className="tw-flex tw-flex-col tw-gap-3">
+      <section
+        data-testid="ever-connect-state"
+        className="tw-flex tw-flex-col tw-gap-3"
+      >
         <dl className={DETAIL_LIST}>
-          <DetailRow label={t('page.everPlatform.connect.connection.status')} testId="ever-connect-status">
-            {t(`page.everPlatform.connect.status.${status.status}`, status.status)}
+          <DetailRow
+            label={t('page.everPlatform.connect.connection.status')}
+            testId="ever-connect-status"
+          >
+            {t(
+              `page.everPlatform.connect.status.${status.status}`,
+              status.status,
+            )}
           </DetailRow>
-          <DetailRow label={t('page.everPlatform.connect.connection.platform')}>{status.platform ?? '—'}</DetailRow>
-          <DetailRow label={t('page.everPlatform.connect.connection.instanceId')}>
+          <DetailRow label={t('page.everPlatform.connect.connection.platform')}>
+            {status.platform ?? '—'}
+          </DetailRow>
+          <DetailRow
+            label={t('page.everPlatform.connect.connection.instanceId')}
+          >
             <code>{status.registryInstanceId ?? '—'}</code>
           </DetailRow>
           <DetailRow label={t('page.everPlatform.connect.connection.keyId')}>
             <code>{status.connectKeyId ?? '—'}</code>
           </DetailRow>
-          <DetailRow label={t('page.everPlatform.connect.connection.lastHeartbeat')}>
+          <DetailRow
+            label={t('page.everPlatform.connect.connection.lastHeartbeat')}
+          >
             {formatTime(status.lastHeartbeatAt)}
           </DetailRow>
-          <DetailRow label={t('page.everPlatform.connect.connection.linkedWorkspaces')}>
+          <DetailRow
+            label={t('page.everPlatform.connect.connection.linkedWorkspaces')}
+          >
             {status.links.length
-              ? status.links.map((link) => `${link.handle ? `ever.co/${link.handle}` : link.workspaceId} (${link.state})`).join(', ')
+              ? status.links
+                  .map(
+                    (link) =>
+                      `${link.handle ? `ever.co/${link.handle}` : link.workspaceId} (${link.state})`,
+                  )
+                  .join(', ')
               : '—'}
           </DetailRow>
         </dl>
@@ -193,16 +256,32 @@ const EverConnectConnection: React.FC<{ workspaces: AdminWorkspace[] }> = ({ wor
               onChange={(event) => setUrl(event.target.value)}
             />
           </label>
-          <p className={MUTED_TEXT}>{t('page.everPlatform.connect.connection.publicUrlHint')}</p>
+          <p className={MUTED_TEXT}>
+            {t('page.everPlatform.connect.connection.publicUrlHint')}
+          </p>
           <div className="tw-flex tw-flex-wrap tw-gap-2">
             <Button
               data-testid="ever-connect-save-url"
               disabled={busy || !url.trim()}
-              onClick={() => run(() => setPublicUrl(url.trim()), t('page.everPlatform.connect.connection.publicUrlSaved'))}
+              onClick={() =>
+                run(
+                  () => setPublicUrl(url.trim()),
+                  t('page.everPlatform.connect.connection.publicUrlSaved'),
+                )
+              }
             >
               {t('page.everPlatform.connect.connection.savePublicUrl')}
             </Button>
-            <Button data-testid="ever-connect-refresh" disabled={busy} onClick={() => run(() => refreshEntitlements(), t('page.everPlatform.connect.refreshed'))}>
+            <Button
+              data-testid="ever-connect-refresh"
+              disabled={busy}
+              onClick={() =>
+                run(
+                  () => refreshEntitlements(),
+                  t('page.everPlatform.connect.refreshed'),
+                )
+              }
+            >
               {t('page.everPlatform.connect.refresh')}
             </Button>
             <Button
@@ -211,10 +290,16 @@ const EverConnectConnection: React.FC<{ workspaces: AdminWorkspace[] }> = ({ wor
               onClick={() =>
                 Modal.confirm({
                   title: t('page.everPlatform.connect.connection.rotateTitle'),
-                  content: t('page.everPlatform.connect.connection.rotateConfirm'),
+                  content: t(
+                    'page.everPlatform.connect.connection.rotateConfirm',
+                  ),
                   okText: t('page.everPlatform.connect.connection.rotate'),
                   cancelText: t('common.cancel', 'Cancel'),
-                  onOk: () => run(() => rotateConnectKey(), t('page.everPlatform.connect.connection.rotated')),
+                  onOk: () =>
+                    run(
+                      () => rotateConnectKey(),
+                      t('page.everPlatform.connect.connection.rotated'),
+                    ),
                 })
               }
             >
@@ -226,12 +311,20 @@ const EverConnectConnection: React.FC<{ workspaces: AdminWorkspace[] }> = ({ wor
               disabled={busy}
               onClick={() =>
                 Modal.confirm({
-                  title: t('page.everPlatform.connect.connection.disconnectTitle'),
-                  content: t('page.everPlatform.connect.connection.disconnectConfirm'),
+                  title: t(
+                    'page.everPlatform.connect.connection.disconnectTitle',
+                  ),
+                  content: t(
+                    'page.everPlatform.connect.connection.disconnectConfirm',
+                  ),
                   okText: t('page.everPlatform.connect.connection.disconnect'),
                   okButtonProps: { danger: true },
                   cancelText: t('common.cancel', 'Cancel'),
-                  onOk: () => run(() => disconnectInstallation(), t('page.everPlatform.connect.connection.disconnected')),
+                  onOk: () =>
+                    run(
+                      () => disconnectInstallation(),
+                      t('page.everPlatform.connect.connection.disconnected'),
+                    ),
                 })
               }
             >

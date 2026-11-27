@@ -26,24 +26,34 @@ const InstallFinished: React.FC<IStepProps> = () => {
 
   return (
     <div className="tw-w-full">
-      <div className="tw-w-96">
+      <div className="tw-w-full">
         <AppHeader
           part1={t('common.setup')}
           part2={t('common.finished')}
-          className="tw-mb-8"
+          textSize="2xl"
+          className="tw-mb-2"
         />
         <div>
-          <p>{t('page.install.completedGuide')}</p>
-          <p>{t('page.install.clickRightSideExtension')}</p>
-          <p>{t('page.install.belowScreenShotButton')}</p>
+          <div className="tw-flex tw-flex-col tw-gap-1 tw-text-sm tw-text-muted-foreground">
+            <p className="tw-m-0">{t('page.install.completedGuide')}</p>
+            <p className="tw-m-0">
+              {t('page.install.clickRightSideExtension')}
+            </p>
+            <p className="tw-m-0">{t('page.install.belowScreenShotButton')}</p>
+          </div>
 
-          <div className="tw-shadow-lg tw-rounded-xl tw-overflow-hidden tw-h-60">
+          <div className="tw-mt-6 tw-h-60 tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-border">
             <img
               className="tw-w-full"
               src="/sign/setup_finished_screen_guide.png"
             />
           </div>
-          <AppButton onClick={makeScreenshotHandler} full className="tw-mt-8">
+          <AppButton
+            onClick={makeScreenshotHandler}
+            full
+            twPadding="tw-px-4"
+            className="tw-mt-6 tw-flex tw-h-10 tw-items-center tw-justify-center"
+          >
             {t('page.install.screenshot')}
           </AppButton>
         </div>

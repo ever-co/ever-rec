@@ -48,7 +48,7 @@ const ToolBar = (props: IToolBar) => {
         left: '5px',
       }}
     >
-      <div className="tw-bg-white !tw-border-iron-grey  tw-shadow-md tw-rounded-md tw-p-1px tw-flex tw-flex-col tw-items-center tw-border">
+      <div className="tw-bg-card tw-ring-1 tw-ring-border tw-shadow-[var(--shadow-float)] tw-rounded-lg tw-p-1 tw-flex tw-flex-col tw-items-center">
         {/*<ToolButton
           active={props.active_tool === tools.comments ? true : false}
           onSelect={() => {
@@ -66,7 +66,7 @@ const ToolBar = (props: IToolBar) => {
           options={props.commentsOptions}
           onResetShape={props.onResetShape}
         />
-        <hr className="tw-w-30px tw-border-iron-grey tw-my-1" />
+        <hr className="tw-w-6 tw-border-border tw-my-1" />
         <TextToolBtn
           active={isActive(tools.text)}
           isOpenEditTool={props.active_tool === tools.text ? true : false}
@@ -88,7 +88,7 @@ const ToolBar = (props: IToolBar) => {
           icon={activeShapeTool().icon}
           active={isActive(activeShapeTool())}
         >
-          <div className="tw-flex tw-flex-col">
+          <div className="tw-flex tw-flex-col tw-p-1">
             <SubPanelButton
               onSelect={() => props.setActiveTool(tools.rectangular)}
               icon={tools.rectangular.icon}
@@ -139,7 +139,7 @@ const ToolBar = (props: IToolBar) => {
           iconSize={{ width: 16, height: 16 }}
           icon={tools.stickers.icon}
         />
-        <hr className="tw-w-30px tw-border-iron-grey tw-my-1" />
+        <hr className="tw-w-6 tw-border-border tw-my-1" />
         <ToolButton
           toolTitle={tools.undo.title}
           icon={tools.undo.icon}
@@ -152,7 +152,7 @@ const ToolBar = (props: IToolBar) => {
           icon={tools.redo.icon}
         />
       </div>
-      <div className="tw-bg-white !tw-border-iron-grey  tw-shadow-md tw-rounded-md tw-p-1px tw-flex tw-flex-col tw-items-center tw-border tw-mt-3">
+      <div className="tw-bg-card tw-ring-1 tw-ring-border tw-shadow-[var(--shadow-float)] tw-rounded-lg tw-p-1 tw-flex tw-flex-col tw-items-center tw-mt-3">
         <ToolButton
           active={props.active_tool === tools.note ? true : false}
           onSelect={() => props.setActiveTool(tools.note)}
@@ -167,7 +167,7 @@ const ToolBar = (props: IToolBar) => {
           iconSize={{ width: 20, height: 18 }}
           icon={tools.transcripe.icon}
         />
-        <hr className="tw-w-30px tw-border-iron-grey tw-my-1" />
+        <hr className="tw-w-6 tw-border-border tw-my-1" />
         <ToolButton
           active={props.active_tool === tools.blur ? true : false}
           onSelect={() => props.setActiveTool(tools.blur)}
@@ -203,7 +203,7 @@ const ToolBar = (props: IToolBar) => {
           iconSize={{ width: 20, height: 18 }}
           icon={tools.download.icon}
         />
-        <hr className="tw-w-30px tw-border-iron-grey tw-my-1" />
+        <hr className="tw-w-6 tw-border-border tw-my-1" />
         <ToolButton
           active={props.active_tool === tools.remove ? true : false}
           onSelect={() => setDeleteModalVisibility(true)}

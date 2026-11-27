@@ -127,7 +127,6 @@ const NewWhiteboardModal: React.FC<Props> = ({ visible, onClose, onOk }) => {
         errors={name.errors}
         onChange={folderNameChangeHandler}
         rules={nameRules}
-        inputClass="tw-bg-transparent tw-placeholder-grey-dark2"
       />
     </Modal>
   );

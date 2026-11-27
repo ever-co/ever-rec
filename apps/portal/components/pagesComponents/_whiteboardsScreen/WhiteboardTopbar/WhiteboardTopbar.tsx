@@ -55,29 +55,33 @@ const menu = (
 
 const WhiteboardsTopbar = () => {
   return (
-    <div className="tw-h-60px tw-bg-light-grey2 tw-border-b tw-border-iron-grey tw-flex tw-items-center tw-justify-start tw-pl-280px">
-      <div className="tw-bg-white tw-w-280px tw-h-60px tw-flex tw-items-center tw-justify-between tw-border-b tw-border-iron-grey tw-absolute tw-left-0 ">
+    <div className="tw-h-60px tw-bg-card tw-border-b tw-border-border tw-flex tw-items-center tw-justify-start tw-pl-280px">
+      <div className="tw-bg-card tw-w-280px tw-h-60px tw-flex tw-items-center tw-justify-between tw-border-b tw-border-r tw-border-border tw-absolute tw-left-0 ">
         <Dropdown overlayClassName="tw-w-220px" overlay={menu}>
           <a onClick={(e) => e.preventDefault()}>
             <div className="tw-flex tw-items-center tw-justify-between ">
               <div className="tw-flex tw-items-center tw-justify-center tw-gap-2 ">
                 <img src={recIcon.src} width={40} />
-                <div className="tw-leading-4 tw-text-grey tw-opacity-75 tw-w-200px ">
-                  <p className="!tw-text-xs">MOTE Inc.</p>
-                  <p className="!tw-text-xs">Sussan Duttan</p>
+                <div className="tw-w-200px ">
+                  <p className="tw-m-0 tw-truncate tw-text-sm tw-font-medium tw-leading-5 tw-text-foreground">
+                    MOTE Inc.
+                  </p>
+                  <p className="tw-m-0 tw-truncate tw-text-xs tw-leading-4 tw-text-muted-foreground">
+                    Sussan Duttan
+                  </p>
                 </div>
               </div>
 
-              <DownOutlined />
+              <DownOutlined className="tw-text-muted-foreground" />
             </div>
           </a>
         </Dropdown>
       </div>
       <div className="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-between">
-        <div className="tw-w-300px tw-border tw-rounded-lg tw-flex tw-items-center tw-justify-center tw-opacity-25 tw-bg-gray tw-h-40px tw-mx-5">
+        <div className="tw-w-300px tw-border tw-border-border tw-rounded-md tw-flex tw-items-center tw-justify-center tw-text-sm tw-text-muted-foreground tw-opacity-50 tw-h-9 tw-mx-5">
           Search
         </div>
-        <div className="tw-w-300px tw-border tw-rounded-lg tw-flex tw-items-center tw-justify-center tw-opacity-25 tw-h-40px tw-mx-5">
+        <div className="tw-w-300px tw-border tw-border-border tw-rounded-md tw-flex tw-items-center tw-justify-center tw-text-sm tw-text-muted-foreground tw-opacity-50 tw-h-9 tw-mx-5">
           Profile
         </div>
       </div>

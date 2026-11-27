@@ -95,11 +95,11 @@ const ToolButton: React.FC<IToolButton> = (props: IToolButton) => {
         <div
           onClick={clickHandler}
           className={classNames(
-            `hover:tw-bg-whiteboard-purple tw-text-white tw-m-2px tw-h-40px tw-w-40px tw-w-full  tw-rounded  tw-flex tw-items-center tw-justify-center tw-cursor-pointer  hover:!tw-text-white tw-transition-all tw-duration-100 `,
+            `tw-size-9 tw-shrink-0 tw-rounded-md tw-flex tw-items-center tw-justify-center tw-cursor-pointer tw-transition-colors tw-duration-150`,
             className,
             active
-              ? 'tw-bg-whiteboard-purple tw-text-white'
-              : 'tw-bg-white  tw-text-black ',
+              ? 'tw-bg-brand-muted tw-text-brand-text'
+              : 'tw-text-muted-foreground hover:tw-bg-accent hover:tw-text-foreground',
           )}
         >
           <AppSvg
@@ -113,13 +113,9 @@ const ToolButton: React.FC<IToolButton> = (props: IToolButton) => {
       {toolPanelState && !!children && (
         <OutsideClickHandler onOutsideClick={outsideClickHandler}>
           <div
-            className={classNames(
-              '!tw-bg-white tw-absolute tw-z-10 tw-shadow-2xl tw-rounded',
-            )}
+            className={classNames('tw-absolute tw-z-10')}
             style={{
-              left: '100px',
-              borderRadius: '4px',
-              background: '#FFFFFF',
+              left: 'calc(100% + 8px)',
             }}
           >
             <SubPanel>{children}</SubPanel>

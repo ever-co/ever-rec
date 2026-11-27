@@ -39,8 +39,8 @@ const Jira: React.FC = () => {
 
   return (
     <div className={styles.mainWrapperItem}>
-      <h1 className="tw-font-semibold">
-        <div className="tw-flex">
+      <h1 className="tw-m-0 tw-text-sm tw-font-medium tw-text-foreground">
+        <div className="tw-flex tw-h-7 tw-items-center">
           <AppSvg className="tw-mr-2" path="/settings/jira.svg" size="22px" />
           {t('page.integrations.jira.title')}
         </div>
@@ -51,22 +51,22 @@ const Jira: React.FC = () => {
       user.jira.isIntegrated &&
       user.jira.isIntegrated == true ? (
         <>
-          <h2 className="tw-max-w-full tw-text-center">
-            <div className="tw-flex tw-flex-col tw-gap-2 tw-justify-center">
-              <div className="tw-mr-2">
-                {t('page.integrations.connectedTo')}
-              </div>
-              <div className="tw-flex">
-                <span className="tw-text-primary-purple tw-font-bold">
+          <h2 className="tw-m-0 tw-max-w-full tw-text-[13px] tw-font-normal tw-leading-5 tw-text-muted-foreground">
+            <div className="tw-flex tw-flex-col">
+              <div>{t('page.integrations.connectedTo')}</div>
+              <div className="tw-flex tw-min-w-0">
+                <span className="tw-truncate tw-font-medium tw-text-foreground">
                   {user.jira.email}
                 </span>
               </div>
             </div>
           </h2>
 
-          <div className="tw-w-90p">
+          <div className={styles.action}>
             <AppButton
-              className={styles.disconnectBtn}
+              bgColor="tw-bg-transparent hover:tw-bg-destructive-muted"
+              twTextColor="tw-text-destructive-text"
+              twPadding="tw-px-4 tw-py-[7px]"
               onClick={() => setIsDisconnect(true)}
               full={true}
             >
@@ -79,8 +79,13 @@ const Jira: React.FC = () => {
           <p className={styles.description}>
             {t('page.integrations.jira.description')}
           </p>
-          <div className="tw-w-90p">
-            <AppButton onClick={connectToAccount} full={true}>
+          <div className={styles.action}>
+            <AppButton
+              outlined
+              twPadding="tw-px-4 tw-py-[7px]"
+              onClick={connectToAccount}
+              full={true}
+            >
               {t('page.integrations.jira.buttonText')}
             </AppButton>
           </div>

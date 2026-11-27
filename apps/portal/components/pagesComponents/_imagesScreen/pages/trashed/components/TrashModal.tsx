@@ -1,7 +1,6 @@
 import React from 'react';
 import { Modal } from 'antd';
 import AppButton from 'components/controls/AppButton';
-import classNames from 'classnames';
 import { useTranslation } from 'react-i18next';
 
 interface ITrashModalProps {
@@ -29,25 +28,21 @@ const TrashModal: React.FC<ITrashModalProps> = ({
       open={visible}
       onCancel={onCancel}
       footer={
-        <div className="tw-flex tw-justify-end tw-mt-14">
-          <AppButton
-            onClick={onCancel}
-            bgColor="tw-bg-app-grey-darker"
-            outlined
-            className="tw-px-8 tw-mx-4 tw-pb-1 tw-pt-1"
-          >
+        <div className="tw-flex tw-justify-end tw-gap-2 tw-mt-6">
+          <AppButton onClick={onCancel} outlined>
             {t('page.image.cancel')}
           </AppButton>
-          <AppButton
-            onClick={onOk}
-            className={classNames('tw-px-8 tw-pb-1 tw-pt-1', confirmClass)}
-          >
+          {/* A class AppButton knows as a look ("tw-bg-red") makes the button destructive,
+              with the right text and hover; any other class is the caller's own ground. */}
+          <AppButton onClick={onOk} bgColor={confirmClass || undefined}>
             {textConfirm}
           </AppButton>
         </div>
       }
     >
-      <h2 className="tw-mb-6 tw-text-2xl tw-font-semibold">{title}</h2>
+      <h2 className="tw-pr-6 tw-text-lg tw-font-semibold tw-text-foreground">
+        {title}
+      </h2>
     </Modal>
   );
 };

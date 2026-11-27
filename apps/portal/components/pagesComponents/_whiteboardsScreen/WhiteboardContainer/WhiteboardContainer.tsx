@@ -5,6 +5,7 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import useInfiniteScroll from 'hooks/useInfiniteScroll';
 import { IWhiteboard } from 'app/interfaces/IWhiteboard';
 
+// Sample teammates. Their colours are data (each person's avatar colour), not chrome.
 const fakeTeam = [
   { name: 'R', color: '#f56a00' },
   { name: 'K', color: '#87d068' },
@@ -27,7 +28,7 @@ const WhiteboardContainer: React.FC<IProps> = ({ whiteboards, currentTab }) => {
       id="scrollableDivItems"
       ref={scrollableDivRef}
     >
-      <div className="tw-h-50px tw-w-full tw-border-b tw-border-1px tw-border-iron-grey tw-sticky tw-top-0 !tw-bg-white tw-z-20"></div>
+      <div className="tw-h-50px tw-w-full tw-border-b tw-border-border tw-sticky tw-top-0 tw-bg-background tw-z-20"></div>
       <div className="tw-w-full tw-h-full">
         <div className="tw-px-20 tw-py-10 tw-w-full">
           <InfiniteScroll
@@ -38,7 +39,7 @@ const WhiteboardContainer: React.FC<IProps> = ({ whiteboards, currentTab }) => {
             scrollableTarget="scrollableDivItems"
             className="scrollbar"
           >
-            <Row className="tw-w-full" gutter={30}>
+            <Row className="tw-w-full" gutter={24}>
               {whiteboards?.map((whiteboard, index) => {
                 if (!whiteboard.trash && currentTab === '1') {
                   return (

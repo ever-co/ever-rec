@@ -15,13 +15,16 @@ const InstallSign: React.FC<IStepProps> = ({ nextStep }) => {
 
   return (
     <div className="tw-w-full">
-      <div className="tw-w-96">
+      <div className="tw-w-full">
         <AppHeader
           part1={t('page.auth.common.sign')}
           part2={t('page.auth.common.in')}
-          className="tw-mb-8"
+          textSize="2xl"
+          className="tw-mb-2"
         />
-        <p>{t('page.install.pinnedDescription')}</p>
+        <p className="tw-m-0 tw-text-sm tw-text-muted-foreground">
+          {t('page.install.pinnedDescription')}
+        </p>
         {/*<SignFlow />*/}
       </div>
     </div>

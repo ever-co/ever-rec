@@ -46,7 +46,7 @@ const WorkspaceFolderSection: React.FC<IFolderSectionProps> = ({
 
   const buildFolderTree = (
     folders: IWorkspaceDbFolder[],
-    leftMargin = 70,
+    leftMargin = 24,
     initial = true,
   ) => {
     const workFolders = initial
@@ -65,7 +65,7 @@ const WorkspaceFolderSection: React.FC<IFolderSectionProps> = ({
           setSelectedFolder={setSelectedFolder}
         >
           {folderChildren &&
-            buildFolderTree(folderChildren, leftMargin + 70, false)}
+            buildFolderTree(folderChildren, leftMargin + 24, false)}
         </Folder>
       );
     });

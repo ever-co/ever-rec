@@ -89,6 +89,7 @@ const ItemActions: FC<IItemActionsProps> = ({
           <AppSvg
             path={'/new-design-v2/single-video-buttons/eye-view.svg'}
             size="14px"
+            className={styles.quietIcon}
           />
         }
       />
@@ -179,7 +180,7 @@ const renderMoreMenuJSX = (
           <AppSvg
             path="/new-design-v2/single-video-buttons/cloud-upload.svg"
             size="21px"
-            color="#5b4dbe"
+            color="currentColor"
           />
         }
         onClick={saveCloudClicked}
@@ -194,8 +195,7 @@ const renderMoreMenuJSX = (
           icon={
             <AppSvg
               path="/new-design-v2/comment-more-options/edit.svg"
-              size="17px"
-              color="#5b4dbe"
+              size="16px"
             />
           }
           onClick={editTitleClicked}
@@ -209,11 +209,7 @@ const renderMoreMenuJSX = (
           key="change-folder"
           className={''}
           icon={
-            <AppSvg
-              path="/common/icon-folder-move.svg"
-              size="17px"
-              color="#5b4dbe"
-            />
+            <AppSvg path="/common/icon-folder-move.svg" size="16px" />
           }
           onClick={changeFolderClicked}
         >
@@ -229,8 +225,8 @@ const renderMoreMenuJSX = (
         icon={
           <AppSvg
             path="/new-design-v2/single-video-buttons/share.svg"
-            size="17px"
-            color="#5b4dbe"
+            size="16px"
+            color="currentColor"
           />
         }
         onClick={shareClicked}
@@ -245,7 +241,7 @@ const renderMoreMenuJSX = (
           <AppSvg
             path="/new-design-v2/single-video-buttons/download.svg"
             size="16px"
-            color="#5b4dbe"
+            color="currentColor"
           />
         }
         onClick={downloadClicked}
@@ -256,7 +252,7 @@ const renderMoreMenuJSX = (
       {!isPublic && (
         <Menu.Item
           icon={
-            <AppSvg size="16px" path="/common/collection.svg" color="#5b4dbe" />
+            <AppSvg size="16px" path="/common/collection.svg" />
           }
           onClick={updateChaptersEnabled}
           key="menu_item_chapters_enabled"
@@ -271,12 +267,12 @@ const renderMoreMenuJSX = (
       {!isPublic && (
         <Menu.Item
           key="delete"
+          danger
           className={styles.menuItem}
           icon={
             <AppSvg
               path="/new-design-v2/comment-more-options/delete-bin.svg"
-              size="18px"
-              color="#5b4dbe"
+              size="16px"
             />
           }
           onClick={deleteClicked}
@@ -309,7 +305,10 @@ const ItemActionButton: FC<IItemActionButtonProps> = ({
 }) => {
   return (
     <button
-      className={styles.itemActionButton}
+      className={classNames(
+        styles.itemActionButton,
+        disabled && styles.itemActionButtonDisabled,
+      )}
       onClick={() => !disabled && clicked()}
     >
       {iconSvg ? (

@@ -56,7 +56,7 @@ const CommentElement: FC<IProps> = ({
           <div className={styles.menuItemOption}>
             <AppSvg
               path="/new-design-v2/comment-more-options/edit.svg"
-              size="20px"
+              size="16px"
             />
             <span>{t('common.edit')}</span>
           </div>
@@ -64,12 +64,13 @@ const CommentElement: FC<IProps> = ({
 
         <Menu.Item
           key="delete"
+          danger
           onClick={() => deleteCommentHandler(comment.id)}
         >
           <div className={styles.menuItemOption}>
             <AppSvg
               path="/new-design-v2/comment-more-options/delete-bin.svg"
-              size="20px"
+              size="16px"
             />
             <span>{t('common.delete')}</span>
           </div>
@@ -86,7 +87,7 @@ const CommentElement: FC<IProps> = ({
       ) : (
         <AppSvg
           path="/sign/default-profile.svg"
-          size="30px"
+          size="32px"
           className="tw-flex tw-justify-center tw-items-center"
         />
       )}
@@ -119,10 +120,10 @@ const CommentElement: FC<IProps> = ({
                   placement="bottomRight"
                   overlay={() => commentMenu(comment)}
                 >
-                  <div style={{ cursor: 'pointer' }}>
+                  <div className={styles.moreButton}>
                     <AppSvg
                       path="/new-design-v2/comment-more-options/more-vertical.svg"
-                      size="22px"
+                      size="18px"
                     />
                   </div>
                 </Dropdown>

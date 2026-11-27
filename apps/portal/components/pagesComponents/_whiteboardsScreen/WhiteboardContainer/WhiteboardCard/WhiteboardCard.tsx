@@ -227,7 +227,11 @@ const WhiteboardCard: React.FC<IWhiteboardCardProps> = ({
       >
         <div className={styles.whiteboardCardThumbnailOverlayTop}>
           <div>
-            <AppSvg size="27px" path={checkIcon.src} />
+            <AppSvg
+              size="20px"
+              path={checkIcon.src}
+              className="[&_path]:tw-fill-current"
+            />
           </div>
 
           <div>
@@ -260,8 +264,8 @@ const WhiteboardCard: React.FC<IWhiteboardCardProps> = ({
         <div>
           <Tooltip title="Ant User" placement="top">
             <Avatar
-              size={26}
-              style={{ backgroundColor: '#87d068', marginRight: '0.5rem' }}
+              size={24}
+              style={{ marginRight: '0.5rem' }}
               icon={<UserOutlined />}
             />
           </Tooltip>

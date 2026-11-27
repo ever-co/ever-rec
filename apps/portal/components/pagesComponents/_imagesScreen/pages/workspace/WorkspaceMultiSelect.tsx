@@ -1,6 +1,4 @@
 import { useState } from 'react';
-import classNames from 'classnames';
-import styles from 'components/pagesComponents/_imagesScreen/components/multiItemsSelect/MultiItemsSelect.module.scss';
 import store from 'app/store/panel';
 import PanelAC from 'app/store/panel/actions/PanelAC';
 import { downloadVideo } from 'app/services/videos';
@@ -140,21 +138,19 @@ const WorkspaceMultiSelect: React.FC<Props> = ({
 
   if (!show) return null;
 
+  // The bulk-selection bar: a floating bar on the popover surface, with a hairline (the look of
+  // the personal library's bar). It takes the middle of the items header, between the heading and
+  // the filter and sort; on a narrow screen it gets a row of its own under them.
   return (
-    <div
-      className={classNames(
-        'multi-items tw-flex tw-justify-around tw-items-center tw-bg-gallery-grey tw-rounded-md tw-p-5px tw-px-2',
-        styles.workspace,
-      )}
-    >
+    <div className="multi-items -tw-order-1 tw-mr-auto tw-flex tw-flex-wrap tw-items-center tw-justify-around tw-rounded-lg tw-border tw-border-solid tw-border-border tw-bg-popover tw-p-1 tw-text-popover-foreground tw-shadow-[var(--shadow-float)] mx-lg:tw-order-last mx-lg:tw-mr-0 mx-lg:tw-mt-2 mx-lg:tw-w-full">
       <div className="tw-flex">
         <AppButton
           onClick={selectAllHandler}
-          className="multi-button tw-mx-5px"
-          bgColor="tw-bg-white"
-          outlined={false}
+          className="multi-button tw-mx-1"
+          twPadding="tw-py-[5px] tw-px-3"
+          outlined
         >
-          <div className="tw-text-gray-600 tw-leading-6 tw-font-normal tw-fontFamily-roboto">
+          <div>
             {areAllSelected
               ? t('common.bulkActions.selectNone')
               : t('common.bulkActions.selectAll')}
@@ -163,36 +159,32 @@ const WorkspaceMultiSelect: React.FC<Props> = ({
 
         <AppButton
           onClick={onDownloadHandler}
-          className="multi-button tw-mx-5px"
-          bgColor="tw-bg-white"
-          outlined={false}
+          className="multi-button tw-mx-1"
+          twPadding="tw-py-[5px] tw-px-3"
+          outlined
         >
-          <div className="tw-text-gray-600 tw-leading-6 tw-font-normal tw-fontFamily-roboto">
-            {t('page.image.download')}
-          </div>
+          <div>{t('page.image.download')}</div>
         </AppButton>
       </div>
 
       <div className="tw-flex">
         <AppButton
           onClick={() => setShowFolderModal(true)}
-          className="multi-button tw-mx-5px"
-          bgColor="tw-bg-white"
+          className="multi-button tw-mx-1"
+          twPadding="tw-py-[5px] tw-px-3"
+          outlined
         >
-          <div className="tw-font-normal tw-text-black">
-            {t('page.image.move')}
-          </div>
+          <div>{t('page.image.move')}</div>
         </AppButton>
 
         <AppButton
           onClick={() => setShowDeleteModal(true)}
-          className="multi-button tw-mx-5px"
-          bgColor="tw-bg-white"
-          outlined={false}
+          className="multi-button tw-mx-1"
+          twPadding="tw-py-[5px] tw-px-3"
+          twTextColor="tw-text-destructive-text"
+          outlined
         >
-          <div className="tw-text-red tw-leading-6 tw-font-normal tw-fontFamily-roboto">
-            {t('common.delete')}
-          </div>
+          <div>{t('common.delete')}</div>
         </AppButton>
       </div>
 

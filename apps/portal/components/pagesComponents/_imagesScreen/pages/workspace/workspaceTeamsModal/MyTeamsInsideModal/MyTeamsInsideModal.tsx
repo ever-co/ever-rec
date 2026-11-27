@@ -46,12 +46,17 @@ const MyTeamsInsideModal: FC<IMyTeamsProps> = ({
             <div className={classNames(styles.teamWrapper)}>
               <div className={styles.mainRow}>
                 <div className={styles.avatarWrapper}>
-                  <div className={styles.avatar}>
+                  <div
+                    className={classNames(
+                      styles.avatar,
+                      !team.avatar && styles.stockAvatar,
+                    )}
+                  >
                     <Image
                       src={team.avatar || '/common/team-icon.svg'}
                       alt="team avatar"
-                      width="26"
-                      height="26"
+                      width={team.avatar ? '32' : '18'}
+                      height={team.avatar ? '32' : '18'}
                     />
                   </div>
                   <div className={styles.teamName}>{team.name}</div>

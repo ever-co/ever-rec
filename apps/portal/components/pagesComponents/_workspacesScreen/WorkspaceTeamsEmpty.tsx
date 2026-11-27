@@ -38,8 +38,6 @@ const WorkspaceTeamsEmpty: FC<IProps> = ({
           <div className={styles.addTeamWrapper}>
             <AppButton
               onClick={onCreateTeam}
-              bgColor="tw-bg-primary-purple"
-              twPadding="tw-p-3"
               className={styles.addTeamBtn}
               full
             >
@@ -52,8 +50,6 @@ const WorkspaceTeamsEmpty: FC<IProps> = ({
       {inModal && onManageTeamsEmpty && (
         <AppButton
           onClick={onManageTeamsEmpty}
-          bgColor="tw-bg-primary-purple"
-          twPadding="tw-p-2"
           className={styles.addTeamBtn}
           full
         >

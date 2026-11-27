@@ -73,7 +73,9 @@ const RenameItemModal: FC<IProps> = ({
     >
       <h2 className={styles.modalHeader}>{modalHeading}</h2>
 
-      <label>{inputLabel}</label>
+      <label className="tw-block tw-text-[13px] tw-font-medium tw-text-foreground">
+        {inputLabel}
+      </label>
       <AppInput
         placeholder={inputPlaceholder}
         value={title}

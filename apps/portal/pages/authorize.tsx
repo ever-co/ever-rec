@@ -75,13 +75,13 @@ export default function AuthorizePage() {
 
   return (
     <AppContainer>
-      <div className="tw-flex tw-items-center tw-justify-center tw-h-screen tw-bg-gray-50">
-        <div className="tw-bg-white tw-shadow tw-rounded-3xl tw-p-10 tw-flex tw-flex-col tw-items-center tw-space-y-6 tw-max-w-md tw-w-full tw-transition-all tw-duration-300">
+      <div className="tw-flex tw-min-h-screen tw-items-center tw-justify-center tw-bg-background tw-py-12">
+        <div className="tw-flex tw-w-full tw-max-w-md tw-flex-col tw-items-center">
           <LogoWrapper />
-          <h1 className="tw-text-2xl tw-font-semibold tw-text-center tw-text-gray-800" aria-live="polite">
+          <h1 className="tw-m-0 tw-text-center tw-text-2xl tw-font-semibold tw-text-foreground" aria-live="polite">
             Processing login...
           </h1>
-          <p className="tw-text-gray-500 tw-text-center tw-text-sm">
+          <p className="tw-m-0 tw-mt-2 tw-text-center tw-text-sm tw-text-muted-foreground">
             Redirecting to Ever Rec Desktop. If it doesn’t open automatically, click the
             button below.
           </p>
@@ -91,7 +91,7 @@ export default function AuthorizePage() {
               href={deeplinkUrl}
               rel="noopener noreferrer"
               aria-label="Open the native app"
-              className="tw-bg-blue-600 hover:tw-bg-blue-700 tw-font-bold tw-px-8 tw-py-3 tw-rounded-xl tw-shadow-md tw-transition-colors tw-duration-200 tw-text-center tw-block"
+              className="tw-mt-6 tw-flex tw-h-10 tw-items-center tw-justify-center tw-rounded-md tw-bg-primary tw-px-6 tw-text-sm tw-font-medium tw-text-primary-foreground tw-transition-colors tw-duration-150 hover:tw-bg-primary/90 hover:tw-text-primary-foreground focus:tw-text-primary-foreground active:tw-text-primary-foreground"
             >
               Open Ever Rec Desktop
             </a>

@@ -12,8 +12,19 @@ import { everIdErrorCode, everIdErrorMessageKey, EverIdErrorMessageKey } from 'a
 import { ITermsAcceptanceDocument } from 'app/interfaces/ITermsAcceptance';
 import { readEverIdBinding } from 'app/services/everIdBinding';
 import { panelRoutes, preRoutes } from 'components/_routes';
+import { cn } from 'app/utilities/cn';
 
 type Mode = 'working' | 'confirm' | 'error';
+
+// A 40px-high button, the height of the fields beside it.
+const BUTTON_40 = 'tw-flex tw-h-10 tw-items-center tw-justify-center';
+const FIELD_LABEL =
+  'tw-mb-1 tw-block tw-text-[13px] tw-font-medium tw-text-foreground';
+// What Ever ID sent: shown as a field, on the quiet ground of a value that cannot be edited here.
+const READ_ONLY_FIELD =
+  'tw-h-10 tw-w-full tw-rounded-md tw-border tw-border-solid tw-border-input tw-bg-muted tw-px-3 tw-text-sm tw-text-foreground tw-outline-none';
+const TERMS_LINK =
+  'tw-text-brand-text tw-underline tw-underline-offset-4 hover:tw-text-brand-text';
 
 /**
  * `/auth/ever-id`: where the API sends the browser back after an Ever ID sign-in.
@@ -96,17 +107,20 @@ const EverIdPage: React.FC = () => {
   const backToLogin = () => router.push(preRoutes.auth + panelRoutes.login);
 
   return (
-    <div className="tw-flex tw-flex-col tw-items-center tw-min-h-screen tw-p-4 tw-pt-16">
+    <div className="tw-flex tw-min-h-screen tw-flex-col tw-items-center tw-bg-background tw-p-4 tw-pt-16">
       <LogoWrapper />
-      <div className="tw-w-full tw-max-w-md tw-mt-8">
+      <div className="tw-w-full tw-max-w-[24rem]">
         {mode === 'working' && <AppSpinner show />}
 
         {mode === 'error' && (
           <div data-testid="ever-id-page-error">
-            <p role="alert" className="tw-mb-6 tw-text-sm">
+            <p
+              role="alert"
+              className="tw-mb-6 tw-rounded-md tw-border tw-border-solid tw-border-destructive/40 tw-bg-destructive-muted tw-px-3 tw-py-2 tw-text-sm tw-text-destructive-text"
+            >
               {t(errorKey)}
             </p>
-            <AppButton full twPadding="tw-p-4" onClick={backToLogin}>
+            <AppButton full twPadding="tw-px-4" className={BUTTON_40} onClick={backToLogin}>
               {t('page.auth.error.backToLogin')}
             </AppButton>
           </div>
@@ -114,29 +128,19 @@ const EverIdPage: React.FC = () => {
 
         {mode === 'confirm' && details && (
           <div data-testid="ever-id-confirm">
-            <h1 className="tw-text-2xl tw-font-bold tw-mb-2">{t('page.auth.everId.createAccountTitle')}</h1>
-            <p className="tw-mb-6 tw-text-sm">{t('page.auth.everId.createAccountIntro')}</p>
+            <h1 className="tw-mb-2 tw-text-2xl tw-font-semibold tw-text-foreground">{t('page.auth.everId.createAccountTitle')}</h1>
+            <p className="tw-mb-6 tw-text-sm tw-text-muted-foreground">{t('page.auth.everId.createAccountIntro')}</p>
 
-            <label htmlFor="ever-id-name" className="tw-block tw-text-xs tw-text-mid-grey">
+            <label htmlFor="ever-id-name" className={FIELD_LABEL}>
               {t('page.auth.everId.name')}
             </label>
-            <input
-              id="ever-id-name"
-              readOnly
-              value={details.name ?? ''}
-              className="tw-w-full tw-mb-4 tw-py-2 tw-border-b tw-border-black tw-bg-transparent"
-            />
-            <label htmlFor="ever-id-email" className="tw-block tw-text-xs tw-text-mid-grey">
+            <input id="ever-id-name" readOnly value={details.name ?? ''} className={cn(READ_ONLY_FIELD, 'tw-mb-4')} />
+            <label htmlFor="ever-id-email" className={FIELD_LABEL}>
               {t('page.auth.everId.email')}
             </label>
-            <input
-              id="ever-id-email"
-              readOnly
-              value={details.email}
-              className="tw-w-full tw-mb-6 tw-py-2 tw-border-b tw-border-black tw-bg-transparent"
-            />
+            <input id="ever-id-email" readOnly value={details.email} className={cn(READ_ONLY_FIELD, 'tw-mb-6')} />
 
-            <div className="tw-flex tw-gap-4">
+            <div className="tw-flex tw-items-start tw-gap-2 tw-text-sm">
               {/* @ts-ignore */}
               <Checkbox
                 aria-label={t('page.register.terms.agree')}
@@ -144,28 +148,23 @@ const EverIdPage: React.FC = () => {
                 disabled={termsDocuments.length === 0}
                 onChange={() => setAccepted((value) => !value)}
               />
-              <p>
+              <p className="tw-m-0">
                 {t('page.register.terms.agree')}
-                <a className="tw-underline tw-text-primary-purple" href="https://rec.com/tos" target="_blank" rel="noreferrer">
+                <a className={TERMS_LINK} href="https://rec.com/tos" target="_blank" rel="noreferrer">
                   {t('page.register.terms.terms')}
                 </a>
                 {t('page.register.terms.and')}
-                <a
-                  className="tw-underline tw-text-primary-purple"
-                  href="https://rec.com/privacy"
-                  target="_blank"
-                  rel="noreferrer"
-                >
+                <a className={TERMS_LINK} href="https://rec.com/privacy" target="_blank" rel="noreferrer">
                   {t('page.register.terms.privacy')}
                 </a>
               </p>
             </div>
 
-            <div className="tw-flex tw-gap-4 tw-mt-8">
-              <AppButton full twPadding="tw-p-4" outlined onClick={backToLogin}>
+            <div className="tw-mt-6 tw-flex tw-gap-3">
+              <AppButton full twPadding="tw-px-4" className={BUTTON_40} outlined onClick={backToLogin}>
                 {t('page.auth.everId.cancel')}
               </AppButton>
-              <AppButton full twPadding="tw-p-4" disabled={!accepted || busy} onClick={create}>
+              <AppButton full twPadding="tw-px-4" className={BUTTON_40} disabled={!accepted || busy} onClick={create}>
                 {t('page.auth.everId.create')}
               </AppButton>
             </div>

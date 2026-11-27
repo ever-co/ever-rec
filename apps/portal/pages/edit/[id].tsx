@@ -1410,8 +1410,6 @@ const EditorScreen: React.FC = () => {
     <div
       className={styles.pageContainer}
       style={{
-        backgroundImage: `url('leak_bg-min.png')`,
-        backgroundSize: 'cover',
         justifyContent: 'center',
         padding: '8px',
       }}

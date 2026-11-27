@@ -1,9 +1,10 @@
-@import 'pagesScss/partials/_colors.scss';
-
 .modalHeader {
   font-size: 1rem;
-  font-weight: bold;
-  margin-bottom: 1.7rem;
+  font-weight: 600;
+  line-height: 1.5rem;
+  margin-bottom: 1rem;
+  // Clear of the dialog's close button.
+  padding-right: 1.5rem;
 }
 
 .inputField {
@@ -26,21 +27,29 @@
   }
 }
 
+// A field inside a dialog: the plain Ever input (transparent ground, hairline, ring on focus).
 .appInputSecond {
-  color: $grey-dark-20;
-  background-color: $primary-violet10;
-  border-radius: 0.2rem;
-  padding: 0.5rem 1rem;
-  border-color: $primary-violet;
-  border-bottom-width: 2px;
+  color: hsl(var(--foreground));
+  background-color: transparent;
+  border-radius: calc(var(--radius) - 2px);
+  padding: 0.5rem 0.75rem;
+  border-color: hsl(var(--input));
 
   &::placeholder {
-    color: $grey-dark-20;
+    color: hsl(var(--muted-foreground));
+  }
+
+  &:focus {
+    border-color: hsl(var(--ring));
   }
 
   &.appInputSecondDanger {
-    background-color: $pink-light;
-    border-color: $pink;
+    border-color: hsl(var(--destructive) / 0.4);
+
+    &:focus {
+      border-color: hsl(var(--destructive));
+      box-shadow: 0 0 0 3px hsl(var(--destructive) / 0.2);
+    }
   }
 }
 

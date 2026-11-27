@@ -618,10 +618,10 @@ const VideoNotFoundPage = () => {
           </div>
           <div className="tw-flex tw-justify-center">
             <div>
-              <div className="tw-font-bold tw-text-3xl tw-text-center tw-mt-4">
+              <div className="tw-font-semibold tw-text-lg tw-text-center tw-mt-4">
                 {t('page.video.oops')}
               </div>
-              <div className="tw-text-lg tw-text-center tw-mt-2">
+              <div className="tw-text-sm tw-text-center tw-mt-2 tw-text-muted-foreground">
                 {t('page.video.noAccess')}
               </div>
 
@@ -630,7 +630,7 @@ const VideoNotFoundPage = () => {
                   onClick={() => {
                     router.push(preRoutes.media + panelRoutes.images);
                   }}
-                  className="tw-m-auto tw-mt-5 tw-px-10 tw-py-4"
+                  className="tw-m-auto tw-mt-5"
                 >
                   {t('page.video.backToPortal')}
                 </AppButton>

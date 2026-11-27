@@ -92,11 +92,12 @@ const EmbeddedSharedVideo: FC = () => {
 
   return (
     <div
+      // The frame around an embedded player: dark in both themes, like everything over media.
       style={{
         width: '100vw',
         height: '100vh',
-        background: '#000',
-        color: '#fff',
+        background: 'hsl(var(--overlay))',
+        color: 'hsl(var(--on-overlay))',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',

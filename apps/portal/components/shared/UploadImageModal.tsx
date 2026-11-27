@@ -25,9 +25,6 @@ const UploadImageModal: React.FC<Props> = ({
       open={visible}
       closable={true}
       onCancel={onCancel}
-      closeIcon={
-        <AppSvg path="/common/close-icon.svg" className="modalCloseButton" />
-      }
       footer={
         <div
           onDrop={onDrop}
@@ -53,7 +50,7 @@ const UploadImageModal: React.FC<Props> = ({
         </div>
       }
     >
-      <h2 className="tw-mb-0 tw-text-base tw-font-semibold">
+      <h2 className="tw-mb-0 tw-pr-6 tw-text-base tw-font-semibold">
         {t('page.image.uploadImages')}
       </h2>
     </Modal>

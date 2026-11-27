@@ -9,7 +9,7 @@ interface IUniqueImageProps {
 
 const UniqueImage: React.FC<IUniqueImageProps> = ({ view }) => {
   return (
-    <span className="tw-border-white tw-border-2 tw-rounded-full tw-mr-13negative">
+    <span className="tw-border-background tw-border-2 tw-rounded-full tw-mr-13negative">
       <img
         src={view?.photoURL}
         className={classNames(

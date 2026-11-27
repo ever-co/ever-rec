@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { everIdStartUrl } from 'app/services/api/everId';
 import { createEverIdBinding } from 'app/services/everIdBinding';
 import { getCookies } from 'app/services/helpers/getCookies';
+import { cn } from 'app/utilities/cn';
 import {
   confirmProvision,
   IProvisionIntent,
@@ -16,6 +17,10 @@ export const PROVISION_INTENT_KEY = 'ever-connect.provision-intent';
 export const PROVISION_PATH = '/ever-connect/provision';
 
 type Phase = 'loading' | 'missing' | 'failed' | 'ready' | 'busy' | 'created' | 'declined';
+
+// A quiet line under the title, and the line that says what went wrong.
+const LINE = 'tw-m-0 tw-text-sm tw-text-muted-foreground';
+const ERROR_LINE = 'tw-m-0 tw-text-sm tw-text-destructive-text';
 
 /**
  * Reads the intent from the URL fragment (`#intent=…`), never from a query string, keeps it for
@@ -119,18 +124,29 @@ const ProvisionConfirm: React.FC = () => {
   };
 
   return (
-    <div data-testid="ever-connect-provision" className="tw-mx-auto tw-flex tw-max-w-xl tw-flex-col tw-gap-4 tw-p-8">
-      <h1 className="tw-text-2xl tw-font-semibold">{t('page.everConnect.provision.title')}</h1>
-      {phase === 'loading' && <p>{t('page.everConnect.provision.loading')}</p>}
-      {phase === 'missing' && <p data-testid="ever-connect-provision-missing">{t('page.everConnect.provision.missing')}</p>}
-      {phase === 'failed' && <p data-testid="ever-connect-provision-failed">{message}</p>}
+    <div
+      data-testid="ever-connect-provision"
+      className="tw-mx-auto tw-flex tw-w-full tw-max-w-md tw-flex-col tw-items-center tw-gap-2 tw-text-center"
+    >
+      <h1 className="tw-m-0 tw-text-2xl tw-font-semibold tw-text-foreground">{t('page.everConnect.provision.title')}</h1>
+      {phase === 'loading' && <p className={LINE}>{t('page.everConnect.provision.loading')}</p>}
+      {phase === 'missing' && (
+        <p data-testid="ever-connect-provision-missing" className={LINE}>
+          {t('page.everConnect.provision.missing')}
+        </p>
+      )}
+      {phase === 'failed' && (
+        <p data-testid="ever-connect-provision-failed" className={ERROR_LINE}>
+          {message}
+        </p>
+      )}
       {(phase === 'ready' || phase === 'busy') && intent && (
-        <section className="tw-flex tw-flex-col tw-gap-4">
-          <p data-testid="ever-connect-provision-question">
+        <section className="tw-flex tw-w-full tw-flex-col tw-items-center tw-gap-2">
+          <p data-testid="ever-connect-provision-question" className={LINE}>
             {t('page.everConnect.provision.question', { name: intent.displayName, handle: intent.handle })}
           </p>
           {signedIn ? (
-            <div className="tw-flex tw-gap-3">
+            <div className="tw-mt-4 tw-flex tw-justify-center tw-gap-3">
               <Button data-testid="ever-connect-provision-create" type="primary" disabled={phase === 'busy'} onClick={create}>
                 {t('page.everConnect.provision.create')}
               </Button>
@@ -139,8 +155,8 @@ const ProvisionConfirm: React.FC = () => {
               </Button>
             </div>
           ) : (
-            <div className="tw-flex tw-flex-col tw-gap-2">
-              <p>{t('page.everConnect.provision.signInHint')}</p>
+            <div className="tw-flex tw-w-full tw-max-w-xs tw-flex-col tw-gap-2">
+              <p className={cn(LINE, 'tw-mb-4')}>{t('page.everConnect.provision.signInHint')}</p>
               <Button
                 data-testid="ever-connect-provision-ever-id"
                 type="primary"
@@ -153,11 +169,23 @@ const ProvisionConfirm: React.FC = () => {
               </Button>
             </div>
           )}
-          {message && <p data-testid="ever-connect-provision-message">{message}</p>}
+          {message && (
+            <p data-testid="ever-connect-provision-message" className={ERROR_LINE}>
+              {message}
+            </p>
+          )}
         </section>
       )}
-      {phase === 'created' && <p data-testid="ever-connect-provision-created">{t('page.everConnect.provision.created')}</p>}
-      {phase === 'declined' && <p data-testid="ever-connect-provision-declined">{t('page.everConnect.provision.declined')}</p>}
+      {phase === 'created' && (
+        <p data-testid="ever-connect-provision-created" className={LINE}>
+          {t('page.everConnect.provision.created')}
+        </p>
+      )}
+      {phase === 'declined' && (
+        <p data-testid="ever-connect-provision-declined" className={LINE}>
+          {t('page.everConnect.provision.declined')}
+        </p>
+      )}
     </div>
   );
 };

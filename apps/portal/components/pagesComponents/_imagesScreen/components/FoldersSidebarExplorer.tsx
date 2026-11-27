@@ -102,13 +102,17 @@ const FoldersSidebarExplorer: React.FC = () => {
             <HorizontalDivider className="tw-my-5 tw-opacity-50" />
             <div>
               <div className="tw-flex tw-justify-between tw-items-center">
-                <h3 className="tw-font-semibold tw-pl-3">
+                <h3 className="tw-text-sm tw-font-semibold tw-pl-3">
                   {t('unique.imageFolders')}
                 </h3>
-                <div onClick={openModal}>
+                <div
+                  onClick={openModal}
+                  className="tw-text-muted-foreground tw-transition-colors tw-duration-150 hover:tw-text-foreground"
+                >
                   <AppSvg
                     path="/common/add_new.svg"
                     className="tw-cursor-pointer"
+                    themed
                   />
                 </div>
               </div>
@@ -119,6 +123,7 @@ const FoldersSidebarExplorer: React.FC = () => {
                       key={`folder_${index}`}
                       title={folder.name}
                       color={folder.color ? folder.color : '#7737FF'}
+                      className="hover:tw-bg-accent"
                       onClick={() => openFolderHandlerImage(folder)}
                     />
                   ))}
@@ -137,13 +142,17 @@ const FoldersSidebarExplorer: React.FC = () => {
             <HorizontalDivider className="tw-my-5 tw-opacity-50" />
             <div>
               <div className="tw-flex tw-justify-between tw-items-center">
-                <h3 className="tw-font-semibold tw-pl-3">
+                <h3 className="tw-text-sm tw-font-semibold tw-pl-3">
                   {t('unique.videoFolders')}
                 </h3>
-                <div onClick={openModal}>
+                <div
+                  onClick={openModal}
+                  className="tw-text-muted-foreground tw-transition-colors tw-duration-150 hover:tw-text-foreground"
+                >
                   <AppSvg
                     path="/common/add_new.svg"
                     className="tw-cursor-pointer"
+                    themed
                   />
                 </div>
               </div>
@@ -154,6 +163,7 @@ const FoldersSidebarExplorer: React.FC = () => {
                       key={`folder_${index}`}
                       title={folder.name}
                       color={folder.color ? folder.color : '#7737FF'}
+                      className="hover:tw-bg-accent"
                       onClick={() => openFolderHandlerVideo(folder)}
                     />
                   ))}

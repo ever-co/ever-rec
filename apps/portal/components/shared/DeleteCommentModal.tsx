@@ -1,7 +1,6 @@
 import React from 'react';
 import { Modal } from 'antd';
 import AppButton from 'components/controls/AppButton';
-import AppSvg from '../elements/AppSvg';
 import classNames from 'classnames';
 import { useTranslation } from 'react-i18next';
 
@@ -28,9 +27,6 @@ const DeleteCommentModal: React.FC<IDeleteScreenshotModalProps> = ({
       open={visible}
       onCancel={onCancel}
       closable={true}
-      closeIcon={
-        <AppSvg path="/common/close-icon.svg" className="modalCloseButton" />
-      }
       footer={
         // Row reversed: the destructive action sits on the right, the markup order stays.
         <div
@@ -56,7 +52,7 @@ const DeleteCommentModal: React.FC<IDeleteScreenshotModalProps> = ({
         </div>
       }
     >
-      <h2 className="tw-mb-0 tw-text-base tw-font-semibold">
+      <h2 className="tw-mb-0 tw-pr-6 tw-text-base tw-font-semibold">
         {t('modals.deleteComment')}
       </h2>
     </Modal>

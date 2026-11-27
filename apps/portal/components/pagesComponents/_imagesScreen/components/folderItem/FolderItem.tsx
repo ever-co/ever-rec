@@ -337,10 +337,7 @@ const FolderItem: React.FC<IFolderItemProps> = ({
       )}
 
       {canEdit && (
-        <Menu.Item
-          key="color"
-          className={styles.menuNormalCursor}
-        >
+        <Menu.Item key="color" className={styles.menuNormalCursor}>
           <div className="tw-text-center tw-text-xs tw-font-medium tw-text-muted-foreground">
             {t('common.folderActions.changeFolderColor')}
           </div>

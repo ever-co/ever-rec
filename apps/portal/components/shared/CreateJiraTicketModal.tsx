@@ -177,11 +177,11 @@ const CreateJiraTicketModal: React.FC<ICreateJiraTicketModalProps> = ({
         </div>
       }
     >
-      <h2 className="tw-mb-4 tw-text-base tw-font-semibold">
+      <h2 className="tw-mb-4 tw-pr-6 tw-text-base tw-font-semibold">
         {t('modals.createJira')}
       </h2>
 
-      <label className="tw-mb-1 tw-block tw-text-sm tw-text-muted-foreground">
+      <label className="tw-mb-1 tw-block tw-text-[13px] tw-font-medium tw-text-foreground">
         {t('modals.selectResource')}
       </label>
       <Select
@@ -215,7 +215,7 @@ const CreateJiraTicketModal: React.FC<ICreateJiraTicketModalProps> = ({
           ))}
       </Select>
 
-      <label className="tw-mb-1 tw-block tw-text-sm tw-text-muted-foreground">
+      <label className="tw-mb-1 tw-block tw-text-[13px] tw-font-medium tw-text-foreground">
         {t('modals.selectProject')}
       </label>
 
@@ -243,7 +243,7 @@ const CreateJiraTicketModal: React.FC<ICreateJiraTicketModalProps> = ({
           ))}
       </Select>
 
-      <label className="tw-mb-1 tw-block tw-text-sm tw-text-muted-foreground">
+      <label className="tw-mb-1 tw-block tw-text-[13px] tw-font-medium tw-text-foreground">
         {t('modals.selectIssueType')}
       </label>
 
