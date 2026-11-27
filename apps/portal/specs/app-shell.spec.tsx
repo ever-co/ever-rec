@@ -297,12 +297,20 @@ describe('SCHeader (the top bar)', () => {
     expect(container.querySelector('h1')).toBeNull();
   });
 
-  it('shows the name of the page where there is nothing to search', async () => {
+  it('shows no disabled search where there is nothing to search', async () => {
     mockAsPath = '/media/trashed';
     await render(<SCHeader filterValue={null} />);
 
-    expect(container.querySelector('input[type="search"]')).toBeNull();
-    expect(container.querySelector('h1')?.textContent).toBe('navigation.bin');
+    expect(container.querySelector('input')).toBeNull();
+    // The page's own heading names it; the bar does not repeat it.
+    expect(container.querySelector('h1')).toBeNull();
+  });
+
+  it('shows a title when the page asks for one', async () => {
+    await render(<SCHeader showSearch={false} text="Workspaces" />);
+
+    expect(container.querySelector('input')).toBeNull();
+    expect(container.querySelector('h1')?.textContent).toBe('Workspaces');
   });
 
   it('keeps the workspace controls: invite for everyone, settings for its admin', async () => {

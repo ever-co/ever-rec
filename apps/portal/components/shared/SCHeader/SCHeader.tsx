@@ -11,7 +11,6 @@ import {
 } from 'lucide-react';
 import { panelRoutes, preRoutes } from 'components/_routes';
 import { infoMessage } from 'app/services/helpers/toastMessages';
-import { useMenuItems } from 'misc/menuItems';
 import { Button } from 'components/ui/button';
 import { Hint } from 'components/ui/tooltip';
 import ThemeToggle from 'components/shell/ThemeToggle';
@@ -30,7 +29,7 @@ interface ISCHeaderProps {
 }
 
 /**
- * The top bar of a page (shared Ever shell, A1): the search or the page's title on the left;
+ * The top bar of a page (shared Ever shell, A1): the search (or a title the page asks for) on the left;
  * the product's controls, notifications, help and the one theme icon on the right. The person's
  * menu and the language choice live in the sidebar's user block and in Preferences.
  */
@@ -48,7 +47,6 @@ const SCHeader: FC<ISCHeaderProps> = ({
   const clickedHelpCenter = useRef(false); // to be removed when implemented
   const router = useRouter();
   const { setDrawerOpen } = useShell();
-  const { mainMenuItems, settingsMenuItems } = useMenuItems();
 
   const goToWorkspace = () => {
     const { workspaceId } = router.query;
@@ -58,13 +56,10 @@ const SCHeader: FC<ISCHeaderProps> = ({
     );
   };
 
-  // A page that has nothing to search (`filterValue === null`) shows its name instead of a
-  // disabled field.
+  // A page that has nothing to search (`filterValue === null`) shows no disabled field; its own
+  // heading names it. A caller can still ask for a title here with `text`.
   const canSearch = showSearch && filterValue !== null;
-  const routeTitle = [...mainMenuItems, ...settingsMenuItems].find(
-    (item) => item.type !== 'back' && router.asPath.includes(item.route),
-  )?.title;
-  const title = text ?? (canSearch ? undefined : routeTitle);
+  const title = canSearch ? undefined : text;
 
   return (
     <header className="tw-flex tw-h-14 tw-shrink-0 tw-items-center tw-justify-between tw-gap-3 tw-border-0 tw-border-b tw-border-solid tw-border-border tw-px-4 md:tw-px-6">
