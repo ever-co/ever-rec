@@ -330,15 +330,19 @@
     border-bottom: 1px solid hsl(var(--border));
   }
 
-  > * {
-    flex: none;
-  }
-
-  // The tools, in the desktop panel's order, straight in the row.
+  // The tools, in the desktop panel's order, straight in the row, each at its own width (the
+  // wrappers' children become the row's items).
   .toolboxstart,
   .toolsColumn,
   .moreTools {
     display: contents !important;
+  }
+
+  > *,
+  .toolboxstart > *,
+  .toolsColumn > *,
+  .moreTools > * {
+    flex: none;
   }
 
   // The floating panel's own controls (drag pin, close, collapse): the bars are docked, the tool
