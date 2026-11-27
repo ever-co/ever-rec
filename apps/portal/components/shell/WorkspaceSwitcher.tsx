@@ -34,7 +34,7 @@ const WorkspaceTile: FC<{
 }> = ({ name, avatar, className }) => (
   <span
     className={cn(
-      'tw-flex tw-size-8 tw-shrink-0 tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-md tw-border tw-border-solid tw-border-border tw-bg-card tw-text-[13px] tw-font-semibold tw-text-foreground',
+      'tw-flex tw-size-7 tw-shrink-0 tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-md tw-border tw-border-solid tw-border-border tw-bg-card tw-text-xs tw-font-semibold tw-text-foreground',
       className,
     )}
     aria-hidden="true"
@@ -103,7 +103,7 @@ const WorkspaceSwitcher: FC<IWorkspaceSwitcherProps> = ({
             'tw-flex tw-min-w-0 tw-items-center tw-gap-2 tw-rounded-lg tw-bg-transparent tw-text-left tw-outline-none tw-transition-colors tw-duration-150 hover:tw-bg-sidebar-accent focus-visible:tw-ring-2 focus-visible:tw-ring-ring data-[state=open]:tw-bg-sidebar-accent',
             collapsed
               ? 'tw-size-10 tw-justify-center'
-              : 'tw-h-12 tw-flex-1 tw-px-2',
+              : 'tw-h-12 tw-flex-1 tw-px-1.5',
           )}
         >
           <WorkspaceTile

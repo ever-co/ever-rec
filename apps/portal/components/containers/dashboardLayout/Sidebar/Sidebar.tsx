@@ -120,7 +120,7 @@ const Sidebar: FC<IProps> = ({
     : t('shell.collapseSidebar');
 
   const headerButtonClass =
-    'tw-flex tw-size-8 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-bg-transparent tw-text-muted-foreground tw-outline-none tw-transition-colors tw-duration-150 hover:tw-bg-sidebar-accent hover:tw-text-sidebar-accent-foreground focus-visible:tw-ring-2 focus-visible:tw-ring-ring';
+    'tw-flex tw-size-7 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-bg-transparent tw-text-muted-foreground tw-outline-none tw-transition-colors tw-duration-150 hover:tw-bg-sidebar-accent hover:tw-text-sidebar-accent-foreground focus-visible:tw-ring-2 focus-visible:tw-ring-ring';
   const collapseButton = inDrawer ? (
     <button
       type="button"
@@ -153,7 +153,7 @@ const Sidebar: FC<IProps> = ({
     >
       <div
         className={cn(
-          'tw-flex tw-shrink-0 tw-items-center tw-gap-1',
+          'tw-flex tw-shrink-0 tw-items-center tw-gap-0.5',
           collapsed ? 'tw-flex-col tw-px-3 tw-pb-1 tw-pt-3' : 'tw-h-16 tw-px-3',
         )}
       >
