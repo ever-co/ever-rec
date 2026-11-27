@@ -58,7 +58,10 @@ const WhiteboardsTopbar = () => {
     <div className="tw-h-60px tw-bg-card tw-border-b tw-border-border tw-flex tw-items-center tw-justify-start tw-pl-280px">
       <div className="tw-bg-card tw-w-280px tw-h-60px tw-flex tw-items-center tw-justify-between tw-border-b tw-border-r tw-border-border tw-absolute tw-left-0 ">
         <Dropdown overlayClassName="tw-w-220px" overlay={menu}>
-          <a onClick={(e) => e.preventDefault()}>
+          <a
+            onClick={(e) => e.preventDefault()}
+            className="tw-text-muted-foreground"
+          >
             <div className="tw-flex tw-items-center tw-justify-between ">
               <div className="tw-flex tw-items-center tw-justify-center tw-gap-2 ">
                 <img src={recIcon.src} width={40} />
@@ -72,7 +75,7 @@ const WhiteboardsTopbar = () => {
                 </div>
               </div>
 
-              <DownOutlined className="tw-text-muted-foreground" />
+              <DownOutlined />
             </div>
           </a>
         </Dropdown>

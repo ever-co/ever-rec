@@ -4,9 +4,12 @@
   align-items: flex-start;
 }
 
+// The font select: the global select skin has no outline of its own, so the field's hairline is
+// drawn here (it was a white box before).
 .select {
   width: 100%;
-  border-radius: 0.25rem;
+  border: 1px solid hsl(var(--input));
+  border-radius: 0.5rem;
 }
 .flexContainer {
   display: flex;

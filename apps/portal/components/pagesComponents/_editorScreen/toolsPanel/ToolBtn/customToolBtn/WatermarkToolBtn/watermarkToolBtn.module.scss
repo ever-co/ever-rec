@@ -49,9 +49,11 @@
   font-size: 0.8125rem;
 }
 
+// The position select: the field's hairline is drawn here (the global select skin has none).
 .selectContainer {
   width: 100%;
-  border-radius: 0.25rem;
+  border: 1px solid hsl(var(--input));
+  border-radius: 0.5rem;
 }
 
 .transBorder {

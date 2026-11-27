@@ -219,8 +219,10 @@
   padding-top: 0.75rem;
 }
 
+// The font select of the stickers panel: its hairline is drawn here (the global select skin has none).
 .optionWrapper {
   width: 100%;
+  border: 1px solid hsl(var(--input));
   border-radius: 0.5rem;
 }
 
