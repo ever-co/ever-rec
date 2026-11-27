@@ -650,7 +650,8 @@
       "system": "Sistema",
       "languageHint": "La lingua dell'app in questo browser",
       "saving": "Salvataggio degli screenshot",
-      "savingHint": "Formato file, cartella di download e link di Google Drive per l'estensione del browser"
+      "savingHint": "Formato file, cartella di download e link di Google Drive per l'estensione del browser",
+      "savingPreferences": "Salvataggio Preferenze"
     }
   },
   "modals": {

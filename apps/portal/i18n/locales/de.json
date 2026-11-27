@@ -650,7 +650,8 @@
       "system": "System",
       "languageHint": "Die Sprache der App in diesem Browser",
       "saving": "Screenshots speichern",
-      "savingHint": "Dateiformat, Download-Ordner und Google-Drive-Links für die Browsererweiterung"
+      "savingHint": "Dateiformat, Download-Ordner und Google-Drive-Links für die Browsererweiterung",
+      "savingPreferences": "Speichern Einstellungen"
     }
   },
   "modals": {

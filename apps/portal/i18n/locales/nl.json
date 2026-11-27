@@ -650,7 +650,8 @@
       "system": "Systeem",
       "languageHint": "De taal van de app in deze browser",
       "saving": "Screenshots opslaan",
-      "savingHint": "Bestandsindeling, downloadmap en Google Drive-links voor de browserextensie"
+      "savingHint": "Bestandsindeling, downloadmap en Google Drive-links voor de browserextensie",
+      "savingPreferences": "Opslaan Voorkeuren"
     }
   },
   "modals": {

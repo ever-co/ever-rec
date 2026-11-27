@@ -953,7 +953,8 @@
       "system": "System",
       "languageHint": "The language of the app on this browser",
       "saving": "Saving screenshots",
-      "savingHint": "File format, download folder and Google Drive links for the browser extension"
+      "savingHint": "File format, download folder and Google Drive links for the browser extension",
+      "savingPreferences": "Saving preferences"
     },
     "termsReaccept": {
       "title": "Please accept our terms",

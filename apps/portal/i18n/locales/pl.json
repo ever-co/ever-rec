@@ -650,7 +650,8 @@
       "system": "Systemowy",
       "languageHint": "Język aplikacji w tej przeglądarce",
       "saving": "Zapisywanie zrzutów ekranu",
-      "savingHint": "Format pliku, folder pobierania i linki Google Drive dla rozszerzenia przeglądarki"
+      "savingHint": "Format pliku, folder pobierania i linki Google Drive dla rozszerzenia przeglądarki",
+      "savingPreferences": "Zapisywanie Preferencje"
     }
   },
   "modals": {

@@ -65,8 +65,9 @@ const Preferences: React.FC = () => {
             {t('navigation.back')}
           </div>
           <AppHeader
-            part1={t('page.preference.saving')}
-            part2={t('page.preference.preferences')}
+            part1={t('page.appearance.savingPreferences')}
+            part2=""
+            spacing={false}
             textSize="2xl"
             className="tw-mb-6"
           />
