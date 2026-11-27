@@ -405,8 +405,8 @@ const ManageWorkspaces: React.FC = () => {
 
                       <div
                         className={styles.membersCountWrapper}
-                        title={t('workspace.membersWithLength', {
-                          length: workspace.members.length,
+                        title={t('shell.members', {
+                          count: workspace.members.length,
                         })}
                       >
                         <UserRound strokeWidth={1.75} aria-hidden="true" />
