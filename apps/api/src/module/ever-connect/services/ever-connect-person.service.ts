@@ -27,6 +27,7 @@ import {
   PersonRequestResult,
 } from '../ever-connect.types';
 import { EverConnectAccountDeletions } from '../../../common/ever-platform/tokens';
+import { workspacesAdministeredBy } from '../../../common/workspace-admin';
 import {
   EVER_CONNECT_ACCOUNT_DELETER,
   EVER_CONNECT_CLOCK,
@@ -475,8 +476,9 @@ export class EverConnectPersonService implements EverConnectAccountDeletions {
    * So the account does not go while it administers a workspace, with two cases left to an
    * operator: a workspace created after this last check whose undo failed (the creation logs its
    * id), and a workspace created while the sweep had taken the mark because this process could not
-   * renew it for a whole day. In both, the account goes and the workspace stays, as it does when an
-   * admin deletes their own account in Rec.
+   * renew it for a whole day. In both, the account goes and the workspace stays without its admin.
+   * Rec's account deletion checks the same rule once more before it deletes anything, and refuses
+   * (the deletion is then run again later) an account that became a workspace's admin in between.
    */
   private async deleteAccounts(uids: string[]): Promise<Decided> {
     const deleter = this.accountDeleter;
@@ -656,9 +658,10 @@ export class EverConnectPersonService implements EverConnectAccountDeletions {
    * Why an account must not be deleted for Ever Platform, `null` when it may be. Reads only.
    *
    * - `operator`: the account operates this installation.
-   * - `workspace_admin`: the account administers a workspace. Rec's account deletion leaves
-   *   workspaces as they are, so the workspace (and what it holds, which may be other people's)
-   *   would stay without its admin: the person hands it over or deletes it in Rec first.
+   * - `workspace_admin`: the account administers a workspace ({@link workspacesAdministeredBy},
+   *   the rule Rec's own account deletion applies too). Rec's account deletion leaves workspaces as
+   *   they are, so the workspace (and what it holds, which may be other people's) would stay
+   *   without its admin: the person hands it over or deletes it in Rec first.
    */
   async holdFor(uid: string): Promise<PersonDeletionHold | null> {
     if (this.settings.operatorUids.has(uid)) return 'operator';
@@ -667,15 +670,12 @@ export class EverConnectPersonService implements EverConnectAccountDeletions {
     } | null;
     // No record: a deletion that removed it already (it goes last), or an account without one.
     if (!user) return null;
-    const ids: unknown[] = Array.isArray(user.workspaceIds)
-      ? user.workspaceIds
-      : Object.values((user.workspaceIds ?? {}) as Record<string, unknown>);
-    for (const id of new Set(ids)) {
-      if (!isDbKey(id)) continue;
-      const workspace = await this.store.workspace(id);
-      if (workspace?.admin === uid) return 'workspace_admin';
-    }
-    return null;
+    const administered = await workspacesAdministeredBy(
+      uid,
+      user.workspaceIds,
+      (id) => this.store.workspace(id),
+    );
+    return administered.length ? 'workspace_admin' : null;
   }
 
   /** An export: one per matched account, when switched on and the portal can serve it. */

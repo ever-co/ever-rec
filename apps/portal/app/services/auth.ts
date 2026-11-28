@@ -29,7 +29,7 @@ import {
 } from '../interfaces/ITermsAcceptance';
 import cookie from 'js-cookie';
 import { CredentialResponse } from '@react-oauth/google';
-import { IDataResponse } from 'app/interfaces/IApiResponse';
+import { IDataResponse, ResStatusEnum } from 'app/interfaces/IApiResponse';
 import { removeCookies } from './helpers/getCookies';
 import {
   newPasswordAPI,
@@ -310,9 +310,24 @@ export const changeUserPassword = async (
   return response;
 };
 
-export const deleteUser = async (): Promise<void> => {
-  const result = await deleteUserAPI();
-  return result;
+/**
+ * Deletes the signed-in account. The API answers a failure with HTTP 200 and status "error": the
+ * account is then not deleted, or not fully (deleting it again finishes it). `refusal` is the API's
+ * message when it refused, deleting nothing, because the account is the admin of a workspace (the
+ * message names the workspaces), for the person to read.
+ */
+export const deleteUser = async (): Promise<{
+  deleted: boolean;
+  refusal?: string;
+}> => {
+  const response: IDataResponse<null> = await deleteUserAPI();
+  if (response?.status === ResStatusEnum.success) return { deleted: true };
+  const refusal =
+    (response?.error as { code?: unknown } | null)?.code ===
+      'workspace_admin' && typeof response?.message === 'string'
+      ? response.message
+      : undefined;
+  return refusal ? { deleted: false, refusal } : { deleted: false };
 };
 
 // TODO refactor

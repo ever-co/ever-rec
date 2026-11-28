@@ -38,7 +38,8 @@ const uploadAvatarAPI = (file: File): Promise<any> => {
   return api.post(`/api/v1/auth/upload-avatar`, formData);
 };
 
-const deleteUserAPI = () => {
+// The client answers the response body (`IDataResponse`), not the axios response.
+const deleteUserAPI = async (): Promise<IDataResponse<null>> => {
   return api.delete(`/api/v1/auth/user`);
 };
 

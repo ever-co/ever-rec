@@ -7,6 +7,10 @@ import { FirebaseAdminService } from '../../firebase/services/firebase-admin.ser
 import { Optional } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { EVER_COUNTER_EVENTS } from '../../../common/events/ever-counters.events';
+import {
+  AdministeredWorkspace,
+  workspacesAdministeredBy,
+} from '../../../common/workspace-admin';
 
 export interface IUserWithCredentials {
   uid: string;
@@ -208,6 +212,29 @@ export class UserService {
       this.logger.error(`Failed to delete user record: ${uid}`, error);
       throw new BadRequestException('Failed to delete user data');
     }
+  }
+
+  /**
+   * The workspaces the user is the admin of ({@link workspacesAdministeredBy}), through the user's
+   * own list `users/<uid>/workspaceIds`. Only each workspace's `admin` and `name` are read, not the
+   * whole workspace (its media collections can be large).
+   */
+  async workspacesAdministeredBy(
+    uid: string,
+  ): Promise<AdministeredWorkspace[]> {
+    const read = async (path: string) =>
+      (await this.firebaseAdminService.getDatabaseRef(path).get()).val();
+    return workspacesAdministeredBy(
+      uid,
+      await read(`${this.rootDb}/${uid}/workspaceIds`),
+      async (id) => {
+        const [admin, name] = await Promise.all([
+          read(`workspaces/${id}/admin`),
+          read(`workspaces/${id}/name`),
+        ]);
+        return admin == null ? null : { admin, name };
+      },
+    );
   }
 
   /**

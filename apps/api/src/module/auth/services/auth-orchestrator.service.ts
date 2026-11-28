@@ -4,6 +4,10 @@ import {
   ACCOUNT_EVENTS,
   AccountDeletedEvent,
 } from '../../../common/events/account.events';
+import {
+  ACCOUNT_DELETION_REFUSED_WORKSPACE_ADMIN,
+  workspaceAdminRefusal,
+} from '../../../common/workspace-admin';
 import { IDataResponse } from '../../../interfaces/_types';
 import { SharedService } from '../../../services/shared/shared.service';
 import { sendError, sendResponse } from '../../../services/utils/sendResponse';
@@ -174,11 +178,28 @@ export class AuthOrchestratorService {
   }
 
   /**
-   * Delete user
+   * Deletes the account (`DELETE /api/v1/auth/user`, and the deletion Ever Platform asks for): its
+   * shares, its files, its sign-in account, what other modules keep for it and its record. Refused
+   * with status `error`, the message naming the workspaces and `error.code` `workspace_admin`,
+   * while the account is the admin of any workspace; nothing is deleted then.
    */
   async deleteUser(uid: string): Promise<IDataResponse> {
     try {
       this.logger.log(`Deleting user: ${uid}`);
+
+      // Not while the account is the admin of a workspace: the deletion leaves workspaces as they
+      // are, so the workspace (and what the other members keep in it) would stay without its admin.
+      // Checked before anything is deleted; a failed check fails the deletion (the catch below).
+      const administered = await this.userService.workspacesAdministeredBy(uid);
+      if (administered.length) {
+        this.logger.warn(
+          `User not deleted: ${uid} is the admin of ${administered.length} workspace(s)`,
+        );
+        return sendError(workspaceAdminRefusal(administered), {
+          code: ACCOUNT_DELETION_REFUSED_WORKSPACE_ADMIN,
+          workspaces: administered,
+        });
+      }
 
       await Promise.all([
         this.sharedService.removeShared(uid),

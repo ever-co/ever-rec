@@ -155,7 +155,17 @@ const ProfilePage: React.FC<ISettingsPageProps> = () => {
   const deleteUserHandler = async () => {
     try {
       dispatch(PanelAC.setLoaderState(true));
-      await deleteUser();
+      const result = await deleteUser();
+      // Not deleted: the person stays signed in. A refusal names the workspaces the account is the
+      // admin of, and stays up long enough to be read.
+      if (!result.deleted) {
+        if (result.refusal) {
+          errorMessage(result.refusal, { long: true });
+        } else {
+          errorHandler({ message: t('toasts.errorDeletingUser') });
+        }
+        return;
+      }
       await signOutHandler();
       successMessage(t('toasts.accountDeleted'));
     } catch (error: any) {
