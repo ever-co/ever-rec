@@ -2,6 +2,8 @@ import { Inject, Injectable } from '@nestjs/common';
 import type * as admin from 'firebase-admin';
 import { FIREBASE_ADMIN } from '../../firebase/firebase.constants';
 import {
+  ACCOUNT_DELETION_MARK_KEPT_MS,
+  AccountDeletionMark,
   ConnectionRecord,
   EnvCodeRecord,
   EVER_CONNECT_FEED_SEEN_KEPT,
@@ -307,6 +309,42 @@ export class EverConnectStoreService {
     return old.length;
   }
 
+  /**
+   * Deletes the marks of account deletions whose last sign of life (start, beat or end) is more
+   * than {@link ACCOUNT_DELETION_MARK_KEPT_MS} ago, done or not; answers how many. A deletion still
+   * running renews its mark, so it keeps it while a renewal reaches the database at least once a
+   * day: each mark is removed in a transaction that checks it again, and one renewed since it was
+   * read stays. After a whole day of failed renewals the mark goes, until the next renewal.
+   */
+  async sweepAccountDeletions(now: number): Promise<number> {
+    const all =
+      (await this.read<Record<string, Record<string, AccountDeletionMark>>>(
+        EVER_CONNECT_PATHS.accountDeletions,
+      )) ?? {};
+    // A mark without its start (never written by this module) goes too.
+    const expired = (mark: AccountDeletionMark | null) =>
+      typeof mark?.startedAt !== 'number' ||
+      lastSignOfLife(mark) < now - ACCOUNT_DELETION_MARK_KEPT_MS;
+    const remove = async (path: string) => {
+      let found = false;
+      const { committed } = await this.db()
+        .ref(path)
+        .transaction((current: AccountDeletionMark | null) => {
+          found = current !== null;
+          return current === null || expired(current) ? null : undefined;
+        });
+      return committed && found;
+    };
+    const removals = Object.entries(all).flatMap(([uid, runs]) =>
+      Object.entries(runs ?? {})
+        .filter(([, mark]) => expired(mark))
+        .map(([run]) =>
+          remove(`${EVER_CONNECT_PATHS.accountDeletions}/${uid}/${run}`),
+        ),
+    );
+    return (await Promise.all(removals)).filter(Boolean).length;
+  }
+
   /** Reads a workspace record (the product's own data; read only). */
   async workspace(
     workspaceId: string,
@@ -314,4 +352,13 @@ export class EverConnectStoreService {
     if (!isDbKey(workspaceId)) return null;
     return this.read(`workspaces/${workspaceId}`);
   }
+}
+
+/** The latest of an account deletion mark's times (each one written by the deletion itself). */
+function lastSignOfLife(mark: AccountDeletionMark): number {
+  return Math.max(
+    ...[mark.startedAt, mark.aliveAt, mark.deletedAt].filter(
+      (time): time is number => typeof time === 'number',
+    ),
+  );
 }
