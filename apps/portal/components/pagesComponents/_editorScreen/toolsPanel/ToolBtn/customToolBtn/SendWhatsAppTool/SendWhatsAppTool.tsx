@@ -43,7 +43,7 @@ const SendWhatsAppTool: React.FC<ISendWhatsAppToolProps> = ({
   // const [searchParams, setSearchParams] = useSearchParams();
 
   const newPhoneRules: ((v: string) => boolean | string)[] = [
-    requiredRule('Please enter an WhatsApp Number'),
+    requiredRule('Please enter an WhatsApp number'),
   ];
   const image: IEditorImage = useSelector(
     (state: RootStateOrAny) => state.panel.editorImage,
@@ -117,7 +117,7 @@ const SendWhatsAppTool: React.FC<ISendWhatsAppToolProps> = ({
           <h2 className={styles.title}>Share with WhatsApp</h2>
           <AppInput
             type={'number'}
-            placeholder="Enter WhatsApp Number with country code"
+            placeholder="Enter WhatsApp number with country code"
             value={phoneInput.value}
             errors={phoneInput.errors}
             onChange={oldPhoneChangeHandler}

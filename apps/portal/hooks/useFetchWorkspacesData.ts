@@ -16,6 +16,12 @@ const useFetchWorkspacesData = () => {
   const router = useRouter();
   const dispatch = useDispatch();
   const fetched = useRef(false);
+  // One request of each kind at a time: the effect below runs again while an answer is on its way.
+  const listInFlight = useRef(false);
+  const workspaceInFlight = useRef<string | null>(null);
+  // Whose list of workspaces has arrived. The store starts with an empty list, so the list itself
+  // cannot tell "none" from "not asked yet".
+  const listLoadedFor = useRef<string | null>(null);
 
   const user: IUser = useSelector((state: RootStateOrAny) => state.auth.user);
   const workspaces = useSelector(
@@ -39,39 +45,53 @@ const useFetchWorkspacesData = () => {
     const fetchFullWorkspaceData = async () => {
       if (!workspaceIdQuery) return;
 
+      const request = `${workspaceIdQuery}|${folderIdQuery || ''}`;
+      if (workspaceInFlight.current === request) return;
+      workspaceInFlight.current = request;
+
       dispatch(PanelAC.setWorkspaceFetched({ workspaceFetched: false }));
       dispatch(PanelAC.setWorkspaceLoaded({ workspaceLoaded: false }));
 
-      const response = await getFullWorkspaceDataAPI(
-        workspaceIdQuery,
-        typeof folderIdQuery === 'string'
-          ? (folderIdQuery as string)
-          : undefined,
-      );
+      try {
+        const response = await getFullWorkspaceDataAPI(
+          workspaceIdQuery,
+          typeof folderIdQuery === 'string'
+            ? (folderIdQuery as string)
+            : undefined,
+        );
 
-      console.log('response:', response);
-      const data = iDataResponseParser<typeof response.data>(response);
+        console.log('response:', response);
+        const data = iDataResponseParser<typeof response.data>(response);
 
-      if (data) {
-        dispatch(PanelAC.setActiveWorkspace({ activeWorkspace: data }));
-        dispatch(PanelAC.setWorkspaceLoaded({ workspaceLoaded: true }));
-        dispatch(PanelAC.setWorkspaceFetched({ workspaceFetched: true }));
-        dispatch(PanelAC.setFavoriteFolders({ folders: data.favFolders }));
+        if (data) {
+          dispatch(PanelAC.setActiveWorkspace({ activeWorkspace: data }));
+          dispatch(PanelAC.setWorkspaceLoaded({ workspaceLoaded: true }));
+          dispatch(PanelAC.setWorkspaceFetched({ workspaceFetched: true }));
+          dispatch(PanelAC.setFavoriteFolders({ folders: data.favFolders }));
+        }
+      } finally {
+        workspaceInFlight.current = null;
       }
     };
 
     console.log('workspaces:', workspaces);
 
     const fetchWorkspaces = async () => {
-      if (!workspaceLoaded) {
+      if (listInFlight.current) return;
+      listInFlight.current = true;
+
+      try {
         const response = await getUserWorkspacesAPI();
         dispatch(PanelAC.setWorkspaceFetched({ workspaceFetched: true }));
         if (response.status !== ResStatusEnum.error) {
+          listLoadedFor.current = user?.id ?? null;
           const userWorkspaces = response.data;
           dispatch(PanelAC.setWorkspaces({ workspaces: userWorkspaces || [] }));
         } else {
           errorHandler({ message: response.message });
         }
+      } finally {
+        listInFlight.current = false;
       }
     };
 
@@ -82,15 +102,28 @@ const useFetchWorkspacesData = () => {
 
     const workspacesExist = Array.isArray(workspaces);
 
+    // The one flag (`workspaceFetched`) is set by whichever answer comes first, so on its own it
+    // lets the other request be skipped for good:
+    // - the list came back before the router had the workspace id: the workspace was never asked
+    //   for and its page stayed on the spinner;
+    // - the workspace came back before the signed-in person was known: the list was never asked
+    //   for and the switcher stayed empty.
+    // So each request is also made when its own data is missing.
+    const workspaceMissing =
+      routerHasWorkspaceId && !idQueryEqualsActiveWorkspaceId;
+    const listMissing =
+      !workspacesExist || (!!user && listLoadedFor.current !== user.id);
+
     if (
-      (routerHasWorkspaceId || !idQueryEqualsActiveWorkspaceId) &&
-      !workspaceLoaded
+      ((routerHasWorkspaceId || !idQueryEqualsActiveWorkspaceId) &&
+        !workspaceLoaded) ||
+      workspaceMissing
     ) {
       fetched.current = true;
       fetchFullWorkspaceData();
     }
 
-    if (!workspaceLoaded && user) {
+    if (user && (!workspaceLoaded || listMissing)) {
       fetched.current = true;
       fetchWorkspaces();
     }

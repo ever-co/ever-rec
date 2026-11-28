@@ -5,7 +5,7 @@ import styles from './WorkspaceTeamsModal.module.scss';
 import classNames from 'classnames';
 import { IWorkspaceTeam } from 'app/interfaces/IWorkspaceTeams';
 import { Modal } from 'antd';
-import AppSvg from 'components/elements/AppSvg';
+import { X } from 'lucide-react';
 import { TabList, Tab, TabPanel, Tabs } from 'react-tabs';
 import WorkspaceMembersModalMembersWrapper from 'components/pagesComponents/_workspacesScreen/WorkspaceMembersModalMembersWrapper';
 import { IWorkspace, IWorkspaceUser } from 'app/interfaces/IWorkspace';
@@ -66,7 +66,9 @@ const WorkspaceTeamsModal: FC<IProps> = ({
       destroyOnClose
       closable
       closeIcon={
-        <AppSvg path="/common/close-icon.svg" className="modalCloseButton" />
+        <span className="tw-flex tw-size-full tw-items-center tw-justify-center">
+          <X className="tw-size-4" aria-hidden="true" />
+        </span>
       }
       onCancel={onCancel}
       footer={<></>}
@@ -86,7 +88,7 @@ const WorkspaceTeamsModal: FC<IProps> = ({
               {t('workspace.teams')}
             </Tab>
             {/* <Tab className={classNames('react-tabs__tab', styles.tab)}>
-              Invite Members
+              Invite members
             </Tab> */}
           </TabList>
 

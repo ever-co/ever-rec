@@ -79,11 +79,7 @@ const VideoChapter: FC<IProps> = ({
       </div>
       <div className={s.Inputs}>
         <div className={s.InputsTimestamp}>
-          <AppSvg
-            path="/new-design-v2/bookmark-solid.svg"
-            size="10px"
-            color="#efa462"
-          />
+          <AppSvg path="/new-design-v2/bookmark-solid.svg" size="10px" />
           <span>{chapter.timestamp}</span>
         </div>
 
@@ -103,7 +99,7 @@ const VideoChapter: FC<IProps> = ({
             chapterClosed(chapter.id);
           }}
         >
-          <AppSvg path="/common/close.svg" size="14px" />
+          <AppSvg path="/common/close.svg" size="10px" />
         </div>
       )}
     </div>

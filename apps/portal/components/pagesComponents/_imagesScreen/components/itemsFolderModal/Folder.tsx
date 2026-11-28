@@ -50,7 +50,7 @@ const Folder: React.FC<IFolderProps> = ({
   return (
     <div ref={currentRef}>
       <SidebarFolderItem
-        style={{ marginLeft: `${leftMargin}px` }}
+        style={{ marginInlineStart: `${leftMargin}px` }}
         className={`${styles.folder} ${highlighted && styles.highlighted}`}
         key={folder ? `${folder.id}` : undefined}
         title={(folder?.name || RootFolderName) as any}

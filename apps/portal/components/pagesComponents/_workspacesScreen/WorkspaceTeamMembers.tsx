@@ -43,8 +43,8 @@ const WorkspaceTeamMembers: FC<IProps> = ({
   }
 
   const { t } = useTranslation();
-  const memberString =
-    teamMemberCount > 1 ? t('workspace.members') : t('workspace.member');
+  // "1 member", "3 members": each language's own plural forms.
+  const memberString = t('shell.members', { count: teamMemberCount });
 
   const clickHandler = () => {
     if (team) {
@@ -74,11 +74,7 @@ const WorkspaceTeamMembers: FC<IProps> = ({
           >
             {memberIcons}
           </div>
-          {teamMemberCount > 0 && (
-            <span>
-              {teamMemberCount} {memberString}
-            </span>
-          )}
+          {teamMemberCount > 0 && <span>{memberString}</span>}
         </>
       )}
     </div>

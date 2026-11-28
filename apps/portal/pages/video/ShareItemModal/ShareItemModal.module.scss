@@ -1,4 +1,14 @@
+// The full-width actions of the dialog: 36px high, content centred.
+.generateLink {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 2.25rem;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
 .localAppSpinnerWrapper {
-  width: 25px;
-  height: 25px;
+  width: 20px;
+  height: 20px;
 }

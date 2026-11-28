@@ -18,6 +18,10 @@ import styles from './editorComments.module.scss';
 
 // import './EditorComments.modules.scss';
 
+// The emoji, mention and microphone icons are image files with one dark ink, flattened here so
+// they read on the light and on the dark panel.
+const monoIcon = 'tw-opacity-60 tw-brightness-0 dark:tw-invert';
+
 interface ICommentsProps {
   commentsOptions: ICommentsOptions;
   onCommentsOptionsChange: (options: ICommentsOptions) => void;
@@ -118,7 +122,7 @@ const EditorComments: React.FC<ICommentsProps> = ({
                     setPickerVisibility(true);
                   }}
                   size={'20px'}
-                  className={styles.centered}
+                  className={classNames(styles.centered, monoIcon)}
                 />
 
                 <IconBtn
@@ -127,7 +131,7 @@ const EditorComments: React.FC<ICommentsProps> = ({
                     infoMessage('We are working hard to add this feature!');
                   }}
                   size={'20px'}
-                  className={styles.centered}
+                  className={classNames(styles.centered, monoIcon)}
                 />
 
                 <IconBtn
@@ -136,7 +140,7 @@ const EditorComments: React.FC<ICommentsProps> = ({
                     infoMessage('We are working hard to add this feature!');
                   }}
                   size={'17px'}
-                  className={styles.centered}
+                  className={classNames(styles.centered, monoIcon)}
                 />
               </div>
 
@@ -154,7 +158,10 @@ const EditorComments: React.FC<ICommentsProps> = ({
                     infoMessage('Your comment should contain characters');
                   }
                 }}
-                className={styles.centered}
+                className={classNames(
+                  styles.centered,
+                  'tw-grayscale dark:tw-invert',
+                )}
               />
             </div>
           </div>

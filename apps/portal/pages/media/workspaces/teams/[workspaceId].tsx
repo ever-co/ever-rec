@@ -6,7 +6,8 @@ import { RootStateOrAny, useDispatch, useSelector } from 'react-redux';
 import { IWorkspace, IWorkspaceUser } from 'app/interfaces/IWorkspace';
 import DashboardCard from 'components/containers/dashboardLayout/elements/DashboardCard';
 import Image from 'next/legacy/image';
-import AppSvg from 'components/elements/AppSvg';
+import { ArrowLeft, LogOut, Settings, UserPlus } from 'lucide-react';
+import DrawerButton from 'components/shell/DrawerButton';
 import MediaIndex from 'pages/media';
 import { useRouter } from 'next/router';
 import AppSpinner from 'components/containers/appSpinner/AppSpinner';
@@ -241,14 +242,15 @@ const WorkspaceTeams: FC = () => {
         <DashboardCard className={styles.dashboardCard}>
           <div className={classNames(styles.mainHeader, styles.teamHeader)}>
             <div className={styles.teamHeading}>
+              <DrawerButton className="-tw-ms-1" />
               <Link
                 href={`${preRoutes.media}${panelRoutes.manageWorkspaces}`}
                 passHref
               >
-                <AppSvg
-                  path="/common/arrow_back-light.svg"
-                  className="tw-cursor-pointer"
-                  size="30px"
+                <ArrowLeft
+                  strokeWidth={1.75}
+                  className="rtl:-tw-scale-x-100"
+                  aria-hidden="true"
                 />
               </Link>
               {activeWorkspace?.name} - {t('workspace.teamsOverview')}
@@ -257,9 +259,9 @@ const WorkspaceTeams: FC = () => {
               <div>
                 <AppButton
                   onClick={() => setShowCreateTeamModal(true)}
-                  bgColor="tw-bg-primary-purple"
-                  twPadding="tw-p-3"
-                  className="tw-whitspace-nowrap tw-mr-3 tw-w-150px"
+                  twPadding="tw-px-3 tw-py-[5px]"
+                  twTextSize="tw-text-[13px]"
+                  className="tw-whitespace-nowrap"
                   full={true}
                 >
                   {t('workspace.createTeam')}
@@ -273,8 +275,8 @@ const WorkspaceTeams: FC = () => {
               className={classNames(styles.workspacesContainer, 'scroll-div')}
             >
               {teams.map((team) => {
-                const isTeamAdmin = user?.id === team?.admin;
-                const isInTeam = team?.members.find(
+                const isTeamAdmin = user?.id === team.admin;
+                const isInTeam = team.members.find(
                   (member) => member.id === user.id,
                 );
 
@@ -282,14 +284,20 @@ const WorkspaceTeams: FC = () => {
                   <div key={team.id}>
                     <div className={styles.workspaceItemWrapper}>
                       <div className={styles.thumbnailWrapper}>
-                        <Image
-                          src={team?.thumbnail || '/common/Thumbnail.svg'}
-                          alt="Team thumbnail"
-                          width={!team?.thumbnail ? '200' : undefined}
-                          height={!team?.thumbnail ? '150' : undefined}
-                          layout={team?.thumbnail ? 'fill' : 'fixed'}
-                          className={team?.thumbnail && styles.thumbnail}
-                        />
+                        <div className={styles.thumbnailImage}>
+                          <Image
+                            src={team.thumbnail || '/common/Thumbnail.svg'}
+                            alt="Team thumbnail"
+                            width={!team.thumbnail ? '200' : undefined}
+                            height={!team.thumbnail ? '150' : undefined}
+                            layout={team.thumbnail ? 'fill' : 'fixed'}
+                            className={
+                              team.thumbnail
+                                ? styles.thumbnail
+                                : styles.thumbnailPlaceholder
+                            }
+                          />
+                        </div>
                         <div className={styles.workspaceName}>{team.name}</div>
                       </div>
                       <div className={styles.subItemsWrapper}>
@@ -304,6 +312,7 @@ const WorkspaceTeams: FC = () => {
                         {isTeamAdmin && (
                           <div className={styles.teamOptionsWrapper}>
                             <div
+                              className={styles.settingsSvg}
                               onClick={() =>
                                 membersClickHandler(
                                   team.id,
@@ -313,16 +322,11 @@ const WorkspaceTeams: FC = () => {
                                 )
                               }
                             >
-                              <AppSvg
-                                path="/common/team-add-member.svg"
-                                width="24px"
-                                height="24px"
-                                className={styles.settingsSvg}
-                                bgColor="#636366"
-                              />
+                              <UserPlus strokeWidth={1.75} aria-hidden="true" />
                             </div>
 
                             <div
+                              className={styles.settingsSvg}
                               onClick={() =>
                                 setShowUpdateWorkspaceTeamModal({
                                   state: true,
@@ -330,12 +334,7 @@ const WorkspaceTeams: FC = () => {
                                 })
                               }
                             >
-                              <AppSvg
-                                path="/common/icon-Manage-dark.svg"
-                                width="24px"
-                                height="24px"
-                                className={styles.settingsSvg}
-                              />
+                              <Settings strokeWidth={1.75} aria-hidden="true" />
                             </div>
                           </div>
                         )}
@@ -348,10 +347,10 @@ const WorkspaceTeams: FC = () => {
                             onClick={() => leaveTeamHandler(team.id, team.name)}
                             title={t('workspace.leaveTeam')}
                           >
-                            <AppSvg
-                              path="/common/leave.svg"
-                              width="24px"
-                              height="24px"
+                            <LogOut
+                              strokeWidth={1.75}
+                              className="rtl:-tw-scale-x-100"
+                              aria-hidden="true"
                             />
                           </div>
                         )}

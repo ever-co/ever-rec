@@ -55,16 +55,23 @@ const menu = (
 
 const WhiteboardsTopbar = () => {
   return (
-    <div className="tw-h-60px tw-bg-light-grey2 tw-border-b tw-border-iron-grey tw-flex tw-items-center tw-justify-start tw-pl-280px">
-      <div className="tw-bg-white tw-w-280px tw-h-60px tw-flex tw-items-center tw-justify-between tw-border-b tw-border-iron-grey tw-absolute tw-left-0 ">
+    <div className="tw-flex tw-h-60px tw-items-center tw-justify-start tw-border-b tw-border-border tw-bg-card tw-pl-280px mx-md:tw-h-auto mx-md:tw-shrink-0 mx-md:tw-flex-col mx-md:tw-items-stretch mx-md:tw-pl-0">
+      <div className="tw-absolute tw-left-0 tw-flex tw-h-60px tw-w-280px tw-items-center tw-justify-between tw-border-b tw-border-r tw-border-border tw-bg-card mx-md:tw-static mx-md:tw-w-full mx-md:tw-border-r-0">
         <Dropdown overlayClassName="tw-w-220px" overlay={menu}>
-          <a onClick={(e) => e.preventDefault()}>
+          <a
+            onClick={(e) => e.preventDefault()}
+            className="tw-text-muted-foreground"
+          >
             <div className="tw-flex tw-items-center tw-justify-between ">
               <div className="tw-flex tw-items-center tw-justify-center tw-gap-2 ">
                 <img src={recIcon.src} width={40} />
-                <div className="tw-leading-4 tw-text-grey tw-opacity-75 tw-w-200px ">
-                  <p className="!tw-text-xs">MOTE Inc.</p>
-                  <p className="!tw-text-xs">Sussan Duttan</p>
+                <div className="tw-w-200px ">
+                  <p className="tw-m-0 tw-truncate tw-text-sm tw-font-medium tw-leading-5 tw-text-foreground">
+                    MOTE Inc.
+                  </p>
+                  <p className="tw-m-0 tw-truncate tw-text-xs tw-leading-4 tw-text-muted-foreground">
+                    Sussan Duttan
+                  </p>
                 </div>
               </div>
 
@@ -73,11 +80,11 @@ const WhiteboardsTopbar = () => {
           </a>
         </Dropdown>
       </div>
-      <div className="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-between">
-        <div className="tw-w-300px tw-border tw-rounded-lg tw-flex tw-items-center tw-justify-center tw-opacity-25 tw-bg-gray tw-h-40px tw-mx-5">
+      <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-between mx-md:tw-h-12">
+        <div className="tw-mx-5 tw-flex tw-h-9 tw-w-300px tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-border tw-text-sm tw-text-muted-foreground tw-opacity-50 mx-md:tw-mx-2 mx-md:tw-w-auto mx-md:tw-flex-1">
           Search
         </div>
-        <div className="tw-w-300px tw-border tw-rounded-lg tw-flex tw-items-center tw-justify-center tw-opacity-25 tw-h-40px tw-mx-5">
+        <div className="tw-mx-5 tw-flex tw-h-9 tw-w-300px tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-border tw-text-sm tw-text-muted-foreground tw-opacity-50 mx-md:tw-mx-2 mx-md:tw-w-auto mx-md:tw-flex-1">
           Profile
         </div>
       </div>

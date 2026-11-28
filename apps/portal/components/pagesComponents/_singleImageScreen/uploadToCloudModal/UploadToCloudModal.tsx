@@ -77,30 +77,29 @@ const UploadToCloudModal: React.FC<IUploadToCloudModalProps> = ({
       }
       footer={
         <div className="tw-flex tw-justify-end tw-mt-4">
-          <AppButton
-            onClick={onClose}
-            bgColor="tw-bg-app-grey-darker"
-            outlined
-            className="tw-px-8 tw-mx-4 tw-pb-1 tw-pt-1"
-          >
+          <AppButton onClick={onClose} outlined className="tw-me-2">
             {t('common.cancel')}
           </AppButton>
-          <AppButton
-            onClick={onOkHandler}
-            className="tw-px-8 tw-pb-1 tw-pt-1"
-            disabled={!valid}
-          >
+          <AppButton onClick={onOkHandler} disabled={!valid}>
             {t('common.save')}
           </AppButton>
         </div>
       }
     >
       <div className="tw-flex tw-items-center tw-mb-6">
-        {!type && <MdOutlineAddToDrive size={30} className="tw-mr-2" />}
-        {type == 'dropbox' && (
-          <AiOutlineDropbox size={30} className="tw-mr-2" />
+        {!type && (
+          <MdOutlineAddToDrive
+            size={20}
+            className="tw-me-2 tw-shrink-0 tw-text-muted-foreground"
+          />
         )}
-        <h2 className="tw-text-2xl tw-font-semibold">
+        {type == 'dropbox' && (
+          <AiOutlineDropbox
+            size={20}
+            className="tw-me-2 tw-shrink-0 tw-text-muted-foreground"
+          />
+        )}
+        <h2 className="tw-text-base tw-font-semibold tw-text-foreground">
           {t('page.image.saveTo')}
           {type ? type : 'Google drive'}
         </h2>

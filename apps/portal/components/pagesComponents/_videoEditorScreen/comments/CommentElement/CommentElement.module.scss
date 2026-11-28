@@ -1,14 +1,25 @@
 @use 'pagesScss/partials/_dotSeparator.scss';
 
+// One comment under an image or a video: a plain row (avatar, name and time, then the text).
 .commentWrapper {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.75rem;
   width: 100%;
 
   img {
-    width: 35px;
-    height: 35px;
+    flex: none;
+    width: 32px;
+    height: 32px;
     border-radius: 100%;
+    object-fit: cover;
+  }
+
+  // The placeholder when the author has no picture.
+  > :global(.app-svg-icon) {
+    flex: none;
+    width: 32px;
+    height: 32px;
+    color: hsl(var(--muted-foreground));
   }
 }
 
@@ -16,33 +27,78 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  line-height: 1.25rem;
 
   div {
     display: flex;
     align-items: center;
     gap: 0.25rem;
-    opacity: 0.8;
+    color: hsl(var(--muted-foreground));
+    font-size: 0.75rem;
   }
 
   span:first-of-type {
-    font-weight: bold;
+    color: hsl(var(--foreground));
+    font-size: 0.8125rem;
+    font-weight: 500;
+  }
+
+  // The separator and the time keep the quiet colour of their row.
+  div span:first-of-type {
+    color: inherit;
+    font-size: 0.5rem;
+    font-weight: 400;
   }
 }
 
 .commentDetails {
   width: 100%;
+  min-width: 0;
 }
 
 .commentContent {
   display: flex;
   justify-content: space-between;
+  gap: 0.5rem;
 
   p {
+    color: hsl(var(--foreground));
+    font-size: 0.875rem;
+    line-height: 1.25rem;
     word-break: break-word;
+  }
+}
+
+// The "more" button of the viewer's own comment.
+.moreButton {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  margin-top: -4px;
+  border-radius: calc(var(--radius) - 4px);
+  color: hsl(var(--muted-foreground));
+  cursor: pointer;
+  transition:
+    background-color 150ms var(--ease-out),
+    color 150ms var(--ease-out);
+
+  &:hover,
+  &:global(.ant-dropdown-open) {
+    background-color: hsl(var(--accent));
+    color: hsl(var(--foreground));
+  }
+
+  // The dots in /public have no ink of their own (black by default): they take the text colour.
+  :global(.injected-svg) {
+    fill: currentColor;
   }
 }
 
 .menuItemOption {
   display: flex;
+  align-items: center;
   gap: 0.5rem;
 }

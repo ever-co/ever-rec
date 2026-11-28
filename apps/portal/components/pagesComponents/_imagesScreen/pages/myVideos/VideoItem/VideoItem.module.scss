@@ -1,46 +1,86 @@
-@import 'pagesScss/partials/_colors.scss';
+// The thumbnail area: media on a quiet ground, a hairline between it and the card's text.
+.media {
+  position: relative;
+  max-height: 177px;
+  border-bottom: 1px solid hsl(var(--border));
+  background-color: hsl(var(--muted));
+}
 
+// Duration badge. It sits over media, so it is dark in both themes.
 .label {
-  background-color: $primary-violet;
-  border-radius: 9999px;
-  bottom: 0.9375rem;
-  color: #ffffff;
-  padding: 0.25rem 0.5rem;
   position: absolute;
-  right: 0.9375rem;
-  font-size: 0.9rem;
-  line-height: 1.2rem;
+  inset-inline-end: 0.5rem;
+  bottom: 0.5rem;
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.375rem;
+  background-color: hsl(var(--overlay) / 0.6);
+  color: hsl(var(--on-overlay));
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1rem;
+  font-variant-numeric: tabular-nums;
 }
 
 .container {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  margin-top: 1rem;
+  margin-top: 0.75rem;
 }
 
+// The title is an antd textarea (hooks/useInitImageVideoItem), or a plain block where the person
+// cannot rename the item. It reads as text; the field shows on hover and focus. The size and the
+// line height are set inline by the hook, hence `!important`.
 .title {
   display: flex;
   width: 100%;
-  padding: 0 0.5rem;
-  height: 2.75rem;
+  height: 3rem;
+  padding: 0 0.6875rem;
+
+  > div {
+    padding: 0.25rem 0.3125rem;
+    color: hsl(var(--foreground));
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.25rem !important;
+  }
+}
+
+.itemFooter .title textarea:global(.ant-input) {
+  padding: 0.1875rem 0.25rem;
+  border-color: transparent;
+  color: hsl(var(--foreground));
+  font-size: 0.875rem !important;
+  font-weight: 500;
+  line-height: 1.25rem !important;
+
+  &:hover {
+    border-color: hsl(var(--input));
+  }
+
+  &:focus {
+    border-color: hsl(var(--ring));
+  }
 }
 
 .editIcon {
   cursor: pointer;
-  margin-left: 0.75rem;
+  margin-inline-start: 0.75rem;
   min-width: 1.25rem;
-  color: #4b5563;
+  color: hsl(var(--muted-foreground));
 }
 
 .itemFooter {
-  padding-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  // The counts row lines its numbers up.
+  font-variant-numeric: tabular-nums;
 }
 
 .imageContainer {
   position: relative;
 
   img {
+    display: block;
     object-fit: cover;
     width: 100%;
     height: 176px;

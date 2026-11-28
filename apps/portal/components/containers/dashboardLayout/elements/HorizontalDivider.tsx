@@ -11,7 +11,7 @@ const HorizontalDivider: React.FC<IHorizontalDividerProps> = ({
   return (
     <div
       className={classNames(
-        'tw-w-full tw-border-solid tw-border-t tw-border-app-grey',
+        'tw-w-full tw-border-0 tw-border-solid tw-border-t tw-border-border',
         className,
       )}
     ></div>

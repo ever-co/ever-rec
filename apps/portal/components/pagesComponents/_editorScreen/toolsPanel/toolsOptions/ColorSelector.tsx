@@ -76,14 +76,14 @@ const ColorSelector: React.FC<IColorSelectorProps> = ({
       {icon ? (
         <div style={{ cursor: 'pointer' }} onClick={togglePicker}>
           <div className={styles.flexContainer}>
-            <Image src={icon} alt="" />
+            <Image src={icon} alt="" className="tw-grayscale dark:tw-invert" />
           </div>
 
           {colorIndicator ? (
             <div
               style={{
                 backgroundColor: localColor,
-                border: '1px solid #D8D8D8',
+                border: '1px solid hsl(var(--foreground) / 0.2)',
                 width: '1.5rem',
                 height: '0.5rem',
               }}
@@ -96,7 +96,7 @@ const ColorSelector: React.FC<IColorSelectorProps> = ({
         <div
           style={{
             backgroundColor: localColor,
-            border: '1px solid black',
+            border: '1px solid hsl(var(--foreground) / 0.2)',
             width: '1.5rem',
             height: '1.5rem',
             borderRadius: '0.25rem',
@@ -108,7 +108,13 @@ const ColorSelector: React.FC<IColorSelectorProps> = ({
 
       {!icon && (
         <div className={styles.imgWrapper} onClick={togglePicker}>
-          <Image src={widthselector} width={8} height={6} alt="" />
+          <Image
+            src={widthselector}
+            width={8}
+            height={6}
+            alt=""
+            className="tw-opacity-60 dark:tw-invert"
+          />
         </div>
       )}
 

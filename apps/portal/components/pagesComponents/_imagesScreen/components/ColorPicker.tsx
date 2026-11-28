@@ -46,7 +46,7 @@ export function ColorPicker({ color, setColor }: ColorPickerProps) {
       <button
         ref={triggerRef}
         onClick={handleTriggerClick}
-        className="tw-w-16 tw-h-[24px] tw-mt-2 tw-border-none  tw-p-0.5 tw-border tw-border-input"
+        className="tw-w-16 tw-h-[24px] tw-mt-2 tw-p-0.5 tw-rounded-md tw-border tw-border-solid tw-border-border"
         style={{ backgroundColor: color }}
       >
         <span className="tw-sr-only">{t('unique.openColor')}</span>

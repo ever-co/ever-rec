@@ -180,16 +180,16 @@
     "deleteWorkspace": "Supprimer l'espace de travail"
   },
   "header": {
-    "searchFiles": "Rechercher des fichiers...",
+    "searchFiles": "Rechercher des fichiers",
     "help": "Centre d'aide",
-    "helpSoon": "Centre d'aide bientôt disponible !",
+    "helpSoon": "Centre d'aide bientôt disponible",
     "notifications": "Notifications",
-    "notificationsSoon": "Notifications bientôt disponibles !",
+    "notificationsSoon": "Notifications bientôt disponibles",
     "companySettings": "Paramètres de l'entreprise",
     "user": {
       "addNewCompany": "Ajouter une nouvelle entreprise",
       "installChrome": "Installer l'extension Chrome",
-      "availableSoon": "Bientôt disponible dans le Chrome Web Store !",
+      "availableSoon": "Bientôt disponible dans le Chrome Web Store",
       "signout": "Se déconnecter"
     }
   },
@@ -640,6 +640,18 @@
       "saveEachFile": "Demander où enregistrer chaque fichier avant de le télécharger.",
       "saveEachFileDescription": "Remarque : Pour utiliser cette fonctionnalité, vous devez autoriser l'extension à gérer les téléchargements lorsque la fenêtre de demande d'autorisation apparaît. De plus, ce n'est que lorsque cette option est activée que vous pouvez spécifier un sous-dossier par défaut pour enregistrer les captures d'écran sur votre disque local. Par défaut, le dossier 'Téléchargements' est utilisé si vous ne spécifiez pas de sous-dossier.",
       "addDateAndUrl": "Ajouter la date et l'URL en haut d'une capture d'écran."
+    },
+    "appearance": {
+      "description": "Apparence et langue d'Ever Rec dans ce navigateur",
+      "theme": "Thème",
+      "themeHint": "S'applique uniquement à ce navigateur",
+      "light": "Clair",
+      "dark": "Sombre",
+      "system": "Système",
+      "languageHint": "La langue de l'application dans ce navigateur",
+      "saving": "Enregistrement des captures",
+      "savingHint": "Format de fichier, dossier de téléchargement et liens Google Drive pour l'extension de navigateur",
+      "savingPreferences": "Enregistrement Préférences"
     }
   },
   "modals": {
@@ -818,5 +830,29 @@
     "videoDeletedAndRedirect": "Vidéo supprimée avec succès. Redirection vers votre espace de travail...",
     "videoMovedToTrashAndRedirecting": "Vidéo déplacée vers la corbeille avec succès. Redirection vers Mes vidéos...",
     "joinedWorkspaceSuccess": "Vous avez rejoint l'espace de travail avec succès. Redirection vers le nouvel espace de travail..."
+  },
+  "shell": {
+    "select": "Sélectionner",
+    "loading": "Chargement",
+    "myLibrary": "Ma bibliothèque",
+    "workspaces": "Espaces de travail",
+    "noOtherWorkspace": "Aucun autre espace de travail",
+    "switchWorkspace": "Changer d'espace de travail",
+    "account": "Compte",
+    "accountMenu": "Menu du compte",
+    "backToApp": "Retour à l'application",
+    "collapseSidebar": "Réduire la barre latérale",
+    "expandSidebar": "Développer la barre latérale",
+    "openNavigation": "Ouvrir la navigation",
+    "closeNavigation": "Fermer la navigation",
+    "switchToDark": "Passer au thème sombre",
+    "switchToLight": "Passer au thème clair",
+    "showStarredFolders": "Afficher les dossiers favoris",
+    "hideStarredFolders": "Masquer les dossiers favoris",
+    "noStarredFolders": "Aucun dossier favori",
+    "members": "{{count}} membres",
+    "members_one": "{{count}} membre",
+    "members_many": "{{count}} membres",
+    "members_other": "{{count}} membres"
   }
 }

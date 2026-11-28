@@ -1,19 +1,18 @@
 .mainContainer {
-  transition-property: all;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 150ms;
+  transition: opacity 150ms var(--ease-out);
 }
 
 .title {
-  font-size: 1rem;
-  line-height: 1.5rem;
-  font-weight: 600;
+  font-size: 0.8125rem;
+  line-height: 1.25rem;
+  font-weight: 500;
+  color: hsl(var(--muted-foreground));
   margin-bottom: 0.5rem;
 }
 
 .container {
-    display: flex;
-    align-items: center;
-    margin-bottom: 1rem;
-    width: 300px;
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+  width: 300px;
 }

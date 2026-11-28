@@ -62,8 +62,7 @@ import VideoChapters from 'components/pagesComponents/_videoEditorScreen/chapter
 import useVideoChapters from 'hooks/useVideoChapters';
 import { Trans, useTranslation } from 'react-i18next';
 
-const tabClassesTw =
-  'tw-flex tw-justify-center tw-items-center tw-w-1/3 tw-h-50px tw-cursor-pointer tw-outline-none';
+const tabClassesTw = styles.manageTab;
 
 interface IEmailModalProps {
   state: boolean;
@@ -387,18 +386,19 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
   const moreMenu = (
     <Menu>
       <Menu.Item
-        icon={<AppSvg size="18px" path="/images/trash.svg" />}
+        danger
+        icon={<AppSvg size="16px" path="/images/trash.svg" />}
         onClick={() => openDeleteModal(video)}
         key="menu_item_delete"
       >
-        <span className="tw-text-xs">{t('unique.deleteVideo')}</span>
+        <span>{t('unique.deleteVideo')}</span>
       </Menu.Item>
       <Menu.Item
-        icon={<AppSvg size="18px" path="/common/collection.svg" />}
+        icon={<AppSvg size="16px" path="/common/collection.svg" />}
         onClick={() => updateChaptersEnabled()}
         key="menu_item_chapters_enabled"
       >
-        <span className="tw-text-xs">
+        <span>
           {t('page.video.actionsSection.chaptersToggle', {
             action: chaptersEnabled
               ? t('page.video.actionsSection.disable')
@@ -463,9 +463,14 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
 
   return (
     <>
-      <div className="tw-bg-blue-grey tw-rounded-2lg mx-xl:tw-px-0 tw-py-0 tw-px-0 tw-shadow-md ">
-        <Tabs selectedTabClassName="react-tabs__tab--selected tw-text-primary-purple tw-font-bold">
-          <TabList className="tw-flex tw-mb-0 ">
+      <div className={styles.managePanel}>
+        <Tabs
+          selectedTabClassName={classNames(
+            'react-tabs__tab--selected',
+            styles.manageTabSelected,
+          )}
+        >
+          <TabList className={styles.manageTabList}>
             <Tab
               className={tabClassesTw}
               onClick={() => {
@@ -474,25 +479,21 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
               }}
             >
               <div className={styles.iconContainer}>
-                <AppSvg path="/images/icon-Manage-light.svg" size="25px" />
+                <AppSvg path="/images/icon-Manage-light.svg" size="16px" />
               </div>
               <div>{t('common.manage')}</div>
             </Tab>
             <Tab className={tabClassesTw}>
               <div className={styles.iconContainer}>
-                <AppSvg
-                  path="/common/collection.svg"
-                  size="22px"
-                  bgColor="#5b4dbe"
-                />
+                <AppSvg path="/common/collection.svg" size="16px" />
               </div>
-              <div className="tw-flex tw-gap-1">
+              <div className="tw-flex tw-items-center tw-gap-1">
                 <span>{t('page.video.actionsSection.chapters')} </span>
                 {hasChanges && (
                   <AppSvg
                     path="/common/circle-solid.svg"
-                    size="10px"
-                    bgColor="#5b4dbe"
+                    size="8px"
+                    bgColor="hsl(var(--brand))"
                   />
                 )}
               </div>
@@ -502,14 +503,14 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
               onClick={() => hasChanges && saveChanges(false)}
             >
               <div className={styles.iconContainer}>
-                <AppSvg path="/images/comments.svg" size="25px" />
+                <AppSvg path="/images/comments.svg" size="16px" />
               </div>
               <div>{t('common.comments')}</div>
             </Tab>
           </TabList>
           <TabPanel>
-            <ImageActionsCard className="tw-rounded-t-none">
-              <div>
+            <ImageActionsCard>
+              <div className="tw-text-muted-foreground [&_strong]:tw-font-medium [&_strong]:tw-text-foreground">
                 <Trans
                   values={{ currentlySavedIn: currentlySavedIn }}
                   i18nKey="page.image.currentlySavedInOnly"
@@ -524,23 +525,18 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
               >
                 <div className={styles.moveToFolderInner}>
                   <div>{t('page.image.moveToFolder')}</div>
-                  <AppSvg
-                    size="24px"
-                    path="/images/right-arrow.svg"
-                    className="tw-ml-4"
-                  />
+                  <AppSvg size="16px" path="/images/right-arrow.svg" />
                 </div>
               </div>
             </ImageActionsCard>
             <ImageActionsCard>
-              <div className="tw-grid tw-gap-4 tw-grid-cols-3 tw-justify-items-center across-btns:tw-gap-1 across-btns:tw-grid-rows-1 across-btns:tw-place-items-center">
+              <div className="tw-grid tw-gap-2 tw-grid-cols-[repeat(auto-fit,minmax(100px,1fr))] across-btns:tw-gap-1">
                 <ImageActionItem
                   title={t('common.download')}
                   onClick={localSave}
                   icon={IoMdDownload}
                   outerClassName={styles.containerVideoAction}
                   circleClassName={styles.innerCircle}
-                  iconColor="#5B4DBE"
                 />
                 <ImageActionItem
                   title={t('page.image.email')}
@@ -548,7 +544,6 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
                   onClick={() => openEmailModal(video)}
                   outerClassName={styles.containerVideoAction}
                   circleClassName={styles.innerCircle}
-                  iconColor="#5B4DBE"
                 />
                 <Dropdown
                   trigger={['click']}
@@ -560,7 +555,6 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
                     icon={FiMoreHorizontal}
                     outerClassName={styles.containerVideoAction}
                     circleClassName={styles.innerCircle}
-                    iconColor="#5B4DBE"
                   />
                 </Dropdown>
               </div>
@@ -570,27 +564,29 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
               {sharedLink ? (
                 <div>
                   <div className="tw-flex tw-items-center tw-justify-between tw-mb-2">
-                    <div className="tw-font-semibold tw-text-sm tw-text-center">
+                    <div className="tw-font-medium tw-text-sm">
                       {t('page.image.shareableLink')}
                     </div>
                     <AppButton
                       onClick={removeSharedLink}
-                      bgColor="tw-bg-red"
-                      className="tw-pt-0 tw-pb-0 tw-pl-2 tw-pr-2"
+                      bgColor="tw-bg-transparent"
+                      twTextColor="tw-text-destructive-text"
+                      twPadding="tw-px-2 tw-py-1"
                     >
-                      <span className="tw-text-xs tw-text-white">
+                      <span className="tw-text-xs">
                         {t('page.image.remove')}
                       </span>
                     </AppButton>
                   </div>
 
-                  <div className="tw-text-xs tw-mb-3 tw-break-words">
+                  <div className="tw-mb-3 tw-rounded-md tw-bg-muted tw-px-3 tw-py-2 tw-text-xs tw-text-muted-foreground tw-break-all">
                     {sharedLink}
                   </div>
 
                   <AppButton
                     onClick={copyLinkHandler}
                     full
+                    outlined
                     className={styles.generateLink}
                   >
                     {shareLoadingState ? (
@@ -599,7 +595,10 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
                       </div>
                     ) : (
                       <>
-                        <IoCopyOutline size={25} className="tw-mr-2" />
+                        <IoCopyOutline
+                          size={16}
+                          className="tw-text-muted-foreground"
+                        />
                         {t('page.image.copy')}
                       </>
                     )}
@@ -607,12 +606,13 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
                 </div>
               ) : (
                 <div>
-                  <div className="tw-font-semibold tw-text-sm tw-mb-2 tw-text-center">
+                  <div className="tw-font-medium tw-text-sm tw-mb-2">
                     {t('page.image.shareYourVideo')}
                   </div>
                   <AppButton
                     onClick={generateShareableLink}
                     full
+                    outlined
                     className={styles.generateLink}
                   >
                     {shareLoadingState ? (
@@ -629,7 +629,7 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
 
             {!workspace && (
               <ImageActionsCard>
-                <div className="tw-font-semibold tw-text-sm tw-mb-2 tw-text-center">
+                <div className="tw-font-medium tw-text-sm tw-mb-2">
                   {t('page.image.saveToCloud')}
                 </div>
                 <div className={styles.cloudProvidersWrapper}>
@@ -642,7 +642,8 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
                     {driveOperationLoading ? (
                       <AppButton
                         className={styles.appButton}
-                        twPadding="tw-px-0 tw-py-3"
+                        bgColor="tw-bg-transparent"
+                        twPadding="tw-px-0 tw-py-0"
                         twRounded="tw-rounded-none"
                         onClick={() => void 0}
                       >
@@ -654,7 +655,7 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
                           )}
                         >
                           <div className={styles.localAppSpinnerWrapper}>
-                            <AppSpinnerLocal circleInnerColor="#5b4dbe" />
+                            <AppSpinnerLocal />
                           </div>
                         </div>
                         <div className={styles.providerText}>
@@ -666,7 +667,8 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
                     ) : (
                       <AppButton
                         className={styles.appButton}
-                        twPadding="tw-px-0 tw-py-3"
+                        bgColor="tw-bg-transparent"
+                        twPadding="tw-px-0 tw-py-0"
                         twRounded="tw-rounded-none"
                         onClick={
                           driveVideoId && driveUser
@@ -679,7 +681,7 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
                         >
                           <AppSvg
                             path="/images/google-drive-logo.svg"
-                            size="25px"
+                            size="16px"
                           />
                           <div className={styles.providerText}>
                             {driveVideoId && driveUser ? (
@@ -699,7 +701,7 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
                         onClick={() => setShowCloudDeleteFileModal('drive')}
                         className={styles.deleteDriveItemBtn}
                       >
-                        <AppSvg size="24px" path="/images/delete-bin.svg" />
+                        <AppSvg size="16px" path="/images/delete-bin.svg" />
                       </AppButton>
                     )}
                   </div>
@@ -715,7 +717,8 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
                           ? openVideoOnDropBox()
                           : openUploadToDropBoxCloudModal('dropbox')
                       }
-                      twPadding="tw-px-0 tw-py-3"
+                      bgColor="tw-bg-transparent"
+                      twPadding="tw-px-0 tw-py-0"
                       className={styles.appButton}
                       twRounded="tw-rounded-none"
                     >
@@ -728,7 +731,7 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
                           )}
                         >
                           <div className={styles.localAppSpinnerWrapper}>
-                            <AppSpinnerLocal circleInnerColor="#5b4dbe" />
+                            <AppSpinnerLocal />
                           </div>
                           <div className={styles.providerText}>
                             <div className={styles.openImageText}>
@@ -740,7 +743,7 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
                         <div
                           className={classNames(styles.svgWrapper, 'tw-flex')}
                         >
-                          <AppSvg path="/images/dropbox-logo.svg" size="25px" />
+                          <AppSvg path="/images/dropbox-logo.svg" size="16px" />
                           <div className={styles.providerText}>
                             {dropBoxImageId
                               ? t('page.image.openVideo')
@@ -755,7 +758,7 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
                         onMouseLeave={onMouseLeaveCloudButtonsHandler}
                         className={styles.deleteDriveItemBtn}
                       >
-                        <AppSvg size="24px" path="/images/delete-bin.svg" />
+                        <AppSvg size="16px" path="/images/delete-bin.svg" />
                       </AppButton>
                     )}
                   </div>
@@ -805,8 +808,8 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
             )}
           </TabPanel>
           <TabPanel
-            className="tw-bg-white tw-flex tw-flex-col tw-justify-between tw-rounded-b-md tw-rounded-tl-md tw-scrollbar-thin tw-scrollbar-thumb-gray-400 tw-scrollbar-track-gray-100 tw-scrollbar-thumb-rounded-full tw-scrollbar-track-rounded-full tw-relative"
-            selectedClassName="react-tabs__tab-panel--selected tw-min-h-500px tw-max-h-1000px tw-overflow-y-auto tw-p-5 tw-h-665px"
+            className={classNames(styles.managePanelBody, 'tw-relative')}
+            selectedClassName="react-tabs__tab-panel--selected tw-min-h-500px tw-max-h-1000px tw-overflow-y-auto tw-p-4 tw-h-665px"
           >
             <VideoChapters
               chapters={chapters}
@@ -824,8 +827,8 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
             />
           </TabPanel>
           <TabPanel
-            className="tw-bg-white tw-flex tw-flex-col tw-justify-between tw-rounded-b-md tw-rounded-tl-md tw-scrollbar-thin tw-scrollbar-thumb-gray-400 tw-scrollbar-track-gray-100 tw-scrollbar-thumb-rounded-full tw-scrollbar-track-rounded-full"
-            selectedClassName="react-tabs__tab-panel--selected tw-min-h-500px tw-max-h-1000px tw-overflow-y-auto tw-p-5"
+            className={styles.managePanelBody}
+            selectedClassName="react-tabs__tab-panel--selected tw-min-h-500px tw-max-h-1000px tw-overflow-y-auto tw-p-4"
           >
             {' '}
             {commentsTemplate}
@@ -888,17 +891,13 @@ const SingleVideoPageManageAreaTemplate: React.FC<IProps> = ({
 export default SingleVideoPageManageAreaTemplate;
 
 const IoMdDownload = (): JSX.Element => (
-  <AppSvg path="/images/file_download.svg" size="23px" />
+  <AppSvg path="/images/file_download.svg" size="16px" />
 );
 
 const FiMoreHorizontal = (): JSX.Element => (
-  <AppSvg path="/images/more_horiz.svg" />
+  <AppSvg path="/images/more_horiz.svg" size="16px" />
 );
 
 const BiMailSend = (): JSX.Element => (
-  <AppSvg
-    path="/images/sendemail.svg"
-    size="24px"
-    className="tw-text-primary-purple"
-  />
+  <AppSvg path="/images/sendemail.svg" size="16px" />
 );

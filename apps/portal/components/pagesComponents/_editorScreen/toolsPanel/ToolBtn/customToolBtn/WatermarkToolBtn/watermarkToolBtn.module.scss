@@ -3,8 +3,8 @@
 }
 
 .title {
-  font-size: 1.25rem;
-  line-height: 1.75rem;
+  font-size: 1rem;
+  line-height: 1.5rem;
   font-weight: 600;
   margin-bottom: 0.5rem;
 }
@@ -23,15 +23,17 @@
   border-radius: 3px;
 }
 
+// The empty upload area of the image watermark.
 .container {
-  background-color: rgba(14, 38, 59, 0.4);
-  border-radius: 3px;
+  background-color: hsl(var(--muted));
+  border-radius: 8px;
   padding: 1.5rem;
   height: 100%;
 }
 
 .innerContainer {
-  border: 1px dashed rgba(255, 255, 255, 0.4);
+  border: 1px dashed hsl(var(--foreground) / 0.25);
+  border-radius: 6px;
   height: 100%;
   width: 100%;
   display: flex;
@@ -43,14 +45,15 @@
 }
 
 .innerTitle {
-  color: black !important;
-  opacity: 0.4;
+  color: hsl(var(--muted-foreground)) !important;
+  font-size: 0.8125rem;
 }
 
+// The position select: the field's hairline is drawn here (the global select skin has none).
 .selectContainer {
   width: 100%;
-  border-radius: 0.25rem;
-  background-color: white;
+  border: 1px solid hsl(var(--input));
+  border-radius: 0.5rem;
 }
 
 .transBorder {
@@ -68,9 +71,9 @@
 
 .subTitle {
   &:hover {
-    color: #3f3799;
+    color: hsl(var(--foreground));
   }
   &:focus {
-    color: #3f3799;
+    color: hsl(var(--foreground));
   }
 }

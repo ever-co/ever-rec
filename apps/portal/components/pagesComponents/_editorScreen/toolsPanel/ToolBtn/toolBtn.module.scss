@@ -1,11 +1,11 @@
 .toolbtnlarge {
-  width: 45px;
-  height: 45px;
+  width: 36px;
+  height: 36px;
 }
 
 .toolbtn {
-  width: 35px;
-  height: 35px;
+  width: 32px;
+  height: 32px;
 }
 
 .icons {
@@ -13,6 +13,18 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+// The tool icons are image files with a single dark ink, so they cannot take `currentColor`:
+// the ink is flattened to black (white in dark) and kept quiet until the button is hovered or active.
+.icons img {
+  filter: brightness(0);
+  opacity: 0.6;
+  transition: opacity 150ms var(--ease-out);
+}
+
+:global(.dark) .icons img {
+  filter: brightness(0) invert(1);
 }
 
 .parentContainer {
@@ -32,56 +44,87 @@
 .tooltipWrapper {
   width: 100%;
   height: 100%;
-  background-color: white;
+  background-color: transparent;
+  color: hsl(var(--muted-foreground));
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  border: 2px solid white;
-  transition-property: all;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 150ms;
-  border-radius: 9999px;
+  transition:
+    background-color 150ms var(--ease-out),
+    box-shadow 150ms var(--ease-out),
+    opacity 150ms var(--ease-out);
+  border-radius: 8px;
 }
 
 .lowOpacity {
-  opacity: 0.3;
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .fullOpacity {
   opacity: 1;
 }
 
+// The selected tool: the accent tint with a thin accent ring.
 .activeBg {
-  background-color: #998fff;
-  color: white;
+  background-color: hsl(var(--brand-muted));
+  color: hsl(var(--brand-text));
+  box-shadow: inset 0 0 0 1px hsl(var(--brand) / 0.45);
+
+  .icons img {
+    opacity: 1;
+  }
 }
 
 .notActiveBg {
-  background-color: white;
-  border-color: transparent;
+  background-color: transparent;
   &:hover {
-    background-color: #cdbbff;
-    border-color: white;
+    background-color: hsl(var(--accent));
+    color: hsl(var(--foreground));
+
+    .icons img {
+      opacity: 1;
+    }
+  }
+}
+
+.lowOpacity.notActiveBg:hover {
+  background-color: transparent;
+
+  .icons img {
+    opacity: 0.6;
   }
 }
 
 .absolute {
   position: absolute;
   z-index: 10;
-  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  box-shadow: var(--shadow-float);
   border-radius: 10px;
   display: flex;
 }
 .close {
   margin-bottom: 30px;
   position: absolute;
-  right: -15px;
-  top: -15px;
+  right: -12px;
+  top: -12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 9999px;
+  border: 1px solid hsl(var(--border));
+  background-color: hsl(var(--popover));
+  color: hsl(var(--muted-foreground));
   cursor: pointer;
-  transition: 0.2s;
+  transition:
+    background-color 150ms var(--ease-out),
+    color 150ms var(--ease-out);
   &:hover {
-    scale: 1.2;
+    background-color: hsl(var(--accent));
+    color: hsl(var(--foreground));
   }
 }
 .negative {
@@ -103,8 +146,8 @@
     height: 30px;
   }
   .toolbtnlarge {
-    width: 35px;
-    height: 35px;
+    width: 32px;
+    height: 32px;
   }
   .icons {
     padding: 3px;
@@ -113,11 +156,52 @@
 
 @media screen and (max-height: 690px) {
   .toolbtn {
-    width: 25px;
-    height: 25px;
+    width: 26px;
+    height: 26px;
   }
   .toolbtnlarge {
-    width: 30px;
-    height: 30px;
+    width: 28px;
+    height: 28px;
   }
+}
+
+// Phone width: the tool bar runs along the bottom of the screen (see toolsPanel.module.scss).
+@media screen and (max-width: 767px) {
+  // Finger-sized buttons, whatever the screen height.
+  .toolbtn,
+  .toolbtnlarge {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+// A tool's options on a phone: a sheet across the width, just above the tool bar. Fixed, so the
+// bar's sideways scrolling does not clip it.
+.phoneSheet {
+  position: fixed;
+  z-index: 30;
+  left: 0.5rem;
+  right: 0.5rem;
+  bottom: calc(var(--editor-tool-bar, 60px) + 0.5rem);
+  display: flex;
+  border-radius: 10px;
+  box-shadow: var(--shadow-float);
+
+  .close {
+    top: -10px;
+    right: -2px;
+  }
+}
+
+// The panel inside the sheet: the sheet's width, and its own scroll when it is taller than the
+// room between the two bars.
+.phoneSheetPanel {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: auto !important;
+  max-height: calc(
+    100dvh - var(--editor-top-bar, 56px) - var(--editor-tool-bar, 60px) - 1.5rem
+  );
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }

@@ -1,17 +1,51 @@
+// The actions of a single video: views, like, edit title, download, share and the "more" menu.
+// One row of outline buttons, all 36px high, with quiet icons.
+
 .itemActions {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 0.75rem;
-  height: 30px;
+  gap: 0.5rem;
+  height: 36px;
   margin: auto 0;
+
+  // Every button of the row shares one height (the views button comes from another component).
+  > button,
+  > div {
+    box-sizing: border-box;
+    height: 36px;
+    max-height: 36px;
+  }
 }
 
 .dropdownWrapper {
   display: flex;
   align-items: center;
+  justify-content: center;
+  width: 36px;
   height: 100%;
+  border-radius: calc(var(--radius) - 2px);
+  color: hsl(var(--muted-foreground));
   cursor: pointer;
+  transition:
+    background-color 150ms var(--ease-out),
+    color 150ms var(--ease-out);
+
+  &:hover,
+  &:global(.ant-dropdown-open) {
+    background-color: hsl(var(--accent));
+    color: hsl(var(--foreground));
+  }
+
+  // The drawing names its own ink: it follows the button instead.
+  :global(.injected-svg) {
+    color: inherit;
+  }
+}
+
+// An icon handed to another component (the eye of the views button).
+.quietIcon :global(.injected-svg) {
+  color: hsl(var(--muted-foreground));
 }
 
 .pointer {
@@ -27,16 +61,51 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  border: 2px solid rgba(0, 0, 255, 0.292);
-  padding: 0.25rem 1rem;
-  border-radius: 0.25rem;
-  font-size: 0.85rem;
-  font-weight: 600;
-  outline: none;
+  border: 1px solid hsl(var(--input));
+  padding: 0 0.75rem;
+  border-radius: calc(var(--radius) - 2px);
+  background-color: transparent;
+  color: hsl(var(--foreground));
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition:
+    background-color 150ms var(--ease-out),
+    border-color 150ms var(--ease-out),
+    opacity 150ms var(--ease-out);
+
+  &:hover {
+    background-color: hsl(var(--accent));
+  }
 
   span {
     white-space: nowrap;
   }
+
+  // The icons sit quietly next to the label (a drawing without its own ink takes it too).
+  :global(.injected-svg) {
+    color: hsl(var(--muted-foreground));
+
+    path:not([fill]) {
+      fill: currentColor;
+    }
+  }
+
+  // The filled thumb of a liked item is a black picture (/public/…/like-thumb-filled.png).
+  img {
+    flex: none;
+  }
+}
+
+:global(.dark) .itemActionButton img {
+  filter: invert(1);
+}
+
+// While a download is being prepared the button does nothing: it shows that.
+.itemActionButtonDisabled,
+.itemActionButtonDisabled:hover {
+  background-color: transparent;
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .hideMoreMenu {

@@ -10,7 +10,6 @@ import useGenerateShareLink from 'hooks/useGenerateShareLink';
 import PanelAC from 'app/store/panel/actions/PanelAC';
 import { useDispatch } from 'react-redux';
 import { Modal } from 'antd';
-import AppSvg from 'components/elements/AppSvg';
 import IEditorVideo from 'app/interfaces/IEditorVideo';
 import { useTranslation } from 'react-i18next';
 
@@ -80,34 +79,27 @@ const ShareItemModal: FC<IProps> = ({
   };
 
   return (
-    <Modal
-      open={visible}
-      footer={null}
-      closable
-      closeIcon={
-        <AppSvg path="/common/close-icon.svg" className="modalCloseButton" />
-      }
-      onCancel={onCancel}
-    >
+    <Modal open={visible} footer={null} closable onCancel={onCancel}>
       {sharedLink ? (
-        <div className="tw-pb-4">
-          <div className="tw-flex tw-items-center tw-justify-between tw-mb-2">
-            <h3 className="tw-font-semibold tw-text-lg tw-mb-2">
+        <div className="tw-pb-8">
+          <div className="tw-flex tw-items-center tw-justify-between tw-gap-4 tw-mb-3 tw-pe-6">
+            <h3 className="tw-font-semibold tw-text-base tw-mb-0">
               {t('page.image.shareableLink')}
             </h3>
 
             <AppButton
-              bgColor="tw-bg-red"
-              className="tw-pt-0 tw-pb-0 tw-pl-2 tw-pr-2"
+              outlined
+              twTextColor="tw-text-destructive-text"
+              className="tw-flex tw-h-8 tw-items-center tw-justify-center tw-px-3 tw-py-0"
               onClick={removeSharedLink}
             >
-              <span className="tw-text-xs tw-text-white">
-                {t('page.image.remove')}
-              </span>
+              <span className="tw-text-xs">{t('page.image.remove')}</span>
             </AppButton>
           </div>
 
-          <div className="tw-text-md tw-mb-3 tw-break-words">{sharedLink}</div>
+          <div className="tw-mb-4 tw-break-all tw-rounded-md tw-border tw-border-solid tw-border-input tw-bg-muted tw-px-3 tw-py-2 tw-text-sm">
+            {sharedLink}
+          </div>
 
           <AppButton
             full
@@ -124,7 +116,7 @@ const ShareItemModal: FC<IProps> = ({
               </div>
             ) : (
               <>
-                <IoCopyOutline size={25} className="tw-mr-2" />
+                <IoCopyOutline size={16} />
                 {t('page.image.copy')}
               </>
             )}
@@ -133,7 +125,8 @@ const ShareItemModal: FC<IProps> = ({
           {embedCode && (
             <AppButton
               full
-              className={`${styles.generateLink} tw-mt-3`}
+              outlined
+              className={`${styles.generateLink} tw-mt-2`}
               onClick={copyEmbedCode}
             >
               {t('page.image.copyEmbedCode')}
@@ -141,8 +134,8 @@ const ShareItemModal: FC<IProps> = ({
           )}
         </div>
       ) : (
-        <div className="tw-pb-4">
-          <h3 className="tw-font-semibold tw-text-lg tw-mb-2">
+        <div className="tw-pb-8">
+          <h3 className="tw-font-semibold tw-text-base tw-mb-4 tw-pe-6">
             {t('page.image.shareYourVideo')}
           </h3>
 

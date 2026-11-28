@@ -111,16 +111,23 @@ const FolderItem: React.FC<IFolderItemProps> = ({
     const id = loadingMessage(t('toasts.renamingFolder'));
 
     let data: any = null;
-    if (workspace && isWorkspaceFolder(folder)) {
-      data = await updateWorkspaceFolderData(
-        workspace.id,
-        { ...folder, name },
-        false,
-      );
-    } else if (forVideos) {
-      data = await updateVideoFolderData({ ...folder, name }, false);
-    } else {
-      data = await updateFolderData({ ...folder, name }, false);
+    // A folder deleted in another tab answers 404: show the rename error instead of leaving the
+    // loading toast.
+    try {
+      if (workspace && isWorkspaceFolder(folder)) {
+        data = await updateWorkspaceFolderData(
+          workspace.id,
+          { ...folder, name },
+          false,
+        );
+      } else if (forVideos) {
+        data = await updateVideoFolderData({ ...folder, name }, false);
+      } else {
+        data = await updateFolderData({ ...folder, name }, false);
+      }
+    } catch (err) {
+      console.error(err);
+      data = null;
     }
 
     data
@@ -176,17 +183,22 @@ const FolderItem: React.FC<IFolderItemProps> = ({
 
   const handleColor = async (value: string) => {
     setLoading(true);
-    if (workspace && isWorkspaceFolder(folder)) {
-      await updateWorkspaceFolderData(workspace.id, {
-        ...folder,
-        color: value,
-      });
-    } else if (forVideos) {
-      await updateVideoFolderData({ ...folder, color: value });
-    } else if (workspace) {
-      console.log('to implement');
-    } else {
-      await updateFolderData({ ...folder, color: value });
+    // A rejected update (a folder deleted in another tab answers 404) must not leave it loading.
+    try {
+      if (workspace && isWorkspaceFolder(folder)) {
+        await updateWorkspaceFolderData(workspace.id, {
+          ...folder,
+          color: value,
+        });
+      } else if (forVideos) {
+        await updateVideoFolderData({ ...folder, color: value });
+      } else if (workspace) {
+        console.log('to implement');
+      } else {
+        await updateFolderData({ ...folder, color: value });
+      }
+    } catch (err) {
+      console.error(err);
     }
     setLoading(false);
   };
@@ -268,8 +280,6 @@ const FolderItem: React.FC<IFolderItemProps> = ({
 
   const moreMenu = (
     <Menu
-      className={classNames(styles.gradientBackground)}
-      style={{ padding: 5 }}
       onClick={(e) => {
         e.domEvent.stopPropagation();
         setIsDropdownVisible(false);
@@ -277,30 +287,31 @@ const FolderItem: React.FC<IFolderItemProps> = ({
     >
       {workspace && workspace.admin === user?.id && (
         <Menu.Item
-          style={{ margin: 10 }}
-          className="tw-bg-white tw-rounded-xl"
-          icon={<AppSvg path={'/common/permissions.svg'} size="18px" />}
+          icon={
+            <AppSvg
+              path={'/common/permissions.svg'}
+              size="16px"
+              className="[&_svg]:tw-fill-current"
+            />
+          }
           key="menu_item_change_permission"
           onClick={() => setShowPermissionModal(true)}
         >
-          <span className="tw-text-base tw-font-semibold">
-            {t('common.folderActions.editPermission')}
-          </span>
+          <span>{t('common.folderActions.editPermission')}</span>
         </Menu.Item>
       )}
       <Menu.Item
-        style={{ margin: 10 }}
-        className="tw-bg-white tw-rounded-xl"
         icon={
           <AppSvg
             path={isFavorite ? '/common/star.svg' : '/common/star_filled.svg'}
-            size="18px"
+            size="16px"
+            className="[&_path]:tw-stroke-current"
           />
         }
         key="menu_item_add_to_favs"
         onClick={(e) => addToFavs()}
       >
-        <span className="tw-text-base tw-font-semibold">
+        <span>
           {isFavorite
             ? t('common.folderActions.removeFavorites')
             : t('common.folderActions.addToFavorites')}
@@ -309,46 +320,37 @@ const FolderItem: React.FC<IFolderItemProps> = ({
 
       {canEdit && (
         <Menu.Item
-          style={{ margin: 10 }}
-          className="tw-bg-white tw-rounded-xl"
-          icon={<AppSvg path="/common/Edit.svg" size="18px" />}
+          icon={<AppSvg path="/common/Edit.svg" size="16px" />}
           key="menu_item_change_name"
           onClick={(e) => {
             openFolderModal();
           }}
         >
-          <span className="tw-text-base tw-font-semibold">
-            {t('common.folderActions.changeFolderName')}
-          </span>
+          <span>{t('common.folderActions.changeFolderName')}</span>
         </Menu.Item>
       )}
 
       {canEdit && (
         <Menu.Item
-          style={{ margin: 10 }}
-          className="tw-bg-white tw-rounded-xl"
           icon={
-            <AppSvg path="/common/trash-v2.svg" bgColor="#FF2116" size="18px" />
+            <AppSvg
+              path="/common/trash-v2.svg"
+              size="16px"
+              className="tw-text-destructive-text [&_svg]:tw-fill-current"
+            />
           }
           key="menu_item_delete_folder"
           onClick={() => setShowDeleteModal(true)}
         >
-          <span className="tw-text-base tw-font-semibold tw-text-picker-red">
+          <span className="tw-text-destructive-text">
             {t('common.folderActions.deleteFolder')}
           </span>
         </Menu.Item>
       )}
 
       {canEdit && (
-        <Menu.Item
-          key="color"
-          className={classNames(
-            'tw-bg-white tw-rounded-xl',
-            styles.menuNormalCursor,
-          )}
-          style={{ margin: 10 }}
-        >
-          <div className="tw-text-center tw-font-semibold">
+        <Menu.Item key="color" className={styles.menuNormalCursor}>
+          <div className="tw-text-center tw-text-xs tw-font-medium tw-text-muted-foreground">
             {t('common.folderActions.changeFolderColor')}
           </div>
           <div className="tw-flex tw-w-full tw-justify-center tw-h-25px tw-items-center">
@@ -377,7 +379,8 @@ const FolderItem: React.FC<IFolderItemProps> = ({
       <div
         className={classNames(
           styles.mainWrapper,
-          (isDropdownVisible || isDragOver) && styles.active,
+          isDropdownVisible && styles.active,
+          isDragOver && styles.dragOver,
         )}
         style={{ height: '58px' }}
         onDragOver={handleDragOver}

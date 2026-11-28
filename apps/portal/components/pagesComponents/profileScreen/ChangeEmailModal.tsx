@@ -71,7 +71,9 @@ const ChangeEmailModal: React.FC<ICreateFolderModalProps> = ({
     >
       <h2 className={styles.modalHeader}>{t('page.profile.emailAddress')}</h2>
 
-      <label>{t('page.profile.currentEmail')}</label>
+      <label className="tw-block tw-text-[13px] tw-font-medium tw-text-foreground">
+        {t('page.profile.currentEmail')}
+      </label>
       <AppInput
         placeholder={t('page.profile.newEmail')}
         value={newEmail.value}

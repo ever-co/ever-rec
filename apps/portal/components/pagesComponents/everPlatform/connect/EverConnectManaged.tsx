@@ -1,8 +1,21 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Button, Checkbox, Input, Switch } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { getManaged, IManagedSettings, IManagedWindow, setManaged } from 'app/services/ever-connect';
-import { formatTime, useErrorMessage } from './shared';
+import {
+  getManaged,
+  IManagedSettings,
+  IManagedWindow,
+  setManaged,
+} from 'app/services/ever-connect';
+import {
+  FIELD_LABEL,
+  formatTime,
+  MUTED_TEXT,
+  NOTICE,
+  TABLE,
+  TABLE_FRAME,
+  useErrorMessage,
+} from './shared';
 
 const DAYS = [0, 1, 2, 3, 4, 5, 6];
 // English day names, shown only if a locale lacks the key; the typed `t` also needs a default for a computed key.
@@ -20,7 +33,11 @@ const EverConnectManaged: React.FC = () => {
   const [settings, setSettings] = useState<IManagedSettings | null>(null);
   const [optIn, setOptIn] = useState(false);
   const [kinds, setKinds] = useState<string[]>([]);
-  const [slot, setSlot] = useState<IManagedWindow>({ days: [0, 6], from: '02:00', to: '05:00' });
+  const [slot, setSlot] = useState<IManagedWindow>({
+    days: [0, 6],
+    from: '02:00',
+    to: '05:00',
+  });
   const [backupDir, setBackupDir] = useState('');
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
@@ -67,13 +84,25 @@ const EverConnectManaged: React.FC = () => {
     }
   };
 
-  if (!settings) return <p>{notice ?? t('page.everPlatform.loading')}</p>;
+  if (!settings)
+    return (
+      <p className={MUTED_TEXT}>{notice ?? t('page.everPlatform.loading')}</p>
+    );
 
   return (
-    <div data-testid="ever-connect-managed" className="tw-flex tw-flex-col tw-gap-4">
-      <p>{t('page.everPlatform.connect.managed.description')}</p>
-      <label className="tw-flex tw-items-center tw-gap-3">
-        <Switch data-testid="ever-connect-managed-opt-in" checked={optIn} onChange={setOptIn} />
+    <div
+      data-testid="ever-connect-managed"
+      className="tw-flex tw-flex-col tw-items-start tw-gap-5"
+    >
+      <p className={MUTED_TEXT}>
+        {t('page.everPlatform.connect.managed.description')}
+      </p>
+      <label className="tw-flex tw-items-center tw-gap-3 tw-text-sm tw-font-medium tw-text-foreground">
+        <Switch
+          data-testid="ever-connect-managed-opt-in"
+          checked={optIn}
+          onChange={setOptIn}
+        />
         {t('page.everPlatform.connect.managed.optIn')}
       </label>
       <Checkbox.Group
@@ -85,44 +114,88 @@ const EverConnectManaged: React.FC = () => {
           label: t(`page.everPlatform.connect.managed.kinds.${kind}`, kind),
         }))}
       />
-      <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
-        <span>{t('page.everPlatform.connect.managed.window')}</span>
+      <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-text-sm tw-text-foreground">
+        <span className="tw-w-full tw-text-[13px] tw-font-medium">
+          {t('page.everPlatform.connect.managed.window')}
+        </span>
         <Checkbox.Group
           value={slot.days}
           onChange={(values) => setSlot({ ...slot, days: values as number[] })}
-          options={DAYS.map((day) => ({ value: day, label: t(`page.everPlatform.connect.managed.days.${day}`, DAY_FALLBACK[day]) }))}
+          options={DAYS.map((day) => ({
+            value: day,
+            label: t(
+              `page.everPlatform.connect.managed.days.${day}`,
+              DAY_FALLBACK[day],
+            ),
+          }))}
         />
-        <Input className="tw-w-24" value={slot.from} onChange={(event) => setSlot({ ...slot, from: event.target.value })} />
-        <Input className="tw-w-24" value={slot.to} onChange={(event) => setSlot({ ...slot, to: event.target.value })} />
-        <span>UTC</span>
+        <Input
+          className="tw-w-20 tw-tabular-nums"
+          value={slot.from}
+          onChange={(event) => setSlot({ ...slot, from: event.target.value })}
+        />
+        <Input
+          className="tw-w-20 tw-tabular-nums"
+          value={slot.to}
+          onChange={(event) => setSlot({ ...slot, to: event.target.value })}
+        />
+        <span className="tw-text-[13px] tw-text-muted-foreground">UTC</span>
       </div>
-      <label>
+      <label className={`tw-w-full ${FIELD_LABEL}`}>
         {t('page.everPlatform.connect.managed.backupDir')}
         <Input
           data-testid="ever-connect-managed-backup-dir"
           value={backupDir}
-          placeholder={settings.backupDirSet ? t('page.everPlatform.connect.managed.backupDirSet') : '/var/backups/ever-rec'}
+          placeholder={
+            settings.backupDirSet
+              ? t('page.everPlatform.connect.managed.backupDirSet')
+              : '/var/backups/ever-rec'
+          }
           onChange={(event) => setBackupDir(event.target.value)}
         />
       </label>
-      <p>{t('page.everPlatform.connect.managed.whatTheyGet')}</p>
-      <Button data-testid="ever-connect-managed-save" type="primary" disabled={busy} onClick={save}>
+      <p className={MUTED_TEXT}>
+        {t('page.everPlatform.connect.managed.whatTheyGet')}
+      </p>
+      <Button
+        data-testid="ever-connect-managed-save"
+        type="primary"
+        disabled={busy}
+        onClick={save}
+      >
         {t('page.everPlatform.connect.managed.save')}
       </Button>
-      {notice && <p data-testid="ever-connect-notice">{notice}</p>}
+      {notice && (
+        <p data-testid="ever-connect-notice" className={NOTICE}>
+          {notice}
+        </p>
+      )}
       {settings.history.length > 0 && (
-        <table data-testid="ever-connect-managed-history" className="tw-w-full tw-text-sm">
-          <tbody>
-            {settings.history.map((row) => (
-              <tr key={row.operationId}>
-                <td>{formatTime(row.at)}</td>
-                <td>{t(`page.everPlatform.connect.managed.kinds.${row.kind}`, row.kind)}</td>
-                <td>{row.status}</td>
-                <td>{row.reason ?? (row.sizeBytes !== undefined ? `${row.sizeBytes} B` : '')}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div className={`tw-w-full ${TABLE_FRAME}`}>
+          <table
+            data-testid="ever-connect-managed-history"
+            className={`${TABLE} tw-tabular-nums`}
+          >
+            <tbody>
+              {settings.history.map((row) => (
+                <tr key={row.operationId}>
+                  <td className="tw-whitespace-nowrap">{formatTime(row.at)}</td>
+                  <td>
+                    {t(
+                      `page.everPlatform.connect.managed.kinds.${row.kind}`,
+                      row.kind,
+                    )}
+                  </td>
+                  <td>{row.status}</td>
+                  <td className="tw-text-muted-foreground">
+                    {row.reason ??
+                      (row.sizeBytes !== undefined ? `${row.sizeBytes} B` : '')}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );

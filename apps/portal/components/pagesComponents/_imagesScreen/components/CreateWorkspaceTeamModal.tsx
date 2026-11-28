@@ -30,25 +30,17 @@ const CreateWorkspaceTeamModal: FC<IProps> = ({ onClose, onOk, visible }) => {
       onCancel={close}
       destroyOnClose={true}
       footer={
-        <div className="tw-flex tw-justify-end tw-mt-4">
-          <AppButton
-            onClick={close}
-            bgColor="tw-bg-app-grey-darker"
-            outlined
-            className="tw-px-8 tw-mx-4 tw-pb-1 tw-pt-1"
-          >
+        <div className="tw-flex tw-justify-end tw-gap-2 tw-mt-6">
+          <AppButton onClick={close} bgColor="tw-bg-app-grey-darker" outlined>
             {t('common.cancel')}
           </AppButton>
-          <AppButton
-            onClick={() => confirm(name)}
-            className="tw-px-8 tw-pb-1 tw-pt-1"
-          >
+          <AppButton onClick={() => confirm(name)}>
             {t('modals.create')}
           </AppButton>
         </div>
       }
     >
-      <h2 className="tw-mb-6 tw-text-2xl tw-font-semibold">
+      <h2 className="tw-mb-4 tw-text-base tw-font-semibold">
         {t('modals.createATeam')}
       </h2>
       <AppInput
@@ -56,7 +48,7 @@ const CreateWorkspaceTeamModal: FC<IProps> = ({ onClose, onOk, visible }) => {
         value={name}
         onChange={({ value, errors }) => setName(value)}
         placeholder={t('modals.enterTeamName')}
-        inputClass="tw-bg-transparent tw-placeholder-black"
+        inputClass="tw-bg-transparent"
       />
     </Modal>
   );

@@ -1,21 +1,33 @@
-@import 'pagesScss/partials/_colors.scss';
-
+// The item card (image or video): a card surface with a hairline; hover darkens the hairline,
+// selection draws the accent ring.
 .wrapper {
   box-sizing: border-box;
-  border-radius: 0.5rem;
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  background-color: hsl(var(--card));
+  // The card sits inside a link; its text is not link-coloured.
+  color: hsl(var(--card-foreground));
   cursor: pointer;
   overflow: hidden;
   position: relative;
-  transition: all 0.1s ease-in-out;
+  transition:
+    border-color 150ms var(--ease-out),
+    box-shadow 150ms var(--ease-out);
 }
 
 .defaultBorder {
-  border: 2px solid;
-  border-color: $grey-light04;
+  border-color: hsl(var(--border));
 }
 
+// Hovered, or its menu is open.
+.wrapper:hover,
+.menuOpen {
+  border-color: hsl(var(--foreground) / 0.25);
+}
+
+// With the 1px border in the same colour this reads as one 2px accent ring.
 .selected,
-.wrapper:hover {
-  border: 2px solid $primary-violet;
-  box-shadow: 0 0 15px 2px rgba(124, 58, 237, 0.225);
+.selected:hover {
+  border-color: hsl(var(--brand));
+  box-shadow: 0 0 0 1px hsl(var(--brand));
 }

@@ -1,40 +1,44 @@
-@import 'pagesScss/partials/_colors.scss';
-
+// One service: its mark and name, one line about it, one action at the foot.
 .mainWrapperItem {
-  height: 250px;
   display: flex;
-  justify-content: space-between;
-  padding-top: 1rem;
-  padding-bottom: 1rem;
-  align-items: center;
   flex-direction: column;
-  border-radius: 10px;
-  background: linear-gradient(180deg, #ffffff 0%, #ebe9f3 50%, #e2ddff 100%);
-  border: 2px solid;
-  border-color: $grey-light04;
+  align-items: stretch;
+  gap: 0.5rem;
+  min-height: 11.5rem;
+  padding: 1rem;
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.75rem;
+  background-color: hsl(var(--card));
+  color: hsl(var(--foreground));
+  transition: border-color 150ms var(--ease-out);
+
+  &:hover {
+    border-color: hsl(var(--foreground) / 0.25);
+  }
 }
 
 .mainWrapper {
+  display: flex;
+  flex-direction: column;
   height: 100%;
+  min-height: 0;
 
   .mainHeader {
     width: 100%;
-    font-family: 'Roboto', sans-serif;
-    font-style: normal;
-
     font-size: 1rem;
     font-weight: 600;
     padding: 1rem 2rem;
-    border-bottom: 1px solid $grey-light05;
+    border-bottom: 1px solid hsl(var(--border));
   }
 
   .innerWrapper {
     display: grid;
-    grid-template-columns: repeat(auto-fit, 300px);
-    gap: 2rem;
-    justify-content: center;
-    max-height: 82vh;
-    padding: 2rem;
+    flex: 1;
+    grid-template-columns: repeat(auto-fill, minmax(17.5rem, 1fr));
+    align-content: start;
+    gap: 1rem;
+    min-height: 0;
+    padding: 1.5rem;
     overflow-y: auto;
   }
 }
@@ -47,12 +51,15 @@
 }
 
 .description {
-  width: 90%;
-  text-align: center;
+  margin: 0;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.8125rem;
+  line-height: 1.25rem;
 }
 
-.disconnectBtn {
-  background-color: #d32f2f;
-  border: 1px solid transparent;
-  color: white;
+// The action sits at the foot of the card, whatever the length of the text above it.
+.action {
+  width: 100%;
+  margin-top: auto;
+  padding-top: 0.5rem;
 }

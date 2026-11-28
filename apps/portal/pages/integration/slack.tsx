@@ -33,25 +33,35 @@ const PanelSlackIntegration: React.FC = () => {
   };
 
   return (
-    <div className="tw-inline-grid tw-grid-cols-7 tw-p-4 tw-min-h-screen tw-w-screen tw-gap-36">
-      <div className="tw-col-span-3 tw-col-start-2 tw-flex tw-flex-col">
+    <div className="tw-grid tw-min-h-screen tw-w-full tw-grid-cols-2 tw-gap-4 tw-bg-background tw-p-4 mx-lg:tw-grid-cols-1">
+      <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-px-4 tw-py-16">
         <Index />
-        <div className="tw-flex-1">
+        <div className="tw-w-full tw-max-w-[24rem]">
           <LogoWrapper />
           <div className="tw-w-full">
-            <div className="tw-w-26rem">
+            <div className="tw-w-full">
               <AppHeader
                 part1={t('page.integrations.hello')}
                 part2={t('page.integrations.welcome')}
-                className="tw-mb-8"
+                textSize="2xl"
+                className="tw-mb-2"
               />
-              <p className="tw-mb-6">{t('page.integrations.gladYouHere')}</p>
-              <p className="tw-mb-8">{t('page.integrations.installSlack')}</p>
+              <p className="tw-m-0 tw-text-sm tw-text-muted-foreground">
+                {t('page.integrations.gladYouHere')}
+              </p>
+              <p className="tw-m-0 tw-mt-1 tw-text-sm tw-text-muted-foreground">
+                {t('page.integrations.installSlack')}
+              </p>
               <Layout>
                 <div className="">
-                  <div className="tw-text-center tw-my-7 tw-flex tw-justify-center">
-                    <div className="lg:tw-w-300px mx-xl:tw-w-full">
-                      <AppButton onClick={connectToAccount} full={true}>
+                  <div className="tw-mt-6 tw-flex tw-justify-center tw-text-center">
+                    <div className="tw-w-full">
+                      <AppButton
+                        onClick={connectToAccount}
+                        full={true}
+                        twPadding="tw-px-4"
+                        className="tw-flex tw-h-10 tw-items-center tw-justify-center"
+                      >
                         {t('page.integrations.connectWithSlack')}
                       </AppButton>
                     </div>
@@ -62,9 +72,14 @@ const PanelSlackIntegration: React.FC = () => {
           </div>
         </div>
       </div>
-      <div className="tw-col-span-3 tw-bg-blue-grey tw-rounded-3xl tw-flex tw-items-center tw-justify-center">
-        <div className="tw-w-8/12 tw-h-full tw-relative">
-          <Image src="/sign/signin1.svg" alt="Google" layout="fill" />
+      <div className="tw-flex tw-items-center tw-justify-center tw-rounded-[0.75rem] tw-bg-muted mx-lg:tw-hidden">
+        <div className="tw-relative tw-h-full tw-w-8/12">
+          <Image
+            src="/sign/signin1.svg"
+            alt=""
+            layout="fill"
+            className="dark:tw-invert dark:tw-hue-rotate-180"
+          />
         </div>
       </div>
     </div>

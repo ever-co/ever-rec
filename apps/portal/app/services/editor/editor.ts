@@ -51,6 +51,8 @@ import { KonvaEventObject } from 'konva/lib/Node';
 import { IMarkerComment } from 'app/interfaces/IMarkerComment';
 import { MarkerAPI } from '../api/markers';
 import { IMarker } from 'app/interfaces/IMarker';
+import { isPhoneViewport } from 'hooks/useIsPhone';
+import { phoneFitScale } from 'components/pagesComponents/_editorScreen/editorHelpers/phoneStage';
 
 export class EditorService {
   static renderStage(
@@ -175,7 +177,14 @@ export class EditorService {
 
         const scaleX = width / imageWidth;
         const scaleY = height / imageHeight;
-        const scale = Math.max(scaleX, scaleY);
+        // On a phone the stage starts fitted to the width of the screen (zoom 100%): the width it
+        // is shown at, which is the saved one when the image was resized or cropped before.
+        const scale = isPhoneViewport()
+          ? phoneFitScale(
+              stage.container(),
+              editorImage.dbData?.stage?.renderDimentions?.width || imageWidth,
+            )
+          : Math.max(scaleX, scaleY);
         setMainScale(scale);
         setInitialDimentions({
           width: innerImage.width,

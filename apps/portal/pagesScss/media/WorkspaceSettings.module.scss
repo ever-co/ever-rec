@@ -1,35 +1,69 @@
 @use 'pagesScss/Shared.module.scss';
 @use 'pagesScss/partials/_dotSeparator.scss';
-@import 'pagesScss/partials/_colors.scss';
 
+// Workspace settings: the top bar, then one centered column like the account settings.
 .section {
-  background-color: #fff;
-  min-height: 100%;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.pageHeadingWrapper {
+  flex-shrink: 0;
+  max-width: 48rem;
+  margin: 0 auto;
+  padding: 2rem 1rem 0;
+  border-bottom: 0;
+
+  @media screen and (min-width: 768px) {
+    padding: 2rem 2rem 0;
+  }
 }
 
 .dotSeparator {
-  margin: 0 0.25rem;
+  margin: 0 0.5rem;
+  color: hsl(var(--muted-foreground));
 }
 
 .mainHeader {
   display: flex;
+  // On a phone the workspace's name and the page's name take a line each.
+  flex-wrap: wrap;
   align-items: center;
+  margin: 0;
+  color: hsl(var(--foreground));
+  font-family: inherit;
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 2rem;
+  letter-spacing: 0;
 }
 
 .settingsWrapper {
   display: flex;
   flex-direction: column;
-  padding: 2rem;
+  flex-shrink: 0;
+  width: 100%;
+  max-width: 48rem;
+  margin: 0 auto;
+  padding: 2rem 1rem;
   gap: 1.5rem;
 
+  @media screen and (min-width: 768px) {
+    padding: 2rem;
+  }
+
   h1 {
+    margin: 0 0 1rem;
+    color: hsl(var(--foreground));
     font-size: 1rem;
-    font-weight: bold;
-    margin-bottom: 1rem;
+    font-weight: 600;
+    line-height: 1.5rem;
   }
 
   .setting {
-    border-bottom: 1px solid $grey-light05;
-    padding-bottom: 1rem;
+    border-bottom: 1px solid hsl(var(--border));
   }
 }

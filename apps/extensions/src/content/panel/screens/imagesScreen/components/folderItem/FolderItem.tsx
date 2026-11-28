@@ -93,16 +93,23 @@ const FolderItem: React.FC<IFolderItemProps> = ({
     const id = loadingMessage(t('toasts.renamingFolder'));
 
     let data = null;
-    if (workspace && isWorkspaceFolder(folder)) {
-      data = await updateWorkspaceFolderData(
-        workspace.id,
-        { ...folder, name },
-        false,
-      );
-    } else if (forVideos) {
-      data = await updateVideoFolderData({ ...folder, name }, false);
-    } else {
-      data = await updateFolderData({ ...folder, name }, false);
+    // A folder deleted in another tab answers 404: show the rename error instead of leaving the
+    // loading toast.
+    try {
+      if (workspace && isWorkspaceFolder(folder)) {
+        data = await updateWorkspaceFolderData(
+          workspace.id,
+          { ...folder, name },
+          false,
+        );
+      } else if (forVideos) {
+        data = await updateVideoFolderData({ ...folder, name }, false);
+      } else {
+        data = await updateFolderData({ ...folder, name }, false);
+      }
+    } catch (err) {
+      console.error(err);
+      data = null;
     }
 
     data
@@ -158,17 +165,22 @@ const FolderItem: React.FC<IFolderItemProps> = ({
 
   const handleColor = async (value: string) => {
     setLoading(true);
-    if (workspace && isWorkspaceFolder(folder)) {
-      await updateWorkspaceFolderData(workspace.id, {
-        ...folder,
-        color: value,
-      });
-    } else if (forVideos) {
-      await updateVideoFolderData({ ...folder, color: value });
-    } else if (workspace) {
-      console.log('to implement');
-    } else {
-      await updateFolderData({ ...folder, color: value });
+    // A rejected update (a folder deleted in another tab answers 404) must not leave it loading.
+    try {
+      if (workspace && isWorkspaceFolder(folder)) {
+        await updateWorkspaceFolderData(workspace.id, {
+          ...folder,
+          color: value,
+        });
+      } else if (forVideos) {
+        await updateVideoFolderData({ ...folder, color: value });
+      } else if (workspace) {
+        console.log('to implement');
+      } else {
+        await updateFolderData({ ...folder, color: value });
+      }
+    } catch (err) {
+      console.error(err);
     }
     setLoading(false);
   };

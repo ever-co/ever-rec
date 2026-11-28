@@ -84,18 +84,17 @@ const SlackChannelModal: React.FC<ISlackChannelModalProps> = ({
       open={true}
       onCancel={onCancel}
       footer={
-        <div className="tw-flex tw-justify-end tw-mt-14">
+        <div className="tw-flex tw-justify-end tw-gap-2 tw-mt-6">
           <AppButton
             onClick={onCancel}
-            bgColor="tw-bg-app-grey-darker"
             outlined
-            className="tw-px-8 tw-mx-4 tw-pb-1 tw-pt-1"
+            className="tw-flex tw-h-9 tw-items-center tw-justify-center tw-px-4 tw-py-0"
           >
             {t('common.cancel')}
           </AppButton>
           <AppButton
             onClick={handleOnsubmit}
-            className="tw-px-8 tw-pb-1 tw-pt-1"
+            className="tw-flex tw-h-9 tw-items-center tw-justify-center tw-px-4 tw-py-0"
             disabled={loading}
           >
             {t('common.send')}
@@ -103,12 +102,14 @@ const SlackChannelModal: React.FC<ISlackChannelModalProps> = ({
         </div>
       }
     >
-      <h2 className="tw-mb-6 tw-text-2xl tw-font-semibold">
+      <h2 className="tw-mb-4 tw-pe-6 tw-text-base tw-font-semibold">
         {t('modals.sendToSlack')}
       </h2>
       <AppSpinner show={channelLoading} local={true} />
       <AppSelect
         label={t('modals.selectChannel')}
+        labelClass="tw-text-sm tw-text-muted-foreground"
+        dense
         placeholder={t('modals.selectAOption')}
         value={selectedChannel}
         errors={errors || undefined}

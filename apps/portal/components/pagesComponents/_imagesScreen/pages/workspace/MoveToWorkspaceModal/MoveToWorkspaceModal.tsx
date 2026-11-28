@@ -1,7 +1,7 @@
-import AppSvg from '../../../../../elements/AppSvg';
 import AppButton from '../../../../../controls/AppButton';
 import React, { useState } from 'react';
 import { Modal } from 'antd';
+import { X } from 'lucide-react';
 import { IWorkspace } from 'app/interfaces/IWorkspace';
 import styles from './MoveToWorkspaceModal.module.scss';
 import classNames from 'classnames';
@@ -29,16 +29,18 @@ const MoveToWorkspaceModal: React.FC<Props> = ({
       open={visible}
       onCancel={onCancel}
       closeIcon={
-        <AppSvg path="/common/close-icon.svg" className="modalCloseButton" />
+        <span className="tw-flex tw-size-full tw-items-center tw-justify-center">
+          <X className="tw-size-4" aria-hidden="true" />
+        </span>
       }
       footer={
-        <div className="tw-flex tw-justify-end tw-mt-14">
+        <div className="tw-flex tw-justify-end tw-gap-2 tw-mt-6">
           <AppButton
             onClick={() => {
               setSelectedWorkspace(null);
               selectedWorkspace && onSuccess(selectedWorkspace);
             }}
-            className="tw-px-8 tw-pb-1 tw-pt-1"
+            className="tw-flex tw-h-9 tw-items-center tw-justify-center tw-px-4 tw-py-0"
             disabled={!selectedWorkspace}
           >
             {t('common.add')}
@@ -48,9 +50,8 @@ const MoveToWorkspaceModal: React.FC<Props> = ({
               setSelectedWorkspace(null);
               onCancel();
             }}
-            bgColor="tw-bg-app-grey-darker"
             outlined
-            className="tw-px-8 tw-mx-4 tw-pb-1 tw-pt-1"
+            className="tw-flex tw-h-9 tw-items-center tw-justify-center tw-px-4 tw-py-0"
           >
             {t('common.cancel')}
           </AppButton>

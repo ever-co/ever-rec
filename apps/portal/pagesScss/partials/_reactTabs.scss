@@ -1,23 +1,22 @@
+// Underline tabs (react-tabs) inside dialogs: quiet labels on a hairline, the active one in the
+// text colour with a 2px line under it.
 .selectedTab {
   background: transparent !important;
-  border: none !important;
-  color: black !important;
-  font-family: Roboto;
-  font-size: 18px;
-  font-weight: bolder !important;
-  line-height: 23px;
-  letter-spacing: 0.25px;
+  border-color: transparent !important;
+  color: hsl(var(--foreground)) !important;
+  font-size: 14px;
+  font-weight: 500 !important;
+  line-height: 20px;
   text-align: center;
 
   &:before {
     content: '';
     position: absolute;
-    left: 50%;
-    bottom: -5px;
-    transform: translate(-50%);
-    height: 1px;
-    width: 90%;
-    border-bottom: 2px solid #5b4dbe;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 2px;
+    background: hsl(var(--foreground));
   }
 
   &:after {
@@ -26,15 +25,30 @@
 }
 
 .tab {
-  font-family: Roboto;
-  font-size: 18px;
-  font-weight: 400;
-  line-height: 23px;
-  letter-spacing: 0.25px;
+  color: hsl(var(--muted-foreground));
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
   text-align: center;
+  transition: color 150ms var(--ease-out);
+
+  &:hover {
+    color: hsl(var(--foreground));
+  }
+
+  // react-tabs marks a focused tab with a white bar under it.
+  &:focus:after {
+    background: transparent !important;
+  }
+
+  // react-tabs removes the outline of a focused tab; keyboard focus keeps a ring.
+  &:focus-visible {
+    outline: 2px solid hsl(var(--ring)) !important;
+    outline-offset: -2px;
+  }
 }
 
 .tabList {
-  border-bottom: none;
+  border-bottom: 1px solid hsl(var(--border));
   margin-bottom: 20px;
 }

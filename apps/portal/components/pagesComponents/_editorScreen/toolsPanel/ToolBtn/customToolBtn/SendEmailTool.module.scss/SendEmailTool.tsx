@@ -87,7 +87,7 @@ const SendEmailTool: React.FC<IEmailToolProps> = ({
         <div className={styles.innerContainer}>
           <h2 className={styles.title}>Email to</h2>
           <ReactMultiEmail
-            placeholder="Add Email"
+            placeholder="Add email"
             className={styles.emailContainer}
             emails={emailcollection?.emails || emails}
             onChange={(_emails: string[]) => {
@@ -106,6 +106,7 @@ const SendEmailTool: React.FC<IEmailToolProps> = ({
                     size="15px"
                     onSelect={() => removeEmail(index)}
                     icon={closeIcon}
+                    className="tw-opacity-60 tw-brightness-0 dark:tw-invert"
                   />
                 </div>
               );
@@ -121,7 +122,7 @@ const SendEmailTool: React.FC<IEmailToolProps> = ({
               checked={messagestatus}
               onChange={() => setMesagestatus(!messagestatus)}
             >
-              <span style={{ color: 'black' }}> Add message</span>
+              <span> Add message</span>
             </Checkbox>
             {messagestatus ? (
               <TextArea

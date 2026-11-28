@@ -1,135 +1,78 @@
-import React, { ReactElement, useState } from 'react';
-import classNames from 'classnames';
-import { BiChevronUp } from 'react-icons/bi';
-import styles from './SidebarItemsStyles.module.scss';
-import { FolderIcon } from 'components/pagesComponents/_imagesScreen/components/folderItem/FolderHeader';
-import useFavoritesFolders from 'hooks/useFavoritesFolders';
+import React, { ReactElement, ReactNode } from 'react';
+import Link from 'next/link';
+import { cn } from 'app/utilities/cn';
 
 interface ISidebarMenuItemProps {
+  href: string;
   icon: ReactElement;
   title: string;
   active: boolean;
+  /** Icons only (the sidebar is collapsed): the title becomes the tooltip. */
+  collapsed?: boolean;
+  /** A control at the end of the row, e.g. the chevron that opens the starred folders. */
+  trailing?: ReactNode;
   className?: string;
+  /** Runs when the link is followed, by a click or from the keyboard. */
   onClick?: () => void;
 }
+
+/**
+ * A row of the sidebar navigation: one icon column, one label, the same height everywhere.
+ *
+ * The row is the link itself, so it is one tab stop and Enter follows it. A trailing control sits
+ * beside the link, not inside it.
+ */
 const SidebarMenuItem: React.FC<ISidebarMenuItemProps> = React.memo(
-  ({ icon, title, active, className = '', onClick }) => {
-    const { favoritesImages, favoritesVideos } = useFavoritesFolders();
-
-    const [isOpen, setIsOpen] = useState(false);
-    const handleToggle = (e: React.MouseEvent) => {
-      e.stopPropagation();
-      setIsOpen(!isOpen);
-    };
-    const FavoriteSection = ({ title, items }) => (
-      <>
-        <h1 className="tw-ml-16 tw-font-bold tw-underline">{title}</h1>
-        <div className={`${styles.listWrapper} scroll-div`}>
-          {items.map((v) => (
-            <div key={v.id} className={styles.title}>
-              <FolderIcon
-                path="/common/folder-icon-v3.svg"
-                bgColor={v.color ? v.color : '#ffffff'}
-                size="19px"
-              />
-              <p className="tw-w-[10rem] tw-truncate">{v.name}</p>
-            </div>
-          ))}
-        </div>
-      </>
-    );
-
-    return (
-      <>
-        {title === 'Favorites' ? (
-          <>
-            <div
-              className={classNames(
-                styles.wrapper,
-                active && styles.active,
-                className,
-              )}
-            >
-              {active && <div className={styles.activeIndicator} />}
-
-              <div className={styles.contentOuterWrapper}>
-                <div
-                  className={classNames(
-                    styles.contentWrapper,
-                    active && styles.active,
-                  )}
-                >
-                  <button
-                    type="button"
-                    onClick={onClick}
-                    className="tw-flex tw-bg-transparent"
-                  >
-                    <div className={classNames(styles.icon)}>{icon}</div>
-                    <div className={classNames(styles.title)}>{title}</div>
-                  </button>
-                  <button
-                    type="button"
-                    aria-label={
-                      isOpen ? 'Collapse favorites' : 'Expand favorites'
-                    }
-                    aria-expanded={isOpen}
-                    className="tw-absolute tw-right-4 "
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleToggle(e);
-                    }}
-                  >
-                    {isOpen ? (
-                      <BiChevronUp className="tw-w-6 tw-h-6 tw-text-gray-500 " />
-                    ) : (
-                      <BiChevronUp className="tw-w-6 tw-h-6 tw-text-gray-500 tw-rotate-180" />
-                    )}
-                  </button>
-                </div>
-              </div>
-            </div>
-            {isOpen && (
-              <>
-                {favoritesImages.length > 0 && (
-                  <FavoriteSection title="Images" items={favoritesImages} />
-                )}
-                {favoritesVideos.length > 0 && (
-                  <FavoriteSection title="Videos" items={favoritesVideos} />
-                )}
-                {favoritesVideos.length === 0 &&
-                  favoritesImages.length === 0 && (
-                    <h1 className="tw-ml-16 tw-font-bold ">No Favorites</h1>
-                  )}
-              </>
-            )}
-          </>
-        ) : (
-          <button
-            className={classNames(
-              styles.wrapper,
-              active && styles.active,
-              className,
-            )}
-            onClick={onClick}
-          >
-            {active && <div className={styles.activeIndicator} />}
-
-            <div className={styles.contentOuterWrapper}>
-              <div
-                className={classNames(
-                  styles.contentWrapper,
-                  active && styles.active,
-                )}
-              >
-                <div className={styles.icon}>{icon}</div>
-                <div className={styles.title}>{title}</div>
-              </div>
-            </div>
-          </button>
+  ({
+    href,
+    icon,
+    title,
+    active,
+    collapsed = false,
+    trailing,
+    className,
+    onClick,
+  }) => (
+    <div
+      className={cn(
+        'tw-group tw-relative tw-flex tw-h-9 tw-select-none tw-items-center tw-rounded-lg tw-text-sm tw-transition-colors tw-duration-150',
+        collapsed ? 'tw-w-10' : 'tw-w-full',
+        active
+          ? 'tw-bg-sidebar-accent tw-font-medium tw-text-sidebar-accent-foreground'
+          : 'tw-text-sidebar-foreground hover:tw-bg-sidebar-accent hover:tw-text-sidebar-accent-foreground',
+        className,
+      )}
+    >
+      <Link
+        href={href}
+        onClick={onClick}
+        title={collapsed ? title : undefined}
+        aria-current={active ? 'page' : undefined}
+        className={cn(
+          'tw-flex tw-h-full tw-min-w-0 tw-flex-1 tw-items-center tw-gap-2.5 tw-rounded-lg tw-text-inherit tw-outline-none hover:tw-text-inherit focus-visible:tw-ring-2 focus-visible:tw-ring-ring',
+          collapsed ? 'tw-justify-center' : 'tw-px-2.5',
         )}
-      </>
-    );
-  },
+      >
+        <span
+          className={cn(
+            'tw-flex tw-size-[18px] tw-shrink-0 tw-items-center tw-justify-center [&_svg]:tw-size-[18px] [&_svg]:tw-stroke-[1.75]',
+            active
+              ? 'tw-text-sidebar-accent-foreground'
+              : 'tw-text-muted-foreground group-hover:tw-text-sidebar-accent-foreground',
+          )}
+          aria-hidden="true"
+        >
+          {icon}
+        </span>
+        {collapsed ? (
+          <span className="tw-sr-only">{title}</span>
+        ) : (
+          <span className="tw-min-w-0 tw-flex-1 tw-truncate">{title}</span>
+        )}
+      </Link>
+      {!collapsed && trailing}
+    </div>
+  ),
 );
 
 SidebarMenuItem.displayName = 'SidebarMenuItem';

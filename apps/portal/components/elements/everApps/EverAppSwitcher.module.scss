@@ -1,12 +1,7 @@
-// The Ever app switcher in the sidebar header. Rec's own tokens: Roboto, ink #383c44, muted #6e6e6e, the
-// lavender-grey hover #f5f4f7 and the purple #5b4dbe for focus and the current app.
+// The Ever app switcher in the sidebar header, on the shared Ever tokens (styles/tokens.scss):
+// a ghost icon button for the mark, and a floating panel like every other menu of the app.
 
-$ink: #383c44;
-$muted: #6e6e6e;
-$hover: #f5f4f7;
-$accent: #5b4dbe;
-$hairline: rgba(56, 60, 68, 0.08);
-$ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+$ease-out: var(--ease-out);
 
 .root {
   position: relative;
@@ -20,30 +15,28 @@ $ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   justify-content: center;
   width: 32px;
   height: 32px;
-  // The mark's left edge lines up with where the Rec logo used to start.
-  margin-left: -4px;
   padding: 0;
   border: 0;
   border-radius: 8px;
   background: transparent;
   cursor: pointer;
-  transition: background-color 120ms $ease-out;
+  transition: background-color 150ms $ease-out;
 
   &:hover,
   &[aria-expanded='true'] {
-    background: $hover;
+    background: hsl(var(--sidebar-accent));
   }
 
   &:focus-visible {
-    outline: 2px solid $accent;
+    outline: 2px solid hsl(var(--ring));
     outline-offset: 2px;
   }
 }
 
 .mark {
   display: block;
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   flex-shrink: 0;
 }
 
@@ -62,17 +55,17 @@ $ease-out: cubic-bezier(0.22, 1, 0.36, 1);
 .panel {
   position: absolute;
   top: calc(100% + 8px);
-  left: 0;
+  inset-inline-start: 0;
   z-index: 1050;
   width: 18rem;
   max-width: calc(100vw - 16px);
   padding: 4px;
-  border: 1px solid $hairline;
-  border-radius: 12px;
-  background: #fff;
-  box-shadow: 0 16px 40px rgba(112, 144, 176, 0.2);
-  color: $ink;
-  font-family: Roboto, Helvetica, Arial, sans-serif;
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  background: hsl(var(--popover));
+  box-shadow: var(--shadow-float);
+  color: hsl(var(--popover-foreground));
+  font-family: var(--font-sans);
   text-align: start;
 }
 
@@ -92,9 +85,9 @@ $ease-out: cubic-bezier(0.22, 1, 0.36, 1);
 .title {
   margin: 0;
   padding: 8px 8px 4px;
-  color: $muted;
+  color: hsl(var(--muted-foreground));
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 400;
   line-height: 16px;
 }
 
@@ -110,28 +103,30 @@ $ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   gap: 10px;
   min-height: 44px;
   padding: 4px 8px;
-  border-radius: 8px;
-  color: $ink;
+  border-radius: 6px;
+  color: hsl(var(--popover-foreground));
   text-decoration: none;
 }
 
 a.row {
   cursor: pointer;
-  transition: background-color 120ms $ease-out;
+  transition: background-color 150ms $ease-out;
 
   &:hover {
-    background: $hover;
-    color: $ink;
+    background: hsl(var(--accent));
+    color: hsl(var(--accent-foreground));
   }
 
   &:focus-visible {
-    background: $hover;
-    outline: 2px solid $accent;
+    background: hsl(var(--accent));
+    color: hsl(var(--accent-foreground));
+    outline: 2px solid hsl(var(--ring));
     outline-offset: -2px;
   }
 }
 
-// A white tile behind every logo: the Platform and Demand marks are dark on a transparent background.
+// A white tile behind every logo, in both themes: the Platform and Demand marks are dark on a
+// transparent background, and a logo keeps its own colours.
 .tile {
   display: inline-flex;
   align-items: center;
@@ -142,8 +137,8 @@ a.row {
   padding: 1px;
   border-radius: 6px;
   background: #fff;
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
-  color: $ink;
+  box-shadow: 0 0 0 1px hsl(var(--border));
+  color: #18181b;
   font-size: 12px;
 }
 
@@ -174,19 +169,20 @@ a.row {
 }
 
 .line {
-  color: $muted;
+  color: hsl(var(--muted-foreground));
   font-size: 12px;
   line-height: 16px;
 }
 
+// The current app's check: selection is where the accent belongs.
 .check {
   flex-shrink: 0;
-  color: $accent;
+  color: hsl(var(--brand-text));
   font-size: 16px;
 }
 
 .separator {
   height: 1px;
-  margin: 4px 8px;
-  background: $hairline;
+  margin: 4px 0;
+  background: hsl(var(--border));
 }

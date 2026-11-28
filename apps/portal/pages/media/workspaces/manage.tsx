@@ -20,7 +20,16 @@ import { errorMessage, infoMessage } from 'app/services/helpers/toastMessages';
 import UploadIconModal from 'components/pagesComponents/_imagesScreen/pages/workspace/uploadIconModal/UploadIconModal';
 import { useUpdateWorkspace } from 'app/services/workspace';
 import Image from 'next/legacy/image';
-import AppSvg from 'components/elements/AppSvg';
+import {
+  Copy,
+  Images,
+  LogOut,
+  Pencil,
+  Shapes,
+  Trash2,
+  UserRound,
+  Users,
+} from 'lucide-react';
 import UploadThumbnailModal from 'components/pagesComponents/_imagesScreen/pages/workspace/uploadThumbnailModal/UploadThumbnailModa';
 import { preRoutes, panelRoutes } from 'components/_routes';
 import router from 'next/router';
@@ -291,14 +300,14 @@ const ManageWorkspaces: React.FC = () => {
             userPhotoURL={user?.photoURL}
           />
           {workspaces?.length === 0 && (
-            <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-h-full ">
+            <div className="tw-flex tw-h-full tw-flex-col tw-items-center tw-justify-center tw-px-4 tw-text-center">
               {/* Large Text */}
-              <h1 className="tw-text-6xl tw-font-bold tw-text-gray-800 tw-mb-4">
+              <h1 className="tw-m-0 tw-mb-2 tw-text-lg tw-font-semibold tw-text-foreground">
                 {t('notFound.workspace.heading')}
               </h1>
 
               {/* Description */}
-              <p className="tw-text-lg tw-text-gray-600 tw-mb-8">
+              <p className="tw-m-0 tw-mb-6 tw-max-w-md tw-text-sm tw-text-muted-foreground">
                 {t('workspace.noWorkspacesDescription')}
               </p>
 
@@ -317,14 +326,20 @@ const ManageWorkspaces: React.FC = () => {
               <div key={workspace.id}>
                 <div className={styles.workspaceItemWrapper}>
                   <div className={styles.thumbnailWrapper}>
-                    <Image
-                      src={workspace?.thumbnail || '/common/Thumbnail.svg'}
-                      alt="workspace thumbnail"
-                      width={!workspace?.thumbnail ? '200' : undefined}
-                      height={!workspace?.thumbnail ? '150' : undefined}
-                      layout={workspace?.thumbnail ? 'fill' : 'fixed'}
-                      className={workspace?.thumbnail && styles.thumbnail}
-                    />
+                    <div className={styles.thumbnailImage}>
+                      <Image
+                        src={workspace.thumbnail || '/common/Thumbnail.svg'}
+                        alt="workspace thumbnail"
+                        width={!workspace.thumbnail ? '200' : undefined}
+                        height={!workspace.thumbnail ? '150' : undefined}
+                        layout={workspace.thumbnail ? 'fill' : 'fixed'}
+                        className={
+                          workspace.thumbnail
+                            ? styles.thumbnail
+                            : styles.thumbnailPlaceholder
+                        }
+                      />
+                    </div>
                     <div className={styles.workspaceName}>{workspace.name}</div>
                   </div>
                   <div className={styles.subItemsWrapper}>
@@ -336,11 +351,7 @@ const ManageWorkspaces: React.FC = () => {
                         }
                         title={t('workspace.changeWorkspaceAvatar')}
                       >
-                        <AppSvg
-                          path="/common/workspace-icon.svg"
-                          width="23px"
-                          height="23px"
-                        />
+                        <Shapes strokeWidth={1.75} aria-hidden="true" />
                       </div>
 
                       <div
@@ -350,11 +361,7 @@ const ManageWorkspaces: React.FC = () => {
                         }
                         title={t('workspace.changeWorkspaceThumbnail')}
                       >
-                        <AppSvg
-                          path="/common/images-icon.svg"
-                          width="24px"
-                          height="24px"
-                        />
+                        <Images strokeWidth={1.75} aria-hidden="true" />
                       </div>
 
                       <div
@@ -364,11 +371,7 @@ const ManageWorkspaces: React.FC = () => {
                         }
                         title={t('workspace.renameWorkspace')}
                       >
-                        <AppSvg
-                          path="/common/edit-pencil-black.svg"
-                          width="24px"
-                          height="24px"
-                        />
+                        <Pencil strokeWidth={1.75} aria-hidden="true" />
                       </div>
 
                       <div
@@ -378,11 +381,7 @@ const ManageWorkspaces: React.FC = () => {
                         }
                         title={t('workspace.copyInviteLink')}
                       >
-                        <AppSvg
-                          path="/common/copy_black.svg"
-                          width="24px"
-                          height="24px"
-                        />
+                        <Copy strokeWidth={1.75} aria-hidden="true" />
                       </div>
                       <ShareWorkspaceModal
                         visible={
@@ -400,27 +399,17 @@ const ManageWorkspaces: React.FC = () => {
                         title={t('workspace.teams')}
                       >
                         <div onClick={() => goToWorkspaceTeams(workspace)}>
-                          <AppSvg
-                            path="/common/team-icon.svg"
-                            width="26px"
-                            height="26px"
-                            className={styles.membersSvg}
-                          />
+                          <Users strokeWidth={1.75} aria-hidden="true" />
                         </div>
                       </div>
 
                       <div
                         className={styles.membersCountWrapper}
-                        title={t('workspace.membersWithLength', {
-                          length: workspace.members.length,
+                        title={t('shell.members', {
+                          count: workspace.members.length,
                         })}
                       >
-                        <AppSvg
-                          path="/common/teams-icon.svg"
-                          width="23px"
-                          height="23px"
-                          className={styles.membersSvg}
-                        />
+                        <UserRound strokeWidth={1.75} aria-hidden="true" />
                         <div className={styles.membersContainer}>
                           {workspace.members.length}
                         </div>
@@ -431,24 +420,24 @@ const ManageWorkspaces: React.FC = () => {
                         onClick={() =>
                           openLeaveDeleteModal(
                             workspace,
-                            workspace?.admin !== user?.id ? 'leave' : 'delete',
+                            workspace.admin !== user?.id ? 'leave' : 'delete',
                           )
                         }
                         title={
-                          workspace?.admin !== user?.id
+                          workspace.admin !== user?.id
                             ? t('workspace.leaveWorkspace')
                             : t('workspace.deleteWorkspace')
                         }
                       >
-                        <AppSvg
-                          path={
-                            workspace?.admin !== user?.id
-                              ? '/common/leave.svg'
-                              : '/item/delete.svg'
-                          }
-                          width="22px"
-                          height="22px"
-                        />
+                        {workspace.admin !== user?.id ? (
+                          <LogOut
+                            strokeWidth={1.75}
+                            className="rtl:-tw-scale-x-100"
+                            aria-hidden="true"
+                          />
+                        ) : (
+                          <Trash2 strokeWidth={1.75} aria-hidden="true" />
+                        )}
                       </div>
                     </div>
                   </div>

@@ -106,6 +106,12 @@ import { MarkerAPI } from 'app/services/api/markers';
 import { IMarker } from 'app/interfaces/IMarker';
 import { io } from 'socket.io-client';
 import { getCookies } from 'app/services/helpers/getCookies';
+import useIsPhone from 'hooks/useIsPhone';
+import {
+  attachPinchZoom,
+  bridgeTouchToMouse,
+  createPhoneTouchState,
+} from 'components/pagesComponents/_editorScreen/editorHelpers/phoneStage';
 //Editor
 
 export interface ISize {
@@ -206,6 +212,12 @@ const EditorScreen: React.FC = () => {
   const [markers, setMarkers] = useState<IMarker[]>([]);
 
   const perfectScale = ((mainScale || 0) * stageScale) / 100;
+
+  // Phone width: one finger is the tools' mouse, two fingers pinch and pan the stage.
+  const isPhone = useIsPhone();
+  const phoneTouch = useRef(createPhoneTouchState());
+  const stageScaleRef = useRef(stageScale);
+  stageScaleRef.current = stageScale;
 
   const [recordingController, setRecordingController] =
     useState<JSX.Element | null>(null);
@@ -409,19 +421,19 @@ const EditorScreen: React.FC = () => {
         img,
         renderDimentions: resizer
           ? {
-            width: resizer.width,
-            height: resizer.height,
-          }
+              width: resizer.width,
+              height: resizer.height,
+            }
           : {
-            width:
-              resizeDimentions.width !== 0
-                ? resizeDimentions.width
-                : initialDimentions.width,
-            height:
-              resizeDimentions.height !== 0
-                ? resizeDimentions.height
-                : initialDimentions.height,
-          },
+              width:
+                resizeDimentions.width !== 0
+                  ? resizeDimentions.width
+                  : initialDimentions.width,
+              height:
+                resizeDimentions.height !== 0
+                  ? resizeDimentions.height
+                  : initialDimentions.height,
+            },
       });
       setHistory(historyArr);
       setHistoryStep(historyArr.length - 1);
@@ -928,6 +940,22 @@ const EditorScreen: React.FC = () => {
   }, [user, editorImageId]);
 
   useEffect(() => {
+    if (!stage || !isPhone) return;
+    return bridgeTouchToMouse(stage, phoneTouch.current);
+  }, [stage, isPhone]);
+
+  useEffect(() => {
+    const container = document.getElementById('stage');
+    if (!container || !isPhone) return;
+    return attachPinchZoom(
+      container,
+      phoneTouch.current,
+      () => stageScaleRef.current,
+      setStageScale,
+    );
+  }, [isPhone]);
+
+  useEffect(() => {
     const allComments = markers?.flatMap((marker) => marker.comments);
     if (comments !== allComments) {
       setComments(allComments);
@@ -960,10 +988,10 @@ const EditorScreen: React.FC = () => {
       !workspaceId
         ? EditorService.saveOriginalImageData(editorImage)
         : saveOriginalWSImageData(
-          activeWorkspace?.id,
-          editorImage.dbData?.refName || '',
-          editorImage,
-        );
+            activeWorkspace?.id,
+            editorImage.dbData?.refName || '',
+            editorImage,
+          );
     }
 
     !editorImage && (workspaceId ? getImageWorkspace() : getImage());
@@ -1407,15 +1435,7 @@ const EditorScreen: React.FC = () => {
   }
 
   return (
-    <div
-      className={styles.pageContainer}
-      style={{
-        backgroundImage: `url('leak_bg-min.png')`,
-        backgroundSize: 'cover',
-        justifyContent: 'center',
-        padding: '8px',
-      }}
-    >
+    <div className={styles.pageContainer}>
       {stage && (
         <ToolsPanel
           stage={stage}
@@ -1501,7 +1521,7 @@ const EditorScreen: React.FC = () => {
         currentShape={currentShape}
         scale={stageScale}
         comments={comments}
-      // addComment={addComment}
+        // addComment={addComment}
       />
       <AppSpinner show={!imageLoaded} tip="Loading image..." />
     </div>

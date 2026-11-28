@@ -1023,11 +1023,33 @@ export class ImageService {
   ): Promise<
     IDataResponse<{ folder: IDbFolder; favFolders: IFavoriteFolders } | null>
   > {
+    // The id goes into a database path: "" would write into the folder list itself and a
+    // sub-path such as `<id>/children` inside another folder. The checks below are outside the
+    // try block, which answers every error with an error response.
+    if (typeof folderId !== 'string' || !is_id(folderId)) {
+      throw new BadRequestException('Invalid folder id');
+    }
+
+    const db = admin.database();
+    const dbFolderRef = db.ref(`users/${uid}/folders/${folderId}`);
+    const dataSnapshot = await dbFolderRef.get();
+    const data = dataSnapshot.val();
+
+    // An update of a folder that is not stored (an unknown id, or a folder deleted in another
+    // tab) would create a partial folder: 404 instead.
+    if (!data) {
+      throw new NotFoundException('Folder not found');
+    }
+    // This route does not move a folder: the nest level and the children of the old and the new
+    // parent would stay as they were. The clients resend the stored parent (false at the top
+    // level), so the update below writes back the stored value; any other parent is refused.
+    if (parentId !== undefined && parentId !== data.parentId) {
+      throw new BadRequestException(
+        'A folder cannot be moved to another parent',
+      );
+    }
+
     try {
-      const db = admin.database();
-      const dbFolderRef = db.ref(`users/${uid}/folders/${folderId}`);
-      const dataSnapshot = await dbFolderRef.get();
-      const data = dataSnapshot.val();
       const updated = new Date().toISOString();
       const favFoldersRef = db.ref(`users/${uid}/favoriteFolders`);
       const favFoldersSnap = await favFoldersRef.get();

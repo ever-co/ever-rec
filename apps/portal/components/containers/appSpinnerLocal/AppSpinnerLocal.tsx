@@ -1,21 +1,18 @@
+import { useTranslation } from 'react-i18next';
 import styles from './AppSpinnerLocal.module.scss';
 
-interface Props {
-  circleInnerColor?: string;
-  circleColor?: string;
-}
+/**
+ * A small spinner for inside a button or a row. It fills its parent and is drawn in
+ * `currentColor`, so it reads on any button in the light and the dark theme.
+ */
+const AppSpinnerLocal = () => {
+  const { t } = useTranslation();
 
-const AppSpinnerLocal = ({ circleInnerColor, circleColor }: Props) => {
-  const circleInnerColorVar = circleInnerColor || '#5b4dbe';
-  const circleColorVar = circleColor || '#ffffff';
   return (
     <div
       className={styles.loadingSpinner}
-      style={{
-        // @ts-ignore
-        '--circle-inner-color': `${circleInnerColorVar}`,
-        '--circle-color': `${circleColorVar}`,
-      }}
+      role="status"
+      aria-label={t('shell.loading')}
     ></div>
   );
 };

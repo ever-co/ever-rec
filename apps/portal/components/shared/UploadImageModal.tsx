@@ -25,31 +25,32 @@ const UploadImageModal: React.FC<Props> = ({
       open={visible}
       closable={true}
       onCancel={onCancel}
-      closeIcon={
-        <AppSvg path="/common/close-icon.svg" className="modalCloseButton" />
-      }
       footer={
         <div
           onDrop={onDrop}
           onDragOver={enableDropping}
-          className="tw-flex tw-flex-col tw-items-center tw-mt-4 tw-pt-10 tw-pb-4 tw-border tw-border-mid-grey tw-border-dashed tw-rounded-md"
+          className="tw-flex tw-flex-col tw-items-center tw-mt-4 tw-px-4 tw-pt-8 tw-pb-6 tw-border tw-border-input tw-border-dashed tw-rounded-lg tw-text-center"
         >
-          <AppSvg path="/common/images-icon.svg" />
-          <p className="tw-mt-6 tw-mb-4">
+          <AppSvg
+            path="/common/images-icon.svg"
+            className="tw-text-muted-foreground [&_path]:tw-fill-current"
+          />
+          <p className="tw-mt-4 tw-mb-4 tw-text-sm tw-text-foreground">
             {t('workspace.dragAndDropImagesHereOr')}
           </p>
           <AppButton
             onClick={onOk}
-            className="tw-text-white tw-pb-2 tw-pt-2"
-            twPadding="tw-px-14"
+            className="tw-flex tw-h-9 tw-items-center tw-justify-center tw-px-4 tw-py-0"
           >
             {t('workspace.browseFile')}
           </AppButton>
-          <p className="tw-mt-4">{t('page.image.uploadDescription')}</p>
+          <p className="tw-mt-4 tw-mb-0 tw-text-xs tw-text-muted-foreground">
+            {t('page.image.uploadDescription')}
+          </p>
         </div>
       }
     >
-      <h2 className="tw-mb-6 tw-text-xl tw-font-bold">
+      <h2 className="tw-mb-0 tw-pe-6 tw-text-base tw-font-semibold">
         {t('page.image.uploadImages')}
       </h2>
     </Modal>

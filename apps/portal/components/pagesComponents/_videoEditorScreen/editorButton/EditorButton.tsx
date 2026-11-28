@@ -27,7 +27,9 @@ const EditorButton: React.FC<IEditorButton> = ({
     <div className="">
       <button
         className={classNames(
-          `${color} ${textcolor} tw-py-3 tw-px-5 tw-rounded-md tw-text-center tw-text-sm tw-font-bold`,
+          // The caller chooses the ground and the text colour (token classes such as
+          // `tw-bg-primary` + `tw-text-primary-foreground`); the shape is the shared button's.
+          `${color} ${textcolor} tw-h-9 tw-px-4 tw-rounded-md tw-text-center tw-text-sm tw-font-medium`,
           disabled && 'tw-cursor-not-allowed',
           disabled && lowerOpacity && 'tw-bg-opacity-80',
         )}

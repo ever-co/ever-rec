@@ -33,7 +33,7 @@ const UserShortInfo: React.FC<IUserShortInfoProps> = ({
         href={preRoutes.settings + panelRoutes.profile}
         className={classNames(
           styles.userPhotoContainer,
-          `tw-rounded-full tw-overflow-hidden tw-cursor-pointer tw-flex tw-justify-center tw-mr-4 tw-h-full px tw-h-full`,
+          `tw-rounded-full tw-overflow-hidden tw-cursor-pointer tw-flex tw-justify-center tw-me-4 tw-h-full px tw-h-full`,
         )}
         style={{
           width: `${avaSize}px`,
@@ -51,16 +51,11 @@ const UserShortInfo: React.FC<IUserShortInfoProps> = ({
             alt=""
           />
         ) : !publicPage ? (
-          <Link
-            href={preRoutes.settings + panelRoutes.profile}
-            className={classNames(
-              styles,
-              `tw-cursor-pointer tw-w-full tw-object-cover`,
-            )}
+          <span
+            className="tw-flex tw-w-full tw-items-center tw-justify-center"
             style={{
               width: `${avaSize}px`,
               height: `${avaSize}px`,
-              pointerEvents: disableGoToProfile ? 'none' : 'auto',
             }}
           >
             <AppSvg
@@ -68,7 +63,7 @@ const UserShortInfo: React.FC<IUserShortInfoProps> = ({
               size={avaSize - 10 + 'px'}
               className="tw-flex tw-justify-center tw-content-center tw-mt-0.5"
             />
-          </Link>
+          </span>
         ) : (
           ''
         )}

@@ -42,10 +42,10 @@ const Slack: React.FC<ISettingsPageProps> = () => {
 
   return (
     <div className={styles.mainWrapperItem}>
-      <h1 className="tw-font-semibold">
-        <div className="tw-flex tw-align-end">
+      <h1 className="tw-m-0 tw-text-sm tw-font-medium tw-text-foreground">
+        <div className="tw-flex tw-h-7 tw-items-center">
           <AppSvg
-            className="tw-mr-2"
+            className="tw-me-2"
             path="/settings/slack-icon.svg"
             size="22px"
           />
@@ -57,16 +57,22 @@ const Slack: React.FC<ISettingsPageProps> = () => {
           <p className={styles.description}>
             {t('page.integrations.slack.description')}
           </p>
-          <div className="tw-flex tw-mb-2 tw-justify-center tw-text-center tw-gap-1 tw-mt-3 tw-mx-4">
-            <AppSvg path="/settings/success.svg" size="22px" />
+          <div className="tw-flex tw-items-start tw-gap-2 tw-text-[13px] tw-leading-5 tw-text-foreground">
+            <AppSvg
+              path="/settings/success.svg"
+              size="16px"
+              className="tw-mt-0.5 tw-shrink-0"
+            />
 
             <div>{t('page.integrations.slack.slackWorkspace')}</div>
           </div>
-          <div className="tw-w-90p">
+          <div className={styles.action}>
             <AppButton
               full={true}
               onClick={() => setIsDisconnect(true)}
-              className={styles.disconnectBtn}
+              bgColor="tw-bg-transparent hover:tw-bg-destructive-muted"
+              twTextColor="tw-text-destructive-text"
+              twPadding="tw-px-4 tw-py-[7px]"
             >
               {t('page.integrations.slack.disconnectSlack')}
             </AppButton>
@@ -77,8 +83,13 @@ const Slack: React.FC<ISettingsPageProps> = () => {
           <p className={styles.description}>
             {t('page.integrations.slack.connectedSlack')}
           </p>
-          <div className="tw-w-90p">
-            <AppButton onClick={connectToAccount} full={true}>
+          <div className={styles.action}>
+            <AppButton
+              outlined
+              twPadding="tw-px-4 tw-py-[7px]"
+              onClick={connectToAccount}
+              full={true}
+            >
               {t('page.integrations.slack.connectWithSlack')}
             </AppButton>
           </div>

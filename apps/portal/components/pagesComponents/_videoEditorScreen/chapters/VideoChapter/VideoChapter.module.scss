@@ -1,32 +1,54 @@
-$primary: #5b4dbe;
-$app-black: #0f1014;
+// One chapter of a video: its frame, the time it starts at and its title. A plain row in the
+// chapters column, a small card in the horizontal strip. On the shared Ever tokens.
 
 .VideoChapter {
   position: relative;
   display: flex;
-  padding: 0.7rem;
-  border: 2px solid transparent;
-  border-radius: 0.25rem;
-  background-color: #f5f4f7;
+  padding: 0.5rem;
+  border: 1px solid transparent;
+  border-radius: calc(var(--radius) - 2px);
+  background-color: transparent;
   cursor: pointer;
+  transition:
+    background-color 150ms var(--ease-out),
+    border-color 150ms var(--ease-out);
+
+  &:hover {
+    background-color: hsl(var(--accent));
+  }
 }
 
 .VideoChapterHorizontal {
+  flex: none;
   flex-direction: column;
   gap: 0.5rem;
+  border-color: hsl(var(--border));
+  background-color: hsl(var(--card));
+
+  &:hover {
+    border-color: hsl(var(--foreground) / 0.25);
+    background-color: hsl(var(--card));
+  }
 }
 
-.active {
-  border-color: $primary;
+// The chapter that is playing: the one accent, as a ring.
+.active,
+.active:hover {
+  border-color: transparent;
+  box-shadow: inset 0 0 0 2px hsl(var(--brand));
 }
 
 .Image {
   position: relative;
+  flex: none;
   width: 40%;
   min-width: 125px;
   height: 75px;
-  background-color: $app-black;
-  margin-right: 1rem;
+  overflow: hidden;
+  border: 1px solid hsl(var(--border));
+  border-radius: calc(var(--radius) - 4px);
+  background-color: hsl(var(--muted));
+  margin-inline-end: 0.75rem;
 }
 
 .ImageHorizontal {
@@ -38,11 +60,13 @@ $app-black: #0f1014;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  gap: 0.25rem;
+  min-width: 0;
 
   span {
-    font-size: 0.85rem;
-    margin-left: 0.25rem;
-    margin-bottom: 0.1rem;
+    font-size: 0.75rem;
+    line-height: 1rem;
+    margin-inline-start: 0.25rem;
   }
 
   div:first-of-type {
@@ -54,18 +78,39 @@ $app-black: #0f1014;
 .InputsTimestamp {
   display: flex;
   align-items: center;
-  svg {
-    margin-bottom: 0.22rem;
-  }
+  color: hsl(var(--muted-foreground));
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
 }
 
 .Close {
   position: absolute;
-  right: 0;
-  margin-right: 0.75rem;
+  top: 0.25rem;
+  inset-inline-end: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: calc(var(--radius) - 4px);
+  color: hsl(var(--muted-foreground));
   cursor: pointer;
+  transition:
+    background-color 150ms var(--ease-out),
+    color 150ms var(--ease-out);
+
+  &:hover {
+    background-color: hsl(var(--foreground) / 0.08);
+    color: hsl(var(--foreground));
+  }
+
+  // The cross in /public is drawn in a fixed grey: it takes the text colour.
+  :global(.injected-svg) path {
+    fill: currentColor;
+  }
 }
 
 .CloseHorizontal {
-  margin-right: 0.45rem;
+  top: 0.25rem;
+  inset-inline-end: 0.25rem;
 }

@@ -66,17 +66,19 @@ const FavoritesPage: React.FC = () => {
 
   const moreMenu = (value: 'images' | 'videos', folderId: string) => (
     <Menu
-      className={classNames(favStyles.gradientBackground)}
-      style={{ padding: 5 }}
       onClick={(e) => {
         e.domEvent.stopPropagation();
         setIsDropdownVisible('');
       }}
     >
       <Menu.Item
-        style={{ margin: 10 }}
-        className="tw-bg-white tw-rounded-xl"
-        icon={<AppSvg path={'/common/star.svg'} size="18px" />}
+        icon={
+          <AppSvg
+            path={'/common/star.svg'}
+            size="18px"
+            className="tw-text-muted-foreground [&_path]:tw-stroke-current"
+          />
+        }
         key="menu_item_add_to_favs"
         onClick={async () => {
           try {
@@ -99,9 +101,7 @@ const FavoritesPage: React.FC = () => {
         }}
         //onClick={(e) => addToFavs()}
       >
-        <span className="tw-text-base tw-font-semibold">
-          Remove from favorites
-        </span>
+        <span>Remove from favorites</span>
       </Menu.Item>
     </Menu>
   );
@@ -110,7 +110,7 @@ const FavoritesPage: React.FC = () => {
     <MediaIndex>
       <section
         className={styles.mainSection}
-        style={{ justifyContent: 'flex-start', backgroundColor: 'white' }}
+        style={{ justifyContent: 'flex-start' }}
       >
         <SCHeader
           filterValue={filter}
@@ -118,7 +118,13 @@ const FavoritesPage: React.FC = () => {
           userPhotoURL={user?.photoURL}
         />
 
-        <DashboardCard className={styles.foldersDashboardCard}>
+        {/* The page scrolls inside this section when the folders do not fit. */}
+        <DashboardCard
+          className={classNames(
+            styles.foldersDashboardCard,
+            'tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-pb-6',
+          )}
+        >
           <div>
             <div className={styles.pageHeadingWrapper}>
               <h1 className={styles.favoriteHeading}>Favorites</h1>
@@ -126,7 +132,7 @@ const FavoritesPage: React.FC = () => {
           </div>
           <>
             <div className={styles.foldersHeadingContainer}>
-              <h3 className={styles.heading}>Images Folders</h3>
+              <h3 className={styles.heading}>Images folders</h3>
             </div>
             {favoritesImages.length ? (
               <div className="tw-h-fit tw-overflow-y-auto">
@@ -164,17 +170,16 @@ const FavoritesPage: React.FC = () => {
                     height={100}
                     alt="no-image"
                   />
-                  <h1 className="tw-text-xl tw-font-bold tw-text-center">
+                  <h1 className="tw-mt-3 tw-text-center tw-text-base tw-font-semibold tw-text-foreground">
                     No Favourite Images Folders found
                   </h1>
                 </div>
               </div>
             )}
 
-            <div className={styles.pageHeadingWrapper} />
-            <div className="tw-bg-white tw-flex tw-flex-grow tw-flex-col">
+            <div className="tw-flex tw-flex-grow tw-flex-col">
               <div className={styles.foldersHeadingContainer}>
-                <h3 className={styles.heading}>Videos Folders</h3>
+                <h3 className={styles.heading}>Videos folders</h3>
               </div>
               {favoritesVideos.length ? (
                 <div className="tw-h-fit tw-overflow-y-auto">
@@ -212,7 +217,7 @@ const FavoritesPage: React.FC = () => {
                       height={100}
                       alt="no-image"
                     />
-                    <h1 className="tw-text-xl tw-font-bold tw-text-center">
+                    <h1 className="tw-mt-3 tw-text-center tw-text-base tw-font-semibold tw-text-foreground">
                       No Favorite Videos Folders found
                     </h1>
                   </div>

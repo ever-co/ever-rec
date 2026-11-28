@@ -1,22 +1,15 @@
+// The comments popup of a marker: a floating panel with a hairline.
 .commentContainer {
   position: absolute;
   width: 330px;
   display: block;
   opacity: 0;
   padding: 2px;
-  border-radius: 0.5rem;
-  background-color: #e9e7f0;
-  background-image: radial-gradient(
-      at 47% 83%,
-      rgb(211, 205, 248) 0,
-      transparent 59%
-    ),
-    radial-gradient(at 82% 65%, hsl(253.33, 23%, 92%) 0, transparent 55%);
-  -webkit-box-shadow: inset 0px 22px 10px -15px #ffffff;
-  box-shadow: inset 0px 22px 10px -15px #ffffff;
-  -webkit-box-shadow: 0px 0px 7px -3px #000000;
-  box-shadow: 0px 0px 7px -3px #000000;
-  border: 1px solid rgba(91, 77, 240, 0.13);
+  border-radius: 10px;
+  background-color: hsl(var(--popover));
+  color: hsl(var(--popover-foreground));
+  box-shadow: var(--shadow-float);
+  border: 1px solid hsl(var(--border));
   z-index: 999;
   /* width */
   ::-webkit-scrollbar {
@@ -26,24 +19,23 @@
 
   /* Track */
   ::-webkit-scrollbar-track {
-    background: rgb(216, 216, 216);
+    background: transparent;
     border-radius: 25px;
   }
 
   /* Handle */
   ::-webkit-scrollbar-thumb {
-    background: rgb(91, 77, 190);
+    background: hsl(var(--foreground) / 0.18);
     border-radius: 25px;
   }
 
   /* Handle on hover */
   ::-webkit-scrollbar-thumb:hover {
-    background: rgb(91, 77, 190);
+    background: hsl(var(--foreground) / 0.32);
   }
   em-emoji-picker {
     height: 200px !important;
-    -webkit-box-shadow: 0px -11px 38px 2px rgba(0, 0, 0, 0.29);
-    box-shadow: 0px -11px 38px 2px rgba(0, 0, 0, 0.29);
+    box-shadow: var(--shadow-float);
   }
 }
 .commentsInnerContainer {
@@ -61,11 +53,19 @@
   background: transparent;
   width: 100%;
 }
+// The compose field: an input with the shared focus ring.
 .innerBlock {
   width: 100%;
-  background: white;
-  outline: #cdbbff;
-  border: 2px solid #cdbbff;
+  background: transparent;
+  border: 1px solid hsl(var(--input));
+  transition:
+    border-color 150ms var(--ease-out),
+    box-shadow 150ms var(--ease-out);
+
+  &:focus-within {
+    border-color: hsl(var(--ring));
+    box-shadow: 0 0 0 3px hsl(var(--ring) / 0.2);
+  }
 }
 
 .rounded {
@@ -82,7 +82,7 @@
 
 .imageContainer {
   width: 100%;
-  border-color: #d4d2d4;
+  border-color: hsl(var(--border));
 }
 
 .textarea {
@@ -90,20 +90,24 @@
   border-radius: 0.5rem;
   padding: 0.5rem;
   height: 100%;
-  background: white;
-  border-color: #d4d2d4;
+  background: transparent;
+  color: hsl(var(--foreground));
+  border-color: hsl(var(--border));
   outline: none;
+
+  &::placeholder {
+    color: hsl(var(--muted-foreground));
+  }
 }
 
 .voiceRecorder {
-  border: gray;
+  border: 0;
   width: 100%;
   border-radius: 9999px;
   padding-top: 0.25rem;
   padding-bottom: 0.25rem;
   height: 100%;
-  background-color: white;
-  border-color: #d4d2d4;
+  background-color: transparent;
   outline: none;
 }
 
@@ -112,21 +116,21 @@
   justify-content: space-between;
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
-  transition: 0.5s;
+  transition: opacity 150ms var(--ease-out);
 }
 .innerIconContainer {
   display: flex;
   justify-content: flex-start;
   width: 160px;
   gap: 3px;
-  transition: 0.5s;
+  transition: opacity 150ms var(--ease-out);
 }
 .iconContainer {
   padding: 1px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: white;
+  background-color: hsl(var(--card));
   border-radius: 9999px;
   height: 30px;
   width: 30px;
@@ -138,11 +142,12 @@
 }
 .controllerContainer {
   position: absolute;
-  background-color: #fbfaff;
+  background-color: hsl(var(--popover));
+  border: 1px solid hsl(var(--border));
   margin-left: 20px;
   margin-top: -360px;
   border-radius: 0.5rem;
-  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  box-shadow: var(--shadow-float);
 }
 .blockDisplay {
   display: block;
@@ -158,8 +163,8 @@
     top: -2px;
     right: -5px;
     z-index: 999;
-    color: #303030;
-    background-color: #fbfaff;
+    color: hsl(var(--foreground));
+    background-color: hsl(var(--popover));
     font-size: xx-small;
   }
 }
@@ -169,9 +174,34 @@
   position: absolute;
   height: 300px;
   overflow: hidden;
-  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  box-shadow: var(--shadow-float);
+  border: 1px solid hsl(var(--border));
   border-radius: 0.5rem; /* 8px */
   display: block;
-  transition: 0.5s;
-  background-color: #ffffff;
+  transition: opacity 150ms var(--ease-out);
+  background-color: hsl(var(--popover));
+}
+
+// Phone width: a sheet across the width above the editor's tool bar, wherever the marker is.
+// markerDrawer.setPosition writes left and top inline for the desktop, hence the !important.
+@media screen and (max-width: 767px) {
+  .commentContainer {
+    position: fixed;
+    left: 0.5rem !important;
+    right: 0.5rem;
+    top: auto !important;
+    bottom: calc(var(--editor-tool-bar, 60px) + 0.5rem);
+    width: auto;
+    max-height: calc(
+      100dvh - var(--editor-top-bar, 56px) - var(--editor-tool-bar, 60px) -
+        1.5rem
+    );
+    overflow-y: auto;
+  }
+
+  // Hidden (opacity 0, EditorService.toggleMarkerPopup) it must not catch the taps meant for the
+  // stage under it.
+  .commentContainer:not([style*='opacity: 1']) {
+    pointer-events: none;
+  }
 }

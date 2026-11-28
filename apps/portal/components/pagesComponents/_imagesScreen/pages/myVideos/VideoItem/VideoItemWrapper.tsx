@@ -39,7 +39,7 @@ const VideoItemWrapper: React.FC<VideoItemWrapperProps> = ({
       isSelected && selectedItems?.items.length !== 0
         ? styles.selected
         : styles.defaultBorder,
-      dropdownVisible && styles.selected,
+      dropdownVisible && styles.menuOpen,
     )}
     onDragStart={onDragStart}
     onClick={onClick}

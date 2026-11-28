@@ -83,24 +83,24 @@ const WorkspaceInvite: FC<any> = () => {
   };
 
   return (
-    <div className="tw-flex tw-flex-col tw-h-screen">
+    <div className="tw-flex tw-h-screen tw-flex-col tw-bg-background">
       <TopMenuBar user={user} />
       <div
         className={classNames(
           'tw-w-full default:tw-px-2 sm:tw-px-2 md:tw-px-2 lg:tw-px-2 xl:tw-px-12 2xl:tw-px-32',
           'workspace-invite',
-          'tw-h-full tw-pt-32',
+          'tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-overflow-y-auto tw-py-12',
         )}
       >
         {/* The inviter is empty when that account was deleted: the invite still works. */}
         {workspaceName && (
-          <div className="tw-flex tw-flex-col tw-items-center">
+          <div className="tw-my-auto tw-flex tw-flex-col tw-items-center">
             {workspaceInviter && (
-              <h1 className="tw-font-semibold tw-text-3xl tw-tracking-wide tw-text-center">
+              <h1 className="tw-m-0 tw-text-balance tw-text-center tw-text-2xl tw-font-semibold tw-text-foreground">
                 {workspaceInviter} {t('workspace.invitedToJoin')}
               </h1>
             )}
-            <h1 className="tw-font-extrabold tw-text-3xl tw-tracking-wide tw-text-center">
+            <h1 className="tw-m-0 tw-text-balance tw-text-center tw-text-2xl tw-font-semibold tw-text-foreground">
               {/* The name is escaped so Trans never reads it as markup, then shown as typed. */}
               <Trans
                 i18nKey="workspace.joinWorkspaceOnRec"
@@ -110,12 +110,12 @@ const WorkspaceInvite: FC<any> = () => {
                 shouldUnescape
               />
             </h1>
-            <p className="tw-pt-6 tw-pb-2 tw-text-2xl tw-text-primary-purple tw-font-extrabold">
+            <p className="tw-m-0 tw-mt-2 tw-text-sm tw-text-muted-foreground">
               {workspaceName}
             </p>
             <AppButton
-              twTextSize="tw-text-lg"
-              twPadding="tw-px-32 tw-py-3"
+              twPadding="tw-px-8"
+              className="tw-mt-6 tw-flex tw-h-10 tw-items-center tw-justify-center"
               onClick={joinWorkspaceHandler}
             >
               {t('workspace.joinNow')}
@@ -128,8 +128,8 @@ const WorkspaceInvite: FC<any> = () => {
           </div>
         )}
         {error && (
-          <div className="tw-flex tw-flex-col tw-items-center">
-            <h1 className="tw-font-semibold tw-text-3xl tw-tracking-wide tw-text-center">
+          <div className="tw-my-auto tw-flex tw-flex-col tw-items-center">
+            <h1 className="tw-m-0 tw-text-center tw-text-xl tw-font-semibold tw-text-foreground">
               {t('workspace.workspaceInviteExpired')}
             </h1>
           </div>
@@ -157,15 +157,15 @@ const WorkspaceMembers: FC<any> = ({ workspaceMembers }) => {
     <div className="tw-pt-4">
       {membersLength >= maxVisibleMembers - 1 ? (
         <div className="tw-flex tw-flex-col tw-items-center">
-          <div className="tw-flex tw-justify-center tw-mb-2 tw-w-2/4 tw-flex-wrap tw-min-w-330px">
+          <div className="tw-mb-3 tw-flex tw-w-2/4 tw-min-w-330px tw-flex-wrap tw-justify-center">
             {workspaceMembers.map((m, i) => {
               if (i > maxVisibleMembers - 1) return null;
               return (
                 <AppSvg
                   key={i}
                   path="/sign/default-profile.svg"
-                  size="70px"
-                  className="tw-flex tw-justify-center tw-content-center tw-m-4"
+                  size="48px"
+                  className="tw-m-1 tw-flex tw-content-center tw-justify-center"
                 />
               );
             })}
@@ -174,13 +174,13 @@ const WorkspaceMembers: FC<any> = ({ workspaceMembers }) => {
         </div>
       ) : (
         <div className="tw-flex tw-flex-col tw-items-center">
-          <div className="tw-flex tw-justify-center tw-mb-2 tw-w-4/5 tw-flex-wrap">
+          <div className="tw-mb-3 tw-flex tw-w-4/5 tw-flex-wrap tw-justify-center">
             {workspaceMembers.map((w, i) => (
               <AppSvg
                 key={i}
                 path="/sign/default-profile.svg"
-                size="70px"
-                className="tw-flex tw-justify-center tw-content-center tw-m-4"
+                size="48px"
+                className="tw-m-1 tw-flex tw-content-center tw-justify-center"
               />
             ))}
           </div>
@@ -207,7 +207,7 @@ const WorkspaceMemberNames: FC<any> = ({ workspaceMembers }) => {
 
   if (membersLength <= maxVisibleMembers) {
     return (
-      <p className="tw-text-center tw-max-w-400px">
+      <p className="tw-m-0 tw-max-w-400px tw-text-center tw-text-sm tw-text-muted-foreground">
         {memberNamesAndLastMember + ' '}
         {t('workspace.joined')}
       </p>
@@ -215,7 +215,7 @@ const WorkspaceMemberNames: FC<any> = ({ workspaceMembers }) => {
   }
 
   return (
-    <p className="tw-text-center tw-max-w-400px">
+    <p className="tw-m-0 tw-max-w-400px tw-text-center tw-text-sm tw-text-muted-foreground">
       <Trans
         i18nKey="workspace.others"
         values={{ members: memberNamesAndOthers }}

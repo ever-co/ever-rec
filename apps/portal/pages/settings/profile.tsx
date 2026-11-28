@@ -33,6 +33,7 @@ import { preRoutes, panelRoutes } from 'components/_routes';
 import { useRouter } from 'next/router';
 import { errorHandler } from 'app/services/helpers/errors';
 import SCHeader from 'components/shared/SCHeader/SCHeader';
+import { Button } from 'components/ui/button';
 import { BiLoaderAlt } from 'react-icons/bi';
 import { useTranslation } from 'react-i18next';
 
@@ -205,14 +206,14 @@ const Profile: React.FC = () => {
                           height: avaSize - 1,
                           width: avaSize,
                         }}
-                        className="tw-bg-black/40 tw-absolute tw-rounded-full tw-flex tw-justify-center tw-item-center"
+                        className="tw-absolute tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-[hsl(var(--overlay)/0.4)]"
                       >
                         <BiLoaderAlt
                           style={{
                             height: avaSize / 3,
                             width: avaSize / 3,
                           }}
-                          className={'tw-animate-spin tw-text-white '}
+                          className="tw-animate-spin tw-text-[hsl(var(--on-overlay))]"
                         />
                       </div>
                     )}
@@ -256,12 +257,15 @@ const Profile: React.FC = () => {
           <ConnectedSignInMethods />
 
           <div className={styles.profileDeleteAccount}>
-            <ProfileDetail
-              title={t('page.profile.account.title')}
-              value={t('page.setting.deleteAccount')}
-              valueColor="red"
-              clicked={() => setShowDeleteAccountModal(true)}
-            />
+            <span>{t('page.profile.account.title')}</span>
+            <Button
+              variant="destructive"
+              size="sm"
+              className="tw-text-[13px]"
+              onClick={() => setShowDeleteAccountModal(true)}
+            >
+              {t('page.setting.deleteAccount')}
+            </Button>
           </div>
 
           <span className={styles.profileSignOut} onClick={signOutHandler}>

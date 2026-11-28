@@ -1,37 +1,45 @@
-$primary-violet10: #efeef9;
-$primary-violet20: #dedbf2;
-$primary-violet30: #cecaec;
-$primary-violet40: #bdb8e5;
-$primary-violet60: #9d94d8;
-$primary-violet80: #7c71cb;
-$primary-violet: #5b4dbe;
+// Every name below used to be a fixed hex. They now point at the shared Ever tokens
+// (styles/tokens.scss), so a module that uses them follows the light and dark themes.
+// New code should use the tokens directly: `hsl(var(--border))`, `hsl(var(--muted-foreground))`…
 
-$grey-dark-20: #636366;
-$grey-dark-30: #48484a;
-$grey-dark-40: #3a3a3c;
-$grey-dark-50: #2c2c2e;
-$grey-dark-60: #1c1c1e;
+// Violet scale. The tints were the old lavender chrome (hover, selected, header): neutral now.
+// The solid violet stays the accent.
+$primary-violet10: hsl(var(--accent));
+$primary-violet20: hsl(var(--accent));
+$primary-violet30: hsl(var(--border));
+$primary-violet40: hsl(var(--input));
+$primary-violet60: hsl(var(--brand-text));
+$primary-violet80: hsl(var(--brand-text));
+$primary-violet: hsl(var(--brand));
 
-$grey-light06: #f2f2f7;
-$grey-light05: #e5e5ea;
-$grey-light04: #d1d1d6;
-$grey-light03: #c7c7cc;
-$grey-light02: #aeaeb2;
-$grey-light01: #8e8e93;
+// Dark greys were text and dark panels.
+$grey-dark-20: hsl(var(--muted-foreground));
+$grey-dark-30: hsl(var(--muted-foreground));
+$grey-dark-40: hsl(var(--foreground));
+$grey-dark-50: hsl(var(--foreground));
+$grey-dark-60: hsl(var(--foreground));
 
-$accessible-red: #d1322b;
-$accessible-mid: #ffd5d2;
-$accessible-green: #176a2c;
+// Light greys were surfaces, hairlines and quiet text.
+$grey-light06: hsl(var(--muted));
+$grey-light05: hsl(var(--border));
+$grey-light04: hsl(var(--border));
+$grey-light03: hsl(var(--input));
+$grey-light02: hsl(var(--muted-foreground));
+$grey-light01: hsl(var(--muted-foreground));
 
-$red: #ff3b30;
-$pink: #ff2d55;
-$pink-light: #ffedec;
-$orange: #ff9500;
+$accessible-red: hsl(var(--destructive-text));
+$accessible-mid: hsl(var(--destructive-muted));
+$accessible-green: hsl(var(--success));
+
+$red: hsl(var(--destructive-text));
+$pink: hsl(var(--destructive-text));
+$pink-light: hsl(var(--destructive-muted));
+$orange: hsl(var(--warning));
 $yellow: #ffcc00;
-$green: #34c759;
+$green: hsl(var(--success));
 $teal: #b3dff3;
-$purple: #af52de;
+$purple: hsl(var(--brand));
 $blue: #007aff;
-$indigo: #5856d6;
+$indigo: hsl(var(--brand));
 
-$blue-grey: #f5f4f7;
+$blue-grey: hsl(var(--muted));

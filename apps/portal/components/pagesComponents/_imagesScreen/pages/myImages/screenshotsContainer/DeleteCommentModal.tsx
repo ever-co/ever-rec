@@ -26,27 +26,21 @@ const DeleteCommentModal: React.FC<IDeleteScreenshotModalProps> = ({
       open={visible}
       onCancel={onCancel}
       footer={
-        <div className="tw-flex tw-justify-end tw-mt-14">
+        <div className="tw-flex tw-justify-end tw-gap-2 tw-mt-6">
           <AppButton
             onClick={onOkHandler}
-            className="tw-px-8 tw-pb-1 tw-pt-1 tw-text-danger tw-border tw-border-danger tw-border-solid"
-            bgColor="tw-bg-white"
+            bgColor="tw-bg-danger"
             // disabled={!valid}
           >
             {t('common.delete')}
           </AppButton>
-          <AppButton
-            onClick={onCancel}
-            bgColor="tw-bg-white"
-            outlined
-            className="tw-px-8 tw-mx-4 tw-pb-1 tw-pt-1"
-          >
+          <AppButton onClick={onCancel} outlined>
             {t('common.cancel')}
           </AppButton>
         </div>
       }
     >
-      <h2 className="tw-mb-6 tw-text-xl tw-font-bold">
+      <h2 className="tw-pe-6 tw-text-base tw-font-semibold tw-text-foreground">
         {t('modals.deleteComment')}
       </h2>
     </Modal>

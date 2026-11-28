@@ -1,20 +1,21 @@
 .ldsRing {
   display: inline-block;
   position: relative;
-  width: 80px;
-  height: 80px;
+  width: 56px;
+  height: 56px;
+  color: hsl(var(--foreground));
 
   .ringMain {
     box-sizing: border-box;
     display: block;
     position: absolute;
-    width: 64px;
-    height: 64px;
-    margin: 8px;
-    border: 10px solid #2a292f;
+    width: 48px;
+    height: 48px;
+    margin: 4px;
+    border: 3px solid currentColor;
     border-radius: 50%;
     animation: ldsRing 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
-    border-color: #2a292f transparent transparent transparent;
+    border-color: currentColor transparent transparent transparent;
   }
 }
 

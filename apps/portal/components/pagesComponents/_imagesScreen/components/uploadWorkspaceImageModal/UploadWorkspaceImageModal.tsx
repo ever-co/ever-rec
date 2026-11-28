@@ -75,9 +75,6 @@ const UploadWorkspaceImageModal: React.FC<Props> = ({
       className={styles.modal}
       open={visible}
       onCancel={onClose}
-      closeIcon={
-        <AppSvg path="/common/close-icon.svg" className="modalCloseButton" />
-      }
       footer={<div></div>}
     >
       {file ? (
@@ -142,11 +139,7 @@ const UploadWorkspaceImageModal: React.FC<Props> = ({
                 <h3 className={styles.dragNDrop}>
                   {t('workspace.dragAndDropImagesHereOr')}
                 </h3>
-                <AppButton
-                  onClick={handleClick}
-                  full={true}
-                  className={styles.appButton}
-                >
+                <AppButton onClick={handleClick} full={true}>
                   <div>{t('workspace.browseFile')}</div>
                 </AppButton>
               </div>

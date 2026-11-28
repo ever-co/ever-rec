@@ -133,39 +133,39 @@ const PanelLogin: React.FC = () => {
         <AppInput
           value={email.value}
           placeholder={t('page.auth.common.email')}
-          inputClass="tw-placeholder-mid-grey"
           errors={email.errors}
           rules={emailRules}
           onChange={emailChangeHandler}
           onKeyDown={handleInputKeyDown}
         />
 
-        <div className="tw-flex tw-justify-between tw-items-center tw-border-b tw-border-black">
+        {/* The eye sits inside the field's right end. */}
+        <div className="tw-mt-2 tw-flex tw-items-center">
           <AppInput
             value={password.value}
             type={passwordShown ? 'text' : 'password'}
             placeholder={t('page.auth.common.password')}
-            className="tw-w-full tw-mt-2"
-            inputClass="tw-placeholder-mid-grey tw-border-b-0 tw-mt-4"
+            className="tw-w-full"
+            inputClass="tw-pe-10"
             errors={password.errors}
             rules={passwordRules}
             onChange={passwordChangeHandler}
             onKeyDown={handleInputKeyDown}
           />
           <PasswordEye
-            className="tw-mt-6"
+            className="tw-relative tw-end-2"
             togglePassword={togglePassword}
             passwordShown={passwordShown}
           />
         </div>
 
-        <div className="tw-flex tw-justify-between tw-items-center tw-mt-8">
-          <div className="tw-flex tw-gap-2 !tw-text-sm">
+        <div className="tw-mt-4 tw-flex tw-items-center tw-justify-between tw-gap-4">
+          <div className="tw-flex tw-items-center tw-gap-2 tw-text-sm tw-text-foreground">
             <Checkbox checked={rememberMe} onChange={handleRememberMeChange} />
-            <p> {t('page.auth.login.rememberMe')}</p>
+            <p className="tw-m-0"> {t('page.auth.login.rememberMe')}</p>
           </div>
           <AppLink
-            className="tw-text-overlay-black !tw-font-extralight !tw-text-sm"
+            className="tw-text-sm"
             onClick={() => router.push(`/auth/reset`)}
           >
             {t('page.auth.login.forgotPassword')}
@@ -175,8 +175,8 @@ const PanelLogin: React.FC = () => {
         <AppButton
           full
           disabled={!valid}
-          className="tw-mt-10"
-          twPadding="tw-p-4"
+          className="tw-mt-6 tw-flex tw-h-10 tw-items-center tw-justify-center"
+          twPadding="tw-px-4"
           onClick={submitHandler}
         >
           {t('page.auth.login.signInWithEmail')}

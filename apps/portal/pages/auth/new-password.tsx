@@ -121,7 +121,6 @@ const PanelNewPassword: React.FC<IPanelNewPasswordProps> = ({ veryfied }) => {
             errors={password.errors}
             value={password.value}
             onChange={passwordChangeHandler}
-            className="tw-mt-4"
           />
 
           <AppInput
@@ -130,22 +129,22 @@ const PanelNewPassword: React.FC<IPanelNewPasswordProps> = ({ veryfied }) => {
             errors={passwordConfirm.errors}
             value={passwordConfirm.value}
             onChange={passwordConfirmChangeHandler}
-            className="tw-mt-4"
+            className="tw-mt-2"
           />
 
           <AppButton
             onClick={setNewPasswordHandler}
             full
             disabled={!valid}
-            className="tw-mt-8"
-            twPadding="tw-p-4"
+            className="tw-mt-6 tw-flex tw-h-10 tw-items-center tw-justify-center"
+            twPadding="tw-px-4"
           >
             {t('page.auth.newPassword.setNewPassword')}
           </AppButton>
         </div>
       ) : (
         <div>
-          <p className="tw-mb-6 tw-text-sm">
+          <p className="tw-m-0 tw-text-sm tw-text-muted-foreground">
             {t('page.auth.error.resetLinkExpired')}
             <br />
             {t('page.auth.error.pleaseTryAgain')}
@@ -156,8 +155,8 @@ const PanelNewPassword: React.FC<IPanelNewPasswordProps> = ({ veryfied }) => {
               router.push('/auth/login');
             }}
             full
-            className="tw-mt-8"
-            twPadding="tw-p-4"
+            className="tw-mt-6 tw-flex tw-h-10 tw-items-center tw-justify-center"
+            twPadding="tw-px-4"
           >
             {t('page.auth.error.backToLogin')}
           </AppButton>

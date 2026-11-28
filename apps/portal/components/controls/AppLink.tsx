@@ -11,7 +11,7 @@ const AppLink: React.FC<IAppLinkProps> = ({ onClick, children, className }) => {
   return (
     <div
       className={classNames(
-        'tw-text-blue tw-font-semibold tw-cursor-pointer',
+        'tw-cursor-pointer tw-font-medium tw-text-brand-text tw-underline-offset-4 hover:tw-underline',
         className,
       )}
       onClick={onClick}

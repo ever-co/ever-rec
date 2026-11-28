@@ -2,14 +2,21 @@ import { useEffect, useState } from 'react';
 import { Select, Tabs } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { getHealth, getStatus } from 'app/services/ever-platform';
-import { getConnectHealth, getConnectStatus, isEverConnectBuildEnabled } from 'app/services/ever-connect';
+import {
+  getConnectHealth,
+  getConnectStatus,
+  isEverConnectBuildEnabled,
+} from 'app/services/ever-connect';
 import { getUserWorkspacesAPI } from 'app/services/api/workspace';
 import EverPlatformStatistics from './EverPlatformStatistics';
 import EverConnectAudit from './connect/EverConnectAudit';
-import EverConnectConnection, { AdminWorkspace } from './connect/EverConnectConnection';
+import EverConnectConnection, {
+  AdminWorkspace,
+} from './connect/EverConnectConnection';
 import EverConnectIntegrations from './connect/EverConnectIntegrations';
 import EverConnectManaged from './connect/EverConnectManaged';
 import EverConnectOrganizationLink from './connect/EverConnectOrganizationLink';
+import { MUTED_TEXT, SELECT } from './connect/shared';
 
 interface Availability {
   statistics: boolean;
@@ -38,13 +45,20 @@ const EverPlatformTabs: React.FC<{ uid: string | undefined }> = ({ uid }) => {
     let active = true;
     void (async () => {
       const statistics = await ok(() => getHealth().then(() => getStatus()));
-      const connect = isEverConnectBuildEnabled() && (await ok(() => getConnectHealth()));
+      const connect =
+        isEverConnectBuildEnabled() && (await ok(() => getConnectHealth()));
       const operator = connect && (await ok(() => getConnectStatus()));
       if (active) setAvailable({ statistics, connect, operator });
       if (connect && uid) {
         try {
           const answer: any = await getUserWorkspacesAPI();
-          const own = ((answer?.data ?? []) as Array<{ id: string; name: string; admin: string }>)
+          const own = (
+            (answer?.data ?? []) as Array<{
+              id: string;
+              name: string;
+              admin: string;
+            }>
+          )
             .filter((workspace) => workspace?.admin === uid)
             .map((workspace) => ({ id: workspace.id, name: workspace.name }));
           if (active) {
@@ -61,19 +75,31 @@ const EverPlatformTabs: React.FC<{ uid: string | undefined }> = ({ uid }) => {
     };
   }, [uid]);
 
-  if (!available) return <p data-testid="ever-platform-loading">{t('page.everPlatform.loading')}</p>;
+  if (!available)
+    return (
+      <p data-testid="ever-platform-loading" className={MUTED_TEXT}>
+        {t('page.everPlatform.loading')}
+      </p>
+    );
   if (!available.statistics && !available.connect) {
-    return <p data-testid="ever-platform-unavailable">{t('page.everPlatform.unavailable')}</p>;
+    return (
+      <p data-testid="ever-platform-unavailable" className={MUTED_TEXT}>
+        {t('page.everPlatform.unavailable')}
+      </p>
+    );
   }
 
   const picker =
     workspaces.length > 1 ? (
       <Select
         data-testid="ever-connect-workspace-picker"
-        className="tw-mb-4 tw-min-w-[240px]"
+        className={`tw-mb-6 tw-min-w-[240px] ${SELECT}`}
         value={workspaceId}
         onChange={(value: string) => setWorkspaceId(value)}
-        options={workspaces.map((workspace) => ({ value: workspace.id, label: workspace.name }))}
+        options={workspaces.map((workspace) => ({
+          value: workspace.id,
+          label: workspace.name,
+        }))}
       />
     ) : null;
   const perWorkspace = (render: (id: string) => React.ReactNode) =>
@@ -83,22 +109,38 @@ const EverPlatformTabs: React.FC<{ uid: string | undefined }> = ({ uid }) => {
         {render(workspaceId)}
       </>
     ) : (
-      <p data-testid="ever-connect-no-workspace">{t('page.everPlatform.connect.noWorkspace')}</p>
+      <p data-testid="ever-connect-no-workspace" className={MUTED_TEXT}>
+        {t('page.everPlatform.connect.noWorkspace')}
+      </p>
     );
 
   const items = [
     ...(available.statistics
-      ? [{ key: 'statistics', label: t('page.everPlatform.tabs.statistics'), children: <EverPlatformStatistics /> }]
+      ? [
+          {
+            key: 'statistics',
+            label: t('page.everPlatform.tabs.statistics'),
+            children: <EverPlatformStatistics />,
+          },
+        ]
       : []),
     ...(available.connect && available.operator
-      ? [{ key: 'connection', label: t('page.everPlatform.tabs.connection'), children: <EverConnectConnection workspaces={workspaces} /> }]
+      ? [
+          {
+            key: 'connection',
+            label: t('page.everPlatform.tabs.connection'),
+            children: <EverConnectConnection workspaces={workspaces} />,
+          },
+        ]
       : []),
     ...(available.connect
       ? [
           {
             key: 'link',
             label: t('page.everPlatform.tabs.link'),
-            children: perWorkspace((id) => <EverConnectOrganizationLink key={id} workspaceId={id} />),
+            children: perWorkspace((id) => (
+              <EverConnectOrganizationLink key={id} workspaceId={id} />
+            )),
           },
           {
             key: 'integrations',
@@ -106,7 +148,13 @@ const EverPlatformTabs: React.FC<{ uid: string | undefined }> = ({ uid }) => {
             children: available.operator ? (
               <EverConnectIntegrations operator />
             ) : (
-              perWorkspace((id) => <EverConnectIntegrations key={id} operator={false} workspaceId={id} />)
+              perWorkspace((id) => (
+                <EverConnectIntegrations
+                  key={id}
+                  operator={false}
+                  workspaceId={id}
+                />
+              ))
             ),
           },
           ...(available.operator
@@ -124,7 +172,9 @@ const EverPlatformTabs: React.FC<{ uid: string | undefined }> = ({ uid }) => {
             children: available.operator ? (
               <EverConnectAudit operator />
             ) : (
-              perWorkspace((id) => <EverConnectAudit key={id} operator={false} workspaceId={id} />)
+              perWorkspace((id) => (
+                <EverConnectAudit key={id} operator={false} workspaceId={id} />
+              ))
             ),
           },
         ]
@@ -132,7 +182,11 @@ const EverPlatformTabs: React.FC<{ uid: string | undefined }> = ({ uid }) => {
   ];
 
   return (
-    <div data-testid="ever-platform-tabs">
+    <div
+      data-testid="ever-platform-tabs"
+      // Underline tabs: a gap between the labels, the panel flush with the page title.
+      className="[&_.ant-tabs-nav-list]:tw-gap-6 [&_.ant-tabs_.ant-tabs-content-holder]:tw-m-0 [&_.ant-tabs_.ant-tabs-nav]:tw-mb-6"
+    >
       <Tabs items={items} destroyInactiveTabPane />
     </div>
   );

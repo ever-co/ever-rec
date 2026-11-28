@@ -6,6 +6,7 @@ import {
   Optional,
 } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
+import { randomUUID } from 'node:crypto';
 import { RequestRefusedError, subjectHash } from '@ever-co/connect-sdk';
 import {
   EVER_IDENTITY_EVENTS,
@@ -18,11 +19,14 @@ import {
 import { EVER_ID_LINK_ROOTS } from '../../ever-id/services/ever-id-link.service';
 import { open, seal } from '../ever-connect.crypto';
 import {
+  ACCOUNT_DELETION_MARK_BEAT_MS,
+  AccountDeletionMark,
   EVER_CONNECT_EVENTS,
   EVER_CONNECT_PATHS,
   PersonRequestRecord,
   PersonRequestResult,
 } from '../ever-connect.types';
+import { EverConnectAccountDeletions } from '../../../common/ever-platform/tokens';
 import {
   EVER_CONNECT_ACCOUNT_DELETER,
   EVER_CONNECT_CLOCK,
@@ -146,7 +150,7 @@ const PROFILE_FIELDS = [
  * Bodies carry ids only, never an e-mail address.
  */
 @Injectable()
-export class EverConnectPersonService {
+export class EverConnectPersonService implements EverConnectAccountDeletions {
   private readonly logger = new Logger('EverConnect');
 
   constructor(
@@ -459,6 +463,20 @@ export class EverConnectPersonService {
    * became a workspace's admin meanwhile is kept). A deletion that did not complete is marked
    * `incomplete` and run again by {@link retryPersonRequests}: Rec's account deletion can
    * run again on an account it already partly deleted.
+   *
+   * Each account is marked as being deleted ({@link deletionStarted}) before that last check, and
+   * the mark is removed only when the account is kept. A workspace created for the account at the
+   * same time checks the mark once it wrote the workspace, and undoes it when the mark is there:
+   * either this check sees the new workspace (the account is kept), or the creation sees the mark
+   * (the workspace is undone). While Rec's deletion of the account runs, the mark is renewed, so the
+   * sweep does not remove it under a deletion that is slow, as long as a renewal reaches the
+   * database at least once a day.
+   *
+   * So the account does not go while it administers a workspace, with two cases left to an
+   * operator: a workspace created after this last check whose undo failed (the creation logs its
+   * id), and a workspace created while the sweep had taken the mark because this process could not
+   * renew it for a whole day. In both, the account goes and the workspace stays, as it does when an
+   * admin deletes their own account in Rec.
    */
   private async deleteAccounts(uids: string[]): Promise<Decided> {
     const deleter = this.accountDeleter;
@@ -472,24 +490,95 @@ export class EverConnectPersonService {
     }
     let started = false;
     for (const uid of uids) {
-      const hold = await this.holdFor(uid);
+      const { mark, startedAt } = await this.markDeletion(uid);
+      let hold: PersonDeletionHold | null;
+      try {
+        hold = await this.holdFor(uid);
+      } catch (error) {
+        // Nothing was deleted: the mark would only keep the account from creating workspaces
+        await mark.remove().catch(() => undefined);
+        throw error;
+      }
       if (hold) {
+        await mark.remove();
         this.logger.warn(`A person's accounts were kept (${hold}).`);
         // Once one account is gone, the others are deleted as soon as nothing holds them.
         return started ? { ...pendingDeletion(), incomplete: true } : pendingDeletion();
       }
       started = true;
-      let deleted = false;
-      try {
-        deleted = await deleter.delete(uid);
-      } catch (error) {
-        this.logger.warn(
-          `A person's account could not be deleted (${errorCode(error)}).`,
-        );
+      // Not done: the mark stays while the deletion is still under way (run again later).
+      if (!(await this.deleteWhileMarked(deleter, uid, { mark, startedAt }))) {
+        return { ...pendingDeletion(), incomplete: true };
       }
-      if (!deleted) return { ...pendingDeletion(), incomplete: true };
+      await mark.update({ deletedAt: this.clock() });
     }
     return { result: 'deleted' };
+  }
+
+  /**
+   * Runs Rec's deletion of the account and renews its mark meanwhile (see {@link deleteAccounts});
+   * answers whether the account was deleted.
+   */
+  private async deleteWhileMarked(
+    deleter: EverConnectAccountDeleter,
+    uid: string,
+    {
+      mark,
+      startedAt,
+    }: Awaited<ReturnType<EverConnectPersonService['markDeletion']>>,
+  ): Promise<boolean> {
+    // The whole mark is written again: one the sweep removed (renewals failed for a day) comes back.
+    const beat = setInterval(() => {
+      const alive: AccountDeletionMark = { startedAt, aliveAt: this.clock() };
+      mark.update(alive).catch((error) => {
+        this.logger.warn(
+          `An account deletion's mark could not be renewed (${errorCode(error)}).`,
+        );
+      });
+    }, ACCOUNT_DELETION_MARK_BEAT_MS);
+    beat.unref?.();
+    try {
+      return await deleter.delete(uid);
+    } catch (error) {
+      this.logger.warn(
+        `A person's account could not be deleted (${errorCode(error)}).`,
+      );
+      return false;
+    } finally {
+      clearInterval(beat);
+    }
+  }
+
+  /** Marks one attempt to delete the account (`ever_connect/account_deletions/<uid>/<run>`). */
+  private async markDeletion(uid: string) {
+    const mark = this.store
+      .db()
+      .ref(`${EVER_CONNECT_PATHS.accountDeletions}/${uid}/${randomUUID()}`);
+    const value: AccountDeletionMark = { startedAt: this.clock() };
+    await mark.set(value);
+    return { mark, startedAt: value.startedAt };
+  }
+
+  /**
+   * {@link EverConnectAccountDeletions}: whether a deletion of the account has started here and was
+   * not called off to keep the account (see {@link deleteAccounts}). Read from the database, so a
+   * deletion run by another process of this installation counts too. A running deletion counts
+   * however long it takes (while its renewals reach the database at least once a day), and a
+   * finished one until the sweep removes its mark, a day later: a
+   * request made by the deleted account before it went can then no longer make it a workspace's
+   * admin.
+   */
+  async deletionStarted(uid: string): Promise<boolean> {
+    if (!isDbKey(uid)) return false;
+    const marks = (
+      await this.store
+        .db()
+        .ref(`${EVER_CONNECT_PATHS.accountDeletions}/${uid}`)
+        .get()
+    ).val();
+    return (
+      !!marks && typeof marks === 'object' && Object.keys(marks).length > 0
+    );
   }
 
   /**

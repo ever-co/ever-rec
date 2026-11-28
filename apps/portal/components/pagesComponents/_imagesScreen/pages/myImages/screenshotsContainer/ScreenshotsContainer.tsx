@@ -399,9 +399,10 @@ const ScreenshotsContainer: React.FC<IScreenshotsContainerProps> = ({
             hasMore={screenshots.length > itemsToLoad}
             loader={null}
             scrollableTarget="scrollableDivItems"
-            style={{ minHeight: '400px' }}
+            // The scroll box is `scrollableDivItems`; this inner box must not cut a card's ring.
+            style={{ minHeight: '400px', overflow: 'visible' }}
           >
-            <Row className={styles.widthFull} gutter={[24, 16]}>
+            <Row className={styles.widthFull} gutter={[16, 16]}>
               {itemsToMap
                 ? itemsToMap.map((screenshot: IEditorImage, index: number) => {
                     if (index + 1 > itemsToLoad)
@@ -420,7 +421,7 @@ const ScreenshotsContainer: React.FC<IScreenshotsContainerProps> = ({
                         <Link
                           href={`/image/${screenshot.dbData?.id}`}
                           passHref
-                          className="tw-w-full tw-h-full"
+                          className="tw-block tw-w-full tw-h-full tw-rounded-lg"
                         >
                           <VideoItem
                             id={index}

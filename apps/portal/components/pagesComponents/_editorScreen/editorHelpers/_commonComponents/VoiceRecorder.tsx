@@ -127,6 +127,7 @@ const VoiceRecorder: React.FC<IRecorderProps> = ({
           id="accept"
           icon={approveIcon}
           size={'30px'}
+          className="dark:tw-invert"
           className1={styles.firstIcon}
         />
         <IconBtn
@@ -134,6 +135,7 @@ const VoiceRecorder: React.FC<IRecorderProps> = ({
           id="cancel"
           icon={declineIcon}
           size={'30px'}
+          className="tw-opacity-60 dark:tw-invert"
           className1={styles.secondIcon}
         />
       </div>
