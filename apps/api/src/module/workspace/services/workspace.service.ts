@@ -8,7 +8,7 @@ import { IDataResponse, IUserData, ItemType } from '../../../interfaces/_types';
 import { IUser } from '../../../interfaces/IUser';
 import { nanoid } from 'nanoid';
 import { WorkspaceUtilitiesService } from './utilities.service';
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import {
   IDbWorkspaceImageData,
   IDbWorkspaceVideoData,
@@ -47,6 +47,7 @@ import {
 @Injectable()
 export class WorkspacesService {
   private readonly config;
+  private readonly logger = new Logger(WorkspacesService.name);
 
   constructor(
     private readonly utilitiesService: WorkspaceUtilitiesService,
@@ -173,7 +174,16 @@ export class WorkspacesService {
           throw error;
         }
         if (deleting) {
-          await undo();
+          try {
+            await undo();
+          } catch (error) {
+            // Left for an operator: the deletion may already be past its last check, and then the
+            // account goes while this workspace still names it as admin.
+            this.logger.error(
+              `A workspace created while its account was being deleted could not be undone (workspace ${workspaceId}).`,
+            );
+            throw error;
+          }
           return sendError(
             'This account is being deleted, so it cannot create a workspace.',
           );

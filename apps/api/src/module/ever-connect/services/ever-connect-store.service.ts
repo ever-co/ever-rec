@@ -312,31 +312,33 @@ export class EverConnectStoreService {
   /**
    * Deletes the marks of account deletions whose last sign of life (start, beat or end) is more
    * than {@link ACCOUNT_DELETION_MARK_KEPT_MS} ago, done or not; answers how many. A deletion still
-   * running renews its mark, so it never loses it.
+   * running renews its mark, so it never loses it: each mark is removed in a transaction that checks
+   * it again, and one renewed since it was read stays.
    */
   async sweepAccountDeletions(now: number): Promise<number> {
     const all =
       (await this.read<Record<string, Record<string, AccountDeletionMark>>>(
         EVER_CONNECT_PATHS.accountDeletions,
       )) ?? {};
-    const old: string[] = [];
+    // A mark without its start (never written by this module) goes too.
+    const expired = (mark: AccountDeletionMark | null) =>
+      typeof mark?.startedAt !== 'number' ||
+      lastSignOfLife(mark) < now - ACCOUNT_DELETION_MARK_KEPT_MS;
+    let removed = 0;
     for (const [uid, runs] of Object.entries(all)) {
       for (const [run, mark] of Object.entries(runs ?? {})) {
-        // A mark without its start (never written by this module) goes too.
-        if (
-          typeof mark?.startedAt !== 'number' ||
-          lastSignOfLife(mark) < now - ACCOUNT_DELETION_MARK_KEPT_MS
-        ) {
-          old.push(`${uid}/${run}`);
-        }
+        if (!expired(mark)) continue;
+        let found = false;
+        const { committed } = await this.db()
+          .ref(`${EVER_CONNECT_PATHS.accountDeletions}/${uid}/${run}`)
+          .transaction((current: AccountDeletionMark | null) => {
+            found = current !== null;
+            return current === null || expired(current) ? null : undefined;
+          });
+        if (committed && found) removed++;
       }
     }
-    if (old.length) {
-      await this.db()
-        .ref(EVER_CONNECT_PATHS.accountDeletions)
-        .update(Object.fromEntries(old.map((key) => [key, null])));
-    }
-    return old.length;
+    return removed;
   }
 
   /** Reads a workspace record (the product's own data; read only). */

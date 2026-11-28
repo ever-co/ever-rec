@@ -484,7 +484,7 @@ export class EverConnectPersonService implements EverConnectAccountDeletions {
     }
     let started = false;
     for (const uid of uids) {
-      const mark = await this.markDeletion(uid);
+      const { mark, startedAt } = await this.markDeletion(uid);
       let hold: PersonDeletionHold | null;
       try {
         hold = await this.holdFor(uid);
@@ -501,9 +501,14 @@ export class EverConnectPersonService implements EverConnectAccountDeletions {
       }
       started = true;
       let deleted = false;
+      // The whole mark is written again: one the sweep removed (renewals failed for a day) comes back.
       const beat = setInterval(() => {
-        const alive: Partial<AccountDeletionMark> = { aliveAt: this.clock() };
-        mark.update(alive).catch(() => undefined);
+        const alive: AccountDeletionMark = { startedAt, aliveAt: this.clock() };
+        mark.update(alive).catch((error) => {
+          this.logger.warn(
+            `An account deletion's mark could not be renewed (${errorCode(error)}).`,
+          );
+        });
       }, ACCOUNT_DELETION_MARK_BEAT_MS);
       beat.unref?.();
       try {
@@ -529,7 +534,7 @@ export class EverConnectPersonService implements EverConnectAccountDeletions {
       .ref(`${EVER_CONNECT_PATHS.accountDeletions}/${uid}/${randomUUID()}`);
     const value: AccountDeletionMark = { startedAt: this.clock() };
     await mark.set(value);
-    return mark;
+    return { mark, startedAt: value.startedAt };
   }
 
   /**

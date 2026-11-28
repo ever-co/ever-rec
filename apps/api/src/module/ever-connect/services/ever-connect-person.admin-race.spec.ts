@@ -5,6 +5,7 @@
  * the account is kept with its new workspace, or the workspace is undone and the account goes. It
  * never goes while it administers a workspace.
  */
+import { Logger } from '@nestjs/common';
 import { createHash } from 'node:crypto';
 import {
   FakeReference,
@@ -145,6 +146,22 @@ function setup() {
   };
 }
 
+/** The deletion's beat, run by hand instead of on its hourly timer. */
+function captureBeats(): Array<() => void> {
+  const beats: Array<() => void> = [];
+  jest.spyOn(global, 'setInterval').mockImplementation(((
+    beat: () => void,
+    every: number,
+  ) => {
+    expect(every).toBe(ACCOUNT_DELETION_MARK_BEAT_MS);
+    beats.push(beat);
+    return { unref: () => undefined } as unknown as NodeJS.Timeout;
+  }) as typeof setInterval);
+  return beats;
+}
+
+const settle = () => new Promise((resolve) => setImmediate(resolve));
+
 describe('a deletion for Ever Platform while the account creates a workspace', () => {
   beforeEach(() => {
     jest.spyOn(console, 'log').mockImplementation(() => undefined);
@@ -273,16 +290,7 @@ describe('a deletion for Ever Platform while the account creates a workspace', (
 
   it('created while a slow deletion runs past a day: the mark is still there, the workspace is undone', async () => {
     const t = setup();
-    // The deletion's beat, run by hand instead of on its hourly timer
-    const beats: Array<() => void> = [];
-    jest.spyOn(global, 'setInterval').mockImplementation(((
-      beat: () => void,
-      every: number,
-    ) => {
-      expect(every).toBe(ACCOUNT_DELETION_MARK_BEAT_MS);
-      beats.push(beat);
-      return { unref: () => undefined } as unknown as NodeJS.Timeout;
-    }) as typeof setInterval);
+    const beats = captureBeats();
     const store = new EverConnectStoreService(mockFirebase as any);
     let created!: Awaited<ReturnType<typeof t.createWorkspace>>;
     let swept = -1;
@@ -291,7 +299,7 @@ describe('a deletion for Ever Platform while the account creates a workspace', (
       for (let hour = 1; hour <= 29; hour++) {
         t.time.now = NOW + hour * ACCOUNT_DELETION_MARK_BEAT_MS;
         beats.forEach((beat) => beat());
-        await new Promise((resolve) => setImmediate(resolve));
+        await settle();
       }
       swept = await store.sweepAccountDeletions(t.time.now);
       created = await t.createWorkspace();
@@ -303,6 +311,80 @@ describe('a deletion for Ever Platform while the account creates a workspace', (
     expect(swept).toBe(0);
     expect(created.status).toBe(ResStatusEnum.error);
     expect(t.administered()).toEqual([]);
+    expect(t.acks).toEqual([{ job_id: 'job-d1', result: 'deleted' }]);
+  });
+
+  it('a mark renewed between the sweep reading it and removing it stays', async () => {
+    const t = setup();
+    const beats = captureBeats();
+    const store = new EverConnectStoreService(mockFirebase as any);
+    const { get } = FakeReference.prototype;
+    let swept = -1;
+    let created!: Awaited<ReturnType<typeof t.createWorkspace>>;
+    t.hooks.beforeDelete = async () => {
+      // No renewal for a day; the next one lands right after the sweep read the marks.
+      t.time.now = NOW + ACCOUNT_DELETION_MARK_KEPT_MS + 1;
+      jest
+        .spyOn(FakeReference.prototype, 'get')
+        .mockImplementation(async function (this: FakeReference) {
+          const read = await get.call(this);
+          const path = (this as unknown as { parts: string[] }).parts.join('/');
+          if (path === EVER_CONNECT_PATHS.accountDeletions) {
+            beats.forEach((beat) => beat());
+            await settle();
+          }
+          return read;
+        });
+      swept = await store.sweepAccountDeletions(t.time.now);
+      (FakeReference.prototype.get as jest.Mock).mockRestore();
+      created = await t.createWorkspace();
+    };
+
+    await t.requestDeletion();
+
+    expect(swept).toBe(0);
+    expect(created.status).toBe(ResStatusEnum.error);
+    expect(t.administered()).toEqual([]);
+    expect(t.acks).toEqual([{ job_id: 'job-d1', result: 'deleted' }]);
+  });
+
+  it('renewals that fail for a day: the sweep takes the mark, the next renewal puts it back whole', async () => {
+    const t = setup();
+    const beats = captureBeats();
+    const store = new EverConnectStoreService(mockFirebase as any);
+    const warn = jest.spyOn((t.person as any).logger, 'warn');
+    let restored: unknown;
+    let swept = -1;
+    let kept = -1;
+    t.hooks.beforeDelete = async () => {
+      const { update } = FakeReference.prototype;
+      const renewal = jest
+        .spyOn(FakeReference.prototype, 'update')
+        .mockRejectedValue(new Error('database unavailable'));
+      for (let hour = 1; hour <= 25; hour++) {
+        t.time.now = NOW + hour * ACCOUNT_DELETION_MARK_BEAT_MS;
+        beats.forEach((beat) => beat());
+        await settle();
+      }
+      swept = await store.sweepAccountDeletions(t.time.now);
+      renewal.mockImplementation(update);
+      t.time.now += ACCOUNT_DELETION_MARK_BEAT_MS;
+      beats.forEach((beat) => beat());
+      await settle();
+      restored = Object.values(t.marks());
+      kept = await store.sweepAccountDeletions(t.time.now);
+    };
+
+    await t.requestDeletion();
+
+    expect(warn).toHaveBeenCalledWith(
+      expect.stringContaining('could not be renewed'),
+    );
+    expect(swept).toBe(1);
+    expect(restored).toEqual([
+      { startedAt: NOW, aliveAt: NOW + 26 * ACCOUNT_DELETION_MARK_BEAT_MS },
+    ]);
+    expect(kept).toBe(0);
     expect(t.acks).toEqual([{ job_id: 'job-d1', result: 'deleted' }]);
   });
 
@@ -345,6 +427,39 @@ describe('a deletion for Ever Platform while the account creates a workspace', (
         detail: { reason_code: 'account_deletion_pending' },
       },
     ]);
+  });
+
+  it('created after the last check, and its undo fails: an error names the workspace for an operator', async () => {
+    const t = setup();
+    const { remove } = FakeReference.prototype;
+    jest
+      .spyOn(FakeReference.prototype, 'remove')
+      .mockImplementation(async function (this: FakeReference) {
+        const path = (this as unknown as { parts: string[] }).parts.join('/');
+        if (path.startsWith('workspaces/')) {
+          throw new Error('database unavailable');
+        }
+        return remove.call(this);
+      });
+    const error = jest.spyOn(Logger.prototype, 'error').mockImplementation();
+    let created!: Awaited<ReturnType<typeof t.createWorkspace>>;
+    t.hooks.beforeDelete = async () => {
+      created = await t.createWorkspace();
+    };
+
+    await t.requestDeletion();
+
+    // Rec's own account deletion leaves the workspaces of the account it deletes, as the product's
+    // own "Delete account" does: the one left here is reported instead of undone.
+    expect(created.status).toBe(ResStatusEnum.error);
+    expect(t.administered()).toEqual(['Mine']);
+    const [workspaceId] = Object.keys(t.db.dump('workspaces') ?? {}).filter(
+      (id) => id !== 'ws-1',
+    );
+    expect(error).toHaveBeenCalledWith(
+      `A workspace created while its account was being deleted could not be undone (workspace ${workspaceId}).`,
+    );
+    expect(t.acks).toEqual([{ job_id: 'job-d1', result: 'deleted' }]);
   });
 
   it('marks a finished deletion until the sweep removes it, a day later', async () => {
