@@ -60,3 +60,27 @@
 .displayHidden {
   display: none;
 }
+
+// Phone width: under the editor's top bar (--editor-top-bar, edit.module.scss), and the list
+// across the width. The desktop offsets are inline styles, hence the !important.
+@media screen and (max-width: 767px) {
+  .mainContainer {
+    position: fixed;
+    z-index: 15;
+    top: calc(var(--editor-top-bar, 56px) + 0.5rem) !important;
+    right: 1rem !important;
+  }
+
+  .commentsContainer {
+    position: fixed;
+    z-index: 25;
+    top: calc(var(--editor-top-bar, 56px) + 3.25rem) !important;
+    left: 0.5rem;
+    right: 0.5rem !important;
+    width: auto;
+    max-height: calc(
+      100dvh - var(--editor-top-bar, 56px) - var(--editor-tool-bar, 60px) -
+        4.25rem
+    ) !important;
+  }
+}

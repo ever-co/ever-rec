@@ -15,6 +15,7 @@ import ToolSubPanel from './components/ToolSubPanel';
 import { tools } from 'components/pagesComponents/_editorScreen/toolsPanel/tools';
 import { X } from 'lucide-react';
 import { Tooltip } from 'antd';
+import useIsPhone from 'hooks/useIsPhone';
 
 type ToolPlacement = 'left' | 'right';
 
@@ -56,6 +57,7 @@ const ToolBtn = forwardRef<{ closePanel: () => void }, IToolBtn>(
     ref,
   ) => {
     const dispatch = useDispatch();
+    const isPhone = useIsPhone();
 
     useImperativeHandle(
       ref,
@@ -146,7 +148,7 @@ const ToolBtn = forwardRef<{ closePanel: () => void }, IToolBtn>(
       >
         <Tooltip
           className={styles.flexContainer}
-          placement={placement}
+          placement={isPhone ? 'top' : placement}
           title={toolTitle}
         >
           <div
@@ -167,42 +169,55 @@ const ToolBtn = forwardRef<{ closePanel: () => void }, IToolBtn>(
         {toolPanelState && !!children && (
           <OutsideClickHandler onOutsideClick={outsideClickHandler}>
             <div
-              className={classNames(
-                styles.absolute,
-                toolTitle === tools.conversation.title ||
-                  toolTitle === tools.emoji.title ||
-                  toolTitle === tools.watermark.title ||
-                  toolTitle === tools.saving.title
-                  ? // toolTitle === tools.share.title
-                    styles.negative
-                  : styles.zero,
-              )}
+              className={
+                isPhone
+                  ? // On a phone the options open as a sheet above the tool bar, across the width.
+                    // `editor-phone-sheet` lets the colour picker inside it open over the sheet.
+                    classNames(styles.phoneSheet, 'editor-phone-sheet')
+                  : classNames(
+                      styles.absolute,
+                      toolTitle === tools.conversation.title ||
+                        toolTitle === tools.emoji.title ||
+                        toolTitle === tools.watermark.title ||
+                        toolTitle === tools.saving.title
+                        ? // toolTitle === tools.share.title
+                          styles.negative
+                        : styles.zero,
+                    )
+              }
               style={
-                placement === 'left' &&
-                toolbarPosition.x < window.innerWidth / 2
-                  ? {
-                      left: '100px',
-                      borderRadius: '10px',
-                    }
-                  : placement === 'right' &&
+                isPhone
+                  ? undefined
+                  : placement === 'left' &&
                       toolbarPosition.x < window.innerWidth / 2
                     ? {
-                        left: '60px',
+                        left: '100px',
                         borderRadius: '10px',
                       }
-                    : placement === 'left' &&
-                        toolbarPosition.x > window.innerWidth / 2
+                    : placement === 'right' &&
+                        toolbarPosition.x < window.innerWidth / 2
                       ? {
-                          right: '75px',
+                          left: '60px',
                           borderRadius: '10px',
                         }
-                      : {
-                          right: '100px',
-                          borderRadius: '10px',
-                        }
+                      : placement === 'left' &&
+                          toolbarPosition.x > window.innerWidth / 2
+                        ? {
+                            right: '75px',
+                            borderRadius: '10px',
+                          }
+                        : {
+                            right: '100px',
+                            borderRadius: '10px',
+                          }
               }
             >
-              <ToolSubPanel className={toolSubPanelClasses}>
+              <ToolSubPanel
+                className={classNames(
+                  toolSubPanelClasses,
+                  isPhone && styles.phoneSheetPanel,
+                )}
+              >
                 {children}
               </ToolSubPanel>
               <div className={styles.close} onClick={() => closePanel()}>

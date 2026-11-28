@@ -69,3 +69,15 @@
   left: 0;
   z-index: 50;
 }
+
+// Inside an options sheet of the editor at phone width (ToolBtn): the sheet scrolls, and would cut
+// the picker off. It opens fixed above the tool bar instead, centred, over the sheet.
+:global(.editor-phone-sheet) .sketchpickerContainer {
+  position: fixed !important;
+  z-index: 40;
+  top: auto !important;
+  bottom: calc(var(--editor-tool-bar, 60px) + 0.5rem) !important;
+  left: 50%;
+  margin-left: 0;
+  transform: translateX(-50%);
+}

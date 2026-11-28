@@ -44,6 +44,8 @@
   min-height: 100vh;
   display: flex;
   align-items: center;
+  justify-content: center;
+  padding: 8px;
   background-color: hsl(var(--muted));
   color: hsl(var(--foreground));
 }
@@ -76,4 +78,74 @@
 .stageContainer::-webkit-scrollbar-track {
   background-color: transparent;
   border-radius: 9999px;
+}
+
+// Phone width (below 768px): a bar at the top (logo, Cancel, Download, Save), a bar of tools along
+// the bottom, and the stage in between, fitted to the width. The stage scrolls when it is zoomed
+// past the width; two fingers pinch and pan it (editorHelpers/phoneStage.ts).
+@media screen and (max-width: 767px) {
+  .pageContainer {
+    --editor-top-bar: 56px;
+    // The tool bar: 40px buttons, 2px margins, 8px padding, 1px border.
+    --editor-tool-bar: calc(61px + env(safe-area-inset-bottom, 0px));
+    display: block;
+    height: 100vh;
+    height: 100dvh;
+    min-height: 0;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  .stageContainer {
+    position: fixed;
+    top: var(--editor-top-bar);
+    bottom: var(--editor-tool-bar);
+    left: 0;
+    right: 0;
+    display: flex;
+    height: auto;
+    padding: 0.75rem;
+    overscroll-behavior: contain;
+
+    // Centred while it is smaller than the room, from the top left once it is larger, so all of
+    // a zoomed stage can be scrolled to (auto margins, unlike centring, give way on overflow).
+    :global(.konvajs-content) {
+      flex: none;
+      margin: auto;
+    }
+  }
+
+  // The marker's comments popup (positioned by markerDrawer.setPosition on a desktop) opens as a
+  // sheet above the tool bar.
+  .popupContainer {
+    position: static;
+    height: 0;
+  }
+}
+
+@media screen and (max-width: 767px) {
+  // Crop and Cancel of the crop tool: in a row over the lower left corner of the stage, clear of
+  // the zoom control (cropperDrawer places them beside the crop frame on a desktop).
+  .cropWrapper {
+    position: fixed !important;
+    left: 1rem !important;
+    top: auto !important;
+    bottom: calc(var(--editor-tool-bar) + 0.75rem) !important;
+  }
+
+  .cropInnerContainer {
+    width: auto;
+    flex-direction: row;
+    gap: 0.5rem;
+  }
+
+  .cropBtn {
+    margin-bottom: 0;
+  }
+
+  .cropBtn,
+  .cancelBtn {
+    min-width: 4.5rem;
+    min-height: 36px;
+  }
 }

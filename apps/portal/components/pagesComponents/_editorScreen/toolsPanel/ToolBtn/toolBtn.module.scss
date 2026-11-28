@@ -164,3 +164,44 @@
     height: 28px;
   }
 }
+
+// Phone width: the tool bar runs along the bottom of the screen (see toolsPanel.module.scss).
+@media screen and (max-width: 767px) {
+  // Finger-sized buttons, whatever the screen height.
+  .toolbtn,
+  .toolbtnlarge {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+// A tool's options on a phone: a sheet across the width, just above the tool bar. Fixed, so the
+// bar's sideways scrolling does not clip it.
+.phoneSheet {
+  position: fixed;
+  z-index: 30;
+  left: 0.5rem;
+  right: 0.5rem;
+  bottom: calc(var(--editor-tool-bar, 60px) + 0.5rem);
+  display: flex;
+  border-radius: 10px;
+  box-shadow: var(--shadow-float);
+
+  .close {
+    top: -10px;
+    right: -2px;
+  }
+}
+
+// The panel inside the sheet: the sheet's width, and its own scroll when it is taller than the
+// room between the two bars.
+.phoneSheetPanel {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: auto !important;
+  max-height: calc(
+    100dvh - var(--editor-top-bar, 56px) - var(--editor-tool-bar, 60px) - 1.5rem
+  );
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}

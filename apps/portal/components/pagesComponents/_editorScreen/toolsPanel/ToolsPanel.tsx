@@ -63,6 +63,7 @@ import IEditorImage from 'app/interfaces/IEditorImage';
 import Image from 'next/legacy/image';
 import { imgSrcLoader } from '../editorHelpers/imgSrcLoader';
 import useEditorVideo from 'hooks/useEditorVideo';
+import useIsPhone from 'hooks/useIsPhone';
 import { Emoji } from 'emoji-mart/dist/index';
 import { ICommentsOptions } from 'app/interfaces/tools_interfaces/ICommentsGroupOptions';
 import ShareTool from './ToolBtn/customToolBtn/ShareToolBtn/ShareToolBtn';
@@ -222,6 +223,9 @@ const ToolsPanel: React.FC<IToolsPanelProps> = ({
   );
   const [locked, setLocked] = useState<boolean>(true);
   const [show, setShow] = useState<boolean>(false);
+  // Below 768px the same panel is laid out as two bars (`.phoneBar`, toolsPanel.module.scss): one
+  // tree for both layouts, so a window crossing the width keeps every tool and its state.
+  const isPhone = useIsPhone();
 
   const {
     stopVideo,
@@ -366,8 +370,18 @@ const ToolsPanel: React.FC<IToolsPanelProps> = ({
   };
 
   return (
-    <Draggable onStop={handleStop} position={{ x: x, y: y }} disabled={locked}>
-      <div className={classNames(styles.mainContainer, styles.toolswrapper)}>
+    <Draggable
+      onStop={handleStop}
+      position={{ x: x, y: y }}
+      disabled={locked || isPhone}
+    >
+      <div
+        className={classNames(
+          styles.mainContainer,
+          styles.toolswrapper,
+          isPhone && styles.phoneBar,
+        )}
+      >
         <div className={styles.innerContainer}>
           {!locked ? (
             <div className={styles.toolbtnsmall}>
@@ -408,7 +422,7 @@ const ToolsPanel: React.FC<IToolsPanelProps> = ({
             <Logo width={89} height={24} type="default" />
             <div className={styles.absoluteContainer}></div>
           </div>{' '}
-          <ToolsColumn>
+          <ToolsColumn className={styles.toolsColumn}>
             <ToolBtn
               toolTitle={tools.video.title}
               large={true}
@@ -484,7 +498,7 @@ const ToolsPanel: React.FC<IToolsPanelProps> = ({
           </ToolsColumn>
         </div>
 
-        <div className={`${show ? styles.hidden : ''}`}>
+        <div className={classNames(styles.moreTools, show && styles.hidden)}>
           <ToolsRow>
             <ResizeTool
               isOpenEditTool={currentTool?.name == 'resize' ? true : false}
@@ -1305,7 +1319,10 @@ const ToolsPanel: React.FC<IToolsPanelProps> = ({
             setLoading={setLoading}
           />
         </ToolsRow>
-        <div style={{ paddingLeft: '0.5rem', paddingRight: '0.5rem' }}>
+        <div
+          className={styles.zoomWrapper}
+          style={{ paddingLeft: '0.5rem', paddingRight: '0.5rem' }}
+        >
           <div className={styles.childContainer}>
             <AppNumberSelector
               value={stageScale}
@@ -1319,6 +1336,7 @@ const ToolsPanel: React.FC<IToolsPanelProps> = ({
         </div>
         <div className={styles.toolboxend}>
           <div
+            className={styles.actions}
             style={{
               paddingTop: '0.5rem',
               paddingLeft: '0.25rem',
@@ -1328,17 +1346,17 @@ const ToolsPanel: React.FC<IToolsPanelProps> = ({
             <AppButton
               className={styles.buttonWrapper}
               onClick={onSaveAsJPG}
-              full
+              full={!isPhone}
               outlined
-              twPadding="tw-px-1 tw-py-0"
+              twPadding={isPhone ? 'tw-px-3 tw-py-0' : 'tw-px-1 tw-py-0'}
             >
               <div className={styles.font}>Download</div>
             </AppButton>
             <AppButton
               className={styles.saveBtn}
               onClick={saveScreenshot}
-              full
-              twPadding="tw-px-1 tw-py-0"
+              full={!isPhone}
+              twPadding={isPhone ? 'tw-px-3 tw-py-0' : 'tw-px-1 tw-py-0'}
             >
               <div className={styles.font}>Save </div>
             </AppButton>
@@ -1347,9 +1365,9 @@ const ToolsPanel: React.FC<IToolsPanelProps> = ({
               onClick={() => {
                 onCancelHandler();
               }}
-              full
+              full={!isPhone}
               bgColor="tw-bg-transparent"
-              twPadding="tw-px-1 tw-py-0"
+              twPadding={isPhone ? 'tw-px-3 tw-py-0' : 'tw-px-1 tw-py-0'}
             >
               <div className={styles.font}>
                 {fromExisted ? 'Back' : 'Cancel'}

@@ -284,3 +284,128 @@
     height: 28px;
   }
 }
+
+// Phone width (below 768px, `.phoneBar` from ToolsPanel): the same panel, laid out as two bars.
+// The panel itself becomes the tool bar along the bottom, one row that scrolls sideways; the logo
+// and the actions sit in a bar at the top; the zoom control floats over the corner of the stage.
+// The heights are the page's (--editor-top-bar, --editor-tool-bar, edit.module.scss).
+.phoneBar {
+  // react-draggable positions the panel with a transform, which would also become the box of
+  // everything fixed inside it (the top bar, the zoom control, the option sheets).
+  transform: none !important;
+  top: auto;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: auto;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0.5rem 0.75rem;
+  padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px));
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  // Above the zoom control: a tool's options sheet opens inside this bar and must cover it.
+  z-index: 25;
+  border: 0;
+  border-top: 1px solid hsl(var(--border));
+  border-radius: 0;
+  box-shadow: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  // The top bar's ground.
+  &::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--editor-top-bar, 56px);
+    background-color: hsl(var(--card));
+    border-bottom: 1px solid hsl(var(--border));
+  }
+
+  // The tools, in the desktop panel's order, straight in the row, each at its own width (the
+  // wrappers' children become the row's items).
+  .toolboxstart,
+  .toolsColumn,
+  .moreTools {
+    display: contents !important;
+  }
+
+  > *,
+  .toolboxstart > *,
+  .toolsColumn > *,
+  .moreTools > * {
+    flex: none;
+  }
+
+  // The floating panel's own controls (drag pin, close, collapse): the bars are docked, the tool
+  // bar scrolls, and Cancel is in the top bar.
+  .innerContainer,
+  .toolbtnsmall {
+    display: none !important;
+  }
+
+  // The logo, at the start of the top bar.
+  .container {
+    position: fixed;
+    top: 0;
+    left: 1rem;
+    height: var(--editor-top-bar, 56px);
+    display: flex;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+  }
+
+  // Cancel, Download and Save, at the end of the top bar.
+  .toolboxend {
+    position: fixed;
+    top: 0;
+    right: 1rem;
+    height: var(--editor-top-bar, 56px);
+    display: flex;
+    align-items: center;
+    border-top: 0;
+  }
+
+  .actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0 !important;
+  }
+
+  .buttonWrapper,
+  .saveBtn,
+  .cancelBtn {
+    height: 36px;
+    margin-bottom: 0;
+  }
+
+  .cancelBtn {
+    order: -1;
+  }
+
+  .zoomWrapper {
+    position: fixed;
+    right: 1rem;
+    bottom: calc(var(--editor-tool-bar, 61px) + 0.75rem);
+    padding: 0 !important;
+    background-color: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+    border-radius: 0.5rem;
+    box-shadow: var(--shadow-float);
+  }
+
+  .childContainer {
+    margin: 0;
+    border: 0;
+  }
+}
