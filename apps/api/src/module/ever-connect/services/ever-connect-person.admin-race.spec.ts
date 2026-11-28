@@ -3,7 +3,8 @@
  * makes an account a workspace's admin). The deletion marks the account before its last check of
  * what holds it, and the creation checks the mark once it wrote the workspace: whatever the order,
  * the account is kept with its new workspace, or the workspace is undone and the account goes. It
- * never goes while it administers a workspace.
+ * never goes while it administers a workspace, except in the cases left to an operator (tested
+ * below: an undo that fails after the last check is logged).
  */
 import { Logger } from '@nestjs/common';
 import { createHash } from 'node:crypto';
@@ -457,9 +458,37 @@ describe('a deletion for Ever Platform while the account creates a workspace', (
       (id) => id !== 'ws-1',
     );
     expect(error).toHaveBeenCalledWith(
-      `A workspace created while its account was being deleted could not be undone (workspace ${workspaceId}).`,
+      `A workspace whose account is or may be being deleted could not be undone (workspace ${workspaceId}).`,
     );
     expect(t.acks).toEqual([{ job_id: 'job-d1', result: 'deleted' }]);
+  });
+
+  it('a mark that cannot be read and an undo that fails: an error names the workspace', async () => {
+    const t = setup();
+    const { remove } = FakeReference.prototype;
+    jest
+      .spyOn(FakeReference.prototype, 'remove')
+      .mockImplementation(async function (this: FakeReference) {
+        const path = (this as unknown as { parts: string[] }).parts.join('/');
+        if (path.startsWith('workspaces/')) {
+          throw new Error('database unavailable');
+        }
+        return remove.call(this);
+      });
+    jest
+      .spyOn(t.person, 'deletionStarted')
+      .mockRejectedValue(new Error('database unavailable'));
+    const error = jest.spyOn(Logger.prototype, 'error').mockImplementation();
+
+    const created = await t.createWorkspace();
+
+    expect(created.status).toBe(ResStatusEnum.error);
+    const [workspaceId] = Object.keys(t.db.dump('workspaces') ?? {}).filter(
+      (id) => id !== 'ws-1',
+    );
+    expect(error).toHaveBeenCalledWith(
+      `A workspace whose account is or may be being deleted could not be undone (workspace ${workspaceId}).`,
+    );
   });
 
   it('marks a finished deletion until the sweep removes it, a day later', async () => {

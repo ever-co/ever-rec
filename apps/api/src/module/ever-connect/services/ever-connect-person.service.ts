@@ -468,9 +468,14 @@ export class EverConnectPersonService implements EverConnectAccountDeletions {
    * the mark is removed only when the account is kept. A workspace created for the account at the
    * same time checks the mark once it wrote the workspace, and undoes it when the mark is there:
    * either this check sees the new workspace (the account is kept), or the creation sees the mark
-   * (the workspace is undone). The account never goes while it administers a workspace. While Rec's
-   * deletion of the account runs, the mark is renewed, so the sweep never removes it under a deletion
-   * that is slow.
+   * (the workspace is undone). While Rec's deletion of the account runs, the mark is renewed, so the
+   * sweep never removes it under a deletion that is slow.
+   *
+   * So the account does not go while it administers a workspace, with two cases left to an
+   * operator: a workspace created after this last check whose undo failed (the creation logs its
+   * id), and a workspace created while the sweep had taken the mark because this process could not
+   * renew it for a whole day. In both, the account goes and the workspace stays, as it does when an
+   * admin deletes their own account in Rec.
    */
   private async deleteAccounts(uids: string[]): Promise<Decided> {
     const deleter = this.accountDeleter;
@@ -500,31 +505,47 @@ export class EverConnectPersonService implements EverConnectAccountDeletions {
         return started ? { ...pendingDeletion(), incomplete: true } : pendingDeletion();
       }
       started = true;
-      let deleted = false;
-      // The whole mark is written again: one the sweep removed (renewals failed for a day) comes back.
-      const beat = setInterval(() => {
-        const alive: AccountDeletionMark = { startedAt, aliveAt: this.clock() };
-        mark.update(alive).catch((error) => {
-          this.logger.warn(
-            `An account deletion's mark could not be renewed (${errorCode(error)}).`,
-          );
-        });
-      }, ACCOUNT_DELETION_MARK_BEAT_MS);
-      beat.unref?.();
-      try {
-        deleted = await deleter.delete(uid);
-      } catch (error) {
-        this.logger.warn(
-          `A person's account could not be deleted (${errorCode(error)}).`,
-        );
-      } finally {
-        clearInterval(beat);
-      }
       // Not done: the mark stays while the deletion is still under way (run again later).
-      if (!deleted) return { ...pendingDeletion(), incomplete: true };
+      if (!(await this.deleteWhileMarked(deleter, uid, { mark, startedAt }))) {
+        return { ...pendingDeletion(), incomplete: true };
+      }
       await mark.update({ deletedAt: this.clock() });
     }
     return { result: 'deleted' };
+  }
+
+  /**
+   * Runs Rec's deletion of the account and renews its mark meanwhile (see {@link deleteAccounts});
+   * answers whether the account was deleted.
+   */
+  private async deleteWhileMarked(
+    deleter: EverConnectAccountDeleter,
+    uid: string,
+    {
+      mark,
+      startedAt,
+    }: Awaited<ReturnType<EverConnectPersonService['markDeletion']>>,
+  ): Promise<boolean> {
+    // The whole mark is written again: one the sweep removed (renewals failed for a day) comes back.
+    const beat = setInterval(() => {
+      const alive: AccountDeletionMark = { startedAt, aliveAt: this.clock() };
+      mark.update(alive).catch((error) => {
+        this.logger.warn(
+          `An account deletion's mark could not be renewed (${errorCode(error)}).`,
+        );
+      });
+    }, ACCOUNT_DELETION_MARK_BEAT_MS);
+    beat.unref?.();
+    try {
+      return await deleter.delete(uid);
+    } catch (error) {
+      this.logger.warn(
+        `A person's account could not be deleted (${errorCode(error)}).`,
+      );
+      return false;
+    } finally {
+      clearInterval(beat);
+    }
   }
 
   /** Marks one attempt to delete the account (`ever_connect/account_deletions/<uid>/<run>`). */

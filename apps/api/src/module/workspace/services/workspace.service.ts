@@ -162,8 +162,17 @@ export class WorkspacesService {
         // The workspace goes first: the deletion finds what the account administers through the
         // account's list, so the list keeps the id while the workspace may still be there.
         const undo = async () => {
-          await workspaceRef.remove();
-          await removeUserWorkspaceId(uid, workspaceId);
+          try {
+            await workspaceRef.remove();
+            await removeUserWorkspaceId(uid, workspaceId);
+          } catch (error) {
+            // Left for an operator: the deletion may already be past its last check, and then the
+            // account goes while this workspace still names it as admin.
+            this.logger.error(
+              `A workspace whose account is or may be being deleted could not be undone (workspace ${workspaceId}).`,
+            );
+            throw error;
+          }
         };
         let deleting = false;
         try {
@@ -174,16 +183,7 @@ export class WorkspacesService {
           throw error;
         }
         if (deleting) {
-          try {
-            await undo();
-          } catch (error) {
-            // Left for an operator: the deletion may already be past its last check, and then the
-            // account goes while this workspace still names it as admin.
-            this.logger.error(
-              `A workspace created while its account was being deleted could not be undone (workspace ${workspaceId}).`,
-            );
-            throw error;
-          }
+          await undo();
           return sendError(
             'This account is being deleted, so it cannot create a workspace.',
           );

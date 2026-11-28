@@ -324,21 +324,24 @@ export class EverConnectStoreService {
     const expired = (mark: AccountDeletionMark | null) =>
       typeof mark?.startedAt !== 'number' ||
       lastSignOfLife(mark) < now - ACCOUNT_DELETION_MARK_KEPT_MS;
-    let removed = 0;
-    for (const [uid, runs] of Object.entries(all)) {
-      for (const [run, mark] of Object.entries(runs ?? {})) {
-        if (!expired(mark)) continue;
-        let found = false;
-        const { committed } = await this.db()
-          .ref(`${EVER_CONNECT_PATHS.accountDeletions}/${uid}/${run}`)
-          .transaction((current: AccountDeletionMark | null) => {
-            found = current !== null;
-            return current === null || expired(current) ? null : undefined;
-          });
-        if (committed && found) removed++;
-      }
-    }
-    return removed;
+    const remove = async (path: string) => {
+      let found = false;
+      const { committed } = await this.db()
+        .ref(path)
+        .transaction((current: AccountDeletionMark | null) => {
+          found = current !== null;
+          return current === null || expired(current) ? null : undefined;
+        });
+      return committed && found;
+    };
+    const removals = Object.entries(all).flatMap(([uid, runs]) =>
+      Object.entries(runs ?? {})
+        .filter(([, mark]) => expired(mark))
+        .map(([run]) =>
+          remove(`${EVER_CONNECT_PATHS.accountDeletions}/${uid}/${run}`),
+        ),
+    );
+    return (await Promise.all(removals)).filter(Boolean).length;
   }
 
   /** Reads a workspace record (the product's own data; read only). */
