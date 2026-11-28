@@ -1,5 +1,6 @@
 import {
   workspaceAdminRefusal,
+  workspaceIdsWithAdmin,
   workspacesAdministeredBy,
 } from './workspace-admin';
 
@@ -30,11 +31,45 @@ describe('workspacesAdministeredBy', () => {
     expect(read.mock.calls.map(([id]) => id)).toEqual(['ws-1', 'gone']);
   });
 
+  it('adds the workspaces found by their admin, once, after the listed ones', async () => {
+    await expect(
+      workspacesAdministeredBy('uid-1', ['ws-1'], read, ['ws-3', 'ws-1']),
+    ).resolves.toEqual([{ id: 'ws-1', name: 'Design team' }, { id: 'ws-3' }]);
+    expect(read.mock.calls.map(([id]) => id)).toEqual(['ws-1', 'ws-3']);
+  });
+
   it('answers none for an account without a list', async () => {
     await expect(
       workspacesAdministeredBy('uid-1', null, read),
     ).resolves.toEqual([]);
     expect(read).not.toHaveBeenCalled();
+  });
+});
+
+describe('workspaceIdsWithAdmin', () => {
+  const query = (found: unknown) => {
+    const equalTo = jest.fn((value: string) => ({
+      get: async () => ({ val: () => found }),
+    }));
+    const orderByChild = jest.fn((child: string) => ({ equalTo }));
+    return { ref: { orderByChild }, orderByChild, equalTo };
+  };
+
+  it('answers the ids of the workspaces whose admin is the account', async () => {
+    const q = query({ 'ws-1': { admin: 'uid-1' }, 'ws-3': { admin: 'uid-1' } });
+
+    await expect(workspaceIdsWithAdmin(q.ref, 'uid-1')).resolves.toEqual([
+      'ws-1',
+      'ws-3',
+    ]);
+    expect(q.orderByChild).toHaveBeenCalledWith('admin');
+    expect(q.equalTo).toHaveBeenCalledWith('uid-1');
+  });
+
+  it('answers none when no workspace names the account', async () => {
+    await expect(
+      workspaceIdsWithAdmin(query(null).ref, 'uid-1'),
+    ).resolves.toEqual([]);
   });
 });
 

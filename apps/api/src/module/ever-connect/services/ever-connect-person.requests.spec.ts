@@ -264,6 +264,16 @@ describe('a person deletion request', () => {
     expect(t.db.dump('users/uid-person')).not.toBeNull();
   });
 
+  it('switched on, and the account administers a workspace its own list misses: kept', async () => {
+    const t = setup({ EVER_CONNECT_PERSON_DELETION_ENABLED: 'true' });
+    t.db.write(['workspaces', 'ws-2'], { admin: 'uid-person', name: 'Own' });
+    t.db.write(['users', 'uid-person', 'workspaceIds'], ['ws-1']);
+    await t.service.onDeletionRequested(t.request('job-d3b'));
+    expect(t.deleter.delete).not.toHaveBeenCalled();
+    expect(t.acks).toEqual([{ job_id: 'job-d3b', ...PENDING_DELETION }]);
+    expect(t.db.dump('users/uid-person')).not.toBeNull();
+  });
+
   it('switched on, but the account operates the installation: kept', async () => {
     const t = setup({ EVER_CONNECT_PERSON_DELETION_ENABLED: 'true' });
     t.db.write(['users', 'uid-operator'], { displayName: 'Operator' });

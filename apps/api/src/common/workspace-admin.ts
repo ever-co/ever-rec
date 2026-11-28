@@ -7,8 +7,12 @@ import { isDbKey } from './db-key';
  * Connect's `holdFor`). Rec's account deletion leaves workspaces as they are, so a workspace whose
  * admin is deleted stays without one, with what it holds (which may be other people's). Both
  * refuse while the account is the admin of any workspace: the person deletes the workspace first
- * (or an operator makes another member its admin). A workspace's admin cannot leave it, so the
- * account's own list `workspaceIds` still names every workspace it administers.
+ * (or an operator makes another member its admin).
+ *
+ * The workspaces are found through the account's own list `workspaceIds` and through the
+ * workspaces that name it as their admin ({@link workspaceIdsWithAdmin}): the list can miss one,
+ * written before an admin could no longer leave their workspace, or left by a workspace deletion
+ * that stopped half way.
  */
 
 /** A workspace the account is the admin of, with its name when it has one. */
@@ -29,21 +33,45 @@ const READS_AT_ONCE = 4;
 /** At most this many names are written into the refusal; the rest are counted. */
 const NAMES_SHOWN = 5;
 
+/** The query of a Realtime Database reference this check runs (Admin SDK or the test fake). */
+export interface WorkspacesQueryable {
+  orderByChild(child: string): {
+    equalTo(value: string): { get(): Promise<{ val(): unknown }> };
+  };
+}
+
 /**
- * The workspaces `uid` is the admin of, found through its own list `users/<uid>/workspaceIds`
- * (every workspace it created or joined; an array, or an object when the array has a hole), each
- * read once with `workspace`, a few at a time. An id that is not a database key, or names no
- * workspace, is skipped. The order is the list's.
+ * The ids of the workspaces whose `admin` is `uid`, by a query on `workspaces`, whatever the
+ * account's own list says. `database.rules.json` indexes `workspaces` by `admin`; without that
+ * index deployed, the Admin SDK reads all workspaces and filters them itself (as the workspace
+ * list, `getUserWorkspaces`, already reads them all).
+ */
+export async function workspaceIdsWithAdmin(
+  workspaces: WorkspacesQueryable,
+  uid: string,
+): Promise<string[]> {
+  const found = (
+    await workspaces.orderByChild('admin').equalTo(uid).get()
+  ).val();
+  return found && typeof found === 'object' ? Object.keys(found) : [];
+}
+
+/**
+ * The workspaces `uid` is the admin of, among those in its own list `users/<uid>/workspaceIds`
+ * (every workspace it created or joined; an array, or an object when the array has a hole) and
+ * `alsoIds` ({@link workspaceIdsWithAdmin}), each read once with `workspace`, a few at a time. An
+ * id that is not a database key, or names no workspace, is skipped. The list's order comes first.
  */
 export async function workspacesAdministeredBy(
   uid: string,
   workspaceIds: unknown,
   workspace: (id: string) => Promise<WorkspaceAdminFields>,
+  alsoIds: readonly string[] = [],
 ): Promise<AdministeredWorkspace[]> {
   const listed: unknown[] = Array.isArray(workspaceIds)
     ? workspaceIds
     : Object.values((workspaceIds ?? {}) as Record<string, unknown>);
-  const ids = [...new Set(listed)].filter(isDbKey);
+  const ids = [...new Set([...listed, ...alsoIds])].filter(isDbKey);
   const found = await mapWithLimit(
     ids,
     READS_AT_ONCE,

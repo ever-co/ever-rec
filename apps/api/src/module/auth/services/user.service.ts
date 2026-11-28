@@ -9,6 +9,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { EVER_COUNTER_EVENTS } from '../../../common/events/ever-counters.events';
 import {
   AdministeredWorkspace,
+  workspaceIdsWithAdmin,
   workspacesAdministeredBy,
 } from '../../../common/workspace-admin';
 
@@ -215,18 +216,25 @@ export class UserService {
   }
 
   /**
-   * The workspaces the user is the admin of ({@link workspacesAdministeredBy}), through the user's
-   * own list `users/<uid>/workspaceIds`. Only each workspace's `admin` and `name` are read, not the
-   * whole workspace (its media collections can be large).
+   * The workspaces the user is the admin of ({@link workspacesAdministeredBy}): those in the user's
+   * own list `users/<uid>/workspaceIds` and those that name the user as their admin. Each one's
+   * `admin` and `name` are then read, not the whole workspace (its media collections can be large).
    */
   async workspacesAdministeredBy(
     uid: string,
   ): Promise<AdministeredWorkspace[]> {
     const read = async (path: string) =>
       (await this.firebaseAdminService.getDatabaseRef(path).get()).val();
+    const [listed, named] = await Promise.all([
+      read(`${this.rootDb}/${uid}/workspaceIds`),
+      workspaceIdsWithAdmin(
+        this.firebaseAdminService.getDatabaseRef('workspaces'),
+        uid,
+      ),
+    ]);
     return workspacesAdministeredBy(
       uid,
-      await read(`${this.rootDb}/${uid}/workspaceIds`),
+      listed,
       async (id) => {
         const [admin, name] = await Promise.all([
           read(`workspaces/${id}/admin`),
@@ -234,6 +242,7 @@ export class UserService {
         ]);
         return admin == null ? null : { admin, name };
       },
+      named,
     );
   }
 

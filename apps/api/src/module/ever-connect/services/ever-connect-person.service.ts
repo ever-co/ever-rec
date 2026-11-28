@@ -27,7 +27,10 @@ import {
   PersonRequestResult,
 } from '../ever-connect.types';
 import { EverConnectAccountDeletions } from '../../../common/ever-platform/tokens';
-import { workspacesAdministeredBy } from '../../../common/workspace-admin';
+import {
+  workspaceIdsWithAdmin,
+  workspacesAdministeredBy,
+} from '../../../common/workspace-admin';
 import {
   EVER_CONNECT_ACCOUNT_DELETER,
   EVER_CONNECT_CLOCK,
@@ -674,6 +677,7 @@ export class EverConnectPersonService implements EverConnectAccountDeletions {
       uid,
       user.workspaceIds,
       (id) => this.store.workspace(id),
+      await workspaceIdsWithAdmin(this.store.db().ref('workspaces'), uid),
     );
     return administered.length ? 'workspace_admin' : null;
   }

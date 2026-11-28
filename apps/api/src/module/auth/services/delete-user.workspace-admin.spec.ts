@@ -151,6 +151,21 @@ describe('deleting an account that administers a workspace', () => {
     expectNothingDeleted();
   });
 
+  it('finds a workspace that names the account as its admin though its own list does not', async () => {
+    // As an admin who left their workspace before that was refused, or a workspace deletion that
+    // took the id out of the list and then failed to remove the workspace.
+    await firebase.db.ref('users/uid-1/workspaceIds').set(['ws-2']);
+
+    const result = await deleteAccount('uid-1');
+
+    expect(result.status).toBe(ResStatusEnum.error);
+    expect(result.error).toEqual({
+      code: 'workspace_admin',
+      workspaces: [{ id: 'ws-1', name: 'Design team' }],
+    });
+    expectNothingDeleted();
+  });
+
   it('is allowed once another member was made the admin', async () => {
     await firebase.db.ref('workspaces/ws-1/admin').set('uid-2');
 
@@ -192,6 +207,7 @@ describe('deleting an account that administers a workspace', () => {
 
   it('is allowed for an account without workspaces', async () => {
     await firebase.db.ref('users/uid-1/workspaceIds').remove();
+    await firebase.db.ref('workspaces/ws-1/admin').set('uid-2');
 
     const result = await deleteAccount('uid-1');
 
