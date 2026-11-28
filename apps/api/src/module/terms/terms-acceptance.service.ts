@@ -75,6 +75,13 @@ export class TermsAcceptanceService {
       // `materiality` stays at the default `'declared-or-semver'`: the corpus
       // does not yet declare a per-document `history`, and `'declared'` would
       // throw on every status check until it does.
+      //
+      // A text that changed under the same version (an editorial change published without a version bump, as the
+      // Privacy Policy 1.0.2 between @ever-co/legal 0.1.2 and 0.7.1) is a notice, not a block. Blocking it locked
+      // people out for good: the dialog asked them to accept version 1.0.2, and recording that is idempotent per
+      // (person, document, version), so the acceptance already on file came back and the dialog never closed.
+      // A material change is published as a new version, and a new version still blocks.
+      onTextMismatch: 'notice',
     });
   }
 
