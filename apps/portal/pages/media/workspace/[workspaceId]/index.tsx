@@ -31,6 +31,7 @@ import { createWorkspaceFolderAPI } from 'app/services/api/workspace';
 import PanelAC from 'app/store/panel/actions/PanelAC';
 import CreateFolderModal from 'components/pagesComponents/_imagesScreen/components/CreateFolderModal';
 import { iDataResponseParser } from 'app/services/helpers/iDataResponseParser';
+import { requestErrorHandler } from 'app/services/helpers/errors';
 import { useRouter } from 'next/router';
 import WorkspaceFolderHistory from 'components/pagesComponents/_workspaceScreen/WorkspaceFolderHistory';
 import { IFavoriteFolders } from 'app/interfaces/Folders';
@@ -197,23 +198,29 @@ const Workspace: FC = () => {
   const createFolderHandler = async (name: string, color: string) => {
     setLoading(true);
     setShowFolderModal(false);
-    const response = await createWorkspaceFolderAPI(
-      activeWorkspace.id,
-      name,
-      currentWorkspaceFolder?.nestLevel || 0,
-      currentWorkspaceFolder?.id || false,
-      color,
-    );
-    const data = iDataResponseParser<typeof response.data>(response);
-
-    data &&
-      dispatch(
-        PanelAC.setActiveWorkspace({
-          activeWorkspace: { ...activeWorkspace, folders: data },
-        }),
+    try {
+      const response = await createWorkspaceFolderAPI(
+        activeWorkspace.id,
+        name,
+        currentWorkspaceFolder?.nestLevel || 0,
+        currentWorkspaceFolder?.id || false,
+        color,
       );
+      const data = iDataResponseParser<typeof response.data>(response);
 
-    setLoading(false);
+      data &&
+        dispatch(
+          PanelAC.setActiveWorkspace({
+            activeWorkspace: { ...activeWorkspace, folders: data },
+          }),
+        );
+    } catch (error) {
+      // The API client already reported a 401 or 403 (a parent folder that is gone, or write
+      // on it taken away); any other error is shown here.
+      requestErrorHandler(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const onDrop = async (
@@ -334,46 +341,62 @@ const Workspace: FC = () => {
     if (file) {
       setLoading(true);
       setShowAddImageModal(false);
-      await uploadImageToWorkspaceAndUpdateLocalState(
-        currentWorkspaceFolder?.id || false,
-        file,
-        activeWorkspace?.id,
-      );
-      setLoading(false);
+      try {
+        await uploadImageToWorkspaceAndUpdateLocalState(
+          currentWorkspaceFolder?.id || false,
+          file,
+          activeWorkspace?.id,
+        );
+      } catch (error) {
+        requestErrorHandler(error);
+      } finally {
+        setLoading(false);
+      }
     }
   };
   const onImageUploadChange = async (event: ChangeEvent<HTMLInputElement>) => {
     if (event.target.value.length && event.target.files?.length) {
       setShowAddImageModal(false);
       setLoading(true);
-      await uploadImageToWorkspaceAndUpdateLocalState(
-        currentWorkspaceFolder?.id || false,
-        event.target.files[0],
-        activeWorkspace?.id,
-      );
-      setLoading(false);
+      try {
+        await uploadImageToWorkspaceAndUpdateLocalState(
+          currentWorkspaceFolder?.id || false,
+          event.target.files[0],
+          activeWorkspace?.id,
+        );
+      } catch (error) {
+        requestErrorHandler(error);
+      } finally {
+        setLoading(false);
+      }
     }
   };
   const onVideoUploadChange = async (event: ChangeEvent<HTMLInputElement>) => {
     if (event.target.value.length && event.target.files?.length) {
       setLoading(true);
 
-      const data = await uploadWorkspaceVideoFile(
-        currentWorkspaceFolder?.id,
-        event.target.files[0],
-        activeWorkspace?.id,
-      );
+      try {
+        const data = await uploadWorkspaceVideoFile(
+          currentWorkspaceFolder?.id,
+          event.target.files[0],
+          activeWorkspace?.id,
+        );
 
-      if (data) {
-        const newWorkspace: IWorkspace = {
-          ...activeWorkspace,
-          videos: [...activeWorkspace.videos, data],
-        };
+        if (data) {
+          const newWorkspace: IWorkspace = {
+            ...activeWorkspace,
+            videos: [...activeWorkspace.videos, data],
+          };
 
-        dispatch(PanelAC.setActiveWorkspace({ activeWorkspace: newWorkspace }));
+          dispatch(
+            PanelAC.setActiveWorkspace({ activeWorkspace: newWorkspace }),
+          );
+        }
+      } catch (error) {
+        requestErrorHandler(error);
+      } finally {
+        setLoading(false);
       }
-
-      setLoading(false);
     }
   };
   // End of upload item functions

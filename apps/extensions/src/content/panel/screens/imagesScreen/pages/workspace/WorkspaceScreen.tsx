@@ -29,6 +29,7 @@ import { useSearchParams } from 'react-router-dom';
 import { createWorkspaceFolderAPI } from '@/app/services/api/workspace';
 import WorkspaceItemsContainer from '@/content/panel/screens/imagesScreen/pages/workspace/WorkspaceItemsContainer';
 import { iDataResponseParser } from '@/app/services/helpers/iDataResponseParser';
+import { requestErrorHandler } from '@/app/services/helpers/errors';
 import WorkspaceFolderHistory from '@/content/panel/screens/imagesScreen/pages/workspace/WorkspaceFolderHistory';
 import CreateFolderModal from '@/content/panel/screens/imagesScreen/components/createFolderModal/CreateFolderModal';
 import { IFavoriteFolders } from '@/app/interfaces/Folders';
@@ -184,23 +185,29 @@ const Workspace: FC = () => {
     if (workspace) {
       setLoading(true);
       setShowFolderModal(false);
-      const response = await createWorkspaceFolderAPI(
-        workspace.id,
-        name,
-        currentWorkspaceFolder?.nestLevel || 0,
-        currentWorkspaceFolder?.id || false,
-        color,
-      );
-      const data = iDataResponseParser<typeof response.data>(response);
-
-      data &&
-        dispatch(
-          PanelAC.setActiveWorkspace({
-            activeWorkspace: { ...activeWorkspace, folders: data },
-          }),
+      try {
+        const response = await createWorkspaceFolderAPI(
+          workspace.id,
+          name,
+          currentWorkspaceFolder?.nestLevel || 0,
+          currentWorkspaceFolder?.id || false,
+          color,
         );
+        const data = iDataResponseParser<typeof response.data>(response);
 
-      setLoading(false);
+        data &&
+          dispatch(
+            PanelAC.setActiveWorkspace({
+              activeWorkspace: { ...activeWorkspace, folders: data },
+            }),
+          );
+      } catch (error) {
+        // The API client already reported a 401 or 403 (a parent folder that is gone, or
+        // write on it taken away); any other error is shown here.
+        requestErrorHandler(error);
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
