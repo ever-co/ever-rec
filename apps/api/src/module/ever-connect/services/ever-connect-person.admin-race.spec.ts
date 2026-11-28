@@ -163,6 +163,53 @@ function captureBeats(): Array<() => void> {
 
 const settle = () => new Promise((resolve) => setImmediate(resolve));
 
+const pathOf = (ref: FakeReference) =>
+  (ref as unknown as { parts: string[] }).parts.join('/');
+
+/** Every removal of a workspace fails; other removals go through. */
+function failWorkspaceRemovals() {
+  const { remove } = FakeReference.prototype;
+  jest
+    .spyOn(FakeReference.prototype, 'remove')
+    .mockImplementation(async function (this: FakeReference) {
+      if (pathOf(this).startsWith('workspaces/')) {
+        throw new Error('database unavailable');
+      }
+      return remove.call(this);
+    });
+}
+
+/** Runs `then` once, right before or right after the deletion writes its first mark. */
+function onFirstMark(when: 'before' | 'after', then: () => Promise<unknown>) {
+  const { set } = FakeReference.prototype;
+  let ran = false;
+  jest.spyOn(FakeReference.prototype, 'set').mockImplementation(async function (
+    this: FakeReference,
+    value: any,
+  ) {
+    const first =
+      !ran &&
+      pathOf(this).startsWith(`${EVER_CONNECT_PATHS.accountDeletions}/`);
+    ran ||= first;
+    if (first && when === 'before') await then();
+    await set.call(this, value);
+    if (first && when === 'after') await then();
+  });
+}
+
+/** The error the creation logs for a workspace it could not undo. */
+function expectUndoLogged(
+  error: jest.SpyInstance,
+  t: ReturnType<typeof setup>,
+) {
+  const workspaceId = Object.keys(t.db.dump('workspaces') ?? {}).find(
+    (id) => id !== 'ws-1',
+  );
+  expect(error).toHaveBeenCalledWith(
+    `A workspace whose account is or may be being deleted could not be undone (workspace ${workspaceId}).`,
+  );
+}
+
 describe('a deletion for Ever Platform while the account creates a workspace', () => {
   beforeEach(() => {
     jest.spyOn(console, 'log').mockImplementation(() => undefined);
@@ -189,25 +236,14 @@ describe('a deletion for Ever Platform while the account creates a workspace', (
 
   it('created right after the deletion marked the account: the workspace is undone, the account goes', async () => {
     const t = setup();
-    let created: Promise<Awaited<ReturnType<typeof t.createWorkspace>>>;
-    const { set } = FakeReference.prototype;
-    jest
-      .spyOn(FakeReference.prototype, 'set')
-      .mockImplementation(async function (this: FakeReference, value: any) {
-        await set.call(this, value);
-        const path = (this as unknown as { parts: string[] }).parts.join('/');
-        if (
-          !created &&
-          path.startsWith(`${EVER_CONNECT_PATHS.accountDeletions}/`)
-        ) {
-          created = t.createWorkspace();
-          await created;
-        }
-      });
+    let created!: Awaited<ReturnType<typeof t.createWorkspace>>;
+    onFirstMark('after', async () => {
+      created = await t.createWorkspace();
+    });
 
     await t.requestDeletion();
 
-    expect((await created).status).toBe(ResStatusEnum.error);
+    expect(created.status).toBe(ResStatusEnum.error);
     expect(t.administered()).toEqual([]);
     expect(t.deleter.delete).toHaveBeenCalledWith(UID);
     expect(t.acks).toEqual([{ job_id: 'job-d1', result: 'deleted' }]);
@@ -244,20 +280,10 @@ describe('a deletion for Ever Platform while the account creates a workspace', (
   it('created between the first check and the mark: the account is kept, and its mark removed', async () => {
     const t = setup();
     const holdFor = jest.spyOn(t.person, 'holdFor');
-    const { set } = FakeReference.prototype;
-    let created: Awaited<ReturnType<typeof t.createWorkspace>>;
-    jest
-      .spyOn(FakeReference.prototype, 'set')
-      .mockImplementation(async function (this: FakeReference, value: any) {
-        const path = (this as unknown as { parts: string[] }).parts.join('/');
-        if (
-          !created &&
-          path.startsWith(`${EVER_CONNECT_PATHS.accountDeletions}/`)
-        ) {
-          created = await t.createWorkspace();
-        }
-        await set.call(this, value);
-      });
+    let created!: Awaited<ReturnType<typeof t.createWorkspace>>;
+    onFirstMark('before', async () => {
+      created = await t.createWorkspace();
+    });
 
     await t.requestDeletion();
 
@@ -329,8 +355,7 @@ describe('a deletion for Ever Platform while the account creates a workspace', (
         .spyOn(FakeReference.prototype, 'get')
         .mockImplementation(async function (this: FakeReference) {
           const read = await get.call(this);
-          const path = (this as unknown as { parts: string[] }).parts.join('/');
-          if (path === EVER_CONNECT_PATHS.accountDeletions) {
+          if (pathOf(this) === EVER_CONNECT_PATHS.accountDeletions) {
             beats.forEach((beat) => beat());
             await settle();
           }
@@ -391,34 +416,15 @@ describe('a deletion for Ever Platform while the account creates a workspace', (
 
   it('an undo that cannot remove the workspace leaves it listed: the deletion sees it and keeps the account', async () => {
     const t = setup();
-    const { set, remove } = FakeReference.prototype;
-    const path = (ref: FakeReference) =>
-      (ref as unknown as { parts: string[] }).parts.join('/');
-    jest
-      .spyOn(FakeReference.prototype, 'remove')
-      .mockImplementation(async function (this: FakeReference) {
-        if (path(this).startsWith('workspaces/')) {
-          throw new Error('database unavailable');
-        }
-        return remove.call(this);
-      });
-    let created: Promise<Awaited<ReturnType<typeof t.createWorkspace>>>;
-    jest
-      .spyOn(FakeReference.prototype, 'set')
-      .mockImplementation(async function (this: FakeReference, value: any) {
-        await set.call(this, value);
-        if (
-          !created &&
-          path(this).startsWith(`${EVER_CONNECT_PATHS.accountDeletions}/`)
-        ) {
-          created = t.createWorkspace();
-          await created;
-        }
-      });
+    failWorkspaceRemovals();
+    let created!: Awaited<ReturnType<typeof t.createWorkspace>>;
+    onFirstMark('after', async () => {
+      created = await t.createWorkspace();
+    });
 
     await t.requestDeletion();
 
-    expect((await created).status).toBe(ResStatusEnum.error);
+    expect(created.status).toBe(ResStatusEnum.error);
     expect(t.administered()).toEqual(['Mine']);
     expect(t.deleter.delete).not.toHaveBeenCalled();
     expect(t.acks).toEqual([
@@ -432,16 +438,7 @@ describe('a deletion for Ever Platform while the account creates a workspace', (
 
   it('created after the last check, and its undo fails: an error names the workspace for an operator', async () => {
     const t = setup();
-    const { remove } = FakeReference.prototype;
-    jest
-      .spyOn(FakeReference.prototype, 'remove')
-      .mockImplementation(async function (this: FakeReference) {
-        const path = (this as unknown as { parts: string[] }).parts.join('/');
-        if (path.startsWith('workspaces/')) {
-          throw new Error('database unavailable');
-        }
-        return remove.call(this);
-      });
+    failWorkspaceRemovals();
     const error = jest.spyOn(Logger.prototype, 'error').mockImplementation();
     let created!: Awaited<ReturnType<typeof t.createWorkspace>>;
     t.hooks.beforeDelete = async () => {
@@ -454,27 +451,13 @@ describe('a deletion for Ever Platform while the account creates a workspace', (
     // own "Delete account" does: the one left here is reported instead of undone.
     expect(created.status).toBe(ResStatusEnum.error);
     expect(t.administered()).toEqual(['Mine']);
-    const [workspaceId] = Object.keys(t.db.dump('workspaces') ?? {}).filter(
-      (id) => id !== 'ws-1',
-    );
-    expect(error).toHaveBeenCalledWith(
-      `A workspace whose account is or may be being deleted could not be undone (workspace ${workspaceId}).`,
-    );
+    expectUndoLogged(error, t);
     expect(t.acks).toEqual([{ job_id: 'job-d1', result: 'deleted' }]);
   });
 
   it('a mark that cannot be read and an undo that fails: an error names the workspace', async () => {
     const t = setup();
-    const { remove } = FakeReference.prototype;
-    jest
-      .spyOn(FakeReference.prototype, 'remove')
-      .mockImplementation(async function (this: FakeReference) {
-        const path = (this as unknown as { parts: string[] }).parts.join('/');
-        if (path.startsWith('workspaces/')) {
-          throw new Error('database unavailable');
-        }
-        return remove.call(this);
-      });
+    failWorkspaceRemovals();
     jest
       .spyOn(t.person, 'deletionStarted')
       .mockRejectedValue(new Error('database unavailable'));
@@ -483,12 +466,7 @@ describe('a deletion for Ever Platform while the account creates a workspace', (
     const created = await t.createWorkspace();
 
     expect(created.status).toBe(ResStatusEnum.error);
-    const [workspaceId] = Object.keys(t.db.dump('workspaces') ?? {}).filter(
-      (id) => id !== 'ws-1',
-    );
-    expect(error).toHaveBeenCalledWith(
-      `A workspace whose account is or may be being deleted could not be undone (workspace ${workspaceId}).`,
-    );
+    expectUndoLogged(error, t);
   });
 
   it('marks a finished deletion until the sweep removes it, a day later', async () => {
