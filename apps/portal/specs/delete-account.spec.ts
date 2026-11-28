@@ -14,8 +14,8 @@ jest.mock('app/services/api/api', () => ({
 }));
 
 const REFUSAL =
-  'You are the admin of the workspace “Team”. Before you delete your account, delete that ' +
-  'workspace or ask for another member to be made its admin.';
+  'You are the admin of the workspace “Team”. Delete that workspace before you delete your ' +
+  'account.';
 
 /** An HTTP error as the API client rejects with it (axios). */
 const httpError = (status: number, data: unknown) =>

@@ -6,8 +6,9 @@ import { isDbKey } from './db-key';
  * deletions: Rec's own (`DELETE /api/v1/auth/user`) and the one Ever Platform asks for (Ever
  * Connect's `holdFor`). Rec's account deletion leaves workspaces as they are, so a workspace whose
  * admin is deleted stays without one, with what it holds (which may be other people's). Both
- * refuse while the account is the admin of any workspace: the person deletes the workspace, or has
- * another member made its admin, first.
+ * refuse while the account is the admin of any workspace: the person deletes the workspace first
+ * (or an operator makes another member its admin). A workspace's admin cannot leave it, so the
+ * account's own list `workspaceIds` still names every workspace it administers.
  */
 
 /** A workspace the account is the admin of, with its name when it has one. */
@@ -60,8 +61,9 @@ export async function workspacesAdministeredBy(
 
 /**
  * What Rec's account deletion answers while the account administers workspaces, naming them:
- * "You are the admin of the workspace “Team”. Before you delete your account, delete that
- * workspace or ask for another member to be made its admin."
+ * "You are the admin of the workspace “Team”. Delete that workspace before you delete your
+ * account." Rec has no way for a person to make another member a workspace's admin, so the
+ * message does not offer one.
  */
 export function workspaceAdminRefusal(
   workspaces: readonly AdministeredWorkspace[],
@@ -82,10 +84,10 @@ export function workspaceAdminRefusal(
       ? `${shown.slice(0, -1).join(', ')} and ${shown[shown.length - 1]}`
       : shown[0];
   return workspaces.length === 1
-    ? `You are the admin of the workspace ${list}. Before you delete your account, ` +
-        'delete that workspace or ask for another member to be made its admin.'
-    : `You are the admin of the workspaces ${list}. Before you delete your account, ` +
-        'delete those workspaces or ask for other members to be made their admins.';
+    ? `You are the admin of the workspace ${list}. ` +
+        'Delete that workspace before you delete your account.'
+    : `You are the admin of the workspaces ${list}. ` +
+        'Delete those workspaces before you delete your account.';
 }
 
 /** A workspace's name as stored, trimmed and at most 120 characters; `undefined` for none. */

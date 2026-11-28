@@ -41,8 +41,8 @@ describe('workspacesAdministeredBy', () => {
 describe('workspaceAdminRefusal', () => {
   it('names one workspace', () => {
     expect(workspaceAdminRefusal([{ id: 'ws-1', name: 'Team' }])).toBe(
-      'You are the admin of the workspace “Team”. Before you delete your account, delete that ' +
-        'workspace or ask for another member to be made its admin.',
+      'You are the admin of the workspace “Team”. Delete that workspace before you delete your ' +
+        'account.',
     );
   });
 
@@ -60,8 +60,8 @@ describe('workspaceAdminRefusal', () => {
       }));
 
     expect(workspaceAdminRefusal(named(3))).toBe(
-      'You are the admin of the workspaces “W1”, “W2” and “W3”. Before you delete your account, ' +
-        'delete those workspaces or ask for other members to be made their admins.',
+      'You are the admin of the workspaces “W1”, “W2” and “W3”. Delete those workspaces before ' +
+        'you delete your account.',
     );
     expect(workspaceAdminRefusal(named(5))).toContain(
       '“W1”, “W2”, “W3”, “W4” and “W5”.',

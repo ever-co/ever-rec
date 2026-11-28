@@ -109,8 +109,8 @@ describe('deleting an account that administers a workspace', () => {
 
     expect(result.status).toBe(ResStatusEnum.error);
     expect(result.message).toBe(
-      'You are the admin of the workspace “Design team”. Before you delete your account, ' +
-        'delete that workspace or ask for another member to be made its admin.',
+      'You are the admin of the workspace “Design team”. Delete that workspace before you ' +
+        'delete your account.',
     );
     // Only the workspace it administers, not the one it is a member of.
     expect(result.error).toEqual({
@@ -128,8 +128,8 @@ describe('deleting an account that administers a workspace', () => {
 
     expect(result.status).toBe(ResStatusEnum.error);
     expect(result.message).toBe(
-      'You are the admin of the workspaces “Design team” and “Sales”. Before you delete your ' +
-        'account, delete those workspaces or ask for other members to be made their admins.',
+      'You are the admin of the workspaces “Design team” and “Sales”. Delete those workspaces ' +
+        'before you delete your account.',
     );
     expect(result.error).toEqual({
       code: 'workspace_admin',
