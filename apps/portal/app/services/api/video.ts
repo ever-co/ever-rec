@@ -129,7 +129,7 @@ const createNewVideoFolderAPI = async (
   rootFolderId: string | false,
   newId: string,
   parentId: string | false,
-): Promise<void> => {
+): Promise<IDataResponse<IDbFolderData | null>> => {
   return api.post(`/api/v1/video/folder`, {
     name,
     color,
