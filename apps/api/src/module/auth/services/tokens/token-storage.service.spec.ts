@@ -16,9 +16,19 @@ const fakeDatabase = (initial: IToken | null) => {
   const state = { value: initial, applyLocally: undefined as boolean | undefined };
   let beforeServerCompare: () => void = () => undefined;
 
+  let abort: { error: Error; clears: boolean } | null = null;
   const ref = {
+    async once() {
+      return snapshotOf(state.value);
+    },
     async transaction(update: Update, _onComplete?: unknown, applyLocally?: boolean) {
       state.applyLocally = applyLocally;
+      if (abort) {
+        // A rejected transaction: the SDK's abort by a set() of the same location (a logout's remove()
+        // clears the entry), or a failure that leaves the entry stored.
+        if (abort.clears) state.value = null;
+        throw abort.error;
+      }
       // Attempt 1: the empty local cache.
       let proposal = update(null);
       beforeServerCompare();
@@ -42,6 +52,10 @@ const fakeDatabase = (initial: IToken | null) => {
   return {
     service,
     state,
+    /** The next transaction rejects with `error`; `clears` removes the entry first (a same-process logout). */
+    rejectNextWith: (error: Error, clears: boolean) => {
+      abort = { error, clears };
+    },
     /** Runs between the first attempt and the server's comparison (a concurrent logout). */
     onBeforeServerCompare: (fn: () => void) => {
       beforeServerCompare = fn;
@@ -95,5 +109,21 @@ describe('TokenStorageService.update', () => {
     await service.update('session-1', 'new-serialized');
 
     expect(state.applyLocally).toBe(false);
+  });
+
+  it('answers a refresh aborted by a same-process logout like any refresh after a logout (404)', async () => {
+    const db = fakeDatabase(stored());
+    db.rejectNextWith(new Error('set'), true);
+
+    await expect(db.service.update('session-1', 'new-serialized')).rejects.toBeInstanceOf(NotFoundException);
+  });
+
+  it('rethrows a transaction failure while the entry is still stored', async () => {
+    const db = fakeDatabase(stored());
+    const failure = new Error('maxretry');
+    db.rejectNextWith(failure, false);
+
+    await expect(db.service.update('session-1', 'new-serialized')).rejects.toBe(failure);
+    expect(db.state.value).toEqual(stored());
   });
 });

@@ -45,12 +45,25 @@ export class TokenStorageService {
     // really is gone, null commits as a no-op and the snapshot stays empty. `applyLocally: false`
     // keeps that intermediate null away from local reads: a concurrent delete() must see the stored
     // entry and remove it on the server, not skip it.
-    const { snapshot } = await ref.transaction(
-      (current: IToken | null) =>
-        current === null ? null : { ...current, token, updatedAt: Date.now() },
-      undefined,
-      false,
-    );
+    let snapshot: { exists(): boolean; val(): unknown };
+    try {
+      ({ snapshot } = await ref.transaction(
+        (current: IToken | null) =>
+          current === null ? null : { ...current, token, updatedAt: Date.now() },
+        undefined,
+        false,
+      ));
+    } catch (error) {
+      // The SDK aborts a pending transaction when a set() on the same location lands through the same
+      // app (a logout's remove() in this process) and rejects it with Error('set'). The entry is gone
+      // then, so the refresh is answered like any refresh after a logout, not as a server error.
+      // Anything else, or an entry that is still stored, is rethrown.
+      const now = await ref.once("value").catch(() => null);
+      if (now && !now.exists()) {
+        throw new NotFoundException(`Token with ID ${id} not found`);
+      }
+      throw error;
+    }
 
     if (!snapshot.exists()) {
       throw new NotFoundException(`Token with ID ${id} not found`);
