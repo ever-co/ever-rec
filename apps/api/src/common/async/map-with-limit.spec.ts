@@ -49,7 +49,8 @@ describe('mapWithLimit', () => {
         return n;
       }),
     ).rejects.toBe(failure);
-    expect(started).not.toContain(5);
+    // Limit 2: 0 and 1 start; 0 finishes and its worker starts 2; then 1 fails. Nothing starts after that.
+    expect(started).toEqual([0, 1, 2]);
   });
 
   it('refuses a limit that is not a positive integer', async () => {
