@@ -33,6 +33,13 @@ import {
   changeWorkspaceFolders,
   moveWorkspaceItem,
 } from './change-workspace-collection';
+import { mapWithLimit } from '../../../common/async/map-with-limit';
+
+/**
+ * Item moves of one folder operation in flight at once. Each is its own transaction on its own path, so they do
+ * not contend; the cap only keeps a folder with thousands of items from opening thousands of transactions at once.
+ */
+const ITEM_MOVES_IN_FLIGHT = 10;
 
 // The first of the collections that holds `itemId` as an item. Own keys only: an id such as
 // `constructor` or `toString` is found on every plain object, and must not count as an item.
@@ -324,8 +331,10 @@ export class WorkspaceFoldersService {
         }
       }
 
-      const moves = await Promise.all(
-        toMove.map(({ collectionName, itemId }) =>
+      const moves = await mapWithLimit(
+        toMove,
+        ITEM_MOVES_IN_FLIGHT,
+        ({ collectionName, itemId }) =>
           moveWorkspaceItem(
             workspaceId,
             collectionName,
@@ -333,7 +342,6 @@ export class WorkspaceFoldersService {
             false,
             deletedFolderIds,
           ),
-        ),
       );
       // The answer shows each moved item as it is stored now, and not one deleted meanwhile.
       toMove.forEach(({ collection, itemId }, i) => {
@@ -457,15 +465,11 @@ export class WorkspaceFoldersService {
       // Each item changes folder in a transaction of its own, which answers the folder it was in:
       // two moves of one item at the same time each see where the other left it, and an item
       // deleted meanwhile is not written.
-      const moves = await Promise.all(
-        toMove.map(({ collectionName, itemId }) =>
-          moveWorkspaceItem(
-            workspaceId,
-            collectionName,
-            itemId,
-            toMoveFolderId,
-          ),
-        ),
+      const moves = await mapWithLimit(
+        toMove,
+        ITEM_MOVES_IN_FLIGHT,
+        ({ collectionName, itemId }) =>
+          moveWorkspaceItem(workspaceId, collectionName, itemId, toMoveFolderId),
       );
       const movedFrom: Array<string | false> = [];
       toMove.forEach(({ collection, itemId }, i) => {
