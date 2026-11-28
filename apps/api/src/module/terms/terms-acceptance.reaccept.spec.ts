@@ -21,6 +21,8 @@ jest.mock('terms-acceptance/firebase', () => {
 });
 
 import * as Sentry from '@sentry/nestjs';
+import { buildRecord } from 'terms-acceptance';
+import { FirebaseAcceptanceAdapter } from 'terms-acceptance/firebase';
 import { TermsAcceptanceService } from './terms-acceptance.service';
 import { corpus } from './terms-acceptance.corpus';
 
@@ -68,6 +70,34 @@ describe('TermsAcceptanceService status and reaccept', () => {
       history.map(() => 'reaccept-modal'),
     );
     expect(history).toHaveLength(claimsFrom(service).length);
+  });
+
+  it('does not lock out an account whose accepted text was reworded under the same version', async () => {
+    const service = newService();
+    // The adapter this service writes to (the in-memory one the mock hands out).
+    const { results } = (FirebaseAcceptanceAdapter as unknown as jest.Mock)
+      .mock;
+    const adapter = results[results.length - 1].value;
+    // What an older @ever-co/legal published under the same version numbers: other digests.
+    for (const claim of claimsFrom(service)) {
+      await adapter.put(
+        buildRecord({
+          ...claim,
+          subjectId: 'uid-7',
+          sha256: 'f'.repeat(64),
+          method: 'signup',
+        }),
+      );
+    }
+
+    const status = await service.status('uid-7', 'en');
+
+    expect(status.satisfied).toBe(true);
+    expect(status.blocking).toEqual([]);
+    expect(status.notices.map((d) => d.reason)).toEqual(
+      status.notices.map(() => 'text-mismatch'),
+    );
+    expect(status.notices).toHaveLength(claimsFrom(service).length);
   });
 
   it('treats a second accept of the same texts as done, not as an error', async () => {
