@@ -202,8 +202,10 @@ export interface AccountDeletionMark {
 /**
  * How long an account deletion's mark is kept after its last sign of life (its start, a beat while
  * the deletion runs, or its end): far longer than any request that may still be making the account
- * a workspace's admin. A deletion still running keeps its mark however long it takes; an attempt
- * that never ended (the process stopped) no longer keeps the account from creating workspaces.
+ * a workspace's admin. A deletion still running keeps its mark however long it takes, as long as
+ * its renewals reach the database (a whole day of failed renewals loses it until the next one); an
+ * attempt that never ended (the process stopped) no longer keeps the account from creating
+ * workspaces.
  */
 export const ACCOUNT_DELETION_MARK_KEPT_MS = 24 * 3600 * 1000;
 

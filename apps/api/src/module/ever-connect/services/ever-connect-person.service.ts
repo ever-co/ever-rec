@@ -469,7 +469,8 @@ export class EverConnectPersonService implements EverConnectAccountDeletions {
    * same time checks the mark once it wrote the workspace, and undoes it when the mark is there:
    * either this check sees the new workspace (the account is kept), or the creation sees the mark
    * (the workspace is undone). While Rec's deletion of the account runs, the mark is renewed, so the
-   * sweep never removes it under a deletion that is slow.
+   * sweep does not remove it under a deletion that is slow, as long as a renewal reaches the
+   * database at least once a day.
    *
    * So the account does not go while it administers a workspace, with two cases left to an
    * operator: a workspace created after this last check whose undo failed (the creation logs its
@@ -562,7 +563,8 @@ export class EverConnectPersonService implements EverConnectAccountDeletions {
    * {@link EverConnectAccountDeletions}: whether a deletion of the account has started here and was
    * not called off to keep the account (see {@link deleteAccounts}). Read from the database, so a
    * deletion run by another process of this installation counts too. A running deletion counts
-   * however long it takes, and a finished one until the sweep removes its mark, a day later: a
+   * however long it takes (while its renewals reach the database at least once a day), and a
+   * finished one until the sweep removes its mark, a day later: a
    * request made by the deleted account before it went can then no longer make it a workspace's
    * admin.
    */

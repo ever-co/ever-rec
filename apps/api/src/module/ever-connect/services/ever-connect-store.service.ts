@@ -312,8 +312,9 @@ export class EverConnectStoreService {
   /**
    * Deletes the marks of account deletions whose last sign of life (start, beat or end) is more
    * than {@link ACCOUNT_DELETION_MARK_KEPT_MS} ago, done or not; answers how many. A deletion still
-   * running renews its mark, so it never loses it: each mark is removed in a transaction that checks
-   * it again, and one renewed since it was read stays.
+   * running renews its mark, so it keeps it while a renewal reaches the database at least once a
+   * day: each mark is removed in a transaction that checks it again, and one renewed since it was
+   * read stays. After a whole day of failed renewals the mark goes, until the next renewal.
    */
   async sweepAccountDeletions(now: number): Promise<number> {
     const all =
