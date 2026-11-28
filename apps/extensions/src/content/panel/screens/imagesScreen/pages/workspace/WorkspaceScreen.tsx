@@ -17,7 +17,6 @@ import {
 import useFolderOrder from '@/content/panel/screens/imagesScreen/pages/shared/hooks/useFolderOrder';
 import DashboardCard from '@/content/panel/components/containers/dashboardLayout/elements/DashboardCard';
 import { ItemOrderEnum } from '@/content/panel/screens/imagesScreen/pages/shared/enums/itemOrderEnum';
-import { uploadFile } from '@/app/services/screenshots';
 import { DbImgData, IDbFolderData } from '@/app/interfaces/IEditorImage';
 import SortingDropDown from '@/content/panel/screens/imagesScreen/components/sortingDropDown/SortingDropDown';
 import { RootStateOrAny, useDispatch, useSelector } from 'react-redux';
@@ -239,24 +238,6 @@ const Workspace: FC = () => {
     setSearchParams(searchParams);
   };
 
-  const changeUploadFileHandler = async (
-    event: ChangeEvent<HTMLInputElement>,
-  ) => {
-    if (event.target.value.length && event.target.files?.length) {
-      setLoading(true);
-      await uploadFile(
-        workspace?.currentFolder?.id || false,
-        event.target.files[0],
-        workspace?.currentFolder || null,
-      );
-      //TODO
-      /* if(workspace?.currentFolder){
-        await increaseFolderItems(workspace.currentFolder, 'image');
-      } */
-      setLoading(false);
-    }
-  };
-
   const isFavorite = useCallback(
     (folder: IWorkspaceDbFolder) => {
       if (favoriteFolders?.workspaces && activeWorkspace) {
@@ -346,46 +327,65 @@ const Workspace: FC = () => {
     if (file) {
       setLoading(true);
       setShowAddImageModal(false);
-      await uploadImageToWorkspaceAndUpdateLocalState(
-        currentWorkspaceFolder?.id || false,
-        file,
-        activeWorkspace?.id,
-      );
-      setLoading(false);
+      try {
+        await uploadImageToWorkspaceAndUpdateLocalState(
+          currentWorkspaceFolder?.id || false,
+          file,
+          activeWorkspace?.id,
+        );
+      } catch (error) {
+        // The API client already reported a 401 or 403; any other error is shown here.
+        requestErrorHandler(error);
+      } finally {
+        setLoading(false);
+      }
     }
   };
   const onImageUploadChange = async (event: ChangeEvent<HTMLInputElement>) => {
     if (event.target.value.length && event.target.files?.length) {
       setShowAddImageModal(false);
       setLoading(true);
-      await uploadImageToWorkspaceAndUpdateLocalState(
-        currentWorkspaceFolder?.id || false,
-        event.target.files[0],
-        activeWorkspace?.id,
-      );
-      setLoading(false);
+      try {
+        await uploadImageToWorkspaceAndUpdateLocalState(
+          currentWorkspaceFolder?.id || false,
+          event.target.files[0],
+          activeWorkspace?.id,
+        );
+      } catch (error) {
+        // The API client already reported a 401 or 403; any other error is shown here.
+        requestErrorHandler(error);
+      } finally {
+        setLoading(false);
+      }
     }
   };
   const onVideoUploadChange = async (event: ChangeEvent<HTMLInputElement>) => {
     if (event.target.value.length && event.target.files?.length) {
       setLoading(true);
 
-      const data = await uploadWorkspaceVideoFile(
-        currentWorkspaceFolder?.id,
-        event.target.files[0],
-        activeWorkspace?.id,
-      );
+      try {
+        const data = await uploadWorkspaceVideoFile(
+          currentWorkspaceFolder?.id,
+          event.target.files[0],
+          activeWorkspace?.id,
+        );
 
-      if (data) {
-        const newWorkspace: any = {
-          ...workspace,
-          videos: [...activeWorkspace.videos, data],
-        };
+        if (data) {
+          const newWorkspace: any = {
+            ...workspace,
+            videos: [...activeWorkspace.videos, data],
+          };
 
-        dispatch(PanelAC.setActiveWorkspace({ activeWorkspace: newWorkspace }));
+          dispatch(
+            PanelAC.setActiveWorkspace({ activeWorkspace: newWorkspace }),
+          );
+        }
+      } catch (error) {
+        // The API client already reported a 401 or 403; any other error is shown here.
+        requestErrorHandler(error);
+      } finally {
+        setLoading(false);
       }
-
-      setLoading(false);
     }
   };
   // End of upload item functions

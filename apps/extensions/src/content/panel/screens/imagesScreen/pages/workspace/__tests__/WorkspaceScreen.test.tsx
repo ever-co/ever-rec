@@ -1,14 +1,19 @@
 import { act } from 'react-dom/test-utils';
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
+import userEvent from '@testing-library/user-event';
 import { render } from '@/test/render';
 import { createWorkspaceFolderAPI } from '@/app/services/api/workspace';
+import {
+  uploadWorkspaceImageFile,
+  uploadWorkspaceVideoFile,
+} from '@/app/services/workspace';
 import { errorMessage } from '@/app/services/helpers/toastMessages';
 import Workspace from '../WorkspaceScreen';
 
-// The workspace screen covers itself with a spinner while it creates a folder. A request that
-// failed (403 when the parent folder is gone or the member lost write on it, 400, 500, no
-// network) left the spinner on: for a 403 until the API client moved to another page, for any
-// other error until the panel was reloaded, and without a word.
+// The workspace screen covers itself with a spinner while it creates a folder or uploads an
+// image or a video. A request that failed (403 when the parent folder is gone or the member
+// lost write on it, 400, 500, no network) left the spinner on: for a 403 until the API client
+// moved to another page, for any other error until the panel was reloaded, and without a word.
 
 interface IDeferred<T> {
   promise: Promise<T>;
@@ -28,6 +33,9 @@ const deferred = <T,>(): IDeferred<T> => {
 let mockState: any;
 let mockFolderModal: {
   onCreateFolder: (name: string, color: string) => Promise<void>;
+};
+let mockUploadImageModal: {
+  onDrop: (event: unknown) => Promise<void>;
 };
 const mockDispatch = jest.fn();
 // One object for every render, as the router gives: the screen's effects depend on it.
@@ -163,7 +171,10 @@ jest.mock('../../shared/components/LibraryActions', () => ({
 }));
 jest.mock('../../../components/uploadImageModal/UploadImageModal', () => ({
   __esModule: true,
-  default: () => null,
+  default: (props: any) => {
+    mockUploadImageModal = props;
+    return null;
+  },
 }));
 jest.mock('@/content/panel/shared/SCHeader/SCHeader', () => ({
   __esModule: true,
@@ -175,6 +186,12 @@ jest.mock('../InviteMembersModal/InviteMembersModal', () => ({
 }));
 
 const mockCreateFolder = createWorkspaceFolderAPI as unknown as jest.Mock<
+  (...args: unknown[]) => Promise<unknown>
+>;
+const mockUploadImage = uploadWorkspaceImageFile as unknown as jest.Mock<
+  (...args: unknown[]) => Promise<unknown>
+>;
+const mockUploadVideo = uploadWorkspaceVideoFile as unknown as jest.Mock<
   (...args: unknown[]) => Promise<unknown>
 >;
 const mockErrorMessage = errorMessage as unknown as jest.Mock;
@@ -290,6 +307,152 @@ describe('workspace screen: creating a folder', () => {
     expect(mockDispatch).toHaveBeenCalledWith({
       type: 'SET_ACTIVE_WORKSPACE',
       payload: { activeWorkspace: expect.objectContaining({ folders }) },
+    });
+  });
+});
+
+const IMAGE_FILE = new File(['png'], 'shot.png', { type: 'image/png' });
+const VIDEO_FILE = new File(['mp4'], 'clip.mp4', { type: 'video/mp4' });
+const IMAGE = { dbData: { id: 'img-1', parentId: false }, url: 'shot.png' };
+const VIDEO = { dbData: { id: 'vid-1', parentId: false }, url: 'clip.mp4' };
+
+const fileInput = (accept: 'image' | 'video') => {
+  const input = container.querySelector<HTMLInputElement>(
+    `input[type="file"][accept^="${accept}/"]`,
+  );
+  if (!input) throw new Error(`no ${accept} file input`);
+  return input;
+};
+
+interface IUploadWay {
+  service: typeof mockUploadImage;
+  file: File;
+  /** Where the uploaded item goes in the active workspace. */
+  list: 'screenshots' | 'videos';
+  item: unknown;
+  /**
+   * Starts the upload as the member does. Gives the handler's promise when the test can reach
+   * it; the file inputs call theirs from a DOM event, so a rejection there is unhandled and Jest
+   * fails the test on it.
+   */
+  start: () => Promise<{ handled?: Promise<void> }>;
+}
+
+const UPLOAD_WAYS: [string, () => IUploadWay][] = [
+  [
+    'dropping an image on the upload modal',
+    () => ({
+      service: mockUploadImage,
+      file: IMAGE_FILE,
+      list: 'screenshots',
+      item: IMAGE,
+      start: async () => {
+        let handled: Promise<void> | undefined;
+        await act(async () => {
+          handled = mockUploadImageModal.onDrop({
+            preventDefault: () => undefined,
+            dataTransfer: { files: [IMAGE_FILE] },
+          });
+        });
+        return { handled };
+      },
+    }),
+  ],
+  [
+    'picking an image',
+    () => ({
+      service: mockUploadImage,
+      file: IMAGE_FILE,
+      list: 'screenshots',
+      item: IMAGE,
+      start: async () => {
+        await userEvent.setup().upload(fileInput('image'), IMAGE_FILE);
+        return {};
+      },
+    }),
+  ],
+  [
+    'picking a video',
+    () => ({
+      service: mockUploadVideo,
+      file: VIDEO_FILE,
+      list: 'videos',
+      item: VIDEO,
+      start: async () => {
+        await userEvent.setup().upload(fileInput('video'), VIDEO_FILE);
+        return {};
+      },
+    }),
+  ],
+];
+
+/** Starts an upload, checks the spinner covers the panel, then lets the request settle. */
+const upload = async (
+  way: IUploadWay,
+  answer: (request: IDeferred<unknown>) => void,
+) => {
+  const request = deferred<unknown>();
+  way.service.mockReturnValue(request.promise);
+
+  const { handled } = await way.start();
+  expect(way.service).toHaveBeenCalledTimes(1);
+  const [, file, workspaceId] = way.service.mock.calls[0];
+  expect(file).toBe(way.file);
+  expect(workspaceId).toBe(WORKSPACE.id);
+  expect(spinnerShown()).toBe(true);
+
+  const outcome = handled?.then(
+    () => 'resolved' as const,
+    () => 'rejected' as const,
+  );
+  await act(async () => {
+    answer(request);
+    await (outcome ?? new Promise((done) => setTimeout(done, 0)));
+  });
+  if (outcome) expect(await outcome).toBe('resolved');
+};
+
+describe.each(UPLOAD_WAYS)('workspace screen: %s', (_name, way) => {
+  it('a 403 clears the spinner without a second toast: the API client shows one', async () => {
+    await upload(way(), (request) =>
+      request.reject(httpError(403, 'Forbidden resource')),
+    );
+
+    expect(spinnerShown()).toBe(false);
+    expect(mockErrorMessage).not.toHaveBeenCalled();
+    expect(mockDispatch).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    [
+      'a 500',
+      () => httpError(500, 'Internal server error'),
+      'Internal server error',
+    ],
+    ['no network', networkError, 'Network Error'],
+  ])('%s clears the spinner and says why', async (_error, error, message) => {
+    await upload(way(), (request) => request.reject(error()));
+
+    expect(spinnerShown()).toBe(false);
+    expect(mockErrorMessage).toHaveBeenCalledTimes(1);
+    expect(mockErrorMessage).toHaveBeenCalledWith(message);
+    expect(mockDispatch).not.toHaveBeenCalled();
+  });
+
+  it('an uploaded file clears the spinner and is added to the workspace', async () => {
+    const uploadWay = way();
+    await upload(uploadWay, (request) => request.resolve(uploadWay.item));
+
+    expect(spinnerShown()).toBe(false);
+    expect(mockErrorMessage).not.toHaveBeenCalled();
+    expect(mockDispatch).toHaveBeenCalledTimes(1);
+    expect(mockDispatch).toHaveBeenCalledWith({
+      type: 'SET_ACTIVE_WORKSPACE',
+      payload: {
+        activeWorkspace: expect.objectContaining({
+          [uploadWay.list]: [uploadWay.item],
+        }),
+      },
     });
   });
 });
