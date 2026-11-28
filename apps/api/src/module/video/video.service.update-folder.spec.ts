@@ -118,10 +118,13 @@ describe('VideoService.updateVideoFolderData', () => {
     folderId: any,
     parentId: any,
     { name = 'Renamed', items = 2, color = '#fff', uid = 'uid-owner' } = {},
-  ) => service.updateVideoFolderData(uid, folderId, name, parentId, items, color);
+  ) =>
+    service.updateVideoFolderData(uid, folderId, name, parentId, items, color);
 
   const folderWrites = () =>
-    mockDb.writes.filter(([, path]) => path.startsWith('users/uid-owner/videoFolders'));
+    mockDb.writes.filter(([, path]) =>
+      path.startsWith('users/uid-owner/videoFolders'),
+    );
 
   it('renames a folder, with its stored parent resent as the clients do', async () => {
     const res = await update('middle', 'top');
@@ -136,10 +139,14 @@ describe('VideoService.updateVideoFolderData', () => {
       [
         'update',
         'users/uid-owner/videoFolders/middle',
-        expect.objectContaining({ name: 'Renamed', color: '#fff', items: 2 }),
+        expect.objectContaining({
+          name: 'Renamed',
+          parentId: 'top',
+          color: '#fff',
+          items: 2,
+        }),
       ],
     ]);
-    expect(folderWrites()[0][2].parentId ?? 'top').toBe('top');
   });
 
   it('changes the color and the item count of a top-level folder', async () => {
@@ -181,9 +188,9 @@ describe('VideoService.updateVideoFolderData', () => {
   });
 
   it('is a 404, and creates no ghost folder, for a folder that is not stored', async () => {
-    await expect(update('deleted-in-another-tab', false)).rejects.toBeInstanceOf(
-      NotFoundException,
-    );
+    await expect(
+      update('deleted-in-another-tab', false),
+    ).rejects.toBeInstanceOf(NotFoundException);
     expect(mockDb.writes).toEqual([]);
     expect(emit).not.toHaveBeenCalled();
   });
@@ -196,10 +203,26 @@ describe('VideoService.updateVideoFolderData', () => {
   });
 
   it.each([
-    { what: 'a top folder under a level-2 folder', folderId: 'top', parentId: 'bottom' },
-    { what: 'a level-1 folder to the top level', folderId: 'middle', parentId: false },
-    { what: 'a level-2 folder under another folder', folderId: 'bottom', parentId: 'other' },
-    { what: 'a folder under a folder that is not stored', folderId: 'other', parentId: 'gone' },
+    {
+      what: 'a top folder under a level-2 folder',
+      folderId: 'top',
+      parentId: 'bottom',
+    },
+    {
+      what: 'a level-1 folder to the top level',
+      folderId: 'middle',
+      parentId: false,
+    },
+    {
+      what: 'a level-2 folder under another folder',
+      folderId: 'bottom',
+      parentId: 'other',
+    },
+    {
+      what: 'a folder under a folder that is not stored',
+      folderId: 'other',
+      parentId: 'gone',
+    },
   ])(
     'refuses to move $what, and writes nothing',
     async ({ folderId, parentId }) => {
