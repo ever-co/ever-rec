@@ -162,6 +162,13 @@ const ProfilePage: React.FC<ISettingsPageProps> = () => {
       console.log('error', error);
       if (error.code === 'auth/user-mismatch') {
         errorHandler({ message: t('toasts.couldNotDeleteAccount') });
+      } else if (error.response?.status === 409) {
+        // Refused, nothing deleted: the account is the admin of a workspace, which the API names.
+        // Long enough to be read.
+        errorMessage(
+          error.response.data?.message || t('toasts.errorDeletingUser'),
+          { long: true },
+        );
       } else {
         error.code !== 'auth/requires-recent-login' &&
           errorHandler({ message: t('toasts.errorDeletingUser') });

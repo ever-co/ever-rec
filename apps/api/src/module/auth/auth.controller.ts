@@ -3,6 +3,8 @@ import {
   Controller,
   Delete,
   Get,
+  HttpException,
+  HttpStatus,
   Post,
   Put,
   Req,
@@ -16,6 +18,8 @@ import {
   uploadOptions,
 } from '../../common/multipart/upload-limits';
 import type { Request } from 'express';
+import { ACCOUNT_DELETION_REFUSED_WORKSPACE_ADMIN } from '../../common/workspace-admin';
+import { ResStatusEnum } from '../../enums/ResStatusEnum';
 import { IDataResponse } from '../../interfaces/_types';
 import { SharedService } from '../../services/shared/shared.service';
 import { RefreshToken } from './decorators/refresh-token.decorator';
@@ -132,10 +136,26 @@ export class AuthController {
     return this.authOrchestratorService.processGoogleLogin(credentials);
   }
 
+  /**
+   * Deletes the signed-in account. An account not deleted is answered with an HTTP error and the
+   * usual body (`status: "error"`), so that no client takes it for a deletion: 409 while the
+   * account is the admin of a workspace (`error.code` `workspace_admin`, the message naming the
+   * workspaces; nothing was deleted), 500 when the deletion failed (deleting again finishes it).
+   */
   @UseGuards(AuthGuard)
   @Delete('user')
-  async deleteUser(@User() user: IRequestUser) {
-    return await this.authOrchestratorService.deleteUser(user?.id);
+  async deleteUser(@User() user: IRequestUser): Promise<IDataResponse> {
+    const result = await this.authOrchestratorService.deleteUser(user?.id);
+    if (result.status === ResStatusEnum.success) return result;
+    const refused =
+      (result.error as { code?: unknown } | null)?.code ===
+      ACCOUNT_DELETION_REFUSED_WORKSPACE_ADMIN;
+    if (refused) throw new HttpException(result, HttpStatus.CONFLICT);
+    // The cause stays in the log: the body says only that the deletion failed.
+    throw new HttpException(
+      { ...result, error: null },
+      HttpStatus.INTERNAL_SERVER_ERROR,
+    );
   }
 
   @UseGuards(AuthGuard)

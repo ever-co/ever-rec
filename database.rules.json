@@ -50,6 +50,9 @@
       ".read": false,
       ".write": false
     },
+    "workspaces": {
+      ".indexOn": ["admin"]
+    },
     "whiteboards": {
       "mainCollection": {
         ".indexOn": ["admin"]

@@ -4,6 +4,7 @@ import {
   changeUserEmail,
   changeUserPassword,
   deleteUser,
+  deletionRefusal,
   login,
   signOut,
   updateUserData,
@@ -167,7 +168,12 @@ const Profile: React.FC = () => {
       successMessage(t('toasts.accountDeleted'));
     } catch (error: any) {
       console.log('error', error);
-      if (error.code === 'auth/user-mismatch') {
+      const refusal = deletionRefusal(error);
+      if (refusal) {
+        // The account is the admin of a workspace: the message names the workspaces, and stays up
+        // long enough to be read. Nothing was deleted, and the person stays signed in.
+        errorMessage(refusal, { long: true });
+      } else if (error.code === 'auth/user-mismatch') {
         errorHandler({ message: t('toasts.couldNotDeleteAccount') });
       } else {
         error.code !== 'auth/requires-recent-login' &&

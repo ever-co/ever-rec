@@ -310,9 +310,27 @@ export const changeUserPassword = async (
   return response;
 };
 
+/**
+ * Deletes the signed-in account. Rejects when the account was not deleted: an HTTP 409 when it was
+ * refused because the account is the admin of a workspace ({@link deletionRefusal}), a 500 when the
+ * deletion failed.
+ */
 export const deleteUser = async (): Promise<void> => {
-  const result = await deleteUserAPI();
-  return result;
+  await deleteUserAPI();
+};
+
+/**
+ * The API's message when {@link deleteUser} was refused because the account is the admin of a
+ * workspace (HTTP 409, `error.code` `workspace_admin`): it names the workspaces. `undefined` for
+ * any other failure.
+ */
+export const deletionRefusal = (error: any): string | undefined => {
+  const body = error?.response?.data;
+  return error?.response?.status === 409 &&
+    body?.error?.code === 'workspace_admin' &&
+    typeof body.message === 'string'
+    ? body.message
+    : undefined;
 };
 
 // TODO refactor

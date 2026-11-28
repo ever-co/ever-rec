@@ -1,5 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import type * as admin from 'firebase-admin';
+import { isDbKey } from '../../../common/db-key';
 import { FIREBASE_ADMIN } from '../../firebase/firebase.constants';
 import {
   ACCOUNT_DELETION_MARK_KEPT_MS,
@@ -24,15 +25,8 @@ export function clean<T>(value: T): T {
   return JSON.parse(JSON.stringify(value)) as T;
 }
 
-/** A Realtime Database key: no `.`, `#`, `$`, `[`, `]` or `/`, and not empty. */
-export function isDbKey(value: unknown): value is string {
-  return (
-    typeof value === 'string' &&
-    value.length > 0 &&
-    value.length <= 128 &&
-    !/[.#$[\]/\u0000-\u001f\u007f]/.test(value)
-  );
-}
+// Shared with the account deletion's workspace check (`common/workspace-admin.ts`).
+export { isDbKey };
 
 /**
  * Typed access to `ever_connect/*` in the Realtime Database (Admin SDK; clients are denied by the

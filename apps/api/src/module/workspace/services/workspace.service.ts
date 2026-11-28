@@ -338,7 +338,16 @@ export class WorkspacesService {
     try {
       const db = admin.database();
       // The workspace must exist.
-      await this.utilitiesService.getWorkspaceById(workspaceId);
+      const { workspaceVal } =
+        await this.utilitiesService.getWorkspaceById(workspaceId);
+      // Its admin does not leave it: the workspace would stay without its admin, and the account
+      // deletion, which finds the workspaces an account administers through the account's own
+      // list, would no longer see it. The admin deletes the workspace instead.
+      if (workspaceVal?.admin === uid) {
+        return sendError(
+          'The admin of a workspace cannot leave it. Delete the workspace instead.',
+        );
+      }
       const userRef = db.ref(`users/${uid}`);
       const userSnap = await userRef.get();
       const userVal: IUserData = userSnap.val();
