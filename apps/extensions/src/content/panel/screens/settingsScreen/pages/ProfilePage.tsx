@@ -155,23 +155,19 @@ const ProfilePage: React.FC<ISettingsPageProps> = () => {
   const deleteUserHandler = async () => {
     try {
       dispatch(PanelAC.setLoaderState(true));
-      const result = await deleteUser();
-      // Not deleted: the person stays signed in. A refusal names the workspaces the account is the
-      // admin of, and stays up long enough to be read.
-      if (!result.deleted) {
-        if (result.refusal) {
-          errorMessage(result.refusal, { long: true });
-        } else {
-          errorHandler({ message: t('toasts.errorDeletingUser') });
-        }
-        return;
-      }
+      await deleteUser();
       await signOutHandler();
       successMessage(t('toasts.accountDeleted'));
     } catch (error: any) {
       console.log('error', error);
       if (error.code === 'auth/user-mismatch') {
         errorHandler({ message: t('toasts.couldNotDeleteAccount') });
+      } else if (error.response?.status === 409) {
+        // Refused, nothing deleted: the account is the admin of a workspace, which the API names.
+        errorHandler({
+          message:
+            error.response.data?.message || t('toasts.errorDeletingUser'),
+        });
       } else {
         error.code !== 'auth/requires-recent-login' &&
           errorHandler({ message: t('toasts.errorDeletingUser') });

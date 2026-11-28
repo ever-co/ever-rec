@@ -181,7 +181,8 @@ export class AuthOrchestratorService {
    * Deletes the account (`DELETE /api/v1/auth/user`, and the deletion Ever Platform asks for): its
    * shares, its files, its sign-in account, what other modules keep for it and its record. Refused
    * with status `error`, the message naming the workspaces and `error.code` `workspace_admin`,
-   * while the account is the admin of any workspace; nothing is deleted then.
+   * while the account is the admin of any workspace; nothing is deleted then (the route answers
+   * it with HTTP 409).
    */
   async deleteUser(uid: string): Promise<IDataResponse> {
     try {

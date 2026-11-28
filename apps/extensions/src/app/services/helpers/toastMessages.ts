@@ -21,17 +21,13 @@ export const successMessage = (text: string) => {
   });
 };
 
-/**
- * An error toast. `long` keeps a message of a sentence or two up for 10 seconds, and while the
- * pointer is on it, instead of 3: long enough to be read.
- */
-export const errorMessage = (text: string, { long = false } = {}) => {
+export const errorMessage = (text: string) => {
   toast.error(text, {
     theme: 'light',
     position: 'top-center',
-    autoClose: long ? 10000 : 3000,
+    autoClose: 3000,
     closeOnClick: false,
-    pauseOnHover: long,
+    pauseOnHover: false,
     draggable: true,
     pauseOnFocusLoss: false,
     bodyStyle: {

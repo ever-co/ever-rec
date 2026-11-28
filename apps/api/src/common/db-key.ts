@@ -16,8 +16,8 @@ export function isDbKey(value: unknown): value is string {
 }
 
 function hasControlCharacter(value: string): boolean {
-  for (let i = 0; i < value.length; i++) {
-    const code = value.charCodeAt(i);
+  for (const character of value) {
+    const code = character.codePointAt(0) ?? 0;
     if (code <= 0x1f || code === 0x7f) return true;
   }
   return false;

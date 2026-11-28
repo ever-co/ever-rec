@@ -1,3 +1,4 @@
+import { mapWithLimit } from './async/map-with-limit';
 import { isDbKey } from './db-key';
 
 /**
@@ -21,31 +22,40 @@ export type WorkspaceAdminFields = { admin?: unknown; name?: unknown } | null;
 /** `error.code` of Rec's account deletion refused for this rule. */
 export const ACCOUNT_DELETION_REFUSED_WORKSPACE_ADMIN = 'workspace_admin';
 
+/** Workspaces read at the same time. */
+const READS_AT_ONCE = 4;
+
 /** At most this many names are written into the refusal; the rest are counted. */
 const NAMES_SHOWN = 5;
 
 /**
  * The workspaces `uid` is the admin of, found through its own list `users/<uid>/workspaceIds`
- * (every workspace it created or joined; an array, or an object when the array has a hole), read
- * one by one with `workspace`. An id that is not a database key, or names no workspace, is skipped.
+ * (every workspace it created or joined; an array, or an object when the array has a hole), each
+ * read once with `workspace`, a few at a time. An id that is not a database key, or names no
+ * workspace, is skipped. The order is the list's.
  */
 export async function workspacesAdministeredBy(
   uid: string,
   workspaceIds: unknown,
   workspace: (id: string) => Promise<WorkspaceAdminFields>,
 ): Promise<AdministeredWorkspace[]> {
-  const ids: unknown[] = Array.isArray(workspaceIds)
+  const listed: unknown[] = Array.isArray(workspaceIds)
     ? workspaceIds
     : Object.values((workspaceIds ?? {}) as Record<string, unknown>);
-  const administered: AdministeredWorkspace[] = [];
-  for (const id of new Set(ids)) {
-    if (!isDbKey(id)) continue;
-    const fields = await workspace(id);
-    if (fields?.admin !== uid) continue;
-    const name = workspaceNameOf(fields.name);
-    administered.push(name ? { id, name } : { id });
-  }
-  return administered;
+  const ids = [...new Set(listed)].filter(isDbKey);
+  const found = await mapWithLimit(
+    ids,
+    READS_AT_ONCE,
+    async (id): Promise<AdministeredWorkspace | null> => {
+      const fields = await workspace(id);
+      if (fields?.admin !== uid) return null;
+      const name = workspaceNameOf(fields.name);
+      return name ? { id, name } : { id };
+    },
+  );
+  return found.filter(
+    (entry): entry is AdministeredWorkspace => entry !== null,
+  );
 }
 
 /**

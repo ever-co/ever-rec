@@ -1,10 +1,11 @@
 /**
- * DELETE /auth/user answers HTTP 200 with status "error" when the account was not deleted. Refused
- * because the account is the admin of a workspace, its message names the workspaces: `deleteUser` hands it
- * over to be shown, and the profile page (settings/profile) keeps the person signed in.
+ * DELETE /auth/user answers an account that was not deleted with an HTTP error: 409 when it was
+ * refused because the account is the admin of a workspace (the message names the workspaces), 500
+ * when the deletion failed. `deleteUser` then rejects, so the profile page (settings/profile) keeps
+ * the person signed in, and `deletionRefusal` gives the message to show for the refusal only.
  */
 import api from 'app/services/api/api';
-import { deleteUser } from 'app/services/auth';
+import { deleteUser, deletionRefusal } from 'app/services/auth';
 
 // The real client reads sign-in tokens from cookies; only what it answers matters here.
 jest.mock('app/services/api/api', () => ({
@@ -12,25 +13,31 @@ jest.mock('app/services/api/api', () => ({
   default: { delete: jest.fn() },
 }));
 
-const answer = (value: unknown) =>
-  (api.delete as jest.Mock).mockResolvedValue(value);
-
 const REFUSAL =
   'You are the admin of the workspace “Team”. Before you delete your account, delete that ' +
   'workspace or ask for another member to be made its admin.';
 
-describe('deleteUser', () => {
+/** An HTTP error as the API client rejects with it (axios). */
+const httpError = (status: number, data: unknown) =>
+  Object.assign(new Error(`Request failed with status code ${status}`), {
+    response: { status, data },
+  });
+
+describe('deleting the account', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it('answers deleted when the API deleted the account', async () => {
-    answer({ status: 'success', message: 'Success!', error: null, data: null });
+  it('resolves once the API deleted the account', async () => {
+    (api.delete as jest.Mock).mockResolvedValue({
+      status: 'success',
+      data: null,
+    });
 
-    await expect(deleteUser()).resolves.toEqual({ deleted: true });
+    await expect(deleteUser()).resolves.toBeUndefined();
     expect(api.delete).toHaveBeenCalledWith('/api/v1/auth/user');
   });
 
-  it('answers the refusal while the account is the admin of a workspace', async () => {
-    answer({
+  it('rejects the refusal, whose message names the workspaces', async () => {
+    const refused = httpError(409, {
       status: 'error',
       message: REFUSAL,
       error: {
@@ -39,21 +46,28 @@ describe('deleteUser', () => {
       },
       data: null,
     });
+    (api.delete as jest.Mock).mockRejectedValue(refused);
 
-    await expect(deleteUser()).resolves.toEqual({
-      deleted: false,
-      refusal: REFUSAL,
-    });
+    const error = await deleteUser().catch((reason) => reason);
+
+    expect(error).toBe(refused);
+    expect(deletionRefusal(error)).toBe(REFUSAL);
   });
 
-  it('answers not deleted, without the message, for any other failure', async () => {
-    answer({
-      status: 'error',
-      message: 'Error while trying to delete user or user files!',
-      error: {},
-      data: null,
-    });
-
-    await expect(deleteUser()).resolves.toEqual({ deleted: false });
+  it('gives no refusal message for any other failure', () => {
+    expect(
+      deletionRefusal(
+        httpError(500, {
+          status: 'error',
+          message: 'Error while trying to delete user or user files!',
+          error: null,
+        }),
+      ),
+    ).toBeUndefined();
+    // A 409 that is not this refusal, and an error without a response (offline).
+    expect(
+      deletionRefusal(httpError(409, { message: 'x', error: { code: 'y' } })),
+    ).toBeUndefined();
+    expect(deletionRefusal(new Error('Network Error'))).toBeUndefined();
   });
 });

@@ -29,7 +29,7 @@ import {
 } from '../interfaces/ITermsAcceptance';
 import cookie from 'js-cookie';
 import { CredentialResponse } from '@react-oauth/google';
-import { IDataResponse, ResStatusEnum } from 'app/interfaces/IApiResponse';
+import { IDataResponse } from 'app/interfaces/IApiResponse';
 import { removeCookies } from './helpers/getCookies';
 import {
   newPasswordAPI,
@@ -311,23 +311,26 @@ export const changeUserPassword = async (
 };
 
 /**
- * Deletes the signed-in account. The API answers a failure with HTTP 200 and status "error": the
- * account is then not deleted, or not fully (deleting it again finishes it). `refusal` is the API's
- * message when it refused, deleting nothing, because the account is the admin of a workspace (the
- * message names the workspaces), for the person to read.
+ * Deletes the signed-in account. Rejects when the account was not deleted: an HTTP 409 when it was
+ * refused because the account is the admin of a workspace ({@link deletionRefusal}), a 500 when the
+ * deletion failed.
  */
-export const deleteUser = async (): Promise<{
-  deleted: boolean;
-  refusal?: string;
-}> => {
-  const response: IDataResponse<null> = await deleteUserAPI();
-  if (response?.status === ResStatusEnum.success) return { deleted: true };
-  const refusal =
-    (response?.error as { code?: unknown } | null)?.code ===
-      'workspace_admin' && typeof response?.message === 'string'
-      ? response.message
-      : undefined;
-  return refusal ? { deleted: false, refusal } : { deleted: false };
+export const deleteUser = async (): Promise<void> => {
+  await deleteUserAPI();
+};
+
+/**
+ * The API's message when {@link deleteUser} was refused because the account is the admin of a
+ * workspace (HTTP 409, `error.code` `workspace_admin`): it names the workspaces. `undefined` for
+ * any other failure.
+ */
+export const deletionRefusal = (error: any): string | undefined => {
+  const body = error?.response?.data;
+  return error?.response?.status === 409 &&
+    body?.error?.code === 'workspace_admin' &&
+    typeof body.message === 'string'
+    ? body.message
+    : undefined;
 };
 
 // TODO refactor

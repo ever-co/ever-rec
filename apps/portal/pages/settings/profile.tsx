@@ -4,6 +4,7 @@ import {
   changeUserEmail,
   changeUserPassword,
   deleteUser,
+  deletionRefusal,
   login,
   signOut,
   updateUserData,
@@ -162,22 +163,17 @@ const Profile: React.FC = () => {
   //! Deletes account and resets global state
   const deleteUserHandler = async () => {
     try {
-      const result = await deleteUser();
-      // Not deleted: the person stays signed in. A refusal names the workspaces the account is the
-      // admin of, and stays up long enough to be read.
-      if (!result.deleted) {
-        if (result.refusal) {
-          errorMessage(result.refusal, { long: true });
-        } else {
-          errorHandler({ message: t('toasts.errorDeletingUser') });
-        }
-        return;
-      }
+      await deleteUser();
       await signOutHandler();
       successMessage(t('toasts.accountDeleted'));
     } catch (error: any) {
       console.log('error', error);
-      if (error.code === 'auth/user-mismatch') {
+      const refusal = deletionRefusal(error);
+      if (refusal) {
+        // The account is the admin of a workspace: the message names the workspaces, and stays up
+        // long enough to be read. Nothing was deleted, and the person stays signed in.
+        errorMessage(refusal, { long: true });
+      } else if (error.code === 'auth/user-mismatch') {
         errorHandler({ message: t('toasts.couldNotDeleteAccount') });
       } else {
         error.code !== 'auth/requires-recent-login' &&

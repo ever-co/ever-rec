@@ -11,7 +11,7 @@ import {
 } from '@/app/services/api/auth';
 import { splitFilename } from '@/app/utilities/common';
 import { message } from 'antd';
-import { IDataResponse, ResStatusEnum } from '@/app/interfaces/IDataResponse';
+import { IDataResponse } from '@/app/interfaces/IDataResponse';
 import { iDataResponseParser } from './helpers/iDataResponseParser';
 import { IUser } from '../interfaces/IUserData';
 
@@ -124,24 +124,8 @@ export const refreshUser = async (credential?: any): Promise<void> => {
   // dummmy, moved to website
 };
 
-/**
- * Deletes the signed-in account. The API answers a failure with HTTP 200 and status "error": the
- * account is then not deleted, or not fully (deleting it again finishes it). `refusal` is the API's
- * message when it refused, deleting nothing, because the account is the admin of a workspace (the
- * message names the workspaces), for the person to read.
- */
-export const deleteUser = async (): Promise<{
-  deleted: boolean;
-  refusal?: string;
-}> => {
-  const response: IDataResponse<null> = await deleteUserAPI();
-  if (response?.status === ResStatusEnum.success) return { deleted: true };
-  const refusal =
-    (response?.error as { code?: unknown } | null)?.code ===
-      'workspace_admin' && typeof response?.message === 'string'
-      ? response.message
-      : undefined;
-  return refusal ? { deleted: false, refusal } : { deleted: false };
+export const deleteUser = async (): Promise<any> => {
+  return deleteUserAPI();
 };
 
 export const deleteFilesInDirectory = async (
