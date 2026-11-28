@@ -358,7 +358,7 @@ const MultiItemsSelect: React.FC<IMultiItemsSelectProps> = ({
   return (
     <div
       className={classNames(
-        'multi-items tw-flex tw-justify-around tw-items-center tw-bg-gallery-grey tw-rounded-md tw-p-5px tw-px-2 tw-mx-2',
+        'multi-items tw-flex tw-justify-around tw-items-center tw-p-1 tw-mx-2',
         isTrash && styles.trash,
         styles.MultiItemsSelect,
       )}
@@ -366,11 +366,12 @@ const MultiItemsSelect: React.FC<IMultiItemsSelectProps> = ({
       <div className="tw-flex">
         <AppButton
           onClick={selectAllHandler}
-          className="multi-button tw-mx-5px"
+          className="multi-button tw-mx-1"
           bgColor="tw-bg-white"
+          twPadding="tw-py-[5px] tw-px-3"
           outlined={false}
         >
-          <div className="tw-text-gray-600 tw-leading-6 tw-font-normal tw-fontFamily-roboto">
+          <div>
             {selected
               ? t('common.bulkActions.selectNone')
               : t('common.bulkActions.selectAll')}
@@ -379,26 +380,24 @@ const MultiItemsSelect: React.FC<IMultiItemsSelectProps> = ({
 
         {isTrash ? (
           <AppButton
-            className="multi-button tw-mx-5px"
+            className="multi-button tw-mx-1"
             bgColor="tw-bg-white"
+            twPadding="tw-py-[5px] tw-px-3"
             outlined={false}
             onClick={() => setRestoreModal(true)}
           >
-            <div className="tw-text-gray-600 tw-leading-6 tw-font-normal tw-fontFamily-roboto">
-              {t('common.bulkActions.restore')}
-            </div>
+            <div>{t('common.bulkActions.restore')}</div>
           </AppButton>
         ) : (
           <>
             <AppButton
-              className="multi-button tw-mx-5px"
+              className="multi-button tw-mx-1"
               bgColor="tw-bg-white"
+              twPadding="tw-py-[5px] tw-px-3"
               outlined={false}
               onClick={onDownloadHandler}
             >
-              <div className="tw-text-gray-600 tw-leading-6 tw-font-normal tw-fontFamily-roboto">
-                {t('common.bulkActions.download')}
-              </div>
+              <div>{t('common.bulkActions.download')}</div>
             </AppButton>
           </>
         )}
@@ -407,25 +406,25 @@ const MultiItemsSelect: React.FC<IMultiItemsSelectProps> = ({
       <div className="tw-flex">
         {!isTrash && (
           <AppButton
-            className="multi-button tw-mx-5px"
+            className="multi-button tw-mx-1"
             bgColor="tw-bg-white"
+            twPadding="tw-py-[5px] tw-px-3"
             onClick={() => setShowFolderModal(true)}
           >
-            <div className="tw-font-normal tw-text-black">
-              {t('common.bulkActions.move')}
-            </div>
+            <div>{t('common.bulkActions.move')}</div>
           </AppButton>
         )}
 
         <AppButton
-          className="multi-button tw-mx-5px"
+          className="multi-button tw-mx-1"
           bgColor="tw-bg-white"
+          twPadding="tw-py-[5px] tw-px-3"
           outlined={false}
           onClick={() =>
             isTrash ? setDeleteModal(true) : setShowDeleteModal(true)
           }
         >
-          <div className="tw-text-red tw-leading-6 tw-font-normal tw-fontFamily-roboto">
+          <div className="tw-text-destructive-text">
             {t('common.bulkActions.delete')}
           </div>
         </AppButton>

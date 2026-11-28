@@ -1,22 +1,25 @@
+// "Manage comments": a small control that floats over the corner of the stage.
 .mainContainer {
   overflow-y: auto;
   align-items: flex-start;
   justify-content: flex-start;
   flex-direction: column;
-  border-radius: 5px;
-  background-color: #e9e7f0;
-  background-image: radial-gradient(
-      at 47% 83%,
-      rgb(211, 205, 248) 0,
-      transparent 59%
-    ),
-    radial-gradient(at 82% 65%, hsl(253.33, 23%, 92%) 0, transparent 55%);
-  -webkit-box-shadow: inset 0px 22px 10px -15px #ffffff;
-  box-shadow: inset 0px 22px 10px -15px #ffffff;
-  -webkit-box-shadow: 0px 0px 7px -3px #000000;
-  box-shadow: 0px 0px 7px -3px #000000;
-  border: 1px solid rgba(91, 77, 240, 0.13);
+  border-radius: 8px;
+  background-color: hsl(var(--card));
+  color: hsl(var(--card-foreground));
+  box-shadow: var(--shadow-sm);
+  border: 1px solid hsl(var(--border));
   position: absolute;
+  transition: background-color 150ms var(--ease-out);
+
+  &:hover {
+    background-color: hsl(var(--accent));
+  }
+
+  b {
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
 }
 
 .innerContainer {
@@ -26,7 +29,7 @@
 
 .container {
   background: transparent;
-  padding: 0.5rem;
+  padding: 0.25rem 0.5rem;
 }
 
 .flexContiner {
@@ -34,34 +37,50 @@
   justify-content: space-between;
 }
 
+// The list of every comment on the image, opened from the control above.
 .commentsContainer {
   position: absolute;
   overflow-y: auto;
   align-items: flex-start;
   justify-content: flex-start;
   flex-direction: column;
-  border-radius: 5px;
-  background-color: #e9e7f0;
-  background-image: radial-gradient(
-      at 47% 83%,
-      rgb(211, 205, 248) 0,
-      transparent 59%
-    ),
-    radial-gradient(at 82% 65%, hsl(253.33, 23%, 92%) 0, transparent 55%);
-  -webkit-box-shadow: inset 0px 22px 10px -15px #ffffff;
-  box-shadow: inset 0px 22px 10px -15px #ffffff;
-  -webkit-box-shadow: 0px 0px 7px -3px #000000;
-  box-shadow: 0px 0px 7px -3px #000000;
-  border: 1px solid rgba(91, 77, 240, 0.13);
-  padding: 13px;
-  background-color: white;
+  border-radius: 10px;
+  background-color: hsl(var(--popover));
+  color: hsl(var(--popover-foreground));
+  box-shadow: var(--shadow-float);
+  border: 1px solid hsl(var(--border));
+  padding: 12px;
   width: 360px;
 }
 
 .displayFlex {
-    display: flex;
+  display: flex;
 }
 
 .displayHidden {
-    display: none;
+  display: none;
+}
+
+// Phone width: under the editor's top bar (--editor-top-bar, edit.module.scss), and the list
+// across the width. The desktop offsets are inline styles, hence the !important.
+@media screen and (max-width: 767px) {
+  .mainContainer {
+    position: fixed;
+    z-index: 15;
+    top: calc(var(--editor-top-bar, 56px) + 0.5rem) !important;
+    right: 1rem !important;
+  }
+
+  .commentsContainer {
+    position: fixed;
+    z-index: 25;
+    top: calc(var(--editor-top-bar, 56px) + 3.25rem) !important;
+    left: 0.5rem;
+    right: 0.5rem !important;
+    width: auto;
+    max-height: calc(
+      100dvh - var(--editor-top-bar, 56px) - var(--editor-tool-bar, 60px) -
+        4.25rem
+    ) !important;
+  }
 }

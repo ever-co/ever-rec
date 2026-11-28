@@ -25,7 +25,7 @@ export const requestErrorHandler = (error: any) => {
 };
 
 const customMessageErrors: Record<string, string> = {
-  'The user did not approve access.': 'Login with Google to use this Feature',
+  'The user did not approve access.': 'Login with Google to use this feature',
 };
 
 const firebaseErrors: Record<string, string> = {

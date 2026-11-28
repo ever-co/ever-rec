@@ -1,5 +1,4 @@
 @import 'pagesScss/partials/_mixins.scss';
-@import 'pagesScss/partials/_colors.scss';
 
 .InviteMembers {
   width: 100%;
@@ -10,37 +9,93 @@
     align-items: center;
 
     svg {
-      margin: 1rem 0;
+      margin: 0.5rem 0 1rem;
     }
 
     p {
-      margin-bottom: 1.5rem;
+      margin: 0 0 1.5rem;
+      color: hsl(var(--muted-foreground));
+      font-size: 0.875rem;
+      line-height: 1.25rem;
+      text-align: center;
     }
   }
 
+  // A row of the form: a 40px field and its action beside it.
   .workspaceInviteWrapper {
     max-width: 100%;
     display: flex;
+    gap: 0.5rem;
 
     &:first-of-type {
-      margin-bottom: 1.5rem;
+      margin-bottom: 0.75rem;
     }
 
+    // The field: the invite link (read only) and the e-mail addresses (react-multi-email, whose
+    // own sheet paints a light box and a focus border of its own).
     .whiteParagraph {
-      width: 65%;
-      height: 45px;
-      padding: 0.6rem 0.5rem;
-      border-top-left-radius: 0.2rem;
-      border-bottom-left-radius: 0.2rem;
-      border-top-right-radius: 0;
-      border-bottom-right-radius: 0;
-      background: white;
+      flex: 1 1 0;
+      min-width: 0;
+      height: 2.5rem;
+      margin: 0;
+      padding: 0 0.75rem;
+      border: 1px solid hsl(var(--input));
+      border-radius: calc(var(--radius) - 2px);
+      background: transparent;
+      color: hsl(var(--foreground));
+      font-size: 0.875rem;
+      line-height: calc(2.5rem - 2px);
       overflow: hidden;
-      border: 1px solid $grey-light02;
+      transition:
+        border-color 150ms var(--ease-out),
+        box-shadow 150ms var(--ease-out);
       @include truncate;
 
+      &:global(.focused) {
+        border-color: hsl(var(--ring));
+        box-shadow: 0 0 0 3px hsl(var(--ring) / 0.2);
+      }
+
+      // One row of the field is 30px (a chip and its margins), whether it holds chips or only
+      // the typing place.
       input {
+        height: 1.875rem;
         border: 0 !important;
+        background: transparent;
+        color: hsl(var(--foreground));
+        font-size: 0.875rem;
+      }
+
+      // An address that was added: a small chip with its remove button.
+      [data-tag] {
+        margin-block: 0.125rem;
+        margin-inline: 0 0.25rem;
+        padding-block: 0.125rem;
+        padding-inline: 0.5rem 0.25rem;
+        border: 1px solid hsl(var(--border));
+        border-radius: calc(var(--radius) - 4px);
+        background-color: hsl(var(--muted));
+        color: hsl(var(--foreground));
+        font-size: 0.75rem;
+        font-weight: 500;
+        line-height: 1.25rem;
+      }
+    }
+
+    // The addresses field keeps the height of a field; more rows of chips scroll inside it.
+    .reactMultiEmail {
+      padding-block: 0.25rem 0;
+      padding-inline: 0.625rem 0.5rem;
+      line-height: 1.25rem;
+
+      > span[data-placeholder] {
+        top: 50%;
+        inset-inline-start: 0.75rem;
+        padding: 0;
+        transform: translateY(-50%);
+        color: hsl(var(--muted-foreground));
+        font-size: 0.875rem;
+        line-height: 1.25rem;
       }
     }
 
@@ -48,16 +103,14 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      width: 35%;
-      font-size: 0.9rem;
+      flex: 0 0 auto;
+      min-width: 9rem;
+      height: 2.5rem;
+      font-size: 0.875rem;
     }
 
     .createWorkspaceButton {
       width: 100%;
     }
   }
-}
-
-.reactMultiEmail > span[data-placeholder] {
-  top: 0.65em;
 }

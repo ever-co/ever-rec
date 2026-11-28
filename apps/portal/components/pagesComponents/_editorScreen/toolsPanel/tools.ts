@@ -148,7 +148,7 @@ export const tools: Record<ToolName, ITool> = {
   },
   curvaArrow: {
     tool: 'curvaArrow',
-    title: 'Curved Arrow',
+    title: 'Curved arrow',
     icon: curvaarrow,
     cursor: 'crosshair',
   },

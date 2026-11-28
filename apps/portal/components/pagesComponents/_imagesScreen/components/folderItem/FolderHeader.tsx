@@ -3,6 +3,7 @@ import styles from './FolderItem.module.scss';
 import { Dropdown } from 'antd';
 import AppSvg from 'components/elements/AppSvg';
 import classNames from 'classnames';
+import { mirrorPlacement, useDirection } from 'i18n/direction';
 
 interface FolderHeaderProps {
   folder: any;
@@ -24,7 +25,7 @@ const FolderHeader: FC<FolderHeaderProps> = ({
       <div className={styles.folderContent}>
         <FolderIcon
           path="/common/folder-icon-v3.svg"
-          bgColor={folder.color ? folder.color : '#ffffff'}
+          bgColor={folder.color ? folder.color : 'transparent'}
           size="19px"
         />
         <FolderName name={folder.name} />
@@ -54,7 +55,8 @@ interface FolderIconProps {
 export const FolderIcon: FC<FolderIconProps> = ({ path, bgColor, size }) => {
   return (
     <div className={styles.folderIconWrapper}>
-      <AppSvg path={path} bgColor={bgColor} size={size} />
+      {/* `themed`: the folder's outline takes the text colour; its body keeps the folder's colour. */}
+      <AppSvg path={path} bgColor={bgColor} size={size} themed />
     </div>
   );
 };
@@ -66,6 +68,9 @@ interface FolderNameProps {
 const FolderName: FC<FolderNameProps> = ({ name }) => {
   return (
     <div
+      // A name reads in its own direction (an English one is cut at its end); the style keeps
+      // it lined up with the page.
+      dir="auto"
       className={classNames(styles.folderName)}
       title={name.length > 25 ? name : undefined}
     >
@@ -85,7 +90,7 @@ const FavoriteStar: FC<IFavoriteStarProps> = ({ isFavorite }) => {
     isFavorite && (
       <AppSvg
         path="/common/star_filled.svg"
-        size="23px"
+        size="16px"
         className={styles.starSvg}
       />
     )
@@ -105,12 +110,13 @@ const MenuButton: FC<MenuButtonProps> = ({
   isDropdownVisible,
   onVisibleChange,
 }) => {
+  const direction = useDirection();
   return (
     <Dropdown
       trigger={['click']}
       open={isDropdownVisible}
       overlay={overlay}
-      placement={placement}
+      placement={mirrorPlacement(placement, direction)}
       onOpenChange={onVisibleChange}
     >
       <div

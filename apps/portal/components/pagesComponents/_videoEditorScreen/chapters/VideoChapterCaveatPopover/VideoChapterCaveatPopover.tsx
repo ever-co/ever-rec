@@ -19,19 +19,20 @@ interface IProps {
 
 const VideoChapterCaveatPopover: FC<IProps> = ({ caveat = 'default' }) => {
   let CaveatComponent = <DefaultCaveat />;
-  let bgColor = '#5b4dbe';
+  // The info mark is quiet; a warning and an error carry their status colour.
+  let bgColor = 'hsl(var(--muted-foreground))';
 
   if (caveat === 'warning') {
     CaveatComponent = <WarningCaveat />;
-    bgColor = '#FF7A00';
+    bgColor = 'hsl(var(--warning))';
   } else if (caveat === 'error') {
     CaveatComponent = <ErrorCaveat />;
-    bgColor = '#f45046';
+    bgColor = 'hsl(var(--destructive-text))';
   }
 
   return (
     <Popover content={CaveatComponent} trigger="hover">
-      <div className="tw-inline-flex tw-ml-2 tw-cursor-pointer">
+      <div className="tw-inline-flex tw-ms-2 tw-cursor-pointer">
         <AppSvg
           path="/common/circle-info-solid.svg"
           size="14px"

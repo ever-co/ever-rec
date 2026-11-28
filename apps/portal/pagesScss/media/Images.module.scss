@@ -1,11 +1,14 @@
-@use 'pagesScss/Shared.module.scss';
+@use 'pagesScss/Shared.module.scss' as shared;
 @import 'pagesScss/partials/_colors.scss';
 
 .favoriteHeading {
-   font-size: 1.2rem;
-   font-weight: 600;
-   margin-right: 1rem;
- }
+  color: hsl(var(--foreground));
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 2rem;
+  letter-spacing: -0.01em;
+  margin-inline-end: 1rem;
+}
 
 .mainSection {
   position: relative;
@@ -14,25 +17,16 @@
   height: 100%;
 
   .foldersDashboardCard {
-    padding-left: 0;
-    padding-right: 0;
+    padding-inline-start: 0;
+    padding-inline-end: 0;
 
     .foldersSectionMainHeader {
       display: flex;
       flex-wrap: wrap;
       justify-content: space-between;
       align-items: center;
-      margin-left: 0;
-      margin-right: 0;
-      border-bottom: 1px solid $grey-light05;
-      padding-bottom: 1rem;
-
-      .mainHeader {
-        font-size: 2rem;
-        font-weight: 600;
-        margin-right: 1rem;
-      }
-
+      margin-inline-start: 0;
+      margin-inline-end: 0;
     }
 
     .foldersSectionMainHeaderCreateFolder {
@@ -49,21 +43,19 @@
     margin-bottom: 1rem;
   }
 
-  .foldersScrollableDiv {
-    overflow-y: auto;
-    margin-right: 1rem;
-  }
-
-  .foldersFavourites{
+  .foldersFavourites {
+    @include shared.page-gutter;
     display: flex;
     flex-wrap: wrap;
-    gap: 18px;
-    margin-left: 32px;
+    gap: 1rem;
+    // 2px above and below, so a tile's focus or selection ring is not cut by the scroll box.
+    padding: 2px var(--page-gutter);
   }
+
   .contentDashboardCard {
     flex: 1;
-    padding-left: 0;
-    padding-right: 0;
+    padding-inline-start: 0;
+    padding-inline-end: 0;
     padding-top: 0;
   }
 
@@ -74,7 +66,7 @@
 }
 
 .heading {
-  font-weight: 600;
+  @include shared.section-title;
 }
 
 @media (max-width: 1024px) {
@@ -93,11 +85,5 @@
         width: 100%;
       }
     }
-  }
-}
-
-@media (max-width: 768px) {
-  .mainSection {
-    margin-top: 1rem;
   }
 }

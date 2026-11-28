@@ -21,35 +21,31 @@ const SubPanelButton = (props: ISubPanelButton) => {
   return (
     <div
       className={classNames(
-        'tw-w-70 tw-h-13 tw-flex tw-items-center tw-cursor-pointer tw-transition-all tw-p-12px',
+        'tw-flex tw-items-center tw-rounded-md tw-cursor-pointer tw-transition-colors tw-duration-150',
         props.disabled ? 'tw-opacity-30' : 'tw-opacity-100',
         props.active
-          ? 'tw-ghost-white tw-bg-primary-violet'
-          : 'tw-bg-transparent hover:tw-bg-sub-btn',
+          ? 'tw-bg-brand-muted tw-text-brand-text'
+          : 'tw-bg-transparent tw-text-foreground hover:tw-bg-accent',
       )}
       onClick={clickHandler}
     >
-      <div
-        className={classNames(
-          'hover:tw-text-black tw-bg-transparent tw-flex tw-items-center tw-justify-around tw-h-60px tw-w-60 tw-px-4',
-          props.active
-            ? 'tw-bg-primary-violet tw-text-black'
-            : 'tw-text-grey-dark2',
-        )}
-      >
+      <div className="tw-flex tw-items-center tw-justify-between tw-gap-4 tw-h-9 tw-w-60 tw-px-3">
         <div
           className={classNames(
-            `tw-h-60px tw-w-60 tw-w-full tw-flex tw-items-center tw-justify-start tw-cursor-pointer tw-transition-all tw-duration-100 `,
+            `tw-flex tw-items-center tw-justify-start tw-gap-2 tw-cursor-pointer`,
           )}
         >
           <AppSvg
             path={props.icon.src}
             width={props.iconWidth ? props.iconWidth + 'px' : 20 + 'px'}
             height={props.iconHeight ? props.iconHeight + 'px' : 20 + 'px'}
+            className={props.active ? undefined : 'tw-text-muted-foreground'}
           />
-          <p className="tw-ml-2 tw-font-medium">{props.title}</p>
+          <p className="tw-m-0 tw-text-sm">{props.title}</p>
         </div>
-        <p>{props.shortcut}</p>
+        <p className="tw-m-0 tw-text-xs tw-text-muted-foreground">
+          {props.shortcut}
+        </p>
       </div>
     </div>
   );

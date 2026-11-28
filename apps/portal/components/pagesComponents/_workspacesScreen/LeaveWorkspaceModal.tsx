@@ -1,6 +1,6 @@
 import classNames from 'classnames';
 import { Modal } from 'antd';
-import AppSvg from '../../elements/AppSvg';
+import { X } from 'lucide-react';
 import AppButton from '../../controls/AppButton';
 import { LeaveDeleteActions } from '../../../pages/media/workspaces/manage';
 import { Trans, useTranslation } from 'react-i18next';
@@ -25,29 +25,32 @@ const LeaveWorkspaceModal: React.FC<IProps> = ({
       onCancel={onCancel}
       closable={true}
       closeIcon={
-        <AppSvg path="/common/close-icon.svg" className="modalCloseButton" />
+        <span className="tw-flex tw-size-full tw-items-center tw-justify-center">
+          <X className="tw-size-4" aria-hidden="true" />
+        </span>
       }
+      // The markup is [confirm] [cancel]; the row is reversed so the action sits on the right
+      // and the cancel to its left, as in the other dialogs.
       footer={
-        <div className={classNames('tw-flex tw-justify-end tw-mt-8')}>
+        <div className={classNames('tw-mt-6 tw-flex tw-justify-end tw-gap-2')}>
+          <AppButton
+            onClick={onCancel}
+            outlined
+            twPadding="tw-px-4 tw-py-[7px]"
+          >
+            {t('common.cancel')}
+          </AppButton>
           <AppButton
             onClick={onOk}
-            className="tw-px-8 tw-text-white tw-pb-1 tw-pt-1 tw-border tw-border-danger tw-border-solid"
+            twPadding="tw-px-4 tw-py-[7px]"
             bgColor="tw-bg-danger"
           >
             {t('common.confirm')}
           </AppButton>
-          <AppButton
-            onClick={onCancel}
-            bgColor="tw-bg-white"
-            outlined
-            className="tw-px-8 tw-mx-4 tw-pb-1 tw-pt-1"
-          >
-            {t('common.cancel')}
-          </AppButton>
         </div>
       }
     >
-      <h2 className="tw-mb-6 tw-text-xl tw-font-bold">
+      <h2 className="tw-m-0 tw-mb-2 tw-pe-6 tw-text-base tw-font-semibold tw-text-foreground">
         <Trans
           values={{
             action: action === 'leave' ? t('common.leave') : t('common.delete'),
@@ -55,7 +58,9 @@ const LeaveWorkspaceModal: React.FC<IProps> = ({
           i18nKey="modals.confirmModalDelete"
         />
       </h2>
-      <p>{t('modals.lastWarning')}</p>
+      <p className="tw-m-0 tw-text-sm tw-text-muted-foreground">
+        {t('modals.lastWarning')}
+      </p>
     </Modal>
   );
 };

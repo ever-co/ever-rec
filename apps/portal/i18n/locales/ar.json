@@ -180,16 +180,16 @@
     "deleteWorkspace": "حذف مساحة العمل"
   },
   "header": {
-    "searchFiles": "البحث في الملفات...",
+    "searchFiles": "البحث في الملفات",
     "help": "مركز المساعدة",
-    "helpSoon": "مركز المساعدة قريباً!",
+    "helpSoon": "مركز المساعدة قريباً",
     "notifications": "الإشعارات",
-    "notificationsSoon": "الإشعارات قريباً!",
+    "notificationsSoon": "الإشعارات قريباً",
     "companySettings": "إعدادات الشركة",
     "user": {
       "addNewCompany": "إضافة شركة جديدة",
       "installChrome": "تثبيت إضافة كروم",
-      "availableSoon": "ستتوفر في متجر كروم الإلكتروني قريباً!",
+      "availableSoon": "ستتوفر في متجر كروم الإلكتروني قريباً",
       "signout": "تسجيل الخروج"
     }
   },
@@ -640,6 +640,18 @@
       "saveEachFile": "السؤال عن مكان حفظ كل ملف قبل التنزيل.",
       "saveEachFileDescription": "ملاحظة: لاستخدام هذه الميزة، تحتاج إلى السماح للإضافة بإدارة التنزيلات عند ظهور نافذة طلب الإذن. وعند تشغيل هذا الخيار فقط، يمكنك تحديد مجلد فرعي افتراضي لحفظ لقطات الشاشة على القرص المحلي. يتم الحفظ في مجلد التنزيلات افتراضياً إذا لم تحدد مجلداً فرعياً.",
       "addDateAndUrl": "إضافة التاريخ وعنوان URL في أعلى لقطة الشاشة."
+    },
+    "appearance": {
+      "description": "مظهر Ever Rec ولغته على هذا المتصفح",
+      "theme": "المظهر",
+      "themeHint": "ينطبق على هذا المتصفح فقط",
+      "light": "فاتح",
+      "dark": "داكن",
+      "system": "النظام",
+      "languageHint": "لغة التطبيق على هذا المتصفح",
+      "saving": "حفظ لقطات الشاشة",
+      "savingHint": "تنسيق الملف ومجلد التنزيل وروابط Google Drive لإضافة المتصفح",
+      "savingPreferences": "الحفظ التفضيلات"
     }
   },
   "modals": {
@@ -818,5 +830,32 @@
     "videoDeletedAndRedirect": "تم حذف الفيديو بنجاح. جاري إعادة التوجيه إلى مساحة العمل...",
     "videoMovedToTrashAndRedirecting": "تم نقل الفيديو إلى سلة المهملات بنجاح. جاري إعادة التوجيه إلى فيديوهاتي...",
     "joinedWorkspaceSuccess": "تم الانضمام إلى مساحة العمل بنجاح. جاري إعادة التوجيه إلى مساحة العمل الجديدة..."
+  },
+  "shell": {
+    "select": "تحديد",
+    "loading": "جارٍ التحميل",
+    "myLibrary": "مكتبتي",
+    "workspaces": "مساحات العمل",
+    "noOtherWorkspace": "لا توجد مساحة عمل أخرى",
+    "switchWorkspace": "تبديل مساحة العمل",
+    "account": "الحساب",
+    "accountMenu": "قائمة الحساب",
+    "backToApp": "العودة إلى التطبيق",
+    "collapseSidebar": "طي الشريط الجانبي",
+    "expandSidebar": "توسيع الشريط الجانبي",
+    "openNavigation": "فتح قائمة التنقل",
+    "closeNavigation": "إغلاق قائمة التنقل",
+    "switchToDark": "التبديل إلى المظهر الداكن",
+    "switchToLight": "التبديل إلى المظهر الفاتح",
+    "showStarredFolders": "إظهار المجلدات المميزة بنجمة",
+    "hideStarredFolders": "إخفاء المجلدات المميزة بنجمة",
+    "noStarredFolders": "لا توجد مجلدات مميزة بنجمة",
+    "members": "{{count}} عضو",
+    "members_zero": "لا أعضاء",
+    "members_one": "عضو واحد",
+    "members_two": "عضوان",
+    "members_few": "{{count}} أعضاء",
+    "members_many": "{{count}} عضوًا",
+    "members_other": "{{count}} عضو"
   }
 }

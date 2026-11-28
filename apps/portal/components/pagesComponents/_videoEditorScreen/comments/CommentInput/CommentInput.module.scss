@@ -1,8 +1,24 @@
+// Editing one's own comment in place: a bordered field, then Cancel (ghost) and Save (filled).
 .commentEdit {
+  margin-top: 0.25rem;
+
   input {
     width: 100%;
-    border-bottom: 1px solid grey;
+    height: 36px;
+    padding: 0 0.75rem;
+    border: 1px solid hsl(var(--input));
+    border-radius: calc(var(--radius) - 2px);
     background-color: transparent;
+    color: hsl(var(--foreground));
+    font-size: 0.875rem;
+    transition:
+      border-color 150ms var(--ease-out),
+      box-shadow 150ms var(--ease-out);
+
+    &:focus {
+      border-color: hsl(var(--ring));
+      box-shadow: 0 0 0 3px hsl(var(--ring) / 0.2);
+    }
   }
 }
 
@@ -11,21 +27,37 @@
   display: flex;
   justify-content: flex-end;
   gap: 0.5rem;
+
+  button {
+    height: 32px;
+    padding: 0 0.75rem;
+    border-radius: calc(var(--radius) - 2px);
+    color: hsl(var(--foreground));
+    font-size: 0.8125rem;
+    font-weight: 500;
+    transition:
+      background-color 150ms var(--ease-out),
+      opacity 150ms var(--ease-out);
+
+    &:hover {
+      background-color: hsl(var(--accent));
+    }
+  }
 }
 
-.saveButton {
-  padding: 0.5rem;
-  background-color: #5b4db9;
-  border-radius: 1rem;
-  width: 62px;
-  font-weight: 500;
-  color: white;
-}
+.commentEditButtons .saveButton {
+  min-width: 64px;
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
 
-.saveButton:hover {
-  background-color: #6f62c4;
-}
+  &:hover {
+    background-color: hsl(var(--primary) / 0.9);
+  }
 
-.saveButton:disabled {
-  background-color: #aea9d0;
+  &:disabled,
+  &:disabled:hover {
+    background-color: hsl(var(--primary));
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 }

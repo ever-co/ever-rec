@@ -14,9 +14,13 @@ const EverPlatformSettings: React.FC = () => {
   return (
     <Settings>
       <SCHeader filterValue={null} userPhotoURL={user?.photoURL} />
-      <div className="tw-p-6">
-        <h1 className="tw-text-2xl tw-font-semibold">{t('page.everPlatform.title')}</h1>
-        <EverPlatformTabs uid={user?.id} />
+      <div className="tw-flex-1 tw-overflow-y-auto">
+        <div className="tw-mx-auto tw-w-full tw-max-w-3xl tw-px-4 tw-py-8 md:tw-px-8">
+          <h1 className="tw-m-0 tw-mb-4 tw-text-2xl tw-font-semibold tw-text-foreground">
+            {t('page.everPlatform.title')}
+          </h1>
+          <EverPlatformTabs uid={user?.id} />
+        </div>
       </div>
     </Settings>
   );

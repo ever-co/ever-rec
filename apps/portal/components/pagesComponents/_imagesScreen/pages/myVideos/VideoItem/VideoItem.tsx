@@ -133,7 +133,7 @@ const VideoItem: FC<IVideoItemProps> = ({
         }}
         onClick={onSelect}
       >
-        <div style={{ position: 'relative', maxHeight: '176px' }}>
+        <div className={styles.media}>
           {type === 'video' ? (
             <>
               <Thumbnail

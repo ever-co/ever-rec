@@ -57,13 +57,13 @@ import pin_lock_black from 'public/assets/svg/tools-panel/pin_lock_black.svg';
 import collapse_close from 'public/assets/svg/tools-panel/collapse_close.svg';
 import expand_open from 'public/assets/svg/tools-panel/expand_open.svg';
 // import browser from '@/app/utilities/browser';
-import ds from 'public/assets/svg/tools-panel/ds.svg';
 import { IUser } from 'app/interfaces/IUserData';
 import PanelSplitter from './PanelSplitter';
 import IEditorImage from 'app/interfaces/IEditorImage';
 import Image from 'next/legacy/image';
 import { imgSrcLoader } from '../editorHelpers/imgSrcLoader';
 import useEditorVideo from 'hooks/useEditorVideo';
+import useIsPhone from 'hooks/useIsPhone';
 import { Emoji } from 'emoji-mart/dist/index';
 import { ICommentsOptions } from 'app/interfaces/tools_interfaces/ICommentsGroupOptions';
 import ShareTool from './ToolBtn/customToolBtn/ShareToolBtn/ShareToolBtn';
@@ -223,6 +223,9 @@ const ToolsPanel: React.FC<IToolsPanelProps> = ({
   );
   const [locked, setLocked] = useState<boolean>(true);
   const [show, setShow] = useState<boolean>(false);
+  // Below 768px the same panel is laid out as two bars (`.phoneBar`, toolsPanel.module.scss): one
+  // tree for both layouts, so a window crossing the width keeps every tool and its state.
+  const isPhone = useIsPhone();
 
   const {
     stopVideo,
@@ -367,14 +370,25 @@ const ToolsPanel: React.FC<IToolsPanelProps> = ({
   };
 
   return (
-    <Draggable onStop={handleStop} position={{ x: x, y: y }} disabled={locked}>
-      <div className={classNames(styles.mainContainer, styles.toolswrapper)}>
+    <Draggable
+      onStop={handleStop}
+      position={{ x: x, y: y }}
+      disabled={locked || isPhone}
+    >
+      <div
+        className={classNames(
+          styles.mainContainer,
+          styles.toolswrapper,
+          isPhone && styles.phoneBar,
+        )}
+      >
         <div className={styles.innerContainer}>
           {!locked ? (
             <div className={styles.toolbtnsmall}>
               <IconBtn
                 size="10px"
                 icon={pin_lock}
+                className="tw-opacity-40 tw-brightness-0 dark:tw-invert"
                 onSelect={() => {
                   setLocked(true);
                 }}
@@ -385,6 +399,7 @@ const ToolsPanel: React.FC<IToolsPanelProps> = ({
               <IconBtn
                 size="10px"
                 icon={pin_lock_black}
+                className="dark:tw-invert"
                 onSelect={() => {
                   setLocked(false);
                 }}
@@ -395,6 +410,7 @@ const ToolsPanel: React.FC<IToolsPanelProps> = ({
             <IconBtn
               size="10px"
               icon={close}
+              className="tw-opacity-60 tw-brightness-0 dark:tw-invert"
               onSelect={() => {
                 onCancelHandler();
               }}
@@ -406,7 +422,7 @@ const ToolsPanel: React.FC<IToolsPanelProps> = ({
             <Logo width={89} height={24} type="default" />
             <div className={styles.absoluteContainer}></div>
           </div>{' '}
-          <ToolsColumn>
+          <ToolsColumn className={styles.toolsColumn}>
             <ToolBtn
               toolTitle={tools.video.title}
               large={true}
@@ -459,6 +475,7 @@ const ToolsPanel: React.FC<IToolsPanelProps> = ({
                 <IconBtn
                   size="10px"
                   icon={collapse_close}
+                  className="tw-opacity-60 tw-brightness-0 dark:tw-invert"
                   onSelect={() => {
                     setShow(true);
                   }}
@@ -471,17 +488,17 @@ const ToolsPanel: React.FC<IToolsPanelProps> = ({
                 <IconBtn
                   size="10px"
                   icon={expand_open}
+                  className="tw-opacity-60 tw-brightness-0 dark:tw-invert"
                   onSelect={() => {
                     setShow(false);
                   }}
                 />
               </div>
             )}
-            <Image src={ds} style={{ userSelect: 'none' }} alt="" />
           </ToolsColumn>
         </div>
 
-        <div className={`${show ? styles.hidden : ''}`}>
+        <div className={classNames(styles.moreTools, show && styles.hidden)}>
           <ToolsRow>
             <ResizeTool
               isOpenEditTool={currentTool?.name == 'resize' ? true : false}
@@ -630,7 +647,6 @@ const ToolsPanel: React.FC<IToolsPanelProps> = ({
                 {' '}
                 <Picker
                   // set={'twitter'}
-                  color={'#eb3507'}
                   data={data}
                   autofocus={true}
                   icons={'solid'}
@@ -639,7 +655,7 @@ const ToolsPanel: React.FC<IToolsPanelProps> = ({
                   emojiSize={40}
                   emojiButtonRadius={'1rem'}
                   emojiButtonSize={65}
-                  emojiButtonColors={['rgb(54, 46, 114)']}
+                  emojiButtonColors={['hsl(var(--foreground) / 0.1)']}
                   onEmojiSelect={(emoji: Emoji) => selectEmoji(emoji)}
                   previewEmoji={emojiOptions.id}
                 />{' '}
@@ -1303,7 +1319,10 @@ const ToolsPanel: React.FC<IToolsPanelProps> = ({
             setLoading={setLoading}
           />
         </ToolsRow>
-        <div style={{ paddingLeft: '0.5rem', paddingRight: '0.5rem' }}>
+        <div
+          className={styles.zoomWrapper}
+          style={{ paddingLeft: '0.5rem', paddingRight: '0.5rem' }}
+        >
           <div className={styles.childContainer}>
             <AppNumberSelector
               value={stageScale}
@@ -1317,6 +1336,7 @@ const ToolsPanel: React.FC<IToolsPanelProps> = ({
         </div>
         <div className={styles.toolboxend}>
           <div
+            className={styles.actions}
             style={{
               paddingTop: '0.5rem',
               paddingLeft: '0.25rem',
@@ -1326,14 +1346,18 @@ const ToolsPanel: React.FC<IToolsPanelProps> = ({
             <AppButton
               className={styles.buttonWrapper}
               onClick={onSaveAsJPG}
-              full
-              bgColor={styles.backgroundColor}
+              full={!isPhone}
+              outlined
+              twPadding={isPhone ? 'tw-px-3 tw-py-0' : 'tw-px-1 tw-py-0'}
             >
-              <div style={{ color: 'black' }} className={styles.font}>
-                Download
-              </div>
+              <div className={styles.font}>Download</div>
             </AppButton>
-            <AppButton className={styles.saveBtn} onClick={saveScreenshot} full>
+            <AppButton
+              className={styles.saveBtn}
+              onClick={saveScreenshot}
+              full={!isPhone}
+              twPadding={isPhone ? 'tw-px-3 tw-py-0' : 'tw-px-1 tw-py-0'}
+            >
               <div className={styles.font}>Save </div>
             </AppButton>
             <AppButton
@@ -1341,10 +1365,11 @@ const ToolsPanel: React.FC<IToolsPanelProps> = ({
               onClick={() => {
                 onCancelHandler();
               }}
-              full
-              bgColor={styles.backgroundColor}
+              full={!isPhone}
+              bgColor="tw-bg-transparent"
+              twPadding={isPhone ? 'tw-px-3 tw-py-0' : 'tw-px-1 tw-py-0'}
             >
-              <div style={{ color: '#f45046' }} className={styles.font}>
+              <div className={styles.font}>
                 {fromExisted ? 'Back' : 'Cancel'}
               </div>
             </AppButton>

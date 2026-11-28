@@ -4,11 +4,20 @@ import React from 'react';
 export interface IAppHeaderProps {
   part1: string;
   part2: string;
-  title?:string;
+  title?: string;
   className?: string;
   spacing?: boolean;
   textSize?: 'xl' | '2xl' | '4xl' | '5xl';
 }
+
+// Whole class names, so Tailwind finds them (a class built as `tw-text-${size}` is never
+// generated). A page title is 24px in the Ever shell; the two larger sizes are one step up.
+const SIZE_CLASS: Record<NonNullable<IAppHeaderProps['textSize']>, string> = {
+  xl: 'tw-text-xl',
+  '2xl': 'tw-text-2xl',
+  '4xl': 'tw-text-2xl',
+  '5xl': 'tw-text-3xl',
+};
 
 const AppHeader: React.FC<IAppHeaderProps> = ({
   part1,
@@ -18,30 +27,26 @@ const AppHeader: React.FC<IAppHeaderProps> = ({
   className,
   textSize = '4xl',
 }) => {
-  return (
-    title ?
+  return title ? (
     <h1
       className={classNames(
-        'tw-font-roboto',
+        'tw-text-foreground',
         className,
-        `tw-text-3xl`,
-        '!tw-mb-6'
+        `tw-text-2xl`,
+        '!tw-mb-6',
       )}
     >
       {title}
     </h1>
-    
-    :
+  ) : (
     <h1
       className={classNames(
-        'tw-font-roboto tw-font-bold',
+        'tw-font-semibold tw-text-foreground',
         className,
-        `tw-text-${textSize}`,
+        SIZE_CLASS[textSize],
       )}
     >
-      <span className={classNames('tw-text-dark-blue', { 'tw-mr-2': spacing })}>
-        {part1}
-      </span>
+      <span className={classNames({ 'tw-me-2': spacing })}>{part1}</span>
       <span>{part2}</span>
     </h1>
   );

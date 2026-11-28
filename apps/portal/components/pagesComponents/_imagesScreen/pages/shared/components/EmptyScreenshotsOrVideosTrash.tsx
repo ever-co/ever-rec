@@ -5,12 +5,14 @@ import { useTranslation } from 'react-i18next';
 const EmptyScreenshotsOrVideosTrash: FC = () => {
   const { t } = useTranslation();
   return (
-    <div className="tw-flex tw-flex-col tw-items-center tw-pt-8 tw-h-70vh">
+    <div className="tw-flex tw-flex-col tw-items-center tw-px-6 tw-py-10">
       <AppSvg path="/images/emptyItems/notrash.svg" className="tw-w-max" />
-      <h2 className="tw-text-2xl tw-mt-7 tw-mb-2 tw-font-semibold">
+      <h2 className="tw-text-lg tw-mt-6 tw-mb-1 tw-font-semibold tw-text-foreground">
         {t('shared.noItems')}
       </h2>
-      <p className="tw-text-center">{t('shared.noItemsInTrash')}</p>
+      <p className="tw-text-center tw-text-sm tw-text-muted-foreground">
+        {t('shared.noItemsInTrash')}
+      </p>
     </div>
   );
 };

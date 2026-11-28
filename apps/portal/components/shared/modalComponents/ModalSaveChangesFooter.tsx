@@ -23,13 +23,13 @@ const ModalSaveChangesFooter: FC<IProps> = ({
     buttonTitle == 'Save changes' ? t('common.saveChanges') : buttonTitle;
   return (
     <div className={styles.footerContainer}>
+      <button type="button" className={styles.cancelLink} onClick={close}>
+        {t('page.profile.nameModal.dontChange')}
+      </button>
+
       <AppButtonSecond onClick={ok} disabled={!valid} danger={danger}>
         {title}
       </AppButtonSecond>
-
-      <span className={styles.cancelLink} onClick={close}>
-        {t('page.profile.nameModal.dontChange')}
-      </span>
     </div>
   );
 };

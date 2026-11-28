@@ -7,7 +7,7 @@ import {
 } from 'app/services/helpers/toastMessages';
 import { ReactMultiEmail } from 'react-multi-email';
 import AppButton from 'components/controls/AppButton';
-import AppSvg from 'components/elements/AppSvg';
+import { Mail, X } from 'lucide-react';
 import WorkspaceInviteLink from './WorkspaceInviteLink';
 import { IInviteMembersInsideModalProps } from './InviteMembersInsideModal';
 import { sendWorkspaceInviteLink } from 'app/services/email';
@@ -116,11 +116,14 @@ interface IEmailLabelProps {
 
 const EmailLabel: FC<IEmailLabelProps> = ({ email, onRemoveEmail }) => {
   return (
-    <div data-tag className="tw-bg-white tw-px-0px tw-py-0px">
+    <div data-tag>
       {email}
 
-      <div className="tw-cursor-pointer tw-ml-1" onClick={onRemoveEmail}>
-        <AppSvg path="/common/close.svg" size="14px" />
+      <div
+        className="tw-ms-1 tw-flex tw-size-4 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded tw-text-muted-foreground tw-transition-colors tw-duration-150 hover:tw-bg-foreground/10 hover:tw-text-foreground"
+        onClick={onRemoveEmail}
+      >
+        <X className="tw-size-3" aria-hidden="true" />
       </div>
     </div>
   );
@@ -133,21 +136,17 @@ interface ISendEmailProps {
 
 const SendEmailButton: FC<ISendEmailProps> = ({ disabled, onEmailSend }) => {
   const { t } = useTranslation();
+  // The second action of the dialog (the first is the invite link above), so an outline button.
   return (
     <AppButton
       onClick={onEmailSend}
+      outlined
       className={classNames(
         styles.whiteParagraphButton,
-        'tw-rounded-bl-none tw-rounded-tl-none',
-        disabled && 'tw-opacity-80',
+        disabled && 'tw-opacity-50',
       )}
     >
-      <AppSvg
-        path="/assets/svg/tools-panel/email-white.svg"
-        size="20px"
-        className="tw-mr-5px"
-        bgColor="white"
-      />
+      <Mail className="tw-size-4 tw-shrink-0" aria-hidden="true" />
       {t('workspace.sendEmail')}
     </AppButton>
   );

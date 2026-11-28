@@ -1,1 +1,18 @@
 @use '../myImages/screenshotsContainer/ScreenshotsContainer.module.scss';
+
+// The workspace's items header is the personal library's, plus the team filter. The heading keeps
+// the left of the row and the filter stands with the sort on the right; the selection bar, when
+// it shows, takes the middle. In the DOM the filter is a child of the heading's box, so that box
+// steps aside and its two children join the row.
+.itemsContainer {
+  column-gap: 0.75rem;
+}
+
+.itemsContainerHeadingContainer {
+  display: contents;
+}
+
+.headingContainerHeading {
+  order: -2;
+  margin-inline-end: auto;
+}

@@ -69,8 +69,12 @@ describe('Settings → Your data export', () => {
     await render(<DataExport job="01KJOB" uid="uid-1" />);
 
     expect(api.getMyExport).toHaveBeenCalledWith('01KJOB');
+    // What the export holds, listed; the file the button saves, named next to it
+    expect(container.querySelectorAll('li')).toHaveLength(4);
+    expect(container.textContent).toContain('ever-rec-export-01KJOB.json');
     const button = byTestId('data-export-download') as HTMLButtonElement;
     expect(button).not.toBeNull();
+    expect(button.tagName).toBe('BUTTON');
     await act(async () => button.click());
     expect(click).toHaveBeenCalledTimes(1);
     expect(created).toHaveLength(1);
@@ -81,7 +85,11 @@ describe('Settings → Your data export', () => {
   it('an export of another account, or an expired one, reads as not available', async () => {
     api.getMyExport.mockRejectedValue(Object.assign(new Error('404'), { response: { status: 404 } }));
     await render(<DataExport job="01KJOB" uid="uid-1" />);
-    expect(byTestId('data-export-unavailable')).not.toBeNull();
+    const unavailable = byTestId('data-export-unavailable');
+    expect(unavailable).not.toBeNull();
+    // Its own title, then the reasons
+    expect(unavailable?.textContent).toBe('page.dataExport.unavailableTitlepage.dataExport.unavailable');
+    expect(container.querySelector('[role="status"]')?.contains(unavailable)).toBe(true);
     expect(byTestId('data-export-download')).toBeNull();
   });
 
@@ -101,7 +109,18 @@ describe('Settings → Your data export', () => {
   });
 
   it('every message the page shows exists in English', () => {
-    for (const key of ['title', 'intro', 'unavailable', 'download']) {
+    for (const key of [
+      'title',
+      'lead',
+      'contents.profile',
+      'contents.identities',
+      'contents.workspaces',
+      'contents.media',
+      'access',
+      'unavailableTitle',
+      'unavailable',
+      'download',
+    ]) {
       expect(typeof message(`page.dataExport.${key}`)).toBe('string');
     }
     expect(typeof message('page.everPlatform.loading')).toBe('string');

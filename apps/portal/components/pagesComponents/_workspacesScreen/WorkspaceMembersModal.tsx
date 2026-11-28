@@ -3,7 +3,7 @@ import classNames from 'classnames';
 import 'react-tabs/style/react-tabs.css';
 import { Tab, TabList, TabPanel, Tabs } from 'react-tabs';
 import { Modal } from 'antd';
-import AppSvg from 'components/elements/AppSvg';
+import { X } from 'lucide-react';
 import { IWorkspaceUser } from 'app/interfaces/IWorkspace';
 import styles from './WorkspaceMembersModal.module.scss';
 import WorkspaceMembersModalMembersWrapper from './WorkspaceMembersModalMembersWrapper';
@@ -53,7 +53,9 @@ const WorkspaceMembersModal: FC<IProps> = ({
       closable
       destroyOnClose
       closeIcon={
-        <AppSvg path="/common/close-icon.svg" className="modalCloseButton" />
+        <span className="tw-flex tw-size-full tw-items-center tw-justify-center">
+          <X className="tw-size-4" aria-hidden="true" />
+        </span>
       }
       footer={<></>}
     >

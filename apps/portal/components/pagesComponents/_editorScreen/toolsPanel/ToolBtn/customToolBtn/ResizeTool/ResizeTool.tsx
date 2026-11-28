@@ -205,7 +205,7 @@ const ResizeTool: React.FC<IResizeToolProps> = ({
           checked={proportional}
           onChange={() => setProportional(!proportional)}
         >
-          <span style={{ color: 'black' }}> Proportional</span>
+          <span> Proportional</span>
         </Checkbox>
         <div className={styles.buttonContainer}>
           <AppButton
@@ -216,12 +216,7 @@ const ResizeTool: React.FC<IResizeToolProps> = ({
             <span>Resize</span>
           </AppButton>
 
-          <AppButton
-            bgColor={styles.whiteBg}
-            outlined
-            onClick={closeSubpanel}
-            className={styles.secondBtn}
-          >
+          <AppButton outlined onClick={closeSubpanel}>
             Cancel
           </AppButton>
         </div>

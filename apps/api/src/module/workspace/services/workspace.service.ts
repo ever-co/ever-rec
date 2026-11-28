@@ -8,7 +8,7 @@ import { IDataResponse, IUserData, ItemType } from '../../../interfaces/_types';
 import { IUser } from '../../../interfaces/IUser';
 import { nanoid } from 'nanoid';
 import { WorkspaceUtilitiesService } from './utilities.service';
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import {
   IDbWorkspaceImageData,
   IDbWorkspaceVideoData,
@@ -38,13 +38,16 @@ import {
   storedMediaUnder,
 } from '../../../common/events/ever-counters.events';
 import {
+  EVER_CONNECT_ACCOUNT_DELETIONS,
   EVER_CONNECT_WORKSPACE_LINK_READER,
+  EverConnectAccountDeletions,
   EverConnectWorkspaceLinkReader,
 } from '../../../common/ever-platform/tokens';
 
 @Injectable()
 export class WorkspacesService {
   private readonly config;
+  private readonly logger = new Logger(WorkspacesService.name);
 
   constructor(
     private readonly utilitiesService: WorkspaceUtilitiesService,
@@ -54,6 +57,10 @@ export class WorkspacesService {
     @Optional()
     @Inject(EVER_CONNECT_WORKSPACE_LINK_READER)
     private readonly everLinks?: EverConnectWorkspaceLinkReader,
+    // Present only when the optional Ever Platform connection module is loaded.
+    @Optional()
+    @Inject(EVER_CONNECT_ACCOUNT_DELETIONS)
+    private readonly accountDeletions?: EverConnectAccountDeletions,
   ) {
     this.config = {
       action: 'read',
@@ -147,6 +154,40 @@ export class WorkspacesService {
           workspaceRef.set(newWorkspace),
           addUserWorkspaceId(uid, workspaceId),
         ]);
+        // The creator becomes the workspace's admin. Asked only once the workspace is written: a
+        // deletion of the account that Ever Platform asked for marks the account before it checks
+        // whether the account administers a workspace, so either it sees this workspace (and keeps
+        // the account) or this sees its mark, and the workspace is undone (also when the mark
+        // could not be read).
+        // The workspace goes first: the deletion finds what the account administers through the
+        // account's list, so the list keeps the id while the workspace may still be there.
+        const undo = async () => {
+          try {
+            await workspaceRef.remove();
+            await removeUserWorkspaceId(uid, workspaceId);
+          } catch (error) {
+            // Left for an operator: the deletion may already be past its last check, and then the
+            // account goes while this workspace still names it as admin.
+            this.logger.error(
+              `A workspace whose account is or may be being deleted could not be undone (workspace ${workspaceId}).`,
+            );
+            throw error;
+          }
+        };
+        let deleting = false;
+        try {
+          deleting = !!(await this.accountDeletions?.deletionStarted(uid));
+        } catch (error) {
+          // The read's error is the one reported, whether or not the undo went through.
+          await undo().catch(() => undefined);
+          throw error;
+        }
+        if (deleting) {
+          await undo();
+          return sendError(
+            'This account is being deleted, so it cannot create a workspace.',
+          );
+        }
         this.eventEmitter?.emit(EVER_COUNTER_EVENTS.workspaceCreated, {});
         const workspace: IWorkspace =
           await this.utilitiesService.parseWorkspaceItems(newWorkspace);

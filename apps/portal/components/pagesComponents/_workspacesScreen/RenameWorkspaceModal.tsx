@@ -1,6 +1,6 @@
 import { ChangeEvent, useEffect, useState } from 'react';
 import { Modal } from 'antd';
-import AppSvg from '../../elements/AppSvg';
+import { X } from 'lucide-react';
 import AppButton from '../../controls/AppButton';
 import { useTranslation } from 'react-i18next';
 
@@ -35,34 +35,32 @@ const RenameWorkspaceModal: React.FC<IProps> = ({
       destroyOnClose={true}
       closable={true}
       closeIcon={
-        <AppSvg path="/common/close-icon.svg" className="modalCloseButton" />
+        <span className="tw-flex tw-size-full tw-items-center tw-justify-center">
+          <X className="tw-size-4" aria-hidden="true" />
+        </span>
       }
       footer={
-        <div className="tw-flex tw-justify-end tw-mt-8">
+        <div className="tw-mt-6 tw-flex tw-justify-end">
           <AppButton
             onClick={() => onOk(newName)}
-            className="tw-px-8 tw-text-white tw-pb-1 tw-pt-1"
+            twPadding="tw-px-4 tw-py-[7px]"
           >
             {t('workspace.confirm')}
           </AppButton>
         </div>
       }
     >
-      <h2 className="tw-mb-6 tw-text-xl tw-font-bold">
+      <h2 className="tw-m-0 tw-mb-2 tw-pe-6 tw-text-base tw-font-semibold tw-text-foreground">
         {t('workspace.renameWorkspace')}
       </h2>
-      <p className="tw-pb-0">{t('workspace.nameYourWorkspaceDescription')}</p>
+      <p className="tw-m-0 tw-text-sm tw-text-muted-foreground">
+        {t('workspace.nameYourWorkspaceDescription')}
+      </p>
       <input
         value={newName}
         type="text"
         placeholder={t('workspace.enterAWorkspaceName')}
-        style={{
-          marginTop: '20px',
-          padding: '10px',
-          width: '100%',
-          background: 'transparent',
-          borderBottom: '1px solid grey',
-        }}
+        className="tw-mt-4 tw-h-9 tw-w-full tw-rounded-md tw-border tw-border-solid tw-border-input tw-bg-transparent tw-px-3 tw-text-sm tw-text-foreground tw-outline-none tw-transition-[border-color,box-shadow] tw-duration-150 placeholder:tw-text-muted-foreground focus:tw-border-ring focus:tw-ring-2 focus:tw-ring-ring/20"
         onChange={changeHandler}
       />
     </Modal>

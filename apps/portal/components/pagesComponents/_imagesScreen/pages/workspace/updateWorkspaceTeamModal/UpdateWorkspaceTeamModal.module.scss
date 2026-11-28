@@ -11,16 +11,18 @@
 .row {
   display: flex;
   flex-direction: column;
-  margin-bottom: 30px;
+  margin-bottom: 1.5rem;
 
   .iconInnerWrapper {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 0.75rem;
   }
 
   .iconButtonsWrapper {
     display: flex;
+    flex-shrink: 0;
   }
 
   .avatar {
@@ -36,100 +38,118 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 30px;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
 }
 
+// The last block of the dialog ("Delete team") stands apart from the settings above it.
 .actionWrapper.lastActionWrapper {
   margin-bottom: 0;
+  padding-top: 1.5rem;
+  border-top: 1px solid hsl(var(--border));
 }
 
+// The label of a setting.
 .heading {
-  margin-bottom: 10px;
-  //styleName: Body Bold;
-  font-family: Roboto;
-  font-size: 14px;
-  font-weight: 700;
-  line-height: 24px;
-  letter-spacing: 0.01em;
-  text-align: left;
-  color: #636366;
+  margin: 0 0 0.5rem;
+  color: hsl(var(--foreground));
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.25rem;
+  text-align: start;
 }
 
 .saveButton {
-  width: 116px;
-  height: 45px;
-  margin-right: 15px;
+  min-width: 5.5rem;
+  height: 2.25rem;
+  margin-inline-end: 0.5rem;
   @include centered();
 }
 
 .cancelButton {
-  width: 130px;
-  height: 46px;
+  min-width: 5.5rem;
+  height: 2.25rem;
   @include centered();
 }
 
 .supportsP {
-  margin-top: 10px;
-  //styleName: Small Body Medium;
-  font-family: Roboto;
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 22px;
-  letter-spacing: 0em;
-  text-align: left;
-  color: #636366;
+  margin: 0.5rem 0 0;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.8125rem;
+  font-weight: 400;
+  line-height: 1.25rem;
+  text-align: start;
 }
 
 .descriptionP {
-  font-family: Roboto;
-  font-size: 16px;
+  margin: 0;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.875rem;
   font-weight: 400;
-  line-height: 24px;
-  letter-spacing: 0em;
-  text-align: left;
-  color: #636366;
+  line-height: 1.25rem;
+  text-align: start;
 }
 
 .thumbnail {
   width: 204px;
   height: 115px;
+  border-radius: calc(var(--radius) - 2px);
   object-fit: contain;
   cursor: pointer;
 }
 
-.imageBorder {
-  border: 1px solid grey !important;
-  padding-left: 10px;
-  padding-right: 10px;
-  border-radius: 10px;
+// The stock pictures (no team icon / no thumbnail yet) are dark ink inside an <img>, so they
+// cannot take the text colour: the dark theme inverts them. They are told apart by the file the
+// <img> shows at the moment (the component swaps `src` by hand when a picture is chosen or
+// reset), so a picture the person chose is never touched.
+
+// The stock team icon: dimmed to the quiet text.
+.row .avatar[src$='team-icon.svg'] {
+  padding: 0.5rem;
+  opacity: 0.6;
 }
 
+:global(.dark) .row .avatar[src$='team-icon.svg'] {
+  filter: invert(1);
+}
+
+// The frame around the stock thumbnail.
 .imageBorder {
-  border: 1px solid grey !important;
-  padding-left: 10px;
-  padding-right: 10px;
-  border-radius: 10px;
+  border: 1px solid hsl(var(--input));
+  padding-inline-start: 10px;
+  padding-inline-end: 10px;
+  border-radius: var(--radius);
+}
+
+// The filter turns the frame over with the drawing: nine tenths of an inversion takes the text
+// colour (the frame here) to the lightness of a control border, and the dark ink to light ink.
+:global(.dark) .thumbnail[src$='Thumbnail.svg'] {
+  filter: invert(0.9);
+  border-color: hsl(var(--foreground));
 }
 
 .dangerButton {
-  min-width: 168px;
-  height: 46px;
+  flex-shrink: 0;
+  height: 2.25rem;
   @include centered();
 }
 
 .confirmDelete {
-  width: 100px;
-  height: 41px;
+  min-width: 5.5rem;
+  height: 2.25rem;
   @include centered();
 }
 
 .leaveTeamBtn {
-  border: 1px solid #d70015;
-  color: #d70015;
+  border: 1px solid hsl(var(--destructive) / 0.4);
+  color: hsl(var(--destructive-text));
 }
 
-.deleteTeamBtn {
-  background-color: #d70015;
+// "Delete team" starts as an outline in the danger ink; only the confirm step is a filled
+// danger button. (The doubled class outweighs the button's own hover surface without
+// `!important`.)
+.deleteTeamBtn.deleteTeamBtn:hover {
+  background-color: hsl(var(--destructive-muted));
 }
 
 .spinnerWrapper {
@@ -138,18 +158,35 @@
 }
 
 .toDeleteTeam {
+  flex-shrink: 0;
   @include centered();
-  gap: 1rem;
+  gap: 0.5rem;
 }
 
 .input {
-  width: 50%;
+  flex: 1 1 0;
+  min-width: 0;
+  height: 2.5rem;
+  padding: 0 0.75rem;
+  border: 1px solid hsl(var(--input));
+  border-radius: calc(var(--radius) - 2px);
   background: transparent;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #ab9e9e;
-  margin-right: 50px;
+  color: hsl(var(--foreground));
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  transition:
+    border-color 150ms var(--ease-out),
+    box-shadow 150ms var(--ease-out);
+
+  &:focus {
+    border-color: hsl(var(--ring));
+    box-shadow: 0 0 0 3px hsl(var(--ring) / 0.2);
+  }
 }
 
 .changeTeamName {
-  @include centered();
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
 }

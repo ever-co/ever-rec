@@ -1,4 +1,5 @@
 import { Modal } from 'antd';
+import { X } from 'lucide-react';
 import AppSvg from 'components/elements/AppSvg';
 import classNames from 'classnames';
 import styles from './UploadThumbnailModal.module.scss';
@@ -27,24 +28,27 @@ const UploadThumbnailModal: React.FC<Props> = ({
       closable={true}
       onCancel={onCancel}
       closeIcon={
-        <AppSvg path="/common/close-icon.svg" className="modalCloseButton" />
+        <span className="tw-flex tw-size-full tw-items-center tw-justify-center">
+          <X className="tw-size-4" aria-hidden="true" />
+        </span>
       }
       footer={
         <div
           onDrop={onDrop}
           onDragOver={enableDropping}
-          className="tw-flex tw-flex-col tw-items-center tw-mt-4 tw-pt-10 tw-pb-4 tw-border tw-border-mid-grey tw-border-dashed tw-rounded-md"
+          className="tw-flex tw-flex-col tw-items-center tw-mt-2 tw-px-4 tw-pt-8 tw-pb-6 tw-border tw-border-input tw-border-dashed tw-rounded-lg tw-text-center"
         >
-          <AppSvg path="/common/images-icon.svg" />
-          <p className={classNames(styles.heading, 'tw-mt-6 tw-mb-4')}>
+          <AppSvg
+            path="/common/images-icon.svg"
+            className="tw-text-muted-foreground [&_path]:tw-fill-current"
+          />
+          <p className={classNames(styles.heading, 'tw-mt-4 tw-mb-4')}>
             {t('page.image.dragDropImagesHereOr')}{' '}
           </p>
           <div className={styles.buttonWrapper}>
             <AppButton
               onClick={onOk}
-              className="tw-text-white tw-pb-3 tw-pt-3"
-              twPadding="tw-px-14"
-              full={true}
+              className="tw-flex tw-h-9 tw-items-center tw-justify-center tw-px-4 tw-py-0"
             >
               {t('workspace.browseFile')}
             </AppButton>

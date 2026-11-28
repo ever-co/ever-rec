@@ -1,0 +1,264 @@
+// Element defaults and the few global helpers, all on the tokens of ./tokens.scss.
+
+html {
+  -webkit-text-size-adjust: 100%;
+  font-family: var(--font-sans);
+  line-height: 1.5;
+  tab-size: 4;
+  scroll-behavior: smooth;
+  background-color: hsl(var(--background));
+}
+
+body {
+  font-family: inherit;
+  line-height: inherit;
+  margin: 0;
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'cv11', 'ss01';
+}
+
+.rec-next {
+  color: hsl(var(--foreground));
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-style: normal;
+  font-weight: 400;
+  letter-spacing: 0;
+
+  ::selection {
+    background: hsl(var(--brand) / 0.25);
+    color: hsl(var(--foreground));
+  }
+
+  input:focus,
+  div:focus {
+    outline: none;
+  }
+
+  // Keyboard focus is always visible, in the one accent.
+  a:focus-visible,
+  button:focus-visible,
+  [role='button']:focus-visible,
+  [tabindex]:not([tabindex='-1']):focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: hsl(var(--muted-foreground));
+    opacity: 1;
+  }
+}
+
+h1,
+h2,
+p,
+pre {
+  margin: 0;
+}
+
+*,
+::before,
+::after {
+  box-sizing: border-box;
+  border-width: 0;
+  border-style: solid;
+  border-color: hsl(var(--border));
+}
+
+h1,
+h2 {
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+a {
+  color: inherit;
+  text-decoration: inherit;
+}
+
+svg {
+  display: block;
+  vertical-align: middle;
+  shape-rendering: auto;
+  text-rendering: optimizeLegibility;
+}
+
+pre {
+  background-color: hsl(var(--muted));
+  border-radius: 0.375rem;
+  color: hsl(var(--foreground));
+  font-family: var(--font-mono);
+  overflow: auto;
+  padding: 0.5rem 0.75rem;
+}
+
+.app {
+  overflow: hidden;
+}
+
+// Icons drawn by <AppSvg> (inline SVG files from /public). Their ink was hard-coded: black, one of
+// the old dark greys, or nothing at all (the SVG default, black). That disappears on a dark
+// surface, so icon-sized drawings take the text colour of the place they sit in.
+.app-svg-icon svg {
+  // No fill on the root: its shapes fall back to black.
+  &:not([fill]) {
+    fill: currentColor;
+  }
+
+  [stroke='black' i],
+  [stroke='#000' i],
+  [stroke='#000000' i],
+  [stroke='#1c1c1e' i],
+  [stroke='#1d1d1d' i],
+  [stroke='#200e32' i],
+  [stroke='#24262f' i],
+  [stroke='#2a292f' i],
+  [stroke='#373444' i],
+  [stroke='#383c44' i],
+  [stroke='#3a3a3a' i],
+  [stroke='#636366' i],
+  [stroke='#6e6e6e' i] {
+    stroke: currentColor;
+  }
+
+  [fill='black' i],
+  [fill='#000' i],
+  [fill='#000000' i],
+  [fill='#1c1c1e' i],
+  [fill='#1d1d1d' i],
+  [fill='#200e32' i],
+  [fill='#24262f' i],
+  [fill='#2a292f' i],
+  [fill='#373444' i],
+  [fill='#383c44' i],
+  [fill='#3a3a3a' i],
+  [fill='#636366' i],
+  [fill='#6e6e6e' i] {
+    fill: currentColor;
+  }
+}
+
+// Scrollbars: thin and neutral everywhere (the old ones were violet on grey).
+* {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--foreground) / 0.2) transparent;
+}
+
+.scroll-div::-webkit-scrollbar,
+.scroll-div-unique-views::-webkit-scrollbar,
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.scroll-div::-webkit-scrollbar-track,
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scroll-div::-webkit-scrollbar-thumb,
+*::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: hsl(var(--foreground) / 0.18);
+  border: 2px solid transparent;
+  background-clip: content-box;
+
+  &:hover {
+    background: hsl(var(--foreground) / 0.32);
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+}
+
+// The e-mail chips field (react-multi-email) ships as a white box with a blue focus line.
+.react-multi-email {
+  min-height: 2.5rem;
+  border: 1px solid hsl(var(--input));
+  border-radius: calc(var(--radius) - 2px);
+  background: transparent;
+  color: hsl(var(--foreground));
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  transition:
+    border-color 150ms var(--ease-out),
+    box-shadow 150ms var(--ease-out);
+
+  &.focused {
+    border-color: hsl(var(--ring));
+    background: transparent;
+    box-shadow: 0 0 0 3px hsl(var(--ring) / 0.2);
+  }
+
+  > span[data-placeholder] {
+    color: hsl(var(--muted-foreground));
+  }
+
+  > input {
+    background: transparent !important;
+    color: hsl(var(--foreground));
+  }
+
+  [data-tag] {
+    border: 1px solid hsl(var(--border));
+    border-radius: 0.375rem;
+    background-color: hsl(var(--muted));
+    color: hsl(var(--foreground));
+    font-weight: 400;
+  }
+
+  [data-tag] [data-tag-handle] {
+    color: hsl(var(--muted-foreground));
+    cursor: pointer;
+  }
+}
+
+// Third-party widgets pick up the tokens.
+:root {
+  --toastify-font-family: var(--font-sans);
+  --toastify-color-light: hsl(var(--popover));
+  --toastify-color-dark: hsl(var(--popover));
+  --toastify-text-color-light: hsl(var(--popover-foreground));
+  --toastify-text-color-dark: hsl(var(--popover-foreground));
+  --toastify-color-info: hsl(var(--brand));
+  --toastify-color-success: hsl(var(--success));
+  --toastify-color-warning: hsl(var(--warning));
+  --toastify-color-error: hsl(var(--destructive));
+  --toastify-color-progress-light: hsl(var(--brand));
+  --toastify-color-progress-dark: hsl(var(--brand));
+  --toastify-toast-min-height: 3rem;
+
+  --plyr-color-main: hsl(var(--brand));
+  --plyr-font-family: var(--font-sans);
+}
+
+.Toastify__toast {
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.625rem;
+  box-shadow: var(--shadow-float);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.Toastify__close-button {
+  color: hsl(var(--muted-foreground));
+  opacity: 1;
+}
+
+// The app shell fills the window. `dvh` follows a phone's address bar as it shows and hides; a
+// browser that does not know the unit keeps the first line.
+.shell-viewport {
+  height: 100vh;
+  height: 100dvh;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}

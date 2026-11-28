@@ -377,7 +377,7 @@ const WhiteboardEditor: React.FC = () => {
         height: '100%',
         overflow: 'scroll auto',
       }}
-      className=" !tw-bg-seashell"
+      className="tw-bg-muted tw-text-foreground"
     >
       <Topbar />
       <div
@@ -391,7 +391,7 @@ const WhiteboardEditor: React.FC = () => {
         {' '}
         <OutsideClickHandler onOutsideClick={outsideClickHandler}>
           {openVideoPanel ? (
-            <div className="tw-flex tw-drop-shadow-md tw-align-center">
+            <div className="tw-flex tw-items-center tw-rounded-lg tw-bg-card tw-p-1 tw-ring-1 tw-ring-border tw-shadow-float">
               <ToolButton
                 active={active_tool === tools.record ? true : false}
                 onSelect={() => {
@@ -399,13 +399,7 @@ const WhiteboardEditor: React.FC = () => {
                 }}
                 icon={tools.record.icon}
                 iconSize={{ width: 20, height: 19 }}
-                className={classNames(
-                  styles.toolButton,
-                  `tw-rounded-l-md tw-p-2 tw-h-40px tw-w-50px tw--mr-2 tw-pr-2`,
-                  active_tool === tools.record
-                    ? '!tw-bg-violet-dark'
-                    : '!tw-bg-primary-purple',
-                )}
+                className={styles.toolButton}
               />
               <ToolButton
                 active={active_tool === tools.task ? true : false}
@@ -414,13 +408,7 @@ const WhiteboardEditor: React.FC = () => {
                 }}
                 icon={tools.task.icon}
                 iconSize={{ width: 20, height: 20 }}
-                className={classNames(
-                  styles.toolButton,
-                  `tw-p-2 tw-h-40px tw-w-50px tw--mr-1 tw-rounded-none`,
-                  active_tool === tools.task
-                    ? '!tw-bg-violet-dark'
-                    : '!tw-bg-primary-purple',
-                )}
+                className={styles.toolButton}
               />
               <ToolButton
                 active={active_tool === tools.tag ? true : false}
@@ -435,13 +423,7 @@ const WhiteboardEditor: React.FC = () => {
                 }}
                 icon={tools.tag.icon}
                 iconSize={{ width: 20, height: 18 }}
-                className={classNames(
-                  styles.toolButton,
-                  `tw-p-2 tw-h-40px tw-w-50px tw-rounded-none`,
-                  active_tool === tools.tag
-                    ? '!tw-bg-violet-dark'
-                    : '!tw-bg-primary-purple',
-                )}
+                className={styles.toolButton}
               />
               <ToolButton
                 active={active_tool === tools.upload ? true : false}
@@ -450,26 +432,22 @@ const WhiteboardEditor: React.FC = () => {
                 }}
                 icon={tools.upload.icon}
                 iconSize={{ width: 20, height: 20 }}
-                className={classNames(
-                  styles.toolButton,
-                  `tw-p-2 tw-h-40px tw-w-50px tw--ml-1 tw-rounded-none tw-rounded-r-md`,
-                  active_tool === tools.upload
-                    ? '!tw-bg-violet-dark'
-                    : '!tw-bg-primary-purple',
-                )}
+                className={styles.toolButton}
               />
             </div>
           ) : (
             <button
-              className="tw-bg-whiteboard-purple tw-text-white tw-h-40px tw-w-50px tw-rounded-md tw-shadow-xl"
+              className="tw-bg-primary tw-text-primary-foreground tw-h-9 tw-w-11 tw-rounded-md tw-transition-colors tw-duration-150 hover:tw-bg-primary/90 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-ring"
               onClick={() => setOpenVideoPanel(!openVideoPanel)}
             >
               <div className="tw-flex tw-justify-center tw-items-center tw-cursor-pointer">
+                {/* The plus is a white-ink image file: inverted where the primary button is light. */}
                 <Image
                   src={tools.plus.icon}
-                  width={30}
-                  height={30}
+                  width={20}
+                  height={20}
                   alt="plus icon"
+                  className="dark:tw-invert"
                 />
               </div>
             </button>

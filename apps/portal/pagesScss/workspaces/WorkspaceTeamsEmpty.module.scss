@@ -7,10 +7,20 @@
 
   h2 {
     text-align: center;
-    font-size: 1.5rem;
+    color: hsl(var(--foreground));
+    font-size: 1.125rem;
     font-weight: 600;
-    line-height: 2rem;
+    line-height: 1.75rem;
     margin: 2rem 0 0.5rem 0;
+  }
+
+  .noMembersDescription {
+    max-width: 28rem;
+    margin: 0;
+    color: hsl(var(--muted-foreground));
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    text-align: center;
   }
 
   &.inModal {
@@ -18,8 +28,7 @@
 
     h2 {
       margin: 2rem 0 2rem 0;
-      font-size: 1.2rem;
-      font-weight: 500;
+      font-size: 1rem;
     }
   }
 
@@ -28,6 +37,6 @@
     justify-content: center;
     align-items: center;
     width: 10rem;
-    margin: 1rem auto;
+    margin: 1.5rem auto 1rem;
   }
 }

@@ -65,11 +65,12 @@ const WhiteboardsScreen: FC = () => {
 
   return (
     <div
-      className="whiteboards !tw-overflow-hidden"
+      // Below 768px the page is a column: top bar, the tabs as a bar, then the cards.
+      className="whiteboards !tw-overflow-hidden mx-md:tw-flex mx-md:tw-flex-col"
       style={{ height: '100vh' }}
     >
       <WhiteboardsTopbar />
-      <div className="tw-h-full tw-w-full tw-flex tw-pl-280px !tw-overflow-hidden">
+      <div className="tw-flex tw-h-full tw-w-full tw-pl-280px !tw-overflow-hidden mx-md:tw-min-h-0 mx-md:tw-flex-1 mx-md:tw-flex-col mx-md:tw-pl-0">
         <WhiteboardsSidebar
           currentTab={currentTab}
           setCurrentTab={setCurrentTab}

@@ -30,7 +30,11 @@ const IconBtn: React.FC<IIconBtn> = ({
     <button disabled={disabled} onClick={onSelect} id={id}>
       <label
         className={className1}
-        style={{ cursor: 'pointer', color: '#a1a1a1', display: 'flex' }}
+        style={{
+          cursor: 'pointer',
+          color: 'hsl(var(--muted-foreground))',
+          display: 'flex',
+        }}
         htmlFor={actual}
       >
         <Image

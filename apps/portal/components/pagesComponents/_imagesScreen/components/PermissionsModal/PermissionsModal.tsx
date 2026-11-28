@@ -9,7 +9,6 @@ import {
 } from 'app/interfaces/IWorkspace';
 import { Tab, TabList, TabPanel, Tabs } from 'react-tabs';
 import 'react-tabs/style/react-tabs.css';
-import AppSvg from 'components/elements/AppSvg';
 import useWorkspacePermissions from 'hooks/useWorkspacePermissions';
 import { ItemType, PermissionsItemType } from 'app/interfaces/ItemType';
 import useShareWorkspaceInviteModal from 'hooks/useShareWorkspaceInviteModal';
@@ -80,9 +79,6 @@ const PermissionsModal: React.FC<Props> = ({
       footer={null}
       destroyOnClose
       closable
-      closeIcon={
-        <AppSvg path="/common/close-icon.svg" className="modalCloseButton" />
-      }
       className={
         members.length > 0 ? styles.emptyWrapper : styles.noMembersSection
       }

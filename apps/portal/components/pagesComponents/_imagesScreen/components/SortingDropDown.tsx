@@ -39,16 +39,12 @@ const SortingDropDown: React.FC<SortingDropDown> = ({
   }
 
   const menu = (
-    <Menu
-      className={classNames(styles.gradientBackground)}
-      onClick={handleMenuClick}
-    >
+    <Menu className={classNames(styles.menu)} onClick={handleMenuClick}>
       <Menu.Item
-        className={classNames(styles.itemsStyle)}
         key={SortEnum.date}
         icon={
           <div
-            className="tw-mr-5px"
+            className={styles.check}
             style={
               sortingType === ItemOrderEnum.dateNewest ||
               sortingType === ItemOrderEnum.dateOldest
@@ -56,7 +52,7 @@ const SortingDropDown: React.FC<SortingDropDown> = ({
                 : { opacity: 0 }
             }
           >
-            <AppSvg path="/common/check-purple.svg" size="19px" />
+            <AppSvg path="/common/check-purple.svg" size="16px" />
           </div>
         }
       >
@@ -68,18 +64,17 @@ const SortingDropDown: React.FC<SortingDropDown> = ({
         </span>
       </Menu.Item>
       <Menu.Item
-        className={classNames(styles.itemsStyle)}
         key={SortEnum.name}
         icon={
           <div
-            className="tw-mr-5px"
+            className={styles.check}
             style={
               sortingType !== ItemOrderEnum.name
                 ? { opacity: 0 }
                 : { opacity: 1 }
             }
           >
-            <AppSvg path="/common/check-purple.svg" size="19px" />
+            <AppSvg path="/common/check-purple.svg" size="16px" />
           </div>
         }
       >

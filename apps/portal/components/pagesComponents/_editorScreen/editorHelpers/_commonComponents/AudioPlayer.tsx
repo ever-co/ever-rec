@@ -60,7 +60,7 @@ const AudioPlayer: React.FC<IPlayerProps> = ({ audioSrc, audioDuration }) => {
       <div className={styles.audioContainer}>
         <div className={styles.iconWrapper}>
           <AppSvg path={micIcon.src} size="17px" className={styles.icon} />
-          <label className={styles.label}>Voice Note</label>
+          <label className={styles.label}>Voice note</label>
         </div>
 
         <div className={styles.duration}>
@@ -76,7 +76,10 @@ const AudioPlayer: React.FC<IPlayerProps> = ({ audioSrc, audioDuration }) => {
           {' '}
           <img
             src={playingState ? pauseIcon.src : playIcon.src}
-            className={!playingState ? styles.spacing : ''}
+            className={classNames(
+              'tw-brightness-0 dark:tw-invert',
+              !playingState ? styles.spacing : '',
+            )}
             alt="play/pause"
           ></img>
         </Button>

@@ -1,8 +1,39 @@
+// The thumbnail frame of an image card: a hairline that darkens on hover; the selected state
+// (the accent ring) is set in the component.
 .wrapper {
-    box-sizing: border-box;
-    border: 3px solid transparent;
+  box-sizing: border-box;
+  transition:
+    border-color 150ms var(--ease-out),
+    box-shadow 150ms var(--ease-out);
+}
 
-    &:hover {
-        //border: 3px solid #8576FF;
-    }
+// The item's menu trigger. It sits over the thumbnail's scrim: light ink in both themes.
+.optionsButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0.5rem;
+  background: transparent;
+  color: hsl(var(--on-overlay));
+  cursor: pointer;
+  transition: background-color 150ms var(--ease-out);
+
+  &:hover,
+  &:global(.ant-dropdown-open) {
+    background-color: hsl(var(--on-overlay) / 0.16);
+  }
+
+  &:focus-visible {
+    outline: 2px solid hsl(var(--on-overlay));
+    outline-offset: 1px;
+  }
+
+  svg {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
 }

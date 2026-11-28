@@ -1,13 +1,35 @@
-@import 'pagesScss/partials/_colors.scss';
-
+// The button row of a dialog: the cancel, then the action on the right, as in every other Ever
+// dialog. The markup has the same order, so the Tab key follows what is seen.
 .footerContainer {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 1.7rem;
+  justify-content: flex-end;
+  // Stretch: the cancel takes the height of the action button beside it.
+  align-items: stretch;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
 
+  // The cancel: an outline button.
   .cancelLink {
-    color: $primary-violet;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.25rem;
+    padding: 0 1rem;
+    border: 1px solid hsl(var(--input));
+    border-radius: calc(var(--radius) - 2px);
+    background-color: transparent;
+    color: hsl(var(--foreground));
+    font-family: inherit;
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.25rem;
+    white-space: nowrap;
     cursor: pointer;
+    user-select: none;
+    transition: background-color 150ms var(--ease-out);
+
+    &:hover {
+      background-color: hsl(var(--accent));
+    }
   }
 }

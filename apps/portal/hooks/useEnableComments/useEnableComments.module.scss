@@ -1,29 +1,305 @@
+// The comment panel of the shared image page (and of the old video manage column).
+// `hooks/` is not in Tailwind's content list, so utility classes written only in the hook are
+// never generated: everything the template needs is styled here, on the shared Ever tokens.
+
+.template {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.75rem;
+  width: 100%;
+  min-height: 500px;
+}
+
+// --- No comments yet
+
+.empty {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 2rem 1rem;
+}
+
+.emptyTitle {
+  margin: 0;
+  color: hsl(var(--foreground));
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.5rem;
+  text-align: center;
+}
+
+.emptyPicture {
+  display: inline-flex;
+  justify-content: center;
+
+  img {
+    width: 50%;
+    max-width: 160px;
+  }
+}
+
+// --- The list
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  max-height: 395px;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
 .wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.5rem;
+  border-radius: calc(var(--radius) - 2px);
+  transition: background-color 150ms var(--ease-out);
+
   .editDeleteWrapper {
     display: flex;
+    gap: 0.75rem;
     opacity: 0;
-    transition: all 0.3s ease-in-out;
+    transition: opacity 150ms var(--ease-out);
   }
 
   &:hover {
+    background-color: hsl(var(--accent));
+
     .editDeleteWrapper {
       opacity: 1;
-      transition: all 0.3s ease-in-out;
     }
   }
 }
 
-.textareaStyle {
-  outline: none;
-}
-.textareaStyle:focus {
-  border-radius: 4px;
-  border: 1px solid #5b4dbe;
-  overflow-y: auto;
-  // outline: 1px solid rgb#5b4dbe;
-  box-shadow: 0 0 0 2px rgb(24 144 255 / 20%);
+.latest {
+  background-color: hsl(var(--muted));
 }
 
-.textareaStyle:hover {
-  border-color: #8576ff;
+.latestLabel {
+  color: hsl(var(--muted-foreground));
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
+.commentBody {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.avatar {
+  flex: none;
+  width: 32px;
+  height: 32px;
+
+  img {
+    width: 100%;
+    height: 100%;
+    border-radius: 9999px;
+    object-fit: cover;
+  }
+}
+
+.commentText {
+  min-width: 0;
+  padding-top: 6px;
+  color: hsl(var(--foreground));
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  overflow-wrap: anywhere;
+}
+
+.commentMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-left: 40px;
+}
+
+.timestamp {
+  color: hsl(var(--muted-foreground));
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1rem;
+}
+
+.editLink,
+.deleteLink {
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1rem;
+  cursor: pointer;
+  transition: color 150ms var(--ease-out);
+}
+
+.editLink {
+  color: hsl(var(--muted-foreground));
+
+  &:hover {
+    color: hsl(var(--foreground));
+  }
+}
+
+.deleteLink {
+  color: hsl(var(--destructive-text));
+
+  &:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+}
+
+.pager {
+  display: flex;
+  justify-content: space-around;
+}
+
+.pagerLink {
+  display: block;
+  margin: 0.5rem 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: hsl(var(--brand-text));
+  font-size: 0.8125rem;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+}
+
+// --- The composer: a bordered field, the tools and the two buttons under the text
+
+.form {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.composer {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid hsl(var(--input));
+  border-radius: calc(var(--radius) - 2px);
+  transition:
+    border-color 150ms var(--ease-out),
+    box-shadow 150ms var(--ease-out);
+
+  &:focus-within {
+    border-color: hsl(var(--ring));
+    box-shadow: 0 0 0 3px hsl(var(--ring) / 0.2);
+  }
+}
+
+.textareaStyle {
+  display: block;
+  width: 100%;
+  height: 56px;
+  padding: 0.25rem;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: hsl(var(--foreground));
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  resize: none;
+}
+
+.composerRow {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.composerTools {
+  display: flex;
+  align-items: center;
+
+  // The emoji button is a black drawing loaded as a picture (/public/images/emoji.svg).
+  :global(#emoji-main-button) {
+    width: 20px;
+    height: 20px;
+    margin: 6px 4px;
+    opacity: 0.6;
+    cursor: pointer;
+    transition: opacity 150ms var(--ease-out);
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+}
+
+:global(.dark) .composerTools :global(#emoji-main-button) {
+  filter: invert(1);
+}
+
+.composerActions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.submitButton,
+.cancelButton,
+.openButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: calc(var(--radius) - 2px);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background-color 150ms var(--ease-out),
+    opacity 150ms var(--ease-out);
+}
+
+.submitButton,
+.openButton {
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+
+  &:hover {
+    background-color: hsl(var(--primary) / 0.9);
+  }
+}
+
+.submitButton {
+  min-width: 88px;
+  height: 32px;
+  padding: 0 0.75rem;
+
+  &:disabled,
+  &:disabled:hover {
+    background-color: hsl(var(--primary));
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.cancelButton {
+  height: 32px;
+  padding: 0 0.75rem;
+  border: 1px solid hsl(var(--input));
+  background-color: transparent;
+  color: hsl(var(--foreground));
+
+  &:hover {
+    background-color: hsl(var(--accent));
+  }
+}
+
+.openButton {
+  width: 100%;
+  height: 36px;
+  font-size: 0.875rem;
 }

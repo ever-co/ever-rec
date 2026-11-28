@@ -17,12 +17,14 @@ const ItemsNotFound: FC<IProps> = ({ emptyType }) => {
 
   return (
     <div className="tw-w-full">
-      <div className="tw-flex tw-flex-col tw-items-center">
+      <div className="tw-flex tw-flex-col tw-items-center tw-px-6 tw-py-10">
         <AppSvg path={imagePath} className="tw-w-max" />
-        <h2 className="tw-text-2xl tw-mt-7 tw-mb-2 tw-font-semibold">
+        <h2 className="tw-text-lg tw-mt-6 tw-mb-1 tw-font-semibold tw-text-foreground">
           {t('shared.noItemsFound')}
         </h2>
-        <p className="tw-text-center">{t('shared.noItemsWithSearchTerm')}</p>
+        <p className="tw-text-center tw-text-sm tw-text-muted-foreground">
+          {t('shared.noItemsWithSearchTerm')}
+        </p>
       </div>
     </div>
   );

@@ -24,7 +24,11 @@ const FolderHistory: FC<IFoldersProps> = ({
     return (
       <div className="tw-flex tw-items-center" key={folder.id}>
         <h1
-          className="tw-font-semibold tw-cursor-pointer"
+          className={
+            isLastFolder
+              ? 'tw-font-semibold tw-cursor-pointer tw-text-foreground'
+              : 'tw-font-semibold tw-cursor-pointer tw-text-muted-foreground tw-transition-colors tw-duration-150 hover:tw-text-foreground'
+          }
           onClick={() => goToFolder(folder)}
         >
           {folder.name}
@@ -33,17 +37,19 @@ const FolderHistory: FC<IFoldersProps> = ({
           <AppSvg
             path="/common/Chevron_right.svg"
             size="20px"
-            className="tw-mx-1"
+            className="tw-mx-1 tw-text-muted-foreground rtl:-tw-scale-x-100"
           />
         )}
       </div>
     );
   });
 
+  // The trail stands where the page title stands: same size, the open folder in the text colour
+  // and the way back to it quiet.
   return (
-    <div className="tw-flex tw-items-center tw-flex-wrap">
+    <div className="tw-flex tw-items-center tw-flex-wrap tw-text-2xl tw-leading-8 tw-tracking-[-0.01em]">
       <h1
-        className="tw-font-semibold tw-cursor-pointer"
+        className="tw-font-semibold tw-cursor-pointer tw-text-muted-foreground tw-transition-colors tw-duration-150 hover:tw-text-foreground"
         onClick={goToMainFolder}
       >
         {t('unique.myItems')}
@@ -51,7 +57,7 @@ const FolderHistory: FC<IFoldersProps> = ({
       <AppSvg
         path="/common/Chevron_right.svg"
         size="20px"
-        className="tw-mx-1"
+        className="tw-mx-1 tw-text-muted-foreground rtl:-tw-scale-x-100"
       />
       {folderElements}
     </div>

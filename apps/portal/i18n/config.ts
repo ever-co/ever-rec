@@ -16,6 +16,7 @@ import plTranslation from './locales/pl.json';
 import ptTranslation from './locales/pt.json';
 import ruTranslation from './locales/ru.json';
 import zhTranslation from './locales/zh.json';
+import { languageDetection } from './constants';
 
 // Initialize i18next
 i18n
@@ -67,6 +68,7 @@ i18n
       },
     },
     fallbackLng: 'en',
+    detection: languageDetection,
     debug: process.env.NODE_ENV === 'development',
     interpolation: {
       escapeValue: false, // React already safes from XSS

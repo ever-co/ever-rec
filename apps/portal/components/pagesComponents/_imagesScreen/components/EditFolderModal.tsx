@@ -124,26 +124,17 @@ const EditFolderModal: React.FC<IEditFolderModalProps> = ({
       open={visible}
       onCancel={onClose}
       footer={
-        <div className="tw-flex tw-justify-end tw-mt-4">
-          <AppButton
-            onClick={onClose}
-            bgColor="tw-bg-app-grey-darker"
-            outlined
-            className="tw-px-8 tw-mx-4 tw-pb-1 tw-pt-1"
-          >
+        <div className="tw-flex tw-justify-end tw-gap-2 tw-mt-6">
+          <AppButton onClick={onClose} bgColor="tw-bg-app-grey-darker" outlined>
             {t('common.cancel')}
           </AppButton>
-          <AppButton
-            onClick={onOkHandler}
-            className="tw-px-8 tw-pb-1 tw-pt-1"
-            disabled={!valid}
-          >
+          <AppButton onClick={onOkHandler} disabled={!valid}>
             {t('modals.changeName')}
           </AppButton>
         </div>
       }
     >
-      <h2 className="tw-mb-6 tw-text-2xl tw-font-semibold">
+      <h2 className="tw-mb-4 tw-text-base tw-font-semibold">
         {t('modals.editFolder')}
       </h2>
       <AppInput
@@ -152,7 +143,7 @@ const EditFolderModal: React.FC<IEditFolderModalProps> = ({
         errors={folderName.errors}
         onChange={folderNameChangeHandler}
         rules={folderNameRules}
-        inputClass="tw-bg-transparent tw-placeholder-black"
+        inputClass="tw-bg-transparent"
       />
     </Modal>
   );

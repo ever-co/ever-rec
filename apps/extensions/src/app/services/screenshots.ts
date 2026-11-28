@@ -507,7 +507,17 @@ const createImagesFolder = async (
   try {
     const newId = uuidv4();
 
-    await createNewFolderAPI(name, color, rootFolderId, newId, parentId);
+    const response = await createNewFolderAPI(
+      name,
+      color,
+      rootFolderId,
+      newId,
+      parentId,
+    );
+
+    // A refusal (parent deleted in another tab, nest level too deep) is an HTTP 200 with status
+    // "error": show its message and leave the explorer as it is.
+    if (!iDataResponseParser<typeof response.data>(response)) return;
 
     getExplorerData(parentId);
   } catch (error: any) {

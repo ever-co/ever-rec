@@ -1,12 +1,27 @@
+// The title field of a chapter. Its border, focus ring and error state come from the antd skin
+// (styles/antd.scss); only its size is set here.
 .ContentInput {
-  border: 1px solid rgb(150, 150, 150) !important;
-  margin-right: 0.5rem;
+  margin-inline-end: 0.5rem;
   height: 51px !important;
   width: 165px;
+  font-size: 0.8125rem;
+  line-height: 1.125rem;
 }
 
+// An empty title that has to be filled before saving (antd's own error red is not a token).
+.ContentInput:global(.ant-input-status-error) {
+  border-color: hsl(var(--destructive)) !important;
+
+  &:focus {
+    box-shadow: 0 0 0 3px hsl(var(--destructive) / 0.2) !important;
+  }
+}
+
+// On a shared page the title is read, not edited: plain text, no field.
 .disabled {
-  color: black !important;
+  border-color: transparent !important;
+  padding-inline-start: 0.25rem !important;
+  color: hsl(var(--foreground)) !important;
   background-color: transparent !important;
   cursor: default !important;
 }

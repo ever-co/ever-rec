@@ -1,28 +1,41 @@
-@import 'pagesScss/partials/_colors.scss';
-
+// The "New folder / New image file / New video file" tiles. Their look is the shared AppButton2;
+// this only lays them out and keeps their icons quiet.
 .libraryActions {
   display: flex;
+  flex-wrap: wrap;
   gap: 1rem;
-  padding: 1rem 2rem;
+  padding: 1.25rem 1.5rem 0;
+
+  @media (max-width: 767px) {
+    padding-inline-start: 1rem;
+    padding-inline-end: 1rem;
+  }
+
+  @media (min-width: 1200px) {
+    padding-inline-start: 2rem;
+    padding-inline-end: 2rem;
+  }
 
   .buttonInner {
     display: flex;
     align-items: center;
 
     svg {
-      margin-right: 1rem;
+      margin-inline-end: 0.75rem;
     }
   }
 }
 
-.actionButton:hover,
-.actionButton.active {
-  border-color: $primary-violet;
-  background-color: $primary-violet10;
-  color: #000000;
+// The icon files carry their own colour (a `color` attribute on the <svg>): the text roles win.
+.actionButton {
+  max-width: 100%;
 
-  & .svgWrapper {
-    color: #000000;
-    fill: #000000;
+  svg {
+    color: hsl(var(--muted-foreground));
+    transition: color 150ms var(--ease-out);
+  }
+
+  &:hover svg {
+    color: hsl(var(--foreground));
   }
 }

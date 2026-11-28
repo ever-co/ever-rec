@@ -1,7 +1,10 @@
 import { Global, Logger, Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ModuleRef } from '@nestjs/core';
-import { EVER_CONNECT_WORKSPACE_LINK_READER } from '../../common/ever-platform/tokens';
+import {
+  EVER_CONNECT_ACCOUNT_DELETIONS,
+  EVER_CONNECT_WORKSPACE_LINK_READER,
+} from '../../common/ever-platform/tokens';
 import { EverInstanceModule } from '../ever-instance/ever-instance.module';
 import { EVER_CONNECT_OIDC_CONFIG } from '../ever-id/ever-id.tokens';
 import {
@@ -60,8 +63,8 @@ const logger = new Logger('EverConnect');
  * timer and no client exist. Loaded but not connected, it sends nothing until the operator
  * connects. See `docs/ever-platform/ever-platform-connection.md`.
  *
- * Global so that the two optional touch points outside it (the workspace handle, the Ever ID
- * client settings) can inject their token with `@Optional()`.
+ * Global so that the optional touch points outside it (the workspace handle, the account
+ * deletions under way, the Ever ID client settings) can inject their token with `@Optional()`.
  */
 @Global()
 @Module({
@@ -185,6 +188,10 @@ const logger = new Logger('EverConnect');
       useExisting: EverConnectLinksService,
     },
     {
+      provide: EVER_CONNECT_ACCOUNT_DELETIONS,
+      useExisting: EverConnectPersonService,
+    },
+    {
       provide: EVER_CONNECT_OIDC_CONFIG,
       useFactory: async (oidc: EverConnectOidcService) => {
         await oidc.load();
@@ -193,6 +200,10 @@ const logger = new Logger('EverConnect');
       inject: [EverConnectOidcService],
     },
   ],
-  exports: [EVER_CONNECT_WORKSPACE_LINK_READER, EVER_CONNECT_OIDC_CONFIG],
+  exports: [
+    EVER_CONNECT_WORKSPACE_LINK_READER,
+    EVER_CONNECT_ACCOUNT_DELETIONS,
+    EVER_CONNECT_OIDC_CONFIG,
+  ],
 })
 export class EverConnectModule {}

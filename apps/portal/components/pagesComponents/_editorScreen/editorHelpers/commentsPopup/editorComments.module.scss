@@ -1,18 +1,11 @@
+// The comments popup beside a shape: a floating panel with a hairline.
 .editorComments {
   display: none;
-  border-radius: 20px !important;
-  background-color: #e9e7f0;
-  background-image: radial-gradient(
-      at 47% 83%,
-      rgb(211, 205, 248) 0,
-      transparent 59%
-    ),
-    radial-gradient(at 82% 65%, hsl(253.33, 23%, 92%) 0, transparent 55%);
-  -webkit-box-shadow: inset 0px 22px 10px -15px #ffffff;
-  box-shadow: inset 0px 22px 10px -15px #ffffff;
-  -webkit-box-shadow: 0px 0px 7px -3px #000000;
-  box-shadow: 0px 0px 7px -3px #000000;
-  border: 1px solid rgba(91, 77, 240, 0.13);
+  border-radius: 10px !important;
+  background-color: hsl(var(--popover));
+  color: hsl(var(--popover-foreground));
+  box-shadow: var(--shadow-float);
+  border: 1px solid hsl(var(--border));
   z-index: 2000;
   position: absolute;
   width: 300px;
@@ -30,28 +23,37 @@
 
   /* Handle */
   ::-webkit-scrollbar-thumb {
-    background: #888;
+    background: hsl(var(--foreground) / 0.18);
     border-radius: 25px;
   }
 
   /* Handle on hover */
   ::-webkit-scrollbar-thumb:hover {
-    background: #555;
+    background: hsl(var(--foreground) / 0.32);
   }
   em-emoji-picker {
     height: 200px !important;
-    -webkit-box-shadow: 0px -11px 38px 2px rgba(0, 0, 0, 0.29);
-    box-shadow: 0px -11px 38px 2px rgba(0, 0, 0, 0.29);
+    box-shadow: var(--shadow-float);
   }
 }
 
 .textarea {
-  border: grey;
+  border: 1px solid hsl(var(--input));
   width: 100%;
   border-radius: 0.5rem;
   padding: 0.5rem;
-  background: #fbfaff;
-  border-bottom: 1px solid #d4d2d4;
+  background: transparent;
+  color: hsl(var(--foreground));
+  outline: none;
+
+  &::placeholder {
+    color: hsl(var(--muted-foreground));
+  }
+
+  &:focus {
+    border-color: hsl(var(--ring));
+    box-shadow: 0 0 0 3px hsl(var(--ring) / 0.2);
+  }
 }
 .iconsContainer {
   display: flex;
@@ -70,11 +72,12 @@
 
 .wrapper {
   position: absolute;
-  background-color: #fbfaff;
+  background-color: hsl(var(--popover));
+  border: 1px solid hsl(var(--border));
   margin-left: 20px;
   margin-top: -10px;
   border-radius: 0.5rem;
-  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  box-shadow: var(--shadow-float);
 }
 
 .blockDisplay {

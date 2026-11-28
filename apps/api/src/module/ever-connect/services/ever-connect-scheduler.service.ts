@@ -216,10 +216,11 @@ export class EverConnectSchedulerService
     return WATCH_MS;
   }
 
-  /** Deletes expired exports, connected or not (local only). */
+  /** Deletes expired exports, old person requests and account deletion marks (local only). */
   private async sweepJob(): Promise<number> {
     await this.store.sweepPersonExports(this.clock()).catch(() => 0);
     await this.store.sweepPersonRequests(this.clock()).catch(() => 0);
+    await this.store.sweepAccountDeletions(this.clock()).catch(() => 0);
     return SWEEP_MS;
   }
 

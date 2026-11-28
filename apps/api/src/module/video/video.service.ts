@@ -971,8 +971,31 @@ export class VideoService {
   ): Promise<
     IDataResponse<{ folder: IDbFolder; favFolders: IFavoriteFolders } | null>
   > {
+    // The id goes into a database path: "" would write into the folder list itself and a
+    // sub-path such as `<id>/children` inside another folder.
+    if (typeof folderId !== 'string' || !is_id(folderId)) {
+      throw new BadRequestException('Invalid folder id');
+    }
+
     const db = admin.database();
     const updated = new Date().toISOString();
+
+    const dbFolderRef = db.ref(`users/${uid}/videoFolders/${folderId}`);
+    const storedFolder = (await dbFolderRef.get()).val();
+
+    // An update of a folder that is not stored (an unknown id, or a folder deleted in another
+    // tab) would create a partial folder: 404 instead.
+    if (!storedFolder) {
+      throw new NotFoundException('Folder not found');
+    }
+    // This route does not move a folder: the nest level and the children of the old and the new
+    // parent would stay as they were. The clients resend the stored parent (false at the top
+    // level), so the update below writes back the stored value; any other parent is refused.
+    if (parentId !== undefined && parentId !== storedFolder.parentId) {
+      throw new BadRequestException(
+        'A folder cannot be moved to another parent',
+      );
+    }
 
     const favFoldersRef = db.ref(`users/${uid}/favoriteFolders`);
     const favFoldersSnap = await favFoldersRef.get();
@@ -988,8 +1011,6 @@ export class VideoService {
     if (favFoldersIndex !== -1) {
       parsedFavVideoFolders[favFoldersIndex].name = name;
     }
-
-    const dbFolderRef = db.ref(`users/${uid}/videoFolders/${folderId}`);
 
     await Promise.all([
       favFoldersRef.set(favFolders),

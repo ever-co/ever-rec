@@ -156,7 +156,7 @@ const TermsGate: FC = () => {
         ))}
       </ul>
       {error && (
-        <p role="alert" className="tw-text-red-600">
+        <p role="alert" className="tw-text-destructive-text">
           {error}
         </p>
       )}

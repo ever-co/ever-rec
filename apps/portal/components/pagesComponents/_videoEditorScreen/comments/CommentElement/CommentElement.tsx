@@ -7,6 +7,7 @@ import CommentInput from '../CommentInput/CommentInput';
 import { RootStateOrAny, useSelector } from 'react-redux';
 import { IUser } from 'app/interfaces/IUserData';
 import { useTranslation } from 'react-i18next';
+import { mirrorPlacement, useDirection } from 'i18n/direction';
 
 export type IComment = {
   id: string;
@@ -39,6 +40,7 @@ const CommentElement: FC<IProps> = ({
   deleteCommentHandler,
 }) => {
   const { t } = useTranslation();
+  const direction = useDirection();
   const user: IUser = useSelector((state: RootStateOrAny) => state.auth.user);
 
   const authorName = comment.user?.name;
@@ -56,7 +58,7 @@ const CommentElement: FC<IProps> = ({
           <div className={styles.menuItemOption}>
             <AppSvg
               path="/new-design-v2/comment-more-options/edit.svg"
-              size="20px"
+              size="16px"
             />
             <span>{t('common.edit')}</span>
           </div>
@@ -64,12 +66,13 @@ const CommentElement: FC<IProps> = ({
 
         <Menu.Item
           key="delete"
+          danger
           onClick={() => deleteCommentHandler(comment.id)}
         >
           <div className={styles.menuItemOption}>
             <AppSvg
               path="/new-design-v2/comment-more-options/delete-bin.svg"
-              size="20px"
+              size="16px"
             />
             <span>{t('common.delete')}</span>
           </div>
@@ -86,7 +89,7 @@ const CommentElement: FC<IProps> = ({
       ) : (
         <AppSvg
           path="/sign/default-profile.svg"
-          size="30px"
+          size="32px"
           className="tw-flex tw-justify-center tw-items-center"
         />
       )}
@@ -97,7 +100,7 @@ const CommentElement: FC<IProps> = ({
 
           <div>
             <span className={styles.dotSeparator}>●</span>
-            <span>{dateElapsed}</span>
+            <span dir="auto">{dateElapsed}</span>
             {isEdited && <span>{t('page.video.editBrackets')}</span>}
           </div>
         </div>
@@ -111,18 +114,21 @@ const CommentElement: FC<IProps> = ({
             />
           ) : (
             <div className={styles.commentContent}>
-              <p>{comment.content}</p>
+              {/* A comment reads in its own language's direction, lined up with the page. */}
+              <p dir="auto" className="[text-align:match-parent]">
+                {comment.content}
+              </p>
 
               {comment.isOwn && user?.id && (
                 <Dropdown
                   trigger={['click']}
-                  placement="bottomRight"
+                  placement={mirrorPlacement('bottomRight', direction)}
                   overlay={() => commentMenu(comment)}
                 >
-                  <div style={{ cursor: 'pointer' }}>
+                  <div className={styles.moreButton}>
                     <AppSvg
                       path="/new-design-v2/comment-more-options/more-vertical.svg"
-                      size="22px"
+                      size="18px"
                     />
                   </div>
                 </Dropdown>

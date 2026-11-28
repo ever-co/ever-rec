@@ -1,29 +1,43 @@
+// Owner and date of an item card: meta text, both quiet.
 .itemAuthorContainer {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 0.5rem;
   padding: 0 1rem;
-  margin-top: 1rem;
+  margin-top: 0.5rem;
+  color: hsl(var(--muted-foreground));
 
   img {
-    border-radius: 100%;
-    margin-right: 0.5rem;
-    width: 1.5rem;
-    height: 1.5rem;
+    flex-shrink: 0;
+    border-radius: 9999px;
+    margin-inline-end: 0.5rem;
+    width: 1.25rem;
+    height: 1.25rem;
+    object-fit: cover;
+    background-color: hsl(var(--muted));
   }
 }
 
 .author {
   display: flex;
+  align-items: center;
+  min-width: 0;
   width: 60%;
 }
 
 .authorName {
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.8125rem;
+  line-height: 1.25rem;
 }
 
 .date {
-  color: #4b5563;
-  font-size: 0.9rem;
+  flex-shrink: 0;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.75rem;
+  line-height: 1.25rem;
+  font-variant-numeric: tabular-nums;
 }

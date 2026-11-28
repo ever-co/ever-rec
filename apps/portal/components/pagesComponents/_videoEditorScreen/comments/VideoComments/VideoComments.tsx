@@ -169,7 +169,7 @@ const VideoCommentsBox: FC<Omit<IProps, 'isWorkspace'>> = ({
   return (
     <div className={styles.comments}>
       <h3>
-        {commentsLength}
+        <span className={styles.count}>{commentsLength}</span>
 
         {t('common.comments')}
       </h3>
@@ -182,7 +182,15 @@ const VideoCommentsBox: FC<Omit<IProps, 'isWorkspace'>> = ({
           onChange={(e) => setUserComment(e.target.value)}
         />
 
-        <AppButton2 onClick={addCommentHandler} disabled={addCommentDisabled}>
+        <AppButton2
+          onClick={addCommentHandler}
+          disabled={addCommentDisabled}
+          className={
+            addCommentDisabled
+              ? `${styles.sendButton} ${styles.sendButtonDisabled}`
+              : styles.sendButton
+          }
+        >
           {t('common.comment')}
         </AppButton2>
       </div>

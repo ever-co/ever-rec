@@ -1,9 +1,7 @@
+// The quick-add tools (record, task, tag, upload) are drawn with white ink: they take the
+// button's text colour, so they read on the tool bar in both themes.
 .toolButton {
-    background-color: '#5B4DBE';
-    &:hover {
-        background-color: #363071 !important;
-    }
-    &:active {
-        background-color: #363071 !important;
-    }
+  svg path {
+    fill: currentColor;
+  }
 }

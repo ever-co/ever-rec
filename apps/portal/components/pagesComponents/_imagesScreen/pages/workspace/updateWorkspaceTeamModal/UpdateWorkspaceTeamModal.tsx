@@ -10,7 +10,7 @@ import AppButton from 'components/controls/AppButton';
 import styles from './UpdateWorkspaceTeamModal.module.scss';
 import classNames from 'classnames';
 import AppSpinnerLocal from 'components/containers/appSpinnerLocal/AppSpinnerLocal';
-import AppSvg from 'components/elements/AppSvg';
+import { X } from 'lucide-react';
 import { iDataResponseParser } from 'app/services/helpers/iDataResponseParser';
 import { useDispatch } from 'react-redux';
 import PanelAC from 'app/store/panel/actions/PanelAC';
@@ -176,7 +176,9 @@ const UpdateWorkspaceTeamModal: React.FC<IProps> = ({
       onCancel={() => onCancelHandler()}
       className={styles.modal}
       closeIcon={
-        <AppSvg path="/common/close-icon.svg" className="modalCloseButton" />
+        <span className="tw-flex tw-size-full tw-items-center tw-justify-center">
+          <X className="tw-size-4" aria-hidden="true" />
+        </span>
       }
       destroyOnClose={true}
       footer={<></>}
@@ -203,7 +205,7 @@ const UpdateWorkspaceTeamModal: React.FC<IProps> = ({
           e.currentTarget.value = '';
         }}
       />
-      <h2 className="tw-text-2xl tw-font-bold tw-mb-10">
+      <h2 className="tw-mb-6 tw-pe-6 tw-text-base tw-font-semibold tw-text-foreground">
         {t('modals.updateTeamSettings')}
       </h2>
       <div className={styles.row}>
@@ -332,6 +334,8 @@ const UpdateWorkspaceTeamModal: React.FC<IProps> = ({
           {!toDeleteTeam && (
             <AppButton
               onClick={deleteTeamHandler}
+              outlined
+              twTextColor="tw-text-destructive-text"
               className={classNames(styles.dangerButton, styles.deleteTeamBtn)}
             >
               {t('modals.deleteTeam')}
@@ -342,7 +346,8 @@ const UpdateWorkspaceTeamModal: React.FC<IProps> = ({
               loading={saveLoadingDeleteTeam}
               onConfirm={() => deleteTeamHandler(false)}
               onCancel={() => (
-                setToDeleteTeam(false), setSaveLoadingDeleteTeam(false)
+                setToDeleteTeam(false),
+                setSaveLoadingDeleteTeam(false)
               )}
             />
           )}
@@ -360,17 +365,22 @@ const DeleteConfirmButtons = ({ onConfirm, onCancel, loading }) => {
     <div className={styles.toDeleteTeam}>
       <AppButton
         onClick={onConfirm}
-        className={classNames(styles.deleteTeamBtn, styles.confirmDelete)}
+        bgColor="tw-bg-danger"
+        className={styles.confirmDelete}
       >
         {loading ? (
           <div className={styles.spinnerWrapper}>
-            <AppSpinnerLocal circleInnerColor="#d70015" />
+            <AppSpinnerLocal />
           </div>
         ) : (
           t('common.confirm')
         )}
       </AppButton>
-      <AppButton onClick={() => onCancel()} className="" outlined>
+      <AppButton
+        onClick={() => onCancel()}
+        className="tw-flex tw-h-9 tw-items-center tw-justify-center tw-px-4 tw-py-0"
+        outlined
+      >
         {t('common.cancel')}
       </AppButton>
     </div>

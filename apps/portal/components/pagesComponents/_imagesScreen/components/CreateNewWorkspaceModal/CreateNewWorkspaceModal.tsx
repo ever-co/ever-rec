@@ -2,7 +2,6 @@ import { ChangeEvent, useState } from 'react';
 import styles from './CreateNewWorkspaceModal.module.scss';
 import { Modal } from 'antd';
 import AppButton from '../../../../controls/AppButton';
-import AppSvg from '../../../../elements/AppSvg';
 import { useTranslation } from 'react-i18next';
 
 interface IProps {
@@ -36,9 +35,6 @@ const CreateNewWorkspaceModal: React.FC<IProps> = ({
       className={styles.modal}
       onCancel={cancelHandler}
       onOk={okHandler}
-      closeIcon={
-        <AppSvg path="/common/close-icon.svg" className="modalCloseButton" />
-      }
       footer={
         <AppButton
           className={styles.appButton}

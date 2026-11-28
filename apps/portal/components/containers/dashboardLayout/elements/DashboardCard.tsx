@@ -7,16 +7,13 @@ interface IDashboardCardProps {
   children: React.ReactNode;
 }
 
+/** A section of a page. It sits straight on the page panel, so it paints no ground of its own. */
 const DashboardCard = (
   { className, style, children }: IDashboardCardProps,
   ref: Ref<HTMLDivElement>,
 ) => {
   return (
-    <div
-      ref={ref}
-      className={classNames('tw-bg-white', className)}
-      style={style || {}}
-    >
+    <div ref={ref} className={classNames(className)} style={style || {}}>
       {children}
     </div>
   );

@@ -7,7 +7,7 @@ const PanelSplitter: React.FC = () => {
         height: '0.75rem',
         width: '100%',
 
-        borderTop: '1px solid #c3c3c3',
+        borderTop: '1px solid hsl(var(--border))',
       }}
     ></div>
   );

@@ -20,19 +20,19 @@ const ItemFooter: FC<IItemFooterProps> = ({ views, likes, comments }) => {
         <div className={styles.iconPair}>
           <AppSvg
             path="/item/comments-v3.svg"
-            size="13px"
+            size="14px"
             className={styles.icon}
           />
           <span className={styles.label}>{comments}</span>
         </div>
 
         <div className={styles.iconPair}>
-          <AppSvg path="/item/likes.svg" size="17px" className={styles.icon} />
+          <AppSvg path="/item/likes.svg" size="16px" className={styles.icon} />
           <span className={styles.label}>{likes.length}</span>
         </div>
 
         <div className={styles.iconPair}>
-          <AppSvg path="/item/views.svg" size="19px" className={styles.icon} />
+          <AppSvg path="/item/views.svg" size="16px" className={styles.icon} />
           <span className={styles.label}>{views}</span>
         </div>
       </div>

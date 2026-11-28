@@ -1,11 +1,13 @@
 import styles from './InviteMembersInsideModal.module.scss';
 import classNames from 'classnames';
 import AppButton from 'components/controls/AppButton';
-import AppSvg from 'components/elements/AppSvg';
+import { Check, Copy } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 const WorkspaceInviteLink = ({ link, copied, primaryButtonClickHandler }) => {
   const { t } = useTranslation();
+  const Icon = copied ? Check : Copy;
+
   return (
     <div className={styles.workspaceInviteWrapper}>
       {link && <p className={styles.whiteParagraph}>{link}</p>}
@@ -16,14 +18,9 @@ const WorkspaceInviteLink = ({ link, copied, primaryButtonClickHandler }) => {
           styles.whiteParagraphButton,
           !link && styles.createWorkspaceButton,
           copied && 'tw-opacity-80',
-          link && 'tw-rounded-bl-none tw-rounded-tl-none',
         )}
       >
-        <AppSvg
-          path={copied ? '/common/done.svg' : '/common/copy.svg'}
-          size="20px"
-          className="tw-mr-5px"
-        />
+        <Icon className="tw-size-4 tw-shrink-0" aria-hidden="true" />
         {link ? t('modals.copyLink') : t('workspace.createWorkspaceInvite')}
       </AppButton>
     </div>
